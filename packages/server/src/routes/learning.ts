@@ -14,7 +14,9 @@ import {
   packageSummaries,
   toStudentView,
 } from '../content/index.js';
-import { TRACKS, getTrack, trackPackageIds } from '../content/tracks.js';
+import { TRACKS, getTrack } from '../content/tracks.js';
+import { trackFoundations, trackPackages, trackReadiness } from '../content/curriculum.js';
+import { CERT_PHILOSOPHY, resolveCertifications } from '../content/certifications.js';
 import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
 import { canAccess, getOverview, getPracticeState } from '../services/progress.js';
 import { openSession, resetSession, runCommand } from '../services/terminalSession.js';
@@ -45,7 +47,7 @@ learningRouter.get(
     const byPackageId = new Map(overview.packages.map((pkg) => [pkg.packageId, pkg]));
 
     const tracks = TRACKS.map((track) => {
-      const packages = trackPackageIds(track.id)
+      const packages = trackPackages(track.id)
         .map((id) => byPackageId.get(id))
         .filter((pkg): pkg is NonNullable<typeof pkg> => pkg !== undefined);
 
@@ -57,6 +59,10 @@ learningRouter.get(
         exerciseCount,
         passedCount,
         percentComplete: exerciseCount === 0 ? 0 : Math.round((passedCount / exerciseCount) * 100),
+        // Readiness is reported separately from progress on purpose: a track can
+        // be 100% complete on the parts that exist while most of it is unwritten,
+        // and a single percentage would hide that.
+        readiness: trackReadiness(track.id),
       };
     });
 
@@ -69,7 +75,17 @@ learningRouter.get(
   asyncRoute(async (request, response) => {
     const track = getTrack(request.params.trackId!);
     if (!track) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such track.');
-    sendOk(response, { track, packages: packageSummaries().filter((pkg) => trackPackageIds(track.id).includes(pkg.id)) });
+
+    sendOk(response, {
+      track,
+      // The foundations this track requires -- which is what makes it possible
+      // for a risk analyst to never be shown a Linux package.
+      foundations: trackFoundations(track.id),
+      readiness: trackReadiness(track.id),
+      certifications: resolveCertifications(track.certifications),
+      certPhilosophy: CERT_PHILOSOPHY,
+      packages: packageSummaries().filter((pkg) => trackPackages(track.id).includes(pkg.id)),
+    });
   }),
 );
 

@@ -168,55 +168,11 @@ export interface LearningPackage {
   modules: LearningModule[];
 }
 
-/**
- * A career track: an ordered curriculum aimed at one role.
- *
- * Tracks group packages rather than owning them, so a foundational package can
- * appear in several tracks without being duplicated. Linux Fundamentals, for
- * instance, is the first thing a SOC analyst and a security data analyst both
- * need, and there is no reason to write or maintain it twice.
+/*
+ * Track, TrackStage, TrackStatus and TrackSummary used to live here. They moved
+ * to career.ts when tracks gained foundations, certifications, and sector
+ * guidance, so that everything about career routing sits in one module.
  */
-export interface Track {
-  id: string;
-  order: number;
-  title: string;
-  /** One line on what the track is. */
-  summary: string;
-  /** Who it is for, in plain language. */
-  audience: string;
-  /** Job titles this prepares someone for. */
-  roles: string[];
-  /** The curriculum in order, including parts not yet written. */
-  curriculum: TrackStage[];
-  /** 'available' when at least one package is playable. */
-  status: TrackStatus;
-}
-
-export const TRACK_STATUSES = ['available', 'in_development'] as const;
-export type TrackStatus = (typeof TRACK_STATUSES)[number];
-
-/**
- * One stage of a track's curriculum.
- *
- * A stage with no `packageId` is planned but unwritten. Showing those honestly,
- * rather than hiding them, lets a student see where a track is going and lets an
- * instructor see exactly what is missing.
- */
-export interface TrackStage {
-  title: string;
-  summary: string;
-  /** Set only when the package exists and is playable. */
-  packageId?: string;
-  /** Roughly how many exercises this stage will contain when written. */
-  plannedExercises?: number;
-}
-
-/** Track metadata plus a student's progress through it. */
-export interface TrackSummary extends Track {
-  exerciseCount: number;
-  passedCount: number;
-  percentComplete: number;
-}
 
 /** Package metadata without exercise bodies, for list views. */
 export interface PackageSummary {
