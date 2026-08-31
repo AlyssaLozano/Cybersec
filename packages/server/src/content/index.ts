@@ -5,15 +5,16 @@
  * controlled, reviewable in a pull request, and type-checked. The database
  * stores only a student's progress *against* these ids.
  *
- * Phase 1 ships Package 1. Adding Packages 2-5 means writing the module files
- * and appending them to PACKAGES; nothing else in the system needs to change.
+ * Packages 1 and 2 ship today. Adding Packages 3-5 means writing the module
+ * files and appending them to PACKAGES; nothing else in the system changes.
  */
 
 import type { Exercise, LearningModule, LearningPackage, PackageSummary } from '@soc/shared';
 
 import { PACKAGE_1 } from './package1.js';
+import { PACKAGE_2 } from './package2.js';
 
-export const PACKAGES: LearningPackage[] = [PACKAGE_1];
+export const PACKAGES: LearningPackage[] = [PACKAGE_1, PACKAGE_2];
 
 /** Every exercise across every package, in curriculum order. */
 export const ALL_EXERCISES: Exercise[] = PACKAGES.flatMap((pkg) =>

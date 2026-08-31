@@ -128,3 +128,57 @@ without `sudo`.
 how a SOC analyst is granted log access in practice rather than handing out root.
 The file keeps its real permissions, `/etc/shadow` remains genuinely unreadable,
 and "Permission denied" stays a lesson rather than an obstacle.
+
+## 10. Exercise 2.3.2 searches for the wrong capitalisation
+
+The spec's exercise 2.3.2 finds service start/stop events with
+`grep -E "started|stopped" /var/log/syslog`.
+
+Real syslog writes `Started` and `Stopping`, not `started` and `stopped`. Against
+the seeded world the spec's command returns **1 line out of 4** — and because it
+returns *something*, it looks like it worked.
+
+**Done:** the exercise teaches `grep -iE "started|stopped"`, which is the actual
+lesson (case-insensitivity plus alternation), and its debrief calls out the
+original mistake as an example of a search that lies to you by succeeding
+partially.
+
+## 11. Exercise 2.4.2 extracts a field from lines that never contain it
+
+The spec's exercise 2.4.2 pulls usernames out of failed logins with:
+
+    grep "Failed password" /var/log/auth.log | grep -oP 'user=\K[^ ]*'
+
+sshd never writes `user=` on a `Failed password` line. It writes that field on the
+accompanying `pam_unix(sshd:auth): authentication failure` line. The spec's
+command returns **nothing at all**.
+
+**Done:** the exercise greps the file directly —
+`grep -oP 'user=\K[^ ]*' /var/log/auth.log | sort -u` — which works and is what
+the field actually does.
+
+## 12. Two label names look like good extraction drills and are not
+
+While writing the Package 2 practice drills, two `\K` targets had to be dropped:
+
+- `name=` also matches inside `logname=`, which appears on all 718 pam_unix
+  lines, so `grep -oP 'name=\K[^ ]*'` returns mostly empty values.
+- `uid=` picks up a trailing parenthesis from session lines (`uid=1004)`), so the
+  "distinct values" answer is polluted with `0)` and `1500)`.
+
+Both would have marked a correct student command as wrong. The drills use
+`rhost=`, `euid=`, `UID=` and `GID=` instead.
+
+## 13. Exercise 1.4.6 searched a wildcard that matched no relevant file
+
+Found by the new catalogue golden test, not present in the source spec.
+
+`grep -i "error" /var/log/*.log` matches `auth.log`, `dpkg.log` and `kern.log` —
+none of which contain the word "error". The errors live in `syslog` (no `.log`
+extension) and `nginx/error.log` (a subdirectory). The exercise returned nothing,
+so its own "you should see filename prefixes" check could never pass.
+
+**Done:** the exercise now searches `/var/log/auth*` for `"Failed password"`,
+which matches both the live log and its rotated `.1` archive. That preserves the
+wildcard lesson, produces visibly different filename prefixes, and teaches
+something true: logs rotate at midnight, so an overnight incident spans two files.

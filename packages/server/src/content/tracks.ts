@@ -12,8 +12,8 @@
  * and whoever writes the remaining content deserves a precise list of what is
  * outstanding. Nothing here pretends to be playable when it is not.
  *
- * As of this build, exactly one package exists: Linux Fundamentals (22
- * exercises). Everything else below is an outline.
+ * As of this build, two packages exist: Linux Fundamentals (22 exercises) and
+ * Log Analysis and Parsing (14). Everything else below is an outline.
  */
 
 import type { Track } from '@soc/shared';
@@ -24,6 +24,14 @@ const LINUX_FUNDAMENTALS = {
   summary:
     'Move around a Linux server, work with files, read logs, and search them with grep and pipes.',
   packageId: '1',
+};
+
+/** Also shared: threat hunting needs the same log-reading fluency. */
+const LOG_ANALYSIS = {
+  title: 'Log Analysis and Parsing',
+  summary:
+    'Read syslog and auth.log fluently, extract fields, build timelines, and correlate an event across two log files.',
+  packageId: '2',
 };
 
 export const TRACKS: Track[] = [
@@ -39,12 +47,7 @@ export const TRACKS: Track[] = [
     status: 'available',
     curriculum: [
       LINUX_FUNDAMENTALS,
-      {
-        title: 'Log Analysis and Parsing',
-        summary:
-          'Read syslog and auth.log fluently, extract fields, build timelines, and correlate an event across two log files.',
-        plannedExercises: 14,
-      },
+      LOG_ANALYSIS,
       {
         title: 'Networking Basics',
         summary:

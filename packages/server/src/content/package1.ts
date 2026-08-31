@@ -225,8 +225,7 @@ const MODULE_1_1: Exercise[] = [
         'Every directory contains two special entries. A single dot (.) means "this directory", and two dots (..) mean "the directory above this one". They are ordinary path components, so you can chain them: `../..` goes up twice, and `../etc` goes up one level and then into etc.',
       syntax: 'cd ..',
       examples: [
-        { command: 'cd ..', explains: 'Moves up one level.' },
-        { command: 'cd ../..', explains: 'Moves up two levels.' },
+        { command: 'cd ../..', explains: 'Moves up two levels in one step.' },
         { command: 'ls ..', explains: 'Lists the parent directory without moving there.' },
       ],
     },
@@ -481,7 +480,7 @@ const MODULE_1_3: Exercise[] = [
         'A pager shows a long file one screen at a time instead of dumping it all. `less` is the standard one. On a real system you move with the arrow keys or Space, search by typing /pattern, and quit with q. Be aware of this simulator’s honest limitation: a browser terminal cannot run an interactive pager, so `less` here prints one page and then explains itself.',
       syntax: 'less FILE',
       examples: [
-        { command: 'less /var/log/syslog', explains: 'Opens the system log in the pager.' },
+        { command: 'less /etc/ssh/sshd_config', explains: 'Opens the SSH server configuration in the pager.' },
         { command: 'head -n 20 /var/log/syslog', explains: 'Often more practical: just take the first 20 lines.' },
       ],
     },
@@ -751,28 +750,29 @@ const MODULE_1_4: Exercise[] = [
     kind: 'terminal',
     goal: 'Use a wildcard to search a whole directory.',
     prompt:
-      'Search every file ending in .log inside /var/log for the word "error", ignoring case. Use a wildcard rather than naming each file.',
+      "Logs get rotated at midnight: today's authentication log is auth.log, and yesterday's is auth.log.1. Search BOTH of them for \"Failed password\" in one command, using a wildcard rather than naming each file.",
     teach: {
       concept:
         'The asterisk * is a wildcard meaning "any characters". The shell expands it into a list of matching filenames BEFORE the command runs, so grep never sees the star -- it just receives several filenames. That is also why grep starts prefixing each result with the file it came from: it now knows it is searching more than one.',
-      syntax: 'grep -i "PATTERN" /path/*.log',
+      syntax: 'grep "PATTERN" /path/prefix*',
       examples: [
-        { command: 'ls /var/log/*.log', explains: 'Lists every file in /var/log ending in .log.' },
-        { command: 'grep "sshd" /var/log/*.log', explains: 'Searches all of them at once.' },
+        { command: 'ls /var/log/*.log', explains: 'Lists every file in /var/log whose name ends in .log.' },
+        { command: 'grep "sshd" /var/log/*.log', explains: 'Searches all of those at once, prefixing each hit with the file it came from.' },
       ],
     },
     hints: [
-      'Combine the case-insensitive option you already know with a path containing a *.',
-      'The path you want is /var/log/*.log -- star, dot, log.',
+      'Both files start with the same word, so a single wildcard can catch the pair.',
+      'The path you want is /var/log/auth* -- the star matches both ".log" and ".log.1".',
     ],
-    solution: 'grep -i "error" /var/log/*.log',
-    expectedOutput: 'Matching lines, each prefixed with the file it came from.',
+    solution: 'grep "Failed password" /var/log/auth*',
+    expectedOutput: 'Matching lines from both log files, each prefixed with the file it came from.',
     checks: [
-      { type: 'command-matches', anyOf: ['\\*\\.log'], regex: true, hint: 'Use the wildcard pattern /var/log/*.log so the shell expands it to every .log file.' },
-      { type: 'output-matches', pattern: '/var/log/[^:]+:', hint: 'When grep searches several files it prefixes each match with the filename. You should see those prefixes.' },
+      { type: 'command-matches', anyOf: ['auth\\*'], regex: true, hint: 'Use the wildcard pattern /var/log/auth* so the shell expands it to both log files.' },
+      { type: 'output-contains', text: '/var/log/auth.log:', hint: "Matches from today's log should be prefixed with its filename." },
+      { type: 'output-contains', text: '/var/log/auth.log.1:', hint: "Yesterday's rotated log should be searched too -- widen the wildcard." },
     ],
     debrief:
-      'The shell expands the * before grep ever runs. That is why the filename prefixes appear automatically, and it is how you search a whole log directory in one pass. You now have every tool you need to work a real log.',
+      'The shell expands the * before grep ever runs, which is why the filename prefixes appear automatically. This matters more than it looks: logs rotate at midnight, so an incident that starts late at night is split across two files. Searching only the current one silently loses half the story.',
      practice: PACKAGE_1_PRACTICE['1.4.6'] ?? [],
   },
 ];
