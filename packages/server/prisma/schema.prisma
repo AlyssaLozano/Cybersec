@@ -1,0 +1,140 @@
+// Local development runs on SQLite so the project needs no Docker.
+//
+// PORTABILITY: this schema deliberately avoids Prisma features that do not
+// exist in SQLite (native enums, scalar lists). Statuses and roles are plain
+// strings constrained by TypeScript unions in @soc/shared, and structured blobs
+// are JSON-encoded strings. Moving to Postgres on AWS is therefore a change of
+// `provider` + DATABASE_URL plus a fresh migration -- not a rewrite.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  email        String    @unique
+  passwordHash String
+  /// "student" | "instructor" | "admin" -- see UserRole in @soc/shared
+  role         String    @default("student")
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+
+  progress         ExerciseProgress[]
+  practiceProgress PracticeProgress[]
+  terminalSessions TerminalSession[]
+  attempts         AttemptLog[]
+
+  @@map("users")
+}
+
+/// One row per student per exercise. Created lazily on first attempt.
+model ExerciseProgress {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Stable content id such as "1.4.3". Not a foreign key: exercise content
+  /// lives in version-controlled code, not in the database.
+  exerciseId String
+  /// Denormalised for cheap per-package aggregate queries.
+  packageId  String
+  moduleId   String
+
+  /// "not_started" | "in_progress" | "passed" -- see ExerciseStatus
+  status          String    @default("in_progress")
+  attempts        Int       @default(0)
+  completedAt     DateTime?
+  lastAttemptedAt DateTime?
+
+  /// How many hints the student has asked for, so the UI can restore the same
+  /// state on reload rather than silently re-hiding help they already used.
+  hintsRevealed Int @default(0)
+
+  /// Whether the student asked to be shown the answer. Recorded so instructors
+  /// can see where the material is too hard -- never used to penalise anyone.
+  solutionRevealed Boolean @default(false)
+
+  @@unique([userId, exerciseId])
+  @@index([userId, packageId])
+  @@map("exercise_progress")
+}
+
+/// Progress on optional practice drills.
+///
+/// Kept separate from ExerciseProgress on purpose: practice must never affect
+/// unlocking or the completion percentage, and keeping it in its own table makes
+/// that impossible to get wrong by accident.
+model PracticeProgress {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Parent exercise, e.g. "1.4.3".
+  exerciseId String
+  /// Drill id, e.g. "1.4.3-p2".
+  practiceId String
+
+  passed          Boolean   @default(false)
+  attempts        Int       @default(0)
+  completedAt     DateTime?
+  lastAttemptedAt DateTime?
+
+  @@unique([userId, practiceId])
+  @@index([userId, exerciseId])
+  @@map("practice_progress")
+}
+
+/// Live terminal state for one student working one exercise, so a student can
+/// close the browser mid-exercise and pick up exactly where they left off.
+model TerminalSession {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  exerciseId String
+
+  /// Current working directory in the simulated filesystem.
+  cwd String @default("/home/student")
+
+  /// JSON-encoded overlay of the student's mutations against the immutable
+  /// base filesystem image. Storing only the diff keeps rows small -- the
+  /// seeded logs alone are hundreds of kilobytes.
+  overlayJson String @default("{}")
+
+  /// JSON-encoded scrollback so the terminal redraws on reload.
+  scrollbackJson String @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, exerciseId])
+  @@map("terminal_sessions")
+}
+
+/// Append-only record of every attempt. Required for the instructor audit
+/// trail, and it is what tells us which exercises students get stuck on.
+model AttemptLog {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  exerciseId String
+  /// Set when the attempt was against a practice drill rather than the exercise.
+  practiceId String?
+  /// Exactly what the student typed.
+  input      String
+  passed     Boolean
+  /// JSON-encoded array of failed check types, for stuck-point analytics.
+  failedJson String   @default("[]")
+  createdAt  DateTime @default(now())
+
+  @@index([userId, exerciseId])
+  @@index([exerciseId, passed])
+  @@map("attempt_logs")
+}

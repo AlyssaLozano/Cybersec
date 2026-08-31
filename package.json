@@ -1,0 +1,29 @@
+{
+  "name": "cybersec-soc-simulator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Interactive SOC training platform: simulated Linux terminal, guided exercises, and incident response scenarios.",
+  "workspaces": [
+    "packages/shared",
+    "packages/server",
+    "packages/client"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm run build --workspace @soc/shared && npm run build --workspace @soc/server && npm run build --workspace @soc/client",
+    "dev": "npm run dev --workspace @soc/server & npm run dev --workspace @soc/client",
+    "dev:server": "npm run dev --workspace @soc/server",
+    "dev:client": "npm run dev --workspace @soc/client",
+    "db:migrate": "npm run db:migrate --workspace @soc/server",
+    "db:seed": "npm run db:seed --workspace @soc/server",
+    "db:studio": "npm run db:studio --workspace @soc/server",
+    "setup": "npm install && npm run build --workspace @soc/shared && npm run db:migrate && npm run db:seed",
+    "test": "npm run test --workspace @soc/server",
+    "typecheck": "npm run typecheck --workspace @soc/shared && npm run typecheck --workspace @soc/server && npm run typecheck --workspace @soc/client"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

