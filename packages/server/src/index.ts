@@ -10,6 +10,7 @@ import { ALL_EXERCISES, PACKAGES } from './content/index.js';
 import { corsOrigins, env } from './env.js';
 import { errorHandler, sendError } from './http.js';
 import { authRouter } from './routes/auth.js';
+import { assessmentRouter } from './routes/assessment.js';
 import { learningRouter } from './routes/learning.js';
 
 export function createApp() {
@@ -41,6 +42,7 @@ export function createApp() {
 
   app.use('/api/auth', authRouter);
   app.use('/api/learning', learningRouter);
+  app.use('/api/assessment', assessmentRouter);
 
   app.use((_request, response) => {
     sendError(response, 404, { code: 'not_found', message: 'No such endpoint.' });

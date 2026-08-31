@@ -544,3 +544,39 @@ describe('item lookup', () => {
     expect(ITEM_BY_ID.size).toBe(ITEMS.length);
   });
 });
+
+// =========================================================================
+// The client view must never carry scoring weights
+// =========================================================================
+
+describe('client item view', () => {
+  it('strips every scoring field from every item', async () => {
+    const { toClientItem } = await import('../routes/assessment.js');
+
+    // A learner who can see that agreeing with e1 adds four points to
+    // penetration testing can work backwards to whatever answer they wanted,
+    // which turns a self-assessment into a wish list.
+    const forbidden = ['lanes', 'factors', 'trait', 'reverse', 'weights', 'traitValue'];
+    const leaked: string[] = [];
+
+    for (const item of ITEMS) {
+      const blob = JSON.stringify(toClientItem(item));
+      for (const key of forbidden) {
+        if (blob.includes(`"${key}"`)) leaked.push(`${item.id} -> ${key}`);
+      }
+    }
+    expect(leaked).toEqual([]);
+  });
+
+  it('still carries everything needed to render the question', () => {
+    const shaped = ITEMS.map((item) => item);
+    for (const item of shaped) {
+      if (item.kind === 'likert') {
+        expect(item.statement.length, item.id).toBeGreaterThan(10);
+      } else {
+        expect(item.prompt.length, item.id).toBeGreaterThan(10);
+        for (const option of item.options) expect(option.label.length, option.id).toBeGreaterThan(2);
+      }
+    }
+  });
+});

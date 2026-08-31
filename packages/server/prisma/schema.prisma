@@ -29,6 +29,7 @@ model User {
   practiceProgress PracticeProgress[]
   terminalSessions TerminalSession[]
   attempts         AttemptLog[]
+  assessment       AssessmentSession?
 
   @@map("users")
 }
@@ -137,4 +138,36 @@ model AttemptLog {
   @@index([userId, exerciseId])
   @@index([exerciseId, passed])
   @@map("attempt_logs")
+}
+
+/// A learner's answers to the Career Fit Analyzer.
+///
+/// One row per user: retaking replaces answers rather than accumulating history,
+/// because a stale answer from three months ago should not quietly keep steering
+/// somebody's recommendation. Individual dimensions can be retaken, which is why
+/// responses are stored as a keyed blob rather than a fixed set of columns.
+model AssessmentSession {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// JSON: { [itemId]: { value?: number, optionId?: string } }
+  /// A JSON string rather than a relation table because responses are only ever
+  /// read and written as a whole set, and this schema must port to Postgres
+  /// without scalar lists.
+  responsesJson String @default("{}")
+
+  /// JSON-encoded LearnerProfile: sector, org size, clearance, chosen track.
+  profileJson String @default("{}")
+
+  /// The generated report, cached so revisiting results does not rescore.
+  /// Null until the learner submits for the first time.
+  reportJson String?
+
+  /// Set when the learner has seen their report at least once.
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("assessment_sessions")
 }
