@@ -32,6 +32,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Know where you are, get somewhere else, and read a path correctly.',
     foundationId: 'linux',
     lanes: {
+      'detection-engineering': 'supporting',
       'soc-ops': 'core',
       'incident-response': 'core',
       forensics: 'core',
@@ -51,6 +52,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Use head, tail, and paging instead of dumping 2,500 lines onto your screen.',
     foundationId: 'linux',
     lanes: {
+      'detection-engineering': 'supporting',
       'soc-ops': 'core',
       'security-engineering': 'core',
       'incident-response': 'core',
@@ -66,6 +68,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Find the handful of lines that matter inside thousands, and count them.',
     foundationId: 'linux',
     lanes: {
+      'detection-engineering': 'core',
       'soc-ops': 'core',
       'security-engineering': 'core',
       'incident-response': 'core',
@@ -83,6 +86,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Feed one command into the next, which is how nearly all real log work is done.',
     foundationId: 'linux',
     lanes: {
+      'detection-engineering': 'core',
       'soc-ops': 'core',
       'incident-response': 'core',
       forensics: 'supporting',
@@ -116,6 +120,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Break a log line into timestamp, host, process, and message without thinking about it.',
     foundationId: 'log-analysis',
     lanes: {
+      'detection-engineering': 'core',
       'soc-ops': 'core',
       'security-engineering': 'core',
       'incident-response': 'core',
@@ -131,6 +136,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Narrow thousands of lines to the hour that matters.',
     foundationId: 'log-analysis',
     lanes: {
+      'detection-engineering': 'core',
       'soc-ops': 'core',
       'security-engineering': 'supporting',
       'incident-response': 'core',
@@ -145,6 +151,7 @@ export const CAPABILITIES: Capability[] = [
       'Judge whether a pattern of failures is an attack, a misconfiguration, or the internet being the internet.',
     foundationId: 'log-analysis',
     lanes: {
+      'detection-engineering': 'core',
       'soc-ops': 'core',
       'security-engineering': 'core',
       'incident-response': 'core',
@@ -160,6 +167,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Pull addresses and labelled values out of unstructured lines and reduce them to a list.',
     foundationId: 'log-analysis',
     lanes: {
+      'detection-engineering': 'core',
       'soc-ops': 'supporting',
       'security-engineering': 'core',
       'incident-response': 'core',
@@ -174,6 +182,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Confirm a finding in a second, independently written source before you report it.',
     foundationId: 'log-analysis',
     lanes: {
+      'detection-engineering': 'core',
       'soc-ops': 'supporting',
       'incident-response': 'core',
       forensics: 'core',
@@ -189,6 +198,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Describe a pattern precisely enough to match every instance and nothing else.',
     foundationId: 'regex',
     lanes: {
+      'detection-engineering': 'core',
       'soc-ops': 'supporting',
       'security-engineering': 'core',
       'incident-response': 'supporting',
@@ -213,7 +223,7 @@ export const CAPABILITIES: Capability[] = [
       pentest: 'supporting',
       'cloud-security': 'supporting',
     },
-    exerciseIds: [],
+    exerciseIds: ['4.2.1', '4.2.2', '4.2.4'],
   },
   {
     id: 'cap-internal-external',
@@ -221,13 +231,14 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Recognise private ranges, and know why a connection leaving the network matters more.',
     foundationId: 'networking',
     lanes: {
+      'detection-engineering': 'supporting',
       'soc-ops': 'core',
       'incident-response': 'core',
       'network-security': 'core',
       'threat-intel': 'supporting',
       'cloud-security': 'supporting',
     },
-    exerciseIds: [],
+    exerciseIds: ['4.1.1', '4.2.5', '4.2.6'],
   },
   {
     id: 'cap-ports-services',
@@ -241,7 +252,7 @@ export const CAPABILITIES: Capability[] = [
       pentest: 'core',
       'incident-response': 'supporting',
     },
-    exerciseIds: [],
+    exerciseIds: ['4.2.2', '4.2.3'],
   },
 
   // --- Investigation tools -------------------------------------------------
@@ -251,6 +262,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Spot a process that has no business running, from the command column alone.',
     foundationId: 'investigation-tools',
     lanes: {
+      'detection-engineering': 'supporting',
       'soc-ops': 'core',
       'incident-response': 'core',
       forensics: 'core',
@@ -264,6 +276,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Know the places an attacker hides something that survives a reboot.',
     foundationId: 'investigation-tools',
     lanes: {
+      'detection-engineering': 'supporting',
       'soc-ops': 'supporting',
       'security-engineering': 'supporting',
       'incident-response': 'core',
@@ -281,6 +294,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Know what 4624, 4625, 4688 and 7045 mean, since most enterprise compromise is Windows.',
     foundationId: 'windows-events',
     lanes: {
+      'detection-engineering': 'supporting',
       'soc-ops': 'core',
       'security-engineering': 'core',
       'incident-response': 'core',
@@ -297,6 +311,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Turn "an attacker does X" into a rule that fires on X and not on everything else.',
     foundationId: 'siem',
     lanes: {
+      'detection-engineering': 'core',
       'soc-ops': 'supporting',
       'security-engineering': 'core',
       'threat-intel': 'supporting',
@@ -310,6 +325,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Judge whether a rule is worth its noise, which is most of what detection work is.',
     foundationId: 'siem',
     lanes: {
+      'detection-engineering': 'core',
       'soc-ops': 'core',
       'security-engineering': 'core',
       'vuln-management': 'supporting',
@@ -324,6 +340,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Decide what to look at first when six things are on fire.',
     foundationId: 'incident-concepts',
     lanes: {
+      'detection-engineering': 'supporting',
       'soc-ops': 'core',
       'incident-response': 'core',
       'vuln-management': 'core',
@@ -337,6 +354,7 @@ export const CAPABILITIES: Capability[] = [
     summary: 'Put scattered events in order and name what stage of an intrusion each one is.',
     foundationId: 'incident-concepts',
     lanes: {
+      'detection-engineering': 'core',
       'soc-ops': 'core',
       'security-engineering': 'supporting',
       'incident-response': 'core',

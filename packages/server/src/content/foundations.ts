@@ -66,7 +66,7 @@ export const FOUNDATIONS: Foundation[] = [
     title: 'Networking Basics',
     summary:
       'Addresses, ports, routing, and DNS from the command line. Work out what a host is talking to, and whether it should be.',
-    plannedExercises: 15,
+    packageId: '4',
     tools: ['packet-analysis'],
   },
   {
@@ -98,7 +98,7 @@ export const FOUNDATIONS: Foundation[] = [
     title: 'Security Incident Concepts',
     summary:
       'Severity, triage, containment decisions, evidence preservation, and escalation. The judgement layer that turns log reading into incident response.',
-    plannedExercises: 19,
+    packageId: '3',
     tools: ['case-management'],
   },
   {

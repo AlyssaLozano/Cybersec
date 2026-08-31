@@ -93,7 +93,7 @@ export function ifconfig(argv: string[], ctx: ExecContext): CommandResult {
 
 /** Formats an address:port pair the way netstat does. */
 function endpoint(address: string, port: number, resolve: boolean, ctx: ExecContext): string {
-  const host = resolve ? (ctx.machine.reverseDns[address] ?? address) : address;
+  const host = resolve ? (resolveAddress(address, ctx) ?? address) : address;
   if (port === 0) return `${host}:*`;
   return `${host}:${port}`;
 }
@@ -173,10 +173,49 @@ export function ss(argv: string[], ctx: ExecContext): CommandResult {
 
 // --- name resolution and reachability ---------------------------------------
 
-/** Look a name up in the simulated resolver; also accepts a literal address. */
+/**
+ * Look a name up the way a real host does: /etc/hosts first, then DNS.
+ *
+ * The ordering is not a detail. /etc/hosts overrides DNS on every real system,
+ * which is exactly why an attacker who can write one line to it can silently
+ * redirect a name with nothing appearing in any DNS log. The Networking package
+ * teaches that, so the simulator has to behave that way or it teaches a lie --
+ * previously rmg-mail-01 and rmg-lab-if-01 were listed in /etc/hosts and were
+ * still unresolvable, which is the opposite of how a host works.
+ */
 function resolveName(name: string, ctx: ExecContext): string | null {
   if (/^\d{1,3}(\.\d{1,3}){3}$/.test(name)) return name;
-  return ctx.machine.dns[name.toLowerCase()] ?? null;
+
+  const wanted = name.toLowerCase();
+
+  const hosts = ctx.vfs.stat('/etc/hosts')?.content ?? '';
+  for (const line of hosts.split('\n')) {
+    const withoutComment = line.split('#')[0] ?? '';
+    const [address, ...names] = withoutComment.trim().split(/\s+/);
+    if (!address || names.length === 0) continue;
+    // IPv6 entries are listed but the simulator only models IPv4 lookups.
+    if (address.includes(':')) continue;
+    if (names.some((entry) => entry.toLowerCase() === wanted)) return address;
+  }
+
+  return ctx.machine.dns[wanted] ?? null;
+}
+
+/**
+ * Reverse lookup, checking /etc/hosts before the resolver for the same reason.
+ */
+function resolveAddress(address: string, ctx: ExecContext): string | null {
+  const hosts = ctx.vfs.stat('/etc/hosts')?.content ?? '';
+  for (const line of hosts.split('\n')) {
+    const withoutComment = line.split('#')[0] ?? '';
+    const [entryAddress, ...names] = withoutComment.trim().split(/\s+/);
+    if (!entryAddress || names.length === 0) continue;
+    if (entryAddress === address) {
+      // Prefer the fully qualified name when the entry lists several.
+      return names.find((entry) => entry.includes('.')) ?? names[0]!;
+    }
+  }
+  return ctx.machine.reverseDns[address] ?? null;
 }
 
 export function ping(argv: string[], ctx: ExecContext): CommandResult {
@@ -233,13 +272,20 @@ export function dig(argv: string[], ctx: ExecContext): CommandResult {
   const args = parseArgs(argv);
   const reverse = args.flags.has('x');
 
-  const target = args.positionals[0];
+  /*
+   * dig control arguments start with '+' and can appear anywhere, including
+   * before the name. Taking positionals[0] blindly meant `dig +short name`
+   * looked up a host called "+short" and silently returned nothing -- and
+   * +short is how most people write it.
+   */
+  const controls = args.positionals.filter((argument) => argument.startsWith('+'));
+  const target = args.positionals.find((argument) => !argument.startsWith('+'));
   if (!target) return toolError('dig', 'no name to look up');
 
-  const shortOnly = args.longFlags.has('short') || args.positionals.includes('+short');
+  const shortOnly = args.longFlags.has('short') || controls.includes('+short');
 
   if (reverse) {
-    const name = ctx.machine.reverseDns[target];
+    const name = resolveAddress(target, ctx);
     if (shortOnly) return ok(name ? name + '.\n' : '');
     const lines = [
       '',
@@ -289,7 +335,7 @@ export function nslookup(argv: string[], ctx: ExecContext): CommandResult {
   const lines = ['Server:\t\t10.20.1.10', 'Address:\t10.20.1.10#53', ''];
 
   if (isAddress) {
-    const name = ctx.machine.reverseDns[target];
+    const name = resolveAddress(target, ctx);
     if (!name) {
       return {
         stdout: fromLines([...lines, `** server can't find ${target}: NXDOMAIN`]),
@@ -318,7 +364,7 @@ export function host(argv: string[], ctx: ExecContext): CommandResult {
   if (!target) return toolError('host', 'usage: host [-v] hostname');
 
   if (/^\d{1,3}(\.\d{1,3}){3}$/.test(target)) {
-    const name = ctx.machine.reverseDns[target];
+    const name = resolveAddress(target, ctx);
     return name
       ? ok(`${target.split('.').reverse().join('.')}.in-addr.arpa domain name pointer ${name}.\n`)
       : { stdout: '', stderr: `Host ${target} not found: 3(NXDOMAIN)\n`, exitCode: 1 };

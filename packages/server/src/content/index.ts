@@ -5,16 +5,20 @@
  * controlled, reviewable in a pull request, and type-checked. The database
  * stores only a student's progress *against* these ids.
  *
- * Packages 1 and 2 ship today. Adding Packages 3-5 means writing the module
- * files and appending them to PACKAGES; nothing else in the system changes.
+ * Packages 1-3 ship today. Adding Packages 4-5 means writing the module files
+ * and appending them to PACKAGES; nothing else in the system changes.
  */
 
 import type { Exercise, LearningModule, LearningPackage, PackageSummary } from '@soc/shared';
 
+import { queueForStudent } from '../services/alerts.js';
+
 import { PACKAGE_1 } from './package1.js';
 import { PACKAGE_2 } from './package2.js';
+import { PACKAGE_3 } from './package3.js';
+import { PACKAGE_4 } from './package4.js';
 
-export const PACKAGES: LearningPackage[] = [PACKAGE_1, PACKAGE_2];
+export const PACKAGES: LearningPackage[] = [PACKAGE_1, PACKAGE_2, PACKAGE_3, PACKAGE_4];
 
 /** Every exercise across every package, in curriculum order. */
 export const ALL_EXERCISES: Exercise[] = PACKAGES.flatMap((pkg) =>
@@ -51,6 +55,37 @@ function validateCatalogue(): void {
     }
     if (exercise.kind === 'multiple-choice' && (exercise.options?.length ?? 0) === 0) {
       throw new Error(`Multiple-choice exercise "${exercise.id}" has no options.`);
+    }
+
+    if (exercise.kind === 'alert-triage') {
+      if (!exercise.queueId) {
+        throw new Error(`Triage exercise "${exercise.id}" names no alert queue.`);
+      }
+      const queue = queueForStudent(exercise.queueId);
+      if (!queue) {
+        throw new Error(
+          `Triage exercise "${exercise.id}" points at alert queue "${exercise.queueId}", which does not exist.`,
+        );
+      }
+      // An expected alert id that is not in the queue would fail every student
+      // for a content bug. This is the failure mode the "compute, never
+      // hardcode" rule exists to prevent, so it is checked at boot.
+      const present = new Set(queue.alerts.map((alert) => alert.id));
+      const referenced = exercise.checks.flatMap((check) =>
+        check.type === 'triage-selection'
+          ? check.alertIds
+          : check.type === 'triage-justifies'
+            ? [check.alertId]
+            : [],
+      );
+      for (const alertId of referenced) {
+        if (!present.has(alertId)) {
+          throw new Error(
+            `Exercise "${exercise.id}" expects alert "${alertId}", which is not in queue "${exercise.queueId}". ` +
+              'The alert corpus and the exercise content have drifted apart.',
+          );
+        }
+      }
     }
   }
 }
@@ -124,5 +159,13 @@ export function toStudentView(exercise: Exercise) {
     /** Only the count ships up front; the text arrives one hint at a time. */
     hintCount: exercise.hints.length,
     options: exercise.options,
+    /**
+     * Which alert queue to load, for triage exercises.
+     *
+     * Safe to ship: the queue it names is what an operator would see in a real
+     * console. The ground truth lives in a separate structure that no route
+     * assembles -- see services/alerts.ts.
+     */
+    queueId: exercise.queueId,
   };
 }
