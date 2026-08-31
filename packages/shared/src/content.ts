@@ -9,8 +9,10 @@
  * existing id — progress rows reference it. Add new ids instead.
  */
 
+import type { TriageDecision } from './alerts.js';
+
 /** How a student answers an exercise, which determines the UI shown. */
-export type ExerciseKind = 'terminal' | 'multiple-choice' | 'short-answer';
+export type ExerciseKind = 'terminal' | 'multiple-choice' | 'short-answer' | 'alert-triage';
 
 /**
  * A single pass/fail condition. An exercise passes only when *every* check
@@ -50,7 +52,38 @@ export type Check =
   | { type: 'choice-equals'; optionIds: string[]; hint: string }
   /** A free-text answer must mention these concepts. Each entry is a group of
    *  synonyms; the answer must hit at least one synonym from every group. */
-  | { type: 'answer-mentions'; conceptGroups: string[][]; hint: string };
+  | { type: 'answer-mentions'; conceptGroups: string[][]; hint: string }
+  /* --- alert triage ------------------------------------------------------
+   *
+   * Triage checks grade a set of decisions against ground truth rather than a
+   * string. They are computed from the generated alert corpus, never written by
+   * hand, so regenerating the corpus cannot leave a stale answer key.
+   */
+  /** Named alerts must carry this decision. `forbidExtra` also fails the check
+   *  when the student applied the decision to anything not on the list, which
+   *  is what stops "escalate everything" from passing. */
+  | {
+      type: 'triage-selection';
+      decision: TriageDecision;
+      alertIds: string[];
+      forbidExtra?: boolean;
+      hint: string;
+    }
+  /** Precision and recall floors for one decision class. Kept separate because
+   *  they fail in opposite directions and a student must know which they did. */
+  | {
+      type: 'triage-accuracy';
+      decision: TriageDecision;
+      minPrecision?: number;
+      minRecall?: number;
+      hint: string;
+    }
+  /** The written reason attached to one alert must hit every concept group. */
+  | { type: 'triage-justifies'; alertId: string; conceptGroups: string[][]; hint: string }
+  /** No more than this many alerts may carry the decision, regardless of which.
+   *  Models a real constraint: an operator who escalates forty alerts a shift
+   *  has escalated nothing, because nobody downstream can absorb that. */
+  | { type: 'triage-budget'; decision: TriageDecision; max: number; hint: string };
 
 export interface ChoiceOption {
   id: string;
@@ -117,6 +150,8 @@ export interface Exercise {
   checks: Check[];
   /** Options for multiple-choice exercises. */
   options?: ChoiceOption[];
+  /** Alert queue this exercise is worked against, for kind 'alert-triage'. */
+  queueId?: string;
   /** Shown after a pass, to connect the mechanic to real SOC work. */
   debrief?: string;
   /** Optional extra drills on the same skill, offered after a pass. */

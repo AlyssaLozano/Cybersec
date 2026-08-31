@@ -13,7 +13,15 @@
  *    problem at a time turns learning into a guessing game.
  */
 
-import type { Check, Evaluation, Exercise, FailedCheck } from '@soc/shared';
+import type {
+  AlertTruth,
+  Check,
+  Evaluation,
+  Exercise,
+  FailedCheck,
+  TriageEntry,
+} from '@soc/shared';
+import { scoreTriage } from '@soc/shared';
 
 import { normalizeCommand } from '../terminal/parser.js';
 import type { Vfs } from '../vfs/vfs.js';
@@ -32,6 +40,16 @@ export interface Attempt {
   selectedOptionIds?: string[];
   /** Free text, for short-answer exercises. */
   answerText?: string;
+  /** Dispositions the student assigned, for alert-triage exercises. */
+  triage?: TriageEntry[];
+  /**
+   * Ground truth for the queue this attempt was made against.
+   *
+   * Supplied by the caller rather than imported here, so that grading stays a
+   * pure function of the attempt and the answer key never becomes ambient state
+   * that some other module could accidentally serialise into a response.
+   */
+  alertTruth?: AlertTruth[];
 }
 
 /** Non-empty output lines, which is what line-count checks care about. */
@@ -136,6 +154,44 @@ function runCheck(check: Check, attempt: Attempt): FailedCheck | null {
         synonyms.some((word) => text.includes(word.toLowerCase())),
       );
       return hitsEveryGroup ? null : failed();
+    }
+
+    case 'triage-selection': {
+      const entries = attempt.triage ?? [];
+      const assigned = new Set(
+        entries.filter((entry) => entry.decision === check.decision).map((entry) => entry.alertId),
+      );
+      const missing = check.alertIds.some((id) => !assigned.has(id));
+      if (missing) return failed();
+      if (check.forbidExtra) {
+        const wanted = new Set(check.alertIds);
+        for (const id of assigned) if (!wanted.has(id)) return failed();
+      }
+      return null;
+    }
+
+    case 'triage-accuracy': {
+      // Without ground truth there is nothing to measure against, and silently
+      // passing would let a misconfigured exercise award an unearned pass.
+      if (!attempt.alertTruth) return failed();
+      const score = scoreTriage(attempt.triage ?? [], attempt.alertTruth, check.decision);
+      if (check.minPrecision !== undefined && score.precision < check.minPrecision) return failed();
+      if (check.minRecall !== undefined && score.recall < check.minRecall) return failed();
+      return null;
+    }
+
+    case 'triage-justifies': {
+      const entry = (attempt.triage ?? []).find((item) => item.alertId === check.alertId);
+      const text = (entry?.justification ?? '').toLowerCase();
+      const hitsEveryGroup = check.conceptGroups.every((synonyms) =>
+        synonyms.some((word) => text.includes(word.toLowerCase())),
+      );
+      return hitsEveryGroup ? null : failed();
+    }
+
+    case 'triage-budget': {
+      const used = (attempt.triage ?? []).filter((entry) => entry.decision === check.decision).length;
+      return used <= check.max ? null : failed();
     }
 
     default: {

@@ -11,10 +11,11 @@
 import { Router } from 'express';
 import { z } from 'zod';
 
-import { API_ERROR_CODES, DIMENSIONS } from '@soc/shared';
+import { API_ERROR_CODES, DIMENSIONS, LANES } from '@soc/shared';
 import type { AssessmentItem } from '@soc/shared';
 
 import { ITEMS } from '../content/assessment/items.js';
+import { CAPABILITIES, PROBES, probesForLane } from '../content/capabilities.js';
 import { shareableSummary } from '../content/assessment/report.js';
 import { CERT_PHILOSOPHY, resolveCertifications } from '../content/certifications.js';
 import { trackFoundations, trackReadiness } from '../content/curriculum.js';
@@ -22,6 +23,12 @@ import { getLaneProfile, LANE_PROFILES } from '../content/lanes.js';
 import { getTrack } from '../content/tracks.js';
 import { TOOL_PHILOSOPHY } from '../content/tools.js';
 import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import {
+  getBaseline,
+  resetBaseline,
+  saveProbeResponses,
+  startBaseline,
+} from '../services/baseline.js';
 import {
   getProfile,
   getState,
@@ -235,5 +242,101 @@ assessmentRouter.patch(
           }
         : {}),
     });
+  }),
+);
+
+// --- capability baseline -----------------------------------------------------
+
+/**
+ * Strip the answer key from a probe before it reaches the browser.
+ *
+ * Same rule as exercise checks and assessment weights: the correct option id and
+ * the explanation ship only AFTER the learner has answered. A baseline you can
+ * read the answers off measures nothing.
+ */
+function toClientProbe(probe: (typeof PROBES)[number]) {
+  return {
+    id: probe.id,
+    capabilityId: probe.capabilityId,
+    prompt: probe.prompt,
+    artifact: probe.artifact,
+    options: probe.options,
+    level: probe.level,
+  };
+}
+
+/** The probes for a lane, without answers. */
+assessmentRouter.get(
+  '/baseline/probes/:laneId',
+  asyncRoute(async (request, response) => {
+    const laneId = request.params.laneId!;
+    if (!LANES.includes(laneId as never)) {
+      throw new HttpError(404, API_ERROR_CODES.notFound, 'No such lane.');
+    }
+    sendOk(response, {
+      laneId,
+      probes: probesForLane(laneId).map(toClientProbe),
+      capabilities: CAPABILITIES.filter((capability) => capability.lanes[laneId as never] !== undefined),
+    });
+  }),
+);
+
+assessmentRouter.get(
+  '/baseline',
+  asyncRoute(async (request, response) => {
+    sendOk(response, await getBaseline(userIdOf(request)));
+  }),
+);
+
+const startSchema = z.object({ laneId: z.enum(LANES) });
+
+assessmentRouter.post(
+  '/baseline/start',
+  asyncRoute(async (request, response) => {
+    const { laneId } = startSchema.parse(request.body);
+    sendOk(response, await startBaseline(userIdOf(request), laneId));
+  }),
+);
+
+const probeSchema = z.object({
+  responses: z
+    .array(z.object({ probeId: z.string().max(64), optionId: z.string().max(64) }))
+    .max(100),
+});
+
+/**
+ * Record answers, and return the correct answer plus explanation for each.
+ *
+ * The explanation is released only in response to an answer, which makes the
+ * baseline a teaching moment rather than only a measurement. Getting one wrong
+ * and immediately learning why is the most useful thing that happens here.
+ */
+assessmentRouter.post(
+  '/baseline/responses',
+  asyncRoute(async (request, response) => {
+    const { responses } = probeSchema.parse(request.body);
+    const state = await saveProbeResponses(userIdOf(request), responses);
+
+    const feedback = responses
+      .map((given) => {
+        const probe = PROBES.find((candidate) => candidate.id === given.probeId);
+        if (!probe) return null;
+        return {
+          probeId: probe.id,
+          correct: given.optionId === probe.answerId,
+          answerId: probe.answerId,
+          explanation: probe.explanation,
+        };
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+
+    sendOk(response, { ...state, feedback });
+  }),
+);
+
+assessmentRouter.post(
+  '/baseline/reset',
+  asyncRoute(async (request, response) => {
+    sendOk(response, await resetBaseline(userIdOf(request)));
   }),
 );

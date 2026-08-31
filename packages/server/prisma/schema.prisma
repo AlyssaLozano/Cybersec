@@ -164,6 +164,16 @@ model AssessmentSession {
   /// Null until the learner submits for the first time.
   reportJson String?
 
+  /// JSON: { [probeId]: optionId } for the capability baseline.
+  /// Stored on the same row as the career assessment because the two are one
+  /// journey -- "what do you want" then "what can you do" -- and separating them
+  /// would mean two lookups on every dashboard render.
+  probeResponsesJson String @default("{}")
+
+  /// Which lane the baseline was taken against. Readiness is lane-specific: the
+  /// same answers mean different things for SOC and for risk work.
+  baselineLaneId String?
+
   /// Set when the learner has seen their report at least once.
   completedAt DateTime?
   createdAt   DateTime  @default(now())
