@@ -1,5 +1,5 @@
 /**
- * The fourteen career lanes, profiled honestly.
+ * The fifteen career lanes, profiled honestly.
  *
  * THE RULE FOR THIS FILE: NO MARKETING.
  *
@@ -55,6 +55,49 @@ export const LANE_PROFILES: LaneProfile[] = [
     trackId: 'soc',
     entryReality:
       'The most accessible entry point in security, and the one most likely to hire somebody with no security experience. Expect to start on shift.',
+  },
+  {
+    id: 'detection-engineering',
+    title: 'Detection Engineering',
+    summary:
+      'Write and tune the rules that produce everybody else’s alerts, and prove they catch what they claim to.',
+    dayToDay: [
+      'Write detection logic for a technique somebody has decided you should cover, then spend longer arguing about the threshold than writing the rule.',
+      'Replay a new rule against last month’s logs to see what it would actually have fired on. Most rules die here, and that is the point.',
+      'Work the tuning backlog: the SOC says a rule is unusable, so you find the benign cause and exclude it without blinding the rule.',
+      'Fix parsing and field mappings. A rule pointed at a field that quietly stopped being populated fires never, and nothing tells you.',
+      'Translate somebody else’s published incident into logic that would catch the same thing here, on the log sources you actually have.',
+    ],
+    personalityMatch: [
+      'You would rather remove a class of alerts than close them one at a time',
+      'You can hold a pattern across several events instead of judging each one alone',
+      'You are comfortable writing queries and code, and reading somebody else’s',
+      'You can live with "good enough" being a threshold you chose rather than a fact you found',
+    ],
+    painPoints: [
+      'You are blamed in both directions. Too noisy and the SOC drowns; too quiet and something is missed. Both are your rule.',
+      'Most of the work is tuning what already exists. Writing new detections is the small, interesting fraction of the week.',
+      'A rule can stop working silently when a log source changes format or dies, and you usually find out during an incident.',
+      'Your coverage map gets read by executives as a guarantee of what cannot happen, which is not what it says.',
+      'You depend on log sources you do not own. Getting one field populated correctly can sit on another team’s roadmap for months.',
+    ],
+    environmentFit: [
+      { environmentId: 'corporate', rank: 1, note: 'Where the role actually exists. Large enough to have outgrown vendor default rules, with the log volume and the alert pain to justify somebody full time.' },
+      { environmentId: 'consulting', rank: 2, note: 'MSSPs write detections across many tenants, which builds breadth quickly. You tune for environments you never see and often never learn whether a rule worked.' },
+      { environmentId: 'government', rank: 3, note: 'Stable, well resourced, and slow. Change control on a detection can take a review cycle, which fights the tune-measure-retune loop this job runs on.' },
+    ],
+    certPathway: ['sec-plus', 'cysa-plus', 'sc-200', 'gcih'],
+    baselineBurnout: 'low',
+    burnoutDrivers: [
+      'Being accountable for alert volume and missed detections at the same time',
+      'Depending on log sources and teams you do not control',
+      'A tuning backlog that never empties',
+    ],
+    advancement:
+      'Senior detection engineer, then detection lead, threat hunting, or security engineering. The work is unusually portable: rules and methodology transfer between employers in a way that knowledge of one company’s alert queue does not.',
+    trackId: 'detection-engineering',
+    entryReality:
+      'Rarely a first security job, and anybody telling you otherwise is selling a course. The normal route is eighteen months to two years in a SOC first, because tuning a rule well requires knowing what the queue feels like at 3am. Data engineers and software developers moving across are the genuine exception.',
   },
   {
     id: 'incident-response',

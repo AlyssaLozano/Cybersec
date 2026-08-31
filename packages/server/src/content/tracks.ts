@@ -139,9 +139,11 @@ export const TRACKS: Track[] = [
     roles: ['Detection Engineer', 'Security Data Analyst', 'SIEM Engineer', 'Threat Hunter'],
     foundations: ['linux', 'log-analysis', 'regex', 'siem', 'data-sql', 'scripting', 'threat-modelling'],
     curriculum: [
-      { title: 'Writing Detection Logic', summary: 'Author portable Sigma rules and reason about true and false positive rates.', plannedExercises: 20 },
-      { title: 'Detection Tuning at Scale', summary: 'Take a rule that fires 4,000 times a day and make it useful.', plannedExercises: 16 },
-      { title: 'Coverage and Measurement', summary: 'Map detections to ATT&CK and find the gaps honestly.', plannedExercises: 14 },
+      { title: 'SIEM Fundamentals', summary: 'Query a SIEM, decide what is worth indexing against what it costs, and normalise sources that disagree about what a username is called.', plannedExercises: 10 },
+      { title: 'Writing Detection Logic', summary: 'Author a threshold rule from scratch, exclude a known benign cause without blinding it, and replay it over a month of old logs before anyone deploys it.', plannedExercises: 14 },
+      { title: 'Correlation and Behavioural Detection', summary: 'Rules that need several events to mean anything, baselines that separate an odd-but-normal user from a compromised one, and one ATT&CK technique covered across every way it shows up.', plannedExercises: 16 },
+      { title: 'Detection Engineering in Practice', summary: 'Find the gap a real incident walked through, cut a rule firing 500 times a day down to something a SOC can work, and build coverage for a named threat actor.', plannedExercises: 16 },
+      { title: 'Detection at Scale', summary: 'Version, test, and retire a hundred rules without chaos, and answer "what can we not detect?" honestly enough to put in front of an executive.', plannedExercises: 10 },
     ],
     certifications: ['sec-plus', 'cysa-plus', 'sc-200', 'gcih'],
     sectorNotes: [
@@ -152,7 +154,8 @@ export const TRACKS: Track[] = [
     ],
     status: 'in_development',
     workRhythm: 'Project work with business hours. Rarely on-call. Deadlines come from engineering cycles rather than incidents.',
-    entryDifficulty: 'moderate',
+    // Rarely entered cold: tuning a rule well needs to have felt the queue first.
+    entryDifficulty: 'hard',
   },
   {
     id: 'threat-intel',

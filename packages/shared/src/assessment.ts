@@ -57,6 +57,7 @@ export const DIMENSION_LABELS: Record<Dimension, string> = {
 
 export const LANES = [
   'soc-ops',
+  'detection-engineering',
   'incident-response',
   'threat-intel',
   'pentest',

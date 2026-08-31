@@ -220,7 +220,7 @@ function burnoutFor(laneId: LaneId, traits: Map<TraitId, number>): 'low' | 'medi
 
   const reactive: LaneId[] = ['soc-ops', 'incident-response'];
   const persuasion: LaneId[] = ['risk-compliance', 'vuln-management', 'security-architecture'];
-  const ambiguous: LaneId[] = ['security-architecture', 'threat-intel', 'red-team'];
+  const ambiguous: LaneId[] = ['security-architecture', 'threat-intel', 'red-team', 'detection-engineering'];
   const unstable: LaneId[] = ['incident-response', 'pentest', 'red-team'];
 
   // Low tolerance for the thing a lane demands most raises risk.
@@ -257,11 +257,30 @@ function concernsFor(laneId: LaneId, traits: Map<TraitId, number>): string[] {
   if ((laneId === 'risk-compliance' || laneId === 'vuln-management') && get('people_orientation') < -0.5) {
     concerns.push('Much of this job is persuading people who do not report to you, and you said that drains you.');
   }
-  if ((laneId === 'security-architecture' || laneId === 'threat-intel') && get('structure_need') > 1) {
+  if (
+    (laneId === 'security-architecture' ||
+      laneId === 'threat-intel' ||
+      laneId === 'detection-engineering') &&
+    get('structure_need') > 1
+  ) {
     concerns.push('You want clear right answers. This lane rarely offers them.');
   }
-  if ((laneId === 'appsec' || laneId === 'security-engineering' || laneId === 'cloud-security') && get('building_drive') < -0.5) {
+  if (
+    (laneId === 'appsec' ||
+      laneId === 'security-engineering' ||
+      laneId === 'cloud-security' ||
+      laneId === 'detection-engineering') &&
+    get('building_drive') < -0.5
+  ) {
     concerns.push('This lane involves writing code and configuration, which you did not seem drawn to.');
+  }
+  if (laneId === 'detection-engineering' && get('detail_orientation') < 0) {
+    concerns.push(
+      'A detection rule that is slightly wrong does not fail quietly — it makes hundreds of alerts somebody else has to close, and detail was not a strength in your answers.',
+    );
+  }
+  if (laneId === 'detection-engineering' && get('depth_preference') < -0.5) {
+    concerns.push('This is slow, iterative work on a small number of rules, and you said you prefer breadth and turnover.');
   }
   if (laneId === 'forensics' && get('detail_orientation') < 0) {
     concerns.push('Forensic work is unforgiving about small procedural mistakes, and detail was not a strength in your answers.');

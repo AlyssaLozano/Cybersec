@@ -1,5 +1,5 @@
 /**
- * The item bank: 68 questions across six dimensions.
+ * The item bank: 75 questions across six dimensions.
  *
  * A NOTE ON COUNT
  *
@@ -44,7 +44,7 @@ export const ITEMS: AssessmentItem[] = [
     statement: 'I would rather work on one thing for a whole week than five things in a day.',
     trait: 'interrupt_tolerance',
     reverse: true,
-    lanes: { forensics: 3, 'threat-intel': 2, 'security-architecture': 2, appsec: 1, 'soc-ops': -2 },
+    lanes: { forensics: 3, 'threat-intel': 2, 'security-architecture': 2, appsec: 1, 'detection-engineering': 1, 'soc-ops': -2 },
   },
   {
     id: 'p3',
@@ -88,7 +88,7 @@ export const ITEMS: AssessmentItem[] = [
     statement: 'I would find it satisfying to close forty small tasks in a day.',
     trait: 'depth_preference',
     reverse: true,
-    lanes: { 'soc-ops': 3, 'vuln-management': 2, iam: 2, forensics: -2, 'security-architecture': -1 },
+    lanes: { 'soc-ops': 3, 'vuln-management': 2, iam: 2, forensics: -2, 'detection-engineering': -1, 'security-architecture': -1 },
   },
   {
     id: 'p8',
@@ -149,7 +149,7 @@ export const ITEMS: AssessmentItem[] = [
   },
 
   // =========================================================================
-  // 2. PROBLEM-SOLVING STYLE (13 items)
+  // 2. PROBLEM-SOLVING STYLE (15 items)
   // =========================================================================
   {
     id: 's1',
@@ -157,7 +157,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'problem_solving',
     statement: 'I am good at spotting when something in a long list looks different from the rest.',
     trait: 'detail_orientation',
-    lanes: { 'soc-ops': 3, forensics: 2, 'threat-intel': 2, 'network-security': 2 },
+    lanes: { 'soc-ops': 3, forensics: 2, 'threat-intel': 2, 'network-security': 2, 'detection-engineering': 2 },
   },
   {
     id: 's2',
@@ -182,7 +182,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'problem_solving',
     statement: 'I enjoy reading for hours to understand something properly before acting.',
     trait: 'research_orientation',
-    lanes: { 'threat-intel': 3, 'security-architecture': 2, appsec: 2, 'risk-compliance': 2, 'soc-ops': -1 },
+    lanes: { 'threat-intel': 3, 'security-architecture': 2, appsec: 2, 'risk-compliance': 2, 'detection-engineering': 1, 'soc-ops': -1 },
   },
   {
     id: 's5',
@@ -199,7 +199,7 @@ export const ITEMS: AssessmentItem[] = [
     statement: 'Given an unfamiliar system, my instinct is to work out how I would know if someone else broke it.',
     trait: 'adversarial_pull',
     reverse: true,
-    lanes: { 'soc-ops': 3, 'incident-response': 2, 'threat-intel': 2, 'network-security': 1 },
+    lanes: { 'soc-ops': 3, 'detection-engineering': 3, 'incident-response': 2, 'threat-intel': 2, 'network-security': 1 },
   },
   {
     id: 's7',
@@ -207,7 +207,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'problem_solving',
     statement: 'I would rather build a tool that solves a problem permanently than solve it by hand each time.',
     trait: 'building_drive',
-    lanes: { 'security-engineering': 4, 'cloud-security': 3, appsec: 2, 'soc-ops': -1 },
+    lanes: { 'security-engineering': 4, 'detection-engineering': 3, 'cloud-security': 3, appsec: 2, 'soc-ops': -1 },
   },
   {
     id: 's8',
@@ -215,7 +215,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'problem_solving',
     statement: 'I am comfortable writing code or scripts, or I would be happy to learn.',
     trait: 'building_drive',
-    lanes: { 'security-engineering': 3, 'cloud-security': 3, appsec: 3, 'red-team': 2, 'risk-compliance': -1 },
+    lanes: { 'security-engineering': 3, 'cloud-security': 3, appsec: 3, 'detection-engineering': 2, 'red-team': 2, 'risk-compliance': -1 },
   },
   {
     id: 's9',
@@ -251,6 +251,24 @@ export const ITEMS: AssessmentItem[] = [
     lanes: { forensics: 3, 'risk-compliance': 2, iam: 2, appsec: 2 },
   },
   {
+    id: 's14',
+    kind: 'likert',
+    dimension: 'problem_solving',
+    statement:
+      'I would rather spend a day making a tool that half-works work properly than a day working around it.',
+    trait: 'building_drive',
+    lanes: { 'detection-engineering': 4, 'security-engineering': 3, 'cloud-security': 1, 'soc-ops': -1 },
+  },
+  {
+    id: 's15',
+    kind: 'likert',
+    dimension: 'problem_solving',
+    statement:
+      'I am good at noticing when three unremarkable things happening together are the thing worth looking at.',
+    trait: 'research_orientation',
+    lanes: { 'detection-engineering': 3, 'threat-intel': 2, 'incident-response': 2, forensics: 1 },
+  },
+  {
     id: 's13',
     kind: 'choice',
     dimension: 'problem_solving',
@@ -271,7 +289,7 @@ export const ITEMS: AssessmentItem[] = [
       {
         id: 'watch-it',
         label: 'Work out what it logs, so I would know if something went wrong',
-        lanes: { 'soc-ops': 3, 'incident-response': 2 },
+        lanes: { 'soc-ops': 3, 'detection-engineering': 3, 'incident-response': 2 },
         traitValue: { trait: 'adversarial_pull', value: -1 },
       },
       {
@@ -360,7 +378,7 @@ export const ITEMS: AssessmentItem[] = [
     statement: 'I would find it demoralising if my work was invisible when it went well.',
     trait: 'people_orientation',
     reverse: true,
-    lanes: { 'security-engineering': -2, iam: -2, 'network-security': -1, pentest: 1 },
+    lanes: { 'security-engineering': -2, 'detection-engineering': -2, iam: -2, 'network-security': -1, pentest: 1 },
   },
   {
     id: 'i10',
@@ -404,7 +422,7 @@ export const ITEMS: AssessmentItem[] = [
   },
 
   // =========================================================================
-  // 4. DETAIL AND BIG PICTURE (10 items)
+  // 4. DETAIL AND BIG PICTURE (11 items)
   // =========================================================================
   {
     id: 'd1',
@@ -494,9 +512,18 @@ export const ITEMS: AssessmentItem[] = [
     lanes: { forensics: 4, 'risk-compliance': 2 },
     factors: { rules: 1 },
   },
+  {
+    id: 'd11',
+    kind: 'likert',
+    dimension: 'detail_bigpicture',
+    statement:
+      'If something I built was creating extra work for a colleague, I would want to know exactly how often it happened.',
+    trait: 'detail_orientation',
+    lanes: { 'detection-engineering': 3, 'security-engineering': 2, 'vuln-management': 1, 'risk-compliance': 1 },
+  },
 
   // =========================================================================
-  // 5. INTERESTS AND ENERGY (15 items)
+  // 5. INTERESTS AND ENERGY (17 items)
   // =========================================================================
   {
     id: 'e1',
@@ -513,7 +540,7 @@ export const ITEMS: AssessmentItem[] = [
     statement: 'I would find it more satisfying to stop an attack than to carry one out.',
     trait: 'adversarial_pull',
     reverse: true,
-    lanes: { 'soc-ops': 3, 'incident-response': 3, 'security-engineering': 2, 'network-security': 2, pentest: -2 },
+    lanes: { 'soc-ops': 3, 'incident-response': 3, 'security-engineering': 2, 'network-security': 2, 'detection-engineering': 2, pentest: -2 },
   },
   {
     id: 'e3',
@@ -521,7 +548,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'interests_energy',
     statement: 'I would rather design something that works well than investigate something that went wrong.',
     trait: 'building_drive',
-    lanes: { 'security-engineering': 3, 'security-architecture': 3, 'cloud-security': 2, forensics: -3, 'incident-response': -2 },
+    lanes: { 'security-engineering': 3, 'security-architecture': 3, 'detection-engineering': 3, 'cloud-security': 2, forensics: -3, 'incident-response': -2 },
   },
   {
     id: 'e4',
@@ -609,6 +636,23 @@ export const ITEMS: AssessmentItem[] = [
     lanes: { 'vuln-management': 4, iam: 1, 'soc-ops': 1 },
   },
   {
+    id: 'e16',
+    kind: 'likert',
+    dimension: 'interests_energy',
+    statement: 'Writing something that catches an attack automatically appeals to me more than catching one myself.',
+    trait: 'building_drive',
+    lanes: { 'detection-engineering': 4, 'security-engineering': 2, 'soc-ops': -2, 'incident-response': -1 },
+  },
+  {
+    id: 'e17',
+    kind: 'likert',
+    dimension: 'interests_energy',
+    statement:
+      'Spending a week making something that already works generate fewer complaints sounds dull to me.',
+    trait: 'novelty_seeking',
+    lanes: { 'detection-engineering': -3, 'security-engineering': -2, 'vuln-management': -1, 'red-team': 1, pentest: 1 },
+  },
+  {
     id: 'e14',
     kind: 'choice',
     dimension: 'interests_energy',
@@ -617,12 +661,12 @@ export const ITEMS: AssessmentItem[] = [
       {
         id: 'caught',
         label: 'I caught something serious that everyone else missed',
-        lanes: { 'soc-ops': 3, 'incident-response': 3, 'threat-intel': 2 },
+        lanes: { 'soc-ops': 3, 'incident-response': 3, 'threat-intel': 2, 'detection-engineering': 1 },
       },
       {
         id: 'built',
         label: 'I built something that quietly prevents a whole class of problem',
-        lanes: { 'security-engineering': 3, 'cloud-security': 2, appsec: 2, 'security-architecture': 2 },
+        lanes: { 'security-engineering': 3, 'detection-engineering': 3, 'cloud-security': 2, appsec: 2, 'security-architecture': 2 },
         traitValue: { trait: 'building_drive', value: 2 },
       },
       {
@@ -648,7 +692,7 @@ export const ITEMS: AssessmentItem[] = [
       {
         id: 'queue',
         label: 'Working through an endless queue of alerts, most of which are nothing',
-        lanes: { 'soc-ops': -4, 'vuln-management': -1 },
+        lanes: { 'soc-ops': -4, 'vuln-management': -1, 'detection-engineering': 1 },
       },
       {
         id: 'paperwork',
@@ -672,7 +716,7 @@ export const ITEMS: AssessmentItem[] = [
   },
 
   // =========================================================================
-  // 6. LIFE AND WORK BALANCE (8 items)
+  // 6. LIFE AND WORK BALANCE (10 items)
   // =========================================================================
   {
     id: 'l1',
@@ -689,7 +733,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'life_balance',
     statement: 'I need predictable hours — nights and weekends are not something I can do.',
     trait: 'stability_need',
-    lanes: { 'incident-response': -4, 'soc-ops': -3, 'risk-compliance': 2, iam: 2, 'security-architecture': 1 },
+    lanes: { 'incident-response': -4, 'soc-ops': -3, 'detection-engineering': 2, 'risk-compliance': 2, iam: 2, 'security-architecture': 1 },
     factors: { stability: 2 },
   },
   {

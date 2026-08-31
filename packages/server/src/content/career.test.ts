@@ -96,7 +96,7 @@ describe('foundations are per-track, not universal', () => {
   });
 
   it('resolves a track to its playable packages, foundations first', () => {
-    expect(trackPackages('soc')).toEqual(['1', '2']);
+    expect(trackPackages('soc')).toEqual(['1', '2', '4', '3']);
     expect(trackPackages('privacy')).toEqual([]);
   });
 });
@@ -106,7 +106,7 @@ describe('foundations are per-track, not universal', () => {
 // =========================================================================
 
 describe('lane profiles are complete and honest', () => {
-  it('covers all fourteen lanes exactly', () => {
+  it('covers all fifteen lanes exactly', () => {
     expect(LANE_PROFILES.map((lane) => lane.id).sort()).toEqual([...LANES].sort());
   });
 
@@ -296,6 +296,54 @@ describe('scoring', () => {
   it('returns a full lane list even with no answers', () => {
     const result = score([]);
     expect(result.lanes.length).toBe(LANES.length);
+  });
+});
+
+// =========================================================================
+// Detection engineering routing
+// =========================================================================
+
+describe('detection engineering routing', () => {
+  /** Somebody who would rather build the rule than work the queue it fills. */
+  const BUILDER: ItemResponse[] = [
+    ...likert(['e16', 's14', 's7', 's6', 's8', 's15', 'd11', 'l2'], 5),
+    ...likert(['p7', 'e17', 'p3'], 1),
+  ];
+
+  it('routes a build-and-tune profile to detection engineering', () => {
+    expect(buildReport(BUILDER).topLanes[0]!.laneId).toBe('detection-engineering');
+  });
+
+  it('does not cannibalise the SOC profile', () => {
+    // These two lanes share most of their vocabulary, so the risk in adding one
+    // is that it quietly steals the other. Somebody who actually wants the queue
+    // must still be sent to the queue.
+    const operator = [...likert(['p3', 'p7', 's1', 'e2', 'p1', 'l1'], 5), ...likert(['p2', 'p8'], 1)];
+    const lanes = score(operator).lanes;
+    const soc = lanes.find((lane) => lane.laneId === 'soc-ops')!;
+    const detection = lanes.find((lane) => lane.laneId === 'detection-engineering')!;
+    expect(soc.raw).toBeGreaterThan(detection.raw);
+  });
+
+  it('warns somebody who wants clear right answers, since a threshold is a choice', () => {
+    // Every tuning decision is a number a person picked, not a fact they found.
+    // A lane that only ever reports as a good fit is marketing.
+    const structured = [...likert(['p5', 'd3', 'd4', 's11'], 5), ...likert(['e16', 's14'], 5)];
+    const detection = score(structured).lanes.find((lane) => lane.laneId === 'detection-engineering')!;
+    expect(detection.concerns.join(' ')).toMatch(/clear right answers/i);
+  });
+
+  it('has enough items bearing on it to be scored with real confidence', () => {
+    const detection = score(BUILDER).lanes.find((lane) => lane.laneId === 'detection-engineering')!;
+    expect(detection.confidence).toBeGreaterThanOrEqual(60);
+  });
+
+  it('maps the lane to the detection engineering track and its foundations', () => {
+    const lane = getLaneProfile('detection-engineering')!;
+    expect(lane.trackId).toBe('detection-engineering');
+    const foundations = trackFoundations('detection-engineering').map((foundation) => foundation.id);
+    expect(foundations).toContain('siem');
+    expect(foundations).toContain('log-analysis');
   });
 });
 
