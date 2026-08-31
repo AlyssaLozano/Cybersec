@@ -6,7 +6,7 @@
  * student's *progress against* these ids.
  *
  * Ids are stable strings ("1.1.3") taken from the source spec. Never renumber an
- * existing id — progress rows reference it. Add new ids instead.
+ * existing id: progress rows reference it. Add new ids instead.
  */
 
 import type { AttackCarrier, AttackIntent, DefenceId } from './ai.js';
@@ -116,7 +116,7 @@ export type Check =
    *
    *  Note what is NOT gradeable here: the deference rate. `CollaborationScore`
    *  reports it, and an instructor should read it, but failing somebody for it
-   *  would mean failing them for agreeing with advice that was correct — and on
+   *  would mean failing them for agreeing with advice that was correct, and on
    *  a realistic queue the copilot is right about most alerts, so a careful
    *  student defers most of the time and should. What is gradeable is what
    *  happened at the alerts where deferring was wrong: `minCaught` and
@@ -134,7 +134,7 @@ export type Check =
    *
    * These grade what happened when the student's payloads met a model under
    * test, never the text of the payloads themselves. That is the same rule as
-   * everywhere else here — grade the outcome, not the keystrokes — and it
+   * everywhere else here (grade the outcome, not the keystrokes) and it
    * matters more in this package than in any other, because there is no single
    * correct jailbreak. There is a class of technique the deployment does not
    * defend against, and any payload in that class is a right answer.
@@ -166,7 +166,7 @@ export type Check =
    *  an assessment report with four hundred payloads in it is not an assessment
    *  report, and submitting only what demonstrates the finding is part of the
    *  job. `min` is the evidence half, and it exists for the exercises that end
-   *  in a NEGATIVE result — "I could not break it" is worth something only when
+   *  in a NEGATIVE result: "I could not break it" is worth something only when
    *  it says how hard you tried, so an exercise that grades a model holding
    *  requires enough attempts to have meant it. */
   | { type: 'probe-budget'; max: number; min?: number; hint: string }
@@ -193,8 +193,8 @@ export type Check =
    *  was selected, which is how "do all of it" stops being an answer. */
   | { type: 'decision-selects'; optionIds: string[]; forbidExtra?: boolean; hint: string }
   /** None of these options may be chosen. Separate from `decision-selects` so an
-   *  exercise can be explicitly about the thing you must NOT do — pulling the
-   *  power on a host whose memory has not been captured, say — and say so in
+   *  exercise can be explicitly about the thing you must NOT do: pulling the
+   *  power on a host whose memory has not been captured, say, and say so in
    *  its own hint. */
   | { type: 'decision-avoids'; optionIds: string[]; hint: string }
   /** The ordering must be within `maxDisplaced` positions of the intended one.
@@ -360,7 +360,7 @@ export interface PracticeItem {
    * A different model under test, for Model Lab drills.
    *
    * A drill's whole premise is "same skill, different target", and in the Model
-   * Lab the target IS the model — running the same three payloads against a
+   * Lab the target IS the model: running the same three payloads against a
    * deployment with different controls is the entire lesson. Absent means the
    * drill uses its parent exercise's model.
    */

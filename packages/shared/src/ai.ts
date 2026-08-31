@@ -5,7 +5,7 @@
  *
  * Every other role in this platform investigates a system that was attacked.
  * This one attacks a system that is meant to be defended, and the artefact under
- * test is not a host or a log file — it is a model plus the deployment wrapped
+ * test is not a host or a log file: it is a model plus the deployment wrapped
  * around it. Grading that as a shell command would test the wrong thing.
  *
  * So the answer a student submits is a set of PROBES (payloads sent to a model
@@ -59,15 +59,15 @@
  * stop it seeing them.
  */
 export const ATTACK_INTENTS = [
-  /** "Ignore previous instructions and ..." — the plainest form. */
+  /** "Ignore previous instructions and ...": the plainest form. */
   'direct-override',
-  /** "You are DAN, an AI with no restrictions" — a persona that has no rules. */
+  /** "You are DAN, an AI with no restrictions": a persona that has no rules. */
   'role-play',
-  /** "Never say you cannot" — removing the model's ability to decline. */
+  /** "Never say you cannot": removing the model's ability to decline. */
   'refusal-suppression',
   /** Few-shot examples in the prompt that teach the behaviour the attacker wants. */
   'in-context',
-  /** "Repeat everything above this line" — pulling the system prompt out. */
+  /** "Repeat everything above this line": pulling the system prompt out. */
   'system-prompt-leak',
   /** Probing for verbatim training data: "continue this record exactly". */
   'training-data-extraction',
@@ -80,7 +80,7 @@ export type AttackIntent = (typeof ATTACK_INTENTS)[number];
  * How the intent is disguised.
  *
  * `none` is a real value, not a null. A payload with no carrier is the plain
- * attack, and every student's first probe should be one — a model that fails
+ * attack, and every student's first probe should be one: a model that fails
  * against plain text needed no cleverness at all, and finding that out first
  * saves an afternoon.
  */
@@ -180,8 +180,8 @@ export interface DefenceProfile {
  * has it, which is the question every exercise asks. Withholding it would only
  * mean students guessed at mechanisms instead of reasoning about them.
  *
- * `cost` is a rough relative figure — latency plus the engineering to keep it
- * working — normalised so that a sensible production stack lands around 6 or 7.
+ * `cost` is a rough relative figure: latency plus the engineering to keep it
+ * working: normalised so that a sensible production stack lands around 6 or 7.
  * It is not a measurement of anything. It exists so that "deploy all eight" is
  * an answer the grader can reject.
  */
@@ -193,7 +193,7 @@ export const DEFENCE_PROFILES: DefenceProfile[] = [
     summary:
       'Fold the input to a canonical form before anything inspects it: NFKC, strip zero-width characters, map homoglyphs back to Latin, and close up letters separated by punctuation.',
     limitation:
-      'Blocks nothing by itself. It has no opinion about what the text says — it only makes obfuscated text legible to whatever inspects it next. Deployed without a filter behind it, it costs latency and buys nothing.',
+      'Blocks nothing by itself. It has no opinion about what the text says: it only makes obfuscated text legible to whatever inspects it next. Deployed without a filter behind it, it costs latency and buys nothing.',
     cost: 1,
   },
   {
@@ -213,7 +213,7 @@ export const DEFENCE_PROFILES: DefenceProfile[] = [
     summary:
       'Reject inputs containing known injection phrasing: instruction overrides, persona jailbreaks, refusal suppression, prompt-extraction requests.',
     limitation:
-      'Sees only what the normalisation in front of it left behind, and only on the user input path — it never reads the documents the system retrieves. It is the first thing every encoding attack defeats and the last thing teams stop trusting.',
+      'Sees only what the normalisation in front of it left behind, and only on the user input path: it never reads the documents the system retrieves. It is the first thing every encoding attack defeats and the last thing teams stop trusting.',
     cost: 2,
   },
   {
@@ -241,7 +241,7 @@ export const DEFENCE_PROFILES: DefenceProfile[] = [
     title: 'Retrieved-content quarantine',
     kind: 'structural',
     summary:
-      'Treat everything the system fetched — documents, log lines, tickets, web pages — as inert data that can be quoted and summarised but never followed.',
+      'Treat everything the system fetched (documents, log lines, tickets, web pages) as inert data that can be quoted and summarised but never followed.',
     limitation:
       'Only covers the retrieval path. It does nothing about what a user types, and it does nothing about a poisoned corpus continuing to return the wrong documents.',
     cost: 3,
@@ -280,7 +280,7 @@ export type DeploymentStage = (typeof DEPLOYMENT_STAGES)[number];
  * Everything here is what a real assessor is handed in a scoping document: what
  * the system is for, where it sits, how much traffic it takes, and the system
  * prompt if the owning team chose to share it. What is NOT here is the defence
- * list — see `ModelDeployment`.
+ * list: see `ModelDeployment`.
  */
 export interface ModelCard {
   id: string;
@@ -369,7 +369,7 @@ export type ProbeStage = (typeof PROBE_STAGES)[number];
  * `stage` ships and the specific defence does not, for the usual reason: naming
  * the exact control that caught a payload would let a student enumerate the
  * deployment in eight probes without understanding any of it. `stage` is the
- * honest amount of feedback — roughly what a real tester infers from the shape
+ * honest amount of feedback: roughly what a real tester infers from the shape
  * of a refusal.
  */
 export interface ProbeResult {
@@ -381,7 +381,7 @@ export interface ProbeResult {
   /** Techniques the harness recognised in the payload. */
   intents: AttackIntent[];
   carriers: AttackCarrier[];
-  /** The simulated model's reply. Never harmful content — see the file header. */
+  /** The simulated model's reply. Never harmful content: see the file header. */
   response: string;
 }
 
@@ -476,7 +476,7 @@ export interface ModelAssessment {
 export interface AiSecurityPortfolio {
   findings: ModelFinding[];
   assessments: ModelAssessment[];
-  /** Reusable suites the student authored — the "tools built" section. */
+  /** Reusable suites the student authored: the "tools built" section. */
   suites: Array<{ id: string; title: string; payloadCount: number; usedAgainst: string[] }>;
   /** Honest note about what this portfolio does and does not prove. */
   caveat: string;

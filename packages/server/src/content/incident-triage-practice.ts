@@ -9,7 +9,7 @@
  *
  * A drill is only worth writing when repeating the same skill against a
  * different target teaches something. That is true of "extract the addresses
- * from this log" and it is largely false of "write the on-call procedure" —
+ * from this log" and it is largely false of "write the on-call procedure":
  * doing that twice teaches nothing the first attempt did not. So the triage
  * exercises carry drills and the written-judgement ones mostly do not, rather
  * than padding every exercise to a uniform five.
@@ -54,7 +54,7 @@ export const INCIDENT_TRIAGE_PRACTICE: Record<string, PracticeItem[]> = {
     {
       id: 'triage.1.1-p1',
       prompt:
-        'Same queue. This time dismiss only the firewall-block alerts — the ones where an inbound ' +
+        'Same queue. This time dismiss only the firewall-block alerts: the ones where an inbound ' +
         'connection to a closed port was dropped. Leave everything else undecided.',
       solution: `Dismiss ${INTRO_SCANNER.join(', ')}.`,
       checks: [
@@ -73,7 +73,7 @@ export const INCIDENT_TRIAGE_PRACTICE: Record<string, PracticeItem[]> = {
       id: 'triage.1.1-p2',
       prompt:
         'Dismiss every alert in this queue whose correct disposition is closure without a rule ' +
-        'change — the ordinary administration and the blocked scanning, but not the noisy rule.',
+        'change: the ordinary administration and the blocked scanning, but not the noisy rule.',
       solution: `Dismiss ${INTRO_DISMISS.join(', ')}.`,
       checks: [
         {
@@ -105,7 +105,7 @@ export const INCIDENT_TRIAGE_PRACTICE: Record<string, PracticeItem[]> = {
           minPrecision: 0.7,
           hint:
             'Several high-severity alerts here are defective rules. Severity is a claim, not a ' +
-            'finding — read what each one actually describes.',
+            'finding: read what each one actually describes.',
         },
         {
           type: 'triage-budget',
@@ -122,7 +122,7 @@ export const INCIDENT_TRIAGE_PRACTICE: Record<string, PracticeItem[]> = {
       id: 'triage.1.5-p1',
       prompt:
         'The night-shift queue with a much harder cap: at most three escalations. You cannot cover ' +
-        'the whole intrusion — choose the three that would most change what happens next, and ' +
+        'the whole intrusion: choose the three that would most change what happens next, and ' +
         'justify one of them.',
       solution:
         `With three slots, escalate the data staging (${NIGHT_STAGING[0]}), the successful login, ` +
@@ -205,7 +205,7 @@ export const INCIDENT_TRIAGE_PRACTICE: Record<string, PracticeItem[]> = {
           minPrecision: 1,
           minRecall: 1,
           hint:
-            'Exact coverage this time — every incident alert escalated, nothing else. Work out ' +
+            'Exact coverage this time: every incident alert escalated, nothing else. Work out ' +
             'which alerts share an actor.',
         },
       ],
@@ -218,7 +218,7 @@ export const INCIDENT_TRIAGE_PRACTICE: Record<string, PracticeItem[]> = {
       prompt:
         'Night-shift queue, command-and-control only: escalate the alert describing repeating ' +
         'outbound connections to an uncategorised destination, and nothing else.',
-      solution: `Escalate ${NIGHT_BEACON.join(', ')} — a fixed fifteen-minute interval with almost no jitter.`,
+      solution: `Escalate ${NIGHT_BEACON.join(', ')}: a fixed fifteen-minute interval with almost no jitter.`,
       checks: [
         {
           type: 'triage-selection',

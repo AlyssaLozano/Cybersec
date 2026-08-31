@@ -4,7 +4,7 @@
  * This is the AI Security equivalent of `shell.test.ts`. Every exercise in
  * Package 7 is graded on what this engine decides, so a change that quietly
  * makes a defence stronger or weaker would silently retune a dozen exercises at
- * once — including making some of them impossible.
+ * once: including making some of them impossible.
  *
  * The cases below are therefore written as the LESSONS rather than as unit
  * coverage. Each one is a claim the curriculum makes to a student, and if the

@@ -94,7 +94,7 @@ up `8.8.8.8`.
 network. Public names resolve to RFC 5737 documentation addresses
 (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`), which are reserved and
 cannot route anywhere real. A student who later runs the same command against
-the live internet will see different numbers — the correct trade, since nothing
+the live internet will see different numbers: the correct trade, since nothing
 here should teach anyone that a lab address is a real destination.
 
 `ping` also requires `-c` so the command terminates; an unbounded ping would
@@ -121,7 +121,7 @@ generic placeholder name weakens the realism the rest of the world is built on.
 ## 9. Reading `/var/log/auth.log` requires group membership
 
 On a real Ubuntu host `/var/log/auth.log` is `root:adm 0640`, so an ordinary
-account cannot read it — yet the entire curriculum has students reading it
+account cannot read it, yet the entire curriculum has students reading it
 without `sudo`.
 
 **Done:** the `student` account is a member of the `adm` group, which is exactly
@@ -135,7 +135,7 @@ The spec's exercise 2.3.2 finds service start/stop events with
 `grep -E "started|stopped" /var/log/syslog`.
 
 Real syslog writes `Started` and `Stopping`, not `started` and `stopped`. Against
-the seeded world the spec's command returns **1 line out of 4** — and because it
+the seeded world the spec's command returns **1 line out of 4**, and because it
 returns *something*, it looks like it worked.
 
 **Done:** the exercise teaches `grep -iE "started|stopped"`, which is the actual
@@ -153,8 +153,8 @@ sshd never writes `user=` on a `Failed password` line. It writes that field on t
 accompanying `pam_unix(sshd:auth): authentication failure` line. The spec's
 command returns **nothing at all**.
 
-**Done:** the exercise greps the file directly —
-`grep -oP 'user=\K[^ ]*' /var/log/auth.log | sort -u` — which works and is what
+**Done:** the exercise greps the file directly:
+`grep -oP 'user=\K[^ ]*' /var/log/auth.log | sort -u`, which works and is what
 the field actually does.
 
 ## 12. Two label names look like good extraction drills and are not
@@ -173,7 +173,7 @@ Both would have marked a correct student command as wrong. The drills use
 
 Found by the new catalogue golden test, not present in the source spec.
 
-`grep -i "error" /var/log/*.log` matches `auth.log`, `dpkg.log` and `kern.log` —
+`grep -i "error" /var/log/*.log` matches `auth.log`, `dpkg.log` and `kern.log`:
 none of which contain the word "error". The errors live in `syslog` (no `.log`
 extension) and `nginx/error.log` (a subdirectory). The exercise returned nothing,
 so its own "you should see filename prefixes" check could never pass.
@@ -196,7 +196,7 @@ lucky, and neither can an instructor reviewing where people get stuck. Every
 other answer key in this codebase is computed from committed, seeded data
 specifically to avoid that.
 
-The lesson would be wrong. What the package needs to teach is structural — a
+The lesson would be wrong. What the package needs to teach is structural: a
 keyword filter is only as good as the normalisation in front of it, a normaliser
 with no filter behind it blocks nothing, and controls on the user input path do
 not touch the retrieval path. Those are facts about a deployment's architecture,
@@ -239,7 +239,7 @@ serving it, and a student who asks "so why is the solo price the same?" gets no
 answer.
 
 **Done:** `content/pricing.ts` gives exactly one reason for the difference, and it
-is the one that holds — the sessions need an instructor who has actually assessed
+is the one that holds: the sessions need an instructor who has actually assessed
 deployed models, and there are very few of those people. The solo path therefore
 includes AI Foundations and AI Security at no extra cost, because a self-paced
 learner is not consuming a scarce instructor, and charging them extra would only
@@ -257,7 +257,7 @@ would be the single most damaging thing in the curriculum.
 junior openings, that the quoted figures are for people arriving from senior
 roles elsewhere, and that the realistic route is two to three years in another
 lane first. The assessment items that route somebody here measure tolerance
-rather than enthusiasm — comfort with the mathematics, comfort where no method
-exists yet, and willingness to spend a week proving a negative — because
+rather than enthusiasm: comfort with the mathematics, comfort where no method
+exists yet, and willingness to spend a week proving a negative, because
 "does AI interest you" would currently route half the population into a
 specialism that cannot absorb them.

@@ -141,7 +141,7 @@ describe('catalogue integrity', () => {
 
 describe('every exercise solution passes its own checks', () => {
   for (const exercise of terminalExercises) {
-    it(`${exercise.id} — ${exercise.title}`, () => {
+    it(`${exercise.id}: ${exercise.title}`, () => {
       const evaluation = attempt(exercise.solution, exercise.setup, exercise, exercise.checks);
       // Surface which check failed rather than just "expected true to be false".
       expect(

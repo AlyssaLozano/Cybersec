@@ -125,7 +125,7 @@ const MODULE_2_1: Exercise[] = [
       {
         type: 'output-contains',
         text: 'rmg-web-02',
-        hint: 'Read /var/log/auth.log — every line should carry this hostname.',
+        hint: 'Read /var/log/auth.log: every line should carry this hostname.',
       },
       {
         type: 'output-matches',
@@ -147,7 +147,7 @@ const MODULE_2_1: Exercise[] = [
     kind: 'terminal',
     goal: 'Cut a line into fields and keep only the ones you want.',
     prompt:
-      'From the first 10 lines of the authentication log, show only the date and time — the first three space-separated fields — and nothing else.',
+      'From the first 10 lines of the authentication log, show only the date and time (the first three space-separated fields) and nothing else.',
     teach: {
       concept:
         'A log line is a row; the spaces between words make it a set of columns. `cut` splits each line on a delimiter and keeps the fields you name. In syslog format the timestamp is spread across the first three fields ("Aug", "15", "00:00:29"), which is why you ask for fields 1 through 3 rather than just field 1.',
@@ -181,7 +181,7 @@ const MODULE_2_1: Exercise[] = [
         type: 'output-matches',
         pattern: '^Aug 15 \\d{2}:\\d{2}:\\d{2}$',
         flags: 'm',
-        hint: 'Each line should be ONLY the timestamp — three fields, nothing after the seconds.',
+        hint: 'Each line should be ONLY the timestamp: three fields, nothing after the seconds.',
       },
       {
         type: 'output-excludes',
@@ -205,7 +205,7 @@ const MODULE_2_1: Exercise[] = [
       'Something is reported to have happened mid-morning. Show every authentication log entry from the 10 o\'clock hour on August 15.',
     teach: {
       concept:
-        'Because the timestamp sits at the front of every line, you can filter by time with plain text matching — no special date tooling required. Searching for "Aug 15 10:" matches 10:00:00 through 10:59:59, because every one of those timestamps literally begins with that text. Scoping to a window is usually the first move in an investigation: an alert gives you a time, and you go read what the machine was saying around it.',
+        'Because the timestamp sits at the front of every line, you can filter by time with plain text matching, no special date tooling required. Searching for "Aug 15 10:" matches 10:00:00 through 10:59:59, because every one of those timestamps literally begins with that text. Scoping to a window is usually the first move in an investigation: an alert gives you a time, and you go read what the machine was saying around it.',
       syntax: 'grep "PATTERN" FILE',
       examples: [
         {
@@ -220,8 +220,8 @@ const MODULE_2_1: Exercise[] = [
     },
     hints: [
       'The timestamp is just text at the start of the line, so grep can match it.',
-      'You want every line whose time begins with 10 — think about what those all have in common.',
-      'Include the colon after the hour: "Aug 15 10:" — without it you would also match day 10 in other contexts.',
+      'You want every line whose time begins with 10: think about what those all have in common.',
+      'Include the colon after the hour: "Aug 15 10:", without it you would also match day 10 in other contexts.',
     ],
     solution: `grep "Aug 15 10:" ${AUTH}`,
     expectedOutput: `${IN_HOUR_10} lines, all timestamped between 10:00 and 10:59.`,
@@ -234,7 +234,7 @@ const MODULE_2_1: Exercise[] = [
       {
         type: 'output-excludes',
         text: 'Aug 15 09:',
-        hint: 'Lines from other hours got through — tighten the pattern.',
+        hint: 'Lines from other hours got through: tighten the pattern.',
       },
     ],
     debrief:
@@ -273,7 +273,7 @@ const MODULE_2_2: Exercise[] = [
       flags: [{ flag: '-c', means: 'Print how many lines matched instead of printing the lines.' }],
     },
     hints: [
-      'The phrase to search for is "Failed password" — two words, capital F.',
+      'The phrase to search for is "Failed password": two words, capital F.',
       'Either grep -c or a pipe into wc -l will give you a number.',
       'Quote the phrase so the space inside it does not split it into two arguments.',
     ],
@@ -287,7 +287,7 @@ const MODULE_2_2: Exercise[] = [
       },
     ],
     debrief:
-      `${FAILED_PASSWORD} failed logins in one day sounds like a siren. Hold that thought — the next exercise shows why the raw number is nearly meaningless on its own. Analysts who page people over a count like this stop being trusted quickly.`,
+      `${FAILED_PASSWORD} failed logins in one day sounds like a siren. Hold that thought: the next exercise shows why the raw number is nearly meaningless on its own. Analysts who page people over a count like this stop being trusted quickly.`,
     practice: LOG_ANALYSIS_PRACTICE['logs.2.1'] ?? [],
   },
   {
@@ -336,11 +336,11 @@ const MODULE_2_2: Exercise[] = [
       {
         type: 'output-excludes',
         text: 'user=nagios',
-        hint: 'Lines about other accounts got through — the second filter is not being applied.',
+        hint: 'Lines about other accounts got through: the second filter is not being applied.',
       },
     ],
     debrief:
-      'Look closely at what these lines say: "Failed password for invalid user admin". Invalid user means no such account exists on this box. Someone is guessing account names that were never here — that is an untargeted scanner working through a wordlist, not somebody who knows you.',
+      'Look closely at what these lines say: "Failed password for invalid user admin". Invalid user means no such account exists on this box. Someone is guessing account names that were never here, that is an untargeted scanner working through a wordlist, not somebody who knows you.',
     practice: LOG_ANALYSIS_PRACTICE['logs.2.2'] ?? [],
   },
   {
@@ -354,7 +354,7 @@ const MODULE_2_2: Exercise[] = [
     prompt: 'Show every successful login recorded in the authentication log.',
     teach: {
       concept:
-        'Failures are loud and usually meaningless; successes are quiet and always matter. When sshd lets someone in it writes "Accepted", followed by the method (password or publickey), the account, and the source address. On a busy internet-facing host there may be thousands of failures and a handful of successes — and the handful is where you look.',
+        'Failures are loud and usually meaningless; successes are quiet and always matter. When sshd lets someone in it writes "Accepted", followed by the method (password or publickey), the account, and the source address. On a busy internet-facing host there may be thousands of failures and a handful of successes, and the handful is where you look.',
       syntax: 'grep "PATTERN" FILE',
       examples: [
         {
@@ -366,7 +366,7 @@ const MODULE_2_2: Exercise[] = [
     hints: [
       'sshd logs a successful authentication with a single word beginning with a capital A.',
       'The word is "Accepted".',
-      'No flags needed — just grep for the word and read what comes back.',
+      'No flags needed: just grep for the word and read what comes back.',
     ],
     solution: `grep "Accepted" ${AUTH}`,
     expectedOutput: `${ACCEPTED} lines, each naming an account and the address it connected from.`,
@@ -383,7 +383,7 @@ const MODULE_2_2: Exercise[] = [
       },
     ],
     debrief:
-      `Read the source addresses. Seven of these come from 10.20.x.x — the internal office network. Two come from 203.0.113.55, an address outside the company entirely, for accounts called testuser and sysmon. ${FAILED_PASSWORD} failures told you nothing. These ${ACCEPTED} lines just told you everything.`,
+      `Read the source addresses. Seven of these come from 10.20.x.x: the internal office network. Two come from 203.0.113.55, an address outside the company entirely, for accounts called testuser and sysmon. ${FAILED_PASSWORD} failures told you nothing. These ${ACCEPTED} lines just told you everything.`,
     practice: LOG_ANALYSIS_PRACTICE['logs.2.3'] ?? [],
   },
   {
@@ -398,7 +398,7 @@ const MODULE_2_2: Exercise[] = [
       'Show authentication activity involving the root account, limited to the first 20 lines so the screen stays manageable.',
     teach: {
       concept:
-        'root can do anything on the machine, so it gets special attention. Searching for it in the auth log turns up both failed attempts against it and legitimate privilege escalation by other accounts. Grepping a common word can return hundreds of lines, so pipe the result into `head` to cap what reaches your screen — you keep control of the terminal and still see whether the pattern is worth pursuing.',
+        'root can do anything on the machine, so it gets special attention. Searching for it in the auth log turns up both failed attempts against it and legitimate privilege escalation by other accounts. Grepping a common word can return hundreds of lines, so pipe the result into `head` to cap what reaches your screen: you keep control of the terminal and still see whether the pattern is worth pursuing.',
       syntax: 'grep "PATTERN" FILE | head -n COUNT',
       examples: [
         {
@@ -481,7 +481,7 @@ const MODULE_2_3: Exercise[] = [
       },
     ],
     debrief:
-      'These are genuine faults — the portal cannot reach the lab interface — and they have nothing to do with the intrusion. Most errors in most logs are like this: real problems for somebody, just not security problems. Learning to set them aside without ignoring them is a large part of the job.',
+      'These are genuine faults (the portal cannot reach the lab interface) and they have nothing to do with the intrusion. Most errors in most logs are like this: real problems for somebody, just not security problems. Learning to set them aside without ignoring them is a large part of the job.',
     practice: LOG_ANALYSIS_PRACTICE['logs.3.1'] ?? [],
   },
   {
@@ -496,7 +496,7 @@ const MODULE_2_3: Exercise[] = [
       'Find every system log entry about a service starting or stopping. Match both words in one command, and do not let capitalisation defeat you.',
     teach: {
       concept:
-        'Sometimes one question needs two words. An extended regular expression lets you write alternatives separated by a pipe INSIDE the pattern: "cat|dog" matches a line containing either. This needs the -E flag, because without it grep treats the pipe as a literal character and searches for the text "cat|dog". Note that the pipe inside quotes means "or", while a pipe outside quotes joins two commands — same symbol, completely different jobs.',
+        'Sometimes one question needs two words. An extended regular expression lets you write alternatives separated by a pipe INSIDE the pattern: "cat|dog" matches a line containing either. This needs the -E flag, because without it grep treats the pipe as a literal character and searches for the text "cat|dog". Note that the pipe inside quotes means "or", while a pipe outside quotes joins two commands: same symbol, completely different jobs.',
       syntax: 'grep -E "ONE|OTHER" FILE',
       examples: [
         {
@@ -510,7 +510,7 @@ const MODULE_2_3: Exercise[] = [
       ],
       flags: [
         { flag: '-E', means: 'Treat the pattern as an extended regular expression, enabling | for alternation.' },
-        { flag: '-iE', means: 'Both flags at once — the usual way you will actually type this.' },
+        { flag: '-iE', means: 'Both flags at once: the usual way you will actually type this.' },
       ],
     },
     hints: [
@@ -548,7 +548,7 @@ const MODULE_2_3: Exercise[] = [
       'Look at only the last 50 lines of the system log, and from those show the kernel messages.',
     teach: {
       concept:
-        'Log files are append-only: the newest entry is the last line. When you are asked "what is happening right now", you want the end of the file, not the whole thing. Piping `tail` into `grep` searches only that recent slice. Order matters here — tail first, then grep — because you are choosing a time window and then filtering inside it. Reversing them would filter the whole file and then take the last 50 matches, which answers a different question.',
+        'Log files are append-only: the newest entry is the last line. When you are asked "what is happening right now", you want the end of the file, not the whole thing. Piping `tail` into `grep` searches only that recent slice. Order matters here (tail first, then grep) because you are choosing a time window and then filtering inside it. Reversing them would filter the whole file and then take the last 50 matches, which answers a different question.',
       syntax: 'tail -n COUNT FILE | grep "PATTERN"',
       examples: [
         {
@@ -598,10 +598,10 @@ const MODULE_2_4: Exercise[] = [
     kind: 'terminal',
     goal: 'Pull a pattern out of log lines and reduce it to a distinct list.',
     prompt:
-      'Produce a sorted list of every unique IP address that appears on an sshd line in the authentication log. Output addresses only — no surrounding log text.',
+      'Produce a sorted list of every unique IP address that appears on an sshd line in the authentication log. Output addresses only, no surrounding log text.',
     teach: {
       concept:
-        'So far grep has returned whole lines. With -o it returns only the part that matched, which turns grep into an extraction tool. Describe an IP address as a pattern — four groups of one to three digits separated by dots — and grep will pull out every one it sees. Feed the result into `sort -u` and thousands of lines collapse into the handful of distinct addresses that produced them.',
+        'So far grep has returned whole lines. With -o it returns only the part that matched, which turns grep into an extraction tool. Describe an IP address as a pattern (four groups of one to three digits separated by dots) and grep will pull out every one it sees. Feed the result into `sort -u` and thousands of lines collapse into the handful of distinct addresses that produced them.',
       syntax: "grep -oE 'PATTERN' FILE | sort -u",
       examples: [
         {
@@ -621,7 +621,7 @@ const MODULE_2_4: Exercise[] = [
     },
     hints: [
       'First narrow to sshd lines, then extract from those.',
-      "An IP address pattern looks like '[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}' — the backslashes make each dot literal.",
+      "An IP address pattern looks like '[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}': the backslashes make each dot literal.",
       'Use grep -oE to print only the matches, then pipe into sort -u to remove duplicates.',
     ],
     solution: `grep "sshd" ${AUTH} | grep -oE '[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}' | sort -u`,
@@ -641,11 +641,11 @@ const MODULE_2_4: Exercise[] = [
       {
         type: 'output-excludes',
         text: 'sshd',
-        hint: 'Log text is still coming through — add -o so grep prints only the matched address.',
+        hint: 'Log text is still coming through: add -o so grep prints only the matched address.',
       },
     ],
     debrief:
-      `Two thousand-odd lines reduced to ${SSHD_UNIQUE_IPS.size} addresses you can actually look at. Five are internal 10.20.x.x hosts. The rest are external, and one of them — 203.0.113.55 — is the address behind both of those successful logins you found earlier.`,
+      `Two thousand-odd lines reduced to ${SSHD_UNIQUE_IPS.size} addresses you can actually look at. Five are internal 10.20.x.x hosts. The rest are external, and one of them: 203.0.113.55: is the address behind both of those successful logins you found earlier.`,
     practice: LOG_ANALYSIS_PRACTICE['logs.4.1'] ?? [],
   },
   {
@@ -675,7 +675,7 @@ const MODULE_2_4: Exercise[] = [
       flags: [
         { flag: '-P', means: 'Use Perl-compatible regular expressions, which is what enables \\K.' },
         { flag: '\\K', means: 'Drop everything matched before this point, keeping only what follows.' },
-        { flag: '[^ ]*', means: 'Any run of characters that are not spaces — i.e. the rest of the value.' },
+        { flag: '[^ ]*', means: 'Any run of characters that are not spaces: i.e. the rest of the value.' },
       ],
     },
     hints: [
@@ -694,7 +694,7 @@ const MODULE_2_4: Exercise[] = [
       {
         type: 'output-excludes',
         text: 'user=',
-        hint: 'The label is still in your output — \\K is what discards everything before it.',
+        hint: 'The label is still in your output: \\K is what discards everything before it.',
       },
       {
         type: 'output-contains',
@@ -703,7 +703,7 @@ const MODULE_2_4: Exercise[] = [
       },
     ],
     debrief:
-      'These are accounts that actually exist on this host, so each failure was a real guess against a real account. testuser is on the list — and testuser is one of the two accounts that later succeeded. Someone guessed until they got in.',
+      'These are accounts that actually exist on this host, so each failure was a real guess against a real account. testuser is on the list, and testuser is one of the two accounts that later succeeded. Someone guessed until they got in.',
     practice: LOG_ANALYSIS_PRACTICE['logs.4.2'] ?? [],
   },
   {
@@ -718,7 +718,7 @@ const MODULE_2_4: Exercise[] = [
       'Show the first 20 SSH-related entries in the authentication log, in the order they occurred.',
     teach: {
       concept:
-        'A timeline is the backbone of every incident report, and log files hand it to you for free: entries are appended as things happen, so the file is already in chronological order. You do not need to sort it — sorting by text would actually break it, because "Aug 9" sorts after "Aug 15" alphabetically. Filter to the events you care about and read top to bottom.',
+        'A timeline is the backbone of every incident report, and log files hand it to you for free: entries are appended as things happen, so the file is already in chronological order. You do not need to sort it: sorting by text would actually break it, because "Aug 9" sorts after "Aug 15" alphabetically. Filter to the events you care about and read top to bottom.',
       syntax: 'grep "PATTERN" FILE | head -n COUNT',
       examples: [
         {
@@ -752,11 +752,11 @@ const MODULE_2_4: Exercise[] = [
       {
         type: 'output-contains',
         text: 'Aug 15 00:',
-        hint: 'The first entries of the day start just after midnight — you want the head of the file, not the tail.',
+        hint: 'The first entries of the day start just after midnight: you want the head of the file, not the tail.',
       },
     ],
     debrief:
-      'Notice that the earliest entries are all the same account failing from the same internal address, every five minutes, all night. That is a monitoring box with a stale password — a misconfiguration that generates more failures than the actual attacker did. Volume is not evidence.',
+      'Notice that the earliest entries are all the same account failing from the same internal address, every five minutes, all night. That is a monitoring box with a stale password: a misconfiguration that generates more failures than the actual attacker did. Volume is not evidence.',
     practice: LOG_ANALYSIS_PRACTICE['logs.4.3'] ?? [],
   },
   {
@@ -771,7 +771,7 @@ const MODULE_2_4: Exercise[] = [
       'The account "testuser" is worth a closer look. Search for it in both the authentication log and the system log at the same time.',
     teach: {
       concept:
-        'Give grep more than one file and it searches all of them, prefixing each result with the filename it came from. That prefix is the point: it lets you confirm an event in a second, independently written log. A single log line is a claim. The same event recorded by two different subsystems is evidence — and if an attacker tampered with one file, the mismatch is itself a finding.',
+        'Give grep more than one file and it searches all of them, prefixing each result with the filename it came from. That prefix is the point: it lets you confirm an event in a second, independently written log. A single log line is a claim. The same event recorded by two different subsystems is evidence, and if an attacker tampered with one file, the mismatch is itself a finding.',
       syntax: 'grep "PATTERN" FILE1 FILE2',
       examples: [
         {
@@ -787,11 +787,11 @@ const MODULE_2_4: Exercise[] = [
     hints: [
       'You can pass grep two filenames instead of one.',
       'The two files are /var/log/auth.log and /var/log/syslog.',
-      'No flags needed — grep adds the filename prefix automatically when searching multiple files.',
+      'No flags needed: grep adds the filename prefix automatically when searching multiple files.',
     ],
     solution: `grep "testuser" ${AUTH} ${SYS}`,
     expectedOutput:
-      `Matches from both files, each prefixed with its filename — many from auth.log, and ${TESTUSER_IN_SYSLOG} from syslog.`,
+      `Matches from both files, each prefixed with its filename: many from auth.log, and ${TESTUSER_IN_SYSLOG} from syslog.`,
     checks: [
       {
         type: 'output-contains',
@@ -801,7 +801,7 @@ const MODULE_2_4: Exercise[] = [
       {
         type: 'output-contains',
         text: `${SYS}:`,
-        hint: 'You need to search the system log as well — pass both filenames to grep.',
+        hint: 'You need to search the system log as well: pass both filenames to grep.',
       },
       {
         type: 'output-contains',
@@ -810,7 +810,7 @@ const MODULE_2_4: Exercise[] = [
       },
     ],
     debrief:
-      'Two independent subsystems recorded the same moment: sshd wrote "Accepted password for testuser from 203.0.113.55" at 10:14:22, and systemd-logind wrote "New session 4821 of user testuser" one second later. That agreement is what turns a suspicion into something you can put in a report — and it is where Alert Triage picks up.',
+      'Two independent subsystems recorded the same moment: sshd wrote "Accepted password for testuser from 203.0.113.55" at 10:14:22, and systemd-logind wrote "New session 4821 of user testuser" one second later. That agreement is what turns a suspicion into something you can put in a report, and it is where Alert Triage picks up.',
     practice: LOG_ANALYSIS_PRACTICE['logs.4.4'] ?? [],
   },
 ];

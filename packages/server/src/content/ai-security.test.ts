@@ -11,8 +11,8 @@
  *
  * So the worked answers live here in machine-runnable form, are put through the
  * real harness and the real grader, and every exercise's own checks must pass.
- * If a change to the harness makes an exercise unpassable — or, worse, makes it
- * pass without the student doing anything — this is what fails.
+ * If a change to the harness makes an exercise unpassable, or, worse, makes it
+ * pass without the student doing anything: this is what fails.
  *
  * WHY THE PAYLOADS ARE HERE AND NOT IN THE CONTENT
  *
@@ -286,7 +286,7 @@ describe('the AI packages are registered and sized as claimed', () => {
 
 describe('every Model Lab exercise has a worked answer that passes its own checks', () => {
   for (const exercise of PROBE_EXERCISES) {
-    it(`${exercise.id} — ${exercise.title}`, () => {
+    it(`${exercise.id}: ${exercise.title}`, () => {
       const answer = WORKED[exercise.id];
       // A model-probe exercise with no runnable worked answer is one nobody has
       // proved is passable. Failing here is the point.
@@ -320,7 +320,7 @@ describe('multiple-choice exercises are answerable and not accidentally trivial'
   const choices = AI_EXERCISES.filter((exercise) => exercise.kind === 'multiple-choice');
 
   for (const exercise of choices) {
-    it(`${exercise.id} — ${exercise.title}`, () => {
+    it(`${exercise.id}: ${exercise.title}`, () => {
       const check = exercise.checks.find((item) => item.type === 'choice-equals');
       expect(check, `${exercise.id} has no choice-equals check`).toBeDefined();
       const expected = (check as Extract<typeof check, { type: 'choice-equals' }>).optionIds;
@@ -341,7 +341,7 @@ describe('short-answer exercises grade against their own worked answer', () => {
   const written = AI_EXERCISES.filter((exercise) => exercise.kind === 'short-answer');
 
   for (const exercise of written) {
-    it(`${exercise.id} — ${exercise.title}`, () => {
+    it(`${exercise.id}: ${exercise.title}`, () => {
       // The stated solution must satisfy the exercise's own concept groups.
       // Otherwise a student who writes exactly what the answer says is marked
       // wrong, which is the trap this whole family of tests exists to catch.
@@ -369,7 +369,7 @@ describe('short-answer drills grade against their own worked answer', () => {
 describe('the answer key stays server-side', () => {
   it('no exercise prose names a defence id', () => {
     // A prompt or hint that names the missing control hands over the finding.
-    // Teaching material may discuss defences by title — "input normalisation" —
+    // Teaching material may discuss defences by title: "input normalisation":
     // but an exercise that prints `retrieved-content-quarantine` at a student
     // has told them which one is absent.
     const offenders: string[] = [];

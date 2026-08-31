@@ -34,14 +34,14 @@ for the role specifications behind the tracks.
 
 ## Running it
 
-Requires Node 20+. No Docker, no database server — local development uses SQLite.
+Requires Node 20+. No Docker, no database server: local development uses SQLite.
 
 ```bash
 npm run setup
 ```
 
 That installs dependencies, builds shared types, creates the database, and seeds
-a demo account. **The demo password is randomly generated and printed once** —
+a demo account. **The demo password is randomly generated and printed once**:
 copy it. Nothing is hardcoded, deliberately: a training platform that ships with
 a known default password is a live vulnerability.
 
@@ -78,7 +78,7 @@ on purpose (see below).
 
 ```
 packages/
-  shared/   TypeScript types used by both sides — one definition, no drift
+  shared/   TypeScript types used by both sides: one definition, no drift
   server/   Express API, terminal engine, exercise content, grading
   client/   React + Vite front end
 ```
@@ -90,7 +90,7 @@ database, never in the browser.
 
 That is a security decision, not a convenience one: if filesystem state lived in
 the client, a student could edit it and pass any exercise. The same reasoning
-keeps exercise *checks* server-side — shipping them to the browser would hand
+keeps exercise *checks* server-side: shipping them to the browser would hand
 over the answer key.
 
 ### The filesystem is copy-on-write
@@ -124,7 +124,7 @@ decoys that look alarming and are completely benign:
 
 1. A misconfigured monitoring host that fails authentication every five minutes
    all day, producing **more failed logins than the actual attacker**. It is a
-   stale password in a monitoring config — exactly what this looks like in real
+   stale password in a monitoring config: exactly what this looks like in real
    life.
 2. A DBA logging in at 03:11. Odd hour, entirely legitimate, because scheduled
    maintenance runs overnight.
@@ -143,11 +143,11 @@ real server. The organisation, staff, and hostnames are entirely fictional.
 A student who has never used a shell cannot "practise what they already know", so
 every exercise carries four layers and they can stop at whichever one works:
 
-1. **Teaching material** — the concept, the command's shape, its flags, and
+1. **Teaching material**: the concept, the command's shape, its flags, and
    worked examples that are deliberately *not* the answer. Available before the
    first attempt.
-2. **Hints** — one at a time, on request, increasing in directness.
-3. **The worked answer** — behind an explicit second click, so a student always
+2. **Hints**: one at a time, on request, increasing in directness.
+3. **The worked answer**: behind an explicit second click, so a student always
    knows the moment they chose to be told.
 4. **`help`** in the terminal itself.
 
@@ -174,7 +174,7 @@ The thing being taught is not a list of magic words. It is that keyword filters
 are defeated by encoding, that normalisation with no filter behind it buys
 nothing, and that only controls which never treat retrieved text as an
 instruction survive indirect injection. A rule engine models exactly that, and
-`ai/harness.test.ts` asserts each of those claims as a test — if a change makes
+`ai/harness.test.ts` asserts each of those claims as a test: if a change makes
 one of them untrue, the curriculum is wrong and the build says so.
 
 And a platform that piped student-authored jailbreaks at a live model would be a
@@ -185,7 +185,7 @@ made-up system prompt of a made-up product, or makes a made-up detector answer
 "SAFE" about a log line the student already read in Package 2. The teaching
 value is entirely in whether the payload landed.
 
-The answer key — which controls a given deployment actually has — never reaches
+The answer key (which controls a given deployment actually has) never reaches
 the browser. A result reports the *stage* a payload died at, which is roughly
 what a real black-box tester infers; naming the control would let somebody map a
 deployment in eight probes without understanding any of it. `services/modelLab.ts`
@@ -195,7 +195,7 @@ is the one seam allowed to see both sides, the same arrangement as
 ### Grading checks outcomes, not keystrokes
 
 Each exercise has typed checks and all must pass. Wherever possible they grade
-what actually happened — `fs-exists` confirms the file is really there,
+what actually happened: `fs-exists` confirms the file is really there,
 `cwd-equals` confirms the student really moved, `output-numeric` compares against
 a count computed from the real log. Command shape is only checked where the
 exercise is explicitly about learning a flag.
@@ -203,7 +203,7 @@ exercise is explicitly about learning a flag.
 Every failed check carries its own hint, and all failures are reported at once:
 revealing one problem at a time turns learning into a guessing game.
 
-Re-attempting is always allowed and can only help — **a pass is permanent** and a
+Re-attempting is always allowed and can only help: **a pass is permanent** and a
 failed retry never takes it away.
 
 ## Deploying
@@ -212,7 +212,7 @@ The server is written 12-factor: all configuration comes from the environment,
 no state on local disk, and the database sits behind a thin data layer.
 
 The Prisma schema deliberately avoids features SQLite lacks (native enums, scalar
-lists) — statuses and roles are plain strings constrained by TypeScript unions,
+lists): statuses and roles are plain strings constrained by TypeScript unions,
 and structured blobs are JSON strings. Moving to Postgres on AWS is therefore a
 change of `provider` plus `DATABASE_URL` and a fresh migration, not a rewrite.
 
@@ -238,7 +238,7 @@ In production the server refuses to start with a placeholder `JWT_SECRET` or wit
   rather than letting anybody imply otherwise.
 - **The adversarial-examples material is conceptual.** Data poisoning,
   adversarial inputs, and model extraction are taught and assessed, but there is
-  no gradient-descent sandbox behind them — a student reasons about a real
+  no gradient-descent sandbox behind them: a student reasons about a real
   behaviour table rather than running FGSM. `adversarial-ml` is outlined as a
   separate foundation for when that changes.
 - **Alert queues and incidents exist inside exercises, not as a live mode.** A

@@ -111,7 +111,7 @@ export interface CertRecommendation {
   certId: string;
   /** Why this one, for this person, given their sector and stage. */
   reason: string;
-  /** 'start_here' | 'next' | 'later' — sequencing guidance. */
+  /** 'start_here' | 'next' | 'later': sequencing guidance. */
   timing: 'start_here' | 'next' | 'later';
 }
 

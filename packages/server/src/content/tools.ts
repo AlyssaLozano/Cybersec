@@ -55,7 +55,7 @@ export const TOOL_MAPPINGS: ToolMapping[] = [
     id: 'endpoint-visibility',
     teaches: 'osquery, Velociraptor, and Sysmon event logs',
     teachesNote:
-      'These give you the same underlying telemetry an EDR collects — process trees, network connections, file writes, persistence — without a per-endpoint licence.',
+      'These give you the same underlying telemetry an EDR collects (process trees, network connections, file writes, persistence) without a per-endpoint licence.',
     industryTools: ['CrowdStrike Falcon', 'Microsoft Defender for Endpoint', 'SentinelOne', 'Carbon Black', 'Cortex XDR'],
     skill: 'Reconstruct what a process did: what launched it, what it spawned, what it touched on disk, and where it connected. Then judge whether that behaviour is normal for the host.',
     differences:
@@ -69,7 +69,7 @@ export const TOOL_MAPPINGS: ToolMapping[] = [
     teachesNote:
       'Windows is where most enterprise compromise actually happens, and its event log is a different world from syslog. These open-source tools parse EVTX and apply detection rules to it.',
     industryTools: ['Splunk with Windows TA', 'Microsoft Sentinel', 'KAPE (free)', 'Magnet AXIOM', 'EnCase'],
-    skill: 'Read Windows security events by ID — 4624 logon, 4625 failed logon, 4672 special privileges, 4688 process creation, 7045 service install — and reconstruct an intrusion from them.',
+    skill: 'Read Windows security events by ID (4624 logon, 4625 failed logon, 4672 special privileges, 4688 process creation, 7045 service install) and reconstruct an intrusion from them.',
     differences:
       'Commercial forensic suites handle disk imaging, registry parsing, browser artefacts, and evidence handling with court-defensible chain of custody. For log triage specifically, the open-source tools are genuinely competitive and are used in real incident response.',
     freeAccessNote: 'Chainsaw, Hayabusa, Velociraptor, and Eric Zimmerman\'s tools are all free. KAPE is free for non-commercial use.',
@@ -78,11 +78,11 @@ export const TOOL_MAPPINGS: ToolMapping[] = [
     id: 'vulnerability-scanning',
     teaches: 'OpenVAS / Greenbone and nuclei',
     teachesNote:
-      'Same scanning model — authenticated and unauthenticated checks against a target — without a commercial licence.',
+      'Same scanning model (authenticated and unauthenticated checks against a target) without a commercial licence.',
     industryTools: ['Tenable Nessus', 'Qualys VMDR', 'Rapid7 InsightVM', 'Tenable.io'],
     skill: 'Scan a scope, read the findings critically, separate genuine risk from noise, confirm false positives, and prioritise by exploitability and exposure rather than by the CVSS number alone.',
     differences:
-      'Commercial scanners have larger and faster-updated plugin feeds, better authenticated-scan coverage, and asset-tracking and reporting workflows built for audits. The analytical skill — deciding what actually matters out of four thousand findings — is where the job is, and that is identical.',
+      'Commercial scanners have larger and faster-updated plugin feeds, better authenticated-scan coverage, and asset-tracking and reporting workflows built for audits. The analytical skill (deciding what actually matters out of four thousand findings) is where the job is, and that is identical.',
     freeAccessNote: 'Greenbone Community Edition is free. Nessus Essentials is free for up to 16 IP addresses, which is enough to learn the interface employers name.',
   },
   {
@@ -105,7 +105,7 @@ export const TOOL_MAPPINGS: ToolMapping[] = [
     skill: 'Enumerate a target methodically, identify a service and version, find and validate an exploitation path, and document it so somebody can reproduce and fix it.',
     differences:
       'Commercial C2 frameworks like Cobalt Strike add mature post-exploitation, malleable traffic profiles, and team collaboration. They are also the tools red teams are hired to emulate. Entry-level work rarely touches them; the methodology is what gets you hired.',
-    freeAccessNote: 'All free. Practise legally on HackTheBox, TryHackMe, VulnHub, or a lab you built yourself — never on systems you do not own or have written permission to test.',
+    freeAccessNote: 'All free. Practise legally on HackTheBox, TryHackMe, VulnHub, or a lab you built yourself: never on systems you do not own or have written permission to test.',
   },
   {
     id: 'threat-intel',
@@ -114,7 +114,7 @@ export const TOOL_MAPPINGS: ToolMapping[] = [
     industryTools: ['Recorded Future', 'Mandiant Advantage', 'Anomali ThreatStream', 'CrowdStrike Falcon Intelligence'],
     skill: 'Turn raw indicators into structured, attributed intelligence: assess source reliability, map behaviour to MITRE ATT&CK, and write an assessment that helps somebody make a decision.',
     differences:
-      'Commercial platforms buy access to proprietary collection — underground forums, telemetry from millions of endpoints, dedicated analysts. You cannot replicate the data. You can absolutely replicate the analytical tradecraft, which is the transferable part.',
+      'Commercial platforms buy access to proprietary collection: underground forums, telemetry from millions of endpoints, dedicated analysts. You cannot replicate the data. You can absolutely replicate the analytical tradecraft, which is the transferable part.',
     freeAccessNote: 'MISP and OpenCTI are free to self-host. MITRE ATT&CK, CISA advisories, and abuse.ch feeds are free and are what many commercial products repackage.',
   },
   {
@@ -144,7 +144,7 @@ export const TOOL_MAPPINGS: ToolMapping[] = [
     teaches: 'ScoutSuite, Prowler, and cloud provider free tiers',
     teachesNote: 'Open-source posture assessment against real AWS, Azure, and GCP accounts you can create for free.',
     industryTools: ['Wiz', 'Palo Alto Prisma Cloud', 'Orca Security', 'AWS Security Hub', 'Microsoft Defender for Cloud'],
-    skill: 'Audit a cloud account: find public storage, over-permissive IAM policies, unencrypted data, and missing logging — then judge which of those actually matters given the workload.',
+    skill: 'Audit a cloud account: find public storage, over-permissive IAM policies, unencrypted data, and missing logging, then judge which of those actually matters given the workload.',
     differences:
       'Commercial CNAPP platforms add agentless workload scanning, attack-path analysis across resources, and runtime protection. Their key advantage is correlating findings into "this specific path leads to your customer data", which open-source tools do not do well.',
     freeAccessNote:
@@ -153,13 +153,13 @@ export const TOOL_MAPPINGS: ToolMapping[] = [
   {
     id: 'identity',
     teaches: 'Keycloak, OpenLDAP, and Samba Active Directory',
-    teachesNote: 'Open-source identity providers implementing the same protocols — SAML, OIDC, LDAP, Kerberos — as the commercial ones.',
+    teachesNote: 'Open-source identity providers implementing the same protocols (SAML, OIDC, LDAP, Kerberos) as the commercial ones.',
     industryTools: ['Okta', 'Microsoft Entra ID (Azure AD)', 'Ping Identity', 'SailPoint', 'CyberArk (privileged access)'],
     skill: 'Reason about identity: how a login actually works across a federation, what a token asserts, how joiner-mover-leaver should be handled, and why standing privilege is dangerous.',
     differences:
       'Commercial IdPs bring lifecycle automation, access certification campaigns, and hundreds of pre-built app integrations. The protocols underneath are open standards and are identical, which is why Keycloak is a genuinely good teacher.',
     freeAccessNote:
-      'Keycloak is free. Microsoft Entra ID has a free tier inside any Azure account, and Okta has a free developer tier — both are worth putting on a CV.',
+      'Keycloak is free. Microsoft Entra ID has a free tier inside any Azure account, and Okta has a free developer tier: both are worth putting on a CV.',
   },
   {
     id: 'scripting',
@@ -189,7 +189,7 @@ export const TOOL_PHILOSOPHY = {
   headline: 'We teach the skill on open-source tools, and tell you which products it maps to.',
   body: [
     'Every tool on this platform is free and open source, for three reasons. We cannot legally bundle commercial products. You should not have to buy a licence to practise. And the thing that actually transfers between employers is the skill, not the button layout.',
-    'That is not the same as saying the commercial tools do not matter. Job adverts name products, and recruiters filter on those names. Where a product has a free tier, a community edition, or a trial, we tell you — because having genuinely touched Splunk or Burp is worth real money at interview, and it is usually a weekend of your time.',
+    'That is not the same as saying the commercial tools do not matter. Job adverts name products, and recruiters filter on those names. Where a product has a free tier, a community edition, or a trial, we tell you, because having genuinely touched Splunk or Burp is worth real money at interview, and it is usually a weekend of your time.',
     'The order matters though. Learn the skill first. Someone who understands why a query isolates the right events can pick up a new query language in a week. Someone who only memorised where the buttons are cannot explain their own findings, and that becomes obvious in the first technical interview.',
   ],
 } as const;

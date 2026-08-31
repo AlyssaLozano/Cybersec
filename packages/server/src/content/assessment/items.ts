@@ -123,7 +123,7 @@ export const ITEMS: AssessmentItem[] = [
     options: [
       {
         id: 'dig-in',
-        label: 'Good — let me get into it',
+        label: 'Good: let me get into it',
         lanes: { 'incident-response': 3, 'soc-ops': 2 },
         traitValue: { trait: 'pressure_tolerance', value: 2 },
       },
@@ -141,7 +141,7 @@ export const ITEMS: AssessmentItem[] = [
       },
       {
         id: 'dread',
-        label: 'My heart sinks — I would find that genuinely stressful',
+        label: 'My heart sinks: I would find that genuinely stressful',
         lanes: { 'incident-response': -3, 'soc-ops': -2, 'risk-compliance': 2, 'security-architecture': 1 },
         traitValue: { trait: 'pressure_tolerance', value: -2 },
       },
@@ -732,7 +732,7 @@ export const ITEMS: AssessmentItem[] = [
     kind: 'likert',
     dimension: 'interests_energy',
     statement:
-      'Working out how something computes its answer — the actual arithmetic — is satisfying rather than tedious.',
+      'Working out how something computes its answer (the actual arithmetic) is satisfying rather than tedious.',
     trait: 'depth_preference',
     lanes: { 'ai-security': 4, appsec: 1, 'detection-engineering': 1 },
   },
@@ -773,7 +773,7 @@ export const ITEMS: AssessmentItem[] = [
     id: 'l2',
     kind: 'likert',
     dimension: 'life_balance',
-    statement: 'I need predictable hours — nights and weekends are not something I can do.',
+    statement: 'I need predictable hours: nights and weekends are not something I can do.',
     trait: 'stability_need',
     lanes: { 'incident-response': -4, 'soc-ops': -3, 'detection-engineering': 2, 'risk-compliance': 2, iam: 2, 'security-architecture': 1 },
     factors: { stability: 2 },

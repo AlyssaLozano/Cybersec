@@ -135,7 +135,7 @@ export function AssessmentReport({
           <h2>Fits your interests, but read this first</h2>
           <p className="muted">
             These scored well on what you enjoy, but something in your answers suggests friction.
-            That does not rule them out — it tells you what to ask about at interview.
+            That does not rule them out: it tells you what to ask about at interview.
           </p>
           <div className="mismatch-list">
             {report.mismatches.map((mismatch) => (

@@ -4,7 +4,7 @@
  * WHY SHORT ANSWERS ARE GRADED THE WAY THEY ARE
  *
  * A short-answer exercise here is checked for whether it hits the required
- * concepts, not for prose quality — no grader can fairly mark writing style, and
+ * concepts, not for prose quality, no grader can fairly mark writing style, and
  * pretending to would fail people for phrasing. The student is told this
  * explicitly below, because an unexplained free-text box invites either a
  * one-word answer or an essay, and neither is what is being asked for.

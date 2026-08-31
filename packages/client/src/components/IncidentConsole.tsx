@@ -7,7 +7,7 @@
  *    beside it rather than below. Every decision in this package is made without
  *    knowing whether the attacker reached the database, and an interface that
  *    tucked that away in small grey text would be teaching students to decide
- *    without looking at it — which is the exact habit the package exists to
+ *    without looking at it, which is the exact habit the package exists to
  *    break.
  *
  * 2. Options carry no scoring hint of any kind before commit. No colour, no
@@ -104,7 +104,7 @@ export function IncidentConsole({
           className="incident-snapshot__toggle"
           onClick={() => setShowSnapshot((open) => !open)}
         >
-          {showSnapshot ? '▾' : '▸'} Incident picture — {point.snapshot.asOf}
+          {showSnapshot ? '▾' : '▸'} Incident picture: {point.snapshot.asOf}
         </button>
 
         {showSnapshot && (
@@ -244,7 +244,7 @@ export function IncidentConsole({
 
         {!ready && point.ordered && (
           <p className="incident-console__hint">
-            Every step belongs in the sequence — the answer is the order, not the selection.
+            Every step belongs in the sequence: the answer is the order, not the selection.
           </p>
         )}
       </section>

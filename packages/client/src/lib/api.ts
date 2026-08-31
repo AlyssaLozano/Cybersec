@@ -257,7 +257,7 @@ export const learning = {
    *
    * `practiceId` matters here: a Model Lab drill may target a different
    * deployment from its parent exercise, which is the whole point of a drill in
-   * this package — the same three payloads against different controls.
+   * this package: the same three payloads against different controls.
    */
   model: (exerciseId: string, practiceId?: string) =>
     request<{ model: ModelCard; suite?: AttackSuite }>(
@@ -337,7 +337,7 @@ export interface SubmitResult {
   /**
    * Per-alert explanation of everything the student got wrong.
    *
-   * Released only after decisions are committed — the same rule that governs the
+   * Released only after decisions are committed: the same rule that governs the
    * worked solution, for the same reason.
    */
   triageDebrief?: {
@@ -353,7 +353,7 @@ export interface SubmitResult {
    * Which of the copilot's suggestions were unsound, and how.
    *
    * Released on the same terms as `triageDebrief`. One entry per kind of
-   * mistake rather than one per affected alert — a single planted mistake spans
+   * mistake rather than one per affected alert: a single planted mistake spans
    * seventy-nine alerts in the night shift, and repeating it that many times
    * would bury the entries that mattered.
    */
@@ -386,7 +386,7 @@ export interface SubmitResult {
    * Why the deployment held or failed, in terms of the controls it had.
    *
    * Released on a pass and never before, on the same terms as the worked
-   * solution — being told which control is missing before you have looked
+   * solution: being told which control is missing before you have looked
    * teaches nothing about looking.
    */
   postMortem?: string;

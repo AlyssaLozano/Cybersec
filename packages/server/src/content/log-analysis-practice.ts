@@ -73,7 +73,7 @@ const outHas = (text: string): Check => ({
 const outLacks = (text: string): Check => ({
   type: 'output-excludes',
   text,
-  hint: `"${text}" should not appear — your filter is letting extra text through.`,
+  hint: `"${text}" should not appear: your filter is letting extra text through.`,
 });
 
 const lines = (count: number): Check => ({
@@ -118,7 +118,7 @@ export const LOG_ANALYSIS_PRACTICE: Record<string, PracticeItem[]> = {
   'logs.1.2': [
     { id: 'logs.1.2-p1', prompt: 'Show only the timestamps from the first 5 lines of the system log.', solution: `head -n 5 ${SYS} | cut -d ' ' -f 1-3`, checks: [lines(5), outLacks('rmg-web-02')] },
     { id: 'logs.1.2-p2', prompt: '/etc/passwd is colon-separated. Print just the account names (field 1).', solution: "cut -d ':' -f 1 /etc/passwd", checks: [outHas('student'), outHas('testuser'), outLacks('/bin/bash')] },
-    { id: 'logs.1.2-p3', prompt: 'From the first 3 lines of the auth log, print only field 4 — the hostname.', solution: `head -n 3 ${AUTH} | cut -d ' ' -f 4`, checks: [lines(3), outHas('rmg-web-02'), outLacks('Aug')] },
+    { id: 'logs.1.2-p3', prompt: 'From the first 3 lines of the auth log, print only field 4: the hostname.', solution: `head -n 3 ${AUTH} | cut -d ' ' -f 4`, checks: [lines(3), outHas('rmg-web-02'), outLacks('Aug')] },
     { id: 'logs.1.2-p4', prompt: 'Print just the group names from /etc/group (field 1, colon-separated).', solution: "cut -d ':' -f 1 /etc/group", checks: [outHas('adm'), outHas('sudo')] },
     { id: 'logs.1.2-p5', prompt: 'Print the login shell of every account in /etc/passwd (field 7).', solution: "cut -d ':' -f 7 /etc/passwd", checks: [outHas('/bin/bash'), outLacks('student:')] },
   ],

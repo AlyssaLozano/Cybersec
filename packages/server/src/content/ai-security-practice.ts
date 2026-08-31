@@ -75,7 +75,7 @@ export const AI_SECURITY_PRACTICE: Record<string, PracticeItem[]> = {
         {
           type: 'probe-all-blocked',
           hint:
-            'If something got through, check what intent the lab recognised — an override should ' +
+            'If something got through, check what intent the lab recognised: an override should ' +
             'not survive here, however it is written.',
         },
         {
@@ -136,7 +136,7 @@ export const AI_SECURITY_PRACTICE: Record<string, PracticeItem[]> = {
         {
           type: 'defence-cost-budget',
           max: 5,
-          hint: 'Five at most — this drill is about what you give up, not what you can afford.',
+          hint: 'Five at most: this drill is about what you give up, not what you can afford.',
         },
       ],
     },

@@ -132,7 +132,7 @@ export const FOUNDATIONS: Foundation[] = [
     id: 'web-fundamentals',
     title: 'Web Application Fundamentals',
     summary:
-      'HTTP, sessions, cookies, and the request/response cycle — plus the OWASP Top 10 classes and why each one happens.',
+      'HTTP, sessions, cookies, and the request/response cycle: plus the OWASP Top 10 classes and why each one happens.',
     plannedExercises: 18,
     tools: ['web-app-testing'],
   },
@@ -140,7 +140,7 @@ export const FOUNDATIONS: Foundation[] = [
     id: 'crypto-basics',
     title: 'Cryptography in Practice',
     summary:
-      'Hashing, symmetric and public key encryption, TLS, and certificates — enough to reason about them correctly without implementing any of it yourself.',
+      'Hashing, symmetric and public key encryption, TLS, and certificates: enough to reason about them correctly without implementing any of it yourself.',
     plannedExercises: 14,
   },
   {
@@ -194,7 +194,7 @@ export const FOUNDATIONS: Foundation[] = [
     id: 'ai-foundations',
     title: 'How AI Systems Work',
     summary:
-      'Weights, forward passes, tokens, embeddings, attention, and next-token prediction — the mechanics, computed by hand rather than described. Then the failure modes that fall out of each: overfitting, adversarial examples, poisoned training data, and prompt injection.',
+      'Weights, forward passes, tokens, embeddings, attention, and next-token prediction: the mechanics, computed by hand rather than described. Then the failure modes that fall out of each: overfitting, adversarial examples, poisoned training data, and prompt injection.',
     packageId: 'ai-foundations',
     tools: ['scripting'],
   },
@@ -210,7 +210,7 @@ export const FOUNDATIONS: Foundation[] = [
     id: 'adversarial-ml',
     title: 'Adversarial Machine Learning',
     summary:
-      'Generate adversarial examples with FGSM and PGD, measure whether they transfer between models, and harden a classifier with adversarial training — including what that costs in ordinary accuracy.',
+      'Generate adversarial examples with FGSM and PGD, measure whether they transfer between models, and harden a classifier with adversarial training: including what that costs in ordinary accuracy.',
     plannedExercises: 18,
     tools: ['scripting'],
   },

@@ -17,7 +17,7 @@
  * WHY THESE OPTIONS
  *
  * Every option below is something somebody has genuinely done in a real
- * incident, including the harmful ones — especially the harmful ones. "Pull the
+ * incident, including the harmful ones: especially the harmful ones. "Pull the
  * power to be safe" and "reset the password and close it" are the two most
  * common real-world responses to a compromise like this, and both are here
  * because a student who has never been tempted by them will not recognise the
@@ -53,7 +53,7 @@ const SYSTEMS: IncidentSnapshot['systems'] = [
  */
 const AT_1142: IncidentSnapshot = {
   incidentId: INCIDENT,
-  asOf: '11:42 — thirty-six minutes after an archive of patient exports was staged in /tmp/.cache',
+  asOf: '11:42: thirty-six minutes after an archive of patient exports was staged in /tmp/.cache',
   systems: SYSTEMS,
   known: [
     'A password for the stale account testuser was accepted at 10:14 from 203.0.113.55, after 62 failures from the same source that morning.',
@@ -66,7 +66,7 @@ const AT_1142: IncidentSnapshot = {
     'Whether the attacker reached rmg-db-01 or any other host.',
     'Whether the staged archive has actually left the network.',
     'Whether the 10:14 login was truly the first access, or only the first one detection noticed.',
-    'How the testuser password was obtained — guessed, reused, or leaked elsewhere.',
+    'How the testuser password was obtained: guessed, reused, or leaked elsewhere.',
   ],
   pressures: [
     'The portal is live and serving patients. Taking it down is a clinical service outage, not just an IT one.',
@@ -78,7 +78,7 @@ const AT_1142: IncidentSnapshot = {
 /** After containment, during eradication. */
 const AT_1330: IncidentSnapshot = {
   incidentId: INCIDENT,
-  asOf: '13:30 — the host is isolated, memory and disk are captured',
+  asOf: '13:30: the host is isolated, memory and disk are captured',
   systems: [
     { host: 'rmg-web-02', role: 'Internet-facing patient portal', state: 'Isolated; evidence captured; portal failed over to web-01' },
     ...SYSTEMS.slice(1),
@@ -117,8 +117,8 @@ export const DECISION_POINTS: DecisionPoint[] = [
         detail: 'Hard shutdown. Stops everything the attacker is doing, instantly.',
         quality: 'harmful',
         consequence:
-          'The intrusion stops and so does your investigation. Everything in memory — the attacker’s ' +
-          'active session, the decrypted key material, any process that never touched disk — is gone ' +
+          'The intrusion stops and so does your investigation. Everything in memory (the attacker’s ' +
+          'active session, the decrypted key material, any process that never touched disk) is gone ' +
           'permanently, and memory was the only place some of it existed. You have also taken the ' +
           'patient portal offline without warning anybody clinical. This is the most common panic ' +
           'response to a live intrusion and it destroys the evidence that would have told you whether ' +
@@ -147,7 +147,7 @@ export const DECISION_POINTS: DecisionPoint[] = [
           'which is the fastest way to establish scope. You are also allowing continued access to ' +
           'regulated patient data that is already staged for transfer, and if it leaves during your ' +
           'observation window, that decision is yours and it will be examined. Defensible only with ' +
-          'explicit authorisation from someone senior enough to own the consequence — which, at 11:42 ' +
+          'explicit authorisation from someone senior enough to own the consequence, which, at 11:42 ' +
           'on a weekday, you can actually get.',
       },
       {
@@ -159,7 +159,7 @@ export const DECISION_POINTS: DecisionPoint[] = [
           'You have told the attacker they have been seen and taken away nothing they need. The SSH ' +
           'key in authorized_keys does not care about the password, and the crontab reconnects within ' +
           'fifteen minutes regardless. What you have actually done is prompt an attacker who now knows ' +
-          'they are being watched to burn what they have — which frequently means encrypting or ' +
+          'they are being watched to burn what they have, which frequently means encrypting or ' +
           'destroying data on the way out.',
       },
       {
@@ -202,7 +202,7 @@ export const DECISION_POINTS: DecisionPoint[] = [
         detail: 'netstat/ss output joined to the process table, before anything is disconnected.',
         quality: 'sound',
         consequence:
-          'Second. Still volatile, and it evaporates the instant you isolate the host — which is the ' +
+          'Second. Still volatile, and it evaporates the instant you isolate the host, which is the ' +
           'very next thing you are about to do.',
       },
       {
@@ -230,7 +230,7 @@ export const DECISION_POINTS: DecisionPoint[] = [
         quality: 'sound',
         consequence:
           'Last of the collection steps. The logs are on the disk image you already took, so this is ' +
-          'a convenience copy — valuable, because you will want to read them without mounting an ' +
+          'a convenience copy: valuable, because you will want to read them without mounting an ' +
           'image, but nothing is lost by doing it at the end.',
       },
     ],
@@ -256,7 +256,7 @@ export const DECISION_POINTS: DecisionPoint[] = [
         label: 'Remove sysmon from the sudo group',
         quality: 'sound',
         consequence:
-          'Necessary, and worth doing explicitly rather than assuming account deletion covers it — ' +
+          'Necessary, and worth doing explicitly rather than assuming account deletion covers it: ' +
           'group membership has outlived account deletion on plenty of real systems.',
       },
       {
@@ -282,7 +282,7 @@ export const DECISION_POINTS: DecisionPoint[] = [
         quality: 'sound',
         consequence:
           'Necessary, and the one people forget because it is not the attacker’s account. It is a ' +
-          'stale test account with a guessable password and sudo rights it should never have had — ' +
+          'stale test account with a guessable password and sudo rights it should never have had: ' +
           'the original way in, and still open.',
       },
       {
@@ -302,7 +302,7 @@ export const DECISION_POINTS: DecisionPoint[] = [
         consequence:
           'The right call whenever an attacker had root, which they did here. Cleaning assumes you ' +
           'found everything; rebuilding assumes you found nothing and is correct either way. The ' +
-          'removals above still matter — they tell you what to check for on every other host.',
+          'removals above still matter: they tell you what to check for on every other host.',
       },
       {
         id: 'block-only',
@@ -325,7 +325,7 @@ export const DECISION_POINTS: DecisionPoint[] = [
       'the network. Legal is asking whether the notification clock has started.',
     snapshot: {
       ...AT_1330,
-      asOf: '14:15 — legal and the privacy officer are on the call',
+      asOf: '14:15: legal and the privacy officer are on the call',
       pressures: [
         'Regulated patient data. Notification timelines run from discovery, not from proof.',
         'Over-notifying has real cost: patient anxiety, regulatory attention, and reputational damage that is not undone by a later correction.',
@@ -359,7 +359,7 @@ export const DECISION_POINTS: DecisionPoint[] = [
         quality: 'defensible',
         consequence:
           'Defensible and probably premature. You do not yet know that anything left, and a ' +
-          'confirmed-breach declaration is very hard to walk back — it reaches patients, regulators, ' +
+          'confirmed-breach declaration is very hard to walk back: it reaches patients, regulators, ' +
           'and press on the strength of an inference. The distinction between "we are investigating a ' +
           'potential compromise" and "your records were taken" matters enormously to the person ' +
           'receiving the letter.',
@@ -370,8 +370,8 @@ export const DECISION_POINTS: DecisionPoint[] = [
         detail: 'Perhaps two hours of work against proxy and firewall records.',
         quality: 'defensible',
         consequence:
-          'Worth doing, and not worth doing first. The evidence would sharpen the advice considerably ' +
-          '— if 6.3 GB never crossed the perimeter, that changes everything. But two hours of silence ' +
+          'Worth doing, and not worth doing first. The evidence would sharpen the advice considerably: ' +
+          'if 6.3 GB never crossed the perimeter, that changes everything. But two hours of silence ' +
           'while a notification clock may already be running is a risk you are taking on somebody ' +
           'else’s behalf. Tell them now, refine within the hour.',
       },
@@ -386,7 +386,7 @@ export const DECISION_POINTS: DecisionPoint[] = [
       'Somebody asks whether the incident is closed. Choose what you would do before saying yes.',
     snapshot: {
       ...AT_1330,
-      asOf: 'Day 3 — rebuild complete, service restored',
+      asOf: 'Day 3: rebuild complete, service restored',
       known: [
         'rmg-web-02 was rebuilt from a known-good image; the compromised disk is preserved.',
         'testuser and sysmon no longer exist on the rebuilt host.',
@@ -438,7 +438,7 @@ export const DECISION_POINTS: DecisionPoint[] = [
       },
       {
         id: 'skip-postmortem',
-        label: 'Close without a post-mortem — the team is exhausted and the fix is obvious',
+        label: 'Close without a post-mortem: the team is exhausted and the fix is obvious',
         quality: 'harmful',
         consequence:
           'The stale account with sudo rights and a guessable password was not created by this ' +

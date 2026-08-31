@@ -3,7 +3,7 @@
  *
  * WHY THIS IS SEPARATE FROM terminalSession
  *
- * A terminal attempt is graded against the *state the command left behind* —
+ * A terminal attempt is graded against the *state the command left behind*:
  * the filesystem, the working directory, the output. It needs a live session and
  * a copy-on-write overlay. A triage decision, a multiple-choice selection, and a
  * written answer need none of that: they are graded against the submission
@@ -12,10 +12,10 @@
  *
  * WHAT THIS MODULE IS CAREFUL ABOUT
  *
- * The answer keys — both of them. `alertTruth` and the copilot's recommendations
+ * The answer keys: both of them. `alertTruth` and the copilot's recommendations
  * are loaded here, handed to the grader, and never put anywhere near the
  * response. The debriefs that *are* returned are released only after the student
- * has committed their decisions — same principle as the worked solution, for the
+ * has committed their decisions: same principle as the worked solution, for the
  * same reason.
  *
  * The copilot adds one thing the other graders do not have: a fact about the

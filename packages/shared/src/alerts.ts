@@ -5,7 +5,7 @@
  *
  * Linux Fundamentals and Log Analysis teach a student to find a thing in a log. Triage is a
  * different skill and grading it as a command would test the wrong one. The
- * question here is never "can you locate this alert" — the alert is already in
+ * question here is never "can you locate this alert": the alert is already in
  * front of you, formatted, with its severity asserted by a rule that has been
  * wrong before. The question is what you do about it, and whether you can
  * justify that when the queue is three hundred deep and eight of them matter.
@@ -24,7 +24,7 @@
  * equivalent of `toStudentView()` in the content catalogue.
  */
 
-/** Severity as asserted by the rule that fired — not necessarily the truth. */
+/** Severity as asserted by the rule that fired, not necessarily the truth. */
 export const ALERT_SEVERITIES = ['critical', 'high', 'medium', 'low', 'info'] as const;
 export type AlertSeverity = (typeof ALERT_SEVERITIES)[number];
 
@@ -45,8 +45,8 @@ export type AlertSource = (typeof ALERT_SOURCES)[number];
  * What a student can do with an alert.
  *
  * Four options rather than two, because the real decision space is not just
- * "real or not". `tune` exists because an alert that is correct but useless —
- * firing fifty times a day for a backup job — is a defect in the rule, and
+ * "real or not". `tune` exists because an alert that is correct but useless
+ * (firing fifty times a day for a backup job) is a defect in the rule, and
  * closing those one at a time forever is how a queue becomes unworkable.
  */
 export const TRIAGE_DECISIONS = ['escalate', 'investigate', 'dismiss', 'tune'] as const;
@@ -187,7 +187,7 @@ export interface AlertQueue {
 /**
  * The student-facing view of an alert.
  *
- * Everything on `Alert` is safe to ship — it is what an operator would see in a
+ * Everything on `Alert` is safe to ship: it is what an operator would see in a
  * real console. The answer key lives in `AlertTruth`, which is a different type
  * and is never assembled into the response. This function exists so that the
  * boundary is a named, greppable thing rather than an assumption.

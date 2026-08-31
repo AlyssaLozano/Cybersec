@@ -84,7 +84,7 @@ export type EnvironmentId = (typeof ENVIRONMENTS)[number];
  * The four underlying needs that decide environment fit.
  *
  * Scored from the items, then compared against each environment's profile,
- * rather than asking "do you want to work for the government?" — which measures
+ * rather than asking "do you want to work for the government?", which measures
  * what somebody has heard about government work, not whether they would like it.
  */
 export const ENVIRONMENT_FACTORS = ['stability', 'pace', 'rules', 'autonomy'] as const;

@@ -15,7 +15,7 @@
  * WHY PROBING IS UNGRADED AND SUBMITTING IS NOT
  *
  * A student may fire as many probes at a model as they like without it counting
- * against them. That is what testing is — most payloads fail, and a platform
+ * against them. That is what testing is: most payloads fail, and a platform
  * that logged every failure as a failed attempt would teach students to think
  * before trying rather than to try systematically, which is exactly backwards
  * for this discipline.
@@ -129,8 +129,8 @@ export function scoreHardening(
 /**
  * Whether a suite payload is written as something the system retrieved.
  *
- * Suite payloads carry their channel in their own text — a document has a
- * document header — rather than in a separate field, so that a student reading
+ * Suite payloads carry their channel in their own text: a document has a
+ * document header, rather than in a separate field, so that a student reading
  * the suite before choosing defences can see exactly what is being sent and
  * where. Guessing from the text would be fragile; these are fixed strings in
  * committed content, and the marker is part of the payload's meaning.

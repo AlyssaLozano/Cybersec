@@ -75,7 +75,7 @@ export const TRACKS: Track[] = [
       },
       {
         when: { sector: 'private', orgSize: 'large' },
-        note: 'Large private SOCs run defined tiers and 24/7 rotas. You will specialise sooner, and the SIEM in use — usually Splunk, Sentinel, or Elastic — is worth learning by name.',
+        note: 'Large private SOCs run defined tiers and 24/7 rotas. You will specialise sooner, and the SIEM in use (usually Splunk, Sentinel, or Elastic) is worth learning by name.',
       },
       {
         when: { sector: 'private', orgSize: 'small' },
@@ -164,7 +164,7 @@ export const TRACKS: Track[] = [
     order: 4,
     title: 'Threat Intelligence',
     summary:
-      'Work out who is attacking, how, and what it means for your organisation — then write it so somebody can act on it.',
+      'Work out who is attacking, how, and what it means for your organisation, then write it so somebody can act on it.',
     audience:
       'Strong writers and researchers, especially people arriving from journalism, academia, military intelligence, or analysis-heavy roles.',
     roles: ['Threat Intelligence Analyst', 'CTI Researcher', 'Intelligence Officer'],
@@ -265,7 +265,7 @@ export const TRACKS: Track[] = [
     sectorNotes: [
       {
         when: { sector: 'government' },
-        note: 'Government vulnerability management is heavily driven by mandated timelines — in US federal, CISA binding operational directives set hard remediation deadlines. Documentation discipline matters more than tooling.',
+        note: 'Government vulnerability management is heavily driven by mandated timelines: in US federal, CISA binding operational directives set hard remediation deadlines. Documentation discipline matters more than tooling.',
       },
     ],
     status: 'planned',
@@ -297,7 +297,7 @@ export const TRACKS: Track[] = [
       },
       {
         when: { sector: 'private', orgSize: 'small' },
-        note: 'At small companies this merges with general infrastructure work — you will own the cloud account rather than audit somebody else\'s.',
+        note: 'At small companies this merges with general infrastructure work: you will own the cloud account rather than audit somebody else\'s.',
       },
     ],
     status: 'planned',
@@ -372,7 +372,7 @@ export const TRACKS: Track[] = [
     sectorNotes: [
       {
         when: { sector: 'government', govLevel: 'state_local' },
-        note: 'Municipal utilities — water, power, transit — run critical OT with famously small security teams. Genuine demand, real public impact, and a very short path from application to interview.',
+        note: 'Municipal utilities (water, power, transit) run critical OT with famously small security teams. Genuine demand, real public impact, and a very short path from application to interview.',
       },
       {
         when: { sector: 'government', govLevel: 'federal' },
@@ -404,11 +404,11 @@ export const TRACKS: Track[] = [
     sectorNotes: [
       {
         when: { sector: 'government', govLevel: 'federal' },
-        note: 'Federal risk work IS the NIST Risk Management Framework — ATOs, system security plans, and continuous monitoring. CGRC is unusually valuable here, and demand is enormous and stable.',
+        note: 'Federal risk work IS the NIST Risk Management Framework: ATOs, system security plans, and continuous monitoring. CGRC is unusually valuable here, and demand is enormous and stable.',
       },
       {
         when: { sector: 'private', orgSize: 'large' },
-        note: 'Large regulated firms — finance, healthcare, pharma — run substantial GRC functions with clear progression. A background in audit or finance transfers almost directly.',
+        note: 'Large regulated firms (finance, healthcare, pharma) run substantial GRC functions with clear progression. A background in audit or finance transfers almost directly.',
       },
     ],
     status: 'in_development',
@@ -509,7 +509,7 @@ export const TRACKS: Track[] = [
     summary:
       'Defend the models an organisation has deployed: test them for prompt injection and jailbreaks, validate the data they were trained on, and decide whether one is safe to put in front of a decision.',
     audience:
-      'People with real technical depth who want to work on something that is still being figured out. NOT an entry point — it needs the AI mechanics and enough security grounding to know what a finding is worth.',
+      'People with real technical depth who want to work on something that is still being figured out. NOT an entry point: it needs the AI mechanics and enough security grounding to know what a finding is worth.',
     roles: ['AI Security Analyst', 'AI Red Teamer', 'ML Security Engineer', 'AI Assurance Analyst'],
     foundations: [
       'ai-foundations',
@@ -530,7 +530,7 @@ export const TRACKS: Track[] = [
       {
         title: 'Monitoring AI Systems in Production',
         summary:
-          'Detect injection attempts, extraction patterns, and behaviour drift in a live query log — the defensive half of the job.',
+          'Detect injection attempts, extraction patterns, and behaviour drift in a live query log: the defensive half of the job.',
         plannedExercises: 14,
       },
     ],
@@ -542,7 +542,7 @@ export const TRACKS: Track[] = [
       },
       {
         when: { sector: 'government', govLevel: 'federal' },
-        note: 'Government AI assurance work is growing and is more about evidence and documentation than about jailbreaks — model provenance, evaluation records, and being able to show what was tested. Clearance timelines still apply.',
+        note: 'Government AI assurance work is growing and is more about evidence and documentation than about jailbreaks: model provenance, evaluation records, and being able to show what was tested. Clearance timelines still apply.',
       },
       {
         when: { sector: 'private', orgSize: 'small' },
@@ -551,7 +551,7 @@ export const TRACKS: Track[] = [
     ],
     status: 'available',
     workRhythm:
-      'Project work, business hours, rarely on-call — you are not in the incident queue. Deadlines come from release cycles: somebody wants to ship a model on Thursday and you are the reason they might not.',
+      'Project work, business hours, rarely on-call: you are not in the incident queue. Deadlines come from release cycles: somebody wants to ship a model on Thursday and you are the reason they might not.',
     entryDifficulty: 'hard',
   },
 ];

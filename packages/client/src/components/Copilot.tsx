@@ -4,7 +4,7 @@
  * DESIGN NOTES THAT ARE NOT COSMETIC
  *
  * 1. It is behind a click and it stays behind a click. Nothing is fetched until
- *    the student asks, because asking is the graded act — an analysis that
+ *    the student asks, because asking is the graded act: an analysis that
  *    appeared automatically would make every alert "consulted" whether or not
  *    anybody read a word of it, and the check would grade nothing.
  *
@@ -18,7 +18,7 @@
  *    alert, where they belong, and a one-click "do what it said" control would
  *    build exactly the habit the module exists to break.
  *
- * 4. Every claim shows where it came from — observed, inferred, or assumed. Real
+ * 4. Every claim shows where it came from: observed, inferred, or assumed. Real
  *    assistants do not annotate their own inventions. This one does, because a
  *    student has to know what one looks like before being asked to spot an
  *    unlabelled one.
@@ -101,7 +101,7 @@ export function Copilot({
           </button>
         </div>
         <p className="copilot__standing-note">
-          It reads this alert on its own — not the queue, not the shift, not your change records. It
+          It reads this alert on its own, not the queue, not the shift, not your change records. It
           is right about most alerts here, which is what makes the ones it is wrong about worth
           finding.
         </p>
@@ -148,7 +148,7 @@ export function Copilot({
         <span className="copilot__confidence">
           {analysis.confidence}% confident
           <em>
-            — how it writes, not how likely it is to be right. The two are unrelated.
+           : how it writes, not how likely it is to be right. The two are unrelated.
           </em>
         </span>
       </div>
@@ -221,7 +221,7 @@ export function CollaborationScorecard({
     <section className="collaboration">
       <h4>Working with the copilot</h4>
       <p className="collaboration__note">
-        Consulting the copilot is not worth marks on its own — deciding correctly without asking
+        Consulting the copilot is not worth marks on its own: deciding correctly without asking
         scores the same as asking and agreeing. What is worth marks is the handful of alerts where
         it was wrong and you noticed.
       </p>
@@ -251,7 +251,7 @@ export function CollaborationScorecard({
       {score.deferenceRate !== null && score.deferenceRate > 0.95 && score.consulted > 3 ? (
         <p className="collaboration__warning">
           You took its recommendation on nearly everything you asked about. That works for as long
-          as it is right, and this queue is built so that it is — mostly.
+          as it is right, and this queue is built so that it is: mostly.
         </p>
       ) : null}
     </section>

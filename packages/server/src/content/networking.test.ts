@@ -106,7 +106,7 @@ describe('Networking structure', () => {
 
 describe('every Networking solution passes its own checks', () => {
   for (const exercise of EXERCISES) {
-    it(`${exercise.id} — ${exercise.title}`, () => {
+    it(`${exercise.id}: ${exercise.title}`, () => {
       const evaluation = attempt(exercise.solution, exercise.setup, exercise, exercise.checks);
       expect(evaluation.failed.map((f) => `${f.type}: ${f.hint}`)).toEqual([]);
       expect(evaluation.passed).toBe(true);

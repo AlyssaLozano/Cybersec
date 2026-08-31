@@ -23,7 +23,7 @@ const outHas = (text: string): Check => ({
 const outLacks = (text: string): Check => ({
   type: 'output-excludes',
   text,
-  hint: `"${text}" should not appear — your filter is letting extra output through.`,
+  hint: `"${text}" should not appear: your filter is letting extra output through.`,
 });
 
 const lines = (count: number): Check => ({
@@ -156,7 +156,7 @@ export const NETWORKING_PRACTICE: Record<string, PracticeItem[]> = {
     { id: 'net.3.2-p2', prompt: 'Find the name behind 10.20.6.41 using dig\'s reverse flag.', solution: 'dig -x 10.20.6.41', checks: [outHas('rmg-web-01')] },
     { id: 'net.3.2-p3', prompt: 'Find the name behind this host\'s own address, 10.20.6.40.', solution: 'nslookup 10.20.6.40', checks: [outHas('rmg-web-02')] },
     { id: 'net.3.2-p4', prompt: 'Use the `host` tool to reverse 10.20.6.41.', solution: 'host 10.20.6.41', checks: [outHas('rmg-web-01')] },
-    { id: 'net.3.2-p5', prompt: 'Try a reverse lookup on the external address 198.51.100.60. Note that it has no reverse record — which is itself a small signal.', solution: 'nslookup 198.51.100.60', checks: [outHas('NXDOMAIN')] },
+    { id: 'net.3.2-p5', prompt: 'Try a reverse lookup on the external address 198.51.100.60. Note that it has no reverse record, which is itself a small signal.', solution: 'nslookup 198.51.100.60', checks: [outHas('NXDOMAIN')] },
   ],
 
   // --- 4.3.3 resolvers -------------------------------------------------------

@@ -9,7 +9,7 @@
  * remembered to strip it.
  *
  * Second the grading, and specifically that the two lazy answers fail. Selecting
- * every option must fail — "do all of it" is not a containment plan and one of
+ * every option must fail: "do all of it" is not a containment plan and one of
  * the options is always actively harmful. And an ordering exercise must not pass
  * on an empty submission, which is the failure mode a tolerance-based check
  * invites.

@@ -4,7 +4,7 @@
  * THE RULE THIS MODULE ENFORCES
  *
  * `DecisionOption.consequence` and `.quality` are the answer key. A student who
- * can read them before choosing is not making a decision — they are reading a
+ * can read them before choosing is not making a decision: they are reading a
  * walkthrough. So the student-facing view goes through `pointForStudent()`,
  * which returns `StudentDecisionPoint`, a type with no field capable of
  * carrying either.

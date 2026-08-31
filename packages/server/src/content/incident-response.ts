@@ -62,7 +62,7 @@ const VOLATILITY_TEACH: Teach = {
   concept:
     'Evidence has a shelf life, and the order you collect it in decides how much of it survives. ' +
     'Memory disappears the instant power or state changes and is the only place some things ever ' +
-    'exist — a decrypted key, an in-memory payload, the attacker’s live session. Disk will still ' +
+    'exist: a decrypted key, an in-memory payload, the attacker’s live session. Disk will still ' +
     'be there in an hour. Collect in order of how fast a thing disappears, most volatile first.',
   examples: [
     {
@@ -82,7 +82,7 @@ const VOLATILITY_TEACH: Teach = {
 const UNCERTAINTY_TEACH: Teach = {
   concept:
     'You will make irreversible decisions on roughly sixty percent of the picture. The skill is not ' +
-    'eliminating the uncertainty — there is no time — it is knowing precisely which part of your ' +
+    'eliminating the uncertainty (there is no time) it is knowing precisely which part of your ' +
     'picture is missing and deciding anyway, out loud, so that somebody else can see what you were ' +
     'working from.',
   examples: [
@@ -197,7 +197,7 @@ const MODULE_1: Exercise[] = [
     goal: 'Sequence evidence collection so that no step destroys what the next one needs.',
     prompt:
       'You have authorisation to contain and about twenty minutes. Put the five collection steps in ' +
-      'the order you would perform them. Every step here is correct — only the order is being graded, ' +
+      'the order you would perform them. Every step here is correct: only the order is being graded, ' +
       'and it is the whole answer.',
     teach: VOLATILITY_TEACH,
     hints: [
@@ -223,7 +223,7 @@ const MODULE_1: Exercise[] = [
       },
     ],
     debrief:
-      'This ordering is not a convention somebody agreed on — it falls out of physics. Every argument ' +
+      'This ordering is not a convention somebody agreed on: it falls out of physics. Every argument ' +
       'about it in a real incident is really an argument about time pressure, and the answer is ' +
       'always that capturing memory takes minutes and not capturing it takes the rest of the ' +
       'investigation.',
@@ -330,12 +330,12 @@ const MODULE_1: Exercise[] = [
         optionIds: ['a', 'b', 'c', 'd'],
         hint:
           'Isolation is a network change, not a disk change. Everything the attacker wrote is still ' +
-          'there — and one of these options mistakes containment for closure.',
+          'there, and one of these options mistakes containment for closure.',
       },
     ],
     debrief:
       'Ridgeline would have reset the testuser password here, congratulated themselves, and been ' +
-      're-compromised the moment the host came back — by a cron job nobody looked for, because the ' +
+      're-compromised the moment the host came back: by a cron job nobody looked for, because the ' +
       'alert about it was rated low.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.1.4'] ?? [],
   },
@@ -360,7 +360,7 @@ const MODULE_2: Exercise[] = [
       concept:
         'The first thing a responder establishes on a compromised host is who can log in. ' +
         '/etc/passwd is one colon-separated line per account: name, placeholder, UID, GID, comment, ' +
-        'home directory, shell. The shell is the last field, and it is the one that matters — an ' +
+        'home directory, shell. The shell is the last field, and it is the one that matters: an ' +
         'account whose shell is /usr/sbin/nologin cannot be used to log in no matter what its ' +
         'password is.',
       syntax: 'grep PATTERN FILE',
@@ -386,7 +386,7 @@ const MODULE_2: Exercise[] = [
     ],
     solution: 'grep bash /etc/passwd',
     expectedOutput:
-      'The accounts with a real login shell, including sysmon (UID 1501) — a name chosen to look ' +
+      'The accounts with a real login shell, including sysmon (UID 1501): a name chosen to look ' +
       'like monitoring infrastructure, on an account nothing provisioned.',
     checks: [
       {
@@ -425,12 +425,12 @@ const MODULE_2: Exercise[] = [
         'Knowing who can become root matters more than knowing who exists. /etc/group lists group ' +
         'name, placeholder, GID, and a comma-separated member list. Membership of sudo is ' +
         'root-equivalent access, and it is exactly where an attacker puts an account they intend to ' +
-        'keep — alongside, quite often, an account of yours that should have lost it years ago.',
+        'keep: alongside, quite often, an account of yours that should have lost it years ago.',
       syntax: 'grep PATTERN FILE',
       examples: [
         {
           command: 'grep adm /etc/group',
-          explains: 'The adm group and its members — historically the accounts allowed to read logs.',
+          explains: 'The adm group and its members: historically the accounts allowed to read logs.',
         },
         {
           command: 'cut -d: -f1 /etc/group',
@@ -457,7 +457,7 @@ const MODULE_2: Exercise[] = [
         type: 'output-contains',
         text: 'testuser',
         hint:
-          'A second account in that group is also wrong — the stale test account the attacker used ' +
+          'A second account in that group is also wrong: the stale test account the attacker used ' +
           'to get in. It should be in your output too.',
       },
     ],
@@ -481,7 +481,7 @@ const MODULE_2: Exercise[] = [
     teach: {
       concept:
         'bash writes the commands a user typed to ~/.bash_history when the shell exits. It is the ' +
-        'closest thing to a transcript of what somebody did, and attackers know it — which is why ' +
+        'closest thing to a transcript of what somebody did, and attackers know it, which is why ' +
         'the last command in a compromised history is so often an attempt to erase it. That attempt ' +
         'is itself written to the file, so it survives and tells you something about intent.',
       syntax: 'cat FILE',
@@ -498,7 +498,7 @@ const MODULE_2: Exercise[] = [
     },
     hints: [
       'Shell history lives in a hidden file in the user’s home directory.',
-      'The file is called .bash_history — the leading dot makes it hidden.',
+      'The file is called .bash_history: the leading dot makes it hidden.',
       'The compromised account is testuser, not sysmon.',
     ],
     solution: 'cat /home/testuser/.bash_history',
@@ -510,7 +510,7 @@ const MODULE_2: Exercise[] = [
         type: 'output-contains',
         text: 'useradd',
         hint:
-          'The history should show the backdoor account being created. Check the path — it is the ' +
+          'The history should show the backdoor account being created. Check the path: it is the ' +
           'compromised account’s home directory.',
       },
       {
@@ -520,7 +520,7 @@ const MODULE_2: Exercise[] = [
       },
     ],
     debrief:
-      'Read the sequence: id, sudo -l, cat /etc/passwd — an attacker working out what they have — ' +
+      'Read the sequence: id, sudo -l, cat /etc/passwd (an attacker working out what they have) ' +
       'then useradd, passwd, usermod -aG sudo, then history -c. The `sudo -l` is the moment they ' +
       'discovered that a temporary test account could become root. The `history -c` at the end ran ' +
       'too late to remove anything, because the file had already been written.',
@@ -542,7 +542,7 @@ const MODULE_2: Exercise[] = [
       concept:
         'Data staging is the step between access and theft: the attacker collects what they want ' +
         'into one file, then moves it. The staged copy tells you what they selected, how much of it ' +
-        'there was, and exactly when — three facts that decide the scope of a breach notification. ' +
+        'there was, and exactly when: three facts that decide the scope of a breach notification. ' +
         'Dot-directories under /tmp are a favourite hiding place because plain ls does not show them.',
       syntax: 'ls [OPTIONS] PATH',
       examples: [
@@ -563,11 +563,11 @@ const MODULE_2: Exercise[] = [
     hints: [
       'You need long form so the size and timestamp are visible.',
       'The flags can be grouped: -la.',
-      'The path is /tmp/.cache — the dot is part of the directory name.',
+      'The path is /tmp/.cache: the dot is part of the directory name.',
     ],
     solution: 'ls -la /tmp/.cache',
     expectedOutput:
-      'pt.tar.gz at roughly 6.3 GB, written at 11:09 and owned by root — plus a second file, the ' +
+      'pt.tar.gz at roughly 6.3 GB, written at 11:09 and owned by root: plus a second file, the ' +
       'payload the scheduled job downloads.',
     checks: [
       {
@@ -587,7 +587,7 @@ const MODULE_2: Exercise[] = [
     debrief:
       'The size and timestamp are the finding, not the filename. 6,298,441 bytes written at 11:09 ' +
       'from a directory holding patient exports is what turns an intrusion into a potential regulated ' +
-      'breach — and it is the number legal will ask for first. Note the second file, owned by sysmon: ' +
+      'breach, and it is the number legal will ask for first. Note the second file, owned by sysmon: ' +
       'that is what the scheduled job fetches and runs.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.2.4'] ?? [],
   },
@@ -601,19 +601,19 @@ const MODULE_2: Exercise[] = [
     goal: 'Read a directory listing as evidence, and recognise what your own privileges hide.',
     prompt:
       'List the backdoor account’s home directory in long form. You will not be able to read what is ' +
-      'inside it — you are logged in as student, not root — but the listing alone is evidence.',
+      'inside it (you are logged in as student, not root) but the listing alone is evidence.',
     teach: {
       concept:
         'You are not root on this host, and a real responder frequently is not either at first. That ' +
         'is not a dead end: metadata is evidence. A directory you cannot open still tells you it ' +
-        'exists, who owns it, what its permissions are, and when it was last written — and for SSH ' +
+        'exists, who owns it, what its permissions are, and when it was last written, and for SSH ' +
         'key material, when it was written is very nearly the whole finding. Recording what you could ' +
         'not access, and why, is part of the job rather than a failure of it.',
       syntax: 'ls [OPTIONS] PATH',
       examples: [
         {
           command: 'ls -la /home',
-          explains: 'Every home directory and when each was created — an account created today stands out.',
+          explains: 'Every home directory and when each was created: an account created today stands out.',
         },
         {
           command: 'ls -la /home/student',
@@ -632,7 +632,7 @@ const MODULE_2: Exercise[] = [
     ],
     solution: 'ls -la /home/sysmon',
     expectedOutput:
-      'A .ssh directory owned by sysmon with permissions drwx------, written at 11:04 — four minutes ' +
+      'A .ssh directory owned by sysmon with permissions drwx------, written at 11:04: four minutes ' +
       'before the attacker logged back in using a key.',
     checks: [
       {
@@ -647,14 +647,14 @@ const MODULE_2: Exercise[] = [
         flags: ['l', 'a'],
         hint:
           'You need both: -a to show the hidden .ssh entry, and -l to show its owner, permissions ' +
-          'and timestamp — which are the evidence.',
+          'and timestamp, which are the evidence.',
       },
     ],
     debrief:
       'You cannot read authorized_keys as student, and that is realistic. What you can establish is ' +
       'that SSH key material was written at 11:04 on an account created at 10:22, four minutes before ' +
       'a key-based login from the attacker’s address. That is enough to know a key exists and to ' +
-      'record that reading it requires escalated access and an evidence request — which is exactly ' +
+      'record that reading it requires escalated access and an evidence request, which is exactly ' +
       'what you would write in the case notes.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.2.5'] ?? [],
   },
@@ -681,7 +681,7 @@ const MODULE_3: Exercise[] = [
       concept:
         'Eradication is a checklist, not a judgement call, because missing one item is ' +
         'indistinguishable from doing nothing. Two things trip people here: forgetting the original ' +
-        'way in — which was not the attacker’s doing and is still open — and deleting evidence in the ' +
+        'way in (which was not the attacker’s doing and is still open) and deleting evidence in the ' +
         'name of cleaning up.',
       examples: [
         {
@@ -747,7 +747,7 @@ const MODULE_3: Exercise[] = [
       concept:
         'An indicator of compromise is any observable that would only be present if the same actor ' +
         'had been there. Good ones are specific enough that a hit means something and durable enough ' +
-        'to survive the attacker changing tools. Addresses are the weakest — they are cheap to ' +
+        'to survive the attacker changing tools. Addresses are the weakest: they are cheap to ' +
         'change; account names, key material and behavioural patterns last longer.',
       examples: [
         {
@@ -771,8 +771,8 @@ const MODULE_3: Exercise[] = [
       'the beacon destination 198.51.100.60, whose appearance in egress logs anywhere would mean ' +
       'another host is still calling home; the account name sysmon and its UID, which would show the ' +
       'same backdoor pattern; and the public key from authorized_keys, whose fingerprint appearing on ' +
-      'any other host would be conclusive. The most durable of the four is the behavioural one — a ' +
-      'crontab fetching a remote script on a fixed interval — because the attacker can change every ' +
+      'any other host would be conclusive. The most durable of the four is the behavioural one: a ' +
+      'crontab fetching a remote script on a fixed interval, because the attacker can change every ' +
       'address and filename but not the technique.',
     expectedOutput:
       'Four indicators, each with what a hit would prove, and some recognition that addresses are the ' +
@@ -814,7 +814,7 @@ const MODULE_3: Exercise[] = [
         '"We think it is clean" is not a finding. Validation means picking tests that would FAIL if ' +
         'you were wrong, and running them: sweep the estate for your indicators, watch egress for the ' +
         'beacon destination, and close the route you never fully explained. Failed remediation does ' +
-        'not announce itself — the incident simply restarts later, usually worse.',
+        'not announce itself: the incident simply restarts later, usually worse.',
       examples: [
         {
           command: 'Watch egress for the beacon destination',
@@ -881,7 +881,7 @@ const MODULE_3: Exercise[] = [
     ],
     solution:
       'A 6.3 GB archive was created at 11:06 from /var/www/portal/exports, a directory holding ' +
-      'generated patient record exports — appointment and billing data covering several thousand ' +
+      'generated patient record exports: appointment and billing data covering several thousand ' +
       'patients. That the data was collected and staged is established by the file itself, its size ' +
       'and its timestamp. Whether any of it left the network is NOT established: there was an active ' +
       'external session at the time, but egress records have not yet been reconciled against the ' +
@@ -906,7 +906,7 @@ const MODULE_3: Exercise[] = [
     debrief:
       'Overstating this makes a breach notification out of an inference; understating it misses a ' +
       'statutory deadline. The people who decide are not technical, so the precision has to come from ' +
-      'you — "staged for exfiltration, transfer unconfirmed" is a sentence they can act on.',
+      'you: "staged for exfiltration, transfer unconfirmed" is a sentence they can act on.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.3.4'] ?? [],
   },
   {
@@ -918,13 +918,13 @@ const MODULE_3: Exercise[] = [
     kind: 'short-answer',
     goal: 'Identify the organisational failure rather than the attacker’s cleverness.',
     prompt:
-      'What is the root cause of this incident? Not the immediate trigger — the condition that made ' +
+      'What is the root cause of this incident? Not the immediate trigger: the condition that made ' +
       'it possible. Name it and say what control would have prevented it.',
     teach: {
       concept:
         'Root cause analysis fails when it stops at the attacker. "Somebody brute-forced us" is not a ' +
         'root cause, because brute force is a constant of the internet and always will be. The root ' +
-        'cause is the condition on your side that turned an ordinary attack into a compromise — and ' +
+        'cause is the condition on your side that turned an ordinary attack into a compromise, and ' +
         'it is nearly always something your own organisation did, months earlier, for a good reason.',
       examples: [
         {
@@ -945,7 +945,7 @@ const MODULE_3: Exercise[] = [
     solution:
       'The root cause is a stale test account, testuser, that survived its purpose by 619 days, kept ' +
       'a weak password, and held sudo rights it was never intended to have. The brute force was ' +
-      'ordinary — this host is scanned continuously — and it succeeded because that one account was ' +
+      'ordinary (this host is scanned continuously) and it succeeded because that one account was ' +
       'both guessable and privileged. The control is an account lifecycle process: non-human and ' +
       'temporary accounts get an expiry date at creation, privileged group membership is reviewed on ' +
       'a schedule, and anything unused for a defined period is disabled automatically rather than ' +
@@ -962,7 +962,7 @@ const MODULE_3: Exercise[] = [
           ['review', 'lifecycle', 'expiry', 'expire', 'disable', 'audit', 'deprovision', 'rotation'],
         ],
         hint:
-          'Name the account and what was wrong with it — stale AND privileged — then propose a ' +
+          'Name the account and what was wrong with it (stale AND privileged) then propose a ' +
           'control that would have caught it before an attacker did.',
       },
     ],
@@ -993,7 +993,7 @@ const MODULE_4: Exercise[] = [
       concept:
         'Notification is not your decision, and the timing of telling the people whose decision it is ' +
         '*is* your decision. Obligations for regulated data generally run from awareness of a ' +
-        'potential compromise, not from proof of transfer — so "I will tell them once I am sure" can ' +
+        'potential compromise, not from proof of transfer, so "I will tell them once I am sure" can ' +
         'consume a statutory deadline on somebody else’s behalf.',
       examples: [
         {
@@ -1011,7 +1011,7 @@ const MODULE_4: Exercise[] = [
     hints: [
       'Whose decision is this, actually?',
       'Notification timelines usually run from awareness, not from proof.',
-      'Two options here are wrong in opposite directions — one waits for certainty, one asserts it.',
+      'Two options here are wrong in opposite directions: one waits for certainty, one asserts it.',
     ],
     solution:
       'Notify legal and the privacy officer now, stating the facts and the uncertainty plainly: an ' +
@@ -1050,13 +1050,13 @@ const MODULE_4: Exercise[] = [
     goal: 'Explain the incident to people who cannot act on technical detail.',
     prompt:
       'You have four minutes with the executive team. Explain what happened, who is affected, what ' +
-      'you are doing, and what you need from them. No jargon — if a word would need explaining, it ' +
+      'you are doing, and what you need from them. No jargon: if a word would need explaining, it ' +
       'does not belong. Six sentences at most.',
     teach: {
       concept:
         'Executives need four things and no others: what happened in plain terms, how bad it is, what ' +
         'is being done, and what decision you need from them. Technical detail does not reassure ' +
-        'them, it obscures the decision — and the most common failure is not being unclear, it is ' +
+        'them, it obscures the decision, and the most common failure is not being unclear, it is ' +
         'burying the ask so far down that nobody realises they were meant to do something.',
       examples: [
         {
@@ -1073,7 +1073,7 @@ const MODULE_4: Exercise[] = [
     },
     hints: [
       'Lead with impact, not chronology. They want to know about patient data.',
-      'Say what you do not know as clearly as what you do — they will be asked.',
+      'Say what you do not know as clearly as what you do: they will be asked.',
       'End with the ask. What decision or resource do you actually need?',
     ],
     solution:
@@ -1081,12 +1081,12 @@ const MODULE_4: Exercise[] = [
       'to give themselves administrator access. They collected a copy of patient appointment and ' +
       'billing records into a single file. We cut off their access this morning and the portal is ' +
       'running normally on a backup server. We do not yet know whether that copy actually left our ' +
-      'network — establishing that is our priority today, and legal has been engaged in case patient ' +
+      'network: establishing that is our priority today, and legal has been engaged in case patient ' +
       'notification is required. What we need from you is a decision on external communications ' +
       'before we know the answer, and authorisation to force a password reset across the ' +
       'organisation.',
     expectedOutput:
-      'Plain-language impact, current status, the open question, and a specific ask — no jargon.',
+      'Plain-language impact, current status, the open question, and a specific ask, no jargon.',
     checks: [
       {
         type: 'answer-mentions',
@@ -1102,7 +1102,7 @@ const MODULE_4: Exercise[] = [
       },
     ],
     debrief:
-      'Notice how much shorter the plain version is. Jargon is usually a way of avoiding commitment — ' +
+      'Notice how much shorter the plain version is. Jargon is usually a way of avoiding commitment: ' +
       '"potential unauthorised data access event" says less than "someone took a copy of patient ' +
       'records" while sounding more careful.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.4.2'] ?? [],
@@ -1123,14 +1123,14 @@ const MODULE_4: Exercise[] = [
         'The timeline is the spine of every incident report and the thing everyone else argues from. ' +
         'Two rules make it useful: every entry is tied to a piece of evidence, and detection time is ' +
         'recorded separately from occurrence time. The gap between those two is the single most ' +
-        'important number in the report — it is what the whole detection programme gets judged on.',
+        'important number in the report: it is what the whole detection programme gets judged on.',
       examples: [
         {
-          command: '10:14 — password accepted for testuser from 203.0.113.55 (auth.log)',
+          command: '10:14: password accepted for testuser from 203.0.113.55 (auth.log)',
           explains: 'Time, event, evidence. Anyone can verify it without asking you.',
         },
         {
-          command: 'Morning — attacker got in somehow',
+          command: 'Morning: attacker got in somehow',
           explains: 'Unverifiable and unusable. It will be challenged and you will have nothing to offer.',
         },
       ],
@@ -1142,14 +1142,14 @@ const MODULE_4: Exercise[] = [
       'End with containment, and note when detection actually happened versus when the events did.',
     ],
     solution:
-      '09:12 — sustained brute force begins against multiple accounts from 203.0.113.55 and three ' +
-      'other addresses (auth.log, SIEM alert at 09:14). 10:14 — password accepted for testuser from ' +
-      '203.0.113.55 after 62 failures; this is initial access (auth.log). 10:22 — local account ' +
-      'sysmon created via sudo by testuser (auth.log, EDR). 10:31 — sysmon added to the sudo group ' +
-      '(auth.log, EDR). 10:40 — crontab installed for sysmon beaconing every 15 minutes (syslog, ' +
-      'EDR). 10:45 — first outbound connection to 198.51.100.60 (proxy log). 11:05 — sysmon logs in ' +
-      'by public key from 203.0.113.55 (auth.log). 11:06 — 6.3 GB archive of patient exports written ' +
-      'to /tmp/.cache (EDR, filesystem). 11:42 — memory captured and host isolated. Detection lagged ' +
+      '09:12: sustained brute force begins against multiple accounts from 203.0.113.55 and three ' +
+      'other addresses (auth.log, SIEM alert at 09:14). 10:14: password accepted for testuser from ' +
+      '203.0.113.55 after 62 failures; this is initial access (auth.log). 10:22: local account ' +
+      'sysmon created via sudo by testuser (auth.log, EDR). 10:31: sysmon added to the sudo group ' +
+      '(auth.log, EDR). 10:40: crontab installed for sysmon beaconing every 15 minutes (syslog, ' +
+      'EDR). 10:45: first outbound connection to 198.51.100.60 (proxy log). 11:05: sysmon logs in ' +
+      'by public key from 203.0.113.55 (auth.log). 11:06: 6.3 GB archive of patient exports written ' +
+      'to /tmp/.cache (EDR, filesystem). 11:42: memory captured and host isolated. Detection lagged ' +
       'occurrence by roughly ninety minutes: every stage raised an alert at the time, and none was ' +
       'escalated until the archive was written.',
     expectedOutput:
@@ -1167,8 +1167,8 @@ const MODULE_4: Exercise[] = [
           ['auth.log', 'syslog', 'log', 'alert', 'edr', 'evidence'],
         ],
         hint:
-          'Cover the whole chain — brute force, initial access, account creation and privilege, ' +
-          'persistence and beacon, data staging — and tie entries to the evidence they come from.',
+          'Cover the whole chain: brute force, initial access, account creation and privilege, ' +
+          'persistence and beacon, data staging, and tie entries to the evidence they come from.',
       },
     ],
     debrief:
@@ -1208,22 +1208,22 @@ const MODULE_4: Exercise[] = [
     hints: [
       'You have already done this once. The order is the one you used.',
       'Include the decision point about containment, and who authorises it.',
-      'Do not stop at eradication — validation and the post-mortem are steps too.',
+      'Do not stop at eradication: validation and the post-mortem are steps too.',
     ],
     solution:
-      'One: confirm the compromise is real — check the rule history and rule out a scheduled job or ' +
+      'One: confirm the compromise is real: check the rule history and rule out a scheduled job or ' +
       'change record. Two: capture volatile memory before touching anything else. Three: record live ' +
       'network connections and their processes. Four: isolate the host at the network layer, failing ' +
       'the service over first if it is customer-facing; get containment authorised by the on-call ' +
       'incident lead. Five: image and hash the disk, and record chain of custody. Six: enumerate ' +
-      'persistence — accounts, group memberships, cron and systemd units, SSH keys — and write down ' +
+      'persistence (accounts, group memberships, cron and systemd units, SSH keys) and write down ' +
       'every mechanism found rather than removing them as you go. Seven: engage legal and the privacy ' +
       'officer as soon as regulated data is plausibly involved, stating what is known and what is ' +
       'not. Eight: rebuild rather than clean, extract indicators, sweep the estate, watch egress for ' +
       'the beacon destination, and hold a blameless post-mortem that produces at least one control.',
     expectedOutput:
       'Six to eight ordered, specific steps covering confirm, preserve, contain, image, enumerate, ' +
-      'notify, rebuild and validate — with roles named.',
+      'notify, rebuild and validate: with roles named.',
     checks: [
       {
         type: 'answer-mentions',
@@ -1244,7 +1244,7 @@ const MODULE_4: Exercise[] = [
     debrief:
       'This is the strongest portfolio piece in the package. A playbook in your own words, derived ' +
       'from an incident you actually worked, is something you can hand a hiring manager and talk ' +
-      'through for twenty minutes — which is considerably more than a certificate does.',
+      'through for twenty minutes, which is considerably more than a certificate does.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.4.4'] ?? [],
   },
 ];

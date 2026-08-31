@@ -8,7 +8,7 @@
  * work without decent automation is miserable. Penetration testing is mostly
  * paperwork with a few good days. Risk work means being ignored until an audit.
  * A career-fit tool that hides this is worse than useless, because the person
- * finds out anyway — eighteen months in, after retraining.
+ * finds out anyway: eighteen months in, after retraining.
  *
  * `dayToDay` should read like a timesheet, not a job advert.
  * `painPoints` should be the actual reasons people resign.
@@ -32,7 +32,7 @@ export const LANE_PROFILES: LaneProfile[] = [
     ],
     personalityMatch: [
       'You can be interrupted constantly without losing the thread',
-      'Repetition does not grind you down — you can look at the ninetieth similar alert as carefully as the first',
+      'Repetition does not grind you down: you can look at the ninetieth similar alert as carefully as the first',
       'You are comfortable making a call with incomplete information and moving on',
       'You would rather resolve many small things than one large thing',
     ],
@@ -104,7 +104,7 @@ export const LANE_PROFILES: LaneProfile[] = [
     title: 'Incident Response',
     summary: 'When something is confirmed bad, you run it: scope it, contain it, get the business back up.',
     dayToDay: [
-      'Long stretches of preparation — writing playbooks, running exercises, improving tooling — punctuated by intense multi-day incidents.',
+      'Long stretches of preparation (writing playbooks, running exercises, improving tooling) punctuated by intense multi-day incidents.',
       'During an incident: work out how far it spread, contain without destroying evidence, and brief people hourly.',
       'Manage a bridge call with twenty people on it, most of whom want a certain answer rather than a true one.',
       'Write the report afterwards. It will be read by executives, lawyers, and possibly a regulator.',
@@ -117,7 +117,7 @@ export const LANE_PROFILES: LaneProfile[] = [
     ],
     painPoints: [
       'On-call is genuinely disruptive and the incidents do not respect weekends.',
-      'The pressure during a real breach is unlike anything else — you are the one everyone is waiting on.',
+      'The pressure during a real breach is unlike anything else: you are the one everyone is waiting on.',
       'You are often blamed for the state of an environment you did not build and were not funded to fix.',
       'Long quiet periods can feel like you are not contributing, right up until you very much are.',
     ],
@@ -248,7 +248,7 @@ export const LANE_PROFILES: LaneProfile[] = [
       'Long campaigns rather than short engagements. Planning and infrastructure setup can take weeks before any action.',
       'Build and maintain tooling and command-and-control infrastructure that will not be caught.',
       'Move slowly and deliberately. Impatience gets you detected, which ends the exercise.',
-      'Work closely with the blue team afterwards — the point is improving detection, not winning.',
+      'Work closely with the blue team afterwards: the point is improving detection, not winning.',
     ],
     personalityMatch: [
       'You have patience measured in weeks',
@@ -319,7 +319,7 @@ export const LANE_PROFILES: LaneProfile[] = [
       'Investigate traffic anomalies that turn out to be a misconfigured backup job nine times out of ten.',
     ],
     personalityMatch: [
-      'You like concrete, verifiable answers — the packet either arrived or it did not',
+      'You like concrete, verifiable answers: the packet either arrived or it did not',
       'You are systematic when troubleshooting rather than guessing',
       'You are comfortable saying no to exception requests, repeatedly',
       'You enjoy detail at a level most people find tedious',
@@ -332,7 +332,7 @@ export const LANE_PROFILES: LaneProfile[] = [
     ],
     environmentFit: [
       { environmentId: 'corporate', rank: 1, note: 'Large estates with real network complexity. Where the depth is.' },
-      { environmentId: 'government', rank: 2, note: 'Highly segmented environments with strict rules — genuinely interesting network design problems.' },
+      { environmentId: 'government', rank: 2, note: 'Highly segmented environments with strict rules: genuinely interesting network design problems.' },
       { environmentId: 'consulting', rank: 3, note: 'Deployment and assessment projects. Broad exposure, shallower ownership.' },
     ],
     certPathway: ['net-plus', 'sec-plus', 'cysa-plus'],
@@ -394,7 +394,7 @@ export const LANE_PROFILES: LaneProfile[] = [
     painPoints: [
       'Scanner false positives consume an enormous share of the job.',
       'Developers resent security review, and you have to earn every inch of goodwill.',
-      'You are measured on things you do not control — their code, their deadlines.',
+      'You are measured on things you do not control: their code, their deadlines.',
       'Without a development background, the credibility gap is real and hard to close.',
     ],
     environmentFit: [
@@ -504,7 +504,7 @@ export const LANE_PROFILES: LaneProfile[] = [
     ],
     environmentFit: [
       { environmentId: 'government', rank: 1, note: 'Risk management IS the job in government, built around formal frameworks. Enormous, stable demand.' },
-      { environmentId: 'corporate', rank: 2, note: 'Regulated industries — finance, healthcare, pharma — run substantial functions with clear progression.' },
+      { environmentId: 'corporate', rank: 2, note: 'Regulated industries (finance, healthcare, pharma) run substantial functions with clear progression.' },
       { environmentId: 'consulting', rank: 3, note: 'Advisory and audit work across many clients. Fast learning and strong exit options.' },
     ],
     certPathway: ['sec-plus', 'crisc', 'cisa', 'cism'],
@@ -575,8 +575,8 @@ export const LANE_PROFILES: LaneProfile[] = [
       'Very little of it is jailbreaking. A great deal of it is reading data, writing documents, and asking who has write access to things.',
     ],
     environmentFit: [
-      { environmentId: 'corporate', rank: 1, note: 'Where the models are. Large technology companies and any organisation that has deployed AI into a decision path — which now includes most banks, insurers, and health systems. The role is usually inside a product security or ML platform team rather than the SOC.' },
-      { environmentId: 'consulting', rank: 2, note: 'AI red teaming sold as an engagement. Broad exposure to many systems very quickly, and the work is genuinely varied — but engagements are short, you rarely see a fix land, and a lot of the market is people who read a paper and bought a domain name.' },
+      { environmentId: 'corporate', rank: 1, note: 'Where the models are. Large technology companies and any organisation that has deployed AI into a decision path, which now includes most banks, insurers, and health systems. The role is usually inside a product security or ML platform team rather than the SOC.' },
+      { environmentId: 'consulting', rank: 2, note: 'AI red teaming sold as an engagement. Broad exposure to many systems very quickly, and the work is genuinely varied, but engagements are short, you rarely see a fix land, and a lot of the market is people who read a paper and bought a domain name.' },
       { environmentId: 'government', rank: 3, note: 'Growing, and more about assurance than attack: provenance, evaluation records, and being able to evidence what was tested. Slower and more documented than the private version, which suits some people considerably better. Clearance timelines apply as everywhere else.' },
     ],
     certPathway: ['sec-plus', 'aigp'],
@@ -591,7 +591,7 @@ export const LANE_PROFILES: LaneProfile[] = [
       'Senior AI security engineer, then either research or leading an AI assurance function. It is genuinely too new to say where it settles, and anybody telling you the ten-year path with confidence is guessing. What is portable is the underlying skill: somebody who can reason about a system nobody has documented is employable regardless of what this specialism is called in five years.',
     trackId: 'ai-security',
     entryReality:
-      'Not a first security job, and the salary figures being quoted around it are for people who were already senior somewhere else. The realistic route is two to three years in another lane — detection engineering, appsec, or security engineering are the usual ones — while learning the AI mechanics properly, then moving across. If you are arriving from machine learning rather than from security, the crossing is shorter and you need the security half instead. Either way, the credential that gets you hired is a portfolio of findings you can walk somebody through, because there is no established certification for this and several of the ones being sold are worthless.',
+      'Not a first security job, and the salary figures being quoted around it are for people who were already senior somewhere else. The realistic route is two to three years in another lane (detection engineering, appsec, or security engineering are the usual ones) while learning the AI mechanics properly, then moving across. If you are arriving from machine learning rather than from security, the crossing is shorter and you need the security half instead. Either way, the credential that gets you hired is a portfolio of findings you can walk somebody through, because there is no established certification for this and several of the ones being sold are worthless.',
   },
 ];
 

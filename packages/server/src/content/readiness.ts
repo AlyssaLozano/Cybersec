@@ -14,7 +14,7 @@
  *
  * Most foundations are not built yet. A naive readiness figure would tell
  * somebody they are 22% ready and then offer nothing to do about it, which is
- * worse than useless — it is discouraging AND unactionable.
+ * worse than useless: it is discouraging AND unactionable.
  *
  * So two numbers are reported. `readiness` is the true figure against the whole
  * job. `readinessOfTeachable` is the figure against what this platform can

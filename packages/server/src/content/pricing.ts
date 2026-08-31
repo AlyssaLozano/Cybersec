@@ -11,8 +11,8 @@
  * THE HONESTY RULE FOR THIS FILE
  *
  * The AI Security specialisation costs more than the standard one. There is
- * exactly one defensible reason for that — the sessions need somebody who has
- * actually done this work, and there are very few of those people — and it is
+ * exactly one defensible reason for that: the sessions need somebody who has
+ * actually done this work, and there are very few of those people, and it is
  * stated plainly rather than dressed up as "premium content". Where a higher
  * price would be hard to justify, the price is not higher: the solo path
  * includes AI Foundations and AI Security at no extra cost, because a
@@ -78,7 +78,7 @@ export const PLANS: PlanTier[] = [
     excludes: [
       'Live sessions with other people',
       'Anything graded by a human',
-      'A certificate — this platform does not issue one, and one it issued would not be worth anything',
+      'A certificate: this platform does not issue one, and one it issued would not be worth anything',
     ],
   },
   {
@@ -118,7 +118,7 @@ export const PLANS: PlanTier[] = [
     ],
     excludes: [
       'An instructor. Peer sessions are run by the participants',
-      'Any guarantee that a session runs — it needs enough people to fill the roles',
+      'Any guarantee that a session runs: it needs enough people to fill the roles',
     ],
   },
   {

@@ -194,7 +194,7 @@ export const SOC_ROLES: SocRole[] = [
     oneLine:
       'Recovers and preserves evidence of what was done, to a standard that survives a courtroom.',
     reality:
-      'Slow, procedural, and unforgiving of shortcuts. Order of operations matters — memory before disk, hash before touch — because evidence collected wrongly is evidence that cannot be used at all.',
+      'Slow, procedural, and unforgiving of shortcuts. Order of operations matters (memory before disk, hash before touch) because evidence collected wrongly is evidence that cannot be used at all.',
     surface: 'artifact-workbench',
     sees: [
       'Memory and disk artefacts parsed into readable form',
@@ -214,7 +214,7 @@ export const SOC_ROLES: SocRole[] = [
     oneLine:
       'Decides what the team does next, on incomplete information, while the incident is still moving.',
     reality:
-      'Almost entirely communication and decision-making. You will make irreversible calls — isolate now, or watch longer — knowing you have perhaps sixty percent of the picture, and then explain them to executives who want a number you do not have.',
+      'Almost entirely communication and decision-making. You will make irreversible calls (isolate now, or watch longer) knowing you have perhaps sixty percent of the picture, and then explain them to executives who want a number you do not have.',
     surface: 'command-view',
     sees: [
       'A high-level incident picture: scope, affected systems, business impact',
@@ -271,7 +271,7 @@ export const SOC_ROLES: SocRole[] = [
     oneLine:
       'Determines what a suspicious file actually does, and writes the signature that catches the next one.',
     reality:
-      'The deepest technical specialism here, and the least often needed — perhaps one incident in five. Requires comfort with assembly, obfuscation, and code written specifically to mislead you.',
+      'The deepest technical specialism here, and the least often needed: perhaps one incident in five. Requires comfort with assembly, obfuscation, and code written specifically to mislead you.',
     surface: 'sample-view',
     sees: [
       'Sample metadata: hashes, entropy, file type, where it was found',

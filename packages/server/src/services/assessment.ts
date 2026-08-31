@@ -4,7 +4,7 @@
  * WHY RESPONSES ARE SAVED AS THEY GO
  *
  * The instrument is seventy items. Somebody will get halfway through, close the
- * tab, and come back tomorrow — and if that loses their answers they will not
+ * tab, and come back tomorrow, and if that loses their answers they will not
  * start again. Every answer is written immediately, so the only thing an
  * abandoned session costs is the questions they had not reached.
  *

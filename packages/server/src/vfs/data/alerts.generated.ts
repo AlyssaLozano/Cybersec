@@ -19,7 +19,7 @@ export const ALERT_QUEUES: AlertQueue[] = [
   {
     id: "q-intro",
     title: "First shift: twelve alerts",
-    briefing: "A short slice of one morning at Ridgeline Medical Group. Twelve alerts, of the roughly nine hundred the stack raises in a day. Exactly one of them is an intrusion. Read every alert before you decide anything — the queue is not sorted by importance, and the rule that shouted loudest is not the one that matters.",
+    briefing: "A short slice of one morning at Ridgeline Medical Group. Twelve alerts, of the roughly nine hundred the stack raises in a day. Exactly one of them is an intrusion. Read every alert before you decide anything: the queue is not sorted by importance, and the rule that shouted loudest is not the one that matters.",
     alerts: [
       {
         "id": "A-5004",
@@ -321,7 +321,7 @@ export const ALERT_QUEUES: AlertQueue[] = [
   {
     id: "q-noisy-rule",
     title: "Three hours of one rule",
-    briefing: "Three hours of queue from the same night. One rule dominates it completely. Your job is not to clear these one at a time — it is to work out what should happen to the rule, and to notice what the volume is hiding.",
+    briefing: "Three hours of queue from the same night. One rule dominates it completely. Your job is not to clear these one at a time: it is to work out what should happen to the rule, and to notice what the volume is hiding.",
     alerts: [
       {
         "id": "A-5025",
@@ -3312,7 +3312,7 @@ export const ALERT_QUEUES: AlertQueue[] = [
           "port": 443
         },
         "summary": "Repeating outbound HTTPS from rmg-web-02 to 198.51.100.60",
-        "detail": "Outbound TLS to 198.51.100.60:443 initiated by a curl process under sysmon. Connections recur at 10:45:00, 11:00:00 and 11:15:00 — a fixed 15-minute interval with sub-second jitter. Destination is not on the egress allowlist and has no category.",
+        "detail": "Outbound TLS to 198.51.100.60:443 initiated by a curl process under sysmon. Connections recur at 10:45:00, 11:00:00 and 11:15:00: a fixed 15-minute interval with sub-second jitter. Destination is not on the egress allowlist and has no category.",
         "enrichment": {
           "priorFirings": 190,
           "priorFalsePositives": 171,
@@ -3959,37 +3959,37 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5004",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5005",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5006",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The nightly backup, on schedule, by key, from the backup server, followed by a transfer of the expected size. It has fired 730 times — twice a night for a year — and been correct and uninteresting every time."
+      "why": "The nightly backup, on schedule, by key, from the backup server, followed by a transfer of the expected size. It has fired 730 times (twice a night for a year) and been correct and uninteresting every time."
     },
     {
       "alertId": "A-5001",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5007",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "A DBA doing scheduled overnight maintenance, from their own workstation, with a change record. The unusual hour is the whole reason the rule exists, and the reason it is wrong most of the time — maintenance runs overnight precisely because that is when it is safe."
+      "why": "A DBA doing scheduled overnight maintenance, from their own workstation, with a change record. The unusual hour is the whole reason the rule exists, and the reason it is wrong most of the time: maintenance runs overnight precisely because that is when it is safe."
     },
     {
       "alertId": "A-5002",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5022",
@@ -4013,7 +4013,7 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5009",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "Somebody mistyped their password twice and then got it right, from their own machine, at the start of the working day. Two failures is a typo; sixty-two failures across nine accounts from an unknown address is an attack. The rule cannot tell the difference — that is what the operator is for."
+      "why": "Somebody mistyped their password twice and then got it right, from their own machine, at the start of the working day. Two failures is a typo; sixty-two failures across nine accounts from an unknown address is an attack. The rule cannot tell the difference, that is what the operator is for."
     },
     {
       "alertId": "A-5014",
@@ -4026,247 +4026,247 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5023",
       "verdict": "false_positive",
       "correctDecision": "tune",
-      "why": "The rule asserts a denial-of-service; the traffic volume says otherwise. The table is undersized for this host, which is a capacity defect. Worth noting that it happens to coincide with the exfiltration — a genuine coincidence, and a good reminder that correlation by timestamp alone will mislead you."
+      "why": "The rule asserts a denial-of-service; the traffic volume says otherwise. The table is undersized for this host, which is a capacity defect. Worth noting that it happens to coincide with the exfiltration: a genuine coincidence, and a good reminder that correlation by timestamp alone will mislead you."
     },
     {
       "alertId": "A-5025",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5026",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5027",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5028",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5029",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5030",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5031",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5032",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5033",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5034",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5035",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5036",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5037",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5038",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5039",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5068",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5040",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5041",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5042",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5043",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5061",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The nightly backup, on schedule, by key, from the backup server, followed by a transfer of the expected size. It has fired 730 times — twice a night for a year — and been correct and uninteresting every time."
+      "why": "The nightly backup, on schedule, by key, from the backup server, followed by a transfer of the expected size. It has fired 730 times (twice a night for a year) and been correct and uninteresting every time."
     },
     {
       "alertId": "A-5044",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5045",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5046",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5047",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5048",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5049",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5050",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5051",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5052",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5053",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5054",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5055",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5056",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5057",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5058",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5059",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5060",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5069",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5062",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "A DBA doing scheduled overnight maintenance, from their own workstation, with a change record. The unusual hour is the whole reason the rule exists, and the reason it is wrong most of the time — maintenance runs overnight precisely because that is when it is safe."
+      "why": "A DBA doing scheduled overnight maintenance, from their own workstation, with a change record. The unusual hour is the whole reason the rule exists, and the reason it is wrong most of the time: maintenance runs overnight precisely because that is when it is safe."
     },
     {
       "alertId": "A-5063",
@@ -4279,73 +4279,73 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "verdict": "true_positive",
       "correctDecision": "escalate",
       "incidentId": "INC-2026-0815",
-      "why": "Targeted, sustained, and coordinated across four sources working one account list. The rule has a poor track record (44 of 61 prior firings were noise) which is exactly why this one is easy to miss — but the shared wordlist across multiple sources is the detail that separates it from ordinary scanning."
+      "why": "Targeted, sustained, and coordinated across four sources working one account list. The rule has a poor track record (44 of 61 prior firings were noise) which is exactly why this one is easy to miss, but the shared wordlist across multiple sources is the detail that separates it from ordinary scanning."
     },
     {
       "alertId": "A-5078",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5115",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5079",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5116",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5141",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The nightly backup, on schedule, by key, from the backup server, followed by a transfer of the expected size. It has fired 730 times — twice a night for a year — and been correct and uninteresting every time."
+      "why": "The nightly backup, on schedule, by key, from the backup server, followed by a transfer of the expected size. It has fired 730 times (twice a night for a year) and been correct and uninteresting every time."
     },
     {
       "alertId": "A-5117",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5151",
       "verdict": "false_positive",
       "correctDecision": "tune",
-      "why": "Root principal use is genuinely worth alerting on, but billing APIs cannot be called by anything else in this account — the permission does not exist to delegate. The rule needs to exclude billing read operations, or it will cry wolf every month until nobody reads it."
+      "why": "Root principal use is genuinely worth alerting on, but billing APIs cannot be called by anything else in this account: the permission does not exist to delegate. The rule needs to exclude billing read operations, or it will cry wolf every month until nobody reads it."
     },
     {
       "alertId": "A-5119",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5142",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "A DBA doing scheduled overnight maintenance, from their own workstation, with a change record. The unusual hour is the whole reason the rule exists, and the reason it is wrong most of the time — maintenance runs overnight precisely because that is when it is safe."
+      "why": "A DBA doing scheduled overnight maintenance, from their own workstation, with a change record. The unusual hour is the whole reason the rule exists, and the reason it is wrong most of the time: maintenance runs overnight precisely because that is when it is safe."
     },
     {
       "alertId": "A-5118",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5080",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5120",
@@ -4357,31 +4357,31 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5081",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5082",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5083",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5122",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5084",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5145",
@@ -4393,37 +4393,37 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5085",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5086",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5121",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5087",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5088",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5089",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5149",
@@ -4435,31 +4435,31 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5090",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5123",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5091",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5124",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5125",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5126",
@@ -4471,61 +4471,61 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5092",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5127",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5093",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5094",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5095",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5146",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "A hardening control denying access it is supposed to deny. Denials are the control working, not evidence of attack — though a sudden change in their pattern would be worth a look."
+      "why": "A hardening control denying access it is supposed to deny. Denials are the control working, not evidence of attack, though a sudden change in their pattern would be worth a look."
     },
     {
       "alertId": "A-5096",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5128",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5097",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5147",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "A scheduled business process that sends mail to patients. It fires three times a day and always will. Note the 40% confidence — the rule already knows it is probably wrong."
+      "why": "A scheduled business process that sends mail to patients. It fires three times a day and always will. Note the 40% confidence: the rule already knows it is probably wrong."
     },
     {
       "alertId": "A-5130",
@@ -4537,37 +4537,37 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5098",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5129",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5099",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5100",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5131",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5101",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5143",
@@ -4585,44 +4585,44 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5102",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5103",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5144",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "Somebody mistyped their password twice and then got it right, from their own machine, at the start of the working day. Two failures is a typo; sixty-two failures across nine accounts from an unknown address is an attack. The rule cannot tell the difference — that is what the operator is for."
+      "why": "Somebody mistyped their password twice and then got it right, from their own machine, at the start of the working day. Two failures is a typo; sixty-two failures across nine accounts from an unknown address is an attack. The rule cannot tell the difference, that is what the operator is for."
     },
     {
       "alertId": "A-5152",
       "verdict": "true_positive",
       "correctDecision": "escalate",
       "incidentId": "INC-2026-0815",
-      "why": "Targeted, sustained, and coordinated across four sources working one account list. The rule has a poor track record (44 of 61 prior firings were noise) which is exactly why this one is easy to miss — but the shared wordlist across multiple sources is the detail that separates it from ordinary scanning."
+      "why": "Targeted, sustained, and coordinated across four sources working one account list. The rule has a poor track record (44 of 61 prior firings were noise) which is exactly why this one is easy to miss, but the shared wordlist across multiple sources is the detail that separates it from ordinary scanning."
     },
     {
       "alertId": "A-5104",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5105",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5106",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5148",
@@ -4634,7 +4634,7 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5133",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5135",
@@ -4646,7 +4646,7 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5134",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5153",
@@ -4659,7 +4659,7 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5107",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5154",
@@ -4672,13 +4672,13 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5137",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5108",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5155",
@@ -4691,13 +4691,13 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5136",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5109",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5156",
@@ -4711,26 +4711,26 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "verdict": "true_positive",
       "correctDecision": "escalate",
       "incidentId": "INC-2026-0815",
-      "why": "Command and control. The tell is not the destination — it is the regularity: exactly 15 minutes apart with almost no jitter is a machine on a timer, not a person browsing. A web server making scheduled outbound calls to an uncategorised address is beaconing."
+      "why": "Command and control. The tell is not the destination: it is the regularity: exactly 15 minutes apart with almost no jitter is a machine on a timer, not a person browsing. A web server making scheduled outbound calls to an uncategorised address is beaconing."
     },
     {
       "alertId": "A-5110",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5138",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5158",
       "verdict": "true_positive",
       "correctDecision": "escalate",
       "incidentId": "INC-2026-0815",
-      "why": "The attacker returning through the door they built, and now using key authentication, which survives a password reset. Same source address as the original brute force — this is the alert that ties the whole sequence to one actor."
+      "why": "The attacker returning through the door they built, and now using key authentication, which survives a password reset. Same source address as the original brute force: this is the alert that ties the whole sequence to one actor."
     },
     {
       "alertId": "A-5159",
@@ -4743,37 +4743,37 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5150",
       "verdict": "false_positive",
       "correctDecision": "tune",
-      "why": "The rule asserts a denial-of-service; the traffic volume says otherwise. The table is undersized for this host, which is a capacity defect. Worth noting that it happens to coincide with the exfiltration — a genuine coincidence, and a good reminder that correlation by timestamp alone will mislead you."
+      "why": "The rule asserts a denial-of-service; the traffic volume says otherwise. The table is undersized for this host, which is a capacity defect. Worth noting that it happens to coincide with the exfiltration: a genuine coincidence, and a good reminder that correlation by timestamp alone will mislead you."
     },
     {
       "alertId": "A-5111",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5139",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5112",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5113",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5114",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5140",
@@ -4803,7 +4803,7 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5171",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "Somebody mistyped their password twice and then got it right, from their own machine, at the start of the working day. Two failures is a typo; sixty-two failures across nine accounts from an unknown address is an attack. The rule cannot tell the difference — that is what the operator is for."
+      "why": "Somebody mistyped their password twice and then got it right, from their own machine, at the start of the working day. Two failures is a typo; sixty-two failures across nine accounts from an unknown address is an attack. The rule cannot tell the difference, that is what the operator is for."
     },
     {
       "alertId": "A-5181",
@@ -4822,7 +4822,7 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5177",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5176",
@@ -4834,13 +4834,13 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5175",
       "verdict": "benign_true_positive",
       "correctDecision": "dismiss",
-      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune — the alert is low severity precisely so it can be skimmed past."
+      "why": "The control worked. A blocked connection to a closed port is the firewall doing its job, and every internet-facing host receives thousands of these a day. There is nothing to investigate and nothing to tune: the alert is low severity precisely so it can be skimmed past."
     },
     {
       "alertId": "A-5178",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5162",
@@ -4853,13 +4853,13 @@ export const ALERT_TRUTH: AlertTruth[] = [
       "alertId": "A-5179",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5180",
       "verdict": "benign_true_positive",
       "correctDecision": "tune",
-      "why": "The detection is correct — the authentication really did fail — but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
+      "why": "The detection is correct (the authentication really did fail) but the cause is a stale credential in a monitoring config, not an attacker. Dismissing these individually is a losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs raising to fix the password. This single misconfiguration produces more failed logins than the actual intrusion does."
     },
     {
       "alertId": "A-5163",

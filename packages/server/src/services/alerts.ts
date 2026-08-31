@@ -26,7 +26,7 @@ const TRUTH_BY_ALERT = new Map(ALERT_TRUTH.map((truth) => [truth.alertId, truth]
  * Fail loudly at startup if any alert lacks an answer.
  *
  * An alert with no truth entry would be ungradeable, and `scoreTriage` would
- * quietly treat it as never-expected — inflating a student's precision for
+ * quietly treat it as never-expected: inflating a student's precision for
  * getting it wrong. Better to refuse to boot.
  */
 function validateCorpus(): void {

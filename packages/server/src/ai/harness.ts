@@ -6,7 +6,7 @@
  *
  * A rule engine that answers one question: given this payload, on this channel,
  * against a deployment with these defences, would the instruction have got
- * through? It is the AI Security equivalent of the terminal engine — the thing
+ * through? It is the AI Security equivalent of the terminal engine: the thing
  * that makes an exercise gradeable on the OUTCOME rather than on whether the
  * student's text matched an answer key.
  *
@@ -81,8 +81,8 @@ const INVISIBLE = /[​-‏⁠﻿­]/g;
  * Letters that are not the letters they look like.
  *
  * Cyrillic and Greek codepoints that render identically to Latin ones in almost
- * every font. This is not an exhaustive confusables table — Unicode publishes
- * one and it is enormous — but it covers what an attacker reaches for first,
+ * every font. This is not an exhaustive confusables table: Unicode publishes
+ * one and it is enormous, but it covers what an attacker reaches for first,
  * which is the set that appears in real incidents.
  */
 const HOMOGLYPHS: Record<string, string> = {
@@ -116,7 +116,7 @@ function foldHomoglyphs(text: string): string {
  *
  * Two passes with different separator classes, deliberately. A single pattern
  * that accepted both punctuation and spaces would swallow the space between
- * words as well — `i-g-n-o-r-e a-l-l` would fold to `ignoreall`, which no filter
+ * words as well: `i-g-n-o-r-e a-l-l` would fold to `ignoreall`, which no filter
  * matches either, and the harness would report a bypass that a real deployment
  * would have caught. Punctuation first, so `i-g-n-o-r-e a-l-l` becomes
  * `ignore all`; then spaces, which no longer see a run of single letters there.
@@ -196,7 +196,7 @@ const HEX_RUN = /(?:[0-9a-fA-F]{2}[\s:]?){10,}/g;
 /**
  * Everything the payload might be hiding, decoded and concatenated.
  *
- * Returns the decoded fragments only, not the original — callers append it, so
+ * Returns the decoded fragments only, not the original: callers append it, so
  * a filter that would have matched the plain text still matches.
  */
 export function decodeCandidates(text: string): string {
@@ -233,7 +233,7 @@ export function decodeCandidates(text: string): string {
  *
  * These are deliberately phrase-shaped rather than keyword-shaped. A single
  * banned word would make the exercises a vocabulary game, and would also be an
- * unfair model of a real filter — nobody blocks the word "ignore".
+ * unfair model of a real filter: nobody blocks the word "ignore".
  */
 const INTENT_PATTERNS: Array<{ intent: AttackIntent; pattern: RegExp }> = [
   {
@@ -248,7 +248,7 @@ const INTENT_PATTERNS: Array<{ intent: AttackIntent; pattern: RegExp }> = [
   },
   {
     // "Ignore the above", with no noun after it. Common, and the shortest form
-    // of the attack — a filter that only matched the fuller phrasing would let
+    // of the attack: a filter that only matched the fuller phrasing would let
     // it through while its authors believed overrides were covered.
     intent: 'direct-override',
     pattern:
@@ -289,7 +289,7 @@ const FEW_SHOT_LABEL = /(?:^|\n)\s*(?:output|answer|assistant|a|label|verdict)\s
  * Which intents this text carries.
  *
  * Whitespace is collapsed first so that a payload broken across forty lines
- * reads the same as one written on a single line — otherwise line wrapping alone
+ * reads the same as one written on a single line: otherwise line wrapping alone
  * would be a working carrier, which it is not.
  */
 export function detectIntents(text: string): AttackIntent[] {
@@ -357,7 +357,7 @@ export function detectCarriers(raw: string): AttackCarrier[] {
  * of phrasings they had already seen, so it covers the four attacks that are
  * *phrased* like attacks and misses the two that are not:
  *
- *   `in-context` is a set of worked examples. There is no banned phrase in it —
+ *   `in-context` is a set of worked examples. There is no banned phrase in it:
  *   the structure is the attack, and a filter looking for words sees a
  *   well-formatted prompt.
  *
@@ -381,7 +381,7 @@ const STRUCTURAL_COVERAGE: Partial<
   // Both of these describe the USER TURN: this fence is the system prompt, that
   // text is the user's, and only the former gives orders. Neither of them says
   // anything about a paragraph the retrieval layer pasted into the context a
-  // moment before the model read it — by then it is not a channel, it is just
+  // moment before the model read it: by then it is not a channel, it is just
   // more of the prompt. That is the gap `retrieved-content-quarantine` exists to
   // close, and the reason a team can test several hundred chat-box payloads,
   // find nothing, and still be wide open.
@@ -495,7 +495,7 @@ export function analysePayload(
   const bypassed = trueIntents.length > 0 && blockedBy.length === 0;
 
   // Report the earliest defence in the request path, because that is the one a
-  // tester would actually have observed — anything behind it never ran.
+  // tester would actually have observed: anything behind it never ran.
   const order: ProbeStage[] = ['input-filter', 'instruction-boundary', 'output-filter'];
   const stage =
     blockedBy.length === 0

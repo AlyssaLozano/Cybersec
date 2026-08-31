@@ -114,7 +114,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
    * Alerts already asked about, as the SERVER records them.
    *
    * Restored on load and refreshed from each answer, so a reload does not hide
-   * consultations a student has already made — several exercises require a
+   * consultations a student has already made: several exercises require a
    * minimum number, and they need to see where they stand.
    */
   const [consultedAlertIds, setConsultedAlertIds] = useState<string[]>([]);
@@ -667,7 +667,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
               <h2>Not sure which one?</h2>
               <p>
                 Answer some questions about how you like to work, and we will suggest which of the
-                fourteen security career paths fit you — and which would make you miserable.
+                fourteen security career paths fit you, and which would make you miserable.
               </p>
               <button type="button" className="primary" onClick={() => setCareerView('quiz')}>
                 Take the Career Fit Analyzer
@@ -818,7 +818,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
                           setEvaluation(null);
                         }}
                       >
-                        {regrade ? 'Go ahead — type your answer' : 'Try it again'}
+                        {regrade ? 'Go ahead: type your answer' : 'Try it again'}
                       </button>
                     </div>
                   </div>

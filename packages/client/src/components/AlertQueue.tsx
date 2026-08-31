@@ -18,14 +18,14 @@
  *    interface congratulates them for escalating will escalate.
  *
  * 4. Nothing here knows the right answer. The queue arrives without ground truth
- *    and the component never receives it — grading happens server-side, and the
+ *    and the component never receives it: grading happens server-side, and the
  *    debrief arrives only after the student commits. The same is true of the
  *    copilot: this component is handed what the assistant said, never whether it
  *    was worth listening to.
  *
  * 5. The copilot is offered only when the exercise enables it, and never opens
  *    itself. Modules 3.1 to 3.4 are worked unaided on purpose, and asking is the
- *    graded act — a panel that populated on selection would mark every alert
+ *    graded act: a panel that populated on selection would mark every alert
  *    consulted whether or not anybody read it.
  */
 
@@ -47,7 +47,7 @@ const DECISIONS: Array<{ id: TriageDecision; label: string; hint: string }> = [
   { id: 'escalate', label: 'Escalate', hint: 'Hand to a second analyst now.' },
   { id: 'investigate', label: 'Investigate', hint: 'Keep it; you need more before deciding.' },
   { id: 'dismiss', label: 'Dismiss', hint: 'Close it. Correct or harmless, nothing further needed.' },
-  { id: 'tune', label: 'Tune rule', hint: 'Close it and flag the rule — it will keep arriving.' },
+  { id: 'tune', label: 'Tune rule', hint: 'Close it and flag the rule: it will keep arriving.' },
 ];
 
 type SortKey = 'time' | 'severity' | 'rule';
@@ -84,7 +84,7 @@ export interface AlertQueueProps {
    *
    * Absent on every exercise before Module 3.5, which is the point: those are
    * worked unaided. Analyses are owned by the parent so that an answer already
-   * fetched survives switching between alerts — re-fetching would be a second
+   * fetched survives switching between alerts: re-fetching would be a second
    * consultation of something the student already read.
    */
   copilot?: {
@@ -296,7 +296,7 @@ export function AlertQueue({
                     <dt>Reputation</dt>
                     <dd>
                       {selected.enrichment.reputation}
-                      {selected.enrichment.reputationNote ? ` — ${selected.enrichment.reputationNote}` : ''}
+                      {selected.enrichment.reputationNote ? `: ${selected.enrichment.reputationNote}` : ''}
                     </dd>
                   </div>
                 ) : null}

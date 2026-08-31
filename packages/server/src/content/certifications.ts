@@ -260,7 +260,7 @@ export const CERTIFICATIONS: Certification[] = [
     issuer: 'ISC2',
     stage: 'advanced',
     summary:
-      'The management-level breadth certification. Requires five years of experience, so it is a goal rather than a starting point — but it appears in an enormous number of senior job adverts.',
+      'The management-level breadth certification. Requires five years of experience, so it is a goal rather than a starting point, but it appears in an enormous number of senior job adverts.',
     approxCostUsd: 749,
     typicalStudyWeeks: 20,
     mandatedSomewhere: true,
@@ -304,7 +304,7 @@ export const CERTIFICATIONS: Certification[] = [
     issuer: 'IAPP',
     stage: 'advanced',
     summary:
-      'AI governance, risk, and the emerging regulation around it. Policy and assurance rather than technique — it does not test whether you can break a model, and nobody should present it as if it does. Worth holding if the work is assurance-shaped; close to irrelevant if it is red-team shaped.',
+      'AI governance, risk, and the emerging regulation around it. Policy and assurance rather than technique: it does not test whether you can break a model, and nobody should present it as if it does. Worth holding if the work is assurance-shaped; close to irrelevant if it is red-team shaped.',
     approxCostUsd: 599,
     typicalStudyWeeks: 10,
     url: 'https://iapp.org/certify/aigp/',
@@ -330,7 +330,7 @@ export function resolveCertifications(ids: string[]) {
 export const CERT_PHILOSOPHY = {
   headline: 'A certificate opens the door. The skill keeps you in the room.',
   body: [
-    'Certifications matter for two unglamorous reasons: automated CV filters screen on them, and some sectors mandate them contractually. Neither reason has anything to do with whether you can do the work — but both decide whether you get the interview.',
+    'Certifications matter for two unglamorous reasons: automated CV filters screen on them, and some sectors mandate them contractually. Neither reason has anything to do with whether you can do the work, but both decide whether you get the interview.',
     'The field is full of people who passed an exam and cannot read a log. Hiring managers know this, and technical interviews are designed to find them out. Study for the certificate, but build the skill alongside it, because the interview tests the second one.',
     'Do not collect certificates. One relevant certification plus demonstrable hands-on work beats four certificates and no portfolio, every time.',
     'AI security is the one area where this advice has to be stated more bluntly, because the certification market got there before the discipline did. There is no established, respected certification for testing deployed models, and several of the ones being advertised were written by people who have never done an engagement. Until that changes, a portfolio of findings you can walk somebody through is the credential, and a general security certificate plus that portfolio will get you further than anything with "AI" in the name.',
@@ -345,11 +345,11 @@ export const CERT_PHILOSOPHY = {
  */
 export const SECTOR_CERT_GUIDANCE = {
   federal:
-    'US federal and defence work is the one place certifications are genuinely compulsory. DoD 8140 (formerly 8570) specifies baseline certifications by role, and a contract may forbid hiring you into a position until you hold one — Security+ is the most common gate. Budget for a clearance process measured in months, and note that many roles require US citizenship. The upside is real: stable funding, structured progression, and employers who will pay for your training.',
+    'US federal and defence work is the one place certifications are genuinely compulsory. DoD 8140 (formerly 8570) specifies baseline certifications by role, and a contract may forbid hiring you into a position until you hold one: Security+ is the most common gate. Budget for a clearance process measured in months, and note that many roles require US citizenship. The upside is real: stable funding, structured progression, and employers who will pay for your training.',
   state_local:
     'State and local government pays less than private industry but is markedly more accessible: smaller teams, broader responsibilities, and hiring managers who will take a career changer with Security+ and genuine enthusiasm. Expect CJIS requirements if the work touches law enforcement data, and expect to be a generalist rather than a specialist. It is one of the best places to get a first security job.',
   private_large:
-    'Large private employers hire into specialised roles with defined tiers, so you can enter narrow and grow. They care about certifications for CV screening and often name specific vendor products — Splunk, CrowdStrike, Microsoft — so a vendor certificate matching their stack is worth more than another general one. Many will fund your training once you are in.',
+    'Large private employers hire into specialised roles with defined tiers, so you can enter narrow and grow. They care about certifications for CV screening and often name specific vendor products (Splunk, CrowdStrike, Microsoft) so a vendor certificate matching their stack is worth more than another general one. Many will fund your training once you are in.',
   private_small:
     'Small companies and managed service providers need generalists who can do a bit of everything, which suits a career changer with prior professional experience. Certifications matter less than demonstrable ability; a home lab you can talk about credibly often counts for more. Expect wider responsibility, faster learning, and less structure.',
 } as const;

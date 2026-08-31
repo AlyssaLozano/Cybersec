@@ -10,7 +10,7 @@
  *
  * THE RULE THIS FILE IS BUILT AROUND: NEVER OVERSTATE IT
  *
- * Everything here is derived from what the platform can genuinely evidence — a
+ * Everything here is derived from what the platform can genuinely evidence: a
  * passed exercise, an attempt count, a suite that was blocked. Nothing is
  * asserted that the database does not record.
  *
@@ -50,8 +50,8 @@ import { prisma } from '../db/client.js';
 /**
  * Severity from where the system sits.
  *
- * Deliberately coarse. The point is the relationship — production exposure is
- * what makes a finding urgent, not how clever the technique was — and a finer
+ * Deliberately coarse. The point is the relationship: production exposure is
+ * what makes a finding urgent, not how clever the technique was, and a finer
  * scale would imply a precision this does not have.
  */
 const SEVERITY_BY_STAGE: Record<DeploymentStage, FindingSeverity> = {
@@ -117,7 +117,7 @@ export async function portfolioFor(userId: string): Promise<AiSecurityPortfolio>
     if (!card) continue;
 
     // Suites the student successfully hardened against, collected as the
-    // "tools built" section rather than as findings — blocking a suite is not
+    // "tools built" section rather than as findings: blocking a suite is not
     // a vulnerability discovery and should not be presented as one.
     for (const suiteId of suiteIdsOf(exercise.checks)) {
       const used = suiteUse.get(suiteId) ?? new Set<string>();
@@ -135,7 +135,7 @@ export async function portfolioFor(userId: string): Promise<AiSecurityPortfolio>
     findings.push({
       id: `finding-${exercise.id}`,
       modelId: card.id,
-      title: `${exercise.title} — ${card.name} ${card.version}`,
+      title: `${exercise.title}: ${card.name} ${card.version}`,
       severity: SEVERITY_BY_STAGE[card.stage],
       intent: intent ?? 'direct-override',
       carrier: carrier ?? 'none',

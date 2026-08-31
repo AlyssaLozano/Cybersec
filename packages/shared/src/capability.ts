@@ -12,8 +12,8 @@
  *
  * "Rate your Linux skills 1-5" measures confidence, not competence, and the two
  * correlate badly in both directions. Every probe here puts a real artifact in
- * front of somebody — an actual line from the seeded auth.log, a real netstat
- * table — and asks what it means. You cannot bluff a question about output you
+ * front of somebody: an actual line from the seeded auth.log, a real netstat
+ * table, and asks what it means. You cannot bluff a question about output you
  * are looking at.
  *
  * WHAT IT IS FOR

@@ -8,7 +8,7 @@
  * DELIBERATELY RESTRAINED ABOUT THE VENDOR CLAIM
  *
  * What the owning team say about their defences is styled exactly like the rest
- * of the card — no warning colour, no "unverified" badge, nothing that hints it
+ * of the card, no warning colour, no "unverified" badge, nothing that hints it
  * should be distrusted. The whole of module 7.1 exists to teach that the
  * architecture diagram and the running system disagree, and an interface that
  * marked the claim as suspicious would give that away before the student had
@@ -104,7 +104,7 @@
 }
 
 /* Deployment stage is the one card field that changes a severity rating, so it
-   is legible at a glance — but as weight, not as a colour, for the same reason
+   is legible at a glance, but as weight, not as a colour, for the same reason
    alert severity is not painted red. */
 .lab-stage {
   font-variant: small-caps;

@@ -50,7 +50,7 @@ const MODULE_4_1: Exercise[] = [
       'Before you can judge whether a connection is coming from inside or outside the company, you need to know where you are. Show this host\'s network interfaces and their addresses.',
     teach: {
       concept:
-        'Every machine on a network has at least two interfaces: a loopback (lo, always 127.0.0.1, which only talks to itself) and one or more real ones. `ip addr show` lists them along with the addresses assigned to each. The line that matters is the one starting `inet` under a real interface — that is the address other machines use to reach you.',
+        'Every machine on a network has at least two interfaces: a loopback (lo, always 127.0.0.1, which only talks to itself) and one or more real ones. `ip addr show` lists them along with the addresses assigned to each. The line that matters is the one starting `inet` under a real interface, that is the address other machines use to reach you.',
       syntax: 'ip addr show',
       examples: [
         { command: 'ip link show', explains: 'Interfaces only, without the addresses. Useful when you just want to know what hardware exists.' },
@@ -64,7 +64,7 @@ const MODULE_4_1: Exercise[] = [
     hints: [
       'The modern command starts with two letters: `ip`.',
       'You want the addresses, so the next word is `addr`.',
-      'Write `ip addr show` — or just `ip addr`, which does the same thing.',
+      'Write `ip addr show`, or just `ip addr`, which does the same thing.',
     ],
     solution: 'ip addr show',
     expectedOutput: `Two interfaces: lo with 127.0.0.1, and eth0 with ${HOST_IP}.`,
@@ -88,7 +88,7 @@ const MODULE_4_1: Exercise[] = [
     prompt: 'Show just the network interfaces on this host, without their IP addresses.',
     teach: {
       concept:
-        '`ip` is one command with several objects: `ip addr` for addresses, `ip link` for the interfaces themselves, `ip route` for where traffic goes. Asking for `link` gives you a much shorter answer when all you want to know is what exists. On a compromised host this is worth checking — an interface you do not recognise can mean a VPN or tunnel somebody added.',
+        '`ip` is one command with several objects: `ip addr` for addresses, `ip link` for the interfaces themselves, `ip route` for where traffic goes. Asking for `link` gives you a much shorter answer when all you want to know is what exists. On a compromised host this is worth checking: an interface you do not recognise can mean a VPN or tunnel somebody added.',
       syntax: 'ip link show',
       examples: [
         { command: 'ip addr show', explains: 'The fuller view, with addresses attached.' },
@@ -102,12 +102,12 @@ const MODULE_4_1: Exercise[] = [
     solution: 'ip link show',
     expectedOutput: 'Four lines: lo and eth0, each with a line describing its hardware address.',
     checks: [
-      { type: 'output-line-count', count: 4, hint: 'Two interfaces, two lines each — four lines in total.' },
+      { type: 'output-line-count', count: 4, hint: 'Two interfaces, two lines each: four lines in total.' },
       { type: 'output-contains', text: 'eth0', hint: 'eth0 should be listed.' },
       { type: 'output-excludes', text: 'inet ', hint: 'This view should NOT include IP addresses. Use `link` rather than `addr`.' },
     ],
     debrief:
-      'Two interfaces is what a normal server looks like. A host with a tun0 or a second unexplained interface is worth asking about — that is often how somebody keeps a route in.',
+      'Two interfaces is what a normal server looks like. A host with a tun0 or a second unexplained interface is worth asking about, that is often how somebody keeps a route in.',
     practice: NETWORKING_PRACTICE['net.1.2'] ?? [],
   },
   {
@@ -122,14 +122,14 @@ const MODULE_4_1: Exercise[] = [
       'The backup server is rmg-backup-01.ridgelinemed.example. Check whether this host can reach it, sending exactly 3 packets.',
     teach: {
       concept:
-        '`ping` sends a small packet and asks for it back. It answers two questions at once: does the name resolve to an address, and does that address answer. The round-trip time tells you roughly how far away the host is — under a millisecond usually means the same network, tens of milliseconds means somewhere else entirely.',
+        '`ping` sends a small packet and asks for it back. It answers two questions at once: does the name resolve to an address, and does that address answer. The round-trip time tells you roughly how far away the host is: under a millisecond usually means the same network, tens of milliseconds means somewhere else entirely.',
       syntax: 'ping -c COUNT HOST',
       examples: [
         { command: 'ping -c 3 rmg-web-01.ridgelinemed.example', explains: 'Three packets to the other web server.' },
         { command: 'ping -c 1 10.20.1.10', explains: 'A single packet to an address, skipping name resolution entirely.' },
       ],
       flags: [
-        { flag: '-c COUNT', means: 'Stop after COUNT packets. Without it, ping runs until you interrupt it — and in this simulator it is required, so the command terminates.' },
+        { flag: '-c COUNT', means: 'Stop after COUNT packets. Without it, ping runs until you interrupt it, and in this simulator it is required, so the command terminates.' },
       ],
     },
     hints: [
@@ -145,7 +145,7 @@ const MODULE_4_1: Exercise[] = [
       { type: 'output-contains', text: '3 received', hint: 'All three packets should come back.' },
     ],
     debrief:
-      'A reply proves the host is up and reachable. Silence proves almost nothing — plenty of hosts are configured not to answer ping at all, and a firewall may be dropping it. "It does not ping" is not evidence a machine is off.',
+      'A reply proves the host is up and reachable. Silence proves almost nothing: plenty of hosts are configured not to answer ping at all, and a firewall may be dropping it. "It does not ping" is not evidence a machine is off.',
     practice: NETWORKING_PRACTICE['net.1.3'] ?? [],
   },
   {
@@ -159,7 +159,7 @@ const MODULE_4_1: Exercise[] = [
     prompt: 'Show this host\'s routing table.',
     teach: {
       concept:
-        'When a machine sends a packet it consults its routing table: "is this destination on a network I am directly attached to, or does it go to the gateway?" The `default` route is the catch-all — anything not local goes there. Knowing the gateway matters in an investigation, because traffic leaving the company passes through it, and that is where it can be blocked.',
+        'When a machine sends a packet it consults its routing table: "is this destination on a network I am directly attached to, or does it go to the gateway?" The `default` route is the catch-all: anything not local goes there. Knowing the gateway matters in an investigation, because traffic leaving the company passes through it, and that is where it can be blocked.',
       syntax: 'ip route',
       examples: [
         { command: 'ip route show', explains: 'The same thing written out in full.' },
@@ -211,7 +211,7 @@ const MODULE_4_1: Exercise[] = [
       { type: 'output-excludes', text: 'lo:', hint: 'Name eth0 specifically so only that interface is shown.' },
     ],
     debrief:
-      'A netmask of 255.255.255.0 is the same thing as /24: the first three numbers identify the network, the last identifies the host. So 10.20.6.40 and 10.20.6.99 are neighbours, and 10.20.4.31 is not — it is one router hop away.',
+      'A netmask of 255.255.255.0 is the same thing as /24: the first three numbers identify the network, the last identifies the host. So 10.20.6.40 and 10.20.6.99 are neighbours, and 10.20.4.31 is not: it is one router hop away.',
     practice: NETWORKING_PRACTICE['net.1.5'] ?? [],
   },
 ];
@@ -230,7 +230,7 @@ const MODULE_4_2: Exercise[] = [
     prompt: 'Show all network connections and listening sockets on this host, without resolving names to hostnames.',
     teach: {
       concept:
-        'A socket is one end of a network conversation. `netstat -an` shows all of them: services waiting for connections (LISTEN) and conversations actually in progress (ESTABLISHED). The `-n` matters more than it looks — without it, netstat tries to turn every address into a hostname, which is slow and can hide the address you needed to see.',
+        'A socket is one end of a network conversation. `netstat -an` shows all of them: services waiting for connections (LISTEN) and conversations actually in progress (ESTABLISHED). The `-n` matters more than it looks, without it, netstat tries to turn every address into a hostname, which is slow and can hide the address you needed to see.',
       syntax: 'netstat [-a] [-n] [-t] [-u] [-l] [-p]',
       examples: [
         { command: 'ss -an', explains: 'The modern replacement. Same idea, slightly different formatting.' },
@@ -254,7 +254,7 @@ const MODULE_4_2: Exercise[] = [
     expectedOutput: 'Sixteen lines: two headers, then every listening and established socket.',
     checks: [
       { type: 'command-has-flag', command: 'netstat', flags: ['n'], hint: 'Add -n so addresses stay numeric.' },
-      { type: 'output-contains', text: 'LISTEN', hint: 'Listening sockets should be included — that is what -a adds.' },
+      { type: 'output-contains', text: 'LISTEN', hint: 'Listening sockets should be included, that is what -a adds.' },
       { type: 'output-contains', text: 'ESTABLISHED', hint: 'Active connections should be included too.' },
     ],
     debrief:
@@ -272,7 +272,7 @@ const MODULE_4_2: Exercise[] = [
     prompt: 'Show only the TCP sockets that are listening for incoming connections, keeping addresses numeric.',
     teach: {
       concept:
-        'A listening socket is a door. Anything in that list is a way into this machine, so it is one of the first things to check on a host you have been handed. Read the Local Address column carefully: 0.0.0.0 means "any interface", so the whole network can reach it. 127.0.0.1 means loopback only — that service can be reached from this host and nowhere else.',
+        'A listening socket is a door. Anything in that list is a way into this machine, so it is one of the first things to check on a host you have been handed. Read the Local Address column carefully: 0.0.0.0 means "any interface", so the whole network can reach it. 127.0.0.1 means loopback only, that service can be reached from this host and nowhere else.',
       syntax: 'netstat -tln',
       examples: [
         { command: 'ss -tln', explains: 'The modern equivalent, same three flags.' },
@@ -290,7 +290,7 @@ const MODULE_4_2: Exercise[] = [
       { type: 'command-has-flag', command: 'netstat', flags: ['l'], hint: 'Add -l to restrict this to listening sockets.' },
       { type: 'command-has-flag', command: 'netstat', flags: ['t'], hint: 'Add -t to restrict this to TCP.' },
       { type: 'output-line-count', count: 9, hint: 'Seven listening sockets plus two header lines.' },
-      { type: 'output-excludes', text: 'ESTABLISHED', hint: 'Only listening sockets should appear — add -l.' },
+      { type: 'output-excludes', text: 'ESTABLISHED', hint: 'Only listening sockets should appear: add -l.' },
     ],
     debrief:
       'Four doors are open to the network: 22 (SSH), 80 and 443 (the web server), and that is it. Postgres on 5432 and the application on 8080 are bound to 127.0.0.1, so they are not reachable from outside this machine. That distinction is the difference between a database being exposed to the internet and being safe.',
@@ -307,7 +307,7 @@ const MODULE_4_2: Exercise[] = [
     prompt: 'Something is listening on port 22. Show which program it is, using a pipe to filter the output.',
     teach: {
       concept:
-        'A port number on its own tells you what a service is *supposed* to be. Port 22 is conventionally SSH — but conventions are not enforcement, and an attacker can run anything on any port. Adding `-p` shows the process actually holding the socket, which is what turns "port 22 is open" into "sshd is listening on port 22".',
+        'A port number on its own tells you what a service is *supposed* to be. Port 22 is conventionally SSH, but conventions are not enforcement, and an attacker can run anything on any port. Adding `-p` shows the process actually holding the socket, which is what turns "port 22 is open" into "sshd is listening on port 22".',
       syntax: 'netstat -tlnp | grep :PORT',
       examples: [
         { command: 'netstat -tlnp | grep :443', explains: 'The same question about the HTTPS port.' },
@@ -321,14 +321,14 @@ const MODULE_4_2: Exercise[] = [
       'Search for `:22` with the colon, so you do not also match port 2200.',
     ],
     solution: 'netstat -tlnp | grep :22',
-    expectedOutput: 'Two lines, both showing 1198/sshd — one for IPv4, one for IPv6.',
+    expectedOutput: 'Two lines, both showing 1198/sshd: one for IPv4, one for IPv6.',
     checks: [
       { type: 'command-has-flag', command: 'netstat', flags: ['p'], hint: 'Add -p so the owning process is shown.' },
       { type: 'command-uses-pipe', hint: 'Pipe netstat into grep to filter down to port 22.' },
       { type: 'output-contains', text: 'sshd', hint: 'The output should name the program holding the port.' },
     ],
     debrief:
-      'sshd on 22 is exactly what should be there. The reason you check is the case where it is not — a listener on 22 owned by something that is not sshd, or sshd running on a port nobody configured. Verifying the boring answer is how you notice the interesting one.',
+      'sshd on 22 is exactly what should be there. The reason you check is the case where it is not: a listener on 22 owned by something that is not sshd, or sshd running on a port nobody configured. Verifying the boring answer is how you notice the interesting one.',
     practice: NETWORKING_PRACTICE['net.2.3'] ?? [],
   },
   {
@@ -363,7 +363,7 @@ const MODULE_4_2: Exercise[] = [
       { type: 'output-excludes', text: 'LISTEN ', hint: 'Listening sockets should be filtered out.' },
     ],
     debrief:
-      'Five conversations. Two are the machine talking to itself on loopback, which is normal and uninteresting. The other three involve real addresses — and one of them is about to matter a great deal.',
+      'Five conversations. Two are the machine talking to itself on loopback, which is normal and uninteresting. The other three involve real addresses, and one of them is about to matter a great deal.',
     practice: NETWORKING_PRACTICE['net.2.4'] ?? [],
   },
   {
@@ -378,7 +378,7 @@ const MODULE_4_2: Exercise[] = [
       'Loopback traffic is this host talking to itself and is rarely interesting. Show the established TCP connections with all loopback lines removed.',
     teach: {
       concept:
-        'grep -v inverts a match: it keeps every line that does NOT contain the pattern. Investigations are largely subtraction — you remove the categories you have already explained until what remains is small enough to read one line at a time. Removing loopback is usually the first subtraction on any host.',
+        'grep -v inverts a match: it keeps every line that does NOT contain the pattern. Investigations are largely subtraction: you remove the categories you have already explained until what remains is small enough to read one line at a time. Removing loopback is usually the first subtraction on any host.',
       syntax: 'netstat -tn | grep ESTABLISHED | grep -v 127.0.0.1',
       examples: [
         { command: 'netstat -tn | grep -v LISTEN', explains: 'Removing a category rather than selecting one.' },
@@ -414,7 +414,7 @@ const MODULE_4_2: Exercise[] = [
       'Show the established connections with loopback removed, and include the owning process this time. One of these is a server reaching OUT to an address on the internet. Find it.',
     teach: {
       concept:
-        'A web server exists to receive connections, not make them. Traffic arriving at port 443 from an office machine is the job working normally. A connection where this host is the one dialling out — to an address nobody recognises, made by a tool like curl rather than a service — is one of the strongest single signals available in security monitoring. Adding -p turns "there is a connection" into "curl made this connection".',
+        'A web server exists to receive connections, not make them. Traffic arriving at port 443 from an office machine is the job working normally. A connection where this host is the one dialling out (to an address nobody recognises, made by a tool like curl rather than a service) is one of the strongest single signals available in security monitoring. Adding -p turns "there is a connection" into "curl made this connection".',
       syntax: 'netstat -tnp | grep ESTABLISHED | grep -v 127.0.0.1',
       examples: [
         { command: 'netstat -tnp | grep :443', explains: 'Everything on the HTTPS port, in and out.' },
@@ -431,11 +431,11 @@ const MODULE_4_2: Exercise[] = [
     checks: [
       { type: 'command-has-flag', command: 'netstat', flags: ['p'], hint: 'Add -p so you can see which process owns each connection.' },
       { type: 'output-contains', text: EXFIL, hint: 'The external address should be visible in your output.' },
-      { type: 'output-contains', text: 'curl', hint: 'The owning process should be shown — that is what -p adds.' },
+      { type: 'output-contains', text: 'curl', hint: 'The owning process should be shown, that is what -p adds.' },
       { type: 'output-excludes', text: '127.0.0.1', hint: 'Loopback should still be filtered out.' },
     ],
     debrief:
-      `That connection has been open on this host since Linux Fundamentals, and you have only now had the tools to see it. ${EXFIL} is not a Ridgeline address. The process is curl — a file transfer tool, not a service. A patient-portal web server has no reason to be uploading anything to an unknown address on the internet. In Log Analysis you found how somebody got in; this is what they are doing now.`,
+      `That connection has been open on this host since Linux Fundamentals, and you have only now had the tools to see it. ${EXFIL} is not a Ridgeline address. The process is curl: a file transfer tool, not a service. A patient-portal web server has no reason to be uploading anything to an unknown address on the internet. In Log Analysis you found how somebody got in; this is what they are doing now.`,
     practice: NETWORKING_PRACTICE['net.2.6'] ?? [],
   },
 ];
@@ -454,7 +454,7 @@ const MODULE_4_3: Exercise[] = [
     prompt: 'Look up the address that portal.ridgelinemed.example resolves to.',
     teach: {
       concept:
-        'DNS turns names into addresses. `dig` asks a resolver directly and shows you the whole answer, including which server replied. The part to read is the ANSWER SECTION. Doing the lookup yourself matters in an investigation because a name in a log is only meaningful once you know what it pointed at — and what it points at can change.',
+        'DNS turns names into addresses. `dig` asks a resolver directly and shows you the whole answer, including which server replied. The part to read is the ANSWER SECTION. Doing the lookup yourself matters in an investigation because a name in a log is only meaningful once you know what it pointed at, and what it points at can change.',
       syntax: 'dig NAME',
       examples: [
         { command: 'dig rmg-web-01.ridgelinemed.example', explains: 'The other web server.' },
@@ -472,7 +472,7 @@ const MODULE_4_3: Exercise[] = [
       { type: 'output-contains', text: HOST_IP, hint: 'The name should resolve to an address.' },
     ],
     debrief:
-      `The portal resolves to ${HOST_IP} — this host. That is worth noticing: the machine you have been investigating is the public patient portal, which is why it is exposed to the internet and why it was being brute-forced all morning.`,
+      `The portal resolves to ${HOST_IP}: this host. That is worth noticing: the machine you have been investigating is the public patient portal, which is why it is exposed to the internet and why it was being brute-forced all morning.`,
     practice: NETWORKING_PRACTICE['net.3.1'] ?? [],
   },
   {
@@ -502,10 +502,10 @@ const MODULE_4_3: Exercise[] = [
     expectedOutput: 'A reverse record naming rmg-monitor-01.ridgelinemed.example.',
     checks: [
       { type: 'output-contains', text: 'rmg-monitor-01', hint: 'The reverse lookup should return the host\'s name.' },
-      { type: 'output-contains', text: 'in-addr.arpa', hint: 'A reverse lookup queries the in-addr.arpa zone — that should appear in the response.' },
+      { type: 'output-contains', text: 'in-addr.arpa', hint: 'A reverse lookup queries the in-addr.arpa zone, that should appear in the response.' },
     ],
     debrief:
-      'It is the monitoring server. Five hundred and seventy-six authentication failures, all day, every five minutes — from the company\'s own monitoring box with a stale password. One reverse lookup turns the noisiest thing in the log into a ticket for whoever owns monitoring, and takes it off your incident list entirely.',
+      'It is the monitoring server. Five hundred and seventy-six authentication failures, all day, every five minutes: from the company\'s own monitoring box with a stale password. One reverse lookup turns the noisiest thing in the log into a ticket for whoever owns monitoring, and takes it off your incident list entirely.',
     practice: NETWORKING_PRACTICE['net.3.2'] ?? [],
   },
   {
@@ -519,7 +519,7 @@ const MODULE_4_3: Exercise[] = [
     prompt: 'Show which DNS servers this host is configured to use.',
     teach: {
       concept:
-        'Every lookup this machine makes goes to the resolvers listed in /etc/resolv.conf. It is a plain text file, so reading it needs no special tool. It matters in an investigation because changing a host\'s resolver is a quiet way to redirect its traffic — if a machine is suddenly asking a nameserver nobody recognises, that is worth explaining.',
+        'Every lookup this machine makes goes to the resolvers listed in /etc/resolv.conf. It is a plain text file, so reading it needs no special tool. It matters in an investigation because changing a host\'s resolver is a quiet way to redirect its traffic: if a machine is suddenly asking a nameserver nobody recognises, that is worth explaining.',
       syntax: 'cat /etc/resolv.conf',
       examples: [
         { command: 'cat /etc/hosts', explains: 'The file checked BEFORE DNS, which can override it entirely.' },
@@ -527,7 +527,7 @@ const MODULE_4_3: Exercise[] = [
       ],
     },
     hints: [
-      'This is a file, not a command — you already know how to read files.',
+      'This is a file, not a command: you already know how to read files.',
       'The file is /etc/resolv.conf.',
     ],
     solution: 'cat /etc/resolv.conf',
@@ -537,7 +537,7 @@ const MODULE_4_3: Exercise[] = [
       { type: 'output-contains', text: 'search ridgelinemed.example', hint: 'The search domain should be listed too.' },
     ],
     debrief:
-      'Both resolvers are on the internal 10.20.1.x network, which is what you want. A host configured to use a public resolver, or one you do not recognise, is bypassing whatever DNS filtering the company put in place — sometimes by accident, sometimes not.',
+      'Both resolvers are on the internal 10.20.1.x network, which is what you want. A host configured to use a public resolver, or one you do not recognise, is bypassing whatever DNS filtering the company put in place: sometimes by accident, sometimes not.',
     practice: NETWORKING_PRACTICE['net.3.3'] ?? [],
   },
   {
@@ -560,7 +560,7 @@ const MODULE_4_3: Exercise[] = [
     },
     hints: [
       'Another plain text file in /etc.',
-      'The file is /etc/hosts — plural, no extension.',
+      'The file is /etc/hosts: plural, no extension.',
     ],
     solution: 'cat /etc/hosts',
     expectedOutput: 'Eleven lines: loopback entries, the Ridgeline hosts, and IPv6 defaults.',
@@ -570,7 +570,7 @@ const MODULE_4_3: Exercise[] = [
       { type: 'output-line-count', count: 11, hint: 'The file has eleven non-empty lines.' },
     ],
     debrief:
-      'Everything here is internal and expected. The check worth remembering is the one that finds a public name — a software update server, say — pointed at an internal or unfamiliar address. That is a redirect, and because it never touches DNS, this file is the only place it is visible.',
+      'Everything here is internal and expected. The check worth remembering is the one that finds a public name (a software update server, say) pointed at an internal or unfamiliar address. That is a redirect, and because it never touches DNS, this file is the only place it is visible.',
     practice: NETWORKING_PRACTICE['net.3.4'] ?? [],
   },
 ];

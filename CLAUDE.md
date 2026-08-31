@@ -25,13 +25,13 @@ purpose: exercise answers depend on exact counts, so the world must not change
 unless somebody intends it to.
 
 **Compute expected answers from the seeded data.** Never hardcode a count in an
-exercise check — derive it (see `countAuth` in `content/linux-fundamentals.ts`),
+exercise check: derive it (see `countAuth` in `content/linux-fundamentals.ts`),
 so regenerating the world cannot leave a stale answer key.
 
 **Exercise ids are permanent.** Progress rows reference them. Add new ids; never
 renumber existing ones.
 
-> **One-time exception, 31 August 2026.** Packages 1–4 were written before the
+> **One-time exception, 31 August 2026.** Packages 1 to 4 were written before the
 > naming convention existed and carried bare numeric ids (`1`, exercises
 > `1.1.1`). Two sessions writing content at the same time both reached for "the
 > next number" and collided. Migration
@@ -49,13 +49,13 @@ renumber existing ones.
 **Packages are named, not numbered.** New content takes a name-prefixed id
 (`incident-response`, exercises `ir.2.1`) rather than the next integer, because
 integers collide between parallel sessions and between source specs. Never
-assert on `PACKAGES` positionally — key by package id, so adding a package adds
+assert on `PACKAGES` positionally: key by package id, so adding a package adds
 a line instead of editing somebody else's expectations.
 
 ## Content rules
 
 Every exercise needs `teach`, at least one `hint`, and at least one `check`. The
-catalogue validator in `content/index.ts` refuses to boot otherwise — a student
+catalogue validator in `content/index.ts` refuses to boot otherwise: a student
 with nowhere to go is a content bug, not a user error.
 
 Worked examples in `teach` must **not** be the exercise's own answer. They teach
@@ -66,7 +66,7 @@ where possible; check command shape only when the exercise is explicitly about
 learning a flag.
 
 Keep the logs boring. Realistic noise and benign-but-alarming decoys are the
-point — signal versus noise is the actual skill being taught.
+point: signal versus noise is the actual skill being taught.
 
 ## Schema portability
 

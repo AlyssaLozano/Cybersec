@@ -3,7 +3,7 @@
  *
  * THREE PANES, AND THE SPLIT IS THE LESSON
  *
- * The CARD is what a real assessor is handed in a scoping document — what the
+ * The CARD is what a real assessor is handed in a scoping document: what the
  * system is for, where it sits, how much traffic it takes, and what the owning
  * team claim about its defences. The claim is deliberately given equal weight
  * to the facts, because reading it sceptically is most of the job.
@@ -11,19 +11,19 @@
  * The CONSOLE is where payloads are sent. It has two buttons and they do
  * different things: Send is unlimited and ungraded, Submit is the short list of
  * probes the student puts their name to. Keeping them visibly separate is the
- * point — testing is mostly failure, and a surface that made every attempt feel
+ * point: testing is mostly failure, and a surface that made every attempt feel
  * like an exam answer would teach people to guess carefully rather than test
  * systematically.
  *
  * The DEPLOYMENT panel appears only when the exercise grades a defence set. It
  * shows the eight available controls with what each one does, what it does NOT
- * do, and what it costs — and a running cost total, because "turn everything on"
+ * do, and what it costs, and a running cost total, because "turn everything on"
  * is not an answer anybody ships and the budget is what makes that concrete.
  *
  * WHAT THIS COMPONENT NEVER SHOWS
  *
  * Which controls the deployment actually has. A result says the stage a payload
- * died at — before the model, at the instruction boundary, or on the way out —
+ * died at: before the model, at the instruction boundary, or on the way out:
  * and nothing more. That is roughly what a real black-box tester infers, and
  * naming the control would let somebody map a deployment in eight probes
  * without understanding any of it.
@@ -304,7 +304,7 @@ export function ModelLab({
             <div className="lab-eyebrow">Deployment</div>
             <p className="lab-note">
               {suite
-                ? 'Choose the controls to run in front of this model. The suite below is what your choice will be measured against — you can read every payload in it before you decide.'
+                ? 'Choose the controls to run in front of this model. The suite below is what your choice will be measured against: you can read every payload in it before you decide.'
                 : 'Choose the controls to run in front of this model, then attack it again with your own payloads and show that every one is now blocked.'}
             </p>
 
@@ -343,7 +343,7 @@ export function ModelLab({
             {suite && (
             <details className="lab-suite">
               <summary>
-                {suite.title} — read the payloads
+                {suite.title}: read the payloads
               </summary>
               <p className="lab-note">{suite.summary}</p>
               {suite.payloads.map((payload, index) => (

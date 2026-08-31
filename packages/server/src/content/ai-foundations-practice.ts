@@ -7,9 +7,9 @@
  * WHY THERE ARE FEW OF THEM HERE
  *
  * A drill earns its place when repeating the same skill against a different
- * target teaches something. That is true of arithmetic — computing a second
+ * target teaches something. That is true of arithmetic: computing a second
  * forward pass with different numbers genuinely proves the first one was not
- * luck — and of spotting poisoned rows in a different dataset. It is largely
+ * luck, and of spotting poisoned rows in a different dataset. It is largely
  * false of "explain why a hallucination is not a lie", where writing the same
  * explanation twice teaches nothing the first attempt did not.
  *
@@ -28,7 +28,7 @@ export const AI_FOUNDATIONS_PRACTICE: Record<string, PracticeItem[]> = {
         'Same neuron shape, different numbers. Weights w1 = -0.4 and w2 = 2.0, bias -1.0, ReLU ' +
         'activation, inputs x1 = 5.0 and x2 = 0.5. What does it output? Answer with the number ' +
         'alone.',
-      solution: '0 — the weighted sum is -2.0 + 1.0 = -1.0, adding the bias of -1.0 gives -2.0, and ReLU(-2.0) = 0.',
+      solution: '0: the weighted sum is -2.0 + 1.0 = -1.0, adding the bias of -1.0 gives -2.0, and ReLU(-2.0) = 0.',
       checks: [
         {
           type: 'answer-mentions',
@@ -122,7 +122,7 @@ export const AI_FOUNDATIONS_PRACTICE: Record<string, PracticeItem[]> = {
       solution:
         'Query 3, an in-context attack. It teaches through worked examples that external ' +
         'documentation-range addresses are internal, then asks the model to complete a fourth. ' +
-        'Query 2 is the decoy — "ignore rule tuning" is an ordinary request containing an ' +
+        'Query 2 is the decoy: "ignore rule tuning" is an ordinary request containing an ' +
         'alarming-looking word.',
       checks: [
         {
@@ -132,7 +132,7 @@ export const AI_FOUNDATIONS_PRACTICE: Record<string, PracticeItem[]> = {
             ['in-context', 'in context', 'few-shot', 'few shot', 'example'],
           ],
           hint:
-            'One query contains no instruction at all — it establishes a pattern through examples ' +
+            'One query contains no instruction at all: it establishes a pattern through examples ' +
             'and asks for the next one. Name its number and the technique.',
         },
       ],

@@ -110,7 +110,7 @@ export function buildReport(responses: ItemResponse[]): AssessmentReport {
 
   const confidenceSentence =
     result.overallConfidence < 60
-      ? ' Treat this as a starting point rather than a conclusion — your answers were not consistent enough to say more than that.'
+      ? ' Treat this as a starting point rather than a conclusion: your answers were not consistent enough to say more than that.'
       : '';
 
   const summary = topProfile
@@ -144,11 +144,11 @@ export function buildReport(responses: ItemResponse[]): AssessmentReport {
 export function shareableSummary(report: AssessmentReport): string {
   const top = report.topLanes[0];
   const profile = top ? getLaneProfile(top.laneId) : null;
-  if (!profile) return 'Career Fit Analyzer — not enough answers to summarise.';
+  if (!profile) return 'Career Fit Analyzer, not enough answers to summarise.';
 
   const environment = report.environments[0];
   const lines = [
-    `Cybersecurity Career Fit — strongest match: ${profile.title}`,
+    `Cybersecurity Career Fit: strongest match: ${profile.title}`,
     '',
     profile.summary,
     '',

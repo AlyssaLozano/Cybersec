@@ -209,7 +209,7 @@ function monitoringNoise(hour: number, minute: number): Built {
     verdict: 'benign_true_positive',
     decision: 'tune',
     why:
-      'The detection is correct — the authentication really did fail — but the cause is a stale ' +
+      'The detection is correct (the authentication really did fail) but the cause is a stale ' +
       'credential in a monitoring config, not an attacker. Dismissing these individually is a ' +
       'losing game at 288 a day: the rule needs an exclusion for the collector and a ticket needs ' +
       'raising to fix the password. This single misconfiguration produces more failed logins than ' +
@@ -245,7 +245,7 @@ function scannerNoise(hour: number): Built {
     why:
       'The control worked. A blocked connection to a closed port is the firewall doing its job, ' +
       'and every internet-facing host receives thousands of these a day. There is nothing to ' +
-      'investigate and nothing to tune — the alert is low severity precisely so it can be ' +
+      'investigate and nothing to tune: the alert is low severity precisely so it can be ' +
       'skimmed past.',
   });
 }
@@ -318,7 +318,7 @@ function intrusionAlerts(): Built[] {
       why:
         'Targeted, sustained, and coordinated across four sources working one account list. The ' +
         'rule has a poor track record (44 of 61 prior firings were noise) which is exactly why ' +
-        'this one is easy to miss — but the shared wordlist across multiple sources is the detail ' +
+        'this one is easy to miss, but the shared wordlist across multiple sources is the detail ' +
         'that separates it from ordinary scanning.',
     }),
     build({
@@ -441,7 +441,7 @@ function intrusionAlerts(): Built[] {
       summary: `Repeating outbound HTTPS from ${WEB_HOST} to ${EXFIL_IP}`,
       detail:
         `Outbound TLS to ${EXFIL_IP}:443 initiated by a curl process under ${BACKDOOR_USER}. ` +
-        `Connections recur at 10:45:00, 11:00:00 and 11:15:00 — a fixed 15-minute interval with ` +
+        `Connections recur at 10:45:00, 11:00:00 and 11:15:00: a fixed 15-minute interval with ` +
         `sub-second jitter. Destination is not on the egress allowlist and has no category.`,
       enrichment: {
         priorFirings: 190,
@@ -454,7 +454,7 @@ function intrusionAlerts(): Built[] {
       decision: 'escalate',
       incident: true,
       why:
-        'Command and control. The tell is not the destination — it is the regularity: exactly 15 ' +
+        'Command and control. The tell is not the destination: it is the regularity: exactly 15 ' +
         'minutes apart with almost no jitter is a machine on a timer, not a person browsing. A web ' +
         'server making scheduled outbound calls to an uncategorised address is beaconing.',
     }),
@@ -482,7 +482,7 @@ function intrusionAlerts(): Built[] {
       incident: true,
       why:
         'The attacker returning through the door they built, and now using key authentication, ' +
-        'which survives a password reset. Same source address as the original brute force — this ' +
+        'which survives a password reset. Same source address as the original brute force: this ' +
         'is the alert that ties the whole sequence to one actor.',
     }),
     build({
@@ -550,7 +550,7 @@ function benignTruePositives(): Built[] {
       decision: 'dismiss',
       why:
         'The nightly backup, on schedule, by key, from the backup server, followed by a transfer ' +
-        'of the expected size. It has fired 730 times — twice a night for a year — and been ' +
+        'of the expected size. It has fired 730 times (twice a night for a year) and been ' +
         'correct and uninteresting every time.',
     }),
     build({
@@ -577,7 +577,7 @@ function benignTruePositives(): Built[] {
       why:
         'A DBA doing scheduled overnight maintenance, from their own workstation, with a change ' +
         'record. The unusual hour is the whole reason the rule exists, and the reason it is wrong ' +
-        'most of the time — maintenance runs overnight precisely because that is when it is safe.',
+        'most of the time: maintenance runs overnight precisely because that is when it is safe.',
     }),
     build({
       time: '08:15:33',
@@ -627,7 +627,7 @@ function benignTruePositives(): Built[] {
       why:
         'Somebody mistyped their password twice and then got it right, from their own machine, at ' +
         'the start of the working day. Two failures is a typo; sixty-two failures across nine ' +
-        'accounts from an unknown address is an attack. The rule cannot tell the difference — that ' +
+        'accounts from an unknown address is an attack. The rule cannot tell the difference, that ' +
         'is what the operator is for.',
     }),
     build({
@@ -665,7 +665,7 @@ function benignTruePositives(): Built[] {
       decision: 'dismiss',
       why:
         'A hardening control denying access it is supposed to deny. Denials are the control ' +
-        'working, not evidence of attack — though a sudden change in their pattern would be worth ' +
+        'working, not evidence of attack, though a sudden change in their pattern would be worth ' +
         'a look.',
     }),
     build({
@@ -685,7 +685,7 @@ function benignTruePositives(): Built[] {
       decision: 'dismiss',
       why:
         'A scheduled business process that sends mail to patients. It fires three times a day and ' +
-        'always will. Note the 40% confidence — the rule already knows it is probably wrong.',
+        'always will. Note the 40% confidence: the rule already knows it is probably wrong.',
     }),
   ];
 }
@@ -776,7 +776,7 @@ function falsePositives(): Built[] {
       why:
         'The rule asserts a denial-of-service; the traffic volume says otherwise. The table is ' +
         'undersized for this host, which is a capacity defect. Worth noting that it happens to ' +
-        'coincide with the exfiltration — a genuine coincidence, and a good reminder that ' +
+        'coincide with the exfiltration: a genuine coincidence, and a good reminder that ' +
         'correlation by timestamp alone will mislead you.',
     }),
     build({
@@ -802,7 +802,7 @@ function falsePositives(): Built[] {
       decision: 'tune',
       why:
         'Root principal use is genuinely worth alerting on, but billing APIs cannot be called by ' +
-        'anything else in this account — the permission does not exist to delegate. The rule needs ' +
+        'anything else in this account: the permission does not exist to delegate. The rule needs ' +
         'to exclude billing read operations, or it will cry wolf every month until nobody reads it.',
     }),
   ];
@@ -852,7 +852,7 @@ const queues: QueueSpec[] = [];
     briefing:
       'A short slice of one morning at Ridgeline Medical Group. Twelve alerts, of the roughly ' +
       'nine hundred the stack raises in a day. Exactly one of them is an intrusion. Read every ' +
-      'alert before you decide anything — the queue is not sorted by importance, and the rule ' +
+      'alert before you decide anything: the queue is not sorted by importance, and the rule ' +
       'that shouted loudest is not the one that matters.',
     built: byTime([...noise, ...benign, ...real, ...fp]),
   });
@@ -876,7 +876,7 @@ const queues: QueueSpec[] = [];
     title: 'Three hours of one rule',
     briefing:
       'Three hours of queue from the same night. One rule dominates it completely. Your job is ' +
-      'not to clear these one at a time — it is to work out what should happen to the rule, and ' +
+      'not to clear these one at a time: it is to work out what should happen to the rule, and ' +
       'to notice what the volume is hiding.',
     built: byTime(others.concat(noisy)),
   });

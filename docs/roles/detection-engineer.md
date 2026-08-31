@@ -1,4 +1,4 @@
-# Detection Engineer — role specification
+# Detection Engineer: role specification
 
 Source specification, filed verbatim. Kept here because the lane profile, the
 assessment items that route to it, and the track curriculum are all derived from
@@ -9,10 +9,10 @@ actually asked for.
 
 | Piece | State |
 |---|---|
-| `detection-engineering` career lane, scored by the Career Fit Analyzer | Done — `content/lanes.ts`, `assessment/items.ts` |
-| Assessment routing (the "ASSESSMENT → DETECTION ENGINEER ROUTING" section) | Done — 20 items bear on the lane |
-| Track curriculum matching the 12-week structure below | Outlined — `content/tracks.ts`, 66 planned exercises, no content written |
-| Capability baseline coverage | Done — 18 capabilities tagged core/supporting for this lane |
+| `detection-engineering` career lane, scored by the Career Fit Analyzer | Done: `content/lanes.ts`, `assessment/items.ts` |
+| Assessment routing (the "ASSESSMENT → DETECTION ENGINEER ROUTING" section) | Done: 20 items bear on the lane |
+| Track curriculum matching the 12-week structure below | Outlined: `content/tracks.ts`, 66 planned exercises, no content written |
+| Capability baseline coverage | Done: 18 capabilities tagged core/supporting for this lane |
 | Rule editor, FP dashboard, effectiveness tester, coverage map | Not started. Needs a rule-evaluation engine on the server |
 | Peer SOC and instructor-led sessions | Not started (Phase 3) |
 | Pricing | Not modelled anywhere in the codebase |
@@ -568,7 +568,7 @@ Assessment questions identify Detection Engineer fit:
 
 **Assessment feedback:**
 
-"Your profile shows strong Detection Engineer traits. You think proactively, you're detail-oriented, and you enjoy building systems. Detection engineering is where you identify attacks before they mature — you're designing the early warning system.
+"Your profile shows strong Detection Engineer traits. You think proactively, you're detail-oriented, and you enjoy building systems. Detection engineering is where you identify attacks before they mature: you're designing the early warning system.
 
 Detection Engineers are rare in the market and highly paid. This is an advanced path (takes 12-16 weeks of focused study), but it leads directly to senior roles."
 

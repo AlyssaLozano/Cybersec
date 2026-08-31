@@ -276,7 +276,7 @@ function concernsFor(laneId: LaneId, traits: Map<TraitId, number>): string[] {
   }
   if (laneId === 'detection-engineering' && get('detail_orientation') < 0) {
     concerns.push(
-      'A detection rule that is slightly wrong does not fail quietly — it makes hundreds of alerts somebody else has to close, and detail was not a strength in your answers.',
+      'A detection rule that is slightly wrong does not fail quietly: it makes hundreds of alerts somebody else has to close, and detail was not a strength in your answers.',
     );
   }
   if (laneId === 'detection-engineering' && get('depth_preference') < -0.5) {
@@ -329,7 +329,7 @@ function environmentScoresFrom(acc: Accumulator): EnvironmentScore[] {
    * This matters more than it looks. Dividing by a constant shrinks a genuine
    * signal from one or two strong answers toward zero, and a person sitting near
    * zero on every factor is closest to whichever environment sits in the middle
-   * — which is always corporate. That produced a quiet bias where anybody who
+   *, which is always corporate. That produced a quiet bias where anybody who
    * answered only a few questions was told they suit corporate work, regardless
    * of what they said. Averaging over contributing items removes it.
    */

@@ -10,7 +10,7 @@
  *
  * A decision point is therefore not a quiz. Every option is something a real
  * responder has actually done, several are defensible, and the ones that are
- * wrong are wrong for reasons a student can only see AFTER committing — which is
+ * wrong are wrong for reasons a student can only see AFTER committing, which is
  * exactly the position they will be in at 02:00. Consequences are revealed on
  * submission, never before.
  *
@@ -25,7 +25,7 @@
  *
  * `DecisionOption.consequence` and `DecisionOption.quality` are the answer.
  * `toStudentDecisionPoint()` is the one function permitted to build the client's
- * view, and it strips both — the same boundary `toStudentView()` enforces for
+ * view, and it strips both: the same boundary `toStudentView()` enforces for
  * exercises and `queueForStudent()` enforces for alerts.
  */
 
@@ -48,10 +48,10 @@ export interface DecisionOption {
   /** What taking this option actually involves. Safe to ship. */
   detail?: string;
   /**
-   * What happens if you choose this. ANSWER KEY — never shipped before commit.
+   * What happens if you choose this. ANSWER KEY: never shipped before commit.
    */
   consequence: string;
-  /** ANSWER KEY — never shipped before commit. */
+  /** ANSWER KEY: never shipped before commit. */
   quality: DecisionQuality;
 }
 

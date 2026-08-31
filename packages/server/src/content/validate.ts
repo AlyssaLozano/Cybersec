@@ -393,7 +393,7 @@ function runCheck(check: Check, attempt: Attempt): FailedCheck | null {
 
     case 'defence-cost-budget': {
       // Cost is computed by the caller from the student's chosen set, so a
-      // submission with no defences costs nothing and passes — which is correct:
+      // submission with no defences costs nothing and passes, which is correct:
       // the budget is a ceiling, and the suite checks are what require spending.
       return (attempt.defenceCost ?? 0) <= check.max ? null : failed();
     }

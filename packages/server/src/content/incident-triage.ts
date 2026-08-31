@@ -200,7 +200,7 @@ const ENRICHMENT_TEACH: Teach = {
     {
       command: 'priorFirings 8412 / priorFalsePositives 8398',
       explains:
-        'This rule is wrong 99.8% of the time. That does not make this instance wrong — but it ' +
+        'This rule is wrong 99.8% of the time. That does not make this instance wrong, but it ' +
         'does mean the rule cannot be trusted to have thought about it.',
     },
     {
@@ -230,7 +230,7 @@ const MODULE_3_1: Exercise[] = [
     teach: {
       concept:
         'Triage is deciding, quickly and correctly, which alerts deserve a human. The queue is not ' +
-        'sorted by importance and cannot be — the tooling does not know which of its own alerts ' +
+        'sorted by importance and cannot be: the tooling does not know which of its own alerts ' +
         'matter. Your first pass is about disposal: most of these will be closed, and closing them ' +
         'correctly is the job, not a preliminary to it.',
       examples: [
@@ -256,7 +256,7 @@ const MODULE_3_1: Exercise[] = [
       'One alert describes an authentication that SUCCEEDED from an address that had been failing.',
     ],
     solution:
-      `Escalate ${INTRO_ESCALATE.join(', ')} — the successful login from an external address that ` +
+      `Escalate ${INTRO_ESCALATE.join(', ')}: the successful login from an external address that ` +
       'had been failing against this host all morning. Everything else in this queue is either the ' +
       'monitoring host with a stale password, ordinary administration, or a scanner being blocked.',
     expectedOutput:
@@ -269,7 +269,7 @@ const MODULE_3_1: Exercise[] = [
         forbidExtra: true,
         hint:
           'Exactly one alert in this queue warrants escalation. If you escalated more than one, ' +
-          'ask what each of the others actually proves — a blocked connection proves the firewall ' +
+          'ask what each of the others actually proves: a blocked connection proves the firewall ' +
           'works, and an administrator running sudo proves they are an administrator.',
       },
       {
@@ -283,7 +283,7 @@ const MODULE_3_1: Exercise[] = [
     ],
     debrief:
       'You escalated one alert out of twelve. That ratio is roughly right, and it will feel wrong ' +
-      'for a while — closing an alert you are not certain about is uncomfortable, and doing it ' +
+      'for a while: closing an alert you are not certain about is uncomfortable, and doing it ' +
       'eighty times a shift is the job. The discomfort is why new operators escalate too much, and ' +
       'why tier-two queues stop being read.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.1.1'] ?? [],
@@ -300,7 +300,7 @@ const MODULE_3_1: Exercise[] = [
     prompt:
       'This queue contains one alert rated CRITICAL with 99% confidence. Find it, read what it ' +
       'actually describes, and give it the disposition it deserves. Write a one-line justification ' +
-      'saying why the severity is wrong — mention what the file actually is and that it is a test.',
+      'saying why the severity is wrong: mention what the file actually is and that it is a test.',
     teach: SEVERITY_TEACH,
     hints: [
       'Filter to critical severity. There is only one.',
@@ -309,8 +309,8 @@ const MODULE_3_1: Exercise[] = [
         'their scanner works. It contains no payload and cannot execute anything harmful.',
     ],
     solution:
-      `Dismiss ${INTRO_EICAR}. It is an EICAR test file — the standard harmless string used to ` +
-      'verify that antivirus is functioning — downloaded during security awareness training the ' +
+      `Dismiss ${INTRO_EICAR}. It is an EICAR test file: the standard harmless string used to ` +
+      'verify that antivirus is functioning: downloaded during security awareness training the ' +
       'previous day. The signature match is correct and the severity is meaningless.',
     expectedOutput: 'The critical alert dismissed, with a justification naming EICAR as a test file.',
     checks: [
@@ -319,8 +319,8 @@ const MODULE_3_1: Exercise[] = [
         decision: 'dismiss',
         alertIds: [INTRO_EICAR],
         hint:
-          'The critical-severity alert should be dismissed. Read its detail field before you decide ' +
-          '— the file it matched is named in there.',
+          'The critical-severity alert should be dismissed. Read its detail field before you decide: ' +
+          'the file it matched is named in there.',
       },
       {
         type: 'triage-justifies',
@@ -331,13 +331,13 @@ const MODULE_3_1: Exercise[] = [
         ],
         hint:
           'Your justification needs to name what the file is (EICAR) and say why it does not ' +
-          'matter (it is inert — it contains no payload).',
+          'matter (it is inert: it contains no payload).',
       },
     ],
     debrief:
       'The most alarming alert in the queue was the least important one, and it was rated critical ' +
       'with near-perfect confidence. Meanwhile the alert describing an actual compromise was rated ' +
-      'medium at 60%. This inversion is not a flaw in the simulation — severity is assigned by ' +
+      'medium at 60%. This inversion is not a flaw in the simulation: severity is assigned by ' +
       'whoever wrote the rule, in advance, without knowing anything about the event that would ' +
       'eventually trigger it.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.1.2'] ?? [],
@@ -357,7 +357,7 @@ const MODULE_3_1: Exercise[] = [
     options: [
       { id: 'a', label: 'This instance is almost certainly not worth acting on either.' },
       { id: 'b', label: 'The rule is generating far more work than value and should be tuned.' },
-      { id: 'c', label: 'This instance still has to be read — history is a prior, not a verdict.' },
+      { id: 'c', label: 'This instance still has to be read: history is a prior, not a verdict.' },
       { id: 'd', label: 'The rule is broken and should be deleted.' },
     ],
     hints: [
@@ -369,7 +369,7 @@ const MODULE_3_1: Exercise[] = [
       'B and C. The rule is clearly generating more noise than value and needs tuning (B), but the ' +
       'individual alert still has to be read, because a base rate is a prior and not a verdict (C). ' +
       'A is the trap: it converts "usually noise" into "is noise", which is precisely how the real ' +
-      'one gets missed. D over-reaches — the rule caught something real 14 times, and deleting it ' +
+      'one gets missed. D over-reaches: the rule caught something real 14 times, and deleting it ' +
       'discards that for a tuning problem.',
     expectedOutput: 'Options B and C selected.',
     checks: [
@@ -383,7 +383,7 @@ const MODULE_3_1: Exercise[] = [
     ],
     debrief:
       'This is the reasoning that decides whether you catch the intrusion in this package. The ' +
-      'brute-force rule in the full night shift has been wrong 44 times out of 61 — and the 62nd ' +
+      'brute-force rule in the full night shift has been wrong 44 times out of 61, and the 62nd ' +
       'firing is real. Base rates tell you how much scrutiny to spend, never whether to look.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.1.3'] ?? [],
   },
@@ -404,9 +404,9 @@ const MODULE_3_1: Exercise[] = [
     teach: {
       concept:
         'Both of these get closed, so it is tempting to call them both false positives. They are ' +
-        'not. The overnight login genuinely happened and the rule described it accurately — it is a ' +
+        'not. The overnight login genuinely happened and the rule described it accurately: it is a ' +
         'benign true positive, and the rule is working. The SQL injection alert describes something ' +
-        'that did not occur — the rule is broken. Conflating them is how a SOC ends up deleting ' +
+        'that did not occur: the rule is broken. Conflating them is how a SOC ends up deleting ' +
         'rules that work, because "false positive rate" gets measured and someone acts on it.',
       examples: [
         {
@@ -475,7 +475,7 @@ const MODULE_3_1: Exercise[] = [
         'Escalation is not free. Every alert you send up consumes an analyst who is not then ' +
         'reading the queue behind you, and a tier-two queue that receives forty escalations a shift ' +
         'is functionally the same as no escalation process at all. Capping escalations is artificial ' +
-        'here and entirely real in practice — the cap is just usually implicit, and discovered the ' +
+        'here and entirely real in practice: the cap is just usually implicit, and discovered the ' +
         'hard way.',
       examples: [
         {
@@ -498,7 +498,7 @@ const MODULE_3_1: Exercise[] = [
     ],
     solution:
       `Escalate ${INTRO_ESCALATE.join(', ')} and nothing else. The budget is not the constraint ` +
-      'here — even with two slots available, only one alert in this queue has a next step that ' +
+      'here: even with two slots available, only one alert in this queue has a next step that ' +
       'requires another person.',
     expectedOutput: 'At most two escalations, including the compromise, everything else disposed of.',
     checks: [
@@ -517,7 +517,7 @@ const MODULE_3_1: Exercise[] = [
     ],
     debrief:
       'Note what the budget did to your thinking: it forced you to ask what escalation is FOR. That ' +
-      'question — what would the next person actually do with this — is the most useful one in ' +
+      'question (what would the next person actually do with this) is the most useful one in ' +
       'triage, and a cap is just a way of making you ask it every time.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.1.5'] ?? [],
   },
@@ -543,7 +543,7 @@ const MODULE_3_2: Exercise[] = [
       concept:
         'A rule can be completely correct and completely unusable. The monitoring collector on this ' +
         'network has a stale password in its config and fails SSH authentication every five minutes, ' +
-        'all day, forever — 288 times a day. Each alert is accurate. Dismissing them one at a time ' +
+        'all day, forever: 288 times a day. Each alert is accurate. Dismissing them one at a time ' +
         'is not triage, it is data entry, and it is how operators stop reading the queue.',
         examples: [
         {
@@ -561,7 +561,7 @@ const MODULE_3_2: Exercise[] = [
     hints: [
       'Group the queue by rule. One of them dwarfs the others.',
       'Look at the source address on those alerts. Is it external, or is it a machine you own?',
-      'The alerts are correct — the authentication really is failing. That makes "dismiss" true but ' +
+      'The alerts are correct: the authentication really is failing. That makes "dismiss" true but ' +
         'useless, and "false positive" simply wrong.',
     ],
     solution:
@@ -582,7 +582,7 @@ const MODULE_3_2: Exercise[] = [
     ],
     debrief:
       'One misconfigured host produced more failed-authentication alerts in three hours than the ' +
-      'attacker produced all day. That is not a contrived ratio — it is the normal state of an ' +
+      'attacker produced all day. That is not a contrived ratio: it is the normal state of an ' +
       'untuned SOC, and it is why "we had an alert for that" appears in so many breach reports.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.2.1'] ?? [],
   },
@@ -601,7 +601,7 @@ const MODULE_3_2: Exercise[] = [
     teach: {
       concept:
         'This is what alert fatigue actually costs. The noisy rule is not dangerous because it is ' +
-        'annoying — it is dangerous because it trains you to skim, and the real alert looks ' +
+        'annoying: it is dangerous because it trains you to skim, and the real alert looks ' +
         'superficially similar to the noise. Both are about failed authentication. One is a ' +
         'monitoring box with a bad password; the other is four external addresses working a shared ' +
         'account list.',
@@ -621,7 +621,7 @@ const MODULE_3_2: Exercise[] = [
         'short window. That is not one machine with a bad password.',
     ],
     solution:
-      `Escalate ${NOISY_ESCALATE.join(', ')} — the coordinated brute force from ${''}` +
+      `Escalate ${NOISY_ESCALATE.join(', ')}: the coordinated brute force from ${''}` +
       'four external addresses working the same account list between 09:12 and 09:47. The ' +
       'monitoring noise is a single internal host failing against a single account.',
     expectedOutput: 'One escalation: the brute-force alert.',
@@ -660,7 +660,7 @@ const MODULE_3_2: Exercise[] = [
         'Tuning is where operators do lasting damage. "Suppress failed-authentication alerts" would ' +
         'silence the noise and also blind you to every brute force forever. A good tuning change is ' +
         'the narrowest exclusion that removes the known-benign case and leaves everything else ' +
-        'intact — and it is always paired with fixing the underlying cause, or the exclusion becomes ' +
+        'intact, and it is always paired with fixing the underlying cause, or the exclusion becomes ' +
         'permanent.',
       examples: [
         {
@@ -682,8 +682,8 @@ const MODULE_3_2: Exercise[] = [
       'An exclusion treats the symptom. What is actually broken, and who fixes it?',
     ],
     solution:
-      'Exclude the specific combination — source address 10.20.9.40 (rmg-mon-01) authenticating as ' +
-      'the nagios account — rather than suppressing the rule or the host outright. That keeps the ' +
+      'Exclude the specific combination: source address 10.20.9.40 (rmg-mon-01) authenticating as ' +
+      'the nagios account, rather than suppressing the rule or the host outright. That keeps the ' +
       'rule firing if the collector starts failing against a different account, or if any other ' +
       'source targets nagios. Alongside it, raise a ticket to fix the stale credential in the ' +
       'monitoring config, and set the exclusion to expire so it does not outlive the problem.',
@@ -700,7 +700,7 @@ const MODULE_3_2: Exercise[] = [
         ],
         hint:
           'Scope the exclusion to both the source AND the account, and say what happens about the ' +
-          'password itself — an exclusion alone leaves a broken credential in place forever.',
+          'password itself: an exclusion alone leaves a broken credential in place forever.',
       },
     ],
     debrief:
@@ -748,7 +748,7 @@ const MODULE_3_2: Exercise[] = [
     ],
     solution:
       'Flag the failed-authentication alerts for tuning, with a note along the lines of: ' +
-      '"rmg-mon-01 (10.20.9.40) failing SSH auth as nagios every 5 minutes — stale credential in ' +
+      '"rmg-mon-01 (10.20.9.40) failing SSH auth as nagios every 5 minutes: stale credential in ' +
       'the monitoring config, not an attack. Requesting an exclusion scoped to this source and ' +
       'account, plus a ticket to correct the password."',
     expectedOutput: 'Tuning flags applied, with at least one justification naming host, account, and remedy.',
@@ -789,12 +789,12 @@ const MODULE_3_2: Exercise[] = [
     prompt:
       'Somewhere in the night shift queue is an alert claiming SQL injection against the patient ' +
       'portal. Find it, read the request it matched, and give it the right disposition. This is a ' +
-      'different kind of problem from the monitoring noise — decide which.',
+      'different kind of problem from the monitoring noise: decide which.',
     teach: {
       concept:
         'The monitoring alerts are correct detections of real events. This one is not: the rule ' +
         'matched the letters "select" inside the ordinary parameter value "selected_labs". No ' +
-        'injection was attempted. That is a defective rule, and the remedy is different — an ' +
+        'injection was attempted. That is a defective rule, and the remedy is different: an ' +
         'exclusion would paper over logic that will misfire on the next parameter containing a SQL ' +
         'keyword, and there are many.',
       examples: [
@@ -815,8 +815,8 @@ const MODULE_3_2: Exercise[] = [
     ],
     solution:
       `Flag ${NIGHT_SQLI} for tuning. The rule matched the substring "select" inside the parameter ` +
-      'value "selected_labs" in a legitimate request. It is a false positive — the event it ' +
-      'describes never happened — and the detection logic needs word-boundary and syntax awareness, ' +
+      'value "selected_labs" in a legitimate request. It is a false positive: the event it ' +
+      'describes never happened, and the detection logic needs word-boundary and syntax awareness, ' +
       'not an exclusion.',
     expectedOutput: 'The SQL injection alert flagged for tuning.',
     checks: [
@@ -850,7 +850,7 @@ const MODULE_3_3: Exercise[] = [
     queueId: WINDOW,
     goal: 'Escalate a set of individually unremarkable alerts that are damning together.',
     prompt:
-      `Every alert raised between 10:10 and 10:35 — ${WINDOW_SIZE} of them. Several are ` +
+      `Every alert raised between 10:10 and 10:35: ${WINDOW_SIZE} of them. Several are ` +
       'individually the kind of thing you would close without much thought. Find the ones that ' +
       'belong to the same actor and escalate exactly those.',
     teach: {
@@ -897,7 +897,7 @@ const MODULE_3_3: Exercise[] = [
       },
     ],
     debrief:
-      'You have just done the thing correlation rules exist to automate — and you did it better, ' +
+      'You have just done the thing correlation rules exist to automate, and you did it better, ' +
       'because you could see that "account created" and "account added to sudo" involved an account ' +
       'that did not exist an hour ago. Most correlation rules cannot express that.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.3.1'] ?? [],
@@ -913,14 +913,14 @@ const MODULE_3_3: Exercise[] = [
     goal: 'Identify the moment an attempt became an intrusion, and say why it is the pivot.',
     prompt:
       'One alert in this window is the hinge: before it, an attacker was outside; after it, they ' +
-      'were inside with valid credentials. Escalate it and justify it — your note must say that the ' +
+      'were inside with valid credentials. Escalate it and justify it: your note must say that the ' +
       'authentication succeeded and that it followed earlier failures from the same source.',
     teach: {
       concept:
         'Every intrusion has a moment where the story changes, and everything after it is different ' +
         'in kind. A brute force that fails ten thousand times is noise. The same brute force ' +
-        'succeeding once is an incident, and every subsequent action by that account — however ' +
-        'ordinary it looks — has to be re-read as possible attacker activity.',
+        'succeeding once is an incident, and every subsequent action by that account, however ' +
+        'ordinary it looks, has to be re-read as possible attacker activity.',
       examples: [
         {
           command: 'Failed password × 62',
@@ -965,7 +965,7 @@ const MODULE_3_3: Exercise[] = [
     ],
     debrief:
       'In the real Ridgeline timeline this alert sat unread for six days. Not because anybody was ' +
-      'negligent — because it was rated medium, on a rule with a mediocre history, in a queue ' +
+      'negligent, because it was rated medium, on a rule with a mediocre history, in a queue ' +
       'containing 288 daily alerts from a monitoring box with a bad password.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.3.2'] ?? [],
   },
@@ -1017,7 +1017,7 @@ const MODULE_3_3: Exercise[] = [
       'B. Record the coincidence so the next analyst is not surprised by it, but do not fold it ' +
       'into the incident without a mechanism. A single archive transfer does not exhaust a ' +
       'connection-tracking table, and the traffic volume at the time was ordinary. The table is ' +
-      'undersized — a capacity defect that happened to surface in the same minute. C is wrong ' +
+      'undersized: a capacity defect that happened to surface in the same minute. C is wrong ' +
       'because the base rate does not license ignoring it, and D pushes an unexamined decision ' +
       'upward, which is what escalation is not for.',
     expectedOutput: 'Option B selected.',
@@ -1052,8 +1052,8 @@ const MODULE_3_3: Exercise[] = [
     teach: {
       concept:
         'An escalation is only as useful as the story attached to it. "Three suspicious alerts, ' +
-        'please review" makes tier two start from nothing. A short ordered narrative — this, then ' +
-        'this, therefore that — lets them begin at containment instead of at reconstruction. Stay ' +
+        'please review" makes tier two start from nothing. A short ordered narrative: this, then ' +
+        'this, therefore that: lets them begin at containment instead of at reconstruction. Stay ' +
         'inside the evidence: what you cannot support belongs in a separate sentence marked as ' +
         'inference.',
       examples: [
@@ -1094,7 +1094,7 @@ const MODULE_3_3: Exercise[] = [
           ['10:14', '10:22', '10:31', 'then', 'after', 'next', 'followed'],
         ],
         hint:
-          'Name both accounts, say that the new one gained privilege, and make the order explicit — ' +
+          'Name both accounts, say that the new one gained privilege, and make the order explicit: ' +
           'either with timestamps or with sequencing words.',
       },
     ],
@@ -1140,14 +1140,14 @@ const MODULE_3_3: Exercise[] = [
       'Duration: do they tell you when the attacker first got in, or only when this rule noticed?',
     ],
     solution:
-      'The alerts do not establish scope — nothing here shows whether the attacker used sysmon to ' +
+      'The alerts do not establish scope: nothing here shows whether the attacker used sysmon to ' +
       'reach other hosts, which would need authentication logs from the rest of the estate. They ' +
-      'do not establish data impact — no alert in this window shows a file being read, copied, or ' +
+      'do not establish data impact, no alert in this window shows a file being read, copied, or ' +
       'sent anywhere, which would need file and egress telemetry. And they do not establish the ' +
       'true start of the intrusion, only when detection noticed: the brute force is visible from ' +
       '09:12, but whether this source had prior access needs a longer log retention window.',
     expectedOutput:
-      'At least two named unknowns — scope, data impact, or dwell time — each with the evidence ' +
+      'At least two named unknowns (scope, data impact, or dwell time) each with the evidence ' +
       'that would resolve it.',
     checks: [
       {
@@ -1158,8 +1158,8 @@ const MODULE_3_3: Exercise[] = [
           ['log', 'telemetry', 'evidence', 'need', 'would show', 'check'],
         ],
         hint:
-          'Name at least two distinct unknowns — whether other systems are affected, and whether ' +
-          'any data was touched — and for each say what evidence would answer it.',
+          'Name at least two distinct unknowns: whether other systems are affected, and whether ' +
+          'any data was touched, and for each say what evidence would answer it.',
       },
     ],
     debrief:
@@ -1189,7 +1189,7 @@ const MODULE_3_4: Exercise[] = [
     teach: {
       concept:
         'Everything so far has been a slice. This is the whole shift, and the intrusion is spread ' +
-        'across eight alerts, five rules, and three hours — mixed into a queue where one rule fires ' +
+        'across eight alerts, five rules, and three hours: mixed into a queue where one rule fires ' +
         'every five minutes and the loudest alert is a harmless test file. Work it in passes: ' +
         'dispose of the known-noisy rule as a group, then read what remains properly.',
       examples: [
@@ -1223,7 +1223,7 @@ const MODULE_3_4: Exercise[] = [
         minRecall: 1,
         hint:
           'You have missed at least one alert belonging to the intrusion. The quiet ones are the ' +
-          'cron change (rated low) and the outbound connection (rated medium) — persistence and ' +
+          'cron change (rated low) and the outbound connection (rated medium): persistence and ' +
           'command-and-control rarely announce themselves.',
       },
       {
@@ -1255,8 +1255,8 @@ const MODULE_3_4: Exercise[] = [
       'every alert belonging to the intrusion. Precision and recall at the same time.',
     teach: {
       concept:
-        'This is the actual job. Recall alone is easy — escalate everything. Precision alone is easy ' +
-        '— escalate nothing. Doing both is what separates an operator from a forwarding rule, and ' +
+        'This is the actual job. Recall alone is easy: escalate everything. Precision alone is easy: ' +
+        'escalate nothing. Doing both is what separates an operator from a forwarding rule, and ' +
         'it is why the two are reported separately here rather than averaged into one score that ' +
         'would hide which one you failed.',
       examples: [
@@ -1274,12 +1274,12 @@ const MODULE_3_4: Exercise[] = [
       'You know which eight matter from the previous exercise. The work is in what you leave out.',
       'For each borderline alert, ask: does this change what anyone would DO?',
       'The archive alert and the cron alert both belong. The disk-space warning and the AppArmor ' +
-        'denial do not — they are somebody else’s queue.',
+        'denial do not: they are somebody else’s queue.',
     ],
     solution:
       `Escalate exactly the ${NIGHT_ESCALATE.length} intrusion alerts and nothing else. The ` +
-      'benign true positives — the backup service account, the overnight DBA, the administrator ' +
-      'patching, the mistyped password — are dismissed. The monitoring noise and the two defective ' +
+      'benign true positives (the backup service account, the overnight DBA, the administrator ' +
+      'patching, the mistyped password) are dismissed. The monitoring noise and the two defective ' +
       'rules are flagged for tuning.',
     expectedOutput: 'Full coverage of the intrusion within the escalation cap.',
     checks: [
@@ -1314,12 +1314,12 @@ const MODULE_3_4: Exercise[] = [
     prompt:
       'One alert in this queue is rated LOW and describes the mechanism that would have kept the ' +
       'attacker on this host through a reboot and a password reset. Escalate it, and justify why ' +
-      'the severity is wrong — say what the scheduled task actually does and why it matters.',
+      'the severity is wrong: say what the scheduled task actually does and why it matters.',
     teach: {
       concept:
         'Persistence is what makes an intrusion expensive. Without it, containment is a password ' +
         'reset; with it, the attacker returns after you have declared the incident closed. Cron ' +
-        'changes are rated low because they are usually configuration management — 331 of the last ' +
+        'changes are rated low because they are usually configuration management: 331 of the last ' +
         '340 firings were. This one downloads a remote script every fifteen minutes and pipes it ' +
         'into a shell, under an account created twenty minutes earlier.',
       examples: [
@@ -1337,7 +1337,7 @@ const MODULE_3_4: Exercise[] = [
       'Filter to low severity and read each one. Only one describes a change to a scheduled task.',
       'Read what the new cron entry runs. It fetches something and executes it.',
       'Ask what happens to this alert’s subject if you reset the compromised account’s password. ' +
-        'Nothing — that is why it matters.',
+        'Nothing, that is why it matters.',
     ],
     solution:
       `Escalate ${NIGHT_CRON} with a note recording that the replaced crontab runs curl against an ` +
@@ -1363,13 +1363,13 @@ const MODULE_3_4: Exercise[] = [
         ],
         hint:
           'Say both what the task does (fetches and runs a remote script on a schedule) and why ' +
-          'that matters (it survives containment — the attacker gets back in).',
+          'that matters (it survives containment: the attacker gets back in).',
       },
     ],
     debrief:
       'Missed persistence is the most common reason incidents reopen. Ridgeline would have reset ' +
       'the testuser password, congratulated themselves, and been re-compromised within fifteen ' +
-      'minutes by a cron job nobody looked for — because the alert about it was rated low.',
+      'minutes by a cron job nobody looked for, because the alert about it was rated low.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.4.3'] ?? [],
   },
   {
@@ -1383,13 +1383,13 @@ const MODULE_3_4: Exercise[] = [
     goal: 'Flag every rule that needs work, without flagging rules that are simply doing their job.',
     prompt:
       'Work the full queue once more and concentrate on tuning. Flag every alert whose rule needs ' +
-      'changing — whether because it fires on known-benign activity or because its logic is broken. ' +
+      'changing: whether because it fires on known-benign activity or because its logic is broken. ' +
       'Do not flag rules that are working correctly on activity that merely happens to be dull.',
     teach: {
       concept:
         'Tuning is the only part of triage that compounds. Every other decision you make tonight ' +
         'evaporates; a tuning flag reduces tomorrow’s queue permanently. The discipline is not ' +
-        'flagging everything you closed — the backup service account alert has fired 730 times and ' +
+        'flagging everything you closed: the backup service account alert has fired 730 times and ' +
         'been correct 730 times, and it should keep firing, because the day it fires at an unusual ' +
         'hour you want to see it.',
       examples: [
@@ -1415,7 +1415,7 @@ const MODULE_3_4: Exercise[] = [
       'firing continuously for the monitoring collector, the SQL keyword rule matching inside ' +
       'ordinary parameter values, the connection-tracking rule asserting a denial of service that ' +
       'the traffic volume contradicts, and the cloud root-principal rule firing on billing reads ' +
-      'that cannot be delegated. Leave the backup, sudo, and out-of-hours rules alone — they are ' +
+      'that cannot be delegated. Leave the backup, sudo, and out-of-hours rules alone: they are ' +
       'correct and low volume.',
     expectedOutput: 'Tuning flags on the noisy and defective rules only.',
     checks: [
@@ -1426,13 +1426,13 @@ const MODULE_3_4: Exercise[] = [
         minPrecision: 0.8,
         hint:
           'Low recall means you have left a rule that needs work unflagged. Low precision means you ' +
-          'have flagged a rule that is doing its job correctly — check the backup and sudo alerts.',
+          'have flagged a rule that is doing its job correctly: check the backup and sudo alerts.',
       },
     ],
     debrief:
       'If Ridgeline had acted on the monitoring exclusion alone, the night-shift queue would have ' +
       'been forty alerts instead of eighty-two, and the eight that mattered would have been a ' +
-      'fifth of it rather than a tenth. Tuning is not housekeeping — it is the highest-leverage ' +
+      'fifth of it rather than a tenth. Tuning is not housekeeping: it is the highest-leverage ' +
       'thing an operator does.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.4.4'] ?? [],
   },
@@ -1460,21 +1460,21 @@ const MODULE_3_4: Exercise[] = [
           explains: 'The most dangerous sentence in SOC operations.',
         },
         {
-          command: 'INC-2026-0815 escalated — compromise on rmg-web-02, persistence not yet removed.',
+          command: 'INC-2026-0815 escalated: compromise on rmg-web-02, persistence not yet removed.',
           explains: 'The incoming analyst knows in one line what they are walking into.',
         },
       ],
     },
     hints: [
       'Lead with the live incident and the host it is on.',
-      'Say explicitly what you do NOT know — scope beyond this host is the obvious one.',
+      'Say explicitly what you do NOT know: scope beyond this host is the obvious one.',
       'End with the outstanding actions: the tuning requests you raised and who owns them.',
     ],
     solution:
       'Escalated INC-2026-0815: rmg-web-02 compromised at 10:14 via the stale testuser account from ' +
       'an external address, with a backdoor account (sysmon) created, granted sudo, and used to ' +
       'stage an archive of patient exports at 11:06. Persistence via a cron job beaconing every ' +
-      'fifteen minutes is still in place — containment is not complete. I have not established ' +
+      'fifteen minutes is still in place: containment is not complete. I have not established ' +
       'whether the attacker reached any other host; that needs authentication logs from the rest of ' +
       'the estate. Raised tuning requests for the monitoring collector’s failed-auth noise and for ' +
       'the SQL keyword rule. The disk-space warning on /var is real but belongs to platform ops.',
@@ -1497,7 +1497,7 @@ const MODULE_3_4: Exercise[] = [
     ],
     debrief:
       'Note how much of this is about what you did not finish. Handover notes that only report ' +
-      'completed work are how a live intrusion goes quiet for a shift — the incoming analyst sees ' +
+      'completed work are how a live intrusion goes quiet for a shift: the incoming analyst sees ' +
       'closed alerts and assumes resolution.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.4.5'] ?? [],
   },
@@ -1515,7 +1515,7 @@ const MODULE_3_4: Exercise[] = [
       'somebody who has been awake for ninety seconds.',
     teach: {
       concept:
-        'Judgement degrades badly at 02:00, and the answer is not to try harder — it is to decide ' +
+        'Judgement degrades badly at 02:00, and the answer is not to try harder: it is to decide ' +
         'in advance. A procedure written while rested is worth more than analysis performed while ' +
         'exhausted. The good ones start by establishing whether the thing is real at all, because ' +
         'the most common 02:00 outcome is a rule misfiring on a batch job.',
@@ -1534,18 +1534,18 @@ const MODULE_3_4: Exercise[] = [
       ],
     },
     hints: [
-      'The first question is never "how bad is it" — it is "is it real".',
+      'The first question is never "how bad is it": it is "is it real".',
       'Then scope: one host or many? Then impact: what data or service is exposed?',
       'End with the two actions that are always available: contain, or escalate to a human who can ' +
         'authorise containment.',
     ],
     solution:
-      'One: establish whether it is real — check the rule’s prior firing history, and whether a ' +
-      'change record or scheduled job explains the activity. Two: establish scope — is this one ' +
+      'One: establish whether it is real: check the rule’s prior firing history, and whether a ' +
+      'change record or scheduled job explains the activity. Two: establish scope: is this one ' +
       'host or several, one account or many, and does the source appear elsewhere tonight. Three: ' +
-      'establish impact — what data or service sits on the affected systems, and is any of it ' +
-      'regulated. Four: decide containment — can I isolate this without destroying evidence, and am ' +
-      'I authorised to. Five: notify — who needs to know now rather than at 09:00, and does a ' +
+      'establish impact: what data or service sits on the affected systems, and is any of it ' +
+      'regulated. Four: decide containment: can I isolate this without destroying evidence, and am ' +
+      'I authorised to. Five: notify, who needs to know now rather than at 09:00, and does a ' +
       'notification clock start tonight. Six: write it down as I go, because I will not remember ' +
       'this accurately in the morning.',
     expectedOutput:
@@ -1566,7 +1566,7 @@ const MODULE_3_4: Exercise[] = [
       },
     ],
     debrief:
-      'You have just written the artefact that turns a good night into a survivable one — and the ' +
+      'You have just written the artefact that turns a good night into a survivable one, and the ' +
       'first genuinely portfolio-worthy thing in this package. An on-call procedure in your own ' +
       'words, defensible in an interview, is worth more to a hiring manager than a certificate.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.4.6'] ?? [],
@@ -2094,7 +2094,7 @@ export const INCIDENT_TRIAGE: LearningPackage = {
       order: 3,
       title: 'Correlation',
       summary:
-        'Turning unremarkable alerts into one actor’s sequence — and resisting timestamps that line ' +
+        'Turning unremarkable alerts into one actor’s sequence, and resisting timestamps that line ' +
         'up for no reason.',
       exercises: MODULE_3_3,
     },

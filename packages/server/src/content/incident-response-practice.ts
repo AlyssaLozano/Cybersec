@@ -7,7 +7,7 @@
  * WHY ONLY THE TERMINAL MODULE HAS THEM
  *
  * A drill earns its place when repeating the same skill against a different
- * target teaches something. That is true of "find the evidence on this host" —
+ * target teaches something. That is true of "find the evidence on this host":
  * there are several kinds and a student should meet more than one. It is false
  * of "write the executive brief", and it is false of the decision points, where
  * the whole value is committing once without knowing the outcome. Doing a
@@ -18,7 +18,7 @@
  *
  * EVERY DRILL HERE RUNS AS `student`, NOT ROOT.
  * The simulated host enforces real permissions, so a drill that reads another
- * user's crontab or SSH keys would fail with "Permission denied" — correctly.
+ * user's crontab or SSH keys would fail with "Permission denied": correctly.
  * Targets are chosen accordingly, and the exercise that meets that wall meets it
  * deliberately.
  */
@@ -45,7 +45,7 @@ export const INCIDENT_RESPONSE_PRACTICE: Record<string, PracticeItem[]> = {
           type: 'output-excludes',
           text: '/bin/bash',
           hint:
-            'You are selecting more fields than you need. Only the name and the UID — fields 1 and 3.',
+            'You are selecting more fields than you need. Only the name and the UID: fields 1 and 3.',
         },
       ],
     },
@@ -108,7 +108,7 @@ export const INCIDENT_RESPONSE_PRACTICE: Record<string, PracticeItem[]> = {
         {
           type: 'output-contains',
           text: '.bash_history',
-          hint: 'Use -a so hidden files are listed — the history file starts with a dot.',
+          hint: 'Use -a so hidden files are listed: the history file starts with a dot.',
         },
         {
           type: 'command-has-flag',
