@@ -6,7 +6,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type {
+  AssessmentReport as ReportData,
+  Dimension,
   Evaluation,
+  LaneProfile,
   ProgressOverview,
   PublicUser,
   ScrollbackEntry,
@@ -17,8 +20,19 @@ import { AuthScreen } from './components/AuthScreen';
 import { LearnPanel } from './components/LearnPanel';
 import { PracticePanel } from './components/PracticePanel';
 import { TrackPicker } from './components/TrackPicker';
+import { Assessment } from './components/Assessment';
+import { AssessmentReport } from './components/AssessmentReport';
+import { LaneDetail } from './components/LaneDetail';
 import { Terminal } from './components/Terminal';
-import { ApiCallError, auth, learning, type ExerciseDetail, type PackageDetail } from './lib/api';
+import {
+  ApiCallError,
+  assessment,
+  auth,
+  learning,
+  type ExerciseDetail,
+  type LaneDetail as LaneDetailData,
+  type PackageDetail,
+} from './lib/api';
 
 export function App() {
   const [user, setUser] = useState<PublicUser | null>(null);
@@ -65,6 +79,62 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
   const [practiceId, setPracticeId] = useState<string | null>(null);
   /** Set by "try again" so the next command is graded despite an earlier pass. */
   const [regrade, setRegrade] = useState(false);
+
+  /**
+   * Career Fit Analyzer view state.
+   *
+   * 'none' means the normal trainer. The analyzer is a distinct mode rather than
+   * a modal, because it is a twenty-minute activity and deserves the whole screen.
+   */
+  const [careerView, setCareerView] = useState<'none' | 'quiz' | 'report' | 'lane'>('none');
+  const [report, setReport] = useState<ReportData | null>(null);
+  const [lanes, setLanes] = useState<LaneProfile[] | null>(null);
+  const [laneDetail, setLaneDetail] = useState<LaneDetailData | null>(null);
+  const [careerDimensions, setCareerDimensions] = useState<Array<{ dimension: Dimension; label: string }>>([]);
+
+  /** Lane id -> title, so the report can name lanes without refetching each. */
+  const laneTitles = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const lane of lanes ?? []) map[lane.id] = lane.title;
+    return map;
+  }, [lanes]);
+
+  const openReport = useCallback(async () => {
+    const [{ report: generated }, laneResult, stateResult] = await Promise.all([
+      assessment.submit(),
+      assessment.lanes(),
+      assessment.state(),
+    ]);
+    setReport(generated);
+    setLanes(laneResult.lanes);
+    setCareerDimensions(stateResult.dimensions.map((d) => ({ dimension: d.dimension, label: d.label })));
+    setCareerView('report');
+  }, []);
+
+  const openLane = useCallback(async (laneId: string) => {
+    setLaneDetail(await assessment.lane(laneId));
+    setCareerView('lane');
+  }, []);
+
+  /**
+   * Picking a lane records it on the profile and switches the trainer to the
+   * matching track. Lanes without a track yet fall back to the picker, rather
+   * than silently doing nothing.
+   */
+  const chooseLaneTrack = useCallback(
+    async (laneId: string) => {
+      const detailResult = laneDetail?.lane.id === laneId ? laneDetail : await assessment.lane(laneId);
+      const targetTrack = detailResult.track?.id ?? null;
+      if (targetTrack) {
+        await assessment.updateProfile({ chosenTrackId: targetTrack });
+        setTrackId(targetTrack);
+      } else {
+        setTrackId(null);
+      }
+      setCareerView('none');
+    },
+    [laneDetail],
+  );
 
   const refreshProgress = useCallback(async () => {
     setProgress(await learning.progress());
@@ -260,6 +330,58 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
     ? (detail?.practice.find((item) => item.id === practiceId) ?? null)
     : null;
 
+  /*
+   * The Career Fit Analyzer takes over the whole screen when active. It is a
+   * twenty-minute activity, not a dialog, and squeezing it into a modal beside
+   * the terminal would make it feel like a formality rather than the thing that
+   * decides what somebody studies for the next year.
+   */
+  if (careerView === 'quiz') {
+    return (
+      <div className="app">
+        <CareerTopBar user={user} onSignOut={signOut} onExit={() => setCareerView('none')} />
+        <Assessment onComplete={openReport} onExit={() => setCareerView('none')} />
+      </div>
+    );
+  }
+
+  if (careerView === 'report' && report) {
+    return (
+      <div className="app">
+        <CareerTopBar user={user} onSignOut={signOut} onExit={() => setCareerView('none')} />
+        <AssessmentReport
+          report={report}
+          laneTitles={laneTitles}
+          dimensions={careerDimensions}
+          onOpenLane={openLane}
+          onChooseTrack={chooseLaneTrack}
+          onRetakeDimension={async (dimension) => {
+            await assessment.retake(dimension);
+            setCareerView('quiz');
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (careerView === 'lane' && laneDetail) {
+    return (
+      <div className="app">
+        <CareerTopBar user={user} onSignOut={signOut} onExit={() => setCareerView('none')} />
+        <LaneDetail
+          lane={laneDetail.lane}
+          certifications={laneDetail.certifications}
+          certPhilosophy={laneDetail.certPhilosophy}
+          track={laneDetail.track}
+          foundations={laneDetail.foundations}
+          readiness={laneDetail.readiness}
+          onBack={() => setCareerView(report ? 'report' : 'none')}
+          onChoose={() => chooseLaneTrack(laneDetail.lane.id)}
+        />
+      </div>
+    );
+  }
+
   // Choose a track before anything else. Skipped automatically on later visits,
   // because a student who has already started has already chosen.
   if (tracks && trackId === null && !autoSelectedTrack) {
@@ -276,7 +398,22 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
               Sign out
             </button>
           </header>
-          <TrackPicker tracks={tracks} activeTrackId={trackId} onChoose={setTrackId} />
+          <div className="picker-with-quiz">
+            <aside className="quiz-invite">
+              <h2>Not sure which one?</h2>
+              <p>
+                Answer some questions about how you like to work, and we will suggest which of the
+                fourteen security career paths fit you — and which would make you miserable.
+              </p>
+              <button type="button" className="primary" onClick={() => setCareerView('quiz')}>
+                Take the Career Fit Analyzer
+              </button>
+              <p className="muted small">
+                About 20 minutes. Your answers save as you go, so you can stop and come back.
+              </p>
+            </aside>
+            <TrackPicker tracks={tracks} activeTrackId={trackId} onChoose={setTrackId} />
+          </div>
         </div>
       );
   }
@@ -290,6 +427,9 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
         </span>
         <button className="btn link" onClick={() => setTrackId(null)}>
           All tracks
+        </button>
+        <button className="btn link" onClick={() => setCareerView('quiz')}>
+          Career fit
         </button>
         <span className="spacer" />
         <span className="who">
@@ -448,5 +588,39 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
         </main>
       </div>
     </div>
+  );
+}
+
+/**
+ * Top bar for the Career Fit Analyzer screens.
+ *
+ * Kept separate from the trainer's top bar because the analyzer has no track,
+ * no exercise, and no progress figure to show -- reusing that bar would leave
+ * three empty slots.
+ */
+function CareerTopBar({
+  user,
+  onSignOut,
+  onExit,
+}: {
+  user: PublicUser;
+  onSignOut: () => void;
+  onExit: () => void;
+}) {
+  return (
+    <header className="topbar">
+      <span className="brand">
+        <span className="dot" />
+        Ridgeline SOC Trainer
+      </span>
+      <button className="btn link" onClick={onExit}>
+        Back to training
+      </button>
+      <span className="spacer" />
+      <span className="who">{user.username}</span>
+      <button className="btn" onClick={onSignOut}>
+        Sign out
+      </button>
+    </header>
   );
 }

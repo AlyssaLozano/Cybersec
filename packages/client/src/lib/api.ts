@@ -9,6 +9,14 @@
 import type {
   ApiError,
   ApiResponse,
+  AssessmentReport,
+  Certification,
+  Dimension,
+  Foundation,
+  ItemResponse,
+  LaneProfile,
+  LearnerProfile,
+  Track,
   Evaluation,
   ExerciseKind,
   PackageSummary,
@@ -172,4 +180,90 @@ export const learning = {
     ),
 
   progress: () => request<ProgressOverview>('/learning/progress'),
+};
+
+// --- Career Fit Analyzer -----------------------------------------------------
+
+/** An item as the client sees it: no scoring weights, by design. */
+export type ClientItem =
+  | { id: string; kind: 'likert'; dimension: Dimension; statement: string }
+  | {
+      id: string;
+      kind: 'choice';
+      dimension: Dimension;
+      prompt: string;
+      detail?: string;
+      options: Array<{ id: string; label: string; detail?: string }>;
+    };
+
+export interface DimensionProgress {
+  dimension: Dimension;
+  label: string;
+  total: number;
+  answered: number;
+  complete: boolean;
+}
+
+export interface AssessmentState {
+  totalItems: number;
+  answeredItems: number;
+  responses: ItemResponse[];
+  profile: LearnerProfile;
+  nextItemId: string | null;
+  dimensions: DimensionProgress[];
+  report: AssessmentReport | null;
+  completedAt: string | null;
+}
+
+export interface LaneDetail {
+  lane: LaneProfile;
+  certifications: Certification[];
+  certPhilosophy: { headline: string; body: string[] };
+  track?: Track;
+  foundations?: Array<Foundation & { playable: boolean }>;
+  readiness?: {
+    foundationsTotal: number;
+    foundationsPlayable: number;
+    stagesTotal: number;
+    stagesPlayable: number;
+  };
+}
+
+export const assessment = {
+  items: () =>
+    request<{ items: ClientItem[]; dimensions: Dimension[]; disclaimer: string }>('/assessment/items'),
+
+  state: () => request<AssessmentState>('/assessment/state'),
+
+  save: (responses: ItemResponse[]) =>
+    request<AssessmentState>('/assessment/responses', {
+      method: 'POST',
+      body: JSON.stringify({ responses }),
+    }),
+
+  submit: () =>
+    request<{ report: AssessmentReport; shareable: string }>('/assessment/submit', { method: 'POST' }),
+
+  retake: (dimension: Dimension) =>
+    request<AssessmentState>('/assessment/retake', {
+      method: 'POST',
+      body: JSON.stringify({ dimension }),
+    }),
+
+  reset: () => request<AssessmentState>('/assessment/reset', { method: 'POST' }),
+
+  lanes: () =>
+    request<{ lanes: LaneProfile[]; toolPhilosophy: { headline: string; body: string[] } }>(
+      '/assessment/lanes',
+    ),
+
+  lane: (laneId: string) => request<LaneDetail>(`/assessment/lanes/${laneId}`),
+
+  profile: () => request<{ profile: LearnerProfile }>('/assessment/profile'),
+
+  updateProfile: (patch: Partial<LearnerProfile>) =>
+    request<{ profile: LearnerProfile }>('/assessment/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
 };

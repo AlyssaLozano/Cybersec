@@ -222,4 +222,18 @@ export interface TrackSummary extends Track {
   exerciseCount: number;
   passedCount: number;
   percentComplete: number;
+  /**
+   * How much of the track exists today.
+   *
+   * Reported separately from progress because a track can be 100% complete on
+   * the parts that are written while most of it is not, and a single percentage
+   * would hide that. Foundations count here too -- after foundations became
+   * per-track, most playable content lives there rather than in `curriculum`.
+   */
+  readiness: {
+    foundationsTotal: number;
+    foundationsPlayable: number;
+    stagesTotal: number;
+    stagesPlayable: number;
+  };
 }

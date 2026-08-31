@@ -29,7 +29,14 @@ export function TrackPicker({ tracks, activeTrackId, onChoose }: TrackPickerProp
       <div className="track-grid">
         {tracks.map((track) => {
           const available = track.status === 'available';
-          const stagesReady = track.curriculum.filter((stage) => stage.packageId).length;
+          /*
+           * Count foundations as well as curriculum stages. After foundations
+           * became per-track, a SOC analyst's Linux and Log Analysis packages
+           * live in `foundations`, not `curriculum` -- so counting only stages
+           * reported "0 of 2 ready" for a track with two finished packages.
+           */
+          const ready = track.readiness.foundationsPlayable + track.readiness.stagesPlayable;
+          const totalParts = track.readiness.foundationsTotal + track.readiness.stagesTotal;
 
           return (
             <article
@@ -40,7 +47,7 @@ export function TrackPicker({ tracks, activeTrackId, onChoose }: TrackPickerProp
                 <h2>{track.title}</h2>
                 {available ? (
                   <span className="badge ready">
-                    {stagesReady} of {track.curriculum.length} stages ready
+                    {ready} of {totalParts} parts ready
                   </span>
                 ) : (
                   <span className="badge planned">Curriculum outlined, content not written yet</span>
