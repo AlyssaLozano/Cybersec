@@ -25,11 +25,32 @@ purpose: exercise answers depend on exact counts, so the world must not change
 unless somebody intends it to.
 
 **Compute expected answers from the seeded data.** Never hardcode a count in an
-exercise check — derive it (see `countAuth` in `content/package1.ts`), so
-regenerating the world cannot leave a stale answer key.
+exercise check — derive it (see `countAuth` in `content/linux-fundamentals.ts`),
+so regenerating the world cannot leave a stale answer key.
 
 **Exercise ids are permanent.** Progress rows reference them. Add new ids; never
 renumber existing ones.
+
+> **One-time exception, 31 August 2026.** Packages 1–4 were written before the
+> naming convention existed and carried bare numeric ids (`1`, exercises
+> `1.1.1`). Two sessions writing content at the same time both reached for "the
+> next number" and collided. Migration
+> `20260831210000_rename_legacy_package_ids` renamed those four packages to
+> `linux-fundamentals`, `log-analysis`, `incident-triage`, and `networking`, and
+> moved the progress rows in `exercise_progress`, `practice_progress`,
+> `attempt_logs`, `terminal_sessions`, and `copilot_consults` with them.
+>
+> It was taken while the only rows in existence belonged to a local demo seed,
+> which is the only condition under which it was affordable. **The rule is
+> absolute from this date.** Renaming again once real students have progress
+> means migrating their history, and a migration that silently misses one table
+> loses somebody's completed work.
+
+**Packages are named, not numbered.** New content takes a name-prefixed id
+(`incident-response`, exercises `ir.2.1`) rather than the next integer, because
+integers collide between parallel sessions and between source specs. Never
+assert on `PACKAGES` positionally — key by package id, so adding a package adds
+a line instead of editing somebody else's expectations.
 
 ## Content rules
 

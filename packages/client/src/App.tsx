@@ -245,7 +245,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
         setPkg(detailResult);
         setProgress(progressResult);
         setTracks(trackResult.tracks);
-        setExerciseId((current) => current ?? progressResult.resume?.exerciseId ?? '1.1.1');
+        setExerciseId((current) => current ?? progressResult.resume?.exerciseId ?? 'linux.1.1');
       } catch (error) {
         if (!cancelled) {
           setLoadError(error instanceof ApiCallError ? error.error.message : 'Could not load the course.');

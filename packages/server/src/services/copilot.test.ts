@@ -300,7 +300,7 @@ describe('working a real queue with the copilot', () => {
 });
 
 describe('copilot checks in isolation', () => {
-  const exercise = ALL_EXERCISES.find((item) => item.id === '3.5.2')!;
+  const exercise = ALL_EXERCISES.find((item) => item.id === 'triage.5.2')!;
   const queueId = exercise.queueId!;
 
   it('is a triage exercise that grades copilot use', () => {

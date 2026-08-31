@@ -42,7 +42,7 @@
  *
  * A successful bypass returns a fictional system prompt, or a fictional
  * detector's wrong verdict about a log line the student has already read in
- * Package 2. The teaching value is entirely in whether the payload landed.
+ * Log Analysis. The teaching value is entirely in whether the payload landed.
  */
 
 import type {
@@ -555,7 +555,7 @@ const BENIGN: Record<string, string> = {
  *
  * Fictional in every case. `securitygpt` is a made-up product, its system prompt
  * is made up, and the log line it wrongly clears is one the student has already
- * read out of the simulated host in Package 2.
+ * read out of the simulated host in Log Analysis.
  */
 const COMPLIANT: Record<string, Partial<Record<AttackIntent | 'default', string>>> = {
   securitygpt: {

@@ -1,7 +1,7 @@
 /**
- * Package 2: Log Analysis and Parsing -- 14 exercises across 4 modules.
+ * Log Analysis and Parsing -- 14 exercises across 4 modules.
  *
- * Package 1 taught the tools. This package points them at the only thing a SOC
+ * Linux Fundamentals taught the tools. This package points them at the only thing a SOC
  * analyst actually does with them: reading logs that are mostly boring in order
  * to find the handful of lines that are not.
  *
@@ -30,14 +30,14 @@
  *          line. The spec's command returns nothing. This version greps the file
  *          directly, which works and is what the field does.
  *
- * As in Package 1, every expected count is COMPUTED from the seeded logs, so
+ * As in Linux Fundamentals, every expected count is COMPUTED from the seeded logs, so
  * regenerating the world can never leave a stale answer key behind.
  */
 
 import type { Exercise, LearningPackage } from '@soc/shared';
 
 import { AUTH_LOG, SYSLOG } from '../vfs/data/generated.js';
-import { PACKAGE_2_PRACTICE } from './package2-practice.js';
+import { LOG_ANALYSIS_PRACTICE } from './log-analysis-practice.js';
 
 const authLines = AUTH_LOG.split('\n').filter((line) => line !== '');
 const sysLines = SYSLOG.split('\n').filter((line) => line !== '');
@@ -88,9 +88,9 @@ const TESTUSER_IN_SYSLOG = count(sysLines, 'testuser');
 
 const MODULE_2_1: Exercise[] = [
   {
-    id: '2.1.1',
+    id: 'logs.1.1',
     moduleId: '2.1',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 1,
     title: 'Read the shape of a log line',
     kind: 'terminal',
@@ -113,7 +113,7 @@ const MODULE_2_1: Exercise[] = [
       ],
     },
     hints: [
-      'You met this command in Package 1: it shows you the beginning of a file.',
+      'You met this command in Linux Fundamentals: it shows you the beginning of a file.',
       'The authentication log lives at /var/log/auth.log.',
       'Use head with -n 3 to ask for exactly three lines.',
     ],
@@ -136,12 +136,12 @@ const MODULE_2_1: Exercise[] = [
     ],
     debrief:
       'Those four fields are your filters. "Which machine" matters when you are reading logs shipped from a hundred hosts into one place, and "which program" is how you separate an SSH problem from a database problem in the same file.',
-    practice: PACKAGE_2_PRACTICE['2.1.1'] ?? [],
+    practice: LOG_ANALYSIS_PRACTICE['logs.1.1'] ?? [],
   },
   {
-    id: '2.1.2',
+    id: 'logs.1.2',
     moduleId: '2.1',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 2,
     title: 'Pull out just the timestamps',
     kind: 'terminal',
@@ -191,12 +191,12 @@ const MODULE_2_1: Exercise[] = [
     ],
     debrief:
       'Field extraction is how log lines become data you can count. Strip everything except the field you care about, and the next tool in the pipe can sort it, tally it, or find the duplicates.',
-    practice: PACKAGE_2_PRACTICE['2.1.2'] ?? [],
+    practice: LOG_ANALYSIS_PRACTICE['logs.1.2'] ?? [],
   },
   {
-    id: '2.1.3',
+    id: 'logs.1.3',
     moduleId: '2.1',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 3,
     title: 'Narrow a log to one hour',
     kind: 'terminal',
@@ -239,7 +239,7 @@ const MODULE_2_1: Exercise[] = [
     ],
     debrief:
       'You just scoped an investigation to a one-hour window. Look at what is in there: an accepted login, a sudo command, and a new account being created. That sequence is the whole reason this package exists.',
-    practice: PACKAGE_2_PRACTICE['2.1.3'] ?? [],
+    practice: LOG_ANALYSIS_PRACTICE['logs.1.3'] ?? [],
   },
 ];
 
@@ -247,9 +247,9 @@ const MODULE_2_1: Exercise[] = [
 
 const MODULE_2_2: Exercise[] = [
   {
-    id: '2.2.1',
+    id: 'logs.2.1',
     moduleId: '2.2',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 1,
     title: 'Count failed logins',
     kind: 'terminal',
@@ -288,12 +288,12 @@ const MODULE_2_2: Exercise[] = [
     ],
     debrief:
       `${FAILED_PASSWORD} failed logins in one day sounds like a siren. Hold that thought — the next exercise shows why the raw number is nearly meaningless on its own. Analysts who page people over a count like this stop being trusted quickly.`,
-    practice: PACKAGE_2_PRACTICE['2.2.1'] ?? [],
+    practice: LOG_ANALYSIS_PRACTICE['logs.2.1'] ?? [],
   },
   {
-    id: '2.2.2',
+    id: 'logs.2.2',
     moduleId: '2.2',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 2,
     title: 'Narrow to one targeted account',
     kind: 'terminal',
@@ -341,12 +341,12 @@ const MODULE_2_2: Exercise[] = [
     ],
     debrief:
       'Look closely at what these lines say: "Failed password for invalid user admin". Invalid user means no such account exists on this box. Someone is guessing account names that were never here — that is an untargeted scanner working through a wordlist, not somebody who knows you.',
-    practice: PACKAGE_2_PRACTICE['2.2.2'] ?? [],
+    practice: LOG_ANALYSIS_PRACTICE['logs.2.2'] ?? [],
   },
   {
-    id: '2.2.3',
+    id: 'logs.2.3',
     moduleId: '2.2',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 3,
     title: 'Find what actually succeeded',
     kind: 'terminal',
@@ -384,12 +384,12 @@ const MODULE_2_2: Exercise[] = [
     ],
     debrief:
       `Read the source addresses. Seven of these come from 10.20.x.x — the internal office network. Two come from 203.0.113.55, an address outside the company entirely, for accounts called testuser and sysmon. ${FAILED_PASSWORD} failures told you nothing. These ${ACCEPTED} lines just told you everything.`,
-    practice: PACKAGE_2_PRACTICE['2.2.3'] ?? [],
+    practice: LOG_ANALYSIS_PRACTICE['logs.2.3'] ?? [],
   },
   {
-    id: '2.2.4',
+    id: 'logs.2.4',
     moduleId: '2.2',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 4,
     title: 'Review activity for a privileged account',
     kind: 'terminal',
@@ -428,7 +428,7 @@ const MODULE_2_2: Exercise[] = [
     ],
     debrief:
       'Two very different things show up under one search: strangers failing to log in AS root, and staff legitimately escalating TO root with sudo. Same word, opposite meanings. Reading the message field rather than pattern-matching the account name is what separates the two.',
-    practice: PACKAGE_2_PRACTICE['2.2.4'] ?? [],
+    practice: LOG_ANALYSIS_PRACTICE['logs.2.4'] ?? [],
   },
 ];
 
@@ -436,9 +436,9 @@ const MODULE_2_2: Exercise[] = [
 
 const MODULE_2_3: Exercise[] = [
   {
-    id: '2.3.1',
+    id: 'logs.3.1',
     moduleId: '2.3',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 1,
     title: 'Find errors regardless of capitalisation',
     kind: 'terminal',
@@ -482,12 +482,12 @@ const MODULE_2_3: Exercise[] = [
     ],
     debrief:
       'These are genuine faults — the portal cannot reach the lab interface — and they have nothing to do with the intrusion. Most errors in most logs are like this: real problems for somebody, just not security problems. Learning to set them aside without ignoring them is a large part of the job.',
-    practice: PACKAGE_2_PRACTICE['2.3.1'] ?? [],
+    practice: LOG_ANALYSIS_PRACTICE['logs.3.1'] ?? [],
   },
   {
-    id: '2.3.2',
+    id: 'logs.3.2',
     moduleId: '2.3',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 2,
     title: 'Match several patterns at once',
     kind: 'terminal',
@@ -534,12 +534,12 @@ const MODULE_2_3: Exercise[] = [
     ],
     debrief:
       'The source specification for this course searched for lowercase "started|stopped" and would have found one line out of four. That is the most common way a log search lies to you: it returns results, so it looks like it worked. Always sanity-check a count against what you expect to be there.',
-    practice: PACKAGE_2_PRACTICE['2.3.2'] ?? [],
+    practice: LOG_ANALYSIS_PRACTICE['logs.3.2'] ?? [],
   },
   {
-    id: '2.3.3',
+    id: 'logs.3.3',
     moduleId: '2.3',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 3,
     title: 'Search only the most recent entries',
     kind: 'terminal',
@@ -582,7 +582,7 @@ const MODULE_2_3: Exercise[] = [
     ],
     debrief:
       'Both hits are UFW BLOCK entries: the firewall dropping connection attempts to ports 445 and 3389 from outside. That is the internet knocking on every door it can find, all day, on every public host. It is background radiation, not an incident.',
-    practice: PACKAGE_2_PRACTICE['2.3.3'] ?? [],
+    practice: LOG_ANALYSIS_PRACTICE['logs.3.3'] ?? [],
   },
 ];
 
@@ -590,9 +590,9 @@ const MODULE_2_3: Exercise[] = [
 
 const MODULE_2_4: Exercise[] = [
   {
-    id: '2.4.1',
+    id: 'logs.4.1',
     moduleId: '2.4',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 1,
     title: 'Extract every unique source address',
     kind: 'terminal',
@@ -646,12 +646,12 @@ const MODULE_2_4: Exercise[] = [
     ],
     debrief:
       `Two thousand-odd lines reduced to ${SSHD_UNIQUE_IPS.size} addresses you can actually look at. Five are internal 10.20.x.x hosts. The rest are external, and one of them — 203.0.113.55 — is the address behind both of those successful logins you found earlier.`,
-    practice: PACKAGE_2_PRACTICE['2.4.1'] ?? [],
+    practice: LOG_ANALYSIS_PRACTICE['logs.4.1'] ?? [],
   },
   {
-    id: '2.4.2',
+    id: 'logs.4.2',
     moduleId: '2.4',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 2,
     title: 'Extract the account names being attacked',
     kind: 'terminal',
@@ -704,12 +704,12 @@ const MODULE_2_4: Exercise[] = [
     ],
     debrief:
       'These are accounts that actually exist on this host, so each failure was a real guess against a real account. testuser is on the list — and testuser is one of the two accounts that later succeeded. Someone guessed until they got in.',
-    practice: PACKAGE_2_PRACTICE['2.4.2'] ?? [],
+    practice: LOG_ANALYSIS_PRACTICE['logs.4.2'] ?? [],
   },
   {
-    id: '2.4.3',
+    id: 'logs.4.3',
     moduleId: '2.4',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 3,
     title: 'Build a timeline of SSH activity',
     kind: 'terminal',
@@ -757,12 +757,12 @@ const MODULE_2_4: Exercise[] = [
     ],
     debrief:
       'Notice that the earliest entries are all the same account failing from the same internal address, every five minutes, all night. That is a monitoring box with a stale password — a misconfiguration that generates more failures than the actual attacker did. Volume is not evidence.',
-    practice: PACKAGE_2_PRACTICE['2.4.3'] ?? [],
+    practice: LOG_ANALYSIS_PRACTICE['logs.4.3'] ?? [],
   },
   {
-    id: '2.4.4',
+    id: 'logs.4.4',
     moduleId: '2.4',
-    packageId: '2',
+    packageId: 'log-analysis',
     order: 4,
     title: 'Corroborate an event across two logs',
     kind: 'terminal',
@@ -810,15 +810,15 @@ const MODULE_2_4: Exercise[] = [
       },
     ],
     debrief:
-      'Two independent subsystems recorded the same moment: sshd wrote "Accepted password for testuser from 203.0.113.55" at 10:14:22, and systemd-logind wrote "New session 4821 of user testuser" one second later. That agreement is what turns a suspicion into something you can put in a report — and it is where Package 3 picks up.',
-    practice: PACKAGE_2_PRACTICE['2.4.4'] ?? [],
+      'Two independent subsystems recorded the same moment: sshd wrote "Accepted password for testuser from 203.0.113.55" at 10:14:22, and systemd-logind wrote "New session 4821 of user testuser" one second later. That agreement is what turns a suspicion into something you can put in a report — and it is where Alert Triage picks up.',
+    practice: LOG_ANALYSIS_PRACTICE['logs.4.4'] ?? [],
   },
 ];
 
 // --- the package -------------------------------------------------------------
 
-export const PACKAGE_2: LearningPackage = {
-  id: '2',
+export const LOG_ANALYSIS: LearningPackage = {
+  id: 'log-analysis',
   order: 2,
   title: 'Log Analysis and Parsing',
   summary:
@@ -830,11 +830,11 @@ export const PACKAGE_2: LearningPackage = {
     'Extract addresses and field values out of log text and reduce them to distinct lists',
     'Corroborate an event across two independent log sources',
   ],
-  prerequisites: ['1'],
+  prerequisites: ['linux-fundamentals'],
   modules: [
     {
       id: '2.1',
-      packageId: '2',
+      packageId: 'log-analysis',
       order: 1,
       title: 'Reading log formats',
       summary: 'Learn the shape of a log line, and filter on its fields.',
@@ -842,7 +842,7 @@ export const PACKAGE_2: LearningPackage = {
     },
     {
       id: '2.2',
-      packageId: '2',
+      packageId: 'log-analysis',
       order: 2,
       title: 'Authentication logs',
       summary: 'Who tried to get in, who succeeded, and which of those matters.',
@@ -850,7 +850,7 @@ export const PACKAGE_2: LearningPackage = {
     },
     {
       id: '2.3',
-      packageId: '2',
+      packageId: 'log-analysis',
       order: 3,
       title: 'System logs',
       summary: 'Everything the machine says when it is not talking about logins.',
@@ -858,7 +858,7 @@ export const PACKAGE_2: LearningPackage = {
     },
     {
       id: '2.4',
-      packageId: '2',
+      packageId: 'log-analysis',
       order: 4,
       title: 'Parsing and extraction',
       summary: 'Turn log text into lists of facts you can count and compare.',

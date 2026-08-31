@@ -3,8 +3,8 @@
  *
  * THE SAME INCIDENT, A THIRD TIME
  *
- * Package 2 taught students to find this intrusion by reading auth.log line by
- * line. Package 3 showed it to them again as eight alerts inside eighty-two.
+ * Log Analysis taught students to find this intrusion by reading auth.log line by
+ * line. Alert Triage showed it to them again as eight alerts inside eighty-two.
  * This is the third pass and the first one where they have to *act*: the
  * attacker is still connected, the archive of patient exports is still sitting
  * in /tmp/.cache, and somebody has to decide what happens next.

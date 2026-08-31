@@ -1,13 +1,12 @@
 /**
- * Golden tests for Package 4: Networking Basics.
+ * Golden tests for Networking Basics.
  *
- * Standalone rather than folded into catalogue.test.ts, because Package 4 is not
- * registered in the catalogue yet — another session owns index.ts while this was
- * written. Everything here validates PACKAGE_4 directly, so the content is proven
- * correct before it is wired in, and the catalogue tests will cover it as soon as
- * it is.
+ * Standalone rather than folded into catalogue.test.ts, because this content was
+ * written while another session owned index.ts. Everything here validates
+ * NETWORKING directly, so the package is proven correct independently of how it
+ * is wired in.
  *
- * The important test is the same one as for Packages 1 and 2: every exercise's
+ * The important test is the same one as for Linux Fundamentals and Log Analysis: every exercise's
  * own claimed answer, and every practice drill's, is run through the real
  * terminal engine and must satisfy that exercise's own checks. An exercise whose
  * solution fails its own grader is a trap.
@@ -22,12 +21,12 @@ import { BASE_IMAGE } from '../vfs/image.js';
 import { MACHINE } from '../vfs/machine.js';
 import { emptyOverlay } from '../vfs/types.js';
 import { Vfs } from '../vfs/vfs.js';
-import { PACKAGE_4 } from './package4.js';
+import { NETWORKING } from './networking.js';
 import { evaluate } from './validate.js';
 
 const HOME = '/home/student';
 
-const EXERCISES: Exercise[] = PACKAGE_4.modules.flatMap((module) => module.exercises);
+const EXERCISES: Exercise[] = NETWORKING.modules.flatMap((module) => module.exercises);
 
 function attempt(solution: string, setup: string[] | undefined, exercise: Exercise, checks: Check[]) {
   const vfs = new Vfs(BASE_IMAGE, emptyOverlay(), HOME);
@@ -52,16 +51,16 @@ function attempt(solution: string, setup: string[] | undefined, exercise: Exerci
   );
 }
 
-describe('Package 4 structure', () => {
+describe('Networking structure', () => {
   it('has 15 exercises across 3 modules', () => {
-    expect(PACKAGE_4.modules.length).toBe(3);
+    expect(NETWORKING.modules.length).toBe(3);
     expect(EXERCISES.length).toBe(15);
   });
 
-  it('uses the 4.x id space, since 3.x belongs to Security Incident Concepts', () => {
+  it('uses the net.x id space, so no other package can collide with it', () => {
     for (const exercise of EXERCISES) {
-      expect(exercise.id, `${exercise.id} is outside the 4.x space`).toMatch(/^4\.\d+\.\d+$/);
-      expect(exercise.packageId).toBe('4');
+      expect(exercise.id, `${exercise.id} is outside the net.x space`).toMatch(/^net\.\d+\.\d+$/);
+      expect(exercise.packageId).toBe('networking');
     }
   });
 
@@ -105,7 +104,7 @@ describe('Package 4 structure', () => {
   });
 });
 
-describe('every Package 4 solution passes its own checks', () => {
+describe('every Networking solution passes its own checks', () => {
   for (const exercise of EXERCISES) {
     it(`${exercise.id} — ${exercise.title}`, () => {
       const evaluation = attempt(exercise.solution, exercise.setup, exercise, exercise.checks);
@@ -115,7 +114,7 @@ describe('every Package 4 solution passes its own checks', () => {
   }
 });
 
-describe('every Package 4 drill passes its own checks', () => {
+describe('every Networking drill passes its own checks', () => {
   const drills: Array<{ exercise: Exercise; drill: PracticeItem }> = EXERCISES.flatMap((exercise) =>
     exercise.practice.map((drill) => ({ exercise, drill })),
   );
@@ -151,8 +150,8 @@ describe('worked examples are runnable and are never the answer', () => {
 describe('the package tells its intended story', () => {
   it('ends by surfacing the exfiltration connection', () => {
     // 4.2.6 is the payoff: the connection has been in the simulated host since
-    // Package 1 with no way to see it. If this stops working, the arc is broken.
-    const finale = EXERCISES.find((exercise) => exercise.id === '4.2.6')!;
+    // Linux Fundamentals with no way to see it. If this stops working, the arc is broken.
+    const finale = EXERCISES.find((exercise) => exercise.id === 'net.2.6')!;
     const vfs = new Vfs(BASE_IMAGE, emptyOverlay(), HOME);
     const result = runLine(finale.solution, { vfs, machine: MACHINE, cwd: HOME });
 
@@ -163,7 +162,7 @@ describe('the package tells its intended story', () => {
 
   it('identifies the noisy monitoring host by reverse lookup', () => {
     // 4.3.2 turns the loudest thing in auth.log into a ticket for another team.
-    const exercise = EXERCISES.find((e) => e.id === '4.3.2')!;
+    const exercise = EXERCISES.find((e) => e.id === 'net.3.2')!;
     const vfs = new Vfs(BASE_IMAGE, emptyOverlay(), HOME);
     const result = runLine(exercise.solution, { vfs, machine: MACHINE, cwd: HOME });
     expect(result.output).toContain('rmg-monitor-01');

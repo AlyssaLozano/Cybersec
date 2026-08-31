@@ -1,5 +1,5 @@
 /**
- * Package 1: Linux Fundamentals -- 22 exercises across 4 modules.
+ * Linux Fundamentals -- 22 exercises across 4 modules.
  *
  * The source specification claimed 24. The real count is 22, and the numbering
  * here follows the exercises that actually exist (see docs/content-issues.md).
@@ -25,7 +25,7 @@
 import type { Exercise, LearningPackage } from '@soc/shared';
 
 import { AUTH_LOG } from '../vfs/data/generated.js';
-import { PACKAGE_1_PRACTICE } from './package1-practice.js';
+import { LINUX_FUNDAMENTALS_PRACTICE } from './linux-fundamentals-practice.js';
 
 const authLines = AUTH_LOG.split('\n');
 
@@ -42,9 +42,9 @@ const HOME = '/home/student';
 
 const MODULE_1_1: Exercise[] = [
   {
-    id: '1.1.1',
+    id: 'linux.1.1',
     moduleId: '1.1',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 1,
     title: 'Find out where you are',
     kind: 'terminal',
@@ -71,12 +71,12 @@ const MODULE_1_1: Exercise[] = [
     ],
     debrief:
       'Sounds trivial, and it is the command you will use most. Half of all mistakes on a live system come from running the right command in the wrong directory.',
-     practice: PACKAGE_1_PRACTICE['1.1.1'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.1.1'] ?? [],
   },
   {
-    id: '1.1.2',
+    id: 'linux.1.2',
     moduleId: '1.1',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 2,
     title: 'See what is here',
     kind: 'terminal',
@@ -102,12 +102,12 @@ const MODULE_1_1: Exercise[] = [
       { type: 'output-contains', text: 'Documents', hint: 'You should see the contents of your home directory listed.' },
     ],
     debrief: 'Notice that `ls` hides anything beginning with a dot. Attackers know that too.',
-     practice: PACKAGE_1_PRACTICE['1.1.2'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.1.2'] ?? [],
   },
   {
-    id: '1.1.3',
+    id: 'linux.1.3',
     moduleId: '1.1',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 3,
     title: 'See everything, with detail',
     kind: 'terminal',
@@ -144,12 +144,12 @@ const MODULE_1_1: Exercise[] = [
     ],
     debrief:
       'Compare this to plain `ls`. Two files were invisible a moment ago. On a compromised host, a directory called `.cache` in an unusual place is a classic hiding spot.',
-     practice: PACKAGE_1_PRACTICE['1.1.3'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.1.3'] ?? [],
   },
   {
-    id: '1.1.4',
+    id: 'linux.1.4',
     moduleId: '1.1',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 4,
     title: 'Move to another directory',
     kind: 'terminal',
@@ -174,12 +174,12 @@ const MODULE_1_1: Exercise[] = [
       { type: 'cwd-equals', path: '/var', hint: 'Use `cd /var`. The leading slash makes it an absolute path from the root of the filesystem.' },
     ],
     debrief: '/var is where changing data lives: logs, spools, caches. You will spend most of your time here.',
-     practice: PACKAGE_1_PRACTICE['1.1.4'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.1.4'] ?? [],
   },
   {
-    id: '1.1.5',
+    id: 'linux.1.5',
     moduleId: '1.1',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 5,
     title: 'Get home in a hurry',
     kind: 'terminal',
@@ -207,12 +207,12 @@ const MODULE_1_1: Exercise[] = [
       { type: 'command-matches', anyOf: ['cd ~', 'cd ~/', 'cd'], hint: 'This exercise is about the ~ shortcut specifically, so use `cd ~` rather than the full path.' },
     ],
     debrief: 'A bare `cd` with no argument does the same thing. Both beat typing /home/yourname on a bad day.',
-     practice: PACKAGE_1_PRACTICE['1.1.5'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.1.5'] ?? [],
   },
   {
-    id: '1.1.6',
+    id: 'linux.1.6',
     moduleId: '1.1',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 6,
     title: 'Go up one level',
     kind: 'terminal',
@@ -240,7 +240,7 @@ const MODULE_1_1: Exercise[] = [
       { type: 'command-matches', anyOf: ['cd ..', 'cd ../'], hint: 'Use the relative `cd ..` rather than typing the absolute path, since that is what this exercise teaches.' },
     ],
     debrief: 'One dot means "here", two means "up". `cd ../..` goes up twice, and so on.',
-     practice: PACKAGE_1_PRACTICE['1.1.6'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.1.6'] ?? [],
   },
 ];
 
@@ -248,9 +248,9 @@ const MODULE_1_1: Exercise[] = [
 
 const MODULE_1_2: Exercise[] = [
   {
-    id: '1.2.1',
+    id: 'linux.2.1',
     moduleId: '1.2',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 1,
     title: 'Create a file',
     kind: 'terminal',
@@ -276,12 +276,12 @@ const MODULE_1_2: Exercise[] = [
     ],
     debrief:
       'No output at all. That is the Unix convention: commands that succeed usually say nothing. Silence is good news.',
-     practice: PACKAGE_1_PRACTICE['1.2.1'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.2.1'] ?? [],
   },
   {
-    id: '1.2.2',
+    id: 'linux.2.2',
     moduleId: '1.2',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 2,
     title: 'Create a directory',
     kind: 'terminal',
@@ -304,12 +304,12 @@ const MODULE_1_2: Exercise[] = [
       { type: 'fs-exists', path: `${HOME}/logs`, exists: true, kind: 'dir', hint: 'A directory named logs should exist afterwards. `mkdir logs` creates it.' },
     ],
     debrief: 'Add `-p` when you need parent directories too: `mkdir -p a/b/c` creates all three.',
-     practice: PACKAGE_1_PRACTICE['1.2.2'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.2.2'] ?? [],
   },
   {
-    id: '1.2.3',
+    id: 'linux.2.3',
     moduleId: '1.2',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 3,
     title: 'Copy a file',
     kind: 'terminal',
@@ -338,12 +338,12 @@ const MODULE_1_2: Exercise[] = [
     ],
     debrief:
       'Copying evidence before you touch it is standard practice. `cp` never removes the original, which is exactly what you want during an investigation.',
-     practice: PACKAGE_1_PRACTICE['1.2.3'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.2.3'] ?? [],
   },
   {
-    id: '1.2.4',
+    id: 'linux.2.4',
     moduleId: '1.2',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 4,
     title: 'Rename a file',
     kind: 'terminal',
@@ -367,12 +367,12 @@ const MODULE_1_2: Exercise[] = [
       { type: 'fs-exists', path: `${HOME}/test_backup.txt`, exists: false, hint: 'The old name should be gone -- `mv` moves rather than copies.' },
     ],
     debrief: 'Renaming and moving are the same operation in Unix: you are changing the path, nothing else.',
-     practice: PACKAGE_1_PRACTICE['1.2.4'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.2.4'] ?? [],
   },
   {
-    id: '1.2.5',
+    id: 'linux.2.5',
     moduleId: '1.2',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 5,
     title: 'Delete a file',
     kind: 'terminal',
@@ -397,12 +397,12 @@ const MODULE_1_2: Exercise[] = [
     ],
     debrief:
       'There is no recycle bin. `rm` is immediate and permanent, which is why `rm -rf` has its reputation. On a live investigation, copy first and delete never.',
-     practice: PACKAGE_1_PRACTICE['1.2.5'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.2.5'] ?? [],
   },
   {
-    id: '1.2.6',
+    id: 'linux.2.6',
     moduleId: '1.2',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 6,
     title: 'Delete a directory',
     kind: 'terminal',
@@ -426,7 +426,7 @@ const MODULE_1_2: Exercise[] = [
     ],
     debrief:
       '`rmdir` refuses to delete anything that still has files in it. That refusal is a safety feature -- it is `rm -r` that will take the whole tree without asking.',
-     practice: PACKAGE_1_PRACTICE['1.2.6'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.2.6'] ?? [],
   },
 ];
 
@@ -434,9 +434,9 @@ const MODULE_1_2: Exercise[] = [
 
 const MODULE_1_3: Exercise[] = [
   {
-    id: '1.3.1',
+    id: 'linux.3.1',
     moduleId: '1.3',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 1,
     title: 'Read a whole file',
     kind: 'terminal',
@@ -463,12 +463,12 @@ const MODULE_1_3: Exercise[] = [
     ],
     debrief:
       'rmg-web-02 is an internet-facing web server holding patient data. Always confirm which host you are on before you act on what you find.',
-     practice: PACKAGE_1_PRACTICE['1.3.1'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.3.1'] ?? [],
   },
   {
-    id: '1.3.2',
+    id: 'linux.3.2',
     moduleId: '1.3',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 2,
     title: 'Open a file too big to read at once',
     kind: 'terminal',
@@ -496,12 +496,12 @@ const MODULE_1_3: Exercise[] = [
     ],
     debrief:
       'Worth practising on a real box, where the search-and-scroll keys matter. But for finding things, `grep` beats scrolling every single time -- which is exactly where this module is heading.',
-     practice: PACKAGE_1_PRACTICE['1.3.2'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.3.2'] ?? [],
   },
   {
-    id: '1.3.3',
+    id: 'linux.3.3',
     moduleId: '1.3',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 3,
     title: 'Read the start of a file',
     kind: 'terminal',
@@ -529,12 +529,12 @@ const MODULE_1_3: Exercise[] = [
     ],
     debrief:
       'The first lines of a log are its oldest. `head` tells you when logging started; it is rarely where an incident is.',
-     practice: PACKAGE_1_PRACTICE['1.3.3'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.3.3'] ?? [],
   },
   {
-    id: '1.3.4',
+    id: 'linux.3.4',
     moduleId: '1.3',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 4,
     title: 'Read the end of a file',
     kind: 'terminal',
@@ -565,7 +565,7 @@ const MODULE_1_3: Exercise[] = [
     ],
     debrief:
       '`tail` is the command you run first during a live incident, because the newest events are at the bottom. On a real box `tail -f` follows a log as it is written.',
-     practice: PACKAGE_1_PRACTICE['1.3.4'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.3.4'] ?? [],
   },
 ];
 
@@ -579,9 +579,9 @@ const SSH_COUNT = countAuth('ssh');
 
 const MODULE_1_4: Exercise[] = [
   {
-    id: '1.4.1',
+    id: 'linux.4.1',
     moduleId: '1.4',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 1,
     title: 'Search a file for a word',
     kind: 'terminal',
@@ -609,12 +609,12 @@ const MODULE_1_4: Exercise[] = [
       { type: 'output-excludes', text: 'Accepted', hint: 'Only matching lines should appear. If you see "Accepted" lines, you printed the whole file rather than filtering it.' },
     ],
     debrief: `That is ${FAILED_COUNT.toLocaleString('en')} lines. Far too many to read, and that is the real lesson: on a live host, failed logins are constant background noise. Finding them is easy. Deciding which ones matter is the job.`,
-     practice: PACKAGE_1_PRACTICE['1.4.1'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.4.1'] ?? [],
   },
   {
-    id: '1.4.2',
+    id: 'linux.4.2',
     moduleId: '1.4',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 2,
     title: 'Search without caring about case',
     kind: 'terminal',
@@ -641,12 +641,12 @@ const MODULE_1_4: Exercise[] = [
       { type: 'output-contains', text: 'ailed', hint: 'You should still be searching auth.log for "failed".' },
     ],
     debrief: `Case-insensitive finds ${FAILED_LOWER_COUNT.toLocaleString('en')} lines against ${FAILED_COUNT.toLocaleString('en')} case-sensitive. When you are searching for evidence rather than confirming a hunch, reach for -i by default.`,
-     practice: PACKAGE_1_PRACTICE['1.4.2'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.4.2'] ?? [],
   },
   {
-    id: '1.4.3',
+    id: 'linux.4.3',
     moduleId: '1.4',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 3,
     title: 'Count matches instead of listing them',
     kind: 'terminal',
@@ -672,12 +672,12 @@ const MODULE_1_4: Exercise[] = [
       { type: 'output-numeric', equals: INVALID_USER_COUNT, hint: `The answer is a single number. Use \`grep -c "invalid user" /var/log/auth.log\`. Watch the case -- "Invalid user" with a capital I appears on different lines.` },
     ],
     debrief: `"invalid user" means the account did not exist at all -- somebody guessing usernames. ${INVALID_USER_COUNT.toLocaleString('en')} of those is a scanner working through a wordlist, not a targeted attack.`,
-     practice: PACKAGE_1_PRACTICE['1.4.3'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.4.3'] ?? [],
   },
   {
-    id: '1.4.4',
+    id: 'linux.4.4',
     moduleId: '1.4',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 4,
     title: 'Show which line each match is on',
     kind: 'terminal',
@@ -705,12 +705,12 @@ const MODULE_1_4: Exercise[] = [
       { type: 'output-contains', text: 'sudo', hint: 'You should be searching for sudo.' },
     ],
     debrief: `Only ${SUDO_COUNT} sudo lines in the whole day, against thousands of failed logins. Rare events are usually the interesting ones. Read those lines closely: one account does something no ordinary user should be doing.`,
-     practice: PACKAGE_1_PRACTICE['1.4.4'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.4.4'] ?? [],
   },
   {
-    id: '1.4.5',
+    id: 'linux.4.5',
     moduleId: '1.4',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 5,
     title: 'Chain two commands with a pipe',
     kind: 'terminal',
@@ -739,12 +739,12 @@ const MODULE_1_4: Exercise[] = [
     ],
     debrief:
       'The pipe is the single most important idea in the shell: every command becomes a filter you can bolt onto the next. Almost all real log analysis is three or four small tools chained this way.',
-     practice: PACKAGE_1_PRACTICE['1.4.5'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.4.5'] ?? [],
   },
   {
-    id: '1.4.6',
+    id: 'linux.4.6',
     moduleId: '1.4',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     order: 6,
     title: 'Search across many files at once',
     kind: 'terminal',
@@ -773,12 +773,12 @@ const MODULE_1_4: Exercise[] = [
     ],
     debrief:
       'The shell expands the * before grep ever runs, which is why the filename prefixes appear automatically. This matters more than it looks: logs rotate at midnight, so an incident that starts late at night is split across two files. Searching only the current one silently loses half the story.',
-     practice: PACKAGE_1_PRACTICE['1.4.6'] ?? [],
+     practice: LINUX_FUNDAMENTALS_PRACTICE['linux.4.6'] ?? [],
   },
 ];
 
-export const PACKAGE_1: LearningPackage = {
-  id: '1',
+export const LINUX_FUNDAMENTALS: LearningPackage = {
+  id: 'linux-fundamentals',
   order: 1,
   title: 'Linux Fundamentals',
   summary:
@@ -793,7 +793,7 @@ export const PACKAGE_1: LearningPackage = {
   modules: [
     {
       id: '1.1',
-      packageId: '1',
+      packageId: 'linux-fundamentals',
       order: 1,
       title: 'Navigation and the filesystem',
       summary: 'Find out where you are and move somewhere else.',
@@ -801,7 +801,7 @@ export const PACKAGE_1: LearningPackage = {
     },
     {
       id: '1.2',
-      packageId: '1',
+      packageId: 'linux-fundamentals',
       order: 2,
       title: 'File operations',
       summary: 'Create, copy, rename, and remove files and directories.',
@@ -809,7 +809,7 @@ export const PACKAGE_1: LearningPackage = {
     },
     {
       id: '1.3',
-      packageId: '1',
+      packageId: 'linux-fundamentals',
       order: 3,
       title: 'Viewing file contents',
       summary: 'Read files, including ones far too large to print.',
@@ -817,7 +817,7 @@ export const PACKAGE_1: LearningPackage = {
     },
     {
       id: '1.4',
-      packageId: '1',
+      packageId: 'linux-fundamentals',
       order: 4,
       title: 'Searching and filtering',
       summary: 'Find the handful of lines that matter inside thousands.',

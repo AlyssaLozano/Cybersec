@@ -1,5 +1,5 @@
 /**
- * Generates the alert queues for Package 3 (Incident Detection and Alert Triage).
+ * Generates the alert queues for Incident Detection and Alert Triage.
  *
  * Run with:  npm run gen:alerts --workspace @soc/server
  * Output:    src/vfs/data/alerts.generated.ts  (committed to git)
@@ -14,8 +14,8 @@
  * WHY IT DESCRIBES THE SAME DAY AS auth.log
  *
  * These alerts are what the monitoring stack raised while the events in
- * `generate-world.ts` were happening on 15 August. A student reaching Package 3
- * has already spent Package 2 reading that intrusion out of raw logs by hand.
+ * `generate-world.ts` were happening on 15 August. A student reaching Alert Triage
+ * has already spent Log Analysis reading that intrusion out of raw logs by hand.
  * Meeting it again from the other end -- as eight alerts buried in a hundred and
  * twenty -- teaches the thing that actually transfers: the detection stack saw
  * most of it, and the reason nobody noticed is that it also saw everything else.
@@ -953,7 +953,7 @@ const banner = `/**
  * Produced by scripts/generate-alerts.ts. To change the alert corpus, edit that
  * script and re-run:  npm run gen:alerts --workspace @soc/server
  *
- * Committed on purpose: Package 3's expected answers are computed from this
+ * Committed on purpose: Alert Triage's expected answers are computed from this
  * corpus, so it must not change unless somebody intends it to.
  *
  * ALERT_TRUTH IS THE ANSWER KEY. It must never be sent to the browser. The only

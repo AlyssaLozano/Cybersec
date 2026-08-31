@@ -15,12 +15,12 @@ touched a live system.
 |---|---|
 | Terminal engine (parser, virtual filesystem, ~45 commands) | Done, 58 tests |
 | Simulated host `rmg-web-02` with 2,539-line auth.log and 222-line syslog | Done |
-| Package 1: Linux Fundamentals, 22 exercises | Done |
+| Linux Fundamentals, 22 exercises | Done |
 | Teaching material, progressive hints, reveal-answer | Done |
 | 110 optional practice drills (5 per exercise) | Done |
 | Auth, progress tracking, resume, linear unlocking | Done |
 | Career routing: 16 tracks, 16 lanes, 70-item assessment, capability baseline | Done, engine and API (no UI for the baseline yet) |
-| Packages 2–4 (Log Analysis, Alert Triage, Networking) | Done |
+| Log Analysis, Alert Triage, Networking | Done |
 | Incident Response and Remediation | Done |
 | AI Foundations, 26 exercises | Done |
 | AI Security Analyst, 20 exercises, with the Model Lab | Done |

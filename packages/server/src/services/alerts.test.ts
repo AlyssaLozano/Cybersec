@@ -212,7 +212,7 @@ describe('triage checks in isolation', () => {
 
   it('triage-accuracy fails closed when ground truth is absent', () => {
     // A misconfigured exercise must not award an unearned pass.
-    const exercise = ALL_EXERCISES.find((item) => item.id === '3.1.1')!;
+    const exercise = ALL_EXERCISES.find((item) => item.id === 'triage.1.1')!;
     const evaluation = evaluate(
       { ...exercise, checks: [{ type: 'triage-accuracy', decision: 'escalate', minRecall: 1, hint: 'x' }] },
       {
@@ -229,7 +229,7 @@ describe('triage checks in isolation', () => {
   });
 
   it('triage-budget counts only the decision it names', () => {
-    const exercise = ALL_EXERCISES.find((item) => item.id === '3.1.1')!;
+    const exercise = ALL_EXERCISES.find((item) => item.id === 'triage.1.1')!;
     const entries: TriageEntry[] = [
       ...escalate.map((alertId) => ({ alertId, decision: 'escalate' as const })),
       ...alertsRequiring(queueId, 'dismiss').map((alertId) => ({ alertId, decision: 'dismiss' as const })),

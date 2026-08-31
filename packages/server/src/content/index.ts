@@ -16,26 +16,30 @@ import { pointWithAnswers } from '../services/incidents.js';
 import { analysisFor } from '../services/copilot.js';
 import { modelCard, suite } from '../services/modelLab.js';
 
-import { PACKAGE_1 } from './package1.js';
-import { PACKAGE_2 } from './package2.js';
-import { PACKAGE_3 } from './package3.js';
-import { PACKAGE_4 } from './package4.js';
+import { LINUX_FUNDAMENTALS } from './linux-fundamentals.js';
+import { LOG_ANALYSIS } from './log-analysis.js';
+import { INCIDENT_TRIAGE } from './incident-triage.js';
+import { NETWORKING } from './networking.js';
 import { INCIDENT_RESPONSE } from './incident-response.js';
 import { AI_FOUNDATIONS } from './ai-foundations.js';
 import { AI_SECURITY } from './ai-security.js';
 
 /**
- * NAMING: packages 1-4 keep numeric ids because progress rows reference them and
- * ids are permanent. Everything added from here on gets a NAME instead --
- * numbers collide the moment two people add content at the same time, which is
- * exactly what happened while Package 4 and Incident Response were being
- * written. `order` still controls where a package appears; the id is just an id.
+ * NAMING: every package id is a NAME, never a number.
+ *
+ * Numbers collide the moment two people add content at the same time, which is
+ * exactly what happened while Networking and Incident Response were being
+ * written in parallel -- both reached for "the next one". The original four
+ * packages were migrated off numeric ids on 2026-08-31, progress rows and all,
+ * so there is no longer a numbered half of the catalogue to collide with.
+ *
+ * `order` still controls where a package appears. The id is just an id.
  */
 export const PACKAGES: LearningPackage[] = [
-  PACKAGE_1,
-  PACKAGE_2,
-  PACKAGE_3,
-  PACKAGE_4,
+  LINUX_FUNDAMENTALS,
+  LOG_ANALYSIS,
+  INCIDENT_TRIAGE,
+  NETWORKING,
   INCIDENT_RESPONSE,
   AI_FOUNDATIONS,
   AI_SECURITY,

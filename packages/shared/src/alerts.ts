@@ -3,7 +3,7 @@
  *
  * WHY THIS IS A SEPARATE SURFACE AND NOT MORE TERMINAL EXERCISES
  *
- * Packages 1 and 2 teach a student to find a thing in a log. Triage is a
+ * Linux Fundamentals and Log Analysis teach a student to find a thing in a log. Triage is a
  * different skill and grading it as a command would test the wrong one. The
  * question here is never "can you locate this alert" — the alert is already in
  * front of you, formatted, with its severity asserted by a rule that has been

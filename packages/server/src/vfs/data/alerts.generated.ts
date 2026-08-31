@@ -4,7 +4,7 @@
  * Produced by scripts/generate-alerts.ts. To change the alert corpus, edit that
  * script and re-run:  npm run gen:alerts --workspace @soc/server
  *
- * Committed on purpose: Package 3's expected answers are computed from this
+ * Committed on purpose: Alert Triage's expected answers are computed from this
  * corpus, so it must not change unless somebody intends it to.
  *
  * ALERT_TRUTH IS THE ANSWER KEY. It must never be sent to the browser. The only

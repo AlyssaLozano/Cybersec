@@ -1,5 +1,5 @@
 /**
- * Package 4: Networking Basics -- 15 exercises across 3 modules.
+ * Networking Basics -- 15 exercises across 3 modules.
  *
  * WHY THIS PACKAGE EXISTS, AND WHY NOW
  *
@@ -7,30 +7,29 @@
  * readiness. Three core SOC capabilities -- reading a netstat table, telling
  * internal addresses from external ones, and knowing what common ports mean --
  * all sit behind this foundation, and none of them were teachable. A learner
- * finishing Packages 1 and 2 hit a wall at 44% readiness largely because of it.
+ * finishing Linux Fundamentals and Log Analysis hit a wall at 44% readiness largely because of it.
  *
- * PACKAGE NUMBERING
+ * IDS
  *
- * This is package '4' and its exercise ids are 4.x.x. The source specification
- * numbered Networking as package 3, but '3' was taken by Security Incident
- * Concepts. Exercise ids are permanent because progress rows reference them, so
- * the numbering follows what is actually free rather than what the spec assumed.
+ * This package is 'networking' and its exercise ids are net.x.x. It was briefly
+ * package '4' -- the source specification called it 3, which was already taken,
+ * which is the collision that ended package numbering here altogether.
  *
  * THE ARC
  *
- * Module 4.1 asks "what is this machine". 4.2 asks "what is it talking to", and
+ * Module net.1 asks "what is this machine". net.2 asks "what is it talking to", and
  * ends by isolating the exfiltration connection that has been sitting in the
- * simulated host since Package 1 without anybody having the tools to see it.
- * 4.3 covers name resolution, including the reverse lookup that turns the
+ * simulated host since Linux Fundamentals without anybody having the tools to see it.
+ * net.3 covers name resolution, including the reverse lookup that turns the
  * noisiest address in auth.log into an obviously-internal monitoring box.
  *
- * As in Packages 1 and 2, every expected count is verified against the real
+ * As in Linux Fundamentals and Log Analysis, every expected count is verified against the real
  * engine output rather than assumed.
  */
 
 import type { Exercise, LearningPackage } from '@soc/shared';
 
-import { PACKAGE_4_PRACTICE } from './package4-practice.js';
+import { NETWORKING_PRACTICE } from './networking-practice.js';
 
 const HOST_IP = '10.20.6.40';
 const GATEWAY = '10.20.6.1';
@@ -40,9 +39,9 @@ const EXFIL = '198.51.100.60';
 
 const MODULE_4_1: Exercise[] = [
   {
-    id: '4.1.1',
+    id: 'net.1.1',
     moduleId: '4.1',
-    packageId: '4',
+    packageId: 'networking',
     order: 1,
     title: 'Find out what address this machine has',
     kind: 'terminal',
@@ -76,12 +75,12 @@ const MODULE_4_1: Exercise[] = [
     ],
     debrief:
       `This host is ${HOST_IP}. Everything in 10.x.x.x is private address space, which means it is inside the company network and not directly reachable from the internet. Hold onto that: for the rest of this package, "does this address start with 10." is the fastest question you can ask about a connection.`,
-    practice: PACKAGE_4_PRACTICE['4.1.1'] ?? [],
+    practice: NETWORKING_PRACTICE['net.1.1'] ?? [],
   },
   {
-    id: '4.1.2',
+    id: 'net.1.2',
     moduleId: '4.1',
-    packageId: '4',
+    packageId: 'networking',
     order: 2,
     title: 'List the interfaces without the noise',
     kind: 'terminal',
@@ -109,12 +108,12 @@ const MODULE_4_1: Exercise[] = [
     ],
     debrief:
       'Two interfaces is what a normal server looks like. A host with a tun0 or a second unexplained interface is worth asking about — that is often how somebody keeps a route in.',
-    practice: PACKAGE_4_PRACTICE['4.1.2'] ?? [],
+    practice: NETWORKING_PRACTICE['net.1.2'] ?? [],
   },
   {
-    id: '4.1.3',
+    id: 'net.1.3',
     moduleId: '4.1',
-    packageId: '4',
+    packageId: 'networking',
     order: 3,
     title: 'Test whether another host is reachable',
     kind: 'terminal',
@@ -147,12 +146,12 @@ const MODULE_4_1: Exercise[] = [
     ],
     debrief:
       'A reply proves the host is up and reachable. Silence proves almost nothing — plenty of hosts are configured not to answer ping at all, and a firewall may be dropping it. "It does not ping" is not evidence a machine is off.',
-    practice: PACKAGE_4_PRACTICE['4.1.3'] ?? [],
+    practice: NETWORKING_PRACTICE['net.1.3'] ?? [],
   },
   {
-    id: '4.1.4',
+    id: 'net.1.4',
     moduleId: '4.1',
-    packageId: '4',
+    packageId: 'networking',
     order: 4,
     title: 'See where traffic goes when it leaves',
     kind: 'terminal',
@@ -180,12 +179,12 @@ const MODULE_4_1: Exercise[] = [
     ],
     debrief:
       `Everything this server sends outside 10.20.6.0/24 goes through ${GATEWAY}. When an incident response plan says "block the traffic", the gateway is usually where that happens.`,
-    practice: PACKAGE_4_PRACTICE['4.1.4'] ?? [],
+    practice: NETWORKING_PRACTICE['net.1.4'] ?? [],
   },
   {
-    id: '4.1.5',
+    id: 'net.1.5',
     moduleId: '4.1',
-    packageId: '4',
+    packageId: 'networking',
     order: 5,
     title: 'Read one interface in detail',
     kind: 'terminal',
@@ -213,7 +212,7 @@ const MODULE_4_1: Exercise[] = [
     ],
     debrief:
       'A netmask of 255.255.255.0 is the same thing as /24: the first three numbers identify the network, the last identifies the host. So 10.20.6.40 and 10.20.6.99 are neighbours, and 10.20.4.31 is not — it is one router hop away.',
-    practice: PACKAGE_4_PRACTICE['4.1.5'] ?? [],
+    practice: NETWORKING_PRACTICE['net.1.5'] ?? [],
   },
 ];
 
@@ -221,9 +220,9 @@ const MODULE_4_1: Exercise[] = [
 
 const MODULE_4_2: Exercise[] = [
   {
-    id: '4.2.1',
+    id: 'net.2.1',
     moduleId: '4.2',
-    packageId: '4',
+    packageId: 'networking',
     order: 1,
     title: 'See every connection at once',
     kind: 'terminal',
@@ -260,12 +259,12 @@ const MODULE_4_2: Exercise[] = [
     ],
     debrief:
       'That is a lot at once, which is the point: this is the raw material. The next four exercises are all about cutting it down to the handful of lines that answer a specific question.',
-    practice: PACKAGE_4_PRACTICE['4.2.1'] ?? [],
+    practice: NETWORKING_PRACTICE['net.2.1'] ?? [],
   },
   {
-    id: '4.2.2',
+    id: 'net.2.2',
     moduleId: '4.2',
-    packageId: '4',
+    packageId: 'networking',
     order: 2,
     title: 'Find what this host is offering',
     kind: 'terminal',
@@ -295,12 +294,12 @@ const MODULE_4_2: Exercise[] = [
     ],
     debrief:
       'Four doors are open to the network: 22 (SSH), 80 and 443 (the web server), and that is it. Postgres on 5432 and the application on 8080 are bound to 127.0.0.1, so they are not reachable from outside this machine. That distinction is the difference between a database being exposed to the internet and being safe.',
-    practice: PACKAGE_4_PRACTICE['4.2.2'] ?? [],
+    practice: NETWORKING_PRACTICE['net.2.2'] ?? [],
   },
   {
-    id: '4.2.3',
+    id: 'net.2.3',
     moduleId: '4.2',
-    packageId: '4',
+    packageId: 'networking',
     order: 3,
     title: 'Find which program owns a port',
     kind: 'terminal',
@@ -330,12 +329,12 @@ const MODULE_4_2: Exercise[] = [
     ],
     debrief:
       'sshd on 22 is exactly what should be there. The reason you check is the case where it is not — a listener on 22 owned by something that is not sshd, or sshd running on a port nobody configured. Verifying the boring answer is how you notice the interesting one.',
-    practice: PACKAGE_4_PRACTICE['4.2.3'] ?? [],
+    practice: NETWORKING_PRACTICE['net.2.3'] ?? [],
   },
   {
-    id: '4.2.4',
+    id: 'net.2.4',
     moduleId: '4.2',
-    packageId: '4',
+    packageId: 'networking',
     order: 4,
     title: 'Show conversations in progress',
     kind: 'terminal',
@@ -365,12 +364,12 @@ const MODULE_4_2: Exercise[] = [
     ],
     debrief:
       'Five conversations. Two are the machine talking to itself on loopback, which is normal and uninteresting. The other three involve real addresses — and one of them is about to matter a great deal.',
-    practice: PACKAGE_4_PRACTICE['4.2.4'] ?? [],
+    practice: NETWORKING_PRACTICE['net.2.4'] ?? [],
   },
   {
-    id: '4.2.5',
+    id: 'net.2.5',
     moduleId: '4.2',
-    packageId: '4',
+    packageId: 'networking',
     order: 5,
     title: 'Filter out the machine talking to itself',
     kind: 'terminal',
@@ -383,7 +382,7 @@ const MODULE_4_2: Exercise[] = [
       syntax: 'netstat -tn | grep ESTABLISHED | grep -v 127.0.0.1',
       examples: [
         { command: 'netstat -tn | grep -v LISTEN', explains: 'Removing a category rather than selecting one.' },
-        { command: 'grep -v "nagios" /var/log/auth.log', explains: 'The same idea back in Package 2: subtract the noise you already understand.' },
+        { command: 'grep -v "nagios" /var/log/auth.log', explains: 'The same idea back in Log Analysis: subtract the noise you already understand.' },
       ],
       flags: [{ flag: '-v', means: 'Invert: keep the lines that do not match.' }],
     },
@@ -401,12 +400,12 @@ const MODULE_4_2: Exercise[] = [
     ],
     debrief:
       'Three lines left, from five. Two are internal office machines connecting in over SSH and HTTPS, which is what this server is for. Read the third one carefully before moving on.',
-    practice: PACKAGE_4_PRACTICE['4.2.5'] ?? [],
+    practice: NETWORKING_PRACTICE['net.2.5'] ?? [],
   },
   {
-    id: '4.2.6',
+    id: 'net.2.6',
     moduleId: '4.2',
-    packageId: '4',
+    packageId: 'networking',
     order: 6,
     title: 'Find the connection that should not exist',
     kind: 'terminal',
@@ -436,8 +435,8 @@ const MODULE_4_2: Exercise[] = [
       { type: 'output-excludes', text: '127.0.0.1', hint: 'Loopback should still be filtered out.' },
     ],
     debrief:
-      `That connection has been open on this host since Package 1, and you have only now had the tools to see it. ${EXFIL} is not a Ridgeline address. The process is curl — a file transfer tool, not a service. A patient-portal web server has no reason to be uploading anything to an unknown address on the internet. In Package 2 you found how somebody got in; this is what they are doing now.`,
-    practice: PACKAGE_4_PRACTICE['4.2.6'] ?? [],
+      `That connection has been open on this host since Linux Fundamentals, and you have only now had the tools to see it. ${EXFIL} is not a Ridgeline address. The process is curl — a file transfer tool, not a service. A patient-portal web server has no reason to be uploading anything to an unknown address on the internet. In Log Analysis you found how somebody got in; this is what they are doing now.`,
+    practice: NETWORKING_PRACTICE['net.2.6'] ?? [],
   },
 ];
 
@@ -445,9 +444,9 @@ const MODULE_4_2: Exercise[] = [
 
 const MODULE_4_3: Exercise[] = [
   {
-    id: '4.3.1',
+    id: 'net.3.1',
     moduleId: '4.3',
-    packageId: '4',
+    packageId: 'networking',
     order: 1,
     title: 'Turn a name into an address',
     kind: 'terminal',
@@ -474,18 +473,18 @@ const MODULE_4_3: Exercise[] = [
     ],
     debrief:
       `The portal resolves to ${HOST_IP} — this host. That is worth noticing: the machine you have been investigating is the public patient portal, which is why it is exposed to the internet and why it was being brute-forced all morning.`,
-    practice: PACKAGE_4_PRACTICE['4.3.1'] ?? [],
+    practice: NETWORKING_PRACTICE['net.3.1'] ?? [],
   },
   {
-    id: '4.3.2',
+    id: 'net.3.2',
     moduleId: '4.3',
-    packageId: '4',
+    packageId: 'networking',
     order: 2,
     title: 'Turn an address back into a name',
     kind: 'terminal',
     goal: 'Use a reverse lookup to identify an unfamiliar address.',
     prompt:
-      'In Package 2 you found hundreds of failed logins from 10.20.9.40. Find out what that machine is called.',
+      'In Log Analysis you found hundreds of failed logins from 10.20.9.40. Find out what that machine is called.',
     teach: {
       concept:
         'A reverse lookup goes the other way: given an address, what name is registered for it? This is one of the fastest ways to make sense of an address in a log. Internal infrastructure is usually named descriptively, so a reverse lookup often answers "should this machine be doing that?" in one step.',
@@ -507,12 +506,12 @@ const MODULE_4_3: Exercise[] = [
     ],
     debrief:
       'It is the monitoring server. Five hundred and seventy-six authentication failures, all day, every five minutes — from the company\'s own monitoring box with a stale password. One reverse lookup turns the noisiest thing in the log into a ticket for whoever owns monitoring, and takes it off your incident list entirely.',
-    practice: PACKAGE_4_PRACTICE['4.3.2'] ?? [],
+    practice: NETWORKING_PRACTICE['net.3.2'] ?? [],
   },
   {
-    id: '4.3.3',
+    id: 'net.3.3',
     moduleId: '4.3',
-    packageId: '4',
+    packageId: 'networking',
     order: 3,
     title: 'Find out who answers this host\'s questions',
     kind: 'terminal',
@@ -539,12 +538,12 @@ const MODULE_4_3: Exercise[] = [
     ],
     debrief:
       'Both resolvers are on the internal 10.20.1.x network, which is what you want. A host configured to use a public resolver, or one you do not recognise, is bypassing whatever DNS filtering the company put in place — sometimes by accident, sometimes not.',
-    practice: PACKAGE_4_PRACTICE['4.3.3'] ?? [],
+    practice: NETWORKING_PRACTICE['net.3.3'] ?? [],
   },
   {
-    id: '4.3.4',
+    id: 'net.3.4',
     moduleId: '4.3',
-    packageId: '4',
+    packageId: 'networking',
     order: 4,
     title: 'Check the file that overrides DNS',
     kind: 'terminal',
@@ -572,18 +571,18 @@ const MODULE_4_3: Exercise[] = [
     ],
     debrief:
       'Everything here is internal and expected. The check worth remembering is the one that finds a public name — a software update server, say — pointed at an internal or unfamiliar address. That is a redirect, and because it never touches DNS, this file is the only place it is visible.',
-    practice: PACKAGE_4_PRACTICE['4.3.4'] ?? [],
+    practice: NETWORKING_PRACTICE['net.3.4'] ?? [],
   },
 ];
 
 // --- the package -------------------------------------------------------------
 
-export const PACKAGE_4: LearningPackage = {
-  id: '4',
+export const NETWORKING: LearningPackage = {
+  id: 'networking',
   order: 4,
   title: 'Networking Basics',
   summary:
-    'Work out what a machine is, what it is talking to, and whether it should be. Ends by finding an active exfiltration connection that has been hiding in plain sight since Package 1.',
+    'Work out what a machine is, what it is talking to, and whether it should be. Ends by finding an active exfiltration connection that has been hiding in plain sight since Linux Fundamentals.',
   outcomes: [
     'Identify a host\'s addresses, interfaces, and default gateway',
     'Tell an internal address from an external one at a glance',
@@ -591,11 +590,11 @@ export const PACKAGE_4: LearningPackage = {
     'Connect a port to the process that owns it',
     'Resolve names forwards and backwards, and know which file overrides DNS',
   ],
-  prerequisites: ['1'],
+  prerequisites: ['linux-fundamentals'],
   modules: [
     {
       id: '4.1',
-      packageId: '4',
+      packageId: 'networking',
       order: 1,
       title: 'What this machine is',
       summary: 'Addresses, interfaces, routes, and reachability.',
@@ -603,7 +602,7 @@ export const PACKAGE_4: LearningPackage = {
     },
     {
       id: '4.2',
-      packageId: '4',
+      packageId: 'networking',
       order: 2,
       title: 'What it is talking to',
       summary: 'Listening sockets, live connections, and the one that should not be there.',
@@ -611,7 +610,7 @@ export const PACKAGE_4: LearningPackage = {
     },
     {
       id: '4.3',
-      packageId: '4',
+      packageId: 'networking',
       order: 3,
       title: 'Names and resolution',
       summary: 'Forward and reverse lookups, resolvers, and the file that quietly overrides them.',

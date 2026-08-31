@@ -62,7 +62,7 @@ export function AuthScreen({ onSignedIn }: AuthScreenProps) {
         <p className="sub">
           {mode === 'login'
             ? 'Sign in to continue your training.'
-            : 'Create an account to start Package 1.'}
+            : 'Create an account to start Linux Fundamentals.'}
         </p>
 
         {message && <div className="auth-error">{message}</div>}

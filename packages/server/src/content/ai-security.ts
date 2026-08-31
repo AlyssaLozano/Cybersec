@@ -38,7 +38,7 @@
  * platform is set in. Nothing in this package describes a real vendor's system,
  * and no payload in it requests harmful content -- the worst outcome any of them
  * can produce is a made-up system prompt or a made-up detector reaching the
- * wrong verdict about a log line the student read in Package 2.
+ * wrong verdict about a log line the student read in Log Analysis.
  */
 
 import type { Exercise, LearningPackage, Teach } from '@soc/shared';

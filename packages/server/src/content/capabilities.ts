@@ -44,7 +44,7 @@ export const CAPABILITIES: Capability[] = [
       'network-security': 'supporting',
       'vuln-management': 'supporting',
     },
-    exerciseIds: ['1.1.1', '1.1.4', '1.1.6'],
+    exerciseIds: ['linux.1.1', 'linux.1.4', 'linux.1.6'],
   },
   {
     id: 'cap-read-large-files',
@@ -60,7 +60,7 @@ export const CAPABILITIES: Capability[] = [
       'network-security': 'supporting',
       'threat-intel': 'supporting',
     },
-    exerciseIds: ['1.3.1', '1.3.3', '1.3.4'],
+    exerciseIds: ['linux.3.1', 'linux.3.3', 'linux.3.4'],
   },
   {
     id: 'cap-grep',
@@ -78,7 +78,7 @@ export const CAPABILITIES: Capability[] = [
       pentest: 'supporting',
       'vuln-management': 'supporting',
     },
-    exerciseIds: ['1.4.1', '1.4.2', '1.4.3'],
+    exerciseIds: ['linux.4.1', 'linux.4.2', 'linux.4.3'],
   },
   {
     id: 'cap-pipes',
@@ -93,7 +93,7 @@ export const CAPABILITIES: Capability[] = [
       'security-engineering': 'core',
       'network-security': 'supporting',
     },
-    exerciseIds: ['1.4.5'],
+    exerciseIds: ['linux.4.5'],
   },
   {
     id: 'cap-permissions',
@@ -110,7 +110,7 @@ export const CAPABILITIES: Capability[] = [
       'vuln-management': 'supporting',
       iam: 'supporting',
     },
-    exerciseIds: ['1.1.3'],
+    exerciseIds: ['linux.1.3'],
   },
 
   // --- Log analysis --------------------------------------------------------
@@ -128,7 +128,7 @@ export const CAPABILITIES: Capability[] = [
       'threat-intel': 'supporting',
       'network-security': 'supporting',
     },
-    exerciseIds: ['2.1.1', '2.1.2'],
+    exerciseIds: ['logs.1.1', 'logs.1.2'],
   },
   {
     id: 'cap-time-scope',
@@ -142,7 +142,7 @@ export const CAPABILITIES: Capability[] = [
       'incident-response': 'core',
       forensics: 'core',
     },
-    exerciseIds: ['2.1.3'],
+    exerciseIds: ['logs.1.3'],
   },
   {
     id: 'cap-signal-noise',
@@ -159,7 +159,7 @@ export const CAPABILITIES: Capability[] = [
       'vuln-management': 'supporting',
       'network-security': 'supporting',
     },
-    exerciseIds: ['2.2.1', '2.2.2', '2.2.3'],
+    exerciseIds: ['logs.2.1', 'logs.2.2', 'logs.2.3'],
   },
   {
     id: 'cap-extract-fields',
@@ -174,7 +174,7 @@ export const CAPABILITIES: Capability[] = [
       'threat-intel': 'core',
       forensics: 'supporting',
     },
-    exerciseIds: ['2.4.1', '2.4.2'],
+    exerciseIds: ['logs.4.1', 'logs.4.2'],
   },
   {
     id: 'cap-correlate',
@@ -188,7 +188,7 @@ export const CAPABILITIES: Capability[] = [
       forensics: 'core',
       'threat-intel': 'supporting',
     },
-    exerciseIds: ['2.4.4'],
+    exerciseIds: ['logs.4.4'],
   },
 
   // --- Regex ---------------------------------------------------------------
@@ -223,7 +223,7 @@ export const CAPABILITIES: Capability[] = [
       pentest: 'supporting',
       'cloud-security': 'supporting',
     },
-    exerciseIds: ['4.2.1', '4.2.2', '4.2.4'],
+    exerciseIds: ['net.2.1', 'net.2.2', 'net.2.4'],
   },
   {
     id: 'cap-internal-external',
@@ -238,7 +238,7 @@ export const CAPABILITIES: Capability[] = [
       'threat-intel': 'supporting',
       'cloud-security': 'supporting',
     },
-    exerciseIds: ['4.1.1', '4.2.5', '4.2.6'],
+    exerciseIds: ['net.1.1', 'net.2.5', 'net.2.6'],
   },
   {
     id: 'cap-ports-services',
@@ -252,7 +252,7 @@ export const CAPABILITIES: Capability[] = [
       pentest: 'core',
       'incident-response': 'supporting',
     },
-    exerciseIds: ['4.2.2', '4.2.3'],
+    exerciseIds: ['net.2.2', 'net.2.3'],
   },
 
   // --- Investigation tools -------------------------------------------------
@@ -346,7 +346,7 @@ export const CAPABILITIES: Capability[] = [
       'vuln-management': 'core',
       'risk-compliance': 'supporting',
     },
-    exerciseIds: ['3.1.1', '3.1.2', '3.1.5'],
+    exerciseIds: ['triage.1.1', 'triage.1.2', 'triage.1.5'],
   },
   {
     id: 'cap-kill-chain',
@@ -364,7 +364,7 @@ export const CAPABILITIES: Capability[] = [
     },
     // Deliberately spans two packages: you learn to sequence events while
     // triaging a queue, and you have to defend the sequence in an IR timeline.
-    exerciseIds: ['3.3.1', '3.3.4', 'ir.4.3'],
+    exerciseIds: ['triage.3.1', 'triage.3.4', 'ir.4.3'],
   },
   {
     id: 'cap-containment',

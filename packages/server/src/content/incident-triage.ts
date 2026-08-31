@@ -1,14 +1,14 @@
 /**
- * Package 3: Incident Detection and Alert Triage -- 21 exercises across 4 modules.
+ * Incident Detection and Alert Triage -- 21 exercises across 4 modules.
  *
  * WHAT CHANGES HERE
  *
- * Packages 1 and 2 taught a student to find a thing in a log. This package is
+ * Linux Fundamentals and Log Analysis taught a student to find a thing in a log. This package is
  * the first one where the answer is a judgement rather than a fact, and it is
  * graded accordingly: on precision and recall against ground truth, not on
  * whether a string matched.
  *
- * The queue a student works is the SAME 15 August that Package 2 taught them to
+ * The queue a student works is the SAME 15 August that Log Analysis taught them to
  * read by hand. They have already found the intrusion the slow way, one grep at
  * a time. Meeting it again as eight alerts inside eighty-two teaches the part
  * that actually transfers to the job: the detection stack saw nearly all of it
@@ -43,7 +43,7 @@ import type { Exercise, LearningPackage, Teach } from '@soc/shared';
 
 import { alertsInIncident, alertsRequiring, queueForStudent } from '../services/alerts.js';
 import { alertsWhereCopilotMisleads, alertsWithCopilotFlaw } from '../services/copilot.js';
-import { PACKAGE_3_PRACTICE } from './package3-practice.js';
+import { INCIDENT_TRIAGE_PRACTICE } from './incident-triage-practice.js';
 
 const INTRO = 'q-intro';
 const NOISY = 'q-noisy-rule';
@@ -77,7 +77,7 @@ function oneByRule(queueId: string, ruleId: string): string {
   if (found.length !== 1) {
     throw new Error(
       `Expected exactly one "${ruleId}" alert in queue "${queueId}", found ${found.length}. ` +
-        'The alert corpus and Package 3 have drifted apart.',
+        'The alert corpus and Alert Triage have drifted apart.',
     );
   }
   return found[0]!;
@@ -215,9 +215,9 @@ const ENRICHMENT_TEACH: Teach = {
 
 const MODULE_3_1: Exercise[] = [
   {
-    id: '3.1.1',
+    id: 'triage.1.1',
     moduleId: '3.1',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 1,
     title: 'Work your first queue',
     kind: 'alert-triage',
@@ -286,12 +286,12 @@ const MODULE_3_1: Exercise[] = [
       'for a while — closing an alert you are not certain about is uncomfortable, and doing it ' +
       'eighty times a shift is the job. The discomfort is why new operators escalate too much, and ' +
       'why tier-two queues stop being read.',
-    practice: PACKAGE_3_PRACTICE['3.1.1'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.1.1'] ?? [],
   },
   {
-    id: '3.1.2',
+    id: 'triage.1.2',
     moduleId: '3.1',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 2,
     title: 'Severity is an assertion, not a fact',
     kind: 'alert-triage',
@@ -340,12 +340,12 @@ const MODULE_3_1: Exercise[] = [
       'medium at 60%. This inversion is not a flaw in the simulation — severity is assigned by ' +
       'whoever wrote the rule, in advance, without knowing anything about the event that would ' +
       'eventually trigger it.',
-    practice: PACKAGE_3_PRACTICE['3.1.2'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.1.2'] ?? [],
   },
   {
-    id: '3.1.3',
+    id: 'triage.1.3',
     moduleId: '3.1',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 3,
     title: 'What a rule’s history tells you',
     kind: 'multiple-choice',
@@ -385,12 +385,12 @@ const MODULE_3_1: Exercise[] = [
       'This is the reasoning that decides whether you catch the intrusion in this package. The ' +
       'brute-force rule in the full night shift has been wrong 44 times out of 61 — and the 62nd ' +
       'firing is real. Base rates tell you how much scrutiny to spend, never whether to look.',
-    practice: PACKAGE_3_PRACTICE['3.1.3'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.1.3'] ?? [],
   },
   {
-    id: '3.1.4',
+    id: 'triage.1.4',
     moduleId: '3.1',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 4,
     title: 'Benign true positive versus false positive',
     kind: 'short-answer',
@@ -455,12 +455,12 @@ const MODULE_3_1: Exercise[] = [
       'Most SOC metrics dashboards get this wrong, and it has consequences: a team that reports a ' +
       '96% false positive rate will be told to disable rules, and the rules disabled will be the ' +
       'ones firing correctly on activity nobody bothered to allowlist.',
-    practice: PACKAGE_3_PRACTICE['3.1.4'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.1.4'] ?? [],
   },
   {
-    id: '3.1.5',
+    id: 'triage.1.5',
     moduleId: '3.1',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 5,
     title: 'The escalation budget',
     kind: 'alert-triage',
@@ -519,7 +519,7 @@ const MODULE_3_1: Exercise[] = [
       'Note what the budget did to your thinking: it forced you to ask what escalation is FOR. That ' +
       'question — what would the next person actually do with this — is the most useful one in ' +
       'triage, and a cap is just a way of making you ask it every time.',
-    practice: PACKAGE_3_PRACTICE['3.1.5'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.1.5'] ?? [],
   },
 ];
 
@@ -527,9 +527,9 @@ const MODULE_3_1: Exercise[] = [
 
 const MODULE_3_2: Exercise[] = [
   {
-    id: '3.2.1',
+    id: 'triage.2.1',
     moduleId: '3.2',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 1,
     title: 'The loudest rule in the queue',
     kind: 'alert-triage',
@@ -584,12 +584,12 @@ const MODULE_3_2: Exercise[] = [
       'One misconfigured host produced more failed-authentication alerts in three hours than the ' +
       'attacker produced all day. That is not a contrived ratio — it is the normal state of an ' +
       'untuned SOC, and it is why "we had an alert for that" appears in so many breach reports.',
-    practice: PACKAGE_3_PRACTICE['3.2.1'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.2.1'] ?? [],
   },
   {
-    id: '3.2.2',
+    id: 'triage.2.2',
     moduleId: '3.2',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 2,
     title: 'What the volume was hiding',
     kind: 'alert-triage',
@@ -641,12 +641,12 @@ const MODULE_3_2: Exercise[] = [
       'dispose of the known-noisy rule as a group, then triage what remains. Working the queue ' +
       'strictly top-to-bottom means arriving at the real alert having already read thirty-six ' +
       'near-identical ones, which is exactly when people stop reading.',
-    practice: PACKAGE_3_PRACTICE['3.2.2'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.2.2'] ?? [],
   },
   {
-    id: '3.2.3',
+    id: 'triage.2.3',
     moduleId: '3.2',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 3,
     title: 'Tune the rule, not the symptom',
     kind: 'short-answer',
@@ -707,12 +707,12 @@ const MODULE_3_2: Exercise[] = [
       'The pairing matters more than the exclusion. Exclusions that are not paired with a fix ' +
       'accumulate, nobody remembers why they exist, and three years later a genuine attack from a ' +
       'decommissioned monitoring range is invisible. Give every exclusion an owner and an expiry.',
-    practice: PACKAGE_3_PRACTICE['3.2.3'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.2.3'] ?? [],
   },
   {
-    id: '3.2.4',
+    id: 'triage.2.4',
     moduleId: '3.2',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 4,
     title: 'Justify a tuning decision',
     kind: 'alert-triage',
@@ -775,12 +775,12 @@ const MODULE_3_2: Exercise[] = [
     debrief:
       'This is the habit that separates operators who get promoted from ones who do not. The ' +
       'analysis is the same; the difference is whether it survives you closing the tab.',
-    practice: PACKAGE_3_PRACTICE['3.2.4'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.2.4'] ?? [],
   },
   {
-    id: '3.2.5',
+    id: 'triage.2.5',
     moduleId: '3.2',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 5,
     title: 'A rule that is simply wrong',
     kind: 'alert-triage',
@@ -833,7 +833,7 @@ const MODULE_3_2: Exercise[] = [
       'Note that this alert is rated HIGH severity, and that a queue containing it also contains a ' +
       'genuine intrusion rated MEDIUM. A student sorting by severity meets this one first and the ' +
       'compromise considerably later.',
-    practice: PACKAGE_3_PRACTICE['3.2.5'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.2.5'] ?? [],
   },
 ];
 
@@ -841,9 +841,9 @@ const MODULE_3_2: Exercise[] = [
 
 const MODULE_3_3: Exercise[] = [
   {
-    id: '3.3.1',
+    id: 'triage.3.1',
     moduleId: '3.3',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 1,
     title: 'Three alerts, one actor',
     kind: 'alert-triage',
@@ -900,12 +900,12 @@ const MODULE_3_3: Exercise[] = [
       'You have just done the thing correlation rules exist to automate — and you did it better, ' +
       'because you could see that "account created" and "account added to sudo" involved an account ' +
       'that did not exist an hour ago. Most correlation rules cannot express that.',
-    practice: PACKAGE_3_PRACTICE['3.3.1'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.3.1'] ?? [],
   },
   {
-    id: '3.3.2',
+    id: 'triage.3.2',
     moduleId: '3.3',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 2,
     title: 'The alert that changes everything',
     kind: 'alert-triage',
@@ -967,12 +967,12 @@ const MODULE_3_3: Exercise[] = [
       'In the real Ridgeline timeline this alert sat unread for six days. Not because anybody was ' +
       'negligent — because it was rated medium, on a rule with a mediocre history, in a queue ' +
       'containing 288 daily alerts from a monitoring box with a bad password.',
-    practice: PACKAGE_3_PRACTICE['3.3.2'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.3.2'] ?? [],
   },
   {
-    id: '3.3.3',
+    id: 'triage.3.3',
     moduleId: '3.3',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 3,
     title: 'Coincidence is not correlation',
     kind: 'multiple-choice',
@@ -1035,12 +1035,12 @@ const MODULE_3_3: Exercise[] = [
       'Incident reports are full of this error, and it is expensive: a coincidence written up as ' +
       'causation sends a networking team hunting a non-existent attack technique for a week, while ' +
       'the real capacity bug stays unfixed.',
-    practice: PACKAGE_3_PRACTICE['3.3.3'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.3.3'] ?? [],
   },
   {
-    id: '3.3.4',
+    id: 'triage.3.4',
     moduleId: '3.3',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 4,
     title: 'State the sequence',
     kind: 'short-answer',
@@ -1102,12 +1102,12 @@ const MODULE_3_3: Exercise[] = [
       'What you just wrote is the top of an incident report. In most SOCs the operator’s escalation ' +
       'note becomes the first paragraph of the eventual write-up almost verbatim, which is a good ' +
       'reason to write it as though it will be read by someone senior. It usually is.',
-    practice: PACKAGE_3_PRACTICE['3.3.4'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.3.4'] ?? [],
   },
   {
-    id: '3.3.5',
+    id: 'triage.3.5',
     moduleId: '3.3',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 5,
     title: 'What you cannot yet say',
     kind: 'short-answer',
@@ -1167,7 +1167,7 @@ const MODULE_3_3: Exercise[] = [
       'The staging of patient records happens at 11:06, thirty-one minutes after the last alert you ' +
       'saw here. An operator who assumed "no data alerts, so no data impact" would have been ' +
       'confidently wrong within the hour.',
-    practice: PACKAGE_3_PRACTICE['3.3.5'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.3.5'] ?? [],
   },
 ];
 
@@ -1175,9 +1175,9 @@ const MODULE_3_3: Exercise[] = [
 
 const MODULE_3_4: Exercise[] = [
   {
-    id: '3.4.1',
+    id: 'triage.4.1',
     moduleId: '3.4',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 1,
     title: 'Clear the night shift',
     kind: 'alert-triage',
@@ -1239,12 +1239,12 @@ const MODULE_3_4: Exercise[] = [
       'Eight alerts out of eighty-two, spread over three hours and five different rules, with the ' +
       'two most important ones rated medium and low. Every one of them fired at the time. The ' +
       'detection stack did its job; the queue is what failed.',
-    practice: PACKAGE_3_PRACTICE['3.4.1'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.4.1'] ?? [],
   },
   {
-    id: '3.4.2',
+    id: 'triage.4.2',
     moduleId: '3.4',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 2,
     title: 'The same shift, under budget',
     kind: 'alert-triage',
@@ -1300,12 +1300,12 @@ const MODULE_3_4: Exercise[] = [
       'Precision and recall are reported separately for a reason you have now felt: they fail in ' +
       'opposite directions, and a single blended score would have let you pass this by escalating ' +
       'half the queue. No real SOC scores triage that way either.',
-    practice: PACKAGE_3_PRACTICE['3.4.2'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.4.2'] ?? [],
   },
   {
-    id: '3.4.3',
+    id: 'triage.4.3',
     moduleId: '3.4',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 3,
     title: 'The quietest alert that mattered',
     kind: 'alert-triage',
@@ -1370,12 +1370,12 @@ const MODULE_3_4: Exercise[] = [
       'Missed persistence is the most common reason incidents reopen. Ridgeline would have reset ' +
       'the testuser password, congratulated themselves, and been re-compromised within fifteen ' +
       'minutes by a cron job nobody looked for — because the alert about it was rated low.',
-    practice: PACKAGE_3_PRACTICE['3.4.3'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.4.3'] ?? [],
   },
   {
-    id: '3.4.4',
+    id: 'triage.4.4',
     moduleId: '3.4',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 4,
     title: 'Leave the queue better than you found it',
     kind: 'alert-triage',
@@ -1434,12 +1434,12 @@ const MODULE_3_4: Exercise[] = [
       'been forty alerts instead of eighty-two, and the eight that mattered would have been a ' +
       'fifth of it rather than a tenth. Tuning is not housekeeping — it is the highest-leverage ' +
       'thing an operator does.',
-    practice: PACKAGE_3_PRACTICE['3.4.4'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.4.4'] ?? [],
   },
   {
-    id: '3.4.5',
+    id: 'triage.4.5',
     moduleId: '3.4',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 5,
     title: 'The handover note',
     kind: 'short-answer',
@@ -1499,12 +1499,12 @@ const MODULE_3_4: Exercise[] = [
       'Note how much of this is about what you did not finish. Handover notes that only report ' +
       'completed work are how a live intrusion goes quiet for a shift — the incoming analyst sees ' +
       'closed alerts and assumes resolution.',
-    practice: PACKAGE_3_PRACTICE['3.4.5'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.4.5'] ?? [],
   },
   {
-    id: '3.4.6',
+    id: 'triage.4.6',
     moduleId: '3.4',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 6,
     title: 'Your own triage procedure',
     kind: 'short-answer',
@@ -1569,7 +1569,7 @@ const MODULE_3_4: Exercise[] = [
       'You have just written the artefact that turns a good night into a survivable one — and the ' +
       'first genuinely portfolio-worthy thing in this package. An on-call procedure in your own ' +
       'words, defensible in an interview, is worth more to a hiring manager than a certificate.',
-    practice: PACKAGE_3_PRACTICE['3.4.6'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.4.6'] ?? [],
   },
 ];
 
@@ -1635,9 +1635,9 @@ const COPILOT_TEACH: Teach = {
 
 const MODULE_3_5: Exercise[] = [
   {
-    id: '3.5.1',
+    id: 'triage.5.1',
     moduleId: '3.5',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 1,
     title: 'Read what the assistant cannot see',
     kind: 'multiple-choice',
@@ -1680,12 +1680,12 @@ const MODULE_3_5: Exercise[] = [
       'reads exactly like a finding, and it is the sentence that turns a routine sudo alert into an ' +
       'escalation. You will meet this exact claim again in the next exercise, attached to an alert ' +
       'the copilot wants you to escalate.',
-    practice: PACKAGE_3_PRACTICE['3.5.1'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.5.1'] ?? [],
   },
   {
-    id: '3.5.2',
+    id: 'triage.5.2',
     moduleId: '3.5',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 2,
     title: 'Work the queue with a second opinion',
     kind: 'alert-triage',
@@ -1743,12 +1743,12 @@ const MODULE_3_5: Exercise[] = [
       'That is the easy version. Nobody tells you the number in a real shift, and the recommendation ' +
       'reads identically whether it is sound or not -- which is why the habit has to be reading the ' +
       'reasoning rather than sampling the verdicts.',
-    practice: PACKAGE_3_PRACTICE['3.5.2'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.5.2'] ?? [],
   },
   {
-    id: '3.5.3',
+    id: 'triage.5.3',
     moduleId: '3.5',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 3,
     title: 'The thing one alert at a time cannot show you',
     kind: 'alert-triage',
@@ -1828,12 +1828,12 @@ const MODULE_3_5: Exercise[] = [
       'not either: it is a question of what the assistant was handed. Anything that needs reading ' +
       'across alerts, across a shift, or across a change record is yours. That is most of what makes ' +
       'triage difficult, and it is the reason the job still exists.',
-    practice: PACKAGE_3_PRACTICE['3.5.3'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.5.3'] ?? [],
   },
   {
-    id: '3.5.4',
+    id: 'triage.5.4',
     moduleId: '3.5',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 4,
     title: 'A full shift, with an assistant that argues back',
     kind: 'alert-triage',
@@ -1930,12 +1930,12 @@ const MODULE_3_5: Exercise[] = [
       'the reason the operator is still accountable for the disposition. Asked in an interview how ' +
       'you use AI in triage, this is the answer worth giving: it drafts, you decide, and you can name ' +
       'the case where you overruled it.',
-    practice: PACKAGE_3_PRACTICE['3.5.4'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.5.4'] ?? [],
   },
   {
-    id: '3.5.5',
+    id: 'triage.5.5',
     moduleId: '3.5',
-    packageId: '3',
+    packageId: 'incident-triage',
     order: 5,
     title: 'Right answer, invented reasons',
     kind: 'short-answer',
@@ -2048,12 +2048,12 @@ const MODULE_3_5: Exercise[] = [
       'did not -- the copilot was right -- and it is still the mistake that does the most damage, ' +
       'because a fabricated attribution repeated once becomes a fact the whole incident is scoped ' +
       'around. Read the recommendation, then read why. They fail independently.',
-    practice: PACKAGE_3_PRACTICE['3.5.5'] ?? [],
+    practice: INCIDENT_TRIAGE_PRACTICE['triage.5.5'] ?? [],
   },
 ];
 
-export const PACKAGE_3: LearningPackage = {
-  id: '3',
+export const INCIDENT_TRIAGE: LearningPackage = {
+  id: 'incident-triage',
   order: 3,
   title: 'Incident Detection and Alert Triage',
   summary:
@@ -2067,11 +2067,11 @@ export const PACKAGE_3: LearningPackage = {
     'Read severity and confidence as claims to be tested rather than facts',
     'Write disposition notes, escalations, and a handover that somebody else can act on',
   ],
-  prerequisites: ['2'],
+  prerequisites: ['log-analysis'],
   modules: [
     {
       id: '3.1',
-      packageId: '3',
+      packageId: 'incident-triage',
       order: 1,
       title: 'Reading a queue',
       summary:
@@ -2080,7 +2080,7 @@ export const PACKAGE_3: LearningPackage = {
     },
     {
       id: '3.2',
-      packageId: '3',
+      packageId: 'incident-triage',
       order: 2,
       title: 'Noise and tuning',
       summary:
@@ -2090,7 +2090,7 @@ export const PACKAGE_3: LearningPackage = {
     },
     {
       id: '3.3',
-      packageId: '3',
+      packageId: 'incident-triage',
       order: 3,
       title: 'Correlation',
       summary:
@@ -2100,7 +2100,7 @@ export const PACKAGE_3: LearningPackage = {
     },
     {
       id: '3.4',
-      packageId: '3',
+      packageId: 'incident-triage',
       order: 4,
       title: 'A full shift',
       summary:
@@ -2110,7 +2110,7 @@ export const PACKAGE_3: LearningPackage = {
     },
     {
       id: '3.5',
-      packageId: '3',
+      packageId: 'incident-triage',
       order: 5,
       title: 'Working with the copilot',
       summary:

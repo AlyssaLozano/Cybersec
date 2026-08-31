@@ -26,7 +26,7 @@ export const FOUNDATIONS: Foundation[] = [
     title: 'Linux Fundamentals',
     summary:
       'Move around a Linux server, work with files, read logs, and search them with grep and pipes. The substrate almost all security tooling sits on.',
-    packageId: '1',
+    packageId: 'linux-fundamentals',
     tools: ['scripting'],
   },
   {
@@ -34,7 +34,7 @@ export const FOUNDATIONS: Foundation[] = [
     title: 'Log Analysis and Parsing',
     summary:
       'Read the logs a real server produces, filter thousands of lines down to the few that matter, and pull structured facts out of unstructured text.',
-    packageId: '2',
+    packageId: 'log-analysis',
     tools: ['siem-search'],
   },
   {
@@ -66,7 +66,7 @@ export const FOUNDATIONS: Foundation[] = [
     title: 'Networking Basics',
     summary:
       'Addresses, ports, routing, and DNS from the command line. Work out what a host is talking to, and whether it should be.',
-    packageId: '4',
+    packageId: 'networking',
     tools: ['packet-analysis'],
   },
   {
@@ -98,7 +98,7 @@ export const FOUNDATIONS: Foundation[] = [
     title: 'Security Incident Concepts',
     summary:
       'Severity, triage, correlation, and escalation. The judgement layer that turns log reading into a decision about whether something is real.',
-    packageId: '3',
+    packageId: 'incident-triage',
     tools: ['case-management'],
   },
   /*

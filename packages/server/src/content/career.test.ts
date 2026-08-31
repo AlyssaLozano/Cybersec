@@ -98,7 +98,7 @@ describe('foundations are per-track, not universal', () => {
   /*
    * Asserted by property, not as a frozen array.
    *
-   * This previously read `toEqual(['1', '2', '4', '3'])`, which made adding a
+   * This previously read as a frozen positional array, which made adding a
    * package to the SOC track an edit to this file -- the positional-assertion
    * problem, in the one test that could not avoid caring about order. What
    * actually matters is that the order follows the track's declared foundations
@@ -114,8 +114,8 @@ describe('foundations are per-track, not universal', () => {
     expect(new Set(soc).size, 'a package should not be reachable twice').toBe(soc.length);
     // Spot-checks of the ordering the track declares, which no reordering of
     // PACKAGES can satisfy by accident.
-    expect(soc.indexOf('1')).toBeLessThan(soc.indexOf('2'));
-    expect(soc.indexOf('3')).toBeLessThan(soc.indexOf('incident-response'));
+    expect(soc.indexOf('linux-fundamentals')).toBeLessThan(soc.indexOf('log-analysis'));
+    expect(soc.indexOf('incident-triage')).toBeLessThan(soc.indexOf('incident-response'));
 
     expect(trackPackages('privacy')).toEqual([]);
   });

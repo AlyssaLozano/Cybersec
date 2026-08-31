@@ -1,7 +1,7 @@
 /**
- * Optional practice drills for Package 3.
+ * Optional practice drills for Alert Triage.
  *
- * Same rules as Packages 1 and 2: drills never gate progression, never appear in
+ * Same rules as Linux Fundamentals and Log Analysis: drills never gate progression, never appear in
  * the completion percentage, and never affect a pass. They exist for repetition,
  * so the skill is identical and only the target changes.
  *
@@ -49,10 +49,10 @@ const NOISY_MONITORING = idsByRule(NOISY, 'auth-failed-password');
 const WINDOW_INCIDENT = alertsRequiring(WINDOW, 'escalate');
 const WINDOW_CONNTRACK = idsByRule(WINDOW, 'net-conntrack-exhaustion');
 
-export const PACKAGE_3_PRACTICE: Record<string, PracticeItem[]> = {
-  '3.1.1': [
+export const INCIDENT_TRIAGE_PRACTICE: Record<string, PracticeItem[]> = {
+  'triage.1.1': [
     {
-      id: '3.1.1-p1',
+      id: 'triage.1.1-p1',
       prompt:
         'Same queue. This time dismiss only the firewall-block alerts — the ones where an inbound ' +
         'connection to a closed port was dropped. Leave everything else undecided.',
@@ -70,7 +70,7 @@ export const PACKAGE_3_PRACTICE: Record<string, PracticeItem[]> = {
       ],
     },
     {
-      id: '3.1.1-p2',
+      id: 'triage.1.1-p2',
       prompt:
         'Dismiss every alert in this queue whose correct disposition is closure without a rule ' +
         'change — the ordinary administration and the blocked scanning, but not the noisy rule.',
@@ -89,9 +89,9 @@ export const PACKAGE_3_PRACTICE: Record<string, PracticeItem[]> = {
     },
   ],
 
-  '3.1.2': [
+  'triage.1.2': [
     {
-      id: '3.1.2-p1',
+      id: 'triage.1.2-p1',
       prompt:
         'In the full night-shift queue, find every alert rated HIGH severity and decide each one on ' +
         'its content rather than its rating. Escalate only those that genuinely warrant it.',
@@ -117,9 +117,9 @@ export const PACKAGE_3_PRACTICE: Record<string, PracticeItem[]> = {
     },
   ],
 
-  '3.1.5': [
+  'triage.1.5': [
     {
-      id: '3.1.5-p1',
+      id: 'triage.1.5-p1',
       prompt:
         'The night-shift queue with a much harder cap: at most three escalations. You cannot cover ' +
         'the whole intrusion — choose the three that would most change what happens next, and ' +
@@ -148,9 +148,9 @@ export const PACKAGE_3_PRACTICE: Record<string, PracticeItem[]> = {
     },
   ],
 
-  '3.2.1': [
+  'triage.2.1': [
     {
-      id: '3.2.1-p1',
+      id: 'triage.2.1-p1',
       prompt:
         'Flag for tuning every alert from the repeating failed-authentication rule, and nothing ' +
         'else in this queue.',
@@ -169,9 +169,9 @@ export const PACKAGE_3_PRACTICE: Record<string, PracticeItem[]> = {
     },
   ],
 
-  '3.2.5': [
+  'triage.2.5': [
     {
-      id: '3.2.5-p1',
+      id: 'triage.2.5-p1',
       prompt:
         'In the twenty-minute correlation window, find the alert describing connection-tracking ' +
         'exhaustion and give it the disposition its evidence supports.',
@@ -191,9 +191,9 @@ export const PACKAGE_3_PRACTICE: Record<string, PracticeItem[]> = {
     },
   ],
 
-  '3.3.1': [
+  'triage.3.1': [
     {
-      id: '3.3.1-p1',
+      id: 'triage.3.1-p1',
       prompt:
         'Same window, inverted: dismiss or flag everything that does NOT belong to the intrusion, ' +
         'leaving only the incident alerts escalated.',
@@ -212,9 +212,9 @@ export const PACKAGE_3_PRACTICE: Record<string, PracticeItem[]> = {
     },
   ],
 
-  '3.4.1': [
+  'triage.4.1': [
     {
-      id: '3.4.1-p1',
+      id: 'triage.4.1-p1',
       prompt:
         'Night-shift queue, command-and-control only: escalate the alert describing repeating ' +
         'outbound connections to an uncategorised destination, and nothing else.',
@@ -232,7 +232,7 @@ export const PACKAGE_3_PRACTICE: Record<string, PracticeItem[]> = {
       ],
     },
     {
-      id: '3.4.1-p2',
+      id: 'triage.4.1-p2',
       prompt:
         'Escalate every alert in the night-shift queue that involves the backdoor account created ' +
         'during the intrusion, and nothing else.',

@@ -61,7 +61,7 @@ const terminalExercises = ALL_EXERCISES.filter((exercise) => exercise.kind === '
 /*
  * Catalogue assertions are keyed by package, never by position.
  *
- * A positional array -- `expect(ids).toEqual(['1','2','3','4'])` -- fails the
+ * A positional array -- `expect(ids).toEqual([...])` in package order -- fails the
  * moment anybody adds a package, whether or not they touched the ones already
  * there. That turns every new package into an edit of somebody else's
  * expectations, which is how two people writing two packages end up fighting
@@ -72,9 +72,10 @@ const terminalExercises = ALL_EXERCISES.filter((exercise) => exercise.kind === '
  * package's size.
  */
 const EXPECTED_EXERCISE_COUNTS: Record<string, number> = {
-  '1': 22,
-  '2': 14,
-  '3': 26,
+  'linux-fundamentals': 22,
+  'log-analysis': 14,
+  'incident-triage': 26,
+  networking: 15,
 };
 
 function exerciseCount(packageId: string): number {
@@ -101,7 +102,9 @@ describe('catalogue integrity', () => {
   }
 
   it('declares the log-analysis package as depending on the Linux one', () => {
-    expect(PACKAGES.find((pkg) => pkg.id === '2')!.prerequisites).toEqual(['1']);
+    expect(PACKAGES.find((pkg) => pkg.id === 'log-analysis')!.prerequisites).toEqual([
+      'linux-fundamentals',
+    ]);
   });
 
   it('gives every exercise a unique id', () => {

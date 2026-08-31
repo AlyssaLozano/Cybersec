@@ -6,13 +6,13 @@
  * The numbered packages (1-4) keep their ids because progress rows reference
  * them and CLAUDE.md makes ids permanent. Every package written from here on
  * gets a NAME instead, because numbers collide the moment two people are adding
- * content at the same time -- which is exactly how this package and Package 4
+ * content at the same time -- which is exactly how this package and Networking
  * were written. Exercise ids follow: 'ir.1.1' rather than '5.1.1'.
  *
  * THE SAME INCIDENT, FOR THE THIRD TIME
  *
- * Package 2 taught students to find this intrusion by hand, one grep at a time.
- * Package 3 showed it to them again as eight alerts inside eighty-two. Here they
+ * Log Analysis taught students to find this intrusion by hand, one grep at a time.
+ * Alert Triage showed it to them again as eight alerts inside eighty-two. Here they
  * have to act on it: the attacker is still connected, an archive of patient
  * exports is sitting in /tmp/.cache, and somebody has to decide what happens in
  * the next five minutes.
@@ -1119,7 +1119,7 @@ const MODULE_4: Exercise[] = [
       ],
     },
     hints: [
-      'You already know the sequence from Packages 2 and 3: brute force, login, account, privilege, ' +
+      'You already know the sequence from Log Analysis and Alert Triage: brute force, login, account, privilege, ' +
         'cron, beacon, key login, archive.',
       'Start earlier than the successful login. The brute force from 09:12 is the first evidence.',
       'End with containment, and note when detection actually happened versus when the events did.',
@@ -1237,7 +1237,7 @@ export const INCIDENT_RESPONSE: LearningPackage = {
   order: 5,
   title: 'Incident Response and Remediation',
   summary:
-    'The intrusion you read in Package 2 and triaged in Package 3, now happening to you. Contain it ' +
+    'The intrusion you read in Log Analysis and triaged in Alert Triage, now happening to you. Contain it ' +
     'without destroying the evidence, find every mechanism the attacker left behind, work out what ' +
     'was taken, and write the things other people will act on.',
   outcomes: [
@@ -1248,7 +1248,7 @@ export const INCIDENT_RESPONSE: LearningPackage = {
     'Brief executives and legal in language they can act on',
     'Turn one incident into indicators, a root cause, and a playbook',
   ],
-  prerequisites: ['3'],
+  prerequisites: ['incident-triage'],
   modules: [
     {
       id: 'ir.1',
@@ -1265,7 +1265,7 @@ export const INCIDENT_RESPONSE: LearningPackage = {
       order: 2,
       title: 'Evidence on the host',
       summary:
-        'Four persistence mechanisms and the way in, found with the same commands Package 1 taught.',
+        'Four persistence mechanisms and the way in, found with the same commands Linux Fundamentals taught.',
       exercises: MODULE_2,
     },
     {
