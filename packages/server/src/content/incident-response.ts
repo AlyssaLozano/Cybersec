@@ -162,6 +162,23 @@ const MODULE_1: Exercise[] = [
           'One of your choices either destroys volatile evidence or tips the attacker off without ' +
           'removing their access. Both make the incident worse than leaving it alone for five minutes.',
       },
+      /*
+       * The reasoning is graded here, not just the choice. Picking the right
+       * option for the wrong reason is the failure this module is about: an
+       * analyst who isolates because "isolating is the safe default" will pull
+       * the power the day the runbook does not cover the situation.
+       */
+      {
+        type: 'decision-justifies',
+        conceptGroups: [
+          ['memory', 'ram', 'volatil'],
+          ['evidence', 'forensic', 'artefact', 'artifact', 'proof'],
+          ['isolat', 'network', 'contain', 'access'],
+        ],
+        hint:
+          'Say why in the box: what is lost if you act in the wrong order, and what isolating buys ' +
+          'you that a shutdown does not.',
+      },
     ],
     debrief:
       'Pulling the power is the single most common response to a live intrusion, and it is why so ' +

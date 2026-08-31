@@ -9,7 +9,13 @@
  * nothing else in the system changes.
  */
 
-import type { Exercise, LearningModule, LearningPackage, PackageSummary } from '@soc/shared';
+import type {
+  AnswerFormat,
+  Exercise,
+  LearningModule,
+  LearningPackage,
+  PackageSummary,
+} from '@soc/shared';
 
 import { queueForStudent } from '../services/alerts.js';
 import { pointWithAnswers } from '../services/incidents.js';
@@ -315,6 +321,44 @@ export function packageSummaries(): PackageSummary[] {
 }
 
 /**
+ * How much text an exercise's free-text answer may be, and what shape.
+ *
+ * DERIVED FROM THE RUBRIC RATHER THAN AUTHORED
+ *
+ * The bound has to scale with what is being asked: "was this a false positive"
+ * needs two sentences, the incident timeline in ir.4.3 needs six ideas in
+ * order. Deriving the ceiling from the number of concepts the rubric requires
+ * keeps those in proportion automatically, and means the 24 existing free-text
+ * exercises became bounded without anyone hand-authoring 24 limits that would
+ * then drift from the rubrics they are supposed to match.
+ *
+ * An exercise can still override with `answerFormat` where the default is
+ * wrong. Nothing here reveals content -- only length and shape.
+ */
+export function answerFormatFor(exercise: Exercise): AnswerFormat | undefined {
+  if (exercise.answerFormat) return exercise.answerFormat;
+
+  const groups = exercise.checks.flatMap((check) =>
+    check.type === 'answer-mentions' || check.type === 'decision-justifies'
+      ? check.conceptGroups
+      : [],
+  );
+  if (groups.length === 0) return undefined;
+
+  const ideas = groups.length;
+  return {
+    // Roughly a sentence of room per idea, plus a little to connect them.
+    maxChars: 240 + 160 * ideas,
+    // Enough that a bare noun cannot satisfy a multi-part question.
+    minChars: 40 + 20 * ideas,
+    shape:
+      ideas <= 2
+        ? 'One or two sentences. Make a claim and say why.'
+        : `${ideas <= 4 ? 'Two to four' : 'Four to six'} sentences covering ${ideas} distinct points. Compression is the skill here -- an essay is not a better answer.`,
+  };
+}
+
+/**
  * The student-facing view of an exercise.
  *
  * Teaching material and hints ship freely -- they are the point, and withholding
@@ -393,5 +437,13 @@ export function toStudentView(exercise: Exercise) {
         check.type === 'defence-cost-budget' ||
         check.type === 'defence-includes',
     ),
+    /**
+     * How long a free-text answer may be, and the shape asked for.
+     *
+     * Safe to ship, and it has to ship: a limit the browser cannot see is a
+     * limit the student discovers by having their answer rejected after
+     * writing it. States length and shape only, never content.
+     */
+    answerFormat: answerFormatFor(exercise),
   };
 }

@@ -29,6 +29,9 @@ import { ALL_EXERCISES, toStudentView } from './index.js';
  * new one needs the same before it goes in here.
  */
 const ALLOWED_KEYS = [
+  // Length and shape of a free-text answer. Reveals no content -- see
+  // `answerFormatFor`, which derives it from how many ideas the rubric wants.
+  'answerFormat',
   'copilotEnabled',
   'decisionPointId',
   'defencesConfigurable',

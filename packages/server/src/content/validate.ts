@@ -16,7 +16,9 @@
 import type {
   AlertTruth,
   Check,
+  CheckReport,
   CollaborationInput,
+  ConceptReport,
   DecisionSubmission,
   DefenceId,
   Evaluation,
@@ -410,15 +412,149 @@ function runCheck(check: Check, attempt: Attempt): FailedCheck | null {
   }
 }
 
+/**
+ * Plain-language statement of what a check required.
+ *
+ * Written for the student, not the author: "counted the failed logins and got
+ * 1,847", not "output-numeric equals 1847". This is what makes a *passing*
+ * submission informative -- until now a pass said only "Correct.", which tells
+ * somebody they were right without telling them what they were right about.
+ *
+ * Exhaustive on purpose. Adding a `Check` variant without describing it is a
+ * compile error, so a new check type cannot ship with a blank explanation.
+ */
+function describeCheck(check: Check): string {
+  switch (check.type) {
+    case 'command-matches':
+      return `Ran one of: ${check.anyOf.join(', ')}`;
+    case 'command-has-flag':
+      return `Passed ${check.flags.join(' and ')} to ${check.command}`;
+    case 'command-uses-pipe':
+      return 'Chained one command into another with a pipe';
+    case 'output-contains':
+      return `Output included "${check.text}"`;
+    case 'output-excludes':
+      return `Output was filtered so that "${check.text}" no longer appears`;
+    case 'output-matches':
+      return 'Output matched the expected shape';
+    case 'output-line-count':
+      return `Output was exactly ${check.count} lines`;
+    case 'output-numeric': {
+      if (check.equals !== undefined) return `Answered with the number ${check.equals}`;
+      const bounds = [
+        check.min !== undefined ? `at least ${check.min}` : null,
+        check.max !== undefined ? `at most ${check.max}` : null,
+      ].filter(Boolean);
+      return `Answered with a number ${bounds.join(' and ')}`;
+    }
+    case 'fs-exists':
+      return check.exists ? `${check.path} exists` : `${check.path} is gone`;
+    case 'cwd-equals':
+      return `Ended up in ${check.path}`;
+    case 'choice-equals':
+      return 'Selected the correct option';
+    case 'answer-mentions':
+      return `Answer covered all ${check.conceptGroups.length} required ideas`;
+    case 'triage-selection':
+      return `Gave ${check.alertIds.length} specific alert(s) the disposition "${check.decision}"${
+        check.forbidExtra ? ', and gave it to nothing else' : ''
+      }`;
+    case 'triage-accuracy':
+      return 'Dispositioned the queue accurately enough against ground truth';
+    case 'triage-budget':
+      return `Used "${check.decision}" on at most ${check.max} alerts`;
+    case 'triage-justifies':
+      return `Justified the call on ${check.alertId} in terms of all ${check.conceptGroups.length} required ideas`;
+    case 'copilot-consulted':
+      return `Asked the copilot about at least ${check.minAlerts} alert(s) before deciding`;
+    case 'copilot-override':
+      return 'Disagreed with the copilot where it was wrong';
+    case 'copilot-collaboration':
+      return 'Worked with the copilot rather than deferring to or ignoring it';
+    case 'decision-selects':
+      return `Chose the sound option(s)${check.forbidExtra ? ' and nothing beyond them' : ''}`;
+    case 'decision-avoids':
+      return 'Avoided every harmful option';
+    case 'decision-orders':
+      return 'Sequenced the actions in a defensible order';
+    case 'decision-justifies':
+      return `Explained the decision in terms of all ${check.conceptGroups.length} required ideas`;
+    case 'probe-bypass':
+      return 'Got a payload past the deployed defences';
+    case 'probe-budget':
+      return `Used at most ${check.max} probes`;
+    case 'probe-all-blocked':
+      return 'Every probe was stopped by the controls in place';
+    case 'probe-carrier-variety':
+      return 'Tried genuinely different carriers rather than variations of one';
+    case 'defence-blocks-suite':
+      return 'The controls deployed stopped the attack suite';
+    case 'defence-cost-budget':
+      return `Kept the deployed controls within a cost of ${check.max}`;
+    case 'defence-includes':
+      return 'Deployed the control the finding calls for';
+    default: {
+      const unreachable: never = check;
+      throw new Error(`Undescribed check type: ${JSON.stringify(unreachable)}`);
+    }
+  }
+}
+
+/** The free text a check reads, or null when it does not read any. */
+function textFor(check: Check, attempt: Attempt): string | null {
+  switch (check.type) {
+    case 'answer-mentions':
+      return attempt.answerText ?? '';
+    case 'decision-justifies':
+      return attempt.decision?.justification ?? '';
+    case 'triage-justifies':
+      return (attempt.triage ?? []).find((item) => item.alertId === check.alertId)?.justification ?? '';
+    default:
+      return null;
+  }
+}
+
+/**
+ * Per-concept breakdown for a free-text check.
+ *
+ * This is the whole point of the reporting layer. A text check is an AND over
+ * concept groups; failing it told the student "not quite" and left them to
+ * guess which of four ideas was missing. Now each concept says whether it
+ * landed and on which word.
+ */
+function conceptReportsFor(check: Check, attempt: Attempt): ConceptReport[] | undefined {
+  const raw = textFor(check, attempt);
+  if (raw === null) return undefined;
+  const groups = (check as { conceptGroups?: string[][] }).conceptGroups;
+  if (!groups) return undefined;
+
+  const text = raw.toLowerCase();
+  return groups.map((synonyms) => {
+    const matched = synonyms.find((word) => text.includes(word.toLowerCase())) ?? null;
+    return { accepted: synonyms, matched, hit: matched !== null };
+  });
+}
+
 export function evaluate(exercise: Exercise, attempt: Attempt, attemptNumber: number): Evaluation {
   const failed: FailedCheck[] = [];
+  const reports: CheckReport[] = [];
+
   for (const check of exercise.checks) {
     const failure = runCheck(check, attempt);
     if (failure) failed.push(failure);
+
+    const concepts = conceptReportsFor(check, attempt);
+    reports.push({
+      type: check.type,
+      looksFor: describeCheck(check),
+      passed: failure === null,
+      ...(failure ? { hint: failure.hint } : {}),
+      ...(concepts ? { concepts } : {}),
+    });
   }
 
   if (failed.length === 0) {
-    return { passed: true, summary: 'Correct.', failed: [], attempt: attemptNumber };
+    return { passed: true, summary: 'Correct.', failed: [], reports, attempt: attemptNumber };
   }
 
   // A command the shell rejected outright is nearly always the real problem, so
@@ -430,5 +566,5 @@ export function evaluate(exercise: Exercise, attempt: Attempt, attemptNumber: nu
         ? 'Not quite yet.'
         : `Not quite yet -- ${failed.length} things to fix.`;
 
-  return { passed: false, summary, failed, attempt: attemptNumber };
+  return { passed: false, summary, failed, reports, attempt: attemptNumber };
 }

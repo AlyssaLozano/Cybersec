@@ -302,8 +302,43 @@ export interface Exercise {
   suiteId?: string;
   /** Shown after a pass, to connect the mechanic to real SOC work. */
   debrief?: string;
+  /**
+   * Bounds and required shape for a free-text answer.
+   *
+   * Authored only where the default is wrong -- see `answerFormatFor()`, which
+   * derives one from the exercise's own rubric.
+   */
+  answerFormat?: AnswerFormat;
   /** Optional extra drills on the same skill, offered after a pass. */
   practice: PracticeItem[];
+}
+
+/**
+ * What a free-text answer is allowed to be.
+ *
+ * WHY FREE TEXT IS BOUNDED AT ALL
+ *
+ * An unbounded box invites an essay, and an essay is the worst possible input
+ * to a rubric: a student who writes six paragraphs will hit every keyword by
+ * accident and learn nothing, while the check reports a pass. A tight bound
+ * forces a claim instead of a spray, which is both the skill being taught --
+ * incident writing is compression under time pressure -- and the only form a
+ * rubric can honestly grade.
+ *
+ * `minChars` exists for the opposite failure: a two-word answer that happens to
+ * contain the right noun.
+ *
+ * Shipping this to the browser is safe. It states the shape expected, never the
+ * content: "two sentences: the decision, and its cost" tells nobody what the
+ * decision is.
+ */
+export interface AnswerFormat {
+  /** Hard cap, enforced in the browser and again on the server. */
+  maxChars: number;
+  /** Below this the answer is too thin to be assessed. */
+  minChars: number;
+  /** The shape being asked for, shown above the box. */
+  shape: string;
 }
 
 /**
