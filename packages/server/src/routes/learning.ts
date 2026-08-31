@@ -5,7 +5,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 
-import { API_ERROR_CODES } from '@soc/shared';
+import { API_ERROR_CODES, DEFENCES, PROBE_CHANNELS, TRIAGE_DECISIONS } from '@soc/shared';
 
 import {
   getExercise,
@@ -20,6 +20,14 @@ import { CERT_PHILOSOPHY, resolveCertifications } from '../content/certification
 import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
 import { canAccess, getOverview, getPracticeState } from '../services/progress.js';
 import { openSession, resetSession, runCommand } from '../services/terminalSession.js';
+import { queueForStudent } from '../services/alerts.js';
+import { pointForStudent } from '../services/incidents.js';
+import { analysisFor } from '../services/copilot.js';
+import { consultedAlerts, recordConsultation } from '../services/copilotConsults.js';
+import { AI_PATH_NOTE, PLANS, PRICING_PHILOSOPHY } from '../content/pricing.js';
+import { modelCard, postMortemFor, probe, suite } from '../services/modelLab.js';
+import { portfolioFor } from '../services/portfolio.js';
+import { submitAnswer } from '../services/submission.js';
 import { prisma } from '../db/client.js';
 
 export const learningRouter = Router();
@@ -89,6 +97,30 @@ learningRouter.get(
   }),
 );
 
+/**
+ * What the platform costs, with the reasoning attached to every number.
+ *
+ * Served from content rather than configuration so the justification travels
+ * with the price. See content/pricing.ts.
+ */
+learningRouter.get('/pricing', (_request, response) => {
+  sendOk(response, { plans: PLANS, philosophy: PRICING_PHILOSOPHY, aiPathNote: AI_PATH_NOTE });
+});
+
+/**
+ * The student's AI Security portfolio.
+ *
+ * Recomputed from progress rows on every request rather than stored, so there
+ * is no second place a claim could be edited and it cannot drift away from what
+ * the student actually passed. See services/portfolio.ts.
+ */
+learningRouter.get(
+  '/portfolio/ai-security',
+  asyncRoute(async (request, response) => {
+    sendOk(response, await portfolioFor(userIdOf(request)));
+  }),
+);
+
 learningRouter.get('/packages', (_request, response) => {
   sendOk(response, { packages: packageSummaries() });
 });
@@ -139,12 +171,13 @@ learningRouter.get(
       );
     }
 
-    const [session, progress, practiceState] = await Promise.all([
+    const [session, progress, practiceState, consultedAlertIds] = await Promise.all([
       openSession(userId, exerciseId),
       prisma.exerciseProgress.findUnique({
         where: { userId_exerciseId: { userId, exerciseId } },
       }),
       getPracticeState(userId, exerciseId),
+      consultedAlerts(userId, exerciseId),
     ]);
 
     const passed = progress?.status === 'passed';
@@ -161,6 +194,9 @@ learningRouter.get(
       // Restore hints the student already unlocked, so a reload does not hide
       // help they have been relying on.
       hints: exercise.hints.slice(0, progress?.hintsRevealed ?? 0),
+      // Likewise for copilot consultations: a reload must not make the queue
+      // look as though nothing was ever asked about.
+      consultedAlertIds,
       // Drill prompts ship freely; their checks and answers do not.
       practice: exercise.practice.map((drill) => ({ id: drill.id, prompt: drill.prompt })),
       practiceState,
@@ -315,5 +351,335 @@ learningRouter.get(
   '/progress',
   asyncRoute(async (request, response) => {
     sendOk(response, await getOverview(userIdOf(request)));
+  }),
+);
+
+/**
+ * The alert queue for an exercise.
+ *
+ * Returns the queue exactly as an operator would see it in a console. The
+ * ground truth lives in a different structure that this handler never touches --
+ * see services/alerts.ts. Shipping it would be the alert-queue equivalent of
+ * shipping the exercise's checks.
+ */
+learningRouter.get(
+  '/exercises/:exerciseId/queue',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const exerciseId = request.params.exerciseId!;
+
+    const exercise = getExercise(exerciseId);
+    if (!exercise) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such exercise.');
+    if (!(await canAccess(userId, exerciseId))) {
+      throw new HttpError(403, API_ERROR_CODES.exerciseLocked, 'That exercise is not unlocked yet.');
+    }
+    if (!exercise.queueId) {
+      throw new HttpError(400, API_ERROR_CODES.validationFailed, 'That exercise has no alert queue.');
+    }
+
+    const queue = queueForStudent(exercise.queueId);
+    if (!queue) {
+      throw new HttpError(500, API_ERROR_CODES.internal, 'The alert queue for this exercise is missing.');
+    }
+
+    sendOk(response, { queue });
+  }),
+);
+
+/**
+ * The AI copilot's analysis of one alert.
+ *
+ * Served one alert at a time, and the request is RECORDED. Both of those are
+ * deliberate.
+ *
+ * Serving the whole queue's analyses at once would be cheaper and would destroy
+ * the thing being taught: "did you ask the assistant about this alert before
+ * dispositioning it" is graded, and it cannot be graded if every analysis
+ * arrives whether or not anybody reads one.
+ *
+ * Recording it here rather than trusting a client report is the same reasoning
+ * that keeps the terminal and the exercise checks on the server. A student can
+ * see their own consultation count; they cannot write it.
+ *
+ * The response carries `CopilotAnalysis` and nothing else. Whether the analysis
+ * is any good lives in the flaw table, which this handler never touches -- see
+ * services/copilot.ts.
+ */
+learningRouter.get(
+  '/exercises/:exerciseId/copilot/:alertId',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const exerciseId = request.params.exerciseId!;
+    const alertId = request.params.alertId!;
+
+    const exercise = getExercise(exerciseId);
+    if (!exercise) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such exercise.');
+    if (!(await canAccess(userId, exerciseId))) {
+      throw new HttpError(403, API_ERROR_CODES.exerciseLocked, 'That exercise is not unlocked yet.');
+    }
+    if (!exercise.queueId) {
+      throw new HttpError(400, API_ERROR_CODES.validationFailed, 'That exercise has no alert queue.');
+    }
+
+    // The alert must belong to THIS exercise's queue. Without this, a student
+    // could pull analyses for a queue they have not unlocked, and -- worse --
+    // rack up consultations against an exercise they are not working.
+    const inQueue = queueForStudent(exercise.queueId)?.alerts.some((alert) => alert.id === alertId);
+    if (!inQueue) {
+      throw new HttpError(404, API_ERROR_CODES.notFound, 'That alert is not in this exercise’s queue.');
+    }
+
+    const analysis = analysisFor(alertId);
+    if (!analysis) {
+      throw new HttpError(500, API_ERROR_CODES.internal, 'The copilot has no analysis for that alert.');
+    }
+
+    await recordConsultation(userId, exerciseId, alertId);
+
+    sendOk(response, {
+      analysis,
+      /** So the UI can show progress against a `copilot-consulted` requirement. */
+      consultedAlertIds: await consultedAlerts(userId, exerciseId),
+    });
+  }),
+);
+
+const submitSchema = z.object({
+  /** Multiple-choice selections. */
+  selectedOptionIds: z.array(z.string().max(64)).max(32).optional(),
+  /** Short-answer text. Capped generously -- these are paragraphs, not essays. */
+  answerText: z.string().max(8_000).optional(),
+  /** Alert triage dispositions. The cap sits above the largest queue. */
+  triage: z
+    .array(
+      z.object({
+        alertId: z.string().max(32),
+        decision: z.enum(TRIAGE_DECISIONS),
+        justification: z.string().max(2_000).optional(),
+      }),
+    )
+    .max(500)
+    .optional(),
+  /** Incident decision: what was chosen, or in what order it would be done. */
+  decision: z
+    .object({
+      optionIds: z.array(z.string().max(64)).max(32).optional(),
+      ordering: z.array(z.string().max(64)).max(32).optional(),
+      justification: z.string().max(4_000).optional(),
+    })
+    .optional(),
+  /**
+   * Model Lab: the payloads the student is putting their name to.
+   *
+   * The cap is small on purpose. Several exercises impose a tighter budget of
+   * their own, and a submission is evidence for a finding rather than a test
+   * log -- there is no exercise here for which fifty payloads is the right
+   * answer.
+   */
+  probes: z
+    .array(
+      z.object({
+        payload: z.string().max(20_000),
+        channel: z.enum(PROBE_CHANNELS).optional(),
+        rationale: z.string().max(1_000).optional(),
+      }),
+    )
+    .max(50)
+    .optional(),
+  /** Model Lab: the defence set the student chose, for hardening exercises. */
+  defences: z.array(z.enum(DEFENCES)).max(DEFENCES.length).optional(),
+  practiceId: z.string().max(64).optional(),
+  regrade: z.boolean().optional(),
+});
+
+/**
+ * Answer an exercise that is not worked in the terminal.
+ *
+ * Triage, multiple-choice, and short-answer all land here. As with the terminal
+ * path, a pass releases the worked solution and the debrief -- and for triage,
+ * the per-alert explanation of everything that was got wrong.
+ */
+learningRouter.post(
+  '/exercises/:exerciseId/submit',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const exerciseId = request.params.exerciseId!;
+
+    if (!(await canAccess(userId, exerciseId))) {
+      throw new HttpError(403, API_ERROR_CODES.exerciseLocked, 'That exercise is not unlocked yet.');
+    }
+
+    const { practiceId, regrade, ...answer } = submitSchema.parse(request.body);
+    const result = await submitAnswer(userId, exerciseId, answer, { practiceId, regrade });
+
+    const exercise = getExercise(exerciseId)!;
+    sendOk(response, {
+      ...result,
+      ...(result.evaluation.passed && !practiceId
+        ? {
+            solution: exercise.solution,
+            expectedOutput: exercise.expectedOutput,
+            debrief: exercise.debrief,
+            nextExerciseId: nextExerciseId(exerciseId),
+            // The Model Lab post-mortem explains which controls the deployment
+            // had and why the attack landed. Released on a pass and never
+            // before, on the same terms as the worked solution: being told
+            // which control is missing before you have looked teaches nothing
+            // about looking.
+            ...(exercise.modelId ? { postMortem: postMortemFor(exercise.modelId) } : {}),
+          }
+        : {}),
+    });
+  }),
+);
+
+/**
+ * The model under test for a Model Lab exercise.
+ *
+ * Returns the card: what the system is for, where it sits, how much traffic it
+ * takes, and what the owning team claim about its defences. What it does NOT
+ * return is which defences are actually deployed -- that is the answer key, it
+ * lives on a different type, and no route assembles it. See
+ * services/modelLab.ts.
+ */
+learningRouter.get(
+  '/exercises/:exerciseId/model',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const exerciseId = request.params.exerciseId!;
+
+    const exercise = getExercise(exerciseId);
+    if (!exercise) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such exercise.');
+    if (!(await canAccess(userId, exerciseId))) {
+      throw new HttpError(403, API_ERROR_CODES.exerciseLocked, 'That exercise is not unlocked yet.');
+    }
+    // A practice drill may target a different deployment from its parent
+    // exercise -- "same skill, different target" is the whole point of a drill,
+    // and here the target is the model.
+    const practiceId = typeof request.query.practiceId === 'string' ? request.query.practiceId : undefined;
+    const drill = practiceId
+      ? exercise.practice.find((item) => item.id === practiceId)
+      : undefined;
+    if (practiceId && !drill) {
+      throw new HttpError(404, API_ERROR_CODES.notFound, `No practice drill "${practiceId}".`);
+    }
+
+    const modelId = drill?.modelId ?? exercise.modelId;
+    if (!modelId) {
+      throw new HttpError(400, API_ERROR_CODES.validationFailed, 'That exercise has no model under test.');
+    }
+
+    const card = modelCard(modelId);
+    if (!card) {
+      throw new HttpError(500, API_ERROR_CODES.internal, 'The model for this exercise is missing.');
+    }
+
+    sendOk(response, {
+      model: card,
+      // The suite the student's defences will be measured against, when there
+      // is one. Shipped in full: grading somebody against a test set they were
+      // not allowed to read would be a worse lesson than any it could teach.
+      ...(exercise.suiteId ? { suite: suite(exercise.suiteId) } : {}),
+    });
+  }),
+);
+
+const probeSchema = z.object({
+  probes: z
+    .array(
+      z.object({
+        payload: z.string().max(20_000),
+        channel: z.enum(PROBE_CHANNELS).optional(),
+        rationale: z.string().max(1_000).optional(),
+      }),
+    )
+    .min(1)
+    .max(10),
+  defences: z.array(z.enum(DEFENCES)).max(DEFENCES.length).optional(),
+  /** Probe the drill's model rather than the exercise's, when one is active. */
+  practiceId: z.string().max(64).optional(),
+});
+
+/**
+ * Fire probes at a model WITHOUT grading anything.
+ *
+ * This is the Send button, and it is deliberately not the Submit button. A
+ * student may probe as much as they like at no cost: testing is mostly failure,
+ * and a platform that recorded every failed payload as a failed attempt would
+ * teach people to think before trying rather than to try systematically, which
+ * is precisely backwards for this discipline.
+ *
+ * Nothing here touches progress. The graded path is POST /submit with `probes`.
+ */
+learningRouter.post(
+  '/exercises/:exerciseId/probe',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const exerciseId = request.params.exerciseId!;
+
+    const exercise = getExercise(exerciseId);
+    if (!exercise) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such exercise.');
+    if (!(await canAccess(userId, exerciseId))) {
+      throw new HttpError(403, API_ERROR_CODES.exerciseLocked, 'That exercise is not unlocked yet.');
+    }
+    const { probes, defences, practiceId } = probeSchema.parse(request.body);
+    const drill = practiceId
+      ? exercise.practice.find((item) => item.id === practiceId)
+      : undefined;
+    if (practiceId && !drill) {
+      throw new HttpError(404, API_ERROR_CODES.notFound, `No practice drill "${practiceId}".`);
+    }
+
+    const modelId = drill?.modelId ?? exercise.modelId;
+    if (!modelId) {
+      throw new HttpError(400, API_ERROR_CODES.validationFailed, 'That exercise has no model under test.');
+    }
+
+    const results = probe(modelId, probes, defences);
+    if (!results) {
+      throw new HttpError(500, API_ERROR_CODES.internal, 'The model for this exercise is missing.');
+    }
+
+    sendOk(response, { results });
+  }),
+);
+
+/**
+ * The decision point an incident exercise puts the student at.
+ *
+ * Returns the situation, the snapshot, and the options as labels. What each
+ * option would actually cause is the answer key and lives on the server-side
+ * decision point -- see services/incidents.ts. Shipping it would turn a decision
+ * into a walkthrough.
+ */
+learningRouter.get(
+  '/exercises/:exerciseId/decision',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const exerciseId = request.params.exerciseId!;
+
+    const exercise = getExercise(exerciseId);
+    if (!exercise) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such exercise.');
+    if (!(await canAccess(userId, exerciseId))) {
+      throw new HttpError(403, API_ERROR_CODES.exerciseLocked, 'That exercise is not unlocked yet.');
+    }
+    if (!exercise.decisionPointId) {
+      throw new HttpError(
+        400,
+        API_ERROR_CODES.validationFailed,
+        'That exercise has no decision point.',
+      );
+    }
+
+    const point = pointForStudent(exercise.decisionPointId);
+    if (!point) {
+      throw new HttpError(
+        500,
+        API_ERROR_CODES.internal,
+        'The decision point for this exercise is missing.',
+      );
+    }
+
+    sendOk(response, { point });
   }),
 );

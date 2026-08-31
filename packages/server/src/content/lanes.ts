@@ -1,5 +1,5 @@
 /**
- * The fifteen career lanes, profiled honestly.
+ * The sixteen career lanes, profiled honestly.
  *
  * THE RULE FOR THIS FILE: NO MARKETING.
  *
@@ -548,6 +548,50 @@ export const LANE_PROFILES: LaneProfile[] = [
     advancement: 'Principal architect, then CISO or independent consulting. A senior destination rather than a step.',
     entryReality:
       'Not an entry point under any circumstances. Expect eight to ten years across several other lanes first. Included here so you can see where a path leads.',
+  },
+  {
+    id: 'ai-security',
+    title: 'AI Security',
+    summary:
+      'Test the models an organisation has deployed, decide whether one is safe to put in front of a decision, and be the reason a launch slips.',
+    dayToDay: [
+      'Read a scoping document and work out which paths into the system nobody has tested. This is where most of the value is, and it happens before you send a payload.',
+      'Send a few hundred payloads at a model and have almost all of them fail. Record what failed as carefully as what worked, because the negative result is half the report.',
+      'Read training data. Actual rows of it, looking for labels that disagree with their content and for markers a supplier added. It is as tedious as it sounds and it catches what testing cannot.',
+      'Write the finding up, argue about the severity with somebody whose launch date depends on the answer, and be right about it in a way they can check.',
+      'Explain to a team that their filter is good and is defending the wrong path, without making it sound like they were careless. They usually were not.',
+    ],
+    personalityMatch: [
+      'You want to know how something computes its answer, not just what it answers',
+      'You can spend a week on something, conclude "I could not break it", and treat that as a result rather than a failure',
+      'You are comfortable where nobody has written the method down and you will have to invent it',
+      'You can be the bearer of expensive news to somebody with a deadline, repeatedly, without either backing down or enjoying it',
+    ],
+    painPoints: [
+      'Almost no junior openings. The roles that exist mostly want somebody who was already a security engineer or an ML engineer, and the "AI security analyst" job advert you saw is often a research post in disguise.',
+      'The hype is exhausting and it is aimed at you. You will spend real time correcting confident nonsense from vendors, executives, and sometimes your own leadership.',
+      'You are a blocker by function. Your best work delays a launch, and the people whose launch it is will remember that.',
+      'The ground moves under you. A technique you documented in March can be irrelevant in September because a model was retrained, which makes your work feel disposable in a way most security work does not.',
+      'Very little of it is jailbreaking. A great deal of it is reading data, writing documents, and asking who has write access to things.',
+    ],
+    environmentFit: [
+      { environmentId: 'corporate', rank: 1, note: 'Where the models are. Large technology companies and any organisation that has deployed AI into a decision path — which now includes most banks, insurers, and health systems. The role is usually inside a product security or ML platform team rather than the SOC.' },
+      { environmentId: 'consulting', rank: 2, note: 'AI red teaming sold as an engagement. Broad exposure to many systems very quickly, and the work is genuinely varied — but engagements are short, you rarely see a fix land, and a lot of the market is people who read a paper and bought a domain name.' },
+      { environmentId: 'government', rank: 3, note: 'Growing, and more about assurance than attack: provenance, evaluation records, and being able to evidence what was tested. Slower and more documented than the private version, which suits some people considerably better. Clearance timelines apply as everywhere else.' },
+    ],
+    certPathway: ['sec-plus', 'aigp'],
+    baselineBurnout: 'medium',
+    burnoutDrivers: [
+      'Being the reason a launch slips, as a recurring feature of the job rather than an occasional event',
+      'Correcting the same misconceptions about how models work, indefinitely',
+      'Work that goes stale when a model is retrained',
+      'A field where the marketing runs years ahead of the practice, so it is hard to tell whether you are behind',
+    ],
+    advancement:
+      'Senior AI security engineer, then either research or leading an AI assurance function. It is genuinely too new to say where it settles, and anybody telling you the ten-year path with confidence is guessing. What is portable is the underlying skill: somebody who can reason about a system nobody has documented is employable regardless of what this specialism is called in five years.',
+    trackId: 'ai-security',
+    entryReality:
+      'Not a first security job, and the salary figures being quoted around it are for people who were already senior somewhere else. The realistic route is two to three years in another lane — detection engineering, appsec, or security engineering are the usual ones — while learning the AI mechanics properly, then moving across. If you are arriving from machine learning rather than from security, the crossing is shorter and you need the security half instead. Either way, the credential that gets you hired is a portfolio of findings you can walk somebody through, because there is no established certification for this and several of the ones being sold are worthless.',
   },
 ];
 

@@ -182,3 +182,82 @@ so its own "you should see filename prefixes" check could never pass.
 which matches both the live log and its rotated `.1` archive. That preserves the
 wildcard lesson, produces visibly different filename prefixes, and teaches
 something true: logs rotate at midnight, so an overnight incident spans two files.
+
+## 14. The AI Security spec asks for a live model, which cannot be graded
+
+The AI Security specification describes a jailbreak testing interface where a
+student sends payloads at a model and the result decides whether they pass. Taken
+literally that means grading against a language model, and it cannot work here
+for three reasons.
+
+Grading would not be reproducible. The same payload succeeds on one run and fails
+on the next, so a student cannot tell whether they learned something or got
+lucky, and neither can an instructor reviewing where people get stuck. Every
+other answer key in this codebase is computed from committed, seeded data
+specifically to avoid that.
+
+The lesson would be wrong. What the package needs to teach is structural — a
+keyword filter is only as good as the normalisation in front of it, a normaliser
+with no filter behind it blocks nothing, and controls on the user input path do
+not touch the retrieval path. Those are facts about a deployment's architecture,
+not about a model's mood on a given afternoon.
+
+And it would generate real attack traffic. A training platform that pipes
+student-authored jailbreaks at a live model is a training platform doing that at
+volume, from many accounts, indefinitely.
+
+**Done:** the lab is a deterministic rule engine (`src/ai/harness.ts`). A payload
+carries an intent and zero or more carriers; a deployment carries controls of
+three kinds; the interaction between them decides the outcome. Each claim the
+curriculum makes is asserted as a test in `harness.test.ts`, so a change that
+quietly strengthens or weakens a control fails the build rather than silently
+retuning a dozen exercises.
+
+## 15. The spec's severity examples would teach an assessor to be ignored
+
+The specification's portfolio example rates a prompt injection as CRITICAL with
+an 80% success rate, and its dashboard rates a system-prompt leak as LOW, with no
+statement of what makes the difference. Read together they imply severity follows
+the technique.
+
+It does not, and teaching that produces assessors whose reports are entirely
+critical and therefore entirely unread. The same bypass is informational out of a
+development build on one laptop and serious out of a production service taking
+twenty thousand decisions a day, because in the second case it reaches something.
+
+**Done:** severity is taught as a function of deployment exposure (`ais.1.4`,
+`ais.5.1`), and the portfolio computes it from the model's deployment stage
+rather than letting anybody assert it. `ais.1.4` requires rating one finding
+*down* to informational, which is the direction students find hard.
+
+## 16. The spec's pricing rationale would not survive a student asking why
+
+The specification prices the AI Security session at $25 against $15 for other
+roles, with the rationale "very specialized, high-value skill, rare expertise".
+Two of those three are claims about the subject rather than about the cost of
+serving it, and a student who asks "so why is the solo price the same?" gets no
+answer.
+
+**Done:** `content/pricing.ts` gives exactly one reason for the difference, and it
+is the one that holds — the sessions need an instructor who has actually assessed
+deployed models, and there are very few of those people. The solo path therefore
+includes AI Foundations and AI Security at no extra cost, because a self-paced
+learner is not consuming a scarce instructor, and charging them extra would only
+gatekeep the newest content behind the ability to pay.
+
+## 17. "AI Security Analysts can earn $150k+" is not a claim this platform can make
+
+The specification's assessment feedback quotes salary figures and describes
+demand as "extreme" and supply as "zero". Those figures are for people who were
+already senior somewhere else, the roles that exist are overwhelmingly not
+entry-level, and routing a career changer toward a 24-32 week path on that basis
+would be the single most damaging thing in the curriculum.
+
+**Done:** the lane profile (`lanes.ts`) states plainly that there are almost no
+junior openings, that the quoted figures are for people arriving from senior
+roles elsewhere, and that the realistic route is two to three years in another
+lane first. The assessment items that route somebody here measure tolerance
+rather than enthusiasm — comfort with the mathematics, comfort where no method
+exists yet, and willingness to spend a week proving a negative — because
+"does AI interest you" would currently route half the population into a
+specialism that cannot absorb them.

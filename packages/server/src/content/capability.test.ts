@@ -67,6 +67,25 @@ describe('capability catalogue', () => {
     }
   });
 
+  /*
+   * The converse of the test above, and the one that was missing.
+   *
+   * An empty `exerciseIds` is correct while a foundation is unbuilt -- there is
+   * genuinely nowhere to send anybody. It stops being correct the moment the
+   * package lands, and nothing noticed: the test above skips empty arrays, so
+   * four capabilities on the built `incident-concepts` foundation measured a
+   * student and then routed them nowhere, silently, for as long as Alert Triage
+   * and Incident Response had been shipping.
+   *
+   * A capability whose foundation is built has no excuse for routing nowhere.
+   */
+  it('routes somewhere whenever the foundation behind it is built', () => {
+    const stranded = CAPABILITIES.filter(
+      (c) => getFoundation(c.foundationId)?.packageId && c.exerciseIds.length === 0,
+    ).map((c) => c.id);
+    expect(stranded).toEqual([]);
+  });
+
   it('gives every capability at least one probe', () => {
     const bare = CAPABILITIES.filter((c) => probesForCapability(c.id).length === 0).map((c) => c.id);
     expect(bare).toEqual([]);

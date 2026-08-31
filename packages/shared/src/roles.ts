@@ -35,6 +35,7 @@ export const SOC_ROLE_IDS = [
   'vulnerability-analyst',
   'malware-analyst',
   'cloud-security',
+  'ai-security',
 ] as const;
 
 export type SocRoleId = (typeof SOC_ROLE_IDS)[number];
@@ -56,6 +57,7 @@ export const ROLE_SURFACES = [
   'vuln-view',
   'sample-view',
   'cloud-view',
+  'model-lab',
 ] as const;
 
 export type RoleSurface = (typeof ROLE_SURFACES)[number];
@@ -87,6 +89,17 @@ export const ROLE_METRICS = [
   'behaviour-analysis',
   'detection-coverage',
   'identity-analysis',
+  /* --- AI security -------------------------------------------------------
+   *
+   * Two metrics rather than one, because they fail in opposite directions and
+   * a student needs to know which they did -- the same reasoning that keeps
+   * triage precision and recall apart. `bypass-discovery` measures whether you
+   * found the gap. `defence-selection` measures whether the controls you then
+   * recommended would have closed it at a price somebody would pay, which is a
+   * different skill and the one assessors are weakest at.
+   */
+  'bypass-discovery',
+  'defence-selection',
 ] as const;
 
 export type RoleMetric = (typeof ROLE_METRICS)[number];
@@ -288,6 +301,26 @@ export const SOC_ROLES: SocRole[] = [
     poorFitIf:
       'you prefer systems you can hold. Cloud work is abstract, and the evidence you get is whatever the provider chose to record.',
     playable: false,
+  },
+  {
+    id: 'ai-security',
+    title: 'AI Security Analyst',
+    oneLine:
+      'Tests the models the organisation has deployed, and decides whether one is safe to put in front of a decision.',
+    reality:
+      'Almost none of it is the live incident queue. It is scoping documents, a few hundred payloads that mostly fail, rows of training data read by hand, and a report somebody’s launch date depends on. The single most valuable thing you do usually happens before you send anything -- working out which path into the system nobody has tested. Expect to be the reason a release slips, repeatedly, and to be right about it in a way the team can check.',
+    surface: 'model-lab',
+    sees: [
+      'The model card: what the system is for, where it is deployed, how much traffic it takes, and what the owning team claim about its defences',
+      'A probe console for sending payloads down either the user path or the retrieval path, and what happened to each',
+      'The stage a blocked payload died at -- before the model, at the instruction boundary, or on the way out -- but never which control caught it',
+      'Fixed attack suites, and what a chosen defence set does against them at what cost',
+    ],
+    metrics: ['bypass-discovery', 'defence-selection', 'severity-accuracy', 'communication-clarity'],
+    keyFoundations: ['ai-foundations', 'ai-security-testing', 'scripting', 'security-writing'],
+    poorFitIf:
+      'you want to be in the room when something is happening. This role sits outside the incident queue by design, its wins are launches that did not go wrong, and a week that ends in "I could not break it" is a normal week rather than a failed one.',
+    playable: true,
   },
 ];
 

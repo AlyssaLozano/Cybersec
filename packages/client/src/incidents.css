@@ -1,0 +1,322 @@
+/*
+ * The IR Lead surface: incident snapshot, decision options, and consequences.
+ *
+ * Kept out of styles.css on the same principle as career.css and alerts.css:
+ * one role, one stylesheet.
+ *
+ * NO SCORING SIGNAL BEFORE COMMIT.
+ *
+ * Options render identically until the student has submitted. No colour, no
+ * emphasis, no ordering hint — several options are deliberately defensible and
+ * at least one is usually harmful, and telling them apart from the text alone is
+ * the exercise. Colour appears only in the outcome block, after commit.
+ *
+ * The "not established" column carries the same weight as "established" for the
+ * same kind of reason: every decision here is made without knowing whether the
+ * attacker reached the database, and greying that out would teach students to
+ * decide without reading it.
+ */
+
+.incident-console {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.incident-console__head h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.incident-console__situation {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 80ch;
+}
+
+/* --- the snapshot ---------------------------------------------------------- */
+
+.incident-snapshot {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+}
+
+.incident-snapshot__toggle {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.incident-snapshot__body {
+  padding: 0 12px 12px;
+  display: grid;
+  gap: 14px;
+}
+
+.incident-snapshot__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.incident-snapshot__facts h4 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+}
+
+.incident-snapshot__facts ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 5px;
+}
+
+.incident-snapshot__facts li {
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+/* Same weight as the established column, on purpose. */
+.incident-snapshot__unknown {
+  border-left: 2px solid var(--warn);
+  padding-left: 12px;
+}
+
+.incident-snapshot__unknown h4 {
+  color: var(--warn);
+}
+
+.incident-snapshot__systems {
+  border-collapse: collapse;
+  font-size: 12px;
+  width: 100%;
+}
+
+.incident-snapshot__systems th,
+.incident-snapshot__systems td {
+  text-align: left;
+  padding: 5px 14px 5px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.incident-snapshot__systems th {
+  color: var(--text-faint);
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.incident-snapshot__systems td:first-child {
+  font-family: var(--mono);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.incident-snapshot__pressures h4 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+}
+
+.incident-snapshot__pressures ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 5px;
+}
+
+.incident-snapshot__pressures li {
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+/* --- the options ----------------------------------------------------------- */
+
+.incident-options > h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+
+.incident-options ul {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.incident-option {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  overflow: hidden;
+}
+
+.incident-option__choose {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: 11px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.incident-option__choose:hover:not(:disabled) {
+  background: var(--bg-raised);
+}
+
+.incident-option__choose:disabled {
+  cursor: default;
+}
+
+.incident-option__marker {
+  font-family: var(--mono);
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.incident-option--picked {
+  border-color: var(--accent);
+}
+
+.incident-option--picked .incident-option__marker {
+  color: var(--accent);
+}
+
+.incident-option__text {
+  display: grid;
+  gap: 4px;
+  line-height: 1.5;
+}
+
+.incident-option__detail {
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+/* --- consequences, after commit only --------------------------------------- */
+
+.incident-option__outcome {
+  border-top: 1px solid var(--border);
+  padding: 10px 12px 12px;
+  background: var(--bg-input);
+}
+
+.incident-option__outcome p {
+  margin: 6px 0 0;
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.incident-option__quality {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.incident-option__quality.is-sound {
+  color: var(--pass);
+}
+
+.incident-option__quality.is-defensible {
+  color: var(--warn);
+}
+
+.incident-option__quality.is-harmful {
+  color: var(--fail);
+}
+
+.incident-option--sound {
+  border-left: 3px solid var(--pass);
+}
+
+.incident-option--defensible {
+  border-left: 3px solid var(--warn);
+}
+
+.incident-option--harmful {
+  border-left: 3px solid var(--fail);
+}
+
+/* --- justification and actions --------------------------------------------- */
+
+.incident-console__note {
+  display: block;
+  color: var(--text-faint);
+  font-size: 11px;
+  margin-bottom: 12px;
+}
+
+.incident-console__note textarea {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  background: var(--bg-input);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.incident-console__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.incident-console__actions button {
+  background: var(--bg-input);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.incident-console__commit {
+  background: var(--accent-dim) !important;
+  color: var(--text) !important;
+  border-color: var(--border-strong) !important;
+}
+
+.incident-console__actions button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.incident-console__hint {
+  margin: 8px 0 0;
+  color: var(--text-faint);
+  font-size: 11px;
+}

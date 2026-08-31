@@ -14,8 +14,8 @@
  * it requires. A student's required foundations are therefore a consequence of
  * the route they chose, not a fixed queue.
  *
- * Two foundations are built today (Linux, Log Analysis). The rest are outlined
- * with honest sizes so the roadmap is visible rather than implied.
+ * Foundations with a `packageId` are built and playable today. The rest are
+ * outlined with honest sizes so the roadmap is visible rather than implied.
  */
 
 import type { Foundation } from '@soc/shared';
@@ -97,8 +97,27 @@ export const FOUNDATIONS: Foundation[] = [
     id: 'incident-concepts',
     title: 'Security Incident Concepts',
     summary:
-      'Severity, triage, containment decisions, evidence preservation, and escalation. The judgement layer that turns log reading into incident response.',
+      'Severity, triage, correlation, and escalation. The judgement layer that turns log reading into a decision about whether something is real.',
     packageId: '3',
+    tools: ['case-management'],
+  },
+  /*
+   * Split from `incident-concepts` when the Incident Response package landed.
+   *
+   * Not a cosmetic split. A track resolves to its packages *through* its
+   * foundations (see `trackPackages`), so a package no foundation points at
+   * belongs to no track and is unreachable from career routing -- which is
+   * exactly where the 18 exercises of Incident Response sat until this existed.
+   *
+   * The boundary is the one the content already draws: `incident-concepts` is
+   * deciding whether something is real, this is what you do once it is.
+   */
+  {
+    id: 'incident-response',
+    title: 'Incident Response and Remediation',
+    summary:
+      'Containment under time pressure, evidence preservation, scoping an intrusion, and the writing that closes it out. What happens after triage decides something is real.',
+    packageId: 'incident-response',
     tools: ['case-management'],
   },
   {
@@ -170,6 +189,38 @@ export const FOUNDATIONS: Foundation[] = [
       'Query, join, and aggregate security data. The difference between reading alerts and finding the pattern across a million of them.',
     plannedExercises: 18,
     tools: ['siem-search'],
+  },
+  {
+    id: 'ai-foundations',
+    title: 'How AI Systems Work',
+    summary:
+      'Weights, forward passes, tokens, embeddings, attention, and next-token prediction — the mechanics, computed by hand rather than described. Then the failure modes that fall out of each: overfitting, adversarial examples, poisoned training data, and prompt injection.',
+    packageId: 'ai-foundations',
+    tools: ['scripting'],
+  },
+  {
+    id: 'ai-security-testing',
+    title: 'AI Security Testing',
+    summary:
+      'Attack and defend a deployed model: find the injection, prove it is a class rather than a payload, deploy controls under a cost budget, and turn what you found into a deployment decision.',
+    packageId: 'ai-security',
+    tools: ['scripting', 'case-management'],
+  },
+  {
+    id: 'adversarial-ml',
+    title: 'Adversarial Machine Learning',
+    summary:
+      'Generate adversarial examples with FGSM and PGD, measure whether they transfer between models, and harden a classifier with adversarial training — including what that costs in ordinary accuracy.',
+    plannedExercises: 18,
+    tools: ['scripting'],
+  },
+  {
+    id: 'ai-governance',
+    title: 'AI Assurance and Governance',
+    summary:
+      'Model cards, data provenance, evaluation records, and the emerging regulation: what an organisation has to be able to prove about a model it deployed, and who signs it off.',
+    plannedExercises: 16,
+    tools: ['grc-tooling'],
   },
   {
     id: 'threat-modelling',

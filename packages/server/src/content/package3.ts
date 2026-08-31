@@ -39,9 +39,10 @@
  * regenerating the corpus can never leave a stale answer key behind.
  */
 
-import type { Exercise, LearningPackage } from '@soc/shared';
+import type { Exercise, LearningPackage, Teach } from '@soc/shared';
 
 import { alertsInIncident, alertsRequiring, queueForStudent } from '../services/alerts.js';
+import { alertsWhereCopilotMisleads, alertsWithCopilotFlaw } from '../services/copilot.js';
 import { PACKAGE_3_PRACTICE } from './package3-practice.js';
 
 const INTRO = 'q-intro';
@@ -114,9 +115,60 @@ const NIGHT_STAGING = oneByRule(NIGHT, 'archive-of-sensitive-path');
  */
 const NIGHT_BUDGET = Math.ceil(NIGHT_ESCALATE.length * 1.5);
 
+// --- Module 3.5's answer key, derived from the copilot's flaw table ----------
+//
+// Not one alert id below is written by hand. They are read out of the generated
+// flaw table, so regenerating the copilot moves these exercises with it rather
+// than leaving them demanding that a student disagree with advice that is now
+// perfectly sound.
+
+/**
+ * Alerts in a queue where following the copilot leads to the wrong disposition.
+ *
+ * Throws when there are none, rather than returning an empty list. A
+ * `copilot-override` check over zero alerts passes trivially, so an exercise
+ * built on one would silently stop testing anything -- which is exactly what a
+ * regenerated corpus that dropped a planted mistake would produce.
+ */
+function copilotTraps(queueId: string, kind?: 'volume-dismissal' | 'over-escalation'): string[] {
+  const found = alertsWhereCopilotMisleads(queueId, kind);
+  if (found.length === 0) {
+    throw new Error(
+      `Queue "${queueId}" has no misleading copilot analyses${kind ? ` of kind "${kind}"` : ''}, ` +
+        'so Module 3.5 has nothing to teach against. The alert corpus and the copilot corpus have ' +
+        'drifted apart -- re-run gen:copilot, or fix the flaw plan.',
+    );
+  }
+  return found;
+}
+
+/** The two over-escalations sitting in the twelve-alert introductory queue. */
+const INTRO_COPILOT_TRAPS = copilotTraps(INTRO);
+
+/** The one in the correlation window. */
+const WINDOW_COPILOT_TRAPS = copilotTraps(WINDOW);
+
+/** Every misleading analysis in the full shift, and the two that matter most. */
+const NIGHT_COPILOT_TRAPS = copilotTraps(NIGHT);
+const NIGHT_BASE_RATE_TRAPS = copilotTraps(NIGHT, 'volume-dismissal');
+
+/**
+ * The alert where the copilot reaches the right answer for invented reasons.
+ *
+ * Used by the written exercise rather than by a triage check, because there is
+ * no disposition that catches it: the recommendation is correct. The only way to
+ * find this one is to have read the rationale.
+ */
+const NIGHT_FABRICATED = alertsWithCopilotFlaw(NIGHT, 'fabricated-attribution');
+if (NIGHT_FABRICATED.length === 0) {
+  throw new Error(
+    'No fabricated-attribution analysis in the night-shift queue, so exercise 3.5.5 has no subject.',
+  );
+}
+
 // --- shared teaching material ------------------------------------------------
 
-const SEVERITY_TEACH = {
+const SEVERITY_TEACH: Teach = {
   concept:
     'Severity and confidence are claims made by the rule that fired, not facts about the world. ' +
     'A rule author guessed at them months ago, before this alert existed. An antivirus signature ' +
@@ -136,9 +188,9 @@ const SEVERITY_TEACH = {
         'What experienced operators do. The rule tells you what it saw; you decide what it means.',
     },
   ],
-} as const;
+};
 
-const ENRICHMENT_TEACH = {
+const ENRICHMENT_TEACH: Teach = {
   concept:
     'Two numbers on every alert change the decision more than severity does: how many times this ' +
     'rule has fired before, and how many of those were worth acting on. A rule that has fired ' +
@@ -157,7 +209,7 @@ const ENRICHMENT_TEACH = {
         'Rare and never yet wrong. Worth reading carefully whatever severity it claims.',
     },
   ],
-} as const;
+};
 
 // --- module 3.1: reading a queue ---------------------------------------------
 
@@ -1521,6 +1573,485 @@ const MODULE_3_4: Exercise[] = [
   },
 ];
 
+
+// --- Module 3.5: working with the copilot ------------------------------------
+//
+// WHY THIS MODULE IS LAST
+//
+// Everything before it teaches a student to disposition an alert on their own
+// judgement. That has to come first. An operator handed an assistant before they
+// can read a queue does not learn to work with it -- they learn to do what it
+// says, because they have nothing of their own to weigh against it.
+//
+// So the copilot arrives only after the full shift in Module 3.4, and the first
+// thing it does is get two alerts wrong.
+//
+// WHAT THIS MODULE IS NOT
+//
+// It is not a lesson in distrusting AI. The copilot in this queue is right about
+// most alerts, and a student who reacts by ignoring it has learned something as
+// useless as one who defers to it. `solo-right` and `corroborated` score
+// identically in the collaboration metric on purpose: the tool is not the point,
+// and neither is refusing the tool. What is scored is the handful of alerts
+// where the advice was wrong and somebody had to notice.
+
+const COPILOT_TEACH: Teach = {
+  concept:
+    'The copilot reads one alert and tells you what it thinks. It is right most of the time, which ' +
+    'is what makes it worth having and also what makes it dangerous: an assistant that was wrong ' +
+    'half the time would be easy to ignore. Every analysis comes in four parts -- what it reads as ' +
+    'risk, what it reads as mitigating, what it recommends, and what it could not see. The last ' +
+    'part is the one operators skip, and it explains nearly every mistake it makes.',
+  examples: [
+    {
+      command: 'Basis: observed',
+      explains:
+        'The copilot is restating something printed on the alert. You can check it in one glance, ' +
+        'and it is almost never where the error is.',
+    },
+    {
+      command: 'Basis: inferred',
+      explains:
+        'The copilot reasoned to this from what it observed. The observation can be true and the ' +
+        'inference still wrong -- this is where most bad advice actually lives.',
+    },
+    {
+      command: 'Basis: assumed',
+      explains:
+        'Nothing it was given supports this. Real assistants do not label these; this one does, ' +
+        'because you have to know what one looks like before you can spot an unlabelled one.',
+    },
+  ],
+  flags: [
+    {
+      flag: 'Confidence',
+      means:
+        'How the copilot writes, not how likely it is to be right. The two are unrelated here on ' +
+        'purpose, so you can prove it to yourself.',
+    },
+    { flag: 'Limits', means: 'What it could not see. Read this before the recommendation, not after.' },
+  ],
+};
+
+const MODULE_3_5: Exercise[] = [
+  {
+    id: '3.5.1',
+    moduleId: '3.5',
+    packageId: '3',
+    order: 1,
+    title: 'Read what the assistant cannot see',
+    kind: 'multiple-choice',
+    goal: 'Learn to check a copilot claim against what the copilot actually had access to.',
+    prompt:
+      'Reviewing a sudo alert, the copilot writes: "I see no approved change record covering this ' +
+      'window." Its own limits section says it can see the alert and the rule’s firing history, and ' +
+      'cannot see change records, ticket queues, or what the person involved says they were doing. ' +
+      'What is wrong with that sentence?',
+    teach: COPILOT_TEACH,
+    hints: [
+      'Compare the claim against the limits section on the same analysis.',
+      'It is not a question of tone or confidence. Ask what it would have had to look at to know this.',
+      'Reporting that something is absent requires being able to look at the place it would be.',
+    ],
+    options: [
+      { id: 'a', label: 'Nothing -- the absence of a change record is a useful triage observation.' },
+      {
+        id: 'b',
+        label:
+          'It reports the absence of something it has no access to, so the sentence carries no information.',
+      },
+      { id: 'c', label: 'It is too hedged; it should state a confidence percentage alongside it.' },
+      { id: 'd', label: 'Change records are an operations concern and are not relevant to triage.' },
+    ],
+    solution: 'b',
+    expectedOutput: 'Option b.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['b'],
+        hint:
+          'Read the limits section and the claim together. The copilot cannot see change records at ' +
+          'all, so "I see no approved change record" describes its own blindness, not the change record.',
+      },
+    ],
+    debrief:
+      'This is the most useful habit in the module and it costs one glance. An assistant reporting ' +
+      'the absence of evidence it cannot observe is reporting nothing at all -- but the sentence ' +
+      'reads exactly like a finding, and it is the sentence that turns a routine sudo alert into an ' +
+      'escalation. You will meet this exact claim again in the next exercise, attached to an alert ' +
+      'the copilot wants you to escalate.',
+    practice: PACKAGE_3_PRACTICE['3.5.1'] ?? [],
+  },
+  {
+    id: '3.5.2',
+    moduleId: '3.5',
+    packageId: '3',
+    order: 2,
+    title: 'Work the queue with a second opinion',
+    kind: 'alert-triage',
+    queueId: INTRO,
+    copilotEnabled: true,
+    goal: 'Use the copilot on a queue you have already worked, and find where it is wrong.',
+    prompt:
+      'The same twelve alerts you started this package with, now with an assistant attached. Open ' +
+      'the copilot on at least eight of them before you commit. It is right about most of this ' +
+      `queue. It is wrong about ${INTRO_COPILOT_TRAPS.length}, and on those it wants you to escalate ` +
+      'something that should be closed. Disposition all twelve.',
+    teach: COPILOT_TEACH,
+    hints: [
+      'Open the copilot on an alert and read the mitigating factors before the recommendation.',
+      'Look for the move where it names a mitigating fact and then talks itself past it. "Allowlists ' +
+        'are frequently stale" is a general truth being used as if it were a finding about this record.',
+      'Both alerts it is wrong about are correct detections of somebody doing their job on schedule. ' +
+        'What settles them is not printed on the alert -- it is what you know about this organisation.',
+    ],
+    solution:
+      'Escalate the intrusion alert. Close the rest. On the service-account and sudo alerts the ' +
+      'copilot wants escalated, disposition them as dismiss anyway: both are documented, recurring, ' +
+      'authorised activity, and the copilot has said in its own limits section that it cannot see ' +
+      'change records or ask the account owner.',
+    expectedOutput:
+      'Twelve dispositions, one escalation, and a disagreement with the copilot on the alerts where ' +
+      'its recommendation rests on a claim it had no basis for.',
+    checks: [
+      {
+        type: 'copilot-consulted',
+        minAlerts: 8,
+        hint:
+          'Open the copilot on at least eight alerts. Working a queue with a second opinion sitting ' +
+          'unread is the cheapest mistake available here.',
+      },
+      {
+        type: 'copilot-override',
+        alertIds: INTRO_COPILOT_TRAPS,
+        hint:
+          'Two of the copilot’s recommendations are wrong, and both want you to escalate routine ' +
+          'authorised work. Read those analyses, then disposition against them.',
+      },
+      {
+        type: 'triage-accuracy',
+        decision: 'escalate',
+        minPrecision: 1,
+        minRecall: 1,
+        hint:
+          'Exactly one alert in this queue warrants escalation. Escalating the ones the copilot ' +
+          'pointed at as well would mean it triaged the queue, not you.',
+      },
+    ],
+    debrief:
+      'You were told in advance that two suggestions were wrong and you still had to find which. ' +
+      'That is the easy version. Nobody tells you the number in a real shift, and the recommendation ' +
+      'reads identically whether it is sound or not -- which is why the habit has to be reading the ' +
+      'reasoning rather than sampling the verdicts.',
+    practice: PACKAGE_3_PRACTICE['3.5.2'] ?? [],
+  },
+  {
+    id: '3.5.3',
+    moduleId: '3.5',
+    packageId: '3',
+    order: 3,
+    title: 'The thing one alert at a time cannot show you',
+    kind: 'alert-triage',
+    queueId: WINDOW,
+    copilotEnabled: true,
+    goal: 'Find the limit that no amount of prompting fixes: the copilot sees one alert at a time.',
+    prompt:
+      'The twenty-minute window again. Open the copilot on at least six of these and read what it ' +
+      'says about each one individually. Every analysis is defensible on its own. Then disposition ' +
+      'the queue on what they have in common -- which is a thing none of those analyses mention.',
+    teach: {
+      concept:
+        'The copilot is given one alert. Not the queue, not the shift, not the other three alerts ' +
+        'that share a source address with this one. Its limits section says so on every single ' +
+        'analysis: "I have not read the other alerts in this queue." Correlation is the thing you ' +
+        'have that it does not, and on this queue correlation is the entire answer.',
+      examples: [
+        {
+          command: 'One alert on its own: a failed login',
+          explains:
+            'Unremarkable. Thousands a day. Any assistant reading it alone will tell you to close ' +
+            'it, and will be right to.',
+        },
+        {
+          command: 'The same alert plus the two either side of it',
+          explains:
+            'Failures, then a success, then an archive of a sensitive path -- one account, five ' +
+            'minutes. Nothing about the middle alert changed. What changed is that you read three.',
+        },
+      ],
+    },
+    hints: [
+      'Read the limits section on any two analyses. They both end with the same sentence.',
+      'Sort by source or by rule rather than by time, and look at what repeats.',
+      'The copilot will not tell you these belong together. That judgement is the one it cannot make ' +
+        'from what it was given.',
+    ],
+    solution:
+      'Escalate the alerts belonging to the intrusion as one sequence: the failures, the success ' +
+      'that follows them, and what that account did next. The copilot rates each of them ' +
+      'individually and never connects them, because it is handed one alert at a time and says so.',
+    expectedOutput:
+      'The correlated alerts escalated as a sequence, and a disagreement with the copilot on the ' +
+      'routine privileged activity it wanted escalated.',
+    checks: [
+      {
+        type: 'copilot-consulted',
+        minAlerts: 6,
+        hint: 'Open the copilot on at least six of these before committing.',
+      },
+      {
+        type: 'copilot-override',
+        alertIds: WINDOW_COPILOT_TRAPS,
+        hint:
+          'One recommendation here is wrong in the same way as the last exercise: routine authorised ' +
+          'work, escalated on a claim the copilot had no basis for.',
+      },
+      {
+        type: 'triage-selection',
+        decision: 'escalate',
+        alertIds: WINDOW_INCIDENT,
+        hint:
+          'The alerts belonging to one actor’s sequence go together. Individually the copilot rated ' +
+          'several of them as ordinary, and individually it was not being unreasonable.',
+      },
+      {
+        type: 'triage-budget',
+        decision: 'escalate',
+        max: WINDOW_INCIDENT.length + 1,
+        hint:
+          'Correlating is not the same as escalating everything in the window -- only the alerts that ' +
+          'belong to the sequence.',
+      },
+    ],
+    debrief:
+      'This is the limit worth remembering, because prompting does not fix it and a better model does ' +
+      'not either: it is a question of what the assistant was handed. Anything that needs reading ' +
+      'across alerts, across a shift, or across a change record is yours. That is most of what makes ' +
+      'triage difficult, and it is the reason the job still exists.',
+    practice: PACKAGE_3_PRACTICE['3.5.3'] ?? [],
+  },
+  {
+    id: '3.5.4',
+    moduleId: '3.5',
+    packageId: '3',
+    order: 4,
+    title: 'A full shift, with an assistant that argues back',
+    kind: 'alert-triage',
+    queueId: NIGHT,
+    copilotEnabled: true,
+    goal: 'Hold a correct escalation against a confident, well-argued, and wrong recommendation.',
+    prompt:
+      'The night shift again -- eighty-two alerts, the same intrusion inside it, the same escalation ' +
+      `budget of ${NIGHT_BUDGET}. This time the copilot is on. Open it on at least twenty alerts. On ` +
+      'two of them it will quote you a real number and use it to argue that you should close ' +
+      'something that matters. The number will be true.',
+    teach: {
+      concept:
+        'The most dangerous thing an assistant can say to you is a correct fact deployed as the ' +
+        'wrong argument. "This rule has been wrong 331 times out of 340, so close it" is sound ' +
+        'reasoning about a population and worthless reasoning about an instance. Base rates tell you ' +
+        'where to look first. They never tell you what a particular alert is, and specific evidence ' +
+        'on the alert in front of you outranks them every time.',
+      examples: [
+        {
+          command: 'Correct use of a base rate',
+          explains:
+            'Deciding which of two hundred alerts to read first, or arguing that a rule needs tuning ' +
+            'because it has never once been right.',
+        },
+        {
+          command: 'Incorrect use of the same base rate',
+          explains:
+            'Closing the alert in front of you because most firings of that rule were noise. A prior ' +
+            'is what you fall back on when you have no specific evidence. Here you have some.',
+        },
+      ],
+    },
+    hints: [
+      'When the copilot recommends closing something, read its risk factors. On the two it gets wrong ' +
+        'here, that list is one line long.',
+      'It also writes "nothing here looks different from the firings that were closed before". Check ' +
+        'whether it was in any position to know that.',
+      'Both alerts it argues away are things happening on a host, at an hour, by an account that you ' +
+        'have already learned to read. Ask what this particular firing shows, not what the rule ' +
+        'usually shows.',
+    ],
+    solution:
+      'Escalate the intrusion sequence, including the two alerts the copilot argues for closing. Its ' +
+      'statistic is accurate and its inference is not: a base rate describes the rule’s history, and ' +
+      'what settles these two is the account, the hour, and what was touched. Stay inside the ' +
+      'escalation budget on everything else.',
+    expectedOutput:
+      'The intrusion escalated within budget, including the two alerts the copilot recommended ' +
+      'closing on historical grounds.',
+    checks: [
+      {
+        type: 'copilot-consulted',
+        minAlerts: 20,
+        hint: 'Open the copilot on at least twenty of the eighty-two before committing.',
+      },
+      {
+        type: 'copilot-override',
+        alertIds: NIGHT_BASE_RATE_TRAPS,
+        hint:
+          'Two analyses argue from the rule’s history to a disposition of this firing. Read them, ' +
+          'then escalate anyway -- the evidence on these alerts outranks the prior.',
+      },
+      {
+        type: 'copilot-collaboration',
+        minCaught: 3,
+        maxMisled: 1,
+        hint:
+          `The copilot is wrong about ${NIGHT_COPILOT_TRAPS.length} alerts in this queue. Catching ` +
+          'most of them means opening the analysis and then disagreeing with it. Following more than ' +
+          'one of them into the wrong disposition fails this check.',
+      },
+      {
+        type: 'triage-accuracy',
+        decision: 'escalate',
+        minRecall: 0.75,
+        hint:
+          'Most of the intrusion still has to be escalated. Argued out of two parts of it, you have ' +
+          'missed it.',
+      },
+      {
+        type: 'triage-budget',
+        decision: 'escalate',
+        max: NIGHT_BUDGET,
+        hint:
+          `The budget is still ${NIGHT_BUDGET}. Disagreeing with the copilot does not mean escalating ` +
+          'everything it wanted closed.',
+      },
+    ],
+    debrief:
+      'You have now worked the same shift twice, once alone and once with an assistant, and the ' +
+      'assistant made the two most important alerts harder rather than easier. That is not a reason ' +
+      'to turn it off -- it read eighty-two alerts with you and was right about most of them. It is ' +
+      'the reason the operator is still accountable for the disposition. Asked in an interview how ' +
+      'you use AI in triage, this is the answer worth giving: it drafts, you decide, and you can name ' +
+      'the case where you overruled it.',
+    practice: PACKAGE_3_PRACTICE['3.5.4'] ?? [],
+  },
+  {
+    id: '3.5.5',
+    moduleId: '3.5',
+    packageId: '3',
+    order: 5,
+    title: 'Right answer, invented reasons',
+    kind: 'short-answer',
+    goal: 'Learn that a correct recommendation can still be unusable, and say why in writing.',
+    prompt:
+      `On the credential-pivot alert in the night shift (${NIGHT_FABRICATED[0]}), the copilot ` +
+      'recommended escalating -- and it was right. Its reasoning said the sequence matched APT28 ' +
+      'tradecraft catalogued in campaigns against financial services, and that infrastructure ' +
+      'overlapping the source address had been reported in prior activity by the same actor. No ' +
+      'threat-intelligence source was attached to that alert, and Ridgeline Medical Group is a ' +
+      'healthcare provider. In your own words: what is wrong with that reasoning, and what harm does ' +
+      'it do if you escalate with it attached?',
+    teach: {
+      concept:
+        'A recommendation can be correct and its justification worthless, and you cannot tell the ' +
+        'difference from the recommendation. This is the failure mode that survives every check in ' +
+        'this module, because no disposition catches it: agree with the copilot and you get the alert ' +
+        'right. The damage happens downstream, in what you wrote in the handover.',
+      examples: [
+        {
+          command: 'What the next analyst inherits',
+          explains:
+            'An actor name in a handover stops being your guess by the second time it is repeated. ' +
+            'Scope, urgency, and who gets called are all decided from it.',
+        },
+        {
+          command: 'What to write instead',
+          explains:
+            'What was observed, in what order, by which account -- and "attribution unknown". An ' +
+            'escalation without an actor name is not a weaker escalation.',
+        },
+      ],
+    },
+    hints: [
+      'Start with the simplest question: where would the copilot have got those two claims from?',
+      'One of them can be checked against something you already know about this organisation.',
+      'Then think about the handover. Who reads the actor name next, and what do they do with it?',
+    ],
+    solution:
+      'Both claims are generated rather than retrieved. No threat-intelligence source was attached to ' +
+      'the alert, nothing in the enrichment mentions an actor, and the campaign it cites targets ' +
+      'financial services while Ridgeline is a healthcare provider -- so the one claim I can check is ' +
+      'wrong, which tells me what to make of the one I cannot. The recommendation to escalate is ' +
+      'still correct, and that is what makes it dangerous: agreeing with it costs nothing, and ' +
+      'repeating its reasoning costs a great deal. If I escalate with an actor name attached, the ' +
+      'next analyst inherits my attribution as an established fact and scopes the incident around it ' +
+      '-- hunting for that actor’s known tooling, and possibly not looking for what is actually ' +
+      'here. The escalation should say what was observed, in what order, by which account, and that ' +
+      'attribution is unknown.',
+    expectedOutput:
+      'A written answer identifying the claims as unsupported, using the sector mismatch as the ' +
+      'checkable tell, and naming the downstream cost of passing them on.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          [
+            'no evidence',
+            'no source',
+            'not supported',
+            'unsupported',
+            'nothing in the alert',
+            'nothing in the enrichment',
+            'no intel',
+            'no threat intel',
+            'no threat-intelligence',
+            'rather than retrieved',
+            'not retrieved',
+            'made up',
+            'made-up',
+            'invent',
+            'fabricat',
+            'hallucin',
+            'no basis',
+            'not attached',
+          ],
+          [
+            'healthcare',
+            'health care',
+            'medical',
+            'hospital',
+            'patient',
+            'not financial',
+            'different sector',
+            'wrong sector',
+          ],
+          [
+            'handover',
+            'hand over',
+            'next analyst',
+            'tier two',
+            'tier 2',
+            'downstream',
+            'scope',
+            'inherit',
+            'anchor',
+            'bias',
+            'wrong direction',
+          ],
+        ],
+        hint:
+          'Your answer needs three things: that the claims have no source behind them, the checkable ' +
+          'tell that shows it (the sector the cited campaign targets, against the sector this ' +
+          'organisation is in), and what it costs the person who reads your escalation next.',
+      },
+    ],
+    debrief:
+      'This is the last exercise in the package and the one most worth carrying into an interview. ' +
+      'Every other mistake in this module changed a disposition, so a check could catch it. This one ' +
+      'did not -- the copilot was right -- and it is still the mistake that does the most damage, ' +
+      'because a fabricated attribution repeated once becomes a fact the whole incident is scoped ' +
+      'around. Read the recommendation, then read why. They fail independently.',
+    practice: PACKAGE_3_PRACTICE['3.5.5'] ?? [],
+  },
+];
+
 export const PACKAGE_3: LearningPackage = {
   id: '3',
   order: 3,
@@ -1576,6 +2107,16 @@ export const PACKAGE_3: LearningPackage = {
         'Eighty-two alerts, eight of them an intrusion, under an escalation budget. Then write the ' +
         'handover.',
       exercises: MODULE_3_4,
+    },
+    {
+      id: '3.5',
+      packageId: '3',
+      order: 5,
+      title: 'Working with the copilot',
+      summary:
+        'The same queues again with an AI assistant attached -- one that is right about most alerts, ' +
+        'wrong about a handful, and confident throughout.',
+      exercises: MODULE_3_5,
     },
   ],
 };

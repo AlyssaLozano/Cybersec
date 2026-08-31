@@ -15,7 +15,8 @@
     "db:seed": "tsx src/db/seed.ts",
     "db:studio": "prisma studio",
     "gen:world": "tsx scripts/generate-world.ts",
-    "gen:alerts": "tsx scripts/generate-alerts.ts"
+    "gen:alerts": "tsx scripts/generate-alerts.ts",
+    "gen:copilot": "tsx scripts/generate-copilot.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

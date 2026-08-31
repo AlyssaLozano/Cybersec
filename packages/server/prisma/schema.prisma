@@ -29,6 +29,7 @@ model User {
   practiceProgress PracticeProgress[]
   terminalSessions TerminalSession[]
   attempts         AttemptLog[]
+  copilotConsults  CopilotConsult[]
   assessment       AssessmentSession?
 
   @@map("users")
@@ -180,4 +181,38 @@ model AssessmentSession {
   updatedAt   DateTime  @updatedAt
 
   @@map("assessment_sessions")
+}
+
+/// One row per student per alert they opened the AI copilot on.
+///
+/// Recorded server-side when the analysis is served, never reported by the
+/// client. "Did you consult the copilot before deciding" is graded, so a
+/// client-supplied answer to it would be an answer the student controls -- the
+/// same reasoning that keeps the terminal and the exercise checks on the server.
+///
+/// It doubles as the instructor audit trail: what the assistant was asked about,
+/// by whom, and how often, which is what a debrief needs in order to say "it
+/// suggested X and you found Y".
+model CopilotConsult {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// The exercise the queue was being worked for. Consultation is scoped to it
+  /// so that re-reading an alert while working a later exercise cannot
+  /// retroactively satisfy an earlier one's `copilot-consulted` check.
+  exerciseId String
+  /// Alert the analysis was requested for, e.g. "A-5006".
+  alertId    String
+
+  /// How many times it was opened. A student who re-reads one analysis five
+  /// times was working at it, and that is worth an instructor seeing.
+  views Int @default(1)
+
+  createdAt    DateTime @default(now())
+  lastViewedAt DateTime @updatedAt
+
+  @@unique([userId, exerciseId, alertId])
+  @@index([userId, exerciseId])
+  @@map("copilot_consults")
 }

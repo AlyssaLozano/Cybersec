@@ -24,3 +24,6 @@ npm-debug.log*
 client.log
 server.log
 cookies.txt
+
+# Scratch space for local debugging
+.tmp/

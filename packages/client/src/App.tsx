@@ -6,14 +6,26 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type {
+  // Aliased: the component below is also called AlertQueue, and the surface is
+  // the thing this file mostly refers to.
+  AlertQueue as AlertQueueData,
+  CopilotAnalysis,
   AssessmentReport as ReportData,
   Dimension,
   Evaluation,
   LaneProfile,
+  AttackSuite,
+  DefenceId,
+  ModelCard,
+  ProbeEntry,
+  ProbeResult,
   ProgressOverview,
   PublicUser,
+  DecisionSubmission,
   ScrollbackEntry,
+  StudentDecisionPoint,
   TrackSummary,
+  TriageEntry,
 } from '@soc/shared';
 
 import { AuthScreen } from './components/AuthScreen';
@@ -24,6 +36,10 @@ import { Assessment } from './components/Assessment';
 import { AssessmentReport } from './components/AssessmentReport';
 import { LaneDetail } from './components/LaneDetail';
 import { Terminal } from './components/Terminal';
+import { AlertQueue } from './components/AlertQueue';
+import { ModelLab } from './components/ModelLab';
+import { WrittenAnswer } from './components/WrittenAnswer';
+import { IncidentConsole } from './components/IncidentConsole';
 import {
   ApiCallError,
   assessment,
@@ -32,6 +48,7 @@ import {
   type ExerciseDetail,
   type LaneDetail as LaneDetailData,
   type PackageDetail,
+  type SubmitResult,
 } from './lib/api';
 
 export function App() {
@@ -77,6 +94,68 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
   const [trackId, setTrackId] = useState<string | null>(null);
   /** The drill currently being graded, or null when working the exercise. */
   const [practiceId, setPracticeId] = useState<string | null>(null);
+  /** The alert queue for a triage exercise, loaded alongside the exercise. */
+  const [queue, setQueue] = useState<AlertQueueData | null>(null);
+  /** Dispositions the student has assigned so far, held here so they survive re-render. */
+  const [triage, setTriage] = useState<TriageEntry[]>([]);
+  /** Per-alert explanation, released only once decisions are committed. */
+  const [triageDebrief, setTriageDebrief] = useState<SubmitResult['triageDebrief'] | null>(null);
+  /**
+   * Copilot analyses the student has asked for, keyed by alert.
+   *
+   * Held here rather than in the queue component so that an answer already
+   * fetched survives switching between alerts. Re-fetching would be a second
+   * consultation of something they have already read, which is misleading in the
+   * instructor's audit trail even though it cannot inflate the graded count.
+   */
+  const [copilotAnalyses, setCopilotAnalyses] = useState<Record<string, CopilotAnalysis>>({});
+  const [copilotLoadingId, setCopilotLoadingId] = useState<string | null>(null);
+  /**
+   * Alerts already asked about, as the SERVER records them.
+   *
+   * Restored on load and refreshed from each answer, so a reload does not hide
+   * consultations a student has already made — several exercises require a
+   * minimum number, and they need to see where they stand.
+   */
+  const [consultedAlertIds, setConsultedAlertIds] = useState<string[]>([]);
+  const [copilotError, setCopilotError] = useState<string | null>(null);
+  /** Released with the debrief: which suggestions were unsound, and how. */
+  const [copilotDebrief, setCopilotDebrief] = useState<SubmitResult['copilotDebrief'] | null>(null);
+  const [collaboration, setCollaboration] = useState<SubmitResult['collaboration'] | null>(null);
+  /** The decision point for an incident exercise, loaded alongside the exercise. */
+  const [decisionPoint, setDecisionPoint] = useState<StudentDecisionPoint | null>(null);
+  /**
+   * What the student has picked so far at that decision point.
+   *
+   * Selection and ordering are held side by side rather than in one field,
+   * because a point grades one axis or the other and keeping them separate means
+   * switching exercises cannot leave a stray selection attached to an ordering.
+   */
+  const [decisionChoice, setDecisionChoice] = useState<{
+    optionIds: string[];
+    ordering: string[];
+    justification: string;
+  }>({ optionIds: [], ordering: [], justification: '' });
+  /** Consequences of every option, released only once the student commits. */
+  const [decisionOutcomes, setDecisionOutcomes] = useState<SubmitResult['decisionOutcomes'] | null>(
+    null,
+  );
+  /** Errors from a non-terminal submission, which has no scrollback to print into. */
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  /* --- the Model Lab -----------------------------------------------------
+   *
+   * The card and the suite arrive with the exercise; the probes and the defence
+   * set are what the student is building. They live here rather than inside the
+   * lab so that opening a practice drill, or a re-render, does not silently
+   * discard work somebody spent twenty minutes on.
+   */
+  const [model, setModel] = useState<ModelCard | null>(null);
+  const [attackSuite, setAttackSuite] = useState<AttackSuite | null>(null);
+  const [probes, setProbes] = useState<ProbeEntry[]>([]);
+  const [defences, setDefences] = useState<DefenceId[]>([]);
+  const [probeResults, setProbeResults] = useState<ProbeResult[] | null>(null);
+  const [hardening, setHardening] = useState<SubmitResult['hardening']>(undefined);
+  const [postMortem, setPostMortem] = useState<string | null>(null);
   /** Set by "try again" so the next command is graded despite an earlier pass. */
   const [regrade, setRegrade] = useState(false);
 
@@ -189,16 +268,68 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
     setPrefill(null);
     setPracticeId(null);
     setRegrade(false);
+    setQueue(null);
+    setTriage([]);
+    setTriageDebrief(null);
+    setCopilotAnalyses({});
+    setCopilotLoadingId(null);
+    setConsultedAlertIds([]);
+    setCopilotError(null);
+    setCopilotDebrief(null);
+    setCollaboration(null);
+    setDecisionPoint(null);
+    setDecisionChoice({ optionIds: [], ordering: [], justification: '' });
+    setDecisionOutcomes(null);
+    setSubmitError(null);
+    setModel(null);
+    setAttackSuite(null);
+    setProbes([]);
+    setDefences([]);
+    setProbeResults(null);
+    setHardening(undefined);
+    setPostMortem(null);
 
     learning
       .exercise(exerciseId)
       .then((result) => {
         if (cancelled) return;
         setDetail(result);
+        // Triage exercises need their queue before they can be worked. It is
+        // fetched separately so the exercise payload stays the same shape for
+        // every kind, and so a queue failure does not blank the whole screen.
+        if (result.exercise.queueId) {
+          learning
+            .queue(exerciseId)
+            .then((loaded) => {
+              if (!cancelled) setQueue(loaded.queue);
+            })
+            .catch(() => {
+              if (!cancelled) setSubmitError('The alert queue for this exercise could not be loaded.');
+            });
+        }
+        // Model Lab exercises need a model card too, but that fetch lives in
+        // its own effect below rather than here: the card depends on the active
+        // practice drill as well as the exercise, because a drill may target a
+        // different deployment.
+        // Likewise for incident exercises: the decision point is fetched
+        // separately so every exercise payload keeps the same shape.
+        if (result.exercise.decisionPointId) {
+          learning
+            .decision(exerciseId)
+            .then((loaded) => {
+              if (!cancelled) setDecisionPoint(loaded.point);
+            })
+            .catch(() => {
+              if (!cancelled) {
+                setSubmitError('The decision point for this exercise could not be loaded.');
+              }
+            });
+        }
         setScrollback(result.session.scrollback);
         setCwd(result.session.cwd);
         setLoadError(null);
         setHints(result.hints ?? []);
+        setConsultedAlertIds(result.consultedAlertIds ?? []);
         if (result.solution) {
           setReveal({
             solution: result.solution,
@@ -217,6 +348,40 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
       cancelled = true;
     };
   }, [exerciseId]);
+
+  /*
+   * Reload the model card when a practice drill is selected or cleared.
+   *
+   * A Model Lab drill may target a DIFFERENT deployment from its parent -- "same
+   * skill, different target" is the whole premise, and here the target is the
+   * model. Without this the card would keep showing the parent's system while
+   * probes went to the drill's, which is the one inconsistency in this surface
+   * that would actively teach something false.
+   */
+  useEffect(() => {
+    if (!exerciseId || !detail?.exercise.modelId) return;
+    let cancelled = false;
+
+    setProbes([]);
+    setProbeResults(null);
+    setHardening(undefined);
+    setPostMortem(null);
+
+    learning
+      .model(exerciseId, practiceId ?? undefined)
+      .then((loaded) => {
+        if (cancelled) return;
+        setModel(loaded.model);
+        setAttackSuite(loaded.suite ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setSubmitError('The model for this exercise could not be loaded.');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [exerciseId, practiceId, detail?.exercise.modelId]);
 
   const passedIds = useMemo(() => {
     const ids = new Set<string>();
@@ -238,6 +403,105 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
 
   const firstUnpassedIndex = orderedIds.findIndex((id) => !passedIds.has(id));
   const unlockedThrough = firstUnpassedIndex === -1 ? orderedIds.length - 1 : firstUnpassedIndex;
+
+  /**
+   * Ask the copilot about one alert.
+   *
+   * One request per alert, made only when the student clicks, because the server
+   * records the asking and several exercises grade it. An already-fetched
+   * analysis is served from state rather than re-requested: the student has read
+   * it, and a second request would misreport them in the instructor's audit
+   * trail as having gone back to it.
+   */
+  const askCopilot = async (alertId: string) => {
+    if (!exerciseId || copilotAnalyses[alertId]) return;
+    setCopilotLoadingId(alertId);
+    setCopilotError(null);
+    try {
+      const result = await learning.copilot(exerciseId, alertId);
+      setCopilotAnalyses((current) => ({ ...current, [alertId]: result.analysis }));
+      setConsultedAlertIds(result.consultedAlertIds);
+    } catch (error) {
+      setCopilotError(
+        error instanceof ApiCallError ? error.error.message : 'The copilot could not be reached.',
+      );
+    } finally {
+      setCopilotLoadingId(null);
+    }
+  };
+
+  /** The copilot debrief keyed by alert, so the panel can find its own entry. */
+  const copilotDebriefByAlert = useMemo(() => {
+    const byAlert: Record<string, NonNullable<SubmitResult['copilotDebrief']>[number]> = {};
+    for (const entry of copilotDebrief ?? []) byAlert[entry.alertId] = entry;
+    return byAlert;
+  }, [copilotDebrief]);
+
+  /**
+   * Answer an exercise that is not worked in the terminal.
+   *
+   * Triage, multiple-choice, and short-answer share one path, because all three
+   * are graded against the submission rather than against filesystem state.
+   */
+  const submit = async (answer: {
+    selectedOptionIds?: string[];
+    answerText?: string;
+    triage?: TriageEntry[];
+    decision?: DecisionSubmission;
+    probes?: ProbeEntry[];
+    defences?: DefenceId[];
+  }) => {
+    if (!exerciseId) return;
+    setBusy(true);
+    setSubmitError(null);
+    try {
+      const result = await learning.submitAnswer(exerciseId, answer, {
+        ...(practiceId ? { practiceId } : {}),
+        ...(regrade ? { regrade: true } : {}),
+      });
+      setEvaluation(result.evaluation);
+      setTriageDebrief(result.triageDebrief ?? null);
+      setCopilotDebrief(result.copilotDebrief ?? null);
+      setCollaboration(result.collaboration ?? null);
+      setDecisionOutcomes(result.decisionOutcomes ?? null);
+      setProbeResults(result.probeResults ?? null);
+      setHardening(result.hardening);
+      setPostMortem(result.postMortem ?? null);
+      if (regrade) setRegrade(false);
+      if (result.evaluation.passed) {
+        if (!practiceId) {
+          setReveal({
+            solution: result.solution,
+            expectedOutput: result.expectedOutput,
+            debrief: result.debrief,
+          });
+        }
+        await refreshProgress();
+      }
+    } catch (error) {
+      setSubmitError(
+        error instanceof ApiCallError ? error.error.message : 'That answer could not be sent.',
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /**
+   * Fire one payload at the model without being graded.
+   *
+   * Deliberately does not touch `evaluation`, `busy` beyond the request, or any
+   * progress state. Probing is testing, testing is mostly failure, and nothing
+   * about a failed probe should look or feel like a failed attempt.
+   */
+  const sendProbe = async (probe: ProbeEntry): Promise<ProbeResult | null> => {
+    if (!exerciseId) return null;
+    const result = await learning.probe(exerciseId, [probe], {
+      ...(defences.length > 0 ? { defences } : {}),
+      ...(practiceId ? { practiceId } : {}),
+    });
+    return result.results[0] ?? null;
+  };
 
   const run = async (input: string) => {
     if (!exerciseId) return;
@@ -574,15 +838,113 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
                 )}
               </section>
 
-              <Terminal
-                scrollback={scrollback}
-                cwd={cwd}
-                busy={busy}
-                prefill={prefill}
-                onPrefillConsumed={() => setPrefill(null)}
-                onRun={run}
-                onReset={reset}
-              />
+              {submitError && <p className="feedback fail">{submitError}</p>}
+
+              {detail.exercise.kind === 'terminal' ? (
+                <Terminal
+                  scrollback={scrollback}
+                  cwd={cwd}
+                  busy={busy}
+                  prefill={prefill}
+                  onPrefillConsumed={() => setPrefill(null)}
+                  onRun={run}
+                  onReset={reset}
+                />
+              ) : detail.exercise.kind === 'alert-triage' ? (
+                queue ? (
+                  <AlertQueue
+                    queue={queue}
+                    entries={triage}
+                    onChange={setTriage}
+                    onSubmit={() => submit({ triage })}
+                    busy={busy}
+                    {...(triageDebrief ? { debrief: triageDebrief } : {})}
+                    {...(detail.exercise.copilotEnabled
+                      ? {
+                          copilot: {
+                            analyses: copilotAnalyses,
+                            consultedAlertIds,
+                            loadingAlertId: copilotLoadingId,
+                            error: copilotError,
+                            onAsk: askCopilot,
+                            ...(copilotDebrief ? { debriefByAlert: copilotDebriefByAlert } : {}),
+                            ...(collaboration ? { collaboration } : {}),
+                          },
+                        }
+                      : {})}
+                  />
+                ) : (
+                  <p className="centered-note">Loading the queue…</p>
+                )
+              ) : detail.exercise.kind === 'model-probe' ? (
+                model ? (
+                  <ModelLab
+                    model={model}
+                    {...(attackSuite ? { suite: attackSuite } : {})}
+                    {...(detail.exercise.defencesConfigurable ? { configurable: true } : {})}
+                    probes={probes}
+                    onChangeProbes={setProbes}
+                    defences={defences}
+                    onChangeDefences={setDefences}
+                    onSend={sendProbe}
+                    onSubmit={() =>
+                      submit({
+                        probes,
+                        // Only sent when the exercise lets the student rebuild
+                        // the deployment. Sending an empty array on a discovery
+                        // exercise would mean "run this with no controls at
+                        // all", which is a very different request from "test it
+                        // as it stands".
+                        ...(detail.exercise.defencesConfigurable ? { defences } : {}),
+                      })
+                    }
+                    busy={busy}
+                    {...(probeResults ? { submitted: probeResults } : {})}
+                    {...(hardening ? { hardening } : {})}
+                    {...(postMortem ? { postMortem } : {})}
+                  />
+                ) : (
+                  <p className="centered-note">Loading the model…</p>
+                )
+              ) : detail.exercise.kind === 'incident-decision' ? (
+                decisionPoint ? (
+                  <IncidentConsole
+                    point={decisionPoint}
+                    optionIds={decisionChoice.optionIds}
+                    ordering={decisionChoice.ordering}
+                    justification={decisionChoice.justification}
+                    onChange={(next) =>
+                      setDecisionChoice((current) => ({ ...current, ...next }))
+                    }
+                    onSubmit={() =>
+                      submit({
+                        decision: {
+                          // Send only the axis this point actually grades, so an
+                          // ordering exercise never arrives carrying a stray
+                          // selection from a previous attempt.
+                          ...(decisionPoint.ordered
+                            ? { ordering: decisionChoice.ordering }
+                            : { optionIds: decisionChoice.optionIds }),
+                          ...(decisionChoice.justification
+                            ? { justification: decisionChoice.justification }
+                            : {}),
+                        },
+                      })
+                    }
+                    busy={busy}
+                    {...(decisionOutcomes ? { outcomes: decisionOutcomes } : {})}
+                  />
+                ) : (
+                  <p className="centered-note">Loading the incident…</p>
+                )
+              ) : (
+                <WrittenAnswer
+                  kind={detail.exercise.kind}
+                  options={detail.exercise.options ?? []}
+                  busy={busy}
+                  onSubmit={submit}
+                />
+              )}
             </>
           )}
         </main>

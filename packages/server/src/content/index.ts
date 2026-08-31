@@ -5,20 +5,41 @@
  * controlled, reviewable in a pull request, and type-checked. The database
  * stores only a student's progress *against* these ids.
  *
- * Packages 1-3 ship today. Adding Packages 4-5 means writing the module files
- * and appending them to PACKAGES; nothing else in the system changes.
+ * Adding a package means writing its module file and appending it to PACKAGES;
+ * nothing else in the system changes.
  */
 
 import type { Exercise, LearningModule, LearningPackage, PackageSummary } from '@soc/shared';
 
 import { queueForStudent } from '../services/alerts.js';
+import { pointWithAnswers } from '../services/incidents.js';
+import { analysisFor } from '../services/copilot.js';
+import { modelCard, suite } from '../services/modelLab.js';
 
 import { PACKAGE_1 } from './package1.js';
 import { PACKAGE_2 } from './package2.js';
 import { PACKAGE_3 } from './package3.js';
 import { PACKAGE_4 } from './package4.js';
+import { INCIDENT_RESPONSE } from './incident-response.js';
+import { AI_FOUNDATIONS } from './ai-foundations.js';
+import { AI_SECURITY } from './ai-security.js';
 
-export const PACKAGES: LearningPackage[] = [PACKAGE_1, PACKAGE_2, PACKAGE_3, PACKAGE_4];
+/**
+ * NAMING: packages 1-4 keep numeric ids because progress rows reference them and
+ * ids are permanent. Everything added from here on gets a NAME instead --
+ * numbers collide the moment two people add content at the same time, which is
+ * exactly what happened while Package 4 and Incident Response were being
+ * written. `order` still controls where a package appears; the id is just an id.
+ */
+export const PACKAGES: LearningPackage[] = [
+  PACKAGE_1,
+  PACKAGE_2,
+  PACKAGE_3,
+  PACKAGE_4,
+  INCIDENT_RESPONSE,
+  AI_FOUNDATIONS,
+  AI_SECURITY,
+];
 
 /** Every exercise across every package, in curriculum order. */
 export const ALL_EXERCISES: Exercise[] = PACKAGES.flatMap((pkg) =>
@@ -76,7 +97,9 @@ function validateCatalogue(): void {
           ? check.alertIds
           : check.type === 'triage-justifies'
             ? [check.alertId]
-            : [],
+            : check.type === 'copilot-override'
+              ? check.alertIds
+              : [],
       );
       for (const alertId of referenced) {
         if (!present.has(alertId)) {
@@ -86,6 +109,158 @@ function validateCatalogue(): void {
           );
         }
       }
+
+      // A copilot-override check naming an alert whose analysis is now sound
+      // would demand that a student disagree with correct advice. That is the
+      // opposite of the lesson, and it is what happens when the copilot corpus
+      // is regenerated without revisiting the exercises, so it is caught here.
+      for (const check of exercise.checks) {
+        if (check.type !== 'copilot-override') continue;
+        for (const alertId of check.alertIds) {
+          const analysis = analysisFor(alertId);
+          if (!analysis) {
+            throw new Error(
+              `Exercise "${exercise.id}" expects the copilot to have analysed alert "${alertId}", and it has not. ` +
+                'Re-run: npm run gen:copilot --workspace @soc/server',
+            );
+          }
+        }
+      }
+    }
+
+    /*
+     * Copilot checks outside a triage exercise would grade a student on their
+     * use of a panel the exercise never shows them -- an unpassable exercise,
+     * and a content bug rather than a user error.
+     */
+    const copilotChecks = exercise.checks.filter(
+      (check) =>
+        check.type === 'copilot-consulted' ||
+        check.type === 'copilot-override' ||
+        check.type === 'copilot-collaboration',
+    );
+    if (copilotChecks.length > 0 && exercise.kind !== 'alert-triage') {
+      throw new Error(
+        `Exercise "${exercise.id}" grades copilot collaboration but is a "${exercise.kind}" exercise, ` +
+          'which never shows the copilot. Copilot checks belong on alert-triage exercises.',
+      );
+    }
+    if (copilotChecks.length > 0 && !exercise.copilotEnabled) {
+      throw new Error(
+        `Exercise "${exercise.id}" grades copilot collaboration but does not enable the copilot, ` +
+          'so no student could ever satisfy those checks.',
+      );
+    }
+
+    if (exercise.kind === 'incident-decision') {
+      if (!exercise.decisionPointId) {
+        throw new Error(`Decision exercise "${exercise.id}" names no decision point.`);
+      }
+      const point = pointWithAnswers(exercise.decisionPointId);
+      if (!point) {
+        throw new Error(
+          `Decision exercise "${exercise.id}" points at "${exercise.decisionPointId}", which does not exist.`,
+        );
+      }
+      // An option id that is not on the decision point would fail every student
+      // for a content bug -- the same failure the "derive, never hardcode" rule
+      // exists to prevent, so it is caught at boot rather than by a learner.
+      const present = new Set(point.options.map((option) => option.id));
+      const referenced = exercise.checks.flatMap((check) =>
+        check.type === 'decision-selects' ||
+        check.type === 'decision-avoids' ||
+        check.type === 'decision-orders'
+          ? check.optionIds
+          : [],
+      );
+      for (const optionId of referenced) {
+        if (!present.has(optionId)) {
+          throw new Error(
+            `Exercise "${exercise.id}" expects option "${optionId}", which is not offered at ` +
+              `"${exercise.decisionPointId}". The decision point and the exercise have drifted apart.`,
+          );
+        }
+      }
+      // An ordering check against a point that is not sequenced would ask the
+      // student to order options that include ones they were meant to leave out.
+      if (exercise.checks.some((check) => check.type === 'decision-orders') && !point.ordered) {
+        throw new Error(
+          `Exercise "${exercise.id}" grades an ordering, but decision point ` +
+            `"${exercise.decisionPointId}" is not marked as sequenced.`,
+        );
+      }
+    }
+
+    /*
+     * Decision checks outside a decision exercise would grade a student on a
+     * console they were never shown. Same reasoning as the copilot guard above.
+     */
+    const decisionChecks = exercise.checks.filter(
+      (check) =>
+        check.type === 'decision-selects' ||
+        check.type === 'decision-avoids' ||
+        check.type === 'decision-orders' ||
+        check.type === 'decision-justifies',
+    );
+    if (decisionChecks.length > 0 && exercise.kind !== 'incident-decision') {
+      throw new Error(
+        `Exercise "${exercise.id}" grades an incident decision but is a "${exercise.kind}" exercise, ` +
+          'which never shows the incident console.',
+      );
+    }
+
+    if (exercise.kind === 'model-probe') {
+      if (!exercise.modelId) {
+        throw new Error(`Model Lab exercise "${exercise.id}" names no model under test.`);
+      }
+      if (!modelCard(exercise.modelId)) {
+        throw new Error(
+          `Model Lab exercise "${exercise.id}" points at model "${exercise.modelId}", which does not exist.`,
+        );
+      }
+      // A drill may target a different deployment. One naming a model that does
+      // not exist would probe nothing and score nothing, so it is caught here
+      // rather than by whoever tries the drill.
+      for (const drill of exercise.practice) {
+        if (drill.modelId && !modelCard(drill.modelId)) {
+          throw new Error(
+            `Practice drill "${drill.id}" points at model "${drill.modelId}", which does not exist.`,
+          );
+        }
+      }
+      // A suite id that does not resolve would score zero blocked out of zero
+      // total and pass every student silently -- the same class of failure the
+      // triage corpus check above exists to catch, so it is caught at boot.
+      for (const check of exercise.checks) {
+        if (check.type !== 'defence-blocks-suite') continue;
+        if (!suite(check.suiteId)) {
+          throw new Error(
+            `Exercise "${exercise.id}" grades against attack suite "${check.suiteId}", which does not exist.`,
+          );
+        }
+      }
+    }
+
+    /*
+     * Model Lab checks outside a model-probe exercise would grade a student on a
+     * lab they were never shown. Same reasoning as the copilot and decision
+     * guards above.
+     */
+    const probeChecks = exercise.checks.filter(
+      (check) =>
+        check.type === 'probe-bypass' ||
+        check.type === 'probe-carrier-variety' ||
+        check.type === 'probe-all-blocked' ||
+        check.type === 'probe-budget' ||
+        check.type === 'defence-blocks-suite' ||
+        check.type === 'defence-cost-budget' ||
+        check.type === 'defence-includes',
+    );
+    if (probeChecks.length > 0 && exercise.kind !== 'model-probe') {
+      throw new Error(
+        `Exercise "${exercise.id}" grades Model Lab probes but is a "${exercise.kind}" exercise, ` +
+          'which never opens the lab.',
+      );
     }
   }
 }
@@ -167,5 +342,52 @@ export function toStudentView(exercise: Exercise) {
      * assembles -- see services/alerts.ts.
      */
     queueId: exercise.queueId,
+    /** Which decision point to load, for incident-decision exercises. */
+    decisionPointId: exercise.decisionPointId,
+    /**
+     * Whether to offer the copilot panel.
+     *
+     * Safe to ship, and it has to: the client cannot render an affordance it is
+     * not told about. What the copilot actually says still arrives one alert at
+     * a time, from a route that records the asking.
+     */
+    copilotEnabled: exercise.copilotEnabled ?? false,
+    /**
+     * Which model to load into the Model Lab, for model-probe exercises.
+     *
+     * Safe to ship: it names a card, and a `ModelCard` has no field capable of
+     * carrying a defence. The answer key -- which controls that deployment
+     * actually has -- lives on `ModelDeployment`, which no route assembles.
+     * See services/modelLab.ts.
+     */
+    modelId: exercise.modelId,
+    /**
+     * Which attack suite the student's defences will be measured against.
+     *
+     * Also safe, and shipped deliberately: the payloads are ones a tester would
+     * write themselves, and knowing them reveals nothing about which controls
+     * stop them. Hiding the suite would mean grading somebody against a test set
+     * they were not allowed to see.
+     */
+    suiteId: exercise.suiteId,
+    /**
+     * Whether this exercise lets the student rebuild the deployment.
+     *
+     * DERIVED from the checks rather than declared as a content field, because a
+     * declared flag can drift: an exercise that grades a defence set but forgot
+     * to set the flag would be unpassable, and one that sets it without grading
+     * anything would offer a control panel that does nothing. Neither is
+     * possible if the flag is a consequence of the grading.
+     *
+     * Note that it is NOT the same question as "has a suite". Exercise ais.4.4
+     * asks the student to deploy a control and then break their own fix with
+     * their own payloads, so it configures defences and names no suite.
+     */
+    defencesConfigurable: exercise.checks.some(
+      (check) =>
+        check.type === 'defence-blocks-suite' ||
+        check.type === 'defence-cost-budget' ||
+        check.type === 'defence-includes',
+    ),
   };
 }

@@ -54,6 +54,11 @@ export function queueForStudent(queueId: string): AlertQueue | null {
   return QUEUE_BY_ID.get(queueId) ?? null;
 }
 
+/** Every queue id in the corpus, in the order the generator emitted them. */
+export function queueIds(): string[] {
+  return ALERT_QUEUES.map((queue) => queue.id);
+}
+
 /** Ground truth for one queue. Server-side callers only. */
 export function truthForQueue(queueId: string): AlertTruth[] {
   const queue = QUEUE_BY_ID.get(queueId);

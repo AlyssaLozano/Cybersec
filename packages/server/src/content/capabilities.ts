@@ -346,7 +346,7 @@ export const CAPABILITIES: Capability[] = [
       'vuln-management': 'core',
       'risk-compliance': 'supporting',
     },
-    exerciseIds: [],
+    exerciseIds: ['3.1.1', '3.1.2', '3.1.5'],
   },
   {
     id: 'cap-kill-chain',
@@ -362,33 +362,38 @@ export const CAPABILITIES: Capability[] = [
       'threat-intel': 'core',
       'red-team': 'supporting',
     },
-    exerciseIds: [],
+    // Deliberately spans two packages: you learn to sequence events while
+    // triaging a queue, and you have to defend the sequence in an IR timeline.
+    exerciseIds: ['3.3.1', '3.3.4', 'ir.4.3'],
   },
   {
     id: 'cap-containment',
     title: 'Make a containment decision',
     summary: 'Know when to pull the plug and when pulling the plug destroys the evidence.',
-    foundationId: 'incident-concepts',
+    foundationId: 'incident-response',
     lanes: {
       'soc-ops': 'supporting',
       'incident-response': 'core',
       forensics: 'core',
       'security-engineering': 'supporting',
     },
-    exerciseIds: [],
+    exerciseIds: ['ir.1.1', 'ir.1.2', 'ir.1.4'],
   },
   {
     id: 'cap-evidence',
     title: 'Preserve evidence',
     summary: 'Avoid the routine actions that quietly destroy what you needed to prove.',
-    foundationId: 'incident-concepts',
+    foundationId: 'incident-response',
     lanes: {
       'incident-response': 'core',
       forensics: 'core',
       'soc-ops': 'supporting',
       'risk-compliance': 'peripheral',
     },
-    exerciseIds: [],
+    // ir.1.2 is shared with cap-containment on purpose. Order of volatility is
+    // the one exercise where the containment decision and the evidence it
+    // destroys are the same decision, which is the whole point of teaching it.
+    exerciseIds: ['ir.1.2', 'ir.2.3', 'ir.2.5'],
   },
 
   // --- AI security ---------------------------------------------------------

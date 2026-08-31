@@ -298,6 +298,17 @@ export const CERTIFICATIONS: Certification[] = [
     prerequisites: ['oscp'],
     url: 'https://www.offsec.com/courses/pen-300/',
   },
+  {
+    id: 'aigp',
+    name: 'AIGP (AI Governance Professional)',
+    issuer: 'IAPP',
+    stage: 'advanced',
+    summary:
+      'AI governance, risk, and the emerging regulation around it. Policy and assurance rather than technique — it does not test whether you can break a model, and nobody should present it as if it does. Worth holding if the work is assurance-shaped; close to irrelevant if it is red-team shaped.',
+    approxCostUsd: 599,
+    typicalStudyWeeks: 10,
+    url: 'https://iapp.org/certify/aigp/',
+  },
 ];
 
 const BY_ID = new Map(CERTIFICATIONS.map((cert) => [cert.id, cert]));
@@ -322,6 +333,7 @@ export const CERT_PHILOSOPHY = {
     'Certifications matter for two unglamorous reasons: automated CV filters screen on them, and some sectors mandate them contractually. Neither reason has anything to do with whether you can do the work — but both decide whether you get the interview.',
     'The field is full of people who passed an exam and cannot read a log. Hiring managers know this, and technical interviews are designed to find them out. Study for the certificate, but build the skill alongside it, because the interview tests the second one.',
     'Do not collect certificates. One relevant certification plus demonstrable hands-on work beats four certificates and no portfolio, every time.',
+    'AI security is the one area where this advice has to be stated more bluntly, because the certification market got there before the discipline did. There is no established, respected certification for testing deployed models, and several of the ones being advertised were written by people who have never done an engagement. Until that changes, a portfolio of findings you can walk somebody through is the credential, and a general security certificate plus that portfolio will get you further than anything with "AI" in the name.',
   ],
 } as const;
 

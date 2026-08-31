@@ -7,10 +7,26 @@
  */
 
 import type {
+  AlertQueue,
   ApiError,
+  AttackSuite,
+  DefenceId,
+  HardeningScore,
+  ModelCard,
+  ProbeEntry,
+  ProbeResult,
   ApiResponse,
   AssessmentReport,
+  DecisionOutcome,
+  DecisionSubmission,
+  StudentDecisionPoint,
+  TriageDecision,
+  TriageEntry,
+  TriageScore,
   Certification,
+  CollaborationScore,
+  CopilotAnalysis,
+  CopilotDebriefEntry,
   Dimension,
   Foundation,
   ItemResponse,
@@ -107,6 +123,49 @@ export interface ExerciseView {
   prompt: string;
   teach: Teach;
   hintCount: number;
+  /** Choices for multiple-choice exercises. */
+  options?: Array<{ id: string; label: string }>;
+  /**
+   * Which alert queue to load, for triage exercises.
+   *
+   * Safe to hold client-side: the queue is what a real operator sees. The
+   * ground truth is a server-only structure and never crosses the wire.
+   */
+  queueId?: string;
+  /**
+   * Whether this exercise offers the AI copilot.
+   *
+   * False for every triage exercise before Module 3.5, deliberately: those are
+   * worked unaided, so that a student has judgement of their own to weigh an
+   * assistant against by the time they meet one.
+   */
+  copilotEnabled?: boolean;
+  /**
+   * Which decision point to load, for incident-decision exercises.
+   *
+   * Safe to hold client-side: the point ships without the consequence or the
+   * quality of any option, which between them are the entire answer.
+   */
+  decisionPointId?: string;
+  /**
+   * Which model the Model Lab loads, for model-probe exercises.
+   *
+   * Safe to hold client-side: it names a card, and a card has no field that
+   * could carry a defence. Which controls the deployment actually has is the
+   * answer key and never leaves the server.
+   */
+  modelId?: string;
+  /** Which attack suite the student's defences are measured against, if any. */
+  suiteId?: string;
+  /**
+   * Whether this exercise lets the student rebuild the deployment.
+   *
+   * Derived server-side from the exercise's own checks, so the control panel
+   * appears exactly when something grades it. Not the same as having a suite:
+   * one exercise asks the student to deploy a control and then break their own
+   * fix with their own payloads.
+   */
+  defencesConfigurable?: boolean;
 }
 
 export interface ExerciseDetail {
@@ -120,6 +179,14 @@ export interface ExerciseDetail {
   };
   /** Hints the student has already unlocked, restored across reloads. */
   hints: string[];
+  /**
+   * Alerts this student has already asked the copilot about.
+   *
+   * Restored on load for the same reason as hints: a reload must not make the
+   * queue look as though nothing was ever asked, particularly when an exercise
+   * requires a minimum number of consultations to pass.
+   */
+  consultedAlertIds: string[];
   /** Optional extra drills on the same skill. Prompts only; no answers. */
   practice: Array<{ id: string; prompt: string }>;
   practiceState: Array<{ practiceId: string; passed: boolean; attempts: number }>;
@@ -180,7 +247,154 @@ export const learning = {
     ),
 
   progress: () => request<ProgressOverview>('/learning/progress'),
+
+  /** The alert queue for a triage exercise. Carries no answer key. */
+  queue: (exerciseId: string) =>
+    request<{ queue: AlertQueue }>(`/learning/exercises/${exerciseId}/queue`),
+
+  /**
+   * The model under test, and the suite it will be measured against.
+   *
+   * `practiceId` matters here: a Model Lab drill may target a different
+   * deployment from its parent exercise, which is the whole point of a drill in
+   * this package — the same three payloads against different controls.
+   */
+  model: (exerciseId: string, practiceId?: string) =>
+    request<{ model: ModelCard; suite?: AttackSuite }>(
+      `/learning/exercises/${exerciseId}/model${practiceId ? `?practiceId=${encodeURIComponent(practiceId)}` : ''}`,
+    ),
+
+  /**
+   * Fire probes at a model without being graded.
+   *
+   * This is the Send button, and it deliberately records nothing. Testing is
+   * mostly failure, and a platform that logged every failed payload as a failed
+   * attempt would teach people to guess carefully instead of testing
+   * systematically. The graded path is `submitAnswer` with `probes`.
+   */
+  probe: (
+    exerciseId: string,
+    probes: ProbeEntry[],
+    options: { defences?: DefenceId[]; practiceId?: string } = {},
+  ) =>
+    request<{ results: ProbeResult[] }>(`/learning/exercises/${exerciseId}/probe`, {
+      method: 'POST',
+      body: JSON.stringify({ probes, ...options }),
+    }),
+
+  /**
+   * The AI copilot's read on one alert.
+   *
+   * Fetched one alert at a time rather than for the whole queue, because asking
+   * is recorded and graded. Pre-loading every analysis would mean every alert
+   * counted as consulted whether or not anybody read a word of it.
+   *
+   * The response carries what the assistant said and nothing about whether it is
+   * any good. That is a separate table the server never sends before a student
+   * has committed.
+   */
+  copilot: (exerciseId: string, alertId: string) =>
+    request<{ analysis: CopilotAnalysis; consultedAlertIds: string[] }>(
+      `/learning/exercises/${exerciseId}/copilot/${alertId}`,
+    ),
+
+  /**
+   * Answer an exercise that is not worked in the terminal.
+   *
+   * Triage, multiple-choice, and short-answer share this endpoint: all three are
+   * graded against the submission itself rather than against filesystem state.
+   */
+  /**
+   * The decision point an incident exercise puts the student at.
+   *
+   * Carries the situation, the snapshot and the option labels. What each option
+   * would actually cause stays server-side until the student commits.
+   */
+  decision: (exerciseId: string) =>
+    request<{ point: StudentDecisionPoint }>(`/learning/exercises/${exerciseId}/decision`),
+
+  submitAnswer: (
+    exerciseId: string,
+    answer: {
+      selectedOptionIds?: string[];
+      answerText?: string;
+      triage?: TriageEntry[];
+      decision?: DecisionSubmission;
+      probes?: ProbeEntry[];
+      defences?: DefenceId[];
+    },
+    options: { practiceId?: string; regrade?: boolean } = {},
+  ) =>
+    request<SubmitResult>(`/learning/exercises/${exerciseId}/submit`, {
+      method: 'POST',
+      body: JSON.stringify({ ...answer, ...options }),
+    }),
 };
+
+/** What the server returns from a non-terminal submission. */
+export interface SubmitResult {
+  evaluation: Evaluation;
+  /**
+   * Per-alert explanation of everything the student got wrong.
+   *
+   * Released only after decisions are committed — the same rule that governs the
+   * worked solution, for the same reason.
+   */
+  triageDebrief?: {
+    scores: TriageScore[];
+    missed: Array<{
+      alertId: string;
+      yourDecision: TriageDecision | null;
+      correct: TriageDecision;
+      why: string;
+    }>;
+  };
+  /**
+   * Which of the copilot's suggestions were unsound, and how.
+   *
+   * Released on the same terms as `triageDebrief`. One entry per kind of
+   * mistake rather than one per affected alert — a single planted mistake spans
+   * seventy-nine alerts in the night shift, and repeating it that many times
+   * would bury the entries that mattered.
+   */
+  copilotDebrief?: CopilotDebriefEntry[];
+  /**
+   * How the student worked with the copilot.
+   *
+   * Reported next to the triage scores, never merged into them: getting the
+   * queue right and handling the assistant well are different skills.
+   */
+  collaboration?: CollaborationScore;
+  /**
+   * What every option at a decision point would have done.
+   *
+   * All options, not just the chosen ones: most of the learning in a decision
+   * exercise is in reading what the others would have cost.
+   */
+  decisionOutcomes?: DecisionOutcome[];
+  /**
+   * What happened to each submitted probe.
+   *
+   * Returned whether or not the exercise passed: it is the evidence being
+   * graded, and hiding it would make a failure unreadable. Each result reports
+   * the STAGE a payload died at and never the control that caught it.
+   */
+  probeResults?: ProbeResult[];
+  /** How the chosen defence set scored against each suite the checks named. */
+  hardening?: HardeningScore[];
+  /**
+   * Why the deployment held or failed, in terms of the controls it had.
+   *
+   * Released on a pass and never before, on the same terms as the worked
+   * solution — being told which control is missing before you have looked
+   * teaches nothing about looking.
+   */
+  postMortem?: string;
+  solution?: string;
+  expectedOutput?: string;
+  debrief?: string;
+  nextExerciseId?: string | null;
+}
 
 // --- Career Fit Analyzer -----------------------------------------------------
 

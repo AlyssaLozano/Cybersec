@@ -1,0 +1,495 @@
+/*
+ * The AI Security Analyst role surface: model card, probe console, deployment
+ * panel, and the submission.
+ *
+ * Kept out of styles.css on the same principle as alerts.css and career.css:
+ * this is one role's surface, and the others will each want their own.
+ *
+ * DELIBERATELY RESTRAINED ABOUT THE VENDOR CLAIM
+ *
+ * What the owning team say about their defences is styled exactly like the rest
+ * of the card — no warning colour, no "unverified" badge, nothing that hints it
+ * should be distrusted. The whole of module 7.1 exists to teach that the
+ * architecture diagram and the running system disagree, and an interface that
+ * marked the claim as suspicious would give that away before the student had
+ * sent a single payload. It is styled as what it is: a paragraph somebody wrote.
+ *
+ * COLOUR IS RESERVED FOR OUTCOMES
+ *
+ * A payload that got through is the one thing on screen that is a fact rather
+ * than an assertion, so it is the only thing that gets a colour.
+ */
+
+.lab {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  flex: 1;
+}
+
+.lab-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(380px, 1.6fr);
+  gap: 14px;
+  align-items: start;
+}
+
+/* The deployment panel only exists on hardening exercises, so the grid grows a
+   third column rather than reserving empty space on every other exercise. */
+.lab-grid:has(.lab-deployment) {
+  grid-template-columns: minmax(220px, 1fr) minmax(340px, 1.4fr) minmax(260px, 1fr);
+}
+
+@media (max-width: 1100px) {
+  .lab-grid,
+  .lab-grid:has(.lab-deployment) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- the scoping document -------------------------------------------------- */
+
+.lab-card,
+.lab-deployment {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.lab-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 6px;
+}
+
+.lab-card h2 {
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+
+.lab-version {
+  color: var(--text-dim);
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.lab-purpose {
+  margin: 0 0 12px;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.lab-facts {
+  display: flex;
+  gap: 20px;
+  margin: 0 0 12px;
+}
+
+.lab-facts dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  margin-bottom: 2px;
+}
+
+.lab-facts dd {
+  margin: 0;
+  font-size: 13px;
+}
+
+/* Deployment stage is the one card field that changes a severity rating, so it
+   is legible at a glance — but as weight, not as a colour, for the same reason
+   alert severity is not painted red. */
+.lab-stage {
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+
+.lab-stage-production {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.lab-stage-staging,
+.lab-stage-development {
+  color: var(--text-dim);
+}
+
+.lab-block {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.lab-block-head {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 6px;
+}
+
+.lab-block p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.lab-pre {
+  margin: 0;
+  padding: 8px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.lab-pre.small {
+  font-size: 11.5px;
+  max-height: 160px;
+}
+
+.lab-pre.response {
+  border-color: var(--border-strong);
+}
+
+/* --- the probe console ----------------------------------------------------- */
+
+.lab-console {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.lab-label {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.lab-input {
+  width: 100%;
+  background: var(--bg-input);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 10px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.lab-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.lab-channel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 10px 8px;
+  margin: 0;
+}
+
+.lab-channel legend {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 0 4px;
+}
+
+.lab-channel label {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.lab-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lab-hint-text {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.lab-error {
+  margin: 0;
+  color: var(--fail);
+  font-size: 12.5px;
+}
+
+/* --- the scratch log ------------------------------------------------------- */
+
+.lab-trials {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 460px;
+  overflow: auto;
+}
+
+.lab-empty {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 12.5px;
+  line-height: 1.55;
+  max-width: 62ch;
+}
+
+.lab-trial {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px;
+  background: var(--bg-panel);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lab-trial.bypassed {
+  border-color: var(--fail);
+}
+
+.lab-trial header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lab-verdict {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.lab-verdict.through {
+  color: var(--fail);
+  font-weight: 600;
+}
+
+.lab-stage-note {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.lab-techniques {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.lab-tag {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  color: var(--text-dim);
+}
+
+.lab-tag.carrier {
+  border-style: dashed;
+}
+
+.lab-tag.muted {
+  color: var(--text-faint);
+  border-color: var(--border);
+}
+
+/* --- the deployment panel -------------------------------------------------- */
+
+.lab-note {
+  margin: 0 0 10px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.lab-cost {
+  font-size: 13px;
+  color: var(--text-dim);
+  padding: 6px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+}
+
+.lab-cost strong {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 15px;
+}
+
+.lab-defence-group {
+  margin-bottom: 12px;
+}
+
+.lab-group-head {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 6px;
+}
+
+.lab-defence {
+  display: flex;
+  gap: 8px;
+  padding: 7px 0;
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.lab-defence input {
+  margin-top: 3px;
+}
+
+.lab-defence-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.lab-defence-title {
+  font-size: 13px;
+}
+
+.lab-defence-cost {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-left: 4px;
+}
+
+.lab-defence-summary {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+/* What a control does NOT do, shown by default. See the component's note. */
+.lab-defence-limit {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.lab-suite {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.lab-suite summary {
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--text-dim);
+}
+
+.lab-suite .lab-pre {
+  margin-top: 8px;
+}
+
+/* --- the submission -------------------------------------------------------- */
+
+.lab-submission {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lab-submission-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lab-submission-head h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.lab-queued {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lab-queued .lab-pre {
+  flex: 1;
+  min-width: 220px;
+}
+
+.lab-scores {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.lab-score-value {
+  font-family: var(--mono);
+  font-size: 16px;
+  margin-right: 6px;
+}
+
+.lab-score-label {
+  font-size: 12.5px;
+  color: var(--text-dim);
+}
+
+.lab-graded {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+.lab-graded li.through {
+  color: var(--fail);
+}
+
+.lab-postmortem {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.lab-postmortem p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  max-width: 82ch;
+}

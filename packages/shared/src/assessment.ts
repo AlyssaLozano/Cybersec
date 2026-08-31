@@ -71,6 +71,7 @@ export const LANES = [
   'vuln-management',
   'forensics',
   'security-architecture',
+  'ai-security',
 ] as const;
 export type LaneId = (typeof LANES)[number];
 

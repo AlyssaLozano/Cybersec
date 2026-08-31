@@ -1,5 +1,5 @@
 /**
- * The item bank: 75 questions across six dimensions.
+ * The item bank: 78 questions across six dimensions.
  *
  * A NOTE ON COUNT
  *
@@ -182,7 +182,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'problem_solving',
     statement: 'I enjoy reading for hours to understand something properly before acting.',
     trait: 'research_orientation',
-    lanes: { 'threat-intel': 3, 'security-architecture': 2, appsec: 2, 'risk-compliance': 2, 'detection-engineering': 1, 'soc-ops': -1 },
+    lanes: { 'threat-intel': 3, 'security-architecture': 2, appsec: 2, 'risk-compliance': 2, 'detection-engineering': 1, 'soc-ops': -1, 'ai-security': 2 },
   },
   {
     id: 's5',
@@ -190,7 +190,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'problem_solving',
     statement: 'Given an unfamiliar system, my instinct is to work out how to break it.',
     trait: 'adversarial_pull',
-    lanes: { pentest: 4, 'red-team': 4, appsec: 2 },
+    lanes: { pentest: 4, 'red-team': 4, appsec: 2, 'ai-security': 3 },
   },
   {
     id: 's6',
@@ -207,7 +207,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'problem_solving',
     statement: 'I would rather build a tool that solves a problem permanently than solve it by hand each time.',
     trait: 'building_drive',
-    lanes: { 'security-engineering': 4, 'detection-engineering': 3, 'cloud-security': 3, appsec: 2, 'soc-ops': -1 },
+    lanes: { 'security-engineering': 4, 'detection-engineering': 3, 'cloud-security': 3, appsec: 2, 'soc-ops': -1, 'ai-security': 1 },
   },
   {
     id: 's8',
@@ -215,7 +215,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'problem_solving',
     statement: 'I am comfortable writing code or scripts, or I would be happy to learn.',
     trait: 'building_drive',
-    lanes: { 'security-engineering': 3, 'cloud-security': 3, appsec: 3, 'detection-engineering': 2, 'red-team': 2, 'risk-compliance': -1 },
+    lanes: { 'security-engineering': 3, 'cloud-security': 3, appsec: 3, 'detection-engineering': 2, 'red-team': 2, 'risk-compliance': -1, 'ai-security': 3 },
   },
   {
     id: 's9',
@@ -223,7 +223,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'problem_solving',
     statement: 'I would rather understand one system deeply than five systems roughly.',
     trait: 'depth_preference',
-    lanes: { appsec: 2, forensics: 2, iam: 2, 'security-architecture': -1 },
+    lanes: { appsec: 2, forensics: 2, iam: 2, 'security-architecture': -1, 'ai-security': 2 },
   },
   {
     id: 's10',
@@ -523,7 +523,7 @@ export const ITEMS: AssessmentItem[] = [
   },
 
   // =========================================================================
-  // 5. INTERESTS AND ENERGY (17 items)
+  // 5. INTERESTS AND ENERGY (20 items)
   // =========================================================================
   {
     id: 'e1',
@@ -531,7 +531,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'interests_energy',
     statement: 'The idea of legally breaking into a company\'s systems genuinely excites me.',
     trait: 'adversarial_pull',
-    lanes: { pentest: 4, 'red-team': 4, appsec: 1 },
+    lanes: { pentest: 4, 'red-team': 4, appsec: 1, 'ai-security': 2 },
   },
   {
     id: 'e2',
@@ -556,7 +556,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'interests_energy',
     statement: 'Learning a completely new tool every few months sounds energising rather than exhausting.',
     trait: 'novelty_seeking',
-    lanes: { 'cloud-security': 3, 'red-team': 2, pentest: 2, 'threat-intel': 1, iam: -1 },
+    lanes: { 'cloud-security': 3, 'red-team': 2, pentest: 2, 'threat-intel': 1, iam: -1, 'ai-security': 3 },
     factors: { pace: 1, stability: -1 },
   },
   {
@@ -566,7 +566,7 @@ export const ITEMS: AssessmentItem[] = [
     statement: 'I would rather use proven methods than the newest approach.',
     trait: 'novelty_seeking',
     reverse: true,
-    lanes: { 'risk-compliance': 2, forensics: 2, iam: 2, 'network-security': 1, 'cloud-security': -2 },
+    lanes: { 'risk-compliance': 2, forensics: 2, iam: 2, 'network-security': 1, 'cloud-security': -2, 'ai-security': -2 },
     factors: { stability: 1, rules: 1 },
   },
   {
@@ -599,7 +599,7 @@ export const ITEMS: AssessmentItem[] = [
     dimension: 'interests_energy',
     statement: 'I would enjoy following a group of attackers over months to understand how they operate.',
     trait: 'research_orientation',
-    lanes: { 'threat-intel': 4, 'red-team': 2, 'incident-response': 1 },
+    lanes: { 'threat-intel': 4, 'red-team': 2, 'incident-response': 1, 'ai-security': 1 },
   },
   {
     id: 'e10',
@@ -713,6 +713,48 @@ export const ITEMS: AssessmentItem[] = [
         traitValue: { trait: 'pressure_tolerance', value: -1 },
       },
     ],
+  },
+
+  /*
+   * The three items below carry most of the AI Security signal, and they are
+   * deliberately about tolerance rather than enthusiasm.
+   *
+   * Everybody finds AI interesting at the moment, so an item asking "does AI
+   * interest you" would route half the population into a specialism that is not
+   * an entry point and has almost no junior openings. What actually predicts
+   * somebody surviving this work is comfort with mathematics they will have to
+   * learn properly, comfort working where nobody has written the method down
+   * yet, and willingness to spend a week proving a negative. Those are the three
+   * things asked here.
+   */
+  {
+    id: 'e18',
+    kind: 'likert',
+    dimension: 'interests_energy',
+    statement:
+      'Working out how something computes its answer — the actual arithmetic — is satisfying rather than tedious.',
+    trait: 'depth_preference',
+    lanes: { 'ai-security': 4, appsec: 1, 'detection-engineering': 1 },
+  },
+  {
+    id: 'e19',
+    kind: 'likert',
+    dimension: 'interests_energy',
+    statement:
+      'I would be comfortable working in an area where there is no agreed method yet and I would have to invent my own.',
+    trait: 'novelty_seeking',
+    lanes: { 'ai-security': 4, 'red-team': 2, 'threat-intel': 1, 'risk-compliance': -2, iam: -2 },
+    factors: { rules: -1, autonomy: 1 },
+  },
+  {
+    id: 'e20',
+    kind: 'likert',
+    dimension: 'interests_energy',
+    statement:
+      'Spending a week testing something and concluding "I could not break it" would feel like a wasted week.',
+    trait: 'research_orientation',
+    reverse: true,
+    lanes: { 'ai-security': 3, appsec: 2, 'threat-intel': 2, pentest: 1 },
   },
 
   // =========================================================================

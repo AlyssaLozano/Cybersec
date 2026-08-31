@@ -48,6 +48,7 @@ export const TRACKS: Track[] = [
       'siem',
       'investigation-tools',
       'incident-concepts',
+      'incident-response',
     ],
     curriculum: [
       {
@@ -104,6 +105,7 @@ export const TRACKS: Track[] = [
       'investigation-tools',
       'packet-analysis',
       'incident-concepts',
+      'incident-response',
       'scripting',
     ],
     curriculum: [
@@ -499,6 +501,58 @@ export const TRACKS: Track[] = [
     status: 'planned',
     workRhythm: 'Business hours, campaign-driven, with peaks around annual training cycles.',
     entryDifficulty: 'accessible',
+  },
+  {
+    id: 'ai-security',
+    order: 16,
+    title: 'AI Security',
+    summary:
+      'Defend the models an organisation has deployed: test them for prompt injection and jailbreaks, validate the data they were trained on, and decide whether one is safe to put in front of a decision.',
+    audience:
+      'People with real technical depth who want to work on something that is still being figured out. NOT an entry point — it needs the AI mechanics and enough security grounding to know what a finding is worth.',
+    roles: ['AI Security Analyst', 'AI Red Teamer', 'ML Security Engineer', 'AI Assurance Analyst'],
+    foundations: [
+      'ai-foundations',
+      'ai-security-testing',
+      'adversarial-ml',
+      'scripting',
+      'threat-modelling',
+      'security-writing',
+      'ai-governance',
+    ],
+    curriculum: [
+      {
+        title: 'Red Teaming a Production AI System',
+        summary:
+          'A full engagement against a deployed assistant: scope it, test the paths nobody tested, and write the report.',
+        plannedExercises: 16,
+      },
+      {
+        title: 'Monitoring AI Systems in Production',
+        summary:
+          'Detect injection attempts, extraction patterns, and behaviour drift in a live query log — the defensive half of the job.',
+        plannedExercises: 14,
+      },
+    ],
+    certifications: ['sec-plus', 'aigp'],
+    sectorNotes: [
+      {
+        when: { orgSize: 'large' },
+        note: 'Almost every one of these roles is at a large organisation or an AI company, because you need somebody to have deployed models worth defending. Small companies buy this as consultancy.',
+      },
+      {
+        when: { sector: 'government', govLevel: 'federal' },
+        note: 'Government AI assurance work is growing and is more about evidence and documentation than about jailbreaks — model provenance, evaluation records, and being able to show what was tested. Clearance timelines still apply.',
+      },
+      {
+        when: { sector: 'private', orgSize: 'small' },
+        note: 'At a startup this is usually somebody’s second hat rather than a job. That is not a bad way in, but the title on the advert will say something else.',
+      },
+    ],
+    status: 'available',
+    workRhythm:
+      'Project work, business hours, rarely on-call — you are not in the incident queue. Deadlines come from release cycles: somebody wants to ship a model on Thursday and you are the reason they might not.',
+    entryDifficulty: 'hard',
   },
 ];
 

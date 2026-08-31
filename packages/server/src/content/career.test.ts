@@ -95,8 +95,28 @@ describe('foundations are per-track, not universal', () => {
     expect(demand.get('linux')).not.toContain('privacy');
   });
 
+  /*
+   * Asserted by property, not as a frozen array.
+   *
+   * This previously read `toEqual(['1', '2', '4', '3'])`, which made adding a
+   * package to the SOC track an edit to this file -- the positional-assertion
+   * problem, in the one test that could not avoid caring about order. What
+   * actually matters is that the order follows the track's declared foundations
+   * and that only built ones appear, so that is what is checked.
+   */
   it('resolves a track to its playable packages, foundations first', () => {
-    expect(trackPackages('soc')).toEqual(['1', '2', '4', '3']);
+    const soc = trackPackages('soc');
+    const declared = trackFoundations('soc')
+      .filter((foundation) => foundation.playable)
+      .map((foundation) => foundation.packageId);
+
+    expect(soc).toEqual(declared);
+    expect(new Set(soc).size, 'a package should not be reachable twice').toBe(soc.length);
+    // Spot-checks of the ordering the track declares, which no reordering of
+    // PACKAGES can satisfy by accident.
+    expect(soc.indexOf('1')).toBeLessThan(soc.indexOf('2'));
+    expect(soc.indexOf('3')).toBeLessThan(soc.indexOf('incident-response'));
+
     expect(trackPackages('privacy')).toEqual([]);
   });
 });
@@ -106,7 +126,7 @@ describe('foundations are per-track, not universal', () => {
 // =========================================================================
 
 describe('lane profiles are complete and honest', () => {
-  it('covers all fifteen lanes exactly', () => {
+  it('covers every lane exactly once', () => {
     expect(LANE_PROFILES.map((lane) => lane.id).sort()).toEqual([...LANES].sort());
   });
 

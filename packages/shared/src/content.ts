@@ -9,10 +9,19 @@
  * existing id — progress rows reference it. Add new ids instead.
  */
 
+import type { AttackCarrier, AttackIntent, DefenceId } from './ai.js';
 import type { TriageDecision } from './alerts.js';
 
 /** How a student answers an exercise, which determines the UI shown. */
-export type ExerciseKind = 'terminal' | 'multiple-choice' | 'short-answer' | 'alert-triage';
+export type ExerciseKind =
+  | 'terminal'
+  | 'multiple-choice'
+  | 'short-answer'
+  | 'alert-triage'
+  /** Worked in the Model Lab: send payloads at a model under test, or harden one. */
+  | 'model-probe'
+  /** Worked in the incident console: commit to a decision, then live with it. */
+  | 'incident-decision';
 
 /**
  * A single pass/fail condition. An exercise passes only when *every* check
@@ -83,7 +92,122 @@ export type Check =
   /** No more than this many alerts may carry the decision, regardless of which.
    *  Models a real constraint: an operator who escalates forty alerts a shift
    *  has escalated nothing, because nobody downstream can absorb that. */
-  | { type: 'triage-budget'; decision: TriageDecision; max: number; hint: string };
+  | { type: 'triage-budget'; decision: TriageDecision; max: number; hint: string }
+  /* --- working with the copilot ------------------------------------------
+   *
+   * These grade the student's relationship with the AI assistant rather than
+   * their answer. They are only meaningful on an exercise whose queue has
+   * copilot analyses, and the catalogue validator enforces that at boot.
+   *
+   * As with triage checks, no alert id below is ever written by hand. They are
+   * computed from the generated flaw table, so regenerating copilot output
+   * cannot leave an exercise pointing at an analysis that is now sound.
+   */
+  /** The student must have opened the copilot on at least this many alerts.
+   *  Grades reaching for the tool at all -- the cheapest thing to get wrong is
+   *  working a hundred-alert queue with a second opinion sitting unread. */
+  | { type: 'copilot-consulted'; minAlerts: number; hint: string }
+  /** On these alerts the student must have consulted the copilot AND landed on
+   *  a disposition other than the one it recommended. This is the check behind
+   *  "the suggestion looked good and was wrong": passing it requires having
+   *  read the advice and then declined it, and neither half alone will do. */
+  | { type: 'copilot-override'; alertIds: string[]; hint: string }
+  /** Thresholds on the collaboration metric.
+   *
+   *  Note what is NOT gradeable here: the deference rate. `CollaborationScore`
+   *  reports it, and an instructor should read it, but failing somebody for it
+   *  would mean failing them for agreeing with advice that was correct — and on
+   *  a realistic queue the copilot is right about most alerts, so a careful
+   *  student defers most of the time and should. What is gradeable is what
+   *  happened at the alerts where deferring was wrong: `minCaught` and
+   *  `maxMisled`. */
+  | {
+      type: 'copilot-collaboration';
+      minScore?: number;
+      /** Fail unless at least this many bad suggestions were overridden. */
+      minCaught?: number;
+      /** Fail once this many wrong recommendations were followed. */
+      maxMisled?: number;
+      hint: string;
+    }
+  /* --- the Model Lab -------------------------------------------------------
+   *
+   * These grade what happened when the student's payloads met a model under
+   * test, never the text of the payloads themselves. That is the same rule as
+   * everywhere else here — grade the outcome, not the keystrokes — and it
+   * matters more in this package than in any other, because there is no single
+   * correct jailbreak. There is a class of technique the deployment does not
+   * defend against, and any payload in that class is a right answer.
+   *
+   * A student who invents a bypass nobody anticipated should pass. A student who
+   * copies the worked answer from the teaching material should not, which is why
+   * the material demonstrates techniques against a DIFFERENT model to the one
+   * each exercise asks about.
+   */
+  /** At least `min` submitted probes must have got through, optionally of a
+   *  particular technique. `intent` and `carrier` are separate because "make it
+   *  say SAFE" and "hide the instruction from the filter" are different skills
+   *  and several exercises test exactly one of them. */
+  | {
+      type: 'probe-bypass';
+      min: number;
+      intent?: AttackIntent;
+      carrier?: AttackCarrier;
+      hint: string;
+    }
+  /** Successful bypasses must span at least this many distinct carriers.
+   *  Stops "found one encoding trick, submitted it eight times" from reading as
+   *  a systematic assessment, which is the thing the suite exercises teach. */
+  | { type: 'probe-carrier-variety'; minDistinct: number; hint: string }
+  /** Every submitted probe must have been blocked. The defence-side inverse:
+   *  the student hardens a deployment and then proves the suite dies against it. */
+  | { type: 'probe-all-blocked'; hint: string }
+  /** How many probes the submission may contain. `max` is the discipline half:
+   *  an assessment report with four hundred payloads in it is not an assessment
+   *  report, and submitting only what demonstrates the finding is part of the
+   *  job. `min` is the evidence half, and it exists for the exercises that end
+   *  in a NEGATIVE result — "I could not break it" is worth something only when
+   *  it says how hard you tried, so an exercise that grades a model holding
+   *  requires enough attempts to have meant it. */
+  | { type: 'probe-budget'; max: number; min?: number; hint: string }
+  /** With the student's chosen defences deployed, a named suite must be blocked.
+   *  `minBlocked` defaults to the whole suite; exercises that teach an honest
+   *  trade-off set it lower and pair it with a cost budget. */
+  | { type: 'defence-blocks-suite'; suiteId: string; minBlocked?: number; hint: string }
+  /** Total cost of the chosen defences must not exceed this. Present for the
+   *  same reason `triage-budget` is: "turn everything on" is not an answer
+   *  anybody ships, and an exercise that accepts it teaches a habit that gets
+   *  overruled by the first product manager who reads a latency graph. */
+  | { type: 'defence-cost-budget'; max: number; hint: string }
+  /** The student's chosen defence set must contain each of these. Used only
+   *  where an exercise is explicitly about learning one control, in the same
+   *  spirit as `command-has-flag`. */
+  | { type: 'defence-includes'; defences: DefenceId[]; hint: string }
+  /* --- incident decisions -------------------------------------------------
+   *
+   * Graded on what the responder chose and in what order, never on prose. The
+   * consequence of each option is the answer key and lives on the decision
+   * point, not on the check.
+   */
+  /** These options must be chosen. `forbidExtra` also fails when anything else
+   *  was selected, which is how "do all of it" stops being an answer. */
+  | { type: 'decision-selects'; optionIds: string[]; forbidExtra?: boolean; hint: string }
+  /** None of these options may be chosen. Separate from `decision-selects` so an
+   *  exercise can be explicitly about the thing you must NOT do — pulling the
+   *  power on a host whose memory has not been captured, say — and say so in
+   *  its own hint. */
+  | { type: 'decision-avoids'; optionIds: string[]; hint: string }
+  /** The ordering must be within `maxDisplaced` positions of the intended one.
+   *  A tolerance rather than an exact match: transposing two steps that do not
+   *  interact is not the same mistake as imaging a disk before capturing RAM. */
+  | {
+      type: 'decision-orders';
+      optionIds: string[];
+      maxDisplaced?: number;
+      hint: string;
+    }
+  /** The written reason for a decision must hit every concept group. */
+  | { type: 'decision-justifies'; conceptGroups: string[][]; hint: string };
 
 export interface ChoiceOption {
   id: string;
@@ -152,6 +276,30 @@ export interface Exercise {
   options?: ChoiceOption[];
   /** Alert queue this exercise is worked against, for kind 'alert-triage'. */
   queueId?: string;
+  /**
+   * Whether the AI copilot panel is available on this exercise.
+   *
+   * Explicit rather than inferred from the presence of copilot checks, because
+   * it is a teaching decision and belongs where a reviewer can see it. Modules
+   * 3.1 to 3.4 deliberately withhold it: an operator handed an assistant before
+   * they can read a queue unaided does not learn to work with one, they learn to
+   * do what it says. The catalogue validator refuses to boot an exercise that
+   * grades copilot use without enabling it.
+   */
+  copilotEnabled?: boolean;
+  /**
+   * Decision point this exercise puts the student at, for kind
+   * 'incident-decision'. Names a point; the consequences stay server-side.
+   */
+  decisionPointId?: string;
+  /** Model under test, for kind 'model-probe'. Names a card, never a defence list. */
+  modelId?: string;
+  /**
+   * Attack suite the student's defences are measured against, for the
+   * hardening exercises. Safe to ship: the payloads are the ones a tester would
+   * write themselves, and knowing them does not reveal which controls stop them.
+   */
+  suiteId?: string;
   /** Shown after a pass, to connect the mechanic to real SOC work. */
   debrief?: string;
   /** Optional extra drills on the same skill, offered after a pass. */
@@ -173,6 +321,15 @@ export interface PracticeItem {
   solution: string;
   /** Commands run before the drill, to set up the state it assumes. */
   setup?: string[];
+  /**
+   * A different model under test, for Model Lab drills.
+   *
+   * A drill's whole premise is "same skill, different target", and in the Model
+   * Lab the target IS the model — running the same three payloads against a
+   * deployment with different controls is the entire lesson. Absent means the
+   * drill uses its parent exercise's model.
+   */
+  modelId?: string;
   checks: Check[];
 }
 

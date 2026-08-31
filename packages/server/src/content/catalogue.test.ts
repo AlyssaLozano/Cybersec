@@ -58,20 +58,50 @@ function attempt(solution: string, setup: string[] | undefined, exercise: Exerci
 
 const terminalExercises = ALL_EXERCISES.filter((exercise) => exercise.kind === 'terminal');
 
+/*
+ * Catalogue assertions are keyed by package, never by position.
+ *
+ * A positional array -- `expect(ids).toEqual(['1','2','3','4'])` -- fails the
+ * moment anybody adds a package, whether or not they touched the ones already
+ * there. That turns every new package into an edit of somebody else's
+ * expectations, which is how two people writing two packages end up fighting
+ * over one line. Keyed assertions mean adding a package adds a line.
+ *
+ * The counts below are what each package is expected to contain. Add an entry
+ * when adding a package; change one only when deliberately changing that
+ * package's size.
+ */
+const EXPECTED_EXERCISE_COUNTS: Record<string, number> = {
+  '1': 22,
+  '2': 14,
+  '3': 26,
+};
+
+function exerciseCount(packageId: string): number {
+  const pkg = PACKAGES.find((candidate) => candidate.id === packageId);
+  return pkg ? pkg.modules.reduce((sum, module) => sum + module.exercises.length, 0) : -1;
+}
+
 describe('catalogue integrity', () => {
-  it('ships the packages this build claims to', () => {
-    expect(PACKAGES.map((pkg) => pkg.id)).toEqual(['1', '2']);
+  it('gives every package a distinct id', () => {
+    const ids = PACKAGES.map((pkg) => pkg.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('has 22 exercises in Package 1 and 14 in Package 2', () => {
-    const counts = PACKAGES.map((pkg) =>
-      pkg.modules.reduce((sum, module) => sum + module.exercises.length, 0),
-    );
-    expect(counts).toEqual([22, 14]);
+  it('names every package', () => {
+    // A package with no title is unreachable from the menu, which is a content
+    // bug that would otherwise only surface as a blank row in the UI.
+    expect(PACKAGES.filter((pkg) => !pkg.title.trim()).map((pkg) => pkg.id)).toEqual([]);
   });
 
-  it('declares Package 2 as depending on Package 1', () => {
-    expect(PACKAGES[1]!.prerequisites).toEqual(['1']);
+  for (const [packageId, expected] of Object.entries(EXPECTED_EXERCISE_COUNTS)) {
+    it(`ships ${expected} exercises in package "${packageId}"`, () => {
+      expect(exerciseCount(packageId)).toBe(expected);
+    });
+  }
+
+  it('declares the log-analysis package as depending on the Linux one', () => {
+    expect(PACKAGES.find((pkg) => pkg.id === '2')!.prerequisites).toEqual(['1']);
   });
 
   it('gives every exercise a unique id', () => {
@@ -144,7 +174,10 @@ describe('worked examples in teaching material are valid commands', () => {
    * deletion against a real seeded file would teach a student to delete it.
    * What must never happen is a misspelled command or broken syntax.
    */
-  const examples = ALL_EXERCISES.flatMap((exercise) =>
+  // Scoped to terminal exercises: in a triage or written-judgement exercise the
+  // "command" field holds the action being illustrated ("escalate", "Group by
+  // user, then by time window"), which is not something a shell can run.
+  const examples = terminalExercises.flatMap((exercise) =>
     (exercise.teach.examples ?? []).map((example) => ({ exercise, example })),
   );
 
