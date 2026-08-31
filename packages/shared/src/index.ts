@@ -1,3 +1,4 @@
+export * from './assessment.js';
 export * from './career.js';
 export * from './content.js';
 export * from './terminal.js';

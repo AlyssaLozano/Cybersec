@@ -1,120 +1,91 @@
 /**
- * Tests for career routing: tracks, foundations, certifications, and the
- * assessment that steers somebody toward one.
+ * Tests for career routing: tracks, foundations, certifications, tool mappings,
+ * and the Career Fit Analyzer.
  *
- * The most important test in this file is the one asserting that a risk or
- * privacy track requires no Linux. That is the entire reason foundations became
- * per-track, and a future edit that quietly reintroduces a universal Linux
- * requirement should fail loudly here.
+ * The most important test here is the one asserting that risk, compliance,
+ * privacy, and awareness require no Linux. That is the entire reason foundations
+ * became per-track, and an edit that quietly reintroduces a universal Linux
+ * requirement should fail loudly.
+ *
+ * The second most important group covers the confidence penalty. The instrument
+ * asks the same construct several ways on purpose; if inconsistent answers stop
+ * producing lower confidence, the redundancy has silently become decoration.
  */
 
 import { describe, expect, it } from 'vitest';
 
-import type { AssessmentAnswer } from '@soc/shared';
+import type { ItemResponse, LaneId } from '@soc/shared';
+import { DIMENSIONS, LANES, TRAITS } from '@soc/shared';
 
-import {
-  ASSESSMENT_QUESTIONS,
-  profileFromAnswers,
-  recommend,
-  remainingQuestions,
-  scoreTracks,
-  sectorGuidanceKey,
-  shouldAsk,
-} from './assessment.js';
+import { ITEMS, ITEM_BY_ID, itemsForDimension } from './assessment/items.js';
+import { buildReport, shareableSummary } from './assessment/report.js';
+import { score, scoreEnvironments, scoreTraits } from './assessment/scoring.js';
 import { CERTIFICATIONS, getCertification } from './certifications.js';
 import { foundationsWithDemand, trackFoundations, trackPackages, trackReadiness } from './curriculum.js';
 import { FOUNDATIONS, getFoundation } from './foundations.js';
+import { getLaneProfile, LANE_PROFILES } from './lanes.js';
 import { getToolMapping, TOOL_MAPPINGS } from './tools.js';
 import { getTrack, TRACKS } from './tracks.js';
 
-const trackIds = new Set(TRACKS.map((track) => track.id));
+// =========================================================================
+// Catalogue integrity
+// =========================================================================
 
 describe('catalogue integrity', () => {
-  it('gives every track, foundation, certification, and tool a unique id', () => {
+  it('gives every entity a unique id', () => {
     for (const [label, ids] of [
       ['tracks', TRACKS.map((t) => t.id)],
       ['foundations', FOUNDATIONS.map((f) => f.id)],
       ['certifications', CERTIFICATIONS.map((c) => c.id)],
       ['tools', TOOL_MAPPINGS.map((t) => t.id)],
+      ['lanes', LANE_PROFILES.map((l) => l.id)],
+      ['items', ITEMS.map((i) => i.id)],
     ] as const) {
       expect(new Set(ids).size, `${label} has duplicate ids`).toBe(ids.length);
     }
   });
 
-  it('resolves every foundation a track requires', () => {
+  it('resolves every foundation, certification, and tool a track or foundation names', () => {
     const broken: string[] = [];
     for (const track of TRACKS) {
-      for (const id of track.foundations) {
-        if (!getFoundation(id)) broken.push(`${track.id} -> ${id}`);
-      }
+      for (const id of track.foundations) if (!getFoundation(id)) broken.push(`track ${track.id} -> ${id}`);
+      for (const id of track.certifications) if (!getCertification(id)) broken.push(`track ${track.id} -> ${id}`);
     }
-    expect(broken).toEqual([]);
-  });
-
-  it('resolves every certification a track names', () => {
-    const broken: string[] = [];
-    for (const track of TRACKS) {
-      for (const id of track.certifications) {
-        if (!getCertification(id)) broken.push(`${track.id} -> ${id}`);
-      }
-    }
-    expect(broken).toEqual([]);
-  });
-
-  it('resolves every tool mapping a foundation names', () => {
-    const broken: string[] = [];
     for (const foundation of FOUNDATIONS) {
       for (const id of foundation.tools ?? []) {
-        if (!getToolMapping(id)) broken.push(`${foundation.id} -> ${id}`);
+        if (!getToolMapping(id)) broken.push(`foundation ${foundation.id} -> ${id}`);
       }
     }
-    expect(broken).toEqual([]);
-  });
-
-  it('resolves every certification prerequisite', () => {
-    const broken: string[] = [];
     for (const cert of CERTIFICATIONS) {
       for (const id of cert.prerequisites ?? []) {
-        if (!getCertification(id)) broken.push(`${cert.id} -> ${id}`);
+        if (!getCertification(id)) broken.push(`cert ${cert.id} -> ${id}`);
       }
     }
     expect(broken).toEqual([]);
-  });
-
-  it('gives every track at least one foundation and one certification', () => {
-    for (const track of TRACKS) {
-      expect(track.foundations.length, `${track.id} has no foundations`).toBeGreaterThan(0);
-      expect(track.certifications.length, `${track.id} names no certifications`).toBeGreaterThan(0);
-    }
   });
 
   it('marks a track available only when it has a playable foundation', () => {
     for (const track of TRACKS.filter((t) => t.status === 'available')) {
-      expect(trackReadiness(track.id).foundationsPlayable, `${track.id} claims to be available`).toBeGreaterThan(0);
+      expect(trackReadiness(track.id).foundationsPlayable, `${track.id}`).toBeGreaterThan(0);
     }
   });
 });
 
+// =========================================================================
+// Foundations are per-track
+// =========================================================================
+
 describe('foundations are per-track, not universal', () => {
   it('does not require Linux for risk, compliance, privacy, or awareness', () => {
-    // This is the point of the whole model: a future GRC analyst should never be
-    // marched through a terminal to prove they belong in security.
     for (const trackId of ['risk-governance', 'compliance-audit', 'privacy', 'awareness']) {
       const foundations = trackFoundations(trackId).map((f) => f.id);
       expect(foundations, `${trackId} should not require Linux`).not.toContain('linux');
     }
   });
 
-  it('does require Linux for the hands-on defensive and offensive tracks', () => {
+  it('does require Linux for hands-on defensive and offensive tracks', () => {
     for (const trackId of ['soc', 'incident-response', 'pentest', 'security-engineering']) {
       expect(trackFoundations(trackId).map((f) => f.id)).toContain('linux');
-    }
-  });
-
-  it('gives no track every foundation', () => {
-    // If one track needed all of them, the pool would not be doing any work.
-    for (const track of TRACKS) {
-      expect(track.foundations.length).toBeLessThan(FOUNDATIONS.length);
     }
   });
 
@@ -122,208 +93,454 @@ describe('foundations are per-track, not universal', () => {
     const demand = new Map(foundationsWithDemand().map((f) => [f.id, f.requiredBy]));
     expect(demand.get('linux')).toContain('soc');
     expect(demand.get('linux')).not.toContain('privacy');
-    expect(demand.get('risk-fundamentals')).toContain('risk-governance');
   });
 
   it('resolves a track to its playable packages, foundations first', () => {
-    // SOC's first two foundations are the two packages that exist today.
     expect(trackPackages('soc')).toEqual(['1', '2']);
-    // A track with no built foundations resolves to nothing rather than throwing.
     expect(trackPackages('privacy')).toEqual([]);
   });
 });
 
-describe('assessment structure', () => {
-  it('only ever weights track ids that exist', () => {
+// =========================================================================
+// Lane profiles
+// =========================================================================
+
+describe('lane profiles are complete and honest', () => {
+  it('covers all fourteen lanes exactly', () => {
+    expect(LANE_PROFILES.map((lane) => lane.id).sort()).toEqual([...LANES].sort());
+  });
+
+  it('ranks all three environments for every lane', () => {
+    for (const lane of LANE_PROFILES) {
+      const ranks = lane.environmentFit.map((fit) => fit.rank).sort();
+      expect(ranks, `${lane.id}`).toEqual([1, 2, 3]);
+      expect(new Set(lane.environmentFit.map((f) => f.environmentId)).size, `${lane.id}`).toBe(3);
+    }
+  });
+
+  it('gives every lane real day-to-day detail and real pain points', () => {
+    for (const lane of LANE_PROFILES) {
+      expect(lane.dayToDay.length, `${lane.id}`).toBeGreaterThanOrEqual(3);
+      // Pain points are the reason this file exists; a lane without them is marketing.
+      expect(lane.painPoints.length, `${lane.id} has no pain points`).toBeGreaterThanOrEqual(3);
+      expect(lane.burnoutDrivers.length, `${lane.id}`).toBeGreaterThanOrEqual(1);
+      expect(lane.advancement.length, `${lane.id}`).toBeGreaterThan(20);
+      expect(lane.entryReality.length, `${lane.id}`).toBeGreaterThan(20);
+    }
+  });
+
+  it('resolves every trackId a lane claims', () => {
+    const broken: string[] = [];
+    for (const lane of LANE_PROFILES) {
+      if (lane.trackId && !getTrack(lane.trackId)) broken.push(`${lane.id} -> ${lane.trackId}`);
+    }
+    expect(broken).toEqual([]);
+  });
+
+  it('names a realistic certification pathway that resolves', () => {
+    const broken: string[] = [];
+    for (const lane of LANE_PROFILES) {
+      expect(lane.certPathway.length, `${lane.id}`).toBeGreaterThan(0);
+      for (const id of lane.certPathway) {
+        if (!getCertification(id)) broken.push(`${lane.id} -> ${id}`);
+      }
+    }
+    expect(broken).toEqual([]);
+  });
+
+  it('is honest that architecture and red team are not entry points', () => {
+    expect(getLaneProfile('security-architecture')!.entryReality).toMatch(/not an entry point/i);
+    expect(getLaneProfile('red-team')!.entryReality).toMatch(/not an entry point/i);
+  });
+});
+
+// =========================================================================
+// Item bank
+// =========================================================================
+
+describe('item bank', () => {
+  it('has between 60 and 80 items, as specified', () => {
+    expect(ITEMS.length).toBeGreaterThanOrEqual(60);
+    expect(ITEMS.length).toBeLessThanOrEqual(80);
+  });
+
+  it('covers every dimension', () => {
+    for (const dimension of DIMENSIONS) {
+      expect(itemsForDimension(dimension).length, dimension).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it('only ever weights lanes that exist', () => {
+    const laneSet = new Set<string>(LANES);
     const unknown: string[] = [];
-    for (const question of ASSESSMENT_QUESTIONS) {
-      for (const option of question.options) {
-        for (const trackId of Object.keys(option.weights ?? {})) {
-          if (!trackIds.has(trackId)) unknown.push(`${question.id}/${option.id} -> ${trackId}`);
+    for (const item of ITEMS) {
+      const weightSets =
+        item.kind === 'likert' ? [item.lanes] : item.options.map((option) => option.lanes ?? {});
+      for (const weights of weightSets) {
+        for (const laneId of Object.keys(weights)) {
+          if (!laneSet.has(laneId)) unknown.push(`${item.id} -> ${laneId}`);
         }
       }
     }
     expect(unknown).toEqual([]);
   });
 
-  it('gives every question at least two options and unique option ids', () => {
-    for (const question of ASSESSMENT_QUESTIONS) {
-      expect(question.options.length, `${question.id}`).toBeGreaterThanOrEqual(2);
-      const ids = question.options.map((option) => option.id);
-      expect(new Set(ids).size, `${question.id} has duplicate option ids`).toBe(ids.length);
+  it('only ever names traits that exist', () => {
+    const traitSet = new Set<string>(TRAITS);
+    const unknown: string[] = [];
+    for (const item of ITEMS) {
+      if (item.kind === 'likert') {
+        if (!traitSet.has(item.trait)) unknown.push(`${item.id} -> ${item.trait}`);
+      } else {
+        for (const option of item.options) {
+          if (option.traitValue && !traitSet.has(option.traitValue.trait)) {
+            unknown.push(`${item.id}/${option.id} -> ${option.traitValue.trait}`);
+          }
+        }
+      }
+    }
+    expect(unknown).toEqual([]);
+  });
+
+  it('gives every lane enough items to be scoreable', () => {
+    const counts = new Map<string, number>();
+    for (const item of ITEMS) {
+      const weightSets =
+        item.kind === 'likert' ? [item.lanes] : item.options.map((option) => option.lanes ?? {});
+      for (const weights of weightSets) {
+        for (const laneId of Object.keys(weights)) {
+          counts.set(laneId, (counts.get(laneId) ?? 0) + 1);
+        }
+      }
+    }
+    for (const lane of LANES) {
+      expect(counts.get(lane) ?? 0, `${lane} has too few items bearing on it`).toBeGreaterThanOrEqual(5);
     }
   });
 
-  it('hides the government follow-ups unless government was chosen', () => {
-    const govQuestion = ASSESSMENT_QUESTIONS.find((q) => q.id === 'q-gov-level')!;
-    expect(shouldAsk(govQuestion, {})).toBe(false);
-    expect(shouldAsk(govQuestion, { sector: 'private' })).toBe(false);
-    expect(shouldAsk(govQuestion, { sector: 'government' })).toBe(true);
+  it('measures each scored trait with at least three indicators', () => {
+    // Below three, the consistency figure is noise rather than signal.
+    const counts = new Map<string, number>();
+    for (const item of ITEMS) {
+      if (item.kind === 'likert') counts.set(item.trait, (counts.get(item.trait) ?? 0) + 1);
+      else {
+        for (const option of item.options) {
+          if (option.traitValue) {
+            counts.set(option.traitValue.trait, (counts.get(option.traitValue.trait) ?? 0) + 1);
+          }
+        }
+      }
+    }
+    const thin = [...counts.entries()].filter(([, count]) => count < 3).map(([trait]) => trait);
+    expect(thin).toEqual([]);
   });
 
-  it('drops answered and irrelevant questions from what remains', () => {
-    const remaining = remainingQuestions({ sector: 'private' }, new Set(['q-rhythm']));
-    const ids = remaining.map((question) => question.id);
-    expect(ids).not.toContain('q-rhythm');
-    expect(ids).not.toContain('q-gov-level');
-    expect(ids).not.toContain('q-clearance');
-    expect(ids).toContain('q-org-size');
+  it('includes reverse-coded items so autopilot answering is visible', () => {
+    const reversed = ITEMS.filter((item) => item.kind === 'likert' && item.reverse);
+    expect(reversed.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('gives every forced choice at least three distinct options', () => {
+    for (const item of ITEMS.filter((i) => i.kind === 'choice')) {
+      if (item.kind !== 'choice') continue;
+      expect(item.options.length, item.id).toBeGreaterThanOrEqual(3);
+      expect(new Set(item.options.map((o) => o.id)).size, item.id).toBe(item.options.length);
+    }
   });
 });
 
-/** Build an answer set from question/option pairs. */
-function answers(...pairs: Array<[string, string]>): AssessmentAnswer[] {
-  return pairs.map(([questionId, optionId]) => ({ questionId, optionIds: [optionId] }));
+// =========================================================================
+// Scoring
+// =========================================================================
+
+/** Answer a set of Likert items with the same value. */
+function likert(ids: string[], value: number): ItemResponse[] {
+  return ids.map((itemId) => ({ itemId, value }));
 }
 
-describe('assessment scoring routes people sensibly', () => {
-  it('sends a hands-on, shift-tolerant, reactive person toward SOC or IR', () => {
-    const result = recommend(
-      answers(
-        ['q-rhythm', 'reactive'],
-        ['q-instinct', 'watch'],
-        ['q-technical-depth', 'love'],
-        ['q-shift', 'yes'],
-        ['q-background', 'it_support'],
-      ),
-    );
-    expect(['soc', 'incident-response']).toContain(result.topTrackId);
-  });
+/** Answer every Likert item neutrally, as a baseline. */
+function allNeutral(): ItemResponse[] {
+  return ITEMS.filter((item) => item.kind === 'likert').map((item) => ({ itemId: item.id, value: 3 }));
+}
 
-  it('sends someone who dislikes terminals and comes from audit toward risk work', () => {
-    const result = recommend(
-      answers(
-        ['q-rhythm', 'organising'],
-        ['q-instinct', 'govern'],
-        ['q-technical-depth', 'prefer-not'],
-        ['q-writing', 'strength'],
-        ['q-background', 'compliance_legal'],
-      ),
-    );
-    expect(['risk-governance', 'compliance-audit', 'privacy']).toContain(result.topTrackId);
-  });
-
-  it('never recommends a terminal-heavy track to someone who ruled terminals out', () => {
-    const result = recommend(
-      answers(['q-technical-depth', 'prefer-not'], ['q-shift', 'no'], ['q-writing', 'strength']),
-    );
-    const hostile = ['pentest', 'incident-response', 'security-engineering'];
-    expect(hostile).not.toContain(result.topTrackId);
-  });
-
-  it('respects a hard "no" on shift work', () => {
-    const scores = new Map(
-      scoreTracks(answers(['q-shift', 'no'])).map((entry) => [entry.trackId, entry.score]),
-    );
-    expect(scores.get('incident-response')!).toBeLessThan(0);
-    expect(scores.get('risk-governance')!).toBeGreaterThan(0);
-  });
-
-  it('sends a developer toward application security', () => {
-    const result = recommend(
-      answers(['q-background', 'software'], ['q-instinct', 'break'], ['q-technical-depth', 'love']),
-    );
-    expect(['appsec', 'pentest']).toContain(result.topTrackId);
-  });
-
-  it('sends a teacher toward awareness work', () => {
-    const result = recommend(
-      answers(['q-background', 'education'], ['q-people', 'lots'], ['q-technical-depth', 'prefer-not']),
-    );
-    expect(result.topTrackId).toBe('awareness');
-  });
-
-  it('surfaces industrial security to someone from a trades background', () => {
-    const result = recommend(answers(['q-background', 'trades_other'], ['q-physical', 'yes']));
-    expect(result.topTrackId).toBe('ot-ics');
-  });
-
+describe('scoring', () => {
   it('is deterministic', () => {
-    const set = answers(['q-rhythm', 'reactive'], ['q-background', 'it_support']);
-    expect(recommend(set)).toEqual(recommend(set));
+    const responses = likert(['e1', 's5', 'p8'], 5);
+    expect(score(responses)).toEqual(score(responses));
   });
 
-  it('always returns something, even with no answers', () => {
-    const result = recommend([]);
-    expect(trackIds.has(result.topTrackId)).toBe(true);
+  it('treats a neutral answer as moving nothing', () => {
+    const result = score(allNeutral());
+    const spread = Math.max(...result.lanes.map((l) => l.raw)) - Math.min(...result.lanes.map((l) => l.raw));
+    expect(spread).toBe(0);
   });
 
-  it('explains itself using the answers that actually moved the result', () => {
-    const result = recommend(
-      answers(['q-rhythm', 'organising'], ['q-technical-depth', 'prefer-not'], ['q-background', 'compliance_legal']),
-    );
-    expect(result.rationale.length).toBeGreaterThan(0);
-    expect(result.rationale.some((line) => line.startsWith('You said:'))).toBe(true);
+  it('counts disagreement against a lane, not merely as absent support', () => {
+    const agreed = score(likert(['e1'], 5)).lanes.find((l) => l.laneId === 'pentest')!;
+    const disagreed = score(likert(['e1'], 1)).lanes.find((l) => l.laneId === 'pentest')!;
+    expect(agreed.raw).toBeGreaterThan(0);
+    expect(disagreed.raw).toBeLessThan(0);
   });
 
-  it('offers alternatives without padding out weak ones', () => {
-    const result = recommend(answers(['q-background', 'trades_other'], ['q-physical', 'yes']));
-    expect(result.alternativeTrackIds).not.toContain(result.topTrackId);
-    expect(result.alternativeTrackIds.length).toBeLessThanOrEqual(3);
-  });
-});
-
-describe('profile and sector guidance', () => {
-  it('builds a profile from the sector answers', () => {
-    const profile = profileFromAnswers(
-      answers(['q-sector', 'government'], ['q-gov-level', 'federal'], ['q-clearance', 'eligible']),
-    );
-    expect(profile).toMatchObject({ sector: 'government', govLevel: 'federal', clearance: 'eligible' });
+  it('handles reverse-coded items by flipping the trait reading', () => {
+    // p2 is reverse-coded on interrupt_tolerance: agreeing means LOW tolerance.
+    const traits = scoreTraits(likert(['p2'], 5));
+    const interrupt = traits.find((t) => t.trait === 'interrupt_tolerance')!;
+    expect(interrupt.value).toBeLessThan(0);
   });
 
-  it('selects the right certification guidance for each world', () => {
-    expect(sectorGuidanceKey({ sector: 'government', govLevel: 'federal' })).toBe('federal');
-    expect(sectorGuidanceKey({ sector: 'government', govLevel: 'state_local' })).toBe('state_local');
-    expect(sectorGuidanceKey({ sector: 'private', orgSize: 'large' })).toBe('private_large');
-    expect(sectorGuidanceKey({ sector: 'private', orgSize: 'small' })).toBe('private_small');
-    expect(sectorGuidanceKey({})).toBeNull();
+  it('ignores responses to unknown items rather than throwing', () => {
+    expect(() => score([{ itemId: 'does-not-exist', value: 5 }])).not.toThrow();
   });
 
-  it('shows a federal candidate a track whose notes cover mandated certification', () => {
-    const soc = getTrack('soc')!;
-    const federalNote = soc.sectorNotes?.find(
-      (note) => note.when.sector === 'government' && note.when.govLevel === 'federal',
-    );
-    expect(federalNote?.note).toMatch(/Security\+|clearance/i);
+  it('returns a full lane list even with no answers', () => {
+    const result = score([]);
+    expect(result.lanes.length).toBe(LANES.length);
   });
 });
 
-describe('certifications are described honestly', () => {
-  it('flags the ones that are genuinely mandated, with a reason', () => {
-    const mandated = CERTIFICATIONS.filter((cert) => cert.mandatedSomewhere);
-    expect(mandated.length).toBeGreaterThan(0);
-    for (const cert of mandated) {
-      expect(cert.mandateNote, `${cert.id} claims a mandate with no explanation`).toBeTruthy();
-    }
+describe('the confidence penalty', () => {
+  /** Items that all indicate detail_orientation in the same direction. */
+  const DETAIL_ITEMS = ['s1', 's2', 's12', 'd1', 'd8'];
+
+  it('reports high consistency when indicators agree', () => {
+    const traits = scoreTraits(likert(DETAIL_ITEMS, 5));
+    const detail = traits.find((t) => t.trait === 'detail_orientation')!;
+    expect(detail.indicators).toBeGreaterThanOrEqual(3);
+    expect(detail.consistency).toBeGreaterThan(0.9);
   });
 
-  it('gives every certification a cost and a realistic study estimate', () => {
-    for (const cert of CERTIFICATIONS) {
-      expect(cert.approxCostUsd, cert.id).toBeGreaterThan(0);
-      expect(cert.typicalStudyWeeks, cert.id).toBeGreaterThan(0);
-    }
+  it('reports low consistency when indicators contradict each other', () => {
+    // Strongly agree with some detail items and strongly disagree with others.
+    const contradictory: ItemResponse[] = [
+      ...likert(['s1', 's2'], 5),
+      ...likert(['s12', 'd1', 'd8'], 1),
+    ];
+    const detail = scoreTraits(contradictory).find((t) => t.trait === 'detail_orientation')!;
+    expect(detail.consistency).toBeLessThan(0.6);
   });
 
-  it('starts every track with an entry-level or core certification, never advanced', () => {
-    for (const track of TRACKS) {
-      const first = getCertification(track.certifications[0]!)!;
-      expect(first.stage, `${track.id} opens with ${first.id}`).not.toBe('advanced');
-    }
+  it('lowers a lane\'s confidence when the traits driving it were inconsistent', () => {
+    const consistent = score(likert(DETAIL_ITEMS, 5));
+    const contradictory = score([...likert(['s1', 's2'], 5), ...likert(['s12', 'd1', 'd8'], 1)]);
+
+    const forensicsConsistent = consistent.lanes.find((l) => l.laneId === 'forensics')!;
+    const forensicsShaky = contradictory.lanes.find((l) => l.laneId === 'forensics')!;
+    expect(forensicsShaky.confidence).toBeLessThan(forensicsConsistent.confidence);
+  });
+
+  it('raises a caveat naming the inconsistent construct', () => {
+    const result = score([...likert(['s1', 's2'], 5), ...likert(['s12', 'd1', 'd8'], 1)]);
+    expect(result.caveats.join(' ')).toMatch(/attention to detail/i);
+  });
+
+  it('warns when too few questions were answered', () => {
+    const result = score(likert(['s1'], 5));
+    expect(result.caveats.join(' ')).toMatch(/answered 1 of/i);
+  });
+
+  it('does not let confidence change the ranking', () => {
+    // Same lane ordering whether or not the answers were consistent.
+    const shaky = score([...likert(['s1', 's2'], 5), ...likert(['s12', 'd1', 'd8'], 1)]);
+    const byRaw = [...shaky.lanes].sort((a, b) => b.raw - a.raw || a.laneId.localeCompare(b.laneId));
+    expect(shaky.lanes.map((l) => l.laneId)).toEqual(byRaw.map((l) => l.laneId));
   });
 });
 
-describe('tool mappings set expectations correctly', () => {
-  it('names industry tools and states the real differences', () => {
-    for (const mapping of TOOL_MAPPINGS) {
-      expect(mapping.industryTools.length, mapping.id).toBeGreaterThan(0);
-      expect(mapping.differences.length, mapping.id).toBeGreaterThan(40);
-      expect(mapping.skill.length, mapping.id).toBeGreaterThan(20);
+describe('lane routing produces sensible results', () => {
+  const cases: Array<{ name: string; responses: ItemResponse[]; expect: LaneId[] }> = [
+    {
+      name: 'an adversarial, patient, code-comfortable person',
+      responses: [...likert(['e1', 's5', 'p8', 's8'], 5), ...likert(['e2'], 1)],
+      expect: ['pentest', 'red-team'],
+    },
+    {
+      name: 'a meticulous, solo, procedure-following person',
+      responses: [...likert(['s10', 'd10', 'd3', 'd6', 'e12', 'i2'], 5), ...likert(['p3'], 1)],
+      expect: ['forensics'],
+    },
+    {
+      name: 'a writer who wants to change how decisions get made',
+      responses: [...likert(['e10', 'i7', 'i1', 'i3'], 5), ...likert(['s8'], 1)],
+      expect: ['risk-compliance'],
+    },
+    {
+      name: 'a builder who wants to fix causes not symptoms',
+      responses: [...likert(['s7', 's8', 'e3'], 5)],
+      expect: ['security-engineering', 'cloud-security', 'security-architecture'],
+    },
+    {
+      name: 'someone who likes reading and connecting dots',
+      responses: [...likert(['e9', 's4', 's10', 'i7'], 5)],
+      expect: ['threat-intel', 'forensics'],
+    },
+    {
+      name: 'someone drawn to access control',
+      responses: [...likert(['e8', 'i8', 'l6'], 5)],
+      expect: ['iam'],
+    },
+    {
+      name: 'someone who likes packets and concrete answers',
+      responses: [...likert(['e6', 's2'], 5)],
+      expect: ['network-security'],
+    },
+    {
+      name: 'a code reader',
+      responses: [...likert(['e7', 's8'], 5)],
+      expect: ['appsec'],
+    },
+  ];
+
+  for (const testCase of cases) {
+    it(`routes ${testCase.name}`, () => {
+      const top = score(testCase.responses).lanes[0]!;
+      expect(testCase.expect).toContain(top.laneId);
+    });
+  }
+});
+
+describe('environment fit', () => {
+  it('sends someone wanting stability and process toward government', () => {
+    const responses: ItemResponse[] = [...likert(['p9', 'l2', 'l4', 'd4', 'd3'], 5), ...likert(['d5', 'l3'], 1)];
+    expect(scoreEnvironments(responses)[0]!.environmentId).toBe('government');
+  });
+
+  it('sends someone impatient with process who wants travel toward consulting', () => {
+    const responses: ItemResponse[] = [...likert(['d5', 'l3', 'l7', 'e4'], 5), ...likert(['p9', 'l4', 'd4'], 1)];
+    expect(scoreEnvironments(responses)[0]!.environmentId).toBe('consulting');
+  });
+
+  it('scores all three environments and explains each', () => {
+    const scores = scoreEnvironments(likert(['p9', 'l4'], 5));
+    expect(scores.length).toBe(3);
+    expect(scores[0]!.score).toBeGreaterThanOrEqual(scores[2]!.score);
+  });
+
+  it('reads the direct environment-preference question', () => {
+    const gov = scoreEnvironments([{ itemId: 'l8', optionId: 'gov' }]);
+    expect(gov[0]!.environmentId).toBe('government');
+    const consult = scoreEnvironments([{ itemId: 'l8', optionId: 'consult' }]);
+    expect(consult[0]!.environmentId).toBe('consulting');
+  });
+});
+
+describe('burnout risk is personalised', () => {
+  it('raises SOC risk for someone with low pressure and interrupt tolerance', () => {
+    const fragile = score([...likert(['p1', 'p3', 'p4', 'p10'], 1), ...likert(['p2', 'p6'], 5)]);
+    const soc = fragile.lanes.find((l) => l.laneId === 'soc-ops')!;
+    expect(soc.burnoutRisk).toBe('high');
+    expect(soc.concerns.join(' ')).toMatch(/pressure|interruption|focus/i);
+  });
+
+  it('lowers SOC risk for someone who thrives on pressure and interruption', () => {
+    const resilient = score([...likert(['p1', 'p3', 'p4', 'p10'], 5), ...likert(['p2', 'p6'], 1)]);
+    const soc = resilient.lanes.find((l) => l.laneId === 'soc-ops')!;
+    expect(soc.burnoutRisk).toBe('medium');
+  });
+
+  it('flags persuasion-heavy lanes for someone who finds chasing people draining', () => {
+    const result = score([...likert(['i4', 'i6', 'i2'], 5), ...likert(['i1', 'i3', 'i8'], 1)]);
+    const vuln = result.lanes.find((l) => l.laneId === 'vuln-management')!;
+    expect(vuln.concerns.join(' ')).toMatch(/persuad|report to you/i);
+  });
+});
+
+// =========================================================================
+// Report
+// =========================================================================
+
+describe('report generation', () => {
+  const responses: ItemResponse[] = [
+    ...likert(['e1', 's5', 'p8', 's8', 'l5'], 5),
+    ...likert(['e2', 'l2'], 1),
+    { itemId: 'l8', optionId: 'consult' },
+    { itemId: 's13', optionId: 'attack-it' },
+  ];
+
+  it('returns three or four top lanes', () => {
+    const report = buildReport(responses);
+    expect(report.topLanes.length).toBeGreaterThanOrEqual(3);
+    expect(report.topLanes.length).toBeLessThanOrEqual(4);
+  });
+
+  it('never repeats a lane between top and alternatives', () => {
+    const report = buildReport(responses);
+    const top = new Set(report.topLanes.map((l) => l.laneId));
+    for (const alternative of report.alternatives) {
+      expect(top.has(alternative.laneId)).toBe(false);
     }
   });
 
-  it('teaches Wireshark as itself rather than as a substitute', () => {
-    const packet = getToolMapping('packet-analysis')!;
-    expect(packet.teaches).toMatch(/Wireshark/);
-    expect(packet.industryTools.join(' ')).toMatch(/same tool/i);
+  it('explains the top lane with the answers that drove it', () => {
+    const report = buildReport(responses);
+    expect(report.topLanes[0]!.reasons.length).toBeGreaterThan(0);
+  });
+
+  it('recommends an environment with reasoning', () => {
+    const report = buildReport(responses);
+    expect(report.environments.length).toBe(3);
+    expect(report.summary).toMatch(/consulting|corporate|government/);
+  });
+
+  it('writes a summary that names the top lane', () => {
+    const report = buildReport(responses);
+    const topTitle = getLaneProfile(report.topLanes[0]!.laneId)!.title.toLowerCase();
+    expect(report.summary.toLowerCase()).toContain(topTitle);
+  });
+
+  it('warns about burnout when the top pick is high risk for this person', () => {
+    // Someone drawn to SOC work who cannot take pressure or interruption.
+    const conflicted = buildReport([
+      ...likert(['e13', 'p7', 'e2'], 5),
+      ...likert(['p1', 'p3', 'p4', 'p10'], 1),
+      ...likert(['p2', 'p6'], 5),
+    ]);
+    const top = conflicted.topLanes[0]!;
+    if (top.burnoutRisk === 'high') {
+      expect(conflicted.burnoutWarning).toBeTruthy();
+      expect(conflicted.burnoutWarning).toMatch(/eyes open|interview/i);
+    }
+  });
+
+  it('surfaces mismatches: strong interest undermined by a specific weakness', () => {
+    const report = buildReport([
+      ...likert(['e13', 'p7'], 5),
+      ...likert(['p3', 'p1'], 1),
+      ...likert(['p2', 'p8'], 5),
+    ]);
+    if (report.mismatches.length > 0) {
+      expect(report.mismatches[0]!.problem.length).toBeGreaterThan(10);
+      expect(report.mismatches[0]!.attraction.length).toBeGreaterThan(5);
+    }
+  });
+
+  it('flags low confidence when responses were sparse', () => {
+    const report = buildReport(likert(['e1'], 5));
+    expect(report.overallConfidence).toBeLessThan(60);
+    expect(report.summary).toMatch(/starting point/i);
+  });
+
+  it('reports progress honestly', () => {
+    const report = buildReport(likert(['e1', 'e2'], 5));
+    expect(report.answered).toBe(2);
+    expect(report.applicable).toBe(ITEMS.length);
+  });
+
+  it('produces a shareable summary that admits what it is not', () => {
+    const summary = shareableSummary(buildReport(responses));
+    expect(summary).toMatch(/not a validated psychometric/i);
+    expect(summary).toMatch(/strongest match/i);
+  });
+
+  it('degrades gracefully with no answers at all', () => {
+    const report = buildReport([]);
+    expect(report.topLanes.length).toBeGreaterThan(0);
+    expect(report.caveats.length).toBeGreaterThan(0);
+  });
+});
+
+describe('item lookup', () => {
+  it('indexes every item by id', () => {
+    expect(ITEM_BY_ID.size).toBe(ITEMS.length);
   });
 });

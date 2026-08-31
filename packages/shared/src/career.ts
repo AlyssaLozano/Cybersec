@@ -72,65 +72,11 @@ export const BACKGROUND_KINDS = [
 ] as const;
 export type BackgroundKind = (typeof BACKGROUND_KINDS)[number];
 
-// --- assessment --------------------------------------------------------------
-
-/**
- * Weights an answer contributes toward each track, keyed by track id.
- * Positive pulls toward a track; negative pushes away.
- */
-export type TrackWeights = Record<string, number>;
-
-export interface AssessmentOption {
-  id: string;
-  /** Plain language, describing the WORK rather than naming a job. */
-  label: string;
-  /** Optional second line for nuance. */
-  detail?: string;
-  /** How choosing this shifts the track scores. */
-  weights?: TrackWeights;
-  /** Profile fields this answer sets, for the sector and background questions. */
-  sets?: Partial<LearnerProfile>;
-}
-
-export interface AssessmentQuestion {
-  id: string;
-  /** Question text. */
-  prompt: string;
-  /** Why we are asking, shown in smaller text so the survey does not feel arbitrary. */
-  rationale?: string;
-  options: AssessmentOption[];
-  /** True when several options may be chosen. */
-  multiSelect?: boolean;
-  /**
-   * Only ask this question when the profile so far matches. Used for the
-   * federal/local question, which is meaningless unless they chose government.
-   */
-  showWhen?: Partial<LearnerProfile>;
-}
-
-/** One submitted answer. */
-export interface AssessmentAnswer {
-  questionId: string;
-  optionIds: string[];
-}
-
-export interface TrackScore {
-  trackId: string;
-  score: number;
-  /** 0-100, normalised against the highest scoring track. */
-  match: number;
-}
-
-export interface Recommendation {
-  /** Highest scoring track. */
-  topTrackId: string;
-  /** Runners-up worth showing, best first. */
-  alternativeTrackIds: string[];
-  scores: TrackScore[];
-  /** Plain-language reasons, generated from the answers that moved the needle. */
-  rationale: string[];
-  profile: LearnerProfile;
-}
+// --- assessment ------------------------------------------------------------
+//
+// The assessment instrument moved to assessment.ts when it grew from a dozen
+// routing questions into a 68-item scored analyzer. LearnerProfile below is
+// still the durable record of what somebody told us about themselves.
 
 // --- certifications ----------------------------------------------------------
 
