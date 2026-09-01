@@ -32,6 +32,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'cheap-rent';
 
@@ -215,11 +225,11 @@ export const CHEAP_RENT_TRUTH: ScenarioTruth = {
         'scheduled. Platform acknowledged two pages and left it. Raising it: there is no workload ' +
         'that accounts for this.',
       commandOptions: [
-        'top -b -n1 | head -20',
-        'kubectl get pods -o wide --field-selector spec.nodeName=rmg-k8s-07',
-        'uptime',
-        'df -h',
-        'systemctl status kubelet',
+        { command: 'top -b -n1 | head -20', ...STATUS_CHECK },
+        { command: 'kubectl get pods -o wide --field-selector spec.nodeName=rmg-k8s-07', correct: true, teaches: CORRECT_STEP },
+        { command: 'uptime', ...STATUS_CHECK },
+        { command: 'df -h', ...STATUS_CHECK },
+        { command: 'systemctl status kubelet', ...STATUS_CHECK },
       ],
       commandNudge: 'Find out what is actually consuming the CPU before deciding what it means.',
       guidance:
@@ -248,11 +258,11 @@ export const CHEAP_RENT_TRUTH: ScenarioTruth = {
         '/tmp, started 23:31. That binary is not in the image manifest, so it was not shipped with ' +
         'the container.',
       commandOptions: [
-        'ps -ef | grep kworker',
-        'docker inspect rmg/portal:latest | grep -A20 Layers',
-        'ls -la /proc/$(pgrep kworker-cache)/exe',
-        'dmesg | tail -30',
-        'kubectl logs -n public-web portal-7f4b',
+        { command: 'ps -ef | grep kworker', ...WRONG_TARGET },
+        { command: 'docker inspect rmg/portal:latest | grep -A20 Layers', correct: true, teaches: CORRECT_STEP },
+        { command: 'ls -la /proc/$(pgrep kworker-cache)/exe', ...WRONG_TARGET },
+        { command: 'dmesg | tail -30', ...WRONG_TARGET },
+        { command: 'kubectl logs -n public-web portal-7f4b', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check whether that binary is in the container image it is supposedly running from.',
@@ -282,11 +292,11 @@ export const CHEAP_RENT_TRUTH: ScenarioTruth = {
         'regular and two-way, about 40 KB a minute. That is a job feed. No bulk data has left over ' +
         'this connection.',
       commandOptions: [
-        'ss -tnp | grep 3333',
-        'grep 198.51.100.77 /var/log/flows.log',
-        'tcpdump -r /var/cap/node07.pcap -c 20',
-        'netstat -rn',
-        'dig -x 198.51.100.77',
+        { command: 'ss -tnp | grep 3333', ...WRONG_TARGET },
+        { command: 'grep 198.51.100.77 /var/log/flows.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'tcpdump -r /var/cap/node07.pcap -c 20', ...WRONG_TARGET },
+        { command: 'netstat -rn', ...WRONG_TARGET },
+        { command: 'dig -x 198.51.100.77', ...WRONG_TARGET },
       ],
       commandNudge:
         'Look at the shape of the traffic over time, not just where it is going.',
@@ -316,11 +326,11 @@ export const CHEAP_RENT_TRUTH: ScenarioTruth = {
         '200 in 4.1 seconds against a 40 millisecond median. That endpoint renders user templates ' +
         'server side. Seven minutes before the miner started.',
       commandOptions: [
-        'grep "report/preview" /var/log/nginx/access.log',
-        'grep 203.0.113.19 /var/log/nginx/access.log',
-        'tail -50 /var/log/nginx/error.log',
-        'curl -I http://localhost/api/report/preview',
-        'cat /etc/nginx/nginx.conf',
+        { command: 'grep "report/preview" /var/log/nginx/access.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep 203.0.113.19 /var/log/nginx/access.log', ...WRONG_TARGET },
+        { command: 'tail -50 /var/log/nginx/error.log', ...DUMP_ALL },
+        { command: 'curl -I http://localhost/api/report/preview', ...TOUCH_ATTACKER },
+        { command: 'cat /etc/nginx/nginx.conf', ...WRONG_TARGET },
       ],
       commandNudge:
         'Compare how long that request took against how long that endpoint normally takes.',
@@ -408,11 +418,11 @@ export const CHEAP_RENT_TRUTH: ScenarioTruth = {
         'That is the same address the template request came from at 23:26. Nothing else has ever ' +
         'talked to it. The intrusion starts at 23:19, not 23:31.',
       commandOptions: [
-        'grep 203.0.113.19 /var/log/flows.log',
-        "awk '$3<\"23:32\"' /var/log/flows.log | tail -30",
-        'ss -tn',
-        'cat /var/log/nginx/access.log | tail -20',
-        'ping -c 2 203.0.113.19',
+        { command: 'grep 203.0.113.19 /var/log/flows.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'awk \'$3<"23:32"\' /var/log/flows.log | tail -30', ...WRONG_TARGET },
+        { command: 'ss -tn', ...WRONG_TARGET },
+        { command: 'cat /var/log/nginx/access.log | tail -20', ...WRONG_TARGET },
+        { command: 'ping -c 2 203.0.113.19', ...TOUCH_ATTACKER },
       ],
       commandNudge:
         'Look for anything else that talked to the address from the template request, and when.',
@@ -440,11 +450,11 @@ export const CHEAP_RENT_TRUTH: ScenarioTruth = {
         'buffer size raised at 01:05, and the change log has the record and the author. Not the ' +
         'miner spreading. Closing it and raising a tuning ticket.',
       commandOptions: [
-        'kubectl top nodes',
-        'grep sidecar /var/log/platform/change-log.txt',
-        'free -h',
-        'kubectl get pods -A | grep -c Running',
-        'dmesg | grep -i oom',
+        { command: 'kubectl top nodes', ...WRONG_TARGET },
+        { command: 'grep sidecar /var/log/platform/change-log.txt', correct: true, teaches: CORRECT_STEP },
+        { command: 'free -h', ...STATUS_CHECK },
+        { command: 'kubectl get pods -A | grep -c Running', ...WRONG_TARGET },
+        { command: 'dmesg | grep -i oom', ...WRONG_TARGET },
       ],
       commandNudge: 'Something changed on the cluster at 01:05. Find the record of it.',
       guidance:

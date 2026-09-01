@@ -34,6 +34,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'last-friday';
 
@@ -194,11 +204,11 @@ export const LAST_FRIDAY_TRUTH: ScenarioTruth = {
         'silent parameters every time. Signed and legitimate. We do not use this product, and it is ' +
         'eleven servers in forty minutes on a Friday. Raising it.',
       commandOptions: [
-        'grep -i "installed" /var/log/software/inventory.log | tail -20',
-        "awk '/remoteaccess/ {print $1, $5}' /var/log/software/inventory.log",
-        'systemctl list-units --type=service | head',
-        'ps aux | grep -i remote',
-        'cat /etc/software-policy/blocked.conf',
+        { command: 'grep -i "installed" /var/log/software/inventory.log | tail -20', ...WRONG_TARGET },
+        { command: 'awk \'/remoteaccess/ {print $1, $5}\' /var/log/software/inventory.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'systemctl list-units --type=service | head', ...WRONG_TARGET },
+        { command: 'ps aux | grep -i remote', ...WRONG_TARGET },
+        { command: 'cat /etc/software-policy/blocked.conf', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check how many hosts got this and over what period, and whether we use this product.',
@@ -230,11 +240,11 @@ export const LAST_FRIDAY_TRUTH: ScenarioTruth = {
         'Created by a helpdesk administrator who badged out at 14:50, from a server rather than ' +
         'their workstation, with no change ticket. That credential is not being used by its owner.',
       commandOptions: [
-        'grep svc_backup_admin /var/log/auth.log',
-        "awk '/useradd|net user/ {print $1, $6}' /var/log/audit/audit.log | tail",
-        'net group "Server Admins" /domain',
-        'grep -i badge /var/log/physical/access.log | tail -20',
-        'last -30',
+        { command: 'grep svc_backup_admin /var/log/auth.log', ...WRONG_TARGET },
+        { command: 'awk \'/useradd|net user/ {print $1, $6}\' /var/log/audit/audit.log | tail', ...WRONG_TARGET },
+        { command: 'net group "Server Admins" /domain', ...WRONG_TARGET },
+        { command: 'grep -i badge /var/log/physical/access.log | tail -20', correct: true, teaches: CORRECT_STEP },
+        { command: 'last -30', ...WRONG_TARGET },
       ],
       commandNudge:
         'Find who created that account, then check where that person was at the time.',
@@ -265,11 +275,11 @@ export const LAST_FRIDAY_TRUTH: ScenarioTruth = {
         '16:20. No alert was raised because nothing fires when an agent goes quiet. They are the ' +
         'same eleven that got the remote access tool. We are blind on those hosts.',
       commandOptions: [
-        'grep -c "checkin" /var/log/edr/console.log',
-        "awk '$4==\"NO_CHECKIN\" {print $2}' /var/log/edr/console.log",
-        'systemctl status edr-agent',
-        'ping -c1 rmg-srv-14',
-        'cat /var/log/edr/console.log | tail -30',
+        { command: 'grep -c "checkin" /var/log/edr/console.log', ...COUNT_ONLY },
+        { command: 'awk \'$4=="NO_CHECKIN" {print $2}\' /var/log/edr/console.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'systemctl status edr-agent', ...STATUS_CHECK },
+        { command: 'ping -c1 rmg-srv-14', ...TOUCH_ATTACKER },
+        { command: 'cat /var/log/edr/console.log | tail -30', ...WRONG_TARGET },
       ],
       commandNudge:
         'Compare how many agents are reporting against how many hosts there are.',
@@ -300,11 +310,11 @@ export const LAST_FRIDAY_TRUTH: ScenarioTruth = {
         'access tool they installed. That command exists to stop a restore. This is ransomware ' +
         'preparation and the encryption has not happened yet.',
       commandOptions: [
-        'grep -i "vssadmin\\|shadow" /var/log/audit/audit.log',
-        "awk '/delete shadows/ {print $1, $3}' /var/log/audit/audit.log",
-        'ls -la /var/backups/',
-        'systemctl status vss',
-        'df -h',
+        { command: 'grep -i "vssadmin\\\\|shadow" /var/log/audit/audit.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'awk \'/delete shadows/ {print $1, $3}\' /var/log/audit/audit.log', ...WRONG_TARGET },
+        { command: 'ls -la /var/backups/', ...WRONG_TARGET },
+        { command: 'systemctl status vss', ...STATUS_CHECK },
+        { command: 'df -h', ...STATUS_CHECK },
       ],
       commandNudge: 'Work out what deleting those copies actually prevents.',
       guidance:
@@ -390,11 +400,11 @@ export const LAST_FRIDAY_TRUTH: ScenarioTruth = {
         'platform has an open ticket for timeouts on that segment. Workstations, not servers. 138 ' +
         'of 140 this month were the same. Closing it.',
       commandOptions: [
-        'grep FAILED /var/log/backup/jobs.log | tail -20',
-        "awk '/FAILED/ {print $4}' /var/log/backup/jobs.log | sort | uniq -c",
-        'grep -i switch /var/log/platform/tickets.log',
-        'ping -c2 rmg-ws-3301',
-        'systemctl status backup.timer',
+        { command: 'grep FAILED /var/log/backup/jobs.log | tail -20', ...WRONG_TARGET },
+        { command: 'awk \'/FAILED/ {print $4}\' /var/log/backup/jobs.log | sort | uniq -c', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -i switch /var/log/platform/tickets.log', ...WRONG_TARGET },
+        { command: 'ping -c2 rmg-ws-3301', ...TOUCH_ATTACKER },
+        { command: 'systemctl status backup.timer', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check which hosts those failures are on and whether anybody already has a ticket open.',

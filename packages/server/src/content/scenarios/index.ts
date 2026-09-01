@@ -120,6 +120,28 @@ function validateScenarios(): void {
     for (const entry of truth.events) {
       const event = byEventId.get(entry.eventId)!;
 
+      /*
+       * Exactly one option is the answer.
+       *
+       * Zero means a beginner picks from five candidates and every one of them
+       * is graded wrong, which reads as the exercise being broken. Two means
+       * the debrief contradicts itself. Both are invisible at runtime, because
+       * the flag is stripped before the options ship, and both are obvious here.
+       */
+      if (entry.commandOptions) {
+        const right = entry.commandOptions.filter((o) => o.correct).length;
+        if (right !== 1) {
+          throw new Error(
+            `Scenario "${scenario.id}" event "${entry.eventId}" has ${right} correct command options. Exactly one option must be the useful next step.`,
+          );
+        }
+        if (entry.commandOptions.some((o) => !o.teaches.trim())) {
+          throw new Error(
+            `Scenario "${scenario.id}" event "${entry.eventId}" has a command option with no lesson. A wrong answer that teaches nothing is the least useful thing a wrong answer can be.`,
+          );
+        }
+      }
+
       // Unsettled events are an expert instrument. Below expert a student is
       // still learning that dismissing is a decision, and an event where the
       // decision is unknowable reads as the exercise being broken.

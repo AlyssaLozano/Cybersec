@@ -36,6 +36,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'nothing-to-restore';
 
@@ -189,11 +199,11 @@ export const NOTHING_TO_RESTORE_TRUTH: ScenarioTruth = {
         'source set empty, three times, and a skip does not alert so the dashboard is green. Empty ' +
         'source set means somebody changed the selection. Raising it.',
       commandOptions: [
-        'grep -i skipped /var/log/backup/verify.log | tail',
-        "awk '/verify/ {print $1, $5}' /var/log/backup/verify.log | tail -20",
-        'systemctl status backup-verify.timer',
-        'df -h /backup',
-        'ls -la /var/log/backup/',
+        { command: 'grep -i skipped /var/log/backup/verify.log | tail', correct: true, teaches: CORRECT_STEP },
+        { command: 'awk \'/verify/ {print $1, $5}\' /var/log/backup/verify.log | tail -20', ...WRONG_TARGET },
+        { command: 'systemctl status backup-verify.timer', ...STATUS_CHECK },
+        { command: 'df -h /backup', ...STATUS_CHECK },
+        { command: 'ls -la /var/log/backup/', ...WRONG_TARGET },
       ],
       commandNudge: 'Read the reason it skipped, not just that it skipped.',
       guidance:
@@ -251,11 +261,11 @@ export const NOTHING_TO_RESTORE_TRUTH: ScenarioTruth = {
         'backup server. The credential is being used from somewhere it never has been. I am ' +
         'reporting the machine, not the person.',
       commandOptions: [
-        'grep bkp-admin /var/log/auth.log',
-        "awk '$5==\"bkp-admin\" {print $9}' /var/log/auth-archive.log | sort | uniq -c",
-        'last | grep bkp',
-        'cat /etc/security/access.conf',
-        'who',
+        { command: 'grep bkp-admin /var/log/auth.log', ...WRONG_TARGET },
+        { command: 'awk \'$5=="bkp-admin" {print $9}\' /var/log/auth-archive.log | sort | uniq -c', correct: true, teaches: CORRECT_STEP },
+        { command: 'last | grep bkp', ...WRONG_TARGET },
+        { command: 'cat /etc/security/access.conf', ...WRONG_TARGET },
+        { command: 'who', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check where that account has connected from over its whole history, not just this month.',
@@ -367,11 +377,11 @@ export const NOTHING_TO_RESTORE_TRUTH: ScenarioTruth = {
         'wear with a replacement scheduled. Ninety-six of ninety-six this month were the same. Not ' +
         'related, and the media is fine. Closing it.',
       commandOptions: [
-        'grep -c "read error" /var/log/tape/library.log',
-        "awk '/read error/ {print $6}' /var/log/tape/library.log | sort | uniq -c",
-        'cat /var/log/tape/vendor-case-4471.txt',
-        'mt -f /dev/nst0 status',
-        'systemctl status tape-library',
+        { command: 'grep -c "read error" /var/log/tape/library.log', ...COUNT_ONLY },
+        { command: 'awk \'/read error/ {print $6}\' /var/log/tape/library.log | sort | uniq -c', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/tape/vendor-case-4471.txt', ...DUMP_ALL },
+        { command: 'mt -f /dev/nst0 status', ...STATUS_CHECK },
+        { command: 'systemctl status tape-library', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check whether those errors actually resulted in any data loss, and whether anybody has a ' +

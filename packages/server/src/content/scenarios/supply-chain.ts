@@ -34,6 +34,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'third-party';
 
@@ -188,11 +198,11 @@ export const THIRD_PARTY_TRUTH: ScenarioTruth = {
         'build, 4 KB out. Rule has been wrong six of six this month. Raising it because build ' +
         'agents normally talk to four places and this is not one of them.',
       commandOptions: [
-        'grep 203.0.113.140 /var/log/flows.log',
-        "awk '$2==\"rmg-ci-03\" {print $4}' /var/log/flows.log | sort -u",
-        'netstat -an | grep 8443',
-        'systemctl status build-agent',
-        'cat /var/log/ci/build-4417.log | tail -40',
+        { command: 'grep 203.0.113.140 /var/log/flows.log', ...WRONG_TARGET },
+        { command: 'awk \'$2=="rmg-ci-03" {print $4}\' /var/log/flows.log | sort -u', correct: true, teaches: CORRECT_STEP },
+        { command: 'netstat -an | grep 8443', ...WRONG_TARGET },
+        { command: 'systemctl status build-agent', ...STATUS_CHECK },
+        { command: 'cat /var/log/ci/build-4417.log | tail -40', ...WRONG_TARGET },
       ],
       commandNudge:
         'List every destination this build agent has ever talked to and see how long the list is.',
@@ -221,11 +231,11 @@ export const THIRD_PARTY_TRUTH: ScenarioTruth = {
         'and made a network call. Post-install scripts are normal here. This package has never had ' +
         'one before.',
       commandOptions: [
-        'cat /var/log/ci/build-4417.log | grep -A5 postinstall',
-        'diff <(cat /var/log/ci/build-4416.log) <(cat /var/log/ci/build-4417.log)',
-        'ps aux',
-        'cat package.json',
-        'ls -la node_modules/',
+        { command: 'cat /var/log/ci/build-4417.log | grep -A5 postinstall', ...WRONG_TARGET },
+        { command: 'diff <(cat /var/log/ci/build-4416.log) <(cat /var/log/ci/build-4417.log)', correct: true, teaches: CORRECT_STEP },
+        { command: 'ps aux', ...WRONG_TARGET },
+        { command: 'cat package.json', ...WRONG_TARGET },
+        { command: 'ls -la node_modules/', ...WRONG_TARGET },
       ],
       commandNudge: 'Compare this build against the last successful one and see what is new.',
       guidance:
@@ -255,11 +265,11 @@ export const THIRD_PARTY_TRUTH: ScenarioTruth = {
         'for seven months. It came in through a patch range, four levels down, not requested ' +
         'directly.',
       commandOptions: [
-        'cat package-lock.json | grep -A3 logging-util',
-        'npm view logging-util time --json',
-        'npm ls logging-util',
-        'git log --oneline -5',
-        'cat package.json | grep logging',
+        { command: 'cat package-lock.json | grep -A3 logging-util', ...WRONG_TARGET },
+        { command: 'npm view logging-util time --json', correct: true, teaches: CORRECT_STEP },
+        { command: 'npm ls logging-util', ...WRONG_TARGET },
+        { command: 'git log --oneline -5', ...WRONG_TARGET },
+        { command: 'cat package.json | grep logging', ...WRONG_TARGET },
       ],
       commandNudge: 'Find out when that version was published relative to when the build ran.',
       guidance:
@@ -289,11 +299,11 @@ export const THIRD_PARTY_TRUTH: ScenarioTruth = {
         'is identical to the previous version. What was taken is credentials, and they are still ' +
         'valid.',
       commandOptions: [
-        'cat node_modules/logging-util/postinstall.js',
-        'echo "$PAYLOAD" | base64 -d',
-        'strings node_modules/logging-util/index.js | head',
-        'npm audit',
-        'ls -la node_modules/logging-util/',
+        { command: 'cat node_modules/logging-util/postinstall.js', correct: true, teaches: CORRECT_STEP },
+        { command: 'echo "$PAYLOAD" | base64 -d', ...WRONG_TARGET },
+        { command: 'strings node_modules/logging-util/index.js | head', ...WRONG_TARGET },
+        { command: 'npm audit', ...WRONG_TARGET },
+        { command: 'ls -la node_modules/logging-util/', ...WRONG_TARGET },
       ],
       commandNudge: 'Read what the script actually collects before it sends anything.',
       guidance:
@@ -348,11 +358,11 @@ export const THIRD_PARTY_TRUTH: ScenarioTruth = {
         'same four. This address appears in none of them and has no history anywhere in the ' +
         'estate.',
       commandOptions: [
-        "awk '$2 ~ /rmg-ci/ {print $4}' /var/log/flows.log | sort -u",
-        'grep -c 203.0.113.140 /var/log/flows.log',
-        'cat /etc/allowlist.d/build-agents.conf',
-        'netstat -rn',
-        'dig -x 203.0.113.140',
+        { command: 'awk \'$2 ~ /rmg-ci/ {print $4}\' /var/log/flows.log | sort -u', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c 203.0.113.140 /var/log/flows.log', ...COUNT_ONLY },
+        { command: 'cat /etc/allowlist.d/build-agents.conf', ...WRONG_TARGET },
+        { command: 'netstat -rn', ...WRONG_TARGET },
+        { command: 'dig -x 203.0.113.140', ...WRONG_TARGET },
       ],
       commandNudge:
         'Work out how many distinct destinations these agents have used across all their builds.',
@@ -380,11 +390,11 @@ export const THIRD_PARTY_TRUTH: ScenarioTruth = {
         'least three months old, base image last rebuilt in June. Real, and not from this morning. ' +
         'Closing it.',
       commandOptions: [
-        'cat /var/log/scanner/portal-latest.json | head -40',
-        'grep -c "first_seen" /var/log/scanner/portal-latest.json',
-        'docker history rmg/portal:latest',
-        'cat Dockerfile',
-        'npm audit --production',
+        { command: 'cat /var/log/scanner/portal-latest.json | head -40', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c "first_seen" /var/log/scanner/portal-latest.json', ...COUNT_ONLY },
+        { command: 'docker history rmg/portal:latest', ...WRONG_TARGET },
+        { command: 'cat Dockerfile', ...WRONG_TARGET },
+        { command: 'npm audit --production', ...WRONG_TARGET },
       ],
       commandNudge: 'Check how long each of those findings has been in the image.',
       guidance:

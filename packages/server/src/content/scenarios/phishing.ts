@@ -28,6 +28,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'second-post';
 
@@ -185,11 +195,11 @@ export const SECOND_POST_TRUTH: ScenarioTruth = {
         'domain one letter off a real supplier, links to a sign-in page. Gateway passed it clean. ' +
         'Raising it and asking who clicked.',
       commandOptions: [
-        'grep "Remittance advice 4471" /var/log/mail/delivery.log',
-        "awk '/4471/ {print $5}' /var/log/mail/delivery.log | sort -u | wc -l",
-        'cat /var/log/mail/gateway.log | tail -40',
-        'dig supplier-domain.example TXT',
-        'systemctl status postfix',
+        { command: 'grep "Remittance advice 4471" /var/log/mail/delivery.log', ...WRONG_TARGET },
+        { command: 'awk \'/4471/ {print $5}\' /var/log/mail/delivery.log | sort -u | wc -l', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/mail/gateway.log | tail -40', ...WRONG_TARGET },
+        { command: 'dig supplier-domain.example TXT', ...WRONG_TARGET },
+        { command: 'systemctl status postfix', ...STATUS_CHECK },
       ],
       commandNudge: 'Find out how many mailboxes it reached before deciding what it is worth.',
       guidance:
@@ -218,11 +228,11 @@ export const SECOND_POST_TRUTH: ScenarioTruth = {
         'form. Certificate on that site was issued at 04:40 this morning, so nothing had any ' +
         'reputation to go on.',
       commandOptions: [
-        'grep 203.0.113.212 /var/log/flows.log',
-        "awk '$4 ~ /203.0.113.212/ && $7==\"POST\"' /var/log/proxy.log",
-        'netstat -an | grep 443',
-        'dig 203.0.113.212',
-        'curl -I https://203.0.113.212',
+        { command: 'grep 203.0.113.212 /var/log/flows.log', ...WRONG_TARGET },
+        { command: 'awk \'$4 ~ /203.0.113.212/ && $7=="POST"\' /var/log/proxy.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'netstat -an | grep 443', ...WRONG_TARGET },
+        { command: 'dig 203.0.113.212', ...WRONG_TARGET },
+        { command: 'curl -I https://203.0.113.212', ...TOUCH_ATTACKER },
       ],
       commandNudge:
         'Separate the hosts that only connected from the hosts that actually sent something.',
@@ -252,11 +262,11 @@ export const SECOND_POST_TRUTH: ScenarioTruth = {
         'host posted to the page. Push prompt approved in three seconds. Five other accounts ' +
         'posted credentials and their prompts were never approved.',
       commandOptions: [
-        'grep marchetti /var/log/auth.log',
-        "grep 'Accepted' /var/log/auth.log | grep 203.0.113.212",
-        'last -30',
-        'grep -c push /var/log/mfa.log',
-        'cat /var/log/auth.log | tail -60',
+        { command: 'grep marchetti /var/log/auth.log', ...WRONG_TARGET },
+        { command: 'grep \'Accepted\' /var/log/auth.log | grep 203.0.113.212', correct: true, teaches: CORRECT_STEP },
+        { command: 'last -30', ...WRONG_TARGET },
+        { command: 'grep -c push /var/log/mfa.log', ...COUNT_ONLY },
+        { command: 'cat /var/log/auth.log | tail -60', ...WRONG_TARGET },
       ],
       commandNudge:
         'Find which of the six that submitted actually resulted in a successful sign-in.',
@@ -366,11 +376,11 @@ export const SECOND_POST_TRUTH: ScenarioTruth = {
         '1,290 messages blocked overnight, inside the normal daily range, none of them from this ' +
         'campaign. That is the gateway working. Closing it.',
       commandOptions: [
-        'grep -c BLOCKED /var/log/mail/gateway.log',
-        "awk '/BLOCKED/ {print $6}' /var/log/mail/gateway.log | sort | uniq -c",
-        'cat /var/log/mail/stats-daily.log',
-        'grep 4471 /var/log/mail/gateway.log',
-        'systemctl status mailgw',
+        { command: 'grep -c BLOCKED /var/log/mail/gateway.log', ...COUNT_ONLY },
+        { command: 'awk \'/BLOCKED/ {print $6}\' /var/log/mail/gateway.log | sort | uniq -c', ...WRONG_TARGET },
+        { command: 'cat /var/log/mail/stats-daily.log', ...DUMP_ALL },
+        { command: 'grep 4471 /var/log/mail/gateway.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'systemctl status mailgw', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check whether any of the blocked messages have anything to do with the one that got through.',

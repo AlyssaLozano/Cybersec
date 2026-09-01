@@ -36,6 +36,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'found-in-the-car-park';
 
@@ -194,11 +204,11 @@ export const FOUND_IN_THE_CAR_PARK_TRUTH: ScenarioTruth = {
         'quarantine as configured. Fifty-eight of sixty this month were contractor kit. Raising it ' +
         'because I do not know where that port is and I want to.',
       commandOptions: [
-        'grep 2F-114 /var/log/nac/events.log',
-        "awk '/QUARANTINE/ {print $4}' /var/log/nac/events.log | sort | uniq -c",
-        'cat /etc/inventory/devices.csv | grep -i 2F',
-        'arp -a | head -20',
-        'systemctl status nac-agent',
+        { command: 'grep 2F-114 /var/log/nac/events.log', ...WRONG_TARGET },
+        { command: 'awk \'/QUARANTINE/ {print $4}\' /var/log/nac/events.log | sort | uniq -c', ...WRONG_TARGET },
+        { command: 'cat /etc/inventory/devices.csv | grep -i 2F', correct: true, teaches: CORRECT_STEP },
+        { command: 'arp -a | head -20', ...STATUS_CHECK },
+        { command: 'systemctl status nac-agent', ...STATUS_CHECK },
       ],
       commandNudge: 'Find out which physical port that is and where in the building it sits.',
       guidance:
@@ -230,11 +240,11 @@ export const FOUND_IN_THE_CAR_PARK_TRUTH: ScenarioTruth = {
         'through exceptions from 2022 and 2023. Contractor laptops do not port scan. Somebody is on ' +
         'the other end of that connection.',
       commandOptions: [
-        "awk '$2 ~ /10.99/ {print $4}' /var/log/flows.log | sort | uniq -c | sort -rn | head",
-        'grep 203.0.113.72 /var/log/flows.log',
-        'cat /etc/network/quarantine-routes.conf',
-        'netstat -rn',
-        'traceroute 203.0.113.72',
+        { command: 'awk \'$2 ~ /10.99/ {print $4}\' /var/log/flows.log | sort | uniq -c | sort -rn | head', ...WRONG_TARGET },
+        { command: 'grep 203.0.113.72 /var/log/flows.log', ...WRONG_TARGET },
+        { command: 'cat /etc/network/quarantine-routes.conf', correct: true, teaches: CORRECT_STEP },
+        { command: 'netstat -rn', ...WRONG_TARGET },
+        { command: 'traceroute 203.0.113.72', ...TOUCH_ATTACKER },
       ],
       commandNudge:
         'Check what the quarantine segment can actually reach before assuming it is contained.',
@@ -268,11 +278,11 @@ export const FOUND_IN_THE_CAR_PARK_TRUTH: ScenarioTruth = {
         'the seating. Anybody could have plugged this in. We need somebody to physically go and get ' +
         'it, and the corridor footage around 08:14 is worth pulling.',
       commandOptions: [
-        'grep 2F-114 /etc/facilities/cable-plant.csv',
-        "awk -F, '$1==\"2F-114\" {print $3, $4}' /etc/facilities/cable-plant.csv",
-        'cat /etc/facilities/camera-coverage.csv | grep 2F',
-        'grep -i outpatient /etc/facilities/access-control.csv',
-        'ls /var/log/facilities/',
+        { command: 'grep 2F-114 /etc/facilities/cable-plant.csv', ...WRONG_TARGET },
+        { command: 'awk -F, \'$1=="2F-114" {print $3, $4}\' /etc/facilities/cable-plant.csv', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /etc/facilities/camera-coverage.csv | grep 2F', ...WRONG_TARGET },
+        { command: 'grep -i outpatient /etc/facilities/access-control.csv', ...WRONG_TARGET },
+        { command: 'ls /var/log/facilities/', ...WRONG_TARGET },
       ],
       commandNudge: 'Look up the cable plant record for that port and see what room it is in.',
       guidance:
@@ -303,11 +313,11 @@ export const FOUND_IN_THE_CAR_PARK_TRUTH: ScenarioTruth = {
         'exchanges that follow. No credential, no exploit, no vulnerability. The protocol trusts ' +
         'whatever answers, and it is on by default. Three staff workstations have already responded.',
       commandOptions: [
-        'tcpdump -r /var/cap/quarantine.pcap -c 30',
-        "awk '/NBT-NS|LLMNR/ {print $3}' /var/log/network/broadcast.log | sort | uniq -c",
-        'grep -c LLMNR /var/log/network/broadcast.log',
-        'nmap -sU -p137 10.99.0.0/24',
-        'cat /etc/network/protocols-enabled.conf',
+        { command: 'tcpdump -r /var/cap/quarantine.pcap -c 30', ...WRONG_TARGET },
+        { command: 'awk \'/NBT-NS|LLMNR/ {print $3}\' /var/log/network/broadcast.log | sort | uniq -c', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c LLMNR /var/log/network/broadcast.log', ...COUNT_ONLY },
+        { command: 'nmap -sU -p137 10.99.0.0/24', ...TOUCH_ATTACKER },
+        { command: 'cat /etc/network/protocols-enabled.conf', ...WRONG_TARGET },
       ],
       commandNudge:
         'Look at what the device is answering, not just what it is connecting to.',
@@ -369,11 +379,11 @@ export const FOUND_IN_THE_CAR_PARK_TRUTH: ScenarioTruth = {
         'only goes to the vendor configuration endpoint. Not related. Closing it, and nobody is ' +
         'going to that ward.',
       commandOptions: [
-        'grep 4C-208 /var/log/nac/events.log',
-        'cat /var/log/biomed/work-orders.log | grep -i monitor',
-        "awk '$2 ~ /4C-208/ {print $4}' /var/log/flows.log | sort -u",
-        'grep -i paediatric /etc/inventory/devices.csv',
-        'cat /etc/facilities/cable-plant.csv | grep 4C',
+        { command: 'grep 4C-208 /var/log/nac/events.log', ...WRONG_TARGET },
+        { command: 'cat /var/log/biomed/work-orders.log | grep -i monitor', correct: true, teaches: CORRECT_STEP },
+        { command: 'awk \'$2 ~ /4C-208/ {print $4}\' /var/log/flows.log | sort -u', ...WRONG_TARGET },
+        { command: 'grep -i paediatric /etc/inventory/devices.csv', ...WRONG_TARGET },
+        { command: 'cat /etc/facilities/cable-plant.csv | grep 4C', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check whether biomedical engineering has a work order for that device, and what it is ' +

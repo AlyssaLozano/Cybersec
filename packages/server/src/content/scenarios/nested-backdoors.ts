@@ -30,6 +30,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'second-floor';
 
@@ -185,11 +195,11 @@ export const SECOND_FLOOR_TRUTH: ScenarioTruth = {
         'disk was wiped and the hash checked. It did not survive on that disk, so it came back from ' +
         'somewhere we did not clean.',
       commandOptions: [
-        'grep 203.0.113.244 /var/log/flows.log | tail -20',
-        "awk '$4 ~ /203.0.113.244/ {print $2}' /var/log/flows.log | sort -u",
-        'cat /var/log/build/rebuild-19th.log | tail',
-        'systemctl status app09',
-        'uptime',
+        { command: 'grep 203.0.113.244 /var/log/flows.log | tail -20', ...WRONG_TARGET },
+        { command: 'awk \'$4 ~ /203.0.113.244/ {print $2}\' /var/log/flows.log | sort -u', ...WRONG_TARGET },
+        { command: 'cat /var/log/build/rebuild-19th.log | tail', correct: true, teaches: CORRECT_STEP },
+        { command: 'systemctl status app09', ...STATUS_CHECK },
+        { command: 'uptime', ...STATUS_CHECK },
       ],
       commandNudge:
         'It did not survive the wipe. Work out what was in scope for the rebuild and what was not.',
@@ -220,11 +230,11 @@ export const SECOND_FLOOR_TRUTH: ScenarioTruth = {
         'one we removed on the 8th, not obfuscated at all. This is the layer they expect us to ' +
         'find. What matters is who registered it.',
       commandOptions: [
-        'schtasks /query /fo LIST /v | grep -A6 -i app09',
-        'cat /tmp/.cache/setup.sh',
-        'diff /var/quarantine/task-8th.txt /tmp/.cache/setup.sh',
-        'ls -la /tmp/',
-        'crontab -l',
+        { command: 'schtasks /query /fo LIST /v | grep -A6 -i app09', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /tmp/.cache/setup.sh', ...WRONG_TARGET },
+        { command: 'diff /var/quarantine/task-8th.txt /tmp/.cache/setup.sh', ...WRONG_TARGET },
+        { command: 'ls -la /tmp/', ...WRONG_TARGET },
+        { command: 'crontab -l', ...WRONG_TARGET },
       ],
       commandNudge:
         'Find out which account registered this task, not just what the task runs.',
@@ -253,11 +263,11 @@ export const SECOND_FLOOR_TRUTH: ScenarioTruth = {
         'at 04:01 on the 24th. Four days after the rebuild. Neither cleanup rotated that ' +
         'credential, because both were scoped to the host.',
       commandOptions: [
-        'grep svc_app09_deploy /var/log/auth.log',
-        "awk '$5==\"svc_app09_deploy\" {print $1, $9}' /var/log/auth.log | tail -20",
-        'cat ~svc_app09_deploy/.ssh/authorized_keys',
-        'last | grep deploy',
-        'net user svc_app09_deploy /domain',
+        { command: 'grep svc_app09_deploy /var/log/auth.log', ...WRONG_TARGET },
+        { command: 'awk \'$5=="svc_app09_deploy" {print $1, $9}\' /var/log/auth.log | tail -20', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat ~svc_app09_deploy/.ssh/authorized_keys', ...WRONG_TARGET },
+        { command: 'last | grep deploy', ...WRONG_TARGET },
+        { command: 'net user svc_app09_deploy /domain', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check whether that credential was ever rotated during either cleanup.',
@@ -342,11 +352,11 @@ export const SECOND_FLOOR_TRUTH: ScenarioTruth = {
         'since the 9th and the 14th. Neither has ever alerted and neither was in scope for either ' +
         'cleanup. Three hosts, not one.',
       commandOptions: [
-        "awk '$4 ~ /203.0.113.244/ {print $2}' /var/log/flows.log | sort | uniq -c",
-        'grep -c 203.0.113.244 /var/log/flows.log',
-        'ping -c1 rmg-app-11',
-        'netstat -an | grep 443',
-        'cat /etc/hosts',
+        { command: 'awk \'$4 ~ /203.0.113.244/ {print $2}\' /var/log/flows.log | sort | uniq -c', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c 203.0.113.244 /var/log/flows.log', ...COUNT_ONLY },
+        { command: 'ping -c1 rmg-app-11', ...TOUCH_ATTACKER },
+        { command: 'netstat -an | grep 443', ...WRONG_TARGET },
+        { command: 'cat /etc/hosts', ...WRONG_TARGET },
       ],
       commandNudge:
         'Search for that destination across every host, not just the one you were handed.',
@@ -375,11 +385,11 @@ export const SECOND_FLOOR_TRUTH: ScenarioTruth = {
         'rmg-app-11, which is one of the hosts we have just found calling out. Closing eight, ' +
         'escalating one.',
       commandOptions: [
-        'cat /var/log/config-mgmt/drift.log | tail -20',
-        "awk '/DRIFT/ {print $3}' /var/log/config-mgmt/drift.log",
-        'grep -i migration /var/log/change-management.log',
-        'diff /etc/baseline/app11.conf /etc/app11.conf',
-        'systemctl status config-agent',
+        { command: 'cat /var/log/config-mgmt/drift.log | tail -20', ...WRONG_TARGET },
+        { command: 'awk \'/DRIFT/ {print $3}\' /var/log/config-mgmt/drift.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -i migration /var/log/change-management.log', ...WRONG_TARGET },
+        { command: 'diff /etc/baseline/app11.conf /etc/app11.conf', ...WRONG_TARGET },
+        { command: 'systemctl status config-agent', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check the list of drifted hosts against the hosts you already know are involved.',

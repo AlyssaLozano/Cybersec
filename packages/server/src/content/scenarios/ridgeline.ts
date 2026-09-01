@@ -36,6 +36,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'ridgeline';
 
@@ -294,11 +304,11 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
       eventId: 'ev.1',
       verdict: 'malicious',
       commandOptions: [
-        'grep "Failed password" /var/log/auth.log | wc -l',
-        'grep "Accepted" /var/log/auth.log | grep testuser',
-        'cat /var/log/auth.log',
-        'systemctl restart sshd',
-        'passwd -l testuser',
+        { command: 'grep "Failed password" /var/log/auth.log | wc -l', ...COUNT_ONLY },
+        { command: 'grep "Accepted" /var/log/auth.log | grep testuser', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/auth.log', ...DUMP_ALL },
+        { command: 'systemctl restart sshd', ...MUTATE },
+        { command: 'passwd -l testuser', ...WRONG_TARGET },
       ],
       commandNudge:
         'A run of failures only matters if you know how it ended. Find out whether any attempt on ' +
@@ -387,11 +397,11 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
       eventId: 'ev.7',
       verdict: 'benign-true-positive',
       commandOptions: [
-        'grep 192.0.2.44 /var/log/syslog | wc -l',
-        'iptables -L -n | head',
-        'grep "3389" /var/log/syslog | tail',
-        'nmap 192.0.2.44',
-        'ping 192.0.2.44',
+        { command: 'grep 192.0.2.44 /var/log/syslog | wc -l', ...COUNT_ONLY },
+        { command: 'iptables -L -n | head', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep "3389" /var/log/syslog | tail', ...WRONG_TARGET },
+        { command: 'nmap 192.0.2.44', ...TOUCH_ATTACKER },
+        { command: 'ping 192.0.2.44', ...TOUCH_ATTACKER },
       ],
       commandNudge:
         'Before you decide, check how often this rule has fired and how often that turned out to ' +
@@ -418,11 +428,11 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
       eventId: 'ev.9',
       verdict: 'malicious',
       commandOptions: [
-        'grep -A2 "Accepted password for testuser" /var/log/auth.log',
-        'ls -l /home/testuser/.ssh/',
-        'last -a | head',
-        'rm /home/testuser/.ssh/authorized_keys',
-        'journalctl -u ssh --since today',
+        { command: 'grep -A2 "Accepted password for testuser" /var/log/auth.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'ls -l /home/testuser/.ssh/', ...WRONG_TARGET },
+        { command: 'last -a | head', ...WRONG_TARGET },
+        { command: 'rm /home/testuser/.ssh/authorized_keys', ...MUTATE },
+        { command: 'journalctl -u ssh --since today', ...WRONG_TARGET },
       ],
       commandNudge:
         'Look at what happened in the seconds AFTER the successful login, not before it. ' +

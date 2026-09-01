@@ -29,6 +29,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'quiet-channel';
 
@@ -185,11 +195,11 @@ export const QUIET_CHANNEL_TRUTH: ScenarioTruth = {
         'DNS resolver has been at 340 percent of baseline for three days with no errors and nobody ' +
         'can name a deployment that explains it. No security rule has fired on any of it. Taking it.',
       commandOptions: [
-        'grep -c query /var/log/named/queries.log',
-        "awk '{print $1}' /var/log/named/queries.log | uniq -c | tail -5",
-        'systemctl status named',
-        'uptime',
-        'df -h /var/log',
+        { command: 'grep -c query /var/log/named/queries.log', ...COUNT_ONLY },
+        { command: 'awk \'{print $1}\' /var/log/named/queries.log | uniq -c | tail -5', correct: true, teaches: CORRECT_STEP },
+        { command: 'systemctl status named', ...STATUS_CHECK },
+        { command: 'uptime', ...STATUS_CHECK },
+        { command: 'df -h /var/log', ...STATUS_CHECK },
       ],
       commandNudge:
         'Establish what the normal query rate is before deciding whether this one matters.',
@@ -221,11 +231,11 @@ export const QUIET_CHANNEL_TRUTH: ScenarioTruth = {
         'days ago, each with a distinct 40 to 60 character label, none repeating. One authoritative ' +
         'nameserver. The labels are not lookups, they are cargo.',
       commandOptions: [
-        "awk '{print $NF}' /var/log/named/queries.log | rev | cut -d. -f1-2 | rev | sort | uniq -c | sort -rn | head",
-        'grep -c 203.0.113.166 /var/log/named/queries.log',
-        'dig @203.0.113.166 example.test',
-        'whois 203.0.113.166',
-        'netstat -an | grep :53',
+        { command: 'awk \'{print $NF}\' /var/log/named/queries.log | rev | cut -d. -f1-2 | rev | sort | uniq -c | sort -rn | head', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c 203.0.113.166 /var/log/named/queries.log', ...COUNT_ONLY },
+        { command: 'dig @203.0.113.166 example.test', ...WRONG_TARGET },
+        { command: 'whois 203.0.113.166', ...WRONG_TARGET },
+        { command: 'netstat -an | grep :53', ...WRONG_TARGET },
       ],
       commandNudge:
         'Group the queries by parent domain and see how many distinct labels each one has.',
@@ -257,11 +267,11 @@ export const QUIET_CHANNEL_TRUTH: ScenarioTruth = {
         'server, which normally does 9,000 a day. They keep going through the maintenance window ' +
         'when the app is stopped, so it is not the application making them.',
       commandOptions: [
-        "awk '{print $3}' /var/log/named/queries.log | sort | uniq -c | sort -rn | head",
-        'grep -c rmg-app-04 /var/log/named/queries.log',
-        'ping -c 2 rmg-app-04',
-        'nslookup rmg-app-04',
-        'cat /etc/hosts',
+        { command: 'awk \'{print $3}\' /var/log/named/queries.log | sort | uniq -c | sort -rn | head', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c rmg-app-04 /var/log/named/queries.log', ...COUNT_ONLY },
+        { command: 'ping -c 2 rmg-app-04', ...TOUCH_ATTACKER },
+        { command: 'nslookup rmg-app-04', ...WRONG_TARGET },
+        { command: 'cat /etc/hosts', ...WRONG_TARGET },
       ],
       commandNudge:
         'Find which host is generating them, then check whether they stop when that host is idle.',
@@ -292,11 +302,11 @@ export const QUIET_CHANNEL_TRUTH: ScenarioTruth = {
         'manager, parent already exited, making DNS calls through a library rather than the system ' +
         'resolver. It is holding an open read handle on the exported results directory.',
       commandOptions: [
-        'ps -ef --forest | head -40',
-        'lsof -p $(pgrep -f dnsq) | head',
-        'ls -la /proc/*/cwd 2>/dev/null | head',
-        'netstat -tulpn',
-        'systemctl list-units --type=service | head',
+        { command: 'ps -ef --forest | head -40', ...WRONG_TARGET },
+        { command: 'lsof -p $(pgrep -f dnsq) | head', correct: true, teaches: CORRECT_STEP },
+        { command: 'ls -la /proc/*/cwd 2>/dev/null | head', ...WRONG_TARGET },
+        { command: 'netstat -tulpn', ...WRONG_TARGET },
+        { command: 'systemctl list-units --type=service | head', ...WRONG_TARGET },
       ],
       commandNudge: 'Find what files that process currently has open.',
       guidance:
@@ -356,11 +366,11 @@ export const QUIET_CHANNEL_TRUTH: ScenarioTruth = {
         'nothing. None of them failed. DNS is permitted from every host by policy and the resolver ' +
         'forwards externally without inspection, so the data never went past any of them.',
       commandOptions: [
-        'grep rmg-app-04 /var/log/proxy/access.log | wc -l',
-        'grep -c DENY /var/log/firewall/blocked.log',
-        'cat /var/log/dlp/events.log | tail -20',
-        'cat /etc/firewall/egress-policy.conf',
-        'dig +short example.test',
+        { command: 'grep rmg-app-04 /var/log/proxy/access.log | wc -l', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c DENY /var/log/firewall/blocked.log', ...COUNT_ONLY },
+        { command: 'cat /var/log/dlp/events.log | tail -20', ...WRONG_TARGET },
+        { command: 'cat /etc/firewall/egress-policy.conf', ...WRONG_TARGET },
+        { command: 'dig +short example.test', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check what the proxy, firewall and DLP recorded for this host over the same three days.',
@@ -390,11 +400,11 @@ export const QUIET_CHANNEL_TRUTH: ScenarioTruth = {
         'last 210. Not related to this, closing it. Worth noting the feed has nothing on the domain ' +
         'we actually care about.',
       commandOptions: [
-        'grep -c MATCH /var/log/dns-feed/matches.log',
-        "awk '{print $5}' /var/log/dns-feed/matches.log | sort | uniq -c | sort -rn | head",
-        'grep 203.0.113.166 /var/log/dns-feed/matches.log',
-        'cat /etc/feeds/subscription.conf',
-        'systemctl status dns-feed',
+        { command: 'grep -c MATCH /var/log/dns-feed/matches.log', ...COUNT_ONLY },
+        { command: 'awk \'{print $5}\' /var/log/dns-feed/matches.log | sort | uniq -c | sort -rn | head', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep 203.0.113.166 /var/log/dns-feed/matches.log', ...WRONG_TARGET },
+        { command: 'cat /etc/feeds/subscription.conf', ...WRONG_TARGET },
+        { command: 'systemctl status dns-feed', ...STATUS_CHECK },
       ],
       commandNudge: 'Look at what category the feed actually assigned those matches.',
       guidance:

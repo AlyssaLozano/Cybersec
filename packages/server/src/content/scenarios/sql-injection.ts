@@ -35,6 +35,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'select-star';
 
@@ -190,11 +200,11 @@ export const SELECT_STAR_TRUTH: ScenarioTruth = {
         'no other page affected, and it does not reproduce internally. Specific requests are ' +
         'expensive rather than the system being busy. Taking it.',
       commandOptions: [
-        'grep "reporting" /var/log/portal/access.log | tail -20',
-        "awk '$10 > 5000 {print $7}' /var/log/portal/access.log | sort | uniq -c | sort -rn",
-        'top -b -n1 | head',
-        'systemctl status postgresql',
-        'df -h',
+        { command: 'grep "reporting" /var/log/portal/access.log | tail -20', ...WRONG_TARGET },
+        { command: 'awk \'$10 > 5000 {print $7}\' /var/log/portal/access.log | sort | uniq -c | sort -rn', correct: true, teaches: CORRECT_STEP },
+        { command: 'top -b -n1 | head', ...STATUS_CHECK },
+        { command: 'systemctl status postgresql', ...STATUS_CHECK },
+        { command: 'df -h', ...STATUS_CHECK },
       ],
       commandNudge:
         'Find the slow requests and see whether they all hit the same endpoint.',
@@ -226,11 +236,11 @@ export const SELECT_STAR_TRUTH: ScenarioTruth = {
         'application builds the query by concatenating a URL parameter. It is all in the database ' +
         'slow query log.',
       commandOptions: [
-        'grep -i union /var/log/postgresql/slow-query.log | head -20',
-        'grep -c UNION /var/log/postgresql/slow-query.log',
-        "awk '/UNION/ {print $NF}' /var/log/postgresql/slow-query.log | head",
-        'grep -rn "SELECT.*+" /opt/portal/src/reporting.js',
-        'psql -c "select count(*) from pg_stat_statements"',
+        { command: 'grep -i union /var/log/postgresql/slow-query.log | head -20', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c UNION /var/log/postgresql/slow-query.log', ...COUNT_ONLY },
+        { command: 'awk \'/UNION/ {print $NF}\' /var/log/postgresql/slow-query.log | head', ...WRONG_TARGET },
+        { command: 'grep -rn "SELECT.*+" /opt/portal/src/reporting.js', ...WRONG_TARGET },
+        { command: 'psql -c "select count(*) from pg_stat_statements"', ...WRONG_TARGET },
       ],
       commandNudge:
         'Read the actual text of the slow queries, not just how many there were.',
@@ -261,11 +271,11 @@ export const SELECT_STAR_TRUTH: ScenarioTruth = {
         'three orders of magnitude of it. This is built to look like a slow human and no volume ' +
         'control was ever going to see it.',
       commandOptions: [
-        "awk '{print $1}' /var/log/portal/access.log | sort | uniq -c | sort -rn | head",
-        "awk '/reporting/ {print $4}' /var/log/portal/access.log | cut -d: -f2 | sort | uniq -c",
-        'cat /etc/portal/rate-limit.conf',
-        'grep -c reporting /var/log/portal/access.log',
-        'netstat -an | grep 443',
+        { command: 'awk \'{print $1}\' /var/log/portal/access.log | sort | uniq -c | sort -rn | head', correct: true, teaches: CORRECT_STEP },
+        { command: 'awk \'/reporting/ {print $4}\' /var/log/portal/access.log | cut -d: -f2 | sort | uniq -c', ...WRONG_TARGET },
+        { command: 'cat /etc/portal/rate-limit.conf', ...WRONG_TARGET },
+        { command: 'grep -c reporting /var/log/portal/access.log', ...COUNT_ONLY },
+        { command: 'netstat -an | grep 443', ...WRONG_TARGET },
       ],
       commandNudge:
         'Work out the request rate per address and compare it against the rate limit.',
@@ -385,11 +395,11 @@ export const SELECT_STAR_TRUTH: ScenarioTruth = {
         'one that worked never appeared in this log, because one well-formed query every four ' +
         'minutes does not match a signature built for probing. Closing it.',
       commandOptions: [
-        'grep -c BLOCK /var/log/waf/events.log',
-        "awk '/BLOCK/ {print $7}' /var/log/waf/events.log | sort | uniq -c | sort -rn | head",
-        'grep reporting /var/log/waf/events.log',
-        'cat /var/log/waf/monthly-summary.log',
-        'systemctl status waf',
+        { command: 'grep -c BLOCK /var/log/waf/events.log', ...COUNT_ONLY },
+        { command: 'awk \'/BLOCK/ {print $7}\' /var/log/waf/events.log | sort | uniq -c | sort -rn | head', ...WRONG_TARGET },
+        { command: 'grep reporting /var/log/waf/events.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/waf/monthly-summary.log', ...DUMP_ALL },
+        { command: 'systemctl status waf', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check whether any of those blocked attempts hit the endpoint you care about.',

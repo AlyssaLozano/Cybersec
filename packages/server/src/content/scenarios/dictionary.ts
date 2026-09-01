@@ -29,6 +29,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'low-tide';
 
@@ -196,11 +206,11 @@ export const LOW_TIDE_TRUTH: ScenarioTruth = {
         'two attempts each. Nothing locked out because nothing got close to the threshold. I am ' +
         'raising it and sending it to logs.',
       commandOptions: [
-        'grep "authentication failure" /var/log/vpn.log | wc -l',
-        "grep 'authentication failure' /var/log/vpn.log | awk '{print $NF}' | sort -u | wc -l",
-        'tail -100 /var/log/vpn.log',
-        'grep "locked" /var/log/vpn.log',
-        'systemctl status openvpn',
+        { command: 'grep "authentication failure" /var/log/vpn.log | wc -l', ...COUNT_ONLY },
+        { command: 'grep \'authentication failure\' /var/log/vpn.log | awk \'{print $NF}\' | sort -u | wc -l', correct: true, teaches: CORRECT_STEP },
+        { command: 'tail -100 /var/log/vpn.log', ...DUMP_ALL },
+        { command: 'grep "locked" /var/log/vpn.log', ...WRONG_TARGET },
+        { command: 'systemctl status openvpn', ...STATUS_CHECK },
       ],
       commandNudge:
         'The total is not the interesting number. Count how many distinct accounts appear.',
@@ -229,11 +239,11 @@ export const LOW_TIDE_TRUTH: ScenarioTruth = {
         'Failures run the staff directory alphabetically, two attempts per account, same two ' +
         'passwords throughout. That is a scraped username list and a spray, not somebody guessing.',
       commandOptions: [
-        'sort -k1 /var/log/vpn.log | head -50',
-        "grep failure /var/log/vpn.log | awk '{print $6}' | head -40",
-        'grep delgado /var/log/vpn.log',
-        'wc -l /var/log/vpn.log',
-        'grep -c Accepted /var/log/vpn.log',
+        { command: 'sort -k1 /var/log/vpn.log | head -50', ...WRONG_TARGET },
+        { command: 'grep failure /var/log/vpn.log | awk \'{print $6}\' | head -40', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep delgado /var/log/vpn.log', ...WRONG_TARGET },
+        { command: 'wc -l /var/log/vpn.log', ...WRONG_TARGET },
+        { command: 'grep -c Accepted /var/log/vpn.log', ...COUNT_ONLY },
       ],
       commandNudge: 'Look at the ORDER the accounts were tried in, not just which ones.',
       guidance:
@@ -262,11 +272,11 @@ export const LOW_TIDE_TRUTH: ScenarioTruth = {
         'attempts. No other traffic from them in ninety days. That is rented infrastructure driven ' +
         'by a script.',
       commandOptions: [
-        "awk '{print $3}' /var/log/vpn.log | sort | uniq -c | sort -rn",
-        'grep 203.0.113 /var/log/vpn.log | wc -l',
-        'netstat -an | grep 443',
-        'cat /etc/hosts',
-        'traceroute 203.0.113.88',
+        { command: 'awk \'{print $3}\' /var/log/vpn.log | sort | uniq -c | sort -rn', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep 203.0.113 /var/log/vpn.log | wc -l', ...COUNT_ONLY },
+        { command: 'netstat -an | grep 443', ...WRONG_TARGET },
+        { command: 'cat /etc/hosts', ...WRONG_TARGET },
+        { command: 'traceroute 203.0.113.88', ...TOUCH_ATTACKER },
       ],
       commandNudge: 'Count the attempts per source address and see whether the switch is regular.',
       guidance:
@@ -295,11 +305,11 @@ export const LOW_TIDE_TRUTH: ScenarioTruth = {
         'authenticated outside office hours or off the office range. MFA did not challenge it. ' +
         'That account is in a legacy exemption group.',
       commandOptions: [
-        'grep "Accepted" /var/log/vpn.log',
-        'grep delgado /var/log/vpn.log | grep -v failure',
-        'last -20',
-        'cat /etc/passwd | grep delgado',
-        'grep 04:12 /var/log/syslog',
+        { command: 'grep "Accepted" /var/log/vpn.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep delgado /var/log/vpn.log | grep -v failure', ...WRONG_TARGET },
+        { command: 'last -20', ...WRONG_TARGET },
+        { command: 'cat /etc/passwd | grep delgado', ...WRONG_TARGET },
+        { command: 'grep 04:12 /var/log/syslog', ...WRONG_TARGET },
       ],
       commandNudge:
         'Find the acceptances in that window, then check what that account normally does.',
@@ -351,11 +361,11 @@ export const LOW_TIDE_TRUTH: ScenarioTruth = {
         'Self-service reset for r.venkataraman, verified, from the office, with a matching service ' +
         'desk call four minutes prior. I am closing it.',
       commandOptions: [
-        'grep venkataraman /var/log/auth.log',
-        'grep "password reset" /var/log/portal.log',
-        'cat /var/log/servicedesk/tickets.log | tail -20',
-        'grep 203.0.113 /var/log/portal.log',
-        'systemctl status portal',
+        { command: 'grep venkataraman /var/log/auth.log', ...WRONG_TARGET },
+        { command: 'grep "password reset" /var/log/portal.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/servicedesk/tickets.log | tail -20', ...WRONG_TARGET },
+        { command: 'grep 203.0.113 /var/log/portal.log', ...WRONG_TARGET },
+        { command: 'systemctl status portal', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check where the reset came from and whether anything else corroborates it.',

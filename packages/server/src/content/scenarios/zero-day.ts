@@ -30,6 +30,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'no-patch';
 
@@ -187,11 +197,11 @@ export const NO_PATCH_TRUTH: ScenarioTruth = {
         'document rendering component. Application team says memory leak but memory usage is ' +
         'normal. Raising it.',
       commandOptions: [
-        'grep -c "worker exited" /var/log/portal/app.log',
-        'grep "worker exited" /var/log/portal/app.log | tail -20',
-        'free -h',
-        'systemctl status portal',
-        'top -b -n1 | head',
+        { command: 'grep -c "worker exited" /var/log/portal/app.log', ...COUNT_ONLY },
+        { command: 'grep "worker exited" /var/log/portal/app.log | tail -20', ...WRONG_TARGET },
+        { command: 'free -h', correct: true, teaches: CORRECT_STEP },
+        { command: 'systemctl status portal', ...STATUS_CHECK },
+        { command: 'top -b -n1 | head', ...STATUS_CHECK },
       ],
       commandNudge: 'Check whether the memory numbers actually support a memory leak.',
       guidance:
@@ -220,11 +230,11 @@ export const NO_PATCH_TRUTH: ScenarioTruth = {
         'uploads are 900 bytes to 4 KB when real documents are far bigger. Forty-four crashed and ' +
         'three did not, at 14:02, 14:19 and 15:51. The three that did not are what I would look at.',
       commandOptions: [
-        'grep "documents/preview" /var/log/portal/access.log | tail -40',
-        "awk '$9==200 && $7 ~ /preview/' /var/log/portal/access.log",
-        'grep -c preview /var/log/portal/access.log',
-        'tail -50 /var/log/portal/error.log',
-        'ls -la /var/portal/uploads/',
+        { command: 'grep "documents/preview" /var/log/portal/access.log | tail -40', ...WRONG_TARGET },
+        { command: 'awk \'$9==200 && $7 ~ /preview/\' /var/log/portal/access.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c preview /var/log/portal/access.log', ...COUNT_ONLY },
+        { command: 'tail -50 /var/log/portal/error.log', ...DUMP_ALL },
+        { command: 'ls -la /var/portal/uploads/', ...WRONG_TARGET },
       ],
       commandNudge:
         'Line the crashes up against the requests, then find the requests that did NOT crash.',
@@ -256,11 +266,11 @@ export const NO_PATCH_TRUTH: ScenarioTruth = {
         'slightly each time like somebody adjusting an offset. That is deliberate iteration, and ' +
         'the interleaving is to stay under rate limits.',
       commandOptions: [
-        "awk '$7 ~ /preview/ {print $1}' /var/log/portal/access.log | sort | uniq -c",
-        'grep preview /var/log/portal/access.log | wc -l',
-        'netstat -an | grep 443',
-        'dig -x 203.0.113.91',
-        'iptables -L -n',
+        { command: 'awk \'$7 ~ /preview/ {print $1}\' /var/log/portal/access.log | sort | uniq -c', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep preview /var/log/portal/access.log | wc -l', ...COUNT_ONLY },
+        { command: 'netstat -an | grep 443', ...WRONG_TARGET },
+        { command: 'dig -x 203.0.113.91', ...WRONG_TARGET },
+        { command: 'iptables -L -n', ...WRONG_TARGET },
       ],
       commandNudge:
         'Count the distinct sources, and check whether they are taking turns or retrying.',
@@ -290,11 +300,11 @@ export const NO_PATCH_TRUTH: ScenarioTruth = {
         'component has never spawned a child process in eighteen months of telemetry. It ran as the ' +
         'application service account. That is the moment they got in.',
       commandOptions: [
-        'ps -ef --forest | grep -A3 portal',
-        'grep -B2 -A5 "15:51" /var/log/audit/audit.log',
-        'ausearch -p $(pgrep portal) 2>/dev/null | head',
-        'ls -la /var/www/portal/',
-        'systemctl status portal',
+        { command: 'ps -ef --forest | grep -A3 portal', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -B2 -A5 "15:51" /var/log/audit/audit.log', ...WRONG_TARGET },
+        { command: 'ausearch -p $(pgrep portal) 2>/dev/null | head', ...WRONG_TARGET },
+        { command: 'ls -la /var/www/portal/', ...WRONG_TARGET },
+        { command: 'systemctl status portal', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check whether that component has ever spawned a child process before today.',
@@ -324,11 +334,11 @@ export const NO_PATCH_TRUTH: ScenarioTruth = {
         'can tell you is which other services run the same component, because they are exposed the ' +
         'same way and will scan clean too.',
       commandOptions: [
-        'grep -rl "docrender" /etc/app-inventory/',
-        'cat /var/log/scanner/portal-latest.json | head -30',
-        'dpkg -l | grep docrender',
-        'curl -s https://localhost/portal/version',
-        'apt list --upgradable',
+        { command: 'grep -rl "docrender" /etc/app-inventory/', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/scanner/portal-latest.json | head -30', ...WRONG_TARGET },
+        { command: 'dpkg -l | grep docrender', ...WRONG_TARGET },
+        { command: 'curl -s https://localhost/portal/version', ...TOUCH_ATTACKER },
+        { command: 'apt list --upgradable', ...WRONG_TARGET },
       ],
       commandNudge:
         'Find out what else in the estate uses the same rendering component.',
@@ -385,11 +395,11 @@ export const NO_PATCH_TRUTH: ScenarioTruth = {
         '3,100 IPS blocks today, inside the normal 2,800 to 3,400, all against things we do not run ' +
         'and none of them at the portal. That is background. Closing it.',
       commandOptions: [
-        'grep -c BLOCK /var/log/ips/events.log',
-        "awk '/BLOCK/ {print $6}' /var/log/ips/events.log | sort | uniq -c | sort -rn | head",
-        'grep portal /var/log/ips/events.log',
-        'cat /var/log/ips/daily-summary.log',
-        'systemctl status ips',
+        { command: 'grep -c BLOCK /var/log/ips/events.log', ...COUNT_ONLY },
+        { command: 'awk \'/BLOCK/ {print $6}\' /var/log/ips/events.log | sort | uniq -c | sort -rn | head', ...WRONG_TARGET },
+        { command: 'grep portal /var/log/ips/events.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/ips/daily-summary.log', ...DUMP_ALL },
+        { command: 'systemctl status ips', ...STATUS_CHECK },
       ],
       commandNudge: 'Check what those blocked attempts were actually aimed at.',
       guidance:

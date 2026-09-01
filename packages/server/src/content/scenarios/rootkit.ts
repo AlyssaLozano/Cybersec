@@ -36,6 +36,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'below-the-floor';
 
@@ -195,11 +205,11 @@ export const BELOW_THE_FLOOR_TRUTH: ScenarioTruth = {
         'sent. Every other port in the estate reconciles within 0.2 percent. Two counters disagree ' +
         'and one of them is lying. Raising it.',
       commandOptions: [
-        'cat /var/log/network/reconciliation-monthly.txt | head -20',
-        "awk '$3 > 1000 {print $1, $3}' /var/log/network/reconciliation-monthly.txt",
-        'ifconfig eth0',
-        'cat /proc/net/dev',
-        'ethtool -S eth0 | head',
+        { command: 'cat /var/log/network/reconciliation-monthly.txt | head -20', ...WRONG_TARGET },
+        { command: 'awk \'$3 > 1000 {print $1, $3}\' /var/log/network/reconciliation-monthly.txt', correct: true, teaches: CORRECT_STEP },
+        { command: 'ifconfig eth0', ...WRONG_TARGET },
+        { command: 'cat /proc/net/dev', ...WRONG_TARGET },
+        { command: 'ethtool -S eth0 | head', ...WRONG_TARGET },
       ],
       commandNudge:
         'Compare that discrepancy against what every other port in the estate looks like.',
@@ -231,11 +241,11 @@ export const BELOW_THE_FLOOR_TRUTH: ScenarioTruth = {
         'process accounting or firewall logs. The switch is a separate box the host cannot touch. ' +
         'The host is lying about its own traffic.',
       commandOptions: [
-        'grep 198.51.100.88 /var/log/switch/flows.log | tail -20',
-        "awk '$2==\"rmg-db-04\" {print $1, $6}' /var/log/switch/flows.log | tail",
-        'netstat -an | grep 443',
-        'ss -tnp',
-        'iptables -L -n -v',
+        { command: 'grep 198.51.100.88 /var/log/switch/flows.log | tail -20', correct: true, teaches: CORRECT_STEP },
+        { command: 'awk \'$2=="rmg-db-04" {print $1, $6}\' /var/log/switch/flows.log | tail', ...WRONG_TARGET },
+        { command: 'netstat -an | grep 443', ...WRONG_TARGET },
+        { command: 'ss -tnp', ...WRONG_TARGET },
+        { command: 'iptables -L -n -v', ...WRONG_TARGET },
       ],
       commandNudge:
         'Compare what the switch recorded against what the host says about the same sessions.',
@@ -265,11 +275,11 @@ export const BELOW_THE_FLOOR_TRUTH: ScenarioTruth = {
         'reports no restart or error. The sequence numbers run continuously across the gap, so ' +
         'entries were removed and the numbering rewritten. Same window as the transfers.',
       commandOptions: [
-        'lastcomm | head -30',
-        "awk '{print $NF}' /var/log/pacct.log | head -40",
-        'grep -c . /var/log/pacct.log',
-        'systemctl status psacct',
-        'journalctl -u psacct --since yesterday',
+        { command: 'lastcomm | head -30', ...WRONG_TARGET },
+        { command: 'awk \'{print $NF}\' /var/log/pacct.log | head -40', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c . /var/log/pacct.log', ...COUNT_ONLY },
+        { command: 'systemctl status psacct', ...STATUS_CHECK },
+        { command: 'journalctl -u psacct --since yesterday', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check whether the sequence numbers in that log jump across the gap or run continuously.',
@@ -300,11 +310,11 @@ export const BELOW_THE_FLOOR_TRUTH: ScenarioTruth = {
         'does not show it: we found it by comparing the boot configuration against the running ' +
         'system from a rescue environment.',
       commandOptions: [
-        'lsmod | head -20',
-        'diff <(lsmod | awk "{print \\$1}" | sort) <(ls /lib/modules/$(uname -r)/kernel -R | sort)',
-        'cat /proc/modules | wc -l',
-        'modinfo hidden_mod',
-        'dmesg | grep -i module | tail',
+        { command: 'lsmod | head -20', ...WRONG_TARGET },
+        { command: 'diff <(lsmod | awk "{print \\\\$1}" | sort) <(ls /lib/modules/$(uname -r)/kernel -R | sort)', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /proc/modules | wc -l', ...COUNT_ONLY },
+        { command: 'modinfo hidden_mod', ...WRONG_TARGET },
+        { command: 'dmesg | grep -i module | tail', ...WRONG_TARGET },
       ],
       commandNudge:
         'Ask the running system what modules are loaded, then ask something outside it the same ' +
@@ -337,11 +347,11 @@ export const BELOW_THE_FLOOR_TRUTH: ScenarioTruth = {
         'same interfaces, and that kernel is modified. Three tools with one dependency is one ' +
         'opinion. Their clean results are not evidence of anything.',
       commandOptions: [
-        'systemctl status edr-agent',
-        'cat /var/log/aide/last-check.log | tail -20',
-        'ps -ef | grep -E "av-scan|edr|aide"',
-        'cat /var/log/av/scan-results.log | tail',
-        'aide --check | head -20',
+        { command: 'systemctl status edr-agent', ...STATUS_CHECK },
+        { command: 'cat /var/log/aide/last-check.log | tail -20', ...WRONG_TARGET },
+        { command: 'ps -ef | grep -E "av-scan|edr|aide"', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/av/scan-results.log | tail', ...WRONG_TARGET },
+        { command: 'aide --check | head -20', ...MUTATE },
       ],
       commandNudge:
         'Work out how those three tools get their information, and whether the sources differ.',

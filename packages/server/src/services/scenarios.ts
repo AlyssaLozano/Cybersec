@@ -625,10 +625,48 @@ export function standInsFor(
  * everyone but the lead would just mean nobody investigates.
  */
 export interface TerminalAid {
-  /** Beginner only. Five candidates; one is the useful next step. */
-  options: string[];
+  /**
+   * Beginner only. Five candidates; one is the useful next step.
+   *
+   * Shipped WITHOUT the `correct` flag and without the lessons, because both
+   * are the answer. `commandLesson()` releases them after a choice is made.
+   */
+  options: Array<{ command: string }>;
   /** Intermediate only. What to look for, never how. */
   nudge: string | null;
+}
+
+/** What a chosen option taught. Released after the choice, never before. */
+export interface CommandLesson {
+  command: string;
+  correct: boolean;
+  /** True for the two categories that damage rather than waste. */
+  harmful: boolean;
+  teaches: string;
+}
+
+/**
+ * The lesson for one chosen command.
+ *
+ * Separate from `terminalAidFor` on purpose. A single call returning options
+ * with their verdicts attached would put the answer in the same payload as the
+ * question, and every leak of this kind in this codebase has come from one
+ * function being convenient enough that a route called it too early.
+ */
+export function commandLesson(
+  scenarioId: string,
+  eventId: string,
+  command: string,
+): CommandLesson | null {
+  const entry = eventTruth(scenarioId, eventId);
+  const option = entry?.commandOptions?.find((o) => o.command === command);
+  if (!option) return null;
+  return {
+    command: option.command,
+    correct: option.correct,
+    harmful: option.harmful ?? false,
+    teaches: option.teaches,
+  };
 }
 
 export function terminalAidFor(
@@ -642,7 +680,12 @@ export function terminalAidFor(
 
   const difficulty = runAt ?? scenario.difficulty;
   if (difficulty === 'beginner') {
-    return { options: entry.commandOptions ?? [], nudge: null };
+    // Strip everything except the command text. The flag and the lesson are the
+    // answer, and they travel through commandLesson() after a choice instead.
+    return {
+      options: (entry.commandOptions ?? []).map((o) => ({ command: o.command })),
+      nudge: null,
+    };
   }
   if (difficulty === 'intermediate') {
     return { options: [], nudge: entry.commandNudge ?? null };

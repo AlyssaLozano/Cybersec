@@ -35,6 +35,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'infusion';
 
@@ -191,11 +201,11 @@ export const INFUSION_TRUTH: ScenarioTruth = {
         'four are running on patients. Flat clinical segment with 900 other devices on it and no ' +
         'security monitoring. Raising it. I am not touching the devices.',
       commandOptions: [
-        'grep 203.0.113.150 /var/log/flows.log | tail -20',
-        "awk '$2 ~ /pump/ {print $2, $4}' /var/log/flows.log | sort -u",
-        'ping -c1 10.44.2.31',
-        'cat /etc/inventory/clinical-devices.csv | head',
-        'nmap -sn 10.44.2.0/24',
+        { command: 'grep 203.0.113.150 /var/log/flows.log | tail -20', ...WRONG_TARGET },
+        { command: 'awk \'$2 ~ /pump/ {print $2, $4}\' /var/log/flows.log | sort -u', ...WRONG_TARGET },
+        { command: 'ping -c1 10.44.2.31', ...TOUCH_ATTACKER },
+        { command: 'cat /etc/inventory/clinical-devices.csv | head', correct: true, teaches: CORRECT_STEP },
+        { command: 'nmap -sn 10.44.2.0/24', ...TOUCH_ATTACKER },
       ],
       commandNudge:
         'Establish what those devices are doing clinically before you propose doing anything to ' +
@@ -228,11 +238,11 @@ export const INFUSION_TRUTH: ScenarioTruth = {
         'segment has no direct internet path, so the pumps are the route out. This is not four ' +
         'compromised pumps, it is a compromised segment.',
       commandOptions: [
-        "awk '$4 ~ /pump/ {print $2}' /var/log/flows.log | sort | uniq -c",
-        'grep -c 203.0.113.150 /var/log/flows.log',
-        'netstat -rn',
-        'cat /etc/network/segments.conf',
-        'traceroute 203.0.113.150',
+        { command: 'awk \'$4 ~ /pump/ {print $2}\' /var/log/flows.log | sort | uniq -c', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c 203.0.113.150 /var/log/flows.log', ...COUNT_ONLY },
+        { command: 'netstat -rn', ...WRONG_TARGET },
+        { command: 'cat /etc/network/segments.conf', ...WRONG_TARGET },
+        { command: 'traceroute 203.0.113.150', ...TOUCH_ATTACKER },
       ],
       commandNudge:
         'Check whether anything else on that segment is connecting TO the pumps.',
@@ -264,11 +274,11 @@ export const INFUSION_TRUTH: ScenarioTruth = {
         'security update in 2019, and changing the software voids certification. There is no patch ' +
         'available and there will not be one.',
       commandOptions: [
-        'nmap -sV -p- 10.44.2.31',
-        'curl -s http://10.44.2.31:8080/ | head',
-        'cat /etc/inventory/firmware-versions.csv | grep pump',
-        'grep -i pump /var/log/vendor/advisories.log',
-        'ssh admin@10.44.2.31 uname -a',
+        { command: 'nmap -sV -p- 10.44.2.31', ...TOUCH_ATTACKER },
+        { command: 'curl -s http://10.44.2.31:8080/ | head', ...TOUCH_ATTACKER },
+        { command: 'cat /etc/inventory/firmware-versions.csv | grep pump', ...WRONG_TARGET },
+        { command: 'grep -i pump /var/log/vendor/advisories.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'ssh admin@10.44.2.31 uname -a', ...TOUCH_ATTACKER },
       ],
       commandNudge:
         'Find out whether a patch exists for this device, and what applying one would cost.',
@@ -300,11 +310,11 @@ export const INFUSION_TRUTH: ScenarioTruth = {
         'since the infusions started. The pumps are delivering correctly and no patient is being ' +
         'harmed. That is the first thing anybody will ask.',
       commandOptions: [
-        'cat /var/log/biomed/pump-parameters-4b.csv',
-        "awk -F, '$3!=$4 {print $1}' /var/log/biomed/pump-parameters-4b.csv",
-        'grep -i "parameter change" /var/log/biomed/device-events.log',
-        'cat /var/log/pharmacy/prescriptions-4b.log | head',
-        'systemctl status biomed-collector',
+        { command: 'cat /var/log/biomed/pump-parameters-4b.csv', ...DUMP_ALL },
+        { command: 'awk -F, \'$3!=$4 {print $1}\' /var/log/biomed/pump-parameters-4b.csv', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -i "parameter change" /var/log/biomed/device-events.log', ...WRONG_TARGET },
+        { command: 'cat /var/log/pharmacy/prescriptions-4b.log | head', ...WRONG_TARGET },
+        { command: 'systemctl status biomed-collector', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check the delivery parameters against the prescriptions before anything else.',
@@ -392,11 +402,11 @@ export const INFUSION_TRUTH: ScenarioTruth = {
         'back. Different ward, and the count matching ours is coincidence. Fourteen of fourteen ' +
         'this month were the same. Closing it.',
       commandOptions: [
-        'grep "ward 2A" /var/log/biomed/device-events.log | tail -20',
-        'cat /var/log/biomed/work-orders.log | grep -i safety',
-        "awk '/OFFLINE/ {print $3}' /var/log/biomed/device-events.log | sort | uniq -c",
-        'ping -c1 10.44.1.14',
-        'cat /etc/inventory/clinical-devices.csv | grep 2A',
+        { command: 'grep "ward 2A" /var/log/biomed/device-events.log | tail -20', ...WRONG_TARGET },
+        { command: 'cat /var/log/biomed/work-orders.log | grep -i safety', correct: true, teaches: CORRECT_STEP },
+        { command: 'awk \'/OFFLINE/ {print $3}\' /var/log/biomed/device-events.log | sort | uniq -c', ...WRONG_TARGET },
+        { command: 'ping -c1 10.44.1.14', ...TOUCH_ATTACKER },
+        { command: 'cat /etc/inventory/clinical-devices.csv | grep 2A', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check which ward those devices are on and whether biomed has a work order for it.',

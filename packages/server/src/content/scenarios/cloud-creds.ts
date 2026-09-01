@@ -32,6 +32,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'key-ring';
 
@@ -190,11 +200,11 @@ export const KEY_RING_TRUTH: ScenarioTruth = {
         'fourteen months old with no expiry and has never been rotated. Straight to cloud security ' +
         'and the lead. Assume it has been used.',
       commandOptions: [
-        'aws iam list-access-keys --user-name data-pipeline',
-        'aws iam get-access-key-last-used --access-key-id AKIA-RMG-DATAPIPE',
-        'git log --oneline -5',
-        'aws sts get-caller-identity',
-        'cat ~/.aws/credentials',
+        { command: 'aws iam list-access-keys --user-name data-pipeline', ...WRONG_TARGET },
+        { command: 'aws iam get-access-key-last-used --access-key-id AKIA-RMG-DATAPIPE', correct: true, teaches: CORRECT_STEP },
+        { command: 'git log --oneline -5', ...WRONG_TARGET },
+        { command: 'aws sts get-caller-identity', ...WRONG_TARGET },
+        { command: 'cat ~/.aws/credentials', ...WRONG_TARGET },
       ],
       commandNudge: 'Find out when that key was last used and from where.',
       guidance:
@@ -282,11 +292,11 @@ export const KEY_RING_TRUTH: ScenarioTruth = {
         'for that bucket is under 200 MB a day and all of it internal. No egress restriction and no ' +
         'private endpoint on it.',
       commandOptions: [
-        'aws s3api get-bucket-logging --bucket clinical-export',
-        "awk '$4==\"203.0.113.91\" {sum+=$8} END {print sum}' /var/log/cloud/flow.log",
-        'aws s3 ls s3://clinical-export --summarize',
-        'aws s3api get-bucket-policy --bucket clinical-export',
-        'netstat -an',
+        { command: 'aws s3api get-bucket-logging --bucket clinical-export', ...WRONG_TARGET },
+        { command: 'awk \'$4=="203.0.113.91" {sum+=$8} END {print sum}\' /var/log/cloud/flow.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'aws s3 ls s3://clinical-export --summarize', ...WRONG_TARGET },
+        { command: 'aws s3api get-bucket-policy --bucket clinical-export', ...WRONG_TARGET },
+        { command: 'netstat -an', ...WRONG_TARGET },
       ],
       commandNudge:
         'Total the bytes out of that bucket today and compare against its normal daily figure.',
@@ -371,11 +381,11 @@ export const KEY_RING_TRUTH: ScenarioTruth = {
         'to a reporting job that grew after a documented onboarding last week. Change record and ' +
         'owner both present. Forty-four of forty-five this month were the same. Closing it.',
       commandOptions: [
-        'aws ce get-anomalies --date-interval Start=2026-09-01,End=2026-09-01',
-        'grep onboard /var/log/change-management.log',
-        'aws organizations list-accounts',
-        'aws ce get-cost-and-usage --time-period Start=2026-08-25,End=2026-09-01',
-        'aws sts get-caller-identity',
+        { command: 'aws ce get-anomalies --date-interval Start=2026-09-01,End=2026-09-01', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep onboard /var/log/change-management.log', ...WRONG_TARGET },
+        { command: 'aws organizations list-accounts', ...WRONG_TARGET },
+        { command: 'aws ce get-cost-and-usage --time-period Start=2026-08-25,End=2026-09-01', ...WRONG_TARGET },
+        { command: 'aws sts get-caller-identity', ...WRONG_TARGET },
       ],
       commandNudge: 'Check which account that anomaly is actually in.',
       guidance:

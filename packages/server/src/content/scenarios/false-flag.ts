@@ -36,6 +36,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'wrong-address';
 
@@ -193,11 +203,11 @@ export const WRONG_ADDRESS_TRUTH: ScenarioTruth = {
         'baseline. Completed. Destination is a hosting address, not our replication target. ' +
         'Raising it.',
       commandOptions: [
-        'grep 198.51.100.44 /var/log/flows.log',
-        "awk '$2==\"rmg-res-01\" {sum+=$6} END {print sum}' /var/log/flows.log",
-        'cat /etc/backup/replication-targets.conf',
-        'netstat -an | grep 443',
-        'du -sh /mnt/research',
+        { command: 'grep 198.51.100.44 /var/log/flows.log', ...WRONG_TARGET },
+        { command: 'awk \'$2=="rmg-res-01" {sum+=$6} END {print sum}\' /var/log/flows.log', ...WRONG_TARGET },
+        { command: 'cat /etc/backup/replication-targets.conf', correct: true, teaches: CORRECT_STEP },
+        { command: 'netstat -an | grep 443', ...WRONG_TARGET },
+        { command: 'du -sh /mnt/research', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check where our backup replication actually goes before accepting that explanation.',
@@ -265,11 +275,11 @@ export const WRONG_ADDRESS_TRUTH: ScenarioTruth = {
         'provider reassigns on a rolling basis and this address has been reassigned twice since, ' +
         'most recently eleven days ago. Same number, different tenant. It confirms nothing.',
       commandOptions: [
-        'whois 198.51.100.44',
-        'grep 198.51.100.44 /var/log/feeds/indicators.log',
-        'dig -x 198.51.100.44',
-        'cat /var/log/feeds/report-metadata.json | head -20',
-        'ping -c1 198.51.100.44',
+        { command: 'whois 198.51.100.44', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep 198.51.100.44 /var/log/feeds/indicators.log', ...WRONG_TARGET },
+        { command: 'dig -x 198.51.100.44', ...WRONG_TARGET },
+        { command: 'cat /var/log/feeds/report-metadata.json | head -20', ...WRONG_TARGET },
+        { command: 'ping -c1 198.51.100.44', ...TOUCH_ATTACKER },
       ],
       commandNudge:
         'Check when that address was assigned to its current holder, and when the report was ' +
@@ -303,11 +313,11 @@ export const WRONG_ADDRESS_TRUTH: ScenarioTruth = {
         'people in research computing know it. That is inside knowledge, and it is the first thing ' +
         'tonight that could not have been planted.',
       commandOptions: [
-        'grep rmg-res-01 /var/log/fileaccess.log | head -30',
-        "awk '$4 ~ /research/ {print $1, $6}' /var/log/fileaccess.log | head -20",
-        'ls -la /mnt/research/',
-        'find /mnt/research -maxdepth 2 -type d',
-        'grep -ri "archive-04" /var/wiki/ 2>/dev/null',
+        { command: 'grep rmg-res-01 /var/log/fileaccess.log | head -30', ...WRONG_TARGET },
+        { command: 'awk \'$4 ~ /research/ {print $1, $6}\' /var/log/fileaccess.log | head -20', correct: true, teaches: CORRECT_STEP },
+        { command: 'ls -la /mnt/research/', ...WRONG_TARGET },
+        { command: 'find /mnt/research -maxdepth 2 -type d', ...WRONG_TARGET },
+        { command: 'grep -ri "archive-04" /var/wiki/ 2>/dev/null', ...WRONG_TARGET },
       ],
       commandNudge:
         'Look at how long the session spent finding the data, and whether it made any wrong turns.',
@@ -404,11 +414,11 @@ export const WRONG_ADDRESS_TRUTH: ScenarioTruth = {
         'outward-pointing signals are all plantable and three of them were planted, and that the ' +
         'behavioural evidence says inside knowledge. I am not naming anybody.',
       commandOptions: [
-        'cat /var/log/feeds/quarterly-summary.txt | head -30',
-        'grep -c "sector" /var/log/feeds/quarterly-summary.txt',
-        'ls /var/log/feeds/quarterly-*',
-        'grep -i healthcare /var/log/feeds/quarterly-summary.txt',
-        'diff /var/log/feeds/quarterly-summary.txt /var/log/feeds/quarterly-prev.txt',
+        { command: 'cat /var/log/feeds/quarterly-summary.txt | head -30', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c "sector" /var/log/feeds/quarterly-summary.txt', ...COUNT_ONLY },
+        { command: 'ls /var/log/feeds/quarterly-*', ...WRONG_TARGET },
+        { command: 'grep -i healthcare /var/log/feeds/quarterly-summary.txt', ...WRONG_TARGET },
+        { command: 'diff /var/log/feeds/quarterly-summary.txt /var/log/feeds/quarterly-prev.txt', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check how specific that summary actually is, and how many sectors it names.',

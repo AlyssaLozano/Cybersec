@@ -37,6 +37,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'own-keys';
 
@@ -194,11 +204,11 @@ export const OWN_KEYS_TRUTH: ScenarioTruth = {
         'on the 5th with no change ticket. That is the day before the gap starts. Straight to the ' +
         'lead.',
       commandOptions: [
-        'ls -la /archive/sessions/ | head -20',
-        "awk '{print $1}' /archive/sessions/index.db.txt | sort -u | head -30",
-        'cat /var/log/archive/retention-policy.log | tail',
-        'df -h /archive',
-        'systemctl status session-archive',
+        { command: 'ls -la /archive/sessions/ | head -20', ...WRONG_TARGET },
+        { command: 'awk \'{print $1}\' /archive/sessions/index.db.txt | sort -u | head -30', ...WRONG_TARGET },
+        { command: 'cat /var/log/archive/retention-policy.log | tail', correct: true, teaches: CORRECT_STEP },
+        { command: 'df -h /archive', ...STATUS_CHECK },
+        { command: 'systemctl status session-archive', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check whether the archive index acknowledges the gap, and what changed just before it.',
@@ -259,11 +269,11 @@ export const OWN_KEYS_TRUTH: ScenarioTruth = {
         'touch its permissions. It shows 71 privileged sessions under that account in the window ' +
         'the primary archive says is empty.',
       commandOptions: [
-        'ls -la /compliance-archive/sessions/ | head -20',
-        "awk '$3==\"d.whitfield\" {print $1}' /compliance-archive/sessions/index.txt | sort | uniq -c",
-        'grep -c whitfield /compliance-archive/sessions/index.txt',
-        'lsattr /compliance-archive/sessions/',
-        'cat /etc/archive/compliance-permissions.conf',
+        { command: 'ls -la /compliance-archive/sessions/ | head -20', ...WRONG_TARGET },
+        { command: 'awk \'$3=="d.whitfield" {print $1}\' /compliance-archive/sessions/index.txt | sort | uniq -c', ...WRONG_TARGET },
+        { command: 'grep -c whitfield /compliance-archive/sessions/index.txt', ...COUNT_ONLY },
+        { command: 'lsattr /compliance-archive/sessions/', ...WRONG_TARGET },
+        { command: 'cat /etc/archive/compliance-permissions.conf', correct: true, teaches: CORRECT_STEP },
       ],
       commandNudge:
         'Find out whether any archive of this data exists that the subject cannot administer.',
@@ -296,11 +306,11 @@ export const OWN_KEYS_TRUTH: ScenarioTruth = {
         'of history on that account and every previous session came from the assigned laptop or the ' +
         'jump host. That is a chosen machine. It tells us the machine, not the person.',
       commandOptions: [
-        "awk '$5==\"d.whitfield\" {print $2}' /var/log/switch/sessions.log | sort | uniq -c",
-        'grep RMG-WS-0788 /var/log/switch/flows.log | wc -l',
-        'cat /etc/inventory/workstations.csv | grep 0788',
-        'arp -a | grep 0788',
-        'ping -c1 RMG-WS-0788',
+        { command: 'awk \'$5=="d.whitfield" {print $2}\' /var/log/switch/sessions.log | sort | uniq -c', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep RMG-WS-0788 /var/log/switch/flows.log | wc -l', ...COUNT_ONLY },
+        { command: 'cat /etc/inventory/workstations.csv | grep 0788', ...WRONG_TARGET },
+        { command: 'arp -a | grep 0788', ...STATUS_CHECK },
+        { command: 'ping -c1 RMG-WS-0788', ...TOUCH_ATTACKER },
       ],
       commandNudge:
         'Check where those sessions came from, using records the subject does not administer.',
@@ -394,11 +404,11 @@ export const OWN_KEYS_TRUTH: ScenarioTruth = {
         'records, and the platform error log records the gap itself. That is the opposite of what ' +
         'we are looking at. Thirty-nine of forty this month were the same. Closing it.',
       commandOptions: [
-        'grep -c "ingestion error" /var/log/logging-platform/errors.log',
-        'grep -i migration /var/log/change-management.log',
-        "awk '/ingestion error/ {print $5}' /var/log/logging-platform/errors.log | sort | uniq -c",
-        'cat /var/log/logging-platform/errors.log | tail -20',
-        'systemctl status log-ingest',
+        { command: 'grep -c "ingestion error" /var/log/logging-platform/errors.log', ...COUNT_ONLY },
+        { command: 'grep -i migration /var/log/change-management.log', ...WRONG_TARGET },
+        { command: 'awk \'/ingestion error/ {print $5}\' /var/log/logging-platform/errors.log | sort | uniq -c', ...WRONG_TARGET },
+        { command: 'cat /var/log/logging-platform/errors.log | tail -20', correct: true, teaches: CORRECT_STEP },
+        { command: 'systemctl status log-ingest', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check whether the platform recorded this gap itself, and whether anybody owns the change.',

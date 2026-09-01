@@ -33,6 +33,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'long-weather';
 
@@ -192,11 +202,11 @@ export const LONG_WEATHER_TRUTH: ScenarioTruth = {
         'was added on 14 June by an account that no longer exists and has no change ticket. Raising ' +
         'it rather than closing it as migration breakage.',
       commandOptions: [
-        'grep 198.51.100.203 /var/log/firewall/blocked.log',
-        'grep -B2 -A2 "198.51.100.203" /etc/firewall/rules.old',
-        'iptables -L -n | head -40',
-        'systemctl status firewalld',
-        'cat /var/log/firewall/blocked.log | wc -l',
+        { command: 'grep 198.51.100.203 /var/log/firewall/blocked.log', ...WRONG_TARGET },
+        { command: 'grep -B2 -A2 "198.51.100.203" /etc/firewall/rules.old', correct: true, teaches: CORRECT_STEP },
+        { command: 'iptables -L -n | head -40', ...WRONG_TARGET },
+        { command: 'systemctl status firewalld', ...STATUS_CHECK },
+        { command: 'cat /var/log/firewall/blocked.log | wc -l', ...COUNT_ONLY },
       ],
       commandNudge:
         'Find the old rule that used to permit this and check who added it and when.',
@@ -228,11 +238,11 @@ export const LONG_WEATHER_TRUTH: ScenarioTruth = {
         'thresholds. Our flow retention is ninety days, so 14 June is where my data starts, not ' +
         'where this started.',
       commandOptions: [
-        "awk '/198.51.100.203/ {print $1, $2}' /var/log/flows.log",
-        'grep -c 198.51.100.203 /var/log/flows.log',
-        'netstat -an | grep 443',
-        'tcpdump -r /var/cap/print02.pcap -c 20',
-        'dig -x 198.51.100.203',
+        { command: 'awk \'/198.51.100.203/ {print $1, $2}\' /var/log/flows.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c 198.51.100.203 /var/log/flows.log', ...COUNT_ONLY },
+        { command: 'netstat -an | grep 443', ...WRONG_TARGET },
+        { command: 'tcpdump -r /var/cap/print02.pcap -c 20', ...WRONG_TARGET },
+        { command: 'dig -x 198.51.100.203', ...WRONG_TARGET },
       ],
       commandNudge:
         'Work out the interval between connections, and check how far back your records go.',
@@ -264,11 +274,11 @@ export const LONG_WEATHER_TRUTH: ScenarioTruth = {
         'release, signature is valid. Registered as SYSTEM on 14 June, same day as the firewall ' +
         'rule. The file is not the problem. Where it is and who put it there is.',
       commandOptions: [
-        'schtasks /query /fo LIST /v | grep -A5 PrintSpool',
-        'sigcheck C:\\ProgramData\\PrintSpoolSvc\\*.exe',
-        'strings C:\\ProgramData\\PrintSpoolSvc\\svc.exe | head',
-        'dir C:\\ProgramData\\PrintSpoolSvc',
-        'tasklist /svc',
+        { command: 'schtasks /query /fo LIST /v | grep -A5 PrintSpool', ...WRONG_TARGET },
+        { command: 'sigcheck C:\\\\ProgramData\\\\PrintSpoolSvc\\\\*.exe', correct: true, teaches: CORRECT_STEP },
+        { command: 'strings C:\\\\ProgramData\\\\PrintSpoolSvc\\\\svc.exe | head', ...WRONG_TARGET },
+        { command: 'dir C:\\\\ProgramData\\\\PrintSpoolSvc', ...WRONG_TARGET },
+        { command: 'tasklist /svc', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check where that binary normally lives, and compare it to where this copy is running from.',
@@ -299,11 +309,11 @@ export const LONG_WEATHER_TRUTH: ScenarioTruth = {
         'domain controllers and one is the finance file server. It has those rights because of a ' +
         '2019 migration.',
       commandOptions: [
-        'grep rmg-svc-print /var/log/auth.log',
-        "awk '$5==\"rmg-svc-print\" {print $1, $9}' /var/log/auth-archive.log | sort -u",
-        'net user rmg-svc-print /domain',
-        'last | grep print',
-        'cat /etc/group | grep print',
+        { command: 'grep rmg-svc-print /var/log/auth.log', ...WRONG_TARGET },
+        { command: 'awk \'$5=="rmg-svc-print" {print $1, $9}\' /var/log/auth-archive.log | sort -u', correct: true, teaches: CORRECT_STEP },
+        { command: 'net user rmg-svc-print /domain', ...WRONG_TARGET },
+        { command: 'last | grep print', ...WRONG_TARGET },
+        { command: 'cat /etc/group | grep print', ...WRONG_TARGET },
       ],
       commandNudge:
         'List every host that account has authenticated to, and check what it is supposed to reach.',
@@ -367,11 +377,11 @@ export const LONG_WEATHER_TRUTH: ScenarioTruth = {
         'destination. I cannot tell you what was in it: file access logging on that host was not ' +
         'turned on until 20 August.',
       commandOptions: [
-        "awk '$4 ~ /198.51.100.203/ && $6 > 1000000' /var/log/flows.log",
-        'grep "2 Aug" /var/log/flows-archive.log | grep rmg-fin-01',
-        'ls -la /var/log/audit/',
-        'du -sh /mnt/finance',
-        'auditctl -l',
+        { command: 'awk \'$4 ~ /198.51.100.203/ && $6 > 1000000\' /var/log/flows.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep "2 Aug" /var/log/flows-archive.log | grep rmg-fin-01', ...WRONG_TARGET },
+        { command: 'ls -la /var/log/audit/', ...WRONG_TARGET },
+        { command: 'du -sh /mnt/finance', ...WRONG_TARGET },
+        { command: 'auditctl -l', ...WRONG_TARGET },
       ],
       commandNudge:
         'Find the largest transfer to that destination, and then check what logging was on that ' +
@@ -402,11 +412,11 @@ export const LONG_WEATHER_TRUTH: ScenarioTruth = {
         'exception list and the new agent has not imported exceptions yet. Twenty-one of twenty-two ' +
         'this month were the same thing. Not related, closing it.',
       commandOptions: [
-        'grep RMG-WS-0140 /var/log/edr/quarantine.log',
-        'cat /etc/edr/exceptions.d/helpdesk.conf',
-        'grep -c quarantine /var/log/edr/quarantine.log',
-        'systemctl status edr-agent',
-        'ls -la /opt/helpdesk/tools/',
+        { command: 'grep RMG-WS-0140 /var/log/edr/quarantine.log', ...WRONG_TARGET },
+        { command: 'cat /etc/edr/exceptions.d/helpdesk.conf', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c quarantine /var/log/edr/quarantine.log', ...COUNT_ONLY },
+        { command: 'systemctl status edr-agent', ...STATUS_CHECK },
+        { command: 'ls -la /opt/helpdesk/tools/', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check whether that tool is on an approved exception list and whether the new agent has it.',

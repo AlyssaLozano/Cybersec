@@ -37,6 +37,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'all-at-once';
 
@@ -197,11 +207,11 @@ export const ALL_AT_ONCE_TRUTH: ScenarioTruth = {
         'holds no data, has no authentication and no route inside. Impact is reputational. Raising ' +
         'it and handing it to the hosting agency.',
       commandOptions: [
-        'curl -sI https://www.example-rmg.test',
-        "awk '{print $1}' /var/log/cdn/access.log | sort -u | wc -l",
-        'dig +short www.example-rmg.test',
-        'cat /etc/hosting/agency-contact.txt',
-        'ping -c2 www.example-rmg.test',
+        { command: 'curl -sI https://www.example-rmg.test', ...TOUCH_ATTACKER },
+        { command: 'awk \'{print $1}\' /var/log/cdn/access.log | sort -u | wc -l', ...WRONG_TARGET },
+        { command: 'dig +short www.example-rmg.test', ...WRONG_TARGET },
+        { command: 'cat /etc/hosting/agency-contact.txt', correct: true, teaches: CORRECT_STEP },
+        { command: 'ping -c2 www.example-rmg.test', ...TOUCH_ATTACKER },
       ],
       commandNudge: 'Find out what that site actually holds and whether it connects to anything.',
       guidance:
@@ -232,11 +242,11 @@ export const ALL_AT_ONCE_TRUTH: ScenarioTruth = {
         'limiting is holding. Nine patients need owning and each account only reaches its own ' +
         'records.',
       commandOptions: [
-        'grep -c "login failed" /var/log/portal/auth.log',
-        "awk '/login ok/ {print $5}' /var/log/portal/auth.log | sort -u",
-        "awk '{print $1}' /var/log/portal/auth.log | sort -u | wc -l",
-        'systemctl status rate-limiter',
-        'grep -c 200 /var/log/portal/access.log',
+        { command: 'grep -c "login failed" /var/log/portal/auth.log', ...COUNT_ONLY },
+        { command: 'awk \'/login ok/ {print $5}\' /var/log/portal/auth.log | sort -u', correct: true, teaches: CORRECT_STEP },
+        { command: 'awk \'{print $1}\' /var/log/portal/auth.log | sort -u | wc -l', ...WRONG_TARGET },
+        { command: 'systemctl status rate-limiter', ...STATUS_CHECK },
+        { command: 'grep -c 200 /var/log/portal/access.log', ...COUNT_ONLY },
       ],
       commandNudge:
         'Work out the success rate, and what one compromised patient account can actually reach.',
@@ -268,11 +278,11 @@ export const ALL_AT_ONCE_TRUTH: ScenarioTruth = {
         'agents on all four stopped reporting at 13:09. Nothing has run yet. This is the one with a ' +
         'clock.',
       commandOptions: [
-        'schtasks /query /fo LIST /v | grep -B3 -A6 15:00',
-        'ls -la /opt/clinical/tmp/',
-        'grep -c NO_CHECKIN /var/log/edr/console.log',
-        'ps -ef | grep -i clinical',
-        'systemctl status edr-agent',
+        { command: 'schtasks /query /fo LIST /v | grep -B3 -A6 15:00', correct: true, teaches: CORRECT_STEP },
+        { command: 'ls -la /opt/clinical/tmp/', ...WRONG_TARGET },
+        { command: 'grep -c NO_CHECKIN /var/log/edr/console.log', ...COUNT_ONLY },
+        { command: 'ps -ef | grep -i clinical', ...WRONG_TARGET },
+        { command: 'systemctl status edr-agent', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check whether it has run yet, and what is scheduled to run it.',
@@ -302,11 +312,11 @@ export const ALL_AT_ONCE_TRUTH: ScenarioTruth = {
         'same age and batch, so correlated failure is normal. Not security. Handing it to platform ' +
         'and taking it off our board.',
       commandOptions: [
-        'cat /var/log/storage/array-health.log | tail -20',
-        "awk '/FAILED/ {print $1, $4}' /var/log/storage/array-health.log",
-        'smartctl -a /dev/sdc | head -20',
-        'cat /var/log/storage/vendor-case.txt',
-        'df -h /mnt/imaging',
+        { command: 'cat /var/log/storage/array-health.log | tail -20', ...WRONG_TARGET },
+        { command: 'awk \'/FAILED/ {print $1, $4}\' /var/log/storage/array-health.log', ...WRONG_TARGET },
+        { command: 'smartctl -a /dev/sdc | head -20', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/storage/vendor-case.txt', ...DUMP_ALL },
+        { command: 'df -h /mnt/imaging', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check how old those drives are and whether they came from the same batch.',
@@ -368,11 +378,11 @@ export const ALL_AT_ONCE_TRUTH: ScenarioTruth = {
         'route. I cannot tell you whether that is the vendor engineer, a compromised vendor ' +
         'credential, or somebody riding the session.',
       commandOptions: [
-        'grep -i "support session" /var/log/remote-access.log',
-        "awk '/vendor-svc/ {print $1, $6}' /var/log/auth.log | tail -20",
-        'grep 11:40 /var/log/remote-access.log',
-        'cat /var/log/change-management.log | grep -i upgrade',
-        'who',
+        { command: 'grep -i "support session" /var/log/remote-access.log', ...WRONG_TARGET },
+        { command: 'awk \'/vendor-svc/ {print $1, $6}\' /var/log/auth.log | tail -20', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep 11:40 /var/log/remote-access.log', ...WRONG_TARGET },
+        { command: 'cat /var/log/change-management.log | grep -i upgrade', ...WRONG_TARGET },
+        { command: 'who', ...STATUS_CHECK },
       ],
       commandNudge:
         'Find which account wrote those files and how that account got onto the servers.',
@@ -401,11 +411,11 @@ export const ALL_AT_ONCE_TRUTH: ScenarioTruth = {
         'it, thought the freeze lifted at noon, and has the ticket. Process failure with a named ' +
         'owner, not a security incident. Closing it and raising it with change management.',
       commandOptions: [
-        'grep 12:50 /var/log/firewall/changes.log',
-        'cat /var/log/change-management.log | grep -i freeze',
-        'iptables -L -n | head -30',
-        'diff /etc/firewall/rules.prev /etc/firewall/rules',
-        'git -C /etc/firewall log --oneline -5',
+        { command: 'grep 12:50 /var/log/firewall/changes.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/change-management.log | grep -i freeze', ...WRONG_TARGET },
+        { command: 'iptables -L -n | head -30', ...WRONG_TARGET },
+        { command: 'diff /etc/firewall/rules.prev /etc/firewall/rules', ...WRONG_TARGET },
+        { command: 'git -C /etc/firewall log --oneline -5', ...WRONG_TARGET },
       ],
       commandNudge:
         'Find out who pushed that change and whether anybody has asked them about it.',

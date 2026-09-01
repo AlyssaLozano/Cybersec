@@ -35,6 +35,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'change-of-bank';
 
@@ -192,11 +202,11 @@ export const CHANGE_OF_BANK_TRUTH: ScenarioTruth = {
         'that is not the supplier. Raising it and asking finance to call the bank now, before we ' +
         'understand anything.',
       commandOptions: [
-        'grep 88214 /var/log/finance/payments.log',
-        "awk '/88214/ {print $1, $5, $7}' /var/log/finance/payments.log",
-        'cat /var/log/servicedesk/tickets.log | grep -i 88214',
-        'grep -i supplier /var/log/finance/audit.log | tail',
-        'date',
+        { command: 'grep 88214 /var/log/finance/payments.log', ...WRONG_TARGET },
+        { command: 'awk \'/88214/ {print $1, $5, $7}\' /var/log/finance/payments.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/servicedesk/tickets.log | grep -i 88214', ...WRONG_TARGET },
+        { command: 'grep -i supplier /var/log/finance/audit.log | tail', ...WRONG_TARGET },
+        { command: 'date', ...STATUS_CHECK },
       ],
       commandNudge:
         'Establish whether the payment actually left and where it went, before anything else.',
@@ -230,11 +240,11 @@ export const CHANGE_OF_BANK_TRUTH: ScenarioTruth = {
         'amount, in their usual style. Nothing was spoofed and the gateway was right to pass it. ' +
         'Their mailbox is compromised, not ours, and we cannot see their side.',
       commandOptions: [
-        'grep -A5 88214 /var/log/mail/archive.log | head -40',
-        "awk '/88214/ {print $3, $5}' /var/log/mail/archive.log",
-        'grep -i "dmarc\\|spf\\|dkim" /var/log/mail/auth-results.log | tail',
-        'grep -c 88214 /var/log/mail/archive.log',
-        'cat /var/log/mail/gateway.log | grep 88214',
+        { command: 'grep -A5 88214 /var/log/mail/archive.log | head -40', correct: true, teaches: CORRECT_STEP },
+        { command: 'awk \'/88214/ {print $3, $5}\' /var/log/mail/archive.log', ...WRONG_TARGET },
+        { command: 'grep -i "dmarc\\\\|spf\\\\|dkim" /var/log/mail/auth-results.log | tail', ...WRONG_TARGET },
+        { command: 'grep -c 88214 /var/log/mail/archive.log', ...COUNT_ONLY },
+        { command: 'cat /var/log/mail/gateway.log | grep 88214', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check whether that message is a new message or a reply inside an existing thread.',
@@ -353,11 +363,11 @@ export const CHANGE_OF_BANK_TRUTH: ScenarioTruth = {
         'connected it. The third is in the finance queue waiting for its callback. Stop that one ' +
         'now. Three supplier mailboxes means this is a campaign, not one vendor.',
       commandOptions: [
-        'grep -il "bank details" /var/log/mail/archive/*.eml | head',
-        "awk '/account change|bank detail/ {print $1, $3}' /var/log/mail/archive.log",
-        'grep -c "bank detail" /var/log/mail/archive.log',
-        'grep -i "change request" /var/log/finance/queue.log',
-        'cat /var/log/finance/pending.log | tail -20',
+        { command: 'grep -il "bank details" /var/log/mail/archive/*.eml | head', correct: true, teaches: CORRECT_STEP },
+        { command: 'awk \'/account change|bank detail/ {print $1, $3}\' /var/log/mail/archive.log', ...WRONG_TARGET },
+        { command: 'grep -c "bank detail" /var/log/mail/archive.log', ...COUNT_ONLY },
+        { command: 'grep -i "change request" /var/log/finance/queue.log', ...WRONG_TARGET },
+        { command: 'cat /var/log/finance/pending.log | tail -20', ...WRONG_TARGET },
       ],
       commandNudge:
         'Search the mail archive for the same request language across every supplier, not just this ' +
@@ -388,11 +398,11 @@ export const CHANGE_OF_BANK_TRUTH: ScenarioTruth = {
         'lookalike-domain phishing, none connected to 88214 or any real thread. That is the gateway ' +
         'working, and it is the opposite of what got us. Closing it.',
       commandOptions: [
-        'grep -c BLOCKED /var/log/mail/gateway.log',
-        "awk '/BLOCKED/ {print $6}' /var/log/mail/gateway.log | sort | uniq -c | head",
-        'grep 88214 /var/log/mail/gateway.log',
-        'cat /var/log/mail/monthly-summary.log',
-        'systemctl status mailgw',
+        { command: 'grep -c BLOCKED /var/log/mail/gateway.log', ...COUNT_ONLY },
+        { command: 'awk \'/BLOCKED/ {print $6}\' /var/log/mail/gateway.log | sort | uniq -c | head', ...WRONG_TARGET },
+        { command: 'grep 88214 /var/log/mail/gateway.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/mail/monthly-summary.log', ...DUMP_ALL },
+        { command: 'systemctl status mailgw', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check whether any of those blocked messages relate to the invoice you are working on.',

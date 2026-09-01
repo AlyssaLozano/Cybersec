@@ -22,6 +22,7 @@ import {
   eventsFor,
   getScenario,
   guidanceFor,
+  commandLesson,
   scoreClaim,
   standInsFor,
   terminalAidFor,
@@ -509,8 +510,13 @@ describe('terminal help is a function of difficulty', () => {
       expect(entry.commandOptions!.length, `${entry.eventId}`).toBe(5);
       // A menu where four options are obviously silly is a button with extra
       // steps, so every candidate has to be a real command somebody might run.
-      expect(entry.commandOptions!.every((c) => c.trim().length > 6)).toBe(true);
-      expect(new Set(entry.commandOptions!).size).toBe(5);
+      expect(entry.commandOptions!.every((c) => c.command.trim().length > 6)).toBe(true);
+      expect(new Set(entry.commandOptions!.map((c) => c.command)).size).toBe(5);
+      // Exactly one is the answer, and every one of the five says what it
+      // taught. A distractor that teaches nothing is a wrong answer with no
+      // lesson in it, which is the whole reason the format exists.
+      expect(entry.commandOptions!.filter((c) => c.correct)).toHaveLength(1);
+      expect(entry.commandOptions!.every((c) => c.teaches.length > 40)).toBe(true);
     }
   });
 
@@ -528,6 +534,52 @@ describe('terminal help is a function of difficulty', () => {
       expect(terminalAidFor(ID, 'ev.1', hard).options).toEqual([]);
       expect(terminalAidFor(ID, 'ev.1', hard).nudge).toBeNull();
     }
+  });
+
+  it('ships the candidates without the answer attached', () => {
+    // The flag and the lesson ARE the answer. Every leak of this kind in this
+    // codebase has come from one convenient function being called too early, so
+    // the options payload is asserted to carry the command text and nothing else.
+    const aid = terminalAidFor(ID, 'ev.1', 'beginner');
+    expect(aid.options.length).toBe(5);
+    for (const option of aid.options) {
+      expect(Object.keys(option)).toEqual(['command']);
+    }
+    const blob = JSON.stringify(aid);
+    for (const forbidden of ['correct', 'teaches', 'harmful']) {
+      expect(blob).not.toContain(forbidden);
+    }
+  });
+
+  it('releases the lesson only once a command has been chosen', () => {
+    const entry = truthFor(ID)!.events.find((e) => e.commandOptions)!;
+    const right = entry.commandOptions!.find((o) => o.correct)!;
+    const wrong = entry.commandOptions!.find((o) => !o.correct)!;
+
+    expect(commandLesson(ID, entry.eventId, right.command)).toMatchObject({ correct: true });
+    const lesson = commandLesson(ID, entry.eventId, wrong.command)!;
+    expect(lesson.correct).toBe(false);
+    // A wrong answer has to say what it cost, not merely that it was wrong.
+    expect(lesson.teaches.length).toBeGreaterThan(40);
+    // A command nobody offered has no lesson to give.
+    expect(commandLesson(ID, entry.eventId, 'rm -rf /')).toBeNull();
+  });
+
+  it('marks the two damaging categories as harmful rather than merely wrong', () => {
+    // Wasting a minute and destroying the evidence are both wrong answers and
+    // they are not the same wrong answer.
+    let harmful = 0;
+    for (const truth of SCENARIO_TRUTH) {
+      for (const entry of truth.events) {
+        for (const option of entry.commandOptions ?? []) {
+          if (option.harmful) {
+            harmful += 1;
+            expect(option.correct).toBe(false);
+          }
+        }
+      }
+    }
+    expect(harmful).toBeGreaterThan(0);
   });
 
   it('gives the lead a coaching line only when the run is set to beginner', () => {

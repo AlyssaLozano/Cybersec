@@ -31,6 +31,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'long-notice';
 
@@ -187,11 +197,11 @@ export const LONG_NOTICE_TRUTH: ScenarioTruth = {
         'Rule is noisy, 209 of 214 closed this month. I am raising it anyway because the volume is ' +
         'unusual for the account and I cannot see what else that account did this morning.',
       commandOptions: [
-        'grep osei /var/log/dlp.log',
-        "awk '$3==\"k.osei\"' /var/log/fileaccess.log | wc -l",
-        'lsblk',
-        'cat /var/log/dlp.log | tail -50',
-        'dmesg | grep -i usb',
+        { command: 'grep osei /var/log/dlp.log', ...WRONG_TARGET },
+        { command: 'awk \'$3=="k.osei"\' /var/log/fileaccess.log | wc -l', correct: true, teaches: CORRECT_STEP },
+        { command: 'lsblk', ...WRONG_TARGET },
+        { command: 'cat /var/log/dlp.log | tail -50', ...WRONG_TARGET },
+        { command: 'dmesg | grep -i usb', ...WRONG_TARGET },
       ],
       commandNudge: 'Look at what that account did in the hours before the copy, not just the copy.',
       guidance:
@@ -218,11 +228,11 @@ export const LONG_NOTICE_TRUTH: ScenarioTruth = {
         '4,190 files opened between 06:40 and 07:56 against a daily average of 104. One per second, ' +
         'sequential, nothing held open. That is a copy operation, not somebody reading.',
       commandOptions: [
-        "awk '$3==\"k.osei\"' /var/log/fileaccess.log | wc -l",
-        "awk '$3==\"k.osei\" {print $1}' /var/log/fileaccess.log | uniq -c",
-        'ls -la /mnt/research/',
-        'grep -c osei /var/log/auth.log',
-        'find /mnt/research -mmin -400',
+        { command: 'awk \'$3=="k.osei"\' /var/log/fileaccess.log | wc -l', ...COUNT_ONLY },
+        { command: 'awk \'$3=="k.osei" {print $1}\' /var/log/fileaccess.log | uniq -c', correct: true, teaches: CORRECT_STEP },
+        { command: 'ls -la /mnt/research/', ...WRONG_TARGET },
+        { command: 'grep -c osei /var/log/auth.log', ...COUNT_ONLY },
+        { command: 'find /mnt/research -mmin -400', ...WRONG_TARGET },
       ],
       commandNudge:
         'Count is one thing. Look at the timestamps and work out the rate they were opened at.',
@@ -279,11 +289,11 @@ export const LONG_NOTICE_TRUTH: ScenarioTruth = {
         'destination, against a 60 MB daily baseline for that workstation. I can prove the volume ' +
         'and the destination. I cannot prove the contents from flow data.',
       commandOptions: [
-        'grep 198.51.100.24 /var/log/flows.log',
-        "awk '$2==\"RMG-WS-4417\" {sum+=$6} END {print sum}' /var/log/flows.log",
-        'netstat -an',
-        'tcpdump -r /var/cap/today.pcap -c 20',
-        'dig 198.51.100.24',
+        { command: 'grep 198.51.100.24 /var/log/flows.log', ...WRONG_TARGET },
+        { command: 'awk \'$2=="RMG-WS-4417" {sum+=$6} END {print sum}\' /var/log/flows.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'netstat -an', ...WRONG_TARGET },
+        { command: 'tcpdump -r /var/cap/today.pcap -c 20', ...WRONG_TARGET },
+        { command: 'dig 198.51.100.24', ...WRONG_TARGET },
       ],
       commandNudge:
         'Total the bytes out of that workstation for the morning and compare it to its baseline.',
@@ -367,11 +377,11 @@ export const LONG_NOTICE_TRUTH: ScenarioTruth = {
         'was extended Monday. Rule has fired 61 times this month and closed 61 times. Not related, ' +
         'closing it.',
       commandOptions: [
-        'cat /var/log/backup/nightly.log | tail -30',
-        'grep retention /var/log/change-management.log',
-        'du -sh /mnt/research',
-        'df -h',
-        'systemctl status backup.timer',
+        { command: 'cat /var/log/backup/nightly.log | tail -30', ...WRONG_TARGET },
+        { command: 'grep retention /var/log/change-management.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'du -sh /mnt/research', ...WRONG_TARGET },
+        { command: 'df -h', ...STATUS_CHECK },
+        { command: 'systemctl status backup.timer', ...STATUS_CHECK },
       ],
       commandNudge: 'Something changed on that server this week. Find out what and when.',
       guidance:

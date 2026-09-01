@@ -37,6 +37,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'cry-wolf';
 
@@ -190,11 +200,11 @@ export const CRY_WOLF_TRUTH: ScenarioTruth = {
         'leaves 430 across 340 rules. I am not reading eleven thousand alerts. I am going to ' +
         'account for the four causes and work what is left.',
       commandOptions: [
-        "awk '{print $4}' /var/log/queue/alerts.log | sort | uniq -c | sort -rn | head",
-        'grep -c . /var/log/queue/alerts.log',
-        'tail -100 /var/log/queue/alerts.log',
-        'cat /var/log/queue/nightly-summary.json',
-        'systemctl status alert-pipeline',
+        { command: 'awk \'{print $4}\' /var/log/queue/alerts.log | sort | uniq -c | sort -rn | head', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c . /var/log/queue/alerts.log', ...COUNT_ONLY },
+        { command: 'tail -100 /var/log/queue/alerts.log', ...DUMP_ALL },
+        { command: 'cat /var/log/queue/nightly-summary.json', ...DUMP_ALL },
+        { command: 'systemctl status alert-pipeline', ...STATUS_CHECK },
       ],
       commandNudge:
         'Group the queue by rule before you open anything, and see how the volume distributes.',
@@ -221,11 +231,11 @@ export const CRY_WOLF_TRUTH: ScenarioTruth = {
         'validation alert every reconnect. 4,100 alerts, all correct, all the same fact. Renewal ' +
         'missed its window. Accounting for the whole class and getting the certificate renewed.',
       commandOptions: [
-        'openssl s_client -connect internal-svc:443 2>/dev/null | openssl x509 -noout -dates',
-        "awk '/TLS validation/ {print $6}' /var/log/queue/alerts.log | sort -u | wc -l",
-        'grep -c "TLS validation" /var/log/queue/alerts.log',
-        'cat /var/log/pki/renewal-schedule.txt',
-        'systemctl status internal-svc',
+        { command: 'openssl s_client -connect internal-svc:443 2>/dev/null | openssl x509 -noout -dates', ...WRONG_TARGET },
+        { command: 'awk \'/TLS validation/ {print $6}\' /var/log/queue/alerts.log | sort -u | wc -l', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c "TLS validation" /var/log/queue/alerts.log', ...COUNT_ONLY },
+        { command: 'cat /var/log/pki/renewal-schedule.txt', ...DUMP_ALL },
+        { command: 'systemctl status internal-svc', ...STATUS_CHECK },
       ],
       commandNudge:
         'Find out how many distinct facts those four thousand alerts actually describe.',
@@ -254,11 +264,11 @@ export const CRY_WOLF_TRUTH: ScenarioTruth = {
         'June platform migration. Source address matches the scanner inventory. Accounting for the ' +
         'class and getting the suppression restored.',
       commandOptions: [
-        "awk '/port scan/ {print $3}' /var/log/queue/alerts.log | sort | uniq -c | sort -rn | head",
-        'cat /etc/scanner/inventory.txt',
-        'grep -c 10.20.4.11 /var/log/queue/alerts.log',
-        'cat /etc/siem/suppressions.conf | grep -i scan',
-        'systemctl status vuln-scanner',
+        { command: 'awk \'/port scan/ {print $3}\' /var/log/queue/alerts.log | sort | uniq -c | sort -rn | head', ...WRONG_TARGET },
+        { command: 'cat /etc/scanner/inventory.txt', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c 10.20.4.11 /var/log/queue/alerts.log', ...COUNT_ONLY },
+        { command: 'cat /etc/siem/suppressions.conf | grep -i scan', ...WRONG_TARGET },
+        { command: 'systemctl status vuln-scanner', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check whether that source address belongs to something of ours before dismissing it.',
@@ -345,11 +355,11 @@ export const CRY_WOLF_TRUTH: ScenarioTruth = {
         'at 01:19, mailbox rule at 01:24, permission grant at 01:31. Four different rules, none in ' +
         'the top four. That is a compromise.',
       commandOptions: [
-        "awk '$6==\"r.kowalczyk\" {print $1, $4}' /var/log/queue/alerts.log",
-        "awk '{print $6}' /var/log/queue/alerts.log | sort | uniq -c | sort -rn | head -20",
-        'grep kowalczyk /var/log/auth.log',
-        'grep -c kowalczyk /var/log/queue/alerts.log',
-        'last | grep kowalczyk',
+        { command: 'awk \'$6=="r.kowalczyk" {print $1, $4}\' /var/log/queue/alerts.log', ...WRONG_TARGET },
+        { command: 'awk \'{print $6}\' /var/log/queue/alerts.log | sort | uniq -c | sort -rn | head -20', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep kowalczyk /var/log/auth.log', ...WRONG_TARGET },
+        { command: 'grep -c kowalczyk /var/log/queue/alerts.log', ...COUNT_ONLY },
+        { command: 'last | grep kowalczyk', ...WRONG_TARGET },
       ],
       commandNudge:
         'Once the big causes are removed, group what is left by account rather than by rule.',

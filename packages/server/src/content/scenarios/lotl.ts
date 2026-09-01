@@ -34,6 +34,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'nothing-installed';
 
@@ -192,11 +202,11 @@ export const NOTHING_INSTALLED_TRUTH: ScenarioTruth = {
         'templates. Raising it anyway: a spreadsheet starting an execution engine is a document ' +
         'that contained instructions.',
       commandOptions: [
-        'grep -B2 -A5 "wscript" /var/log/edr/process.log',
-        "awk '/wscript|cscript/ {print $2, $6}' /var/log/edr/process.log | tail -20",
-        'ps -ef | grep office',
-        'sigcheck C:\\Windows\\System32\\wscript.exe',
-        'ls -la /home/finance/Documents/',
+        { command: 'grep -B2 -A5 "wscript" /var/log/edr/process.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'awk \'/wscript|cscript/ {print $2, $6}\' /var/log/edr/process.log | tail -20', ...WRONG_TARGET },
+        { command: 'ps -ef | grep office', ...WRONG_TARGET },
+        { command: 'sigcheck C:\\\\Windows\\\\System32\\\\wscript.exe', ...WRONG_TARGET },
+        { command: 'ls -la /home/finance/Documents/', ...WRONG_TARGET },
       ],
       commandNudge: 'Look at what started that process, not at the process itself.',
       guidance:
@@ -227,11 +237,11 @@ export const NOTHING_INSTALLED_TRUTH: ScenarioTruth = {
         'because certificate enrolment needs it. Nothing was bypassed. It was used for something ' +
         'other than its job.',
       commandOptions: [
-        'grep -i certutil /var/log/edr/process.log',
-        "awk '/certutil/ {print $0}' /var/log/edr/process.log | tail",
-        'sigcheck C:\\Windows\\System32\\certutil.exe',
-        'cat /etc/appcontrol/allowlist.conf | grep -i cert',
-        'ls -la /tmp/',
+        { command: 'grep -i certutil /var/log/edr/process.log', ...WRONG_TARGET },
+        { command: 'awk \'/certutil/ {print $0}\' /var/log/edr/process.log | tail', correct: true, teaches: CORRECT_STEP },
+        { command: 'sigcheck C:\\\\Windows\\\\System32\\\\certutil.exe', ...WRONG_TARGET },
+        { command: 'cat /etc/appcontrol/allowlist.conf | grep -i cert', ...WRONG_TARGET },
+        { command: 'ls -la /tmp/', ...WRONG_TARGET },
       ],
       commandNudge:
         'Read the arguments that tool was given, not just which tool was used.',
@@ -261,11 +271,11 @@ export const NOTHING_INSTALLED_TRUTH: ScenarioTruth = {
         'a system scripting binary against a file in a user temp directory, every ninety minutes, ' +
         'as the logged-on user. Real update tasks run as SYSTEM and do not point at user temp.',
       commandOptions: [
-        'schtasks /query /fo LIST /v | grep -B3 -A8 Update',
-        "awk '/schtasks|Task Registered/ {print $1, $7}' /var/log/audit/audit.log",
-        'ls -la /var/spool/cron/',
-        'systemctl list-timers',
-        'cat /etc/crontab',
+        { command: 'schtasks /query /fo LIST /v | grep -B3 -A8 Update', correct: true, teaches: CORRECT_STEP },
+        { command: 'awk \'/schtasks|Task Registered/ {print $1, $7}\' /var/log/audit/audit.log', ...WRONG_TARGET },
+        { command: 'ls -la /var/spool/cron/', ...WRONG_TARGET },
+        { command: 'systemctl list-timers', ...WRONG_TARGET },
+        { command: 'cat /etc/crontab', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check which account that task runs as, and compare it to the real update tasks.',
@@ -295,11 +305,11 @@ export const NOTHING_INSTALLED_TRUTH: ScenarioTruth = {
         '8 KB each time. The interval matches the scheduled task exactly. The specific hostname ' +
         'inside that provider has been seen from no other host in the estate.',
       commandOptions: [
-        "awk '$2==\"RMG-WS-1180\" {print $1, $4}' /var/log/flows.log | tail -30",
-        'grep -c cdn /var/log/proxy/access.log',
-        "awk '/cdn/ {print $6}' /var/log/proxy/access.log | sort | uniq -c",
-        'dig +short cdn-provider.example',
-        'netstat -an | grep 443',
+        { command: 'awk \'$2=="RMG-WS-1180" {print $1, $4}\' /var/log/flows.log | tail -30', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c cdn /var/log/proxy/access.log', ...COUNT_ONLY },
+        { command: 'awk \'/cdn/ {print $6}\' /var/log/proxy/access.log | sort | uniq -c', ...WRONG_TARGET },
+        { command: 'dig +short cdn-provider.example', ...WRONG_TARGET },
+        { command: 'netstat -an | grep 443', ...WRONG_TARGET },
       ],
       commandNudge:
         'Compare the interval of those connections against anything else you have found.',
@@ -330,11 +340,11 @@ export const NOTHING_INSTALLED_TRUTH: ScenarioTruth = {
         'under the finance account. Infrastructure use that daily and we cannot remove it. This ' +
         'account is not an administrator and has never run it before. They are mapping the domain.',
       commandOptions: [
-        'grep -i "powershell" /var/log/edr/process.log | tail -20',
-        "awk '$5==\"finance\\\\\\\\j.reyes\" {print $6}' /var/log/edr/process.log | sort -u",
-        'net user j.reyes /domain',
-        'last | grep reyes',
-        'cat /etc/group',
+        { command: 'grep -i "powershell" /var/log/edr/process.log | tail -20', ...WRONG_TARGET },
+        { command: 'awk \'$5=="finance\\\\\\\\\\\\\\\\j.reyes" {print $6}\' /var/log/edr/process.log | sort -u', correct: true, teaches: CORRECT_STEP },
+        { command: 'net user j.reyes /domain', ...WRONG_TARGET },
+        { command: 'last | grep reyes', ...WRONG_TARGET },
+        { command: 'cat /etc/group', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check whether that account has ever run this tool before, not whether the tool is normal.',
@@ -390,11 +400,11 @@ export const NOTHING_INSTALLED_TRUTH: ScenarioTruth = {
         'test builds with owners contacted. That is the control working. Nothing in our incident was ' +
         'unsigned. Closing it.',
       commandOptions: [
-        'grep -c BLOCKED /var/log/appcontrol/events.log',
-        "awk '/BLOCKED/ {print $5}' /var/log/appcontrol/events.log | sort | uniq -c | sort -rn",
-        'grep RMG-WS-1180 /var/log/appcontrol/events.log',
-        'cat /var/log/appcontrol/weekly-summary.log',
-        'systemctl status appcontrol',
+        { command: 'grep -c BLOCKED /var/log/appcontrol/events.log', ...COUNT_ONLY },
+        { command: 'awk \'/BLOCKED/ {print $5}\' /var/log/appcontrol/events.log | sort | uniq -c | sort -rn', ...WRONG_TARGET },
+        { command: 'grep RMG-WS-1180 /var/log/appcontrol/events.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/appcontrol/weekly-summary.log', ...DUMP_ALL },
+        { command: 'systemctl status appcontrol', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check whether any of those blocks came from the workstation you are working on.',

@@ -36,6 +36,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'signed-and-trusted';
 
@@ -194,11 +204,11 @@ export const SIGNED_AND_TRUSTED_TRUTH: ScenarioTruth = {
         'the platform egress exception so nothing alerted. Raising it: that destination should not ' +
         'exist.',
       commandOptions: [
-        "awk '/mon-agent/ {print $4}' /var/log/flows.log | sort | uniq -c | sort -rn | head",
-        'grep -c 198.51.100.117 /var/log/flows.log',
-        'cat /etc/monitoring/vendor-endpoints.txt',
-        'systemctl status mon-agent',
-        'netstat -an | grep 443',
+        { command: 'awk \'/mon-agent/ {print $4}\' /var/log/flows.log | sort | uniq -c | sort -rn | head', ...WRONG_TARGET },
+        { command: 'grep -c 198.51.100.117 /var/log/flows.log', ...COUNT_ONLY },
+        { command: 'cat /etc/monitoring/vendor-endpoints.txt', correct: true, teaches: CORRECT_STEP },
+        { command: 'systemctl status mon-agent', ...STATUS_CHECK },
+        { command: 'netstat -an | grep 443', ...WRONG_TARGET },
       ],
       commandNudge:
         'Compare the destinations these agents use against the endpoint list the vendor publishes.',
@@ -230,11 +240,11 @@ export const SIGNED_AND_TRUSTED_TRUTH: ScenarioTruth = {
         'after the update window, from every host that took the update and no host that did not. ' +
         'It is the update.',
       commandOptions: [
-        'whois 198.51.100.117',
-        "awk '$4 ~ /198.51.100.117/ {print $2}' /var/log/flows.log | sort -u | wc -l",
-        'grep "02:40" /var/log/flows.log | head -20',
-        'dig +short mon-update-cdn.example',
-        'cat /var/log/monitoring/update-history.log',
+        { command: 'whois 198.51.100.117', ...WRONG_TARGET },
+        { command: 'awk \'$4 ~ /198.51.100.117/ {print $2}\' /var/log/flows.log | sort -u | wc -l', ...WRONG_TARGET },
+        { command: 'grep "02:40" /var/log/flows.log | head -20', correct: true, teaches: CORRECT_STEP },
+        { command: 'dig +short mon-update-cdn.example', ...WRONG_TARGET },
+        { command: 'cat /var/log/monitoring/update-history.log', ...DUMP_ALL },
       ],
       commandNudge:
         'Find out when these connections started, and what else happened around that time.',
@@ -294,11 +304,11 @@ export const SIGNED_AND_TRUSTED_TRUTH: ScenarioTruth = {
         'in neither the release notes nor the vendor file manifest. It runs inside the agent, which ' +
         'is SYSTEM and excluded from endpoint scanning on the vendor own recommendation.',
       commandOptions: [
-        'diff <(ls /opt/monagent/lib-prev) <(ls /opt/monagent/lib)',
-        'sigcheck /opt/monagent/lib/*.so',
-        'cat /opt/monagent/MANIFEST.txt | grep -c .',
-        'lsof -p $(pgrep mon-agent) | grep -i lib',
-        'ps -ef | grep mon-agent',
+        { command: 'diff <(ls /opt/monagent/lib-prev) <(ls /opt/monagent/lib)', correct: true, teaches: CORRECT_STEP },
+        { command: 'sigcheck /opt/monagent/lib/*.so', ...WRONG_TARGET },
+        { command: 'cat /opt/monagent/MANIFEST.txt | grep -c .', ...WRONG_TARGET },
+        { command: 'lsof -p $(pgrep mon-agent) | grep -i lib', ...WRONG_TARGET },
+        { command: 'ps -ef | grep mon-agent', ...WRONG_TARGET },
       ],
       commandNudge:
         'Compare what files this release contains against the previous one and against the vendor ' +
@@ -332,11 +342,11 @@ export const SIGNED_AND_TRUSTED_TRUTH: ScenarioTruth = {
         'monitoring database has no field for any of that. It is being collected for somebody ' +
         'else, and it is how you plan movement and evasion.',
       commandOptions: [
-        'grep -i "inventory" /var/log/monagent/debug.log | tail -30',
-        "awk '/query/ {print $5}' /var/log/monagent/debug.log | sort -u",
-        'cat /opt/monagent/schema/inventory.sql | head -40',
-        'mysql -e "describe inventory" monitoring',
-        'ls -la /var/log/monagent/',
+        { command: 'grep -i "inventory" /var/log/monagent/debug.log | tail -30', ...WRONG_TARGET },
+        { command: 'awk \'/query/ {print $5}\' /var/log/monagent/debug.log | sort -u', ...WRONG_TARGET },
+        { command: 'cat /opt/monagent/schema/inventory.sql | head -40', correct: true, teaches: CORRECT_STEP },
+        { command: 'mysql -e "describe inventory" monitoring', ...WRONG_TARGET },
+        { command: 'ls -la /var/log/monagent/', ...WRONG_TARGET },
       ],
       commandNudge:
         'Compare what the agent is collecting against what the platform database can actually store.',
@@ -396,11 +406,11 @@ export const SIGNED_AND_TRUSTED_TRUTH: ScenarioTruth = {
         'configuration error, marked resolved, no security notice. The window does not overlap our ' +
         'update six days ago. It is not confirmation of anything. Closing it.',
       commandOptions: [
-        'cat /var/log/feeds/vendor-status.log | tail -20',
-        "awk '/degradation/ {print $1, $2}' /var/log/feeds/vendor-status.log",
-        'grep -i security /var/log/feeds/vendor-status.log',
-        'cat /var/log/monitoring/update-history.log | tail -5',
-        'date -d "6 days ago"',
+        { command: 'cat /var/log/feeds/vendor-status.log | tail -20', ...WRONG_TARGET },
+        { command: 'awk \'/degradation/ {print $1, $2}\' /var/log/feeds/vendor-status.log', ...WRONG_TARGET },
+        { command: 'grep -i security /var/log/feeds/vendor-status.log', ...WRONG_TARGET },
+        { command: 'cat /var/log/monitoring/update-history.log | tail -5', correct: true, teaches: CORRECT_STEP },
+        { command: 'date -d "6 days ago"', ...WRONG_TARGET },
       ],
       commandNudge:
         'Compare the dates on that notice against the date of the update you care about.',

@@ -39,6 +39,16 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
+import {
+  BROAD_SEARCH,
+  COUNT_ONLY,
+  CORRECT_STEP,
+  DUMP_ALL,
+  MUTATE,
+  STATUS_CHECK,
+  TOUCH_ATTACKER,
+  WRONG_TARGET,
+} from './distractors.js';
 
 const ID = 'bad-teacher';
 
@@ -199,11 +209,11 @@ export const BAD_TEACHER_TRUTH: ScenarioTruth = {
         'accuracy is 94.2 percent, its best ever. All four errors are the same class. Raising it to ' +
         'AI security.',
       commandOptions: [
-        'grep -c "recommend=dismiss" /var/log/model/inference.log',
-        "awk '/dismiss/ && $6>0.9 {print $4}' /var/log/model/inference.log | sort | uniq -c",
-        'cat /var/log/model/quality-review-monthly.json | head -30',
-        'systemctl status model-serving',
-        'ls -la /var/log/model/',
+        { command: 'grep -c "recommend=dismiss" /var/log/model/inference.log', ...COUNT_ONLY },
+        { command: 'awk \'/dismiss/ && $6>0.9 {print $4}\' /var/log/model/inference.log | sort | uniq -c', correct: true, teaches: CORRECT_STEP },
+        { command: 'cat /var/log/model/quality-review-monthly.json | head -30', ...WRONG_TARGET },
+        { command: 'systemctl status model-serving', ...STATUS_CHECK },
+        { command: 'ls -la /var/log/model/', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check whether the wrong recommendations are spread across alert types or concentrated in ' +
@@ -266,11 +276,11 @@ export const BAD_TEACHER_TRUTH: ScenarioTruth = {
         'since the 12th. It used to be one in four. The dashboard says healthy because they are all ' +
         'being closed quickly. Nothing anywhere alerts on an escalation rate hitting zero.',
       commandOptions: [
-        "awk '/build-egress/ && /escalate/ {print $1}' /var/log/queue/decisions.log | uniq -c",
-        'grep -c build-egress /var/log/queue/alerts.log',
-        "awk '/build-egress/ {print $5}' /var/log/queue/decisions.log | sort | uniq -c",
-        'cat /var/log/queue/dashboard-state.json',
-        'date -d "19 days ago"',
+        { command: 'awk \'/build-egress/ && /escalate/ {print $1}\' /var/log/queue/decisions.log | uniq -c', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c build-egress /var/log/queue/alerts.log', ...COUNT_ONLY },
+        { command: 'awk \'/build-egress/ {print $5}\' /var/log/queue/decisions.log | sort | uniq -c', ...WRONG_TARGET },
+        { command: 'cat /var/log/queue/dashboard-state.json', ...DUMP_ALL },
+        { command: 'date -d "19 days ago"', ...WRONG_TARGET },
       ],
       commandNudge:
         'Compare how many of that class arrive against how many get escalated, over time.',
@@ -333,11 +343,11 @@ export const BAD_TEACHER_TRUTH: ScenarioTruth = {
         'web interface. Badge records show the account holder was not in the building. It is not ' +
         'them. That token should never have been able to write feedback.',
       commandOptions: [
-        "awk '$4==\"a.pemberton\" {print $1, $2}' /var/log/feedback/submissions.log | head -30",
-        'grep -c pemberton /var/log/feedback/submissions.log',
-        'grep pemberton /var/log/physical/access.log | tail',
-        'cat /var/log/api/token-scopes.json | grep -A5 pemberton',
-        'last | grep pemberton',
+        { command: 'awk \'$4=="a.pemberton" {print $1, $2}\' /var/log/feedback/submissions.log | head -30', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -c pemberton /var/log/feedback/submissions.log', ...COUNT_ONLY },
+        { command: 'grep pemberton /var/log/physical/access.log | tail', ...WRONG_TARGET },
+        { command: 'cat /var/log/api/token-scopes.json | grep -A5 pemberton', ...WRONG_TARGET },
+        { command: 'last | grep pemberton', ...WRONG_TARGET },
       ],
       commandNudge:
         'Check when the submissions happened and whether they came from a person or a token.',
@@ -399,11 +409,11 @@ export const BAD_TEACHER_TRUTH: ScenarioTruth = {
         'and latency does not change what the model recommends. Eighteen of eighteen this month ' +
         'were the same. Closing it.',
       commandOptions: [
-        'grep latency /var/log/model/serving.log | tail -20',
-        "awk '/latency/ {print $5}' /var/log/model/serving.log | tail -30",
-        'grep -i migration /var/log/change-management.log',
-        'cat /var/log/model/quality-review-monthly.json | grep -i latency',
-        'systemctl status model-serving',
+        { command: 'grep latency /var/log/model/serving.log | tail -20', ...WRONG_TARGET },
+        { command: 'awk \'/latency/ {print $5}\' /var/log/model/serving.log | tail -30', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -i migration /var/log/change-management.log', ...WRONG_TARGET },
+        { command: 'cat /var/log/model/quality-review-monthly.json | grep -i latency', ...WRONG_TARGET },
+        { command: 'systemctl status model-serving', ...STATUS_CHECK },
       ],
       commandNudge:
         'Check when the latency changed against when the confidence started shifting.',

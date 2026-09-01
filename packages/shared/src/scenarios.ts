@@ -223,6 +223,49 @@ export interface ScenarioAction {
   forRoles: SocRoleId[];
 }
 
+/**
+ * One candidate command offered at the terminal, at beginner only.
+ *
+ * WHY EVERY OPTION CARRIES A LESSON AND NOT JUST THE RIGHT ONE
+ *
+ * The first version of this was a list of five strings. A student who picked
+ * the wrong one learned only that they had picked the wrong one, which is the
+ * least useful thing a wrong answer can teach. The distractors are the whole
+ * value of the format: each is a real mistake a real analyst makes, and each
+ * fails in its own specific way.
+ *
+ * Searching the filesystem for a log you already know the location of wastes
+ * minutes you do not have. Counting matches when you needed to see them throws
+ * away the context. Changing ownership of a file before it is preserved
+ * destroys the evidence. Connecting to the attacker's host to see what they see
+ * tells them you are there. None of those are silly, all of them get made, and
+ * a menu where four options are obviously wrong is a button with extra steps.
+ *
+ * So `teaches` is required on every option including the correct one, and it is
+ * released after the choice rather than before it.
+ */
+export interface CommandOption {
+  /** The command exactly as the student will type it. */
+  command: string;
+  /** Exactly one option per event is the useful next step. */
+  correct: boolean;
+  /**
+   * What choosing this taught, shown after the choice.
+   *
+   * On the correct option it says why this is the one that moves the
+   * investigation. On the others it names the specific cost of the mistake,
+   * because "wrong" is not a lesson and "this destroys chain of custody" is.
+   */
+  teaches: string;
+  /**
+   * Set where an option is not merely unhelpful but actively harmful: it
+   * destroys evidence, alerts the attacker, or changes the system under
+   * investigation. Scored harder than a wasted command, and called out
+   * separately in the debrief.
+   */
+  harmful?: boolean;
+}
+
 /** The answer key for one event. Never shipped before a claim is committed. */
 export interface EventTruth {
   eventId: string;
@@ -265,6 +308,37 @@ export interface EventTruth {
   appearsToBe?: string;
 
   /**
+   * For `ambiguous` events: what it turns out to have actually been.
+   *
+   * WHY AN UNSETTLED EVENT STILL HAS A TRUTH
+   *
+   * The first version treated both dispositions as identical, on the grounds
+   * that the evidence does not settle it. That is right about the evidence and
+   * wrong about the world: the event was one thing or the other, and a student
+   * who guessed confidently and happened to land on it has not done better work
+   * than one who guessed confidently the other way, but they have done less
+   * damage.
+   *
+   * So calibration remains the main mark and direction breaks the tie. A
+   * calibrated claim scores best whichever way it leans. Between two
+   * overconfident claims, the one that was also wrong costs more, because that
+   * is the one that sends a floor down the wrong path at speed.
+   *
+   * Optional: omit it where the event genuinely has no fact of the matter.
+   */
+  leaning?: 'malicious' | 'benign';
+  /**
+   * The finding whose absence means the incident was failed, whatever else was
+   * caught.
+   *
+   * Most events are worth points. One or two per scenario are worth the
+   * scenario: the accepted login after the run of failures, the payload staged
+   * before detonation, the second credential that survives the revocation.
+   * Catching nine of ten events and missing this one is not ninety percent of
+   * a response, and the debrief says so rather than averaging it away.
+   */
+  critical?: boolean;
+  /**
    * For `ambiguous` events: what would actually have settled it.
    *
    * The point of an unknowable event is not that nothing could resolve it, it
@@ -304,7 +378,7 @@ export interface EventTruth {
    * instructive ways, because a menu where four options are obviously silly is
    * a button with extra steps.
    */
-  commandOptions?: string[];
+  commandOptions?: CommandOption[];
   /**
    * What to go looking for, at intermediate only.
    *
