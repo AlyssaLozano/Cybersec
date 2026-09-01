@@ -11,3 +11,4 @@ export * from './terminal.js';
 export * from './progress.js';
 export * from './auth.js';
 export * from './api.js';
+export * from './scenarios.js';
