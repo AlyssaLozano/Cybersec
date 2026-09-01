@@ -234,6 +234,10 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.1',
       verdict: 'malicious',
+      standIn:
+        'Triage: sixty-two failed passwords for testuser from one external address in eleven ' +
+        'minutes. The account exists and is not locked. Rule has a thin history, so it has not ' +
+        'earned the benefit of the doubt. Raising it.',
       techniques: ['T1110.001 Password Guessing', 'T1078.003 Valid Accounts: Local'],
       stage: 'initial-access',
       firstResponder: 'soc-operator',
@@ -251,6 +255,10 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.2',
       verdict: 'blocked-reconnaissance',
+      standIn:
+        'Network: an outbound connection from rmg-web-02 to an address off the allowlist was ' +
+        'blocked. Direction matters here. The control stopped the connection and did nothing ' +
+        'about whatever made it, so something on that host already ran.',
       techniques: ['T1071.001 Application Layer Protocol: Web', 'T1041 Exfiltration Over C2 Channel'],
       stage: 'execution',
       firstResponder: 'network-analyst',
@@ -269,6 +277,10 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.3',
       verdict: 'malicious',
+      standIn:
+        'Malware: the interpreter call decodes to a fetch-and-execute from a remote host. It is a ' +
+        'loader. What it pulls is whatever that host is serving at the time, so I cannot tell you ' +
+        'the capability without capturing the second stage.',
       techniques: ['T1059 Command and Scripting Interpreter', 'T1105 Ingress Tool Transfer', 'T1027 Obfuscated Files or Information'],
       stage: 'execution',
       firstResponder: 'malware-analyst',
@@ -285,6 +297,10 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.4',
       verdict: 'malicious',
+      standIn:
+        'Network: an SSH session from the web host to the patient records database. Ninety days of ' +
+        'flow history show no prior connection on that path, and the application uses 5432, never ' +
+        '22. This is not the app.',
       techniques: ['T1021.004 Remote Services: SSH', 'T1570 Lateral Tool Transfer'],
       stage: 'lateral-movement',
       firstResponder: 'network-analyst',
@@ -301,6 +317,9 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.7',
       verdict: 'benign-true-positive',
+      standIn:
+        'Triage: inbound scan to a closed port, dropped. That rule has fired 23,487 times and been ' +
+        'closed as noise almost every one. Dismissing it.',
       guidance:
         'Direction decides this one. Ask which way the connection was going before you ask whether ' +
         'it was blocked.',
@@ -319,6 +338,10 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.9',
       verdict: 'malicious',
+      standIn:
+        'Logs: an accepted password for testuser at 10:14:22 after sixty-two failures, and four ' +
+        'seconds later a write to that account authorized_keys. Nothing else touched that file in ' +
+        'ninety days.',
       techniques: ['T1098.004 Account Manipulation: SSH Authorized Keys'],
       stage: 'persistence',
       firstResponder: 'log-analyst',
@@ -335,6 +358,10 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.10',
       verdict: 'malicious',
+      standIn:
+        'Forensics: the key added to authorized_keys matches no inventory entry, and its file ' +
+        'timestamp is four seconds after the accepted password. I have captured it with times ' +
+        'intact. A rebuild would take that relationship with it.',
       techniques: ['T1098.004 Account Manipulation: SSH Authorized Keys', 'T1556 Modify Authentication Process'],
       stage: 'persistence',
       firstResponder: 'forensics',
@@ -350,6 +377,10 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.5',
       verdict: 'malicious',
+      standIn:
+        'Cloud: the backup principal deleted five snapshots totalling 1.08 TB, all inside ' +
+        'retention. That principal has never used its delete permission before, and the calls came ' +
+        'from inside the estate rather than the scheduler that normally drives it.',
       techniques: ['T1485 Data Destruction', 'T1490 Inhibit System Recovery', 'T1078.004 Valid Accounts: Cloud'],
       stage: 'impact',
       firstResponder: 'cloud-security',
@@ -367,6 +398,9 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.8',
       verdict: 'false-positive',
+      standIn:
+        'Triage: the monitoring collector failing on a five-minute cadence all day. Stale ' +
+        'credential in a config, not an attacker. Dismissing and raising a tuning ticket.',
       guidance:
         'The monitoring collector produces more failures than the attacker does. Counting is not ' +
         'triage.',
@@ -384,6 +418,10 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.6',
       verdict: 'malicious',
+      standIn:
+        'Network: 6.3 GB from the database host to the same address rmg-web-02 was blocked from ' +
+        'reaching earlier. That host has egress the web host does not. I can prove the volume and ' +
+        'the destination. I cannot prove the contents.',
       techniques: ['T1041 Exfiltration Over C2 Channel', 'T1030 Data Transfer Size Limits'],
       stage: 'exfiltration',
       firstResponder: 'network-analyst',

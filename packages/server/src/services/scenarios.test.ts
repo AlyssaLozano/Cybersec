@@ -23,6 +23,7 @@ import {
   getScenario,
   guidanceFor,
   scoreClaim,
+  standInsFor,
   truthFor,
 } from './scenarios.js';
 
@@ -465,6 +466,44 @@ describe('the investigation trace is reported, never scored', () => {
 
   it('is absent entirely when no trace was recorded', () => {
     expect(scoreClaim(ID, c)!.investigation).toBeUndefined();
+  });
+});
+
+describe('empty seats are covered by the lead', () => {
+  const ALL = getScenario(ID)!.roles;
+
+  it('gives the lead nothing for a seat somebody is sitting in', () => {
+    // Everyone present: the people in the chairs do the work.
+    expect(standInsFor(ID, ALL, 99_999)).toEqual([]);
+  });
+
+  it('covers only the chairs nobody filled', () => {
+    const short = ALL.filter((r) => r !== 'forensics' && r !== 'cloud-security');
+    const due = standInsFor(ID, short, 99_999);
+    const roles = new Set(due.map((d) => d.role));
+    expect(roles).toEqual(new Set(['forensics', 'cloud-security']));
+    expect(due.every((d) => d.text.length > 40)).toBe(true);
+  });
+
+  it('paces them, rather than dumping a feed the moment each event lands', () => {
+    const short = ALL.filter((r) => r !== 'forensics');
+    // ev.10 lands at 180s. Forensics does not have something to say instantly.
+    expect(standInsFor(ID, short, 200).some((d) => d.eventId === 'ev.10')).toBe(false);
+    expect(standInsFor(ID, short, 600).some((d) => d.eventId === 'ev.10')).toBe(true);
+  });
+
+  it('is a finding, not a verdict', () => {
+    // It reports what that seat saw. It does not tell the floor what to do,
+    // because the lead relaying it still has to decide.
+    const due = standInsFor(ID, ALL.filter((r) => r !== 'network-analyst'), 99_999);
+    const text = due.map((d) => d.text).join(' ').toLowerCase();
+    expect(text).not.toMatch(/you should|escalate this to|declare an incident/);
+  });
+
+  it('arrives in the order the shift would have produced it', () => {
+    const due = standInsFor(ID, ['ir-lead'], 99_999);
+    const times = due.map((d) => d.dueAtSeconds);
+    expect([...times].sort((a, b) => a - b)).toEqual(times);
   });
 });
 

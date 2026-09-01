@@ -401,6 +401,85 @@ function treatsAsThreat(decision: TriageDecision): boolean {
 }
 
 /**
+ * How long each seat would plausibly take before it had something to say.
+ *
+ * Not a fudge factor. Triage is fast by definition and forensics is slow by
+ * definition, and delivering every stand-in the instant its event lands would
+ * give the lead a feed no real floor produces, which teaches the wrong sense of
+ * pace.
+ */
+const REPORTING_DELAY_SECONDS: Record<string, number> = {
+  'soc-operator': 60,
+  'network-analyst': 150,
+  'log-analyst': 240,
+  'cloud-security': 240,
+  'malware-analyst': 300,
+  forensics: 360,
+  'threat-intel': 420,
+  'vulnerability-analyst': 300,
+  'ai-security': 300,
+  'ir-lead': 0,
+};
+
+export interface StandIn {
+  eventId: string;
+  /** The seat nobody is in. */
+  role: SocRoleId;
+  /** When the lead should read it out. */
+  dueAtSeconds: number;
+  /** What that seat would have reported, in their words. */
+  text: string;
+}
+
+/**
+ * What the lead has to read out on behalf of empty chairs, and when.
+ *
+ * Only for seats the scenario expects and nobody filled. A seat that is filled
+ * gets nothing: the person in it does the work, and handing the lead a
+ * duplicate would let them pre-empt their own analyst.
+ *
+ * Deliberately given ONLY to the lead. It is somebody else's finding, so it is
+ * not scored as the lead's analysis, but failing to relay it is on them: the
+ * floor cannot act on something nobody said out loud.
+ */
+export function standInsFor(
+  scenarioId: string,
+  filledRoles: SocRoleId[],
+  atSeconds: number,
+): StandIn[] {
+  const scenario = BY_ID.get(scenarioId);
+  const truth = truthFor(scenarioId);
+  if (!scenario || !truth) return [];
+
+  const filled = new Set(filledRoles);
+  const due: StandIn[] = [];
+
+  for (const entry of truth.events) {
+    if (!entry.standIn) continue;
+    // Somebody is in that chair. It is their finding to make.
+    if (filled.has(entry.firstResponder)) continue;
+    // A seat the scenario never asked for is not an empty chair.
+    if (!scenario.roles.includes(entry.firstResponder)) continue;
+
+    const event = scenario.events.find((e) => e.id === entry.eventId);
+    if (!event) continue;
+
+    const delay = REPORTING_DELAY_SECONDS[entry.firstResponder] ?? 180;
+    const dueAt = event.atSeconds + delay;
+    if (dueAt > atSeconds) continue;
+
+    due.push({
+      eventId: entry.eventId,
+      role: entry.firstResponder,
+      dueAtSeconds: dueAt,
+      text: entry.standIn,
+    });
+  }
+
+  return due.sort((a, b) => a.dueAtSeconds - b.dueAtSeconds);
+}
+
+/**
  * Events two seats read differently.
  *
  * WHY DISAGREEMENT IS ROUTED UP RATHER THAN RESOLVED

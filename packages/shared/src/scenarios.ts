@@ -143,6 +143,26 @@ export interface EventTruth {
   /** Shown in the debrief, after the claim is committed. */
   why: string;
   /**
+   * What the first responder would have reported, for when nobody is in that
+   * seat.
+   *
+   * WHY AN EMPTY SEAT NEEDS COVERING AT ALL
+   *
+   * Sessions do not always fill, and the pricing already says so. A scenario
+   * where the Forensics chair is empty is not a scenario with less forensics,
+   * it is a scenario where the intrusion becomes unprovable and the floor is
+   * working a story with a hole in it.
+   *
+   * So the lead reads it out. That is what actually happens when a SOC is short
+   * a person, it keeps the incident coherent, and relaying somebody else's
+   * technical finding accurately is a real skill the lead is otherwise never
+   * asked to demonstrate.
+   *
+   * Written as the seat would have said it, not as a verdict. It reports the
+   * finding; it does not say what anybody should now do about it.
+   */
+  standIn?: string;
+  /**
    * A coaching line offered WHILE the event is open, not after.
    *
    * This is the difference between "here is the output" and "here is what the
