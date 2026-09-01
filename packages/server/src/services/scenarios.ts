@@ -40,7 +40,12 @@ import type {
   InvestigationNote,
   InvestigationTrace,
 } from '@soc/shared';
-import { CLAIM_GRACE_SECONDS, CLAIM_LATE_SECONDS } from '@soc/shared';
+import {
+  AMBIGUOUS_CONFIDENCE_CEILING,
+  AMBIGUOUS_CONFIDENCE_FLOOR,
+  CLAIM_GRACE_SECONDS,
+  CLAIM_LATE_SECONDS,
+} from '@soc/shared';
 
 import { SCENARIOS, SCENARIO_TRUTH } from '../content/scenarios/index.js';
 
@@ -70,14 +75,46 @@ export function eventsFor(
   if (!scenario) return [];
   const surfaces = SURFACES_BY_ROLE[role] ?? [];
   const difficulty = runAt ?? scenario.difficulty;
-  const visible = scenario.events.filter(
-    (event) => event.atSeconds <= atSeconds && surfaces.includes(event.surface),
-  );
-  // At expert the tooling stops telling you how worried to be. Severity is an
-  // assertion by whoever wrote the rule, and reading it off the row is the
-  // habit expert difficulty exists to remove.
-  if (difficulty !== 'expert') return visible;
-  return visible.map((event) => ({ ...event, claimedSeverity: null }));
+  const expert = difficulty === 'expert';
+
+  const arrived = scenario.events.filter((event) => event.atSeconds <= atSeconds);
+
+  if (!expert) {
+    // Below expert, an expert-only event does not exist at all. It is not
+    // hidden from a seat, it never happened in this run.
+    return arrived.filter(
+      (event) => !event.expertOnly && surfaces.includes(event.surface),
+    );
+  }
+
+  const visible: ScenarioEvent[] = [];
+  for (const event of arrived) {
+    // A withheld stage is gone from every seat, which is the point: the gap has
+    // to be inferred from the shape of what remains, not spotted by whoever
+    // happens to hold the right console.
+    if (event.withheldAtExpert) continue;
+
+    const onSurface =
+      surfaces.includes(event.surface) ||
+      (event.expertAlsoOn ?? []).some((s) => surfaces.includes(s));
+    if (!onSurface) continue;
+
+    // The degraded record goes to the seat that is NOT the event's home
+    // surface. The primary surface keeps the full detail, so the two seats hold
+    // genuinely different accounts of one moment and have to reconcile them.
+    const degraded =
+      event.expertDetail !== undefined && !surfaces.includes(event.surface);
+
+    visible.push({
+      ...event,
+      // At expert the tooling stops telling you how worried to be. Severity is
+      // an assertion by whoever wrote the rule, and reading it off the row is
+      // the habit expert difficulty exists to remove.
+      claimedSeverity: null,
+      ...(degraded ? { detail: event.expertDetail! } : {}),
+    });
+  }
+  return visible;
 }
 
 /**
@@ -134,8 +171,15 @@ export interface SeatBriefing {
   questions: string[];
   /** Who normally receives their findings. */
   handsTo: SocRoleId[];
-  /** How many events will reach this seat over the shift. */
-  expectedEvents: number;
+  /**
+   * How many events will reach this seat over the shift.
+   *
+   * Null at expert, where the count is itself an answer. Knowing eight are
+   * coming tells you when to stop looking, and "am I done" is one of the
+   * questions expert exists to make the floor answer from the evidence rather
+   * than from a progress bar.
+   */
+  expectedEvents: number | null;
   /**
    * The vocabulary this seat is about to be judged on.
    *
@@ -347,11 +391,16 @@ const REMIT: Record<string, { remit: string; questions: string[]; handsTo: SocRo
  * Returns null for a role the scenario has not seated, because briefing
  * somebody for a chair they are not in is its own kind of confusing.
  */
-export function briefingFor(scenarioId: string, role: SocRoleId): SeatBriefing | null {
+export function briefingFor(
+  scenarioId: string,
+  role: SocRoleId,
+  runAt?: ScenarioDifficulty,
+): SeatBriefing | null {
   const scenario = BY_ID.get(scenarioId);
   if (!scenario || !scenario.roles.includes(role)) return null;
   const spec = REMIT[role];
   if (!spec) return null;
+  const difficulty = runAt ?? scenario.difficulty;
 
   return {
     role,
@@ -362,8 +411,16 @@ export function briefingFor(scenarioId: string, role: SocRoleId): SeatBriefing |
     surfaces: (SURFACES_BY_ROLE[role] ?? []).map((s) => SURFACE_LABELS[s] ?? s),
     questions: spec.questions,
     handsTo: spec.handsTo,
-    expectedEvents: eventsFor(scenarioId, role, Number.MAX_SAFE_INTEGER).length,
-    glossary: [...DISPOSITIONS, ...(TERMS[role] ?? [])],
+    expectedEvents:
+      difficulty === 'expert'
+        ? null
+        : eventsFor(scenarioId, role, Number.MAX_SAFE_INTEGER, difficulty).length,
+    // The glossary goes too at expert. Somebody sitting an expert run has
+    // already been told four times what a benign true positive is, and leaving
+    // it in place lets a seat look up the vocabulary of a finding instead of
+    // recognising it. Everything in it is available in the foundations content,
+    // which is where a definition belongs.
+    glossary: difficulty === 'expert' ? [] : [...DISPOSITIONS, ...(TERMS[role] ?? [])],
   };
 }
 
@@ -817,6 +874,18 @@ export interface DebriefStage {
   spottedAfterSeconds: number | null;
   /** True when the seat that took it read it correctly. */
   readCorrectly: boolean;
+  /**
+   * True when this run never put the event on any board.
+   *
+   * Withheld stages have to be reported, or the narrative has a hole the floor
+   * cannot account for. They are never counted as missed: nobody fails to catch
+   * what was not there.
+   */
+  neverShown: boolean;
+  /** What the planted evidence was built to suggest, where there was any. */
+  appearsToBe?: string;
+  /** For unsettled events: the evidence that would have decided it. */
+  wouldSettleIt?: string;
 }
 
 export interface Debrief {
@@ -827,20 +896,36 @@ export interface Debrief {
   stages: DebriefStage[];
   missed: string[];
   contested: string[];
+  /**
+   * Stages this run removed from the board. Expert only, and empty everywhere
+   * else. Reported so the gap is explained rather than left as a mystery.
+   */
+  withheld: string[];
   /** The plain summary line, derived rather than written. */
   summary: string;
 }
 
-export function buildDebrief(scenarioId: string, claims: Claim[]): Debrief | null {
+export function buildDebrief(
+  scenarioId: string,
+  claims: Claim[],
+  runAt?: ScenarioDifficulty,
+): Debrief | null {
   const scenario = BY_ID.get(scenarioId);
   const truth = truthFor(scenarioId);
   if (!scenario || !truth) return null;
+  const expert = (runAt ?? scenario.difficulty) === 'expert';
 
   const firstClaim = new Map<string, Claim>();
   for (const claim of claims) {
     const held = firstClaim.get(claim.eventId);
     if (!held || claim.atSeconds < held.atSeconds) firstClaim.set(claim.eventId, claim);
   }
+
+  // An event that was not on the board this run cannot be graded against this
+  // run. Expert-only events at lower tiers and withheld stages at expert are
+  // the two directions of the same rule.
+  const wasOnTheBoard = (event: ScenarioEvent): boolean =>
+    expert ? !event.withheldAtExpert : !event.expertOnly;
 
   const stages: DebriefStage[] = truth.events.map((entry) => {
     const event = scenario.events.find((e) => e.id === entry.eventId)!;
@@ -853,15 +938,23 @@ export function buildDebrief(scenarioId: string, claims: Claim[]): Debrief | nul
       why: entry.why,
       spottedBy: claim?.role ?? null,
       spottedAfterSeconds: claim ? Math.max(0, claim.atSeconds - event.atSeconds) : null,
+      // An unsettled event has no correct read, so "read correctly" means
+      // somebody took it and did not walk past it.
       readCorrectly: claim
-        ? treatsAsThreat(claim.disposition) === shouldTreatAsThreat
+        ? entry.verdict === 'ambiguous' || treatsAsThreat(claim.disposition) === shouldTreatAsThreat
         : false,
+      neverShown: !wasOnTheBoard(event),
+      ...(entry.appearsToBe ? { appearsToBe: entry.appearsToBe } : {}),
+      ...(entry.wouldSettleIt ? { wouldSettleIt: entry.wouldSettleIt } : {}),
     };
   });
 
+  const onBoard = stages.filter((s) => !s.neverShown);
+
   // Only malicious stages count as "missed". Nobody needs telling they failed
-  // to escalate the noise.
-  const missed = stages
+  // to escalate the noise, and nobody is marked down for a stage this run
+  // deliberately removed.
+  const missed = onBoard
     .filter((s) => {
       const entry = truth.events.find((e) => e.eventId === s.eventId)!;
       const matters = entry.verdict === 'malicious' || entry.verdict === 'blocked-reconnaissance';
@@ -869,20 +962,41 @@ export function buildDebrief(scenarioId: string, claims: Claim[]): Debrief | nul
     })
     .map((s) => s.eventId);
 
+  const withheld = stages.filter((s) => s.neverShown).map((s) => s.eventId);
   const contested = contestedEvents(claims).map((c) => c.eventId);
 
-  const caught = stages.filter((s) => s.readCorrectly).length;
+  const shown = new Set(onBoard.map((s) => s.eventId));
   const total = truth.events.filter(
-    (e) => e.verdict === 'malicious' || e.verdict === 'blocked-reconnaissance',
+    (e) =>
+      shown.has(e.eventId) &&
+      (e.verdict === 'malicious' || e.verdict === 'blocked-reconnaissance'),
   ).length;
+  const caught = total - missed.length;
 
-  const summary =
+  const parts: string[] = [];
+  parts.push(
     missed.length === 0
-      ? `Every stage of the intrusion was caught and read correctly, ${caught} of ${total}.`
-      : `${total - missed.length} of ${total} stages caught. ${missed.length} went unread: ` +
-        `${missed.join(', ')}. An intrusion does not need every stage to be missed to succeed.`;
+      ? `Every stage of the intrusion that reached a board was caught and read correctly, ${caught} of ${total}.`
+      : `${caught} of ${total} stages caught. ${missed.length} went unread: ${missed.join(', ')}. ` +
+        'An intrusion does not need every stage to be missed to succeed.',
+  );
+  if (withheld.length > 0) {
+    parts.push(
+      `${withheld.length} stage(s) never reached any console: ${withheld.join(', ')}. Nobody could ` +
+        'have caught these and they are not counted against the floor. The question worth asking ' +
+        'is whether anybody noticed the gap and said so.',
+    );
+  }
 
-  return { scenarioId, whatHappened: truth.narrative, stages, missed, contested, summary };
+  return {
+    scenarioId,
+    whatHappened: truth.narrative,
+    stages,
+    missed,
+    contested,
+    withheld,
+    summary: parts.join(' '),
+  };
 }
 
 /**
@@ -923,6 +1037,71 @@ export function describeInvestigation(
 }
 
 /**
+ * Score an ambiguous event, where there is no right disposition.
+ *
+ * WHY THIS IS SCORED AT ALL RATHER THAN SKIPPED
+ *
+ * The tempting alternative is to leave unknowable events unmarked. That teaches
+ * the opposite of the intended lesson: an event that costs nothing is an event
+ * a student learns to click past, and the whole reason it is here is that
+ * real floors have to act on exactly this and cannot click past it.
+ *
+ * So it is marked, out of the same 40, on the two things that are actually
+ * assessable when the answer is not: whether the confidence matches the
+ * evidence, and whether they said what would have settled it. Either
+ * disposition is fine. A seat that escalates at 40% and one that investigates
+ * at 40% have both done the job.
+ */
+function scoreCalibration(claim: Claim, notes: string[]): number {
+  const confidence = Math.max(0, Math.min(100, claim.confidence));
+  let points: number;
+
+  if (confidence > AMBIGUOUS_CONFIDENCE_CEILING) {
+    // The expensive failure, and the one this event exists to catch. A tidy
+    // story told confidently is what commits a floor to the wrong containment.
+    const over = confidence - AMBIGUOUS_CONFIDENCE_CEILING;
+    points = Math.max(4, 22 - Math.round(over * 0.45));
+    notes.push(
+      `Held at ${confidence}% on evidence that does not support it. This one could be argued ` +
+        'either way, and stating it that firmly is how a floor commits to a story before the ' +
+        'evidence has caught up.',
+    );
+  } else if (confidence < AMBIGUOUS_CONFIDENCE_FLOOR) {
+    // The other failure, which is quieter and still a failure. A seat that will
+    // not have a view leaves the decision with somebody who has less evidence.
+    points = 20;
+    notes.push(
+      `Held at ${confidence}%, which reads as declining to have a view. Uncertainty is the right ` +
+        'read here; refusing to commit to one still leaves the call with somebody holding less ' +
+        'evidence than you.',
+    );
+  } else {
+    points = 34;
+    notes.push(
+      `Correctly read as unsettled and held at ${confidence}%. Either disposition was defensible ` +
+        'here; the confidence is what was being marked.',
+    );
+  }
+
+  // Naming the missing evidence is what turns "nobody knows" into a request
+  // somebody can action, so it is worth real points rather than a note.
+  const namesWhatWouldSettleIt = /\b(if|would|need|until|once|unless|pending|await)\b/i.test(
+    claim.reasoning,
+  );
+  if (namesWhatWouldSettleIt) {
+    points = Math.min(40, points + 6);
+    notes.push('Says what would change the assessment, which makes the uncertainty actionable.');
+  } else {
+    notes.push(
+      'Does not say what would settle it. "I cannot tell" is an answer; "I cannot tell, and here ' +
+        'is what I would need" is the useful one.',
+    );
+  }
+
+  return points;
+}
+
+/**
  * Score one claim.
  *
  * Four lines out of 100. Accuracy carries the most weight because being wrong
@@ -952,28 +1131,44 @@ export function scoreClaim(
   // Confidence scales the result in both directions: conviction is rewarded
   // when it is earned and punished when it is not.
   const conviction = Math.max(0, Math.min(100, claim.confidence)) / 100;
-  let accuracy = correct ? 25 + Math.round(conviction * 15) : Math.round((1 - conviction) * 14);
-  if (correct) {
-    notes.push(
-      shouldTreatAsThreat
-        ? 'Identified real malicious activity.'
-        : 'Correctly declined to escalate something that did not warrant it.',
-    );
-    if (conviction < 0.5) notes.push('Right call, held with less confidence than it deserved.');
+
+  let accuracy: number;
+  if (truth.verdict === 'ambiguous') {
+    // Nothing to be right about. The evidence does not settle it, so the mark
+    // is entirely on whether the confidence matches that, and the label says so
+    // rather than pretending a correctness score was computed.
+    accuracy = scoreCalibration(claim, notes);
   } else {
-    notes.push(
-      shouldTreatAsThreat
-        ? 'This was a genuine threat and the claim treated it as benign.'
-        : 'This did not warrant escalation. Escalating everything is the same as triaging nothing.',
-    );
-    if (conviction > 0.7) notes.push('Held with high confidence, which is what makes it expensive.');
+    accuracy = correct ? 25 + Math.round(conviction * 15) : Math.round((1 - conviction) * 14);
+    if (correct) {
+      notes.push(
+        shouldTreatAsThreat
+          ? 'Identified real malicious activity.'
+          : 'Correctly declined to escalate something that did not warrant it.',
+      );
+      if (conviction < 0.5) notes.push('Right call, held with less confidence than it deserved.');
+    } else {
+      notes.push(
+        shouldTreatAsThreat
+          ? 'This was a genuine threat and the claim treated it as benign.'
+          : 'This did not warrant escalation. Escalating everything is the same as triaging nothing.',
+      );
+      if (conviction > 0.7) notes.push('Held with high confidence, which is what makes it expensive.');
+    }
   }
-  // An empty justification cannot be assessed, whatever it concluded.
+
+  // An empty justification cannot be assessed, whatever it concluded. This bites
+  // hardest on an ambiguous event, where the reasoning IS the answer.
   if (claim.reasoning.trim().length < 40) {
     accuracy = Math.min(accuracy, 12);
     notes.push('Too short to show reasoning. A disposition without a why is not triage.');
   }
-  lines.push({ label: 'Accuracy', points: accuracy, outOf: 40, notes });
+  lines.push({
+    label: truth.verdict === 'ambiguous' ? 'Calibration' : 'Accuracy',
+    points: accuracy,
+    outOf: 40,
+    notes,
+  });
 
   // --- 2. role discipline ------------------------------------------------
   const roleNotes: string[] = [];

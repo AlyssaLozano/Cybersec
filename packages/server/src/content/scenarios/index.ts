@@ -61,6 +61,73 @@ function validateScenarios(): void {
         );
       }
     }
+
+    /*
+     * Expert-difficulty coherence.
+     *
+     * Every rule here catches a flag that would silently do nothing. An author
+     * reaches for `expertDetail` to manufacture a contradiction, forgets that a
+     * degraded record only reaches a seat that does not own the home surface,
+     * and ships an expert run identical to the advanced one. That failure is
+     * invisible at runtime and obvious here.
+     */
+    const byEventId = new Map(scenario.events.map((e) => [e.id, e]));
+
+    for (const event of scenario.events) {
+      if (event.expertOnly && event.withheldAtExpert) {
+        throw new Error(
+          `Scenario "${scenario.id}" event "${event.id}" is both expert-only and withheld at expert, so it appears at no difficulty at all.`,
+        );
+      }
+      // A degraded record is shown only to seats reached through `expertAlsoOn`.
+      // Without one it is authored text nobody can ever be served.
+      if (event.expertDetail && (event.expertAlsoOn ?? []).length === 0) {
+        throw new Error(
+          `Scenario "${scenario.id}" event "${event.id}" defines expertDetail but no expertAlsoOn, so the degraded view reaches nobody.`,
+        );
+      }
+      if ((event.expertAlsoOn ?? []).includes(event.surface)) {
+        throw new Error(
+          `Scenario "${scenario.id}" event "${event.id}" lists its own surface in expertAlsoOn, which changes nothing.`,
+        );
+      }
+    }
+
+    for (const entry of truth.events) {
+      const event = byEventId.get(entry.eventId)!;
+
+      // Unsettled events are an expert instrument. Below expert a student is
+      // still learning that dismissing is a decision, and an event where the
+      // decision is unknowable reads as the exercise being broken.
+      if (entry.verdict === 'ambiguous' && !event.expertOnly) {
+        throw new Error(
+          `Scenario "${scenario.id}" event "${entry.eventId}" is ambiguous but not expertOnly. Unsettled events are reserved for expert.`,
+        );
+      }
+      // The debrief cannot teach "distrust the tidy story" without stating what
+      // the story was, so planted misdirection has to say what it looked like.
+      if (entry.verdict === 'ambiguous' && !entry.wouldSettleIt) {
+        throw new Error(
+          `Scenario "${scenario.id}" event "${entry.eventId}" is ambiguous but does not say what would have settled it, which is the whole lesson.`,
+        );
+      }
+    }
+
+    // An expert run that removed every malicious event leaves a floor with
+    // nothing to find. The gap is meant to be part of the chain, not the chain.
+    const maliciousIds = new Set(
+      truth.events
+        .filter((e) => e.verdict === 'malicious' || e.verdict === 'blocked-reconnaissance')
+        .map((e) => e.eventId),
+    );
+    const maliciousAtExpert = scenario.events.filter(
+      (e) => maliciousIds.has(e.id) && !e.withheldAtExpert,
+    );
+    if (maliciousIds.size > 0 && maliciousAtExpert.length === 0) {
+      throw new Error(
+        `Scenario "${scenario.id}" withholds every malicious event at expert, leaving nothing to find.`,
+      );
+    }
   }
 }
 

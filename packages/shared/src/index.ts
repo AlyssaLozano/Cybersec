@@ -14,3 +14,4 @@ export * from './api.js';
 export * from './scenarios.js';
 export * from './live.js';
 export * from './reports.js';
+export * from './rooms.js';

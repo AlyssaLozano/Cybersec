@@ -64,8 +64,42 @@ export const EVENT_VERDICTS = [
   'blocked-reconnaissance',
   /** Deliberate noise generated to bury the real signal. */
   'decoy',
+  /**
+   * The evidence genuinely does not settle it, and a competent analyst could
+   * argue it either way.
+   *
+   * WHY A VERDICT THAT REFUSES TO DECIDE IS NOT A COP-OUT
+   *
+   * Every other verdict here has a right answer, so every other event rewards
+   * picking it. That trains a habit real incidents punish: the analyst who
+   * always has a confident read is the one who states the tidy story before the
+   * evidence supports it, and tidy stories are how floors commit to the wrong
+   * containment.
+   *
+   * An ambiguous event scores CALIBRATION rather than correctness. Either
+   * disposition is accepted; what is marked is whether the confidence attached
+   * to it matches how much the evidence actually supports. Saying "escalating,
+   * fifty percent, here is what would settle it" is the correct answer, and it
+   * is the only verdict where a confident claim scores worse than an unsure one
+   * no matter which way it went.
+   *
+   * Reserved for expert. Below that it is unfair rather than instructive: a
+   * student still learning that dismissing is a decision does not need an event
+   * where the decision is unknowable.
+   */
+  'ambiguous',
 ] as const;
 export type EventVerdict = (typeof EVENT_VERDICTS)[number];
+
+/**
+ * The confidence band an ambiguous event is asking for.
+ *
+ * Outside it in either direction is miscalibration: over the ceiling is
+ * certainty the evidence does not support, under the floor is refusing to have
+ * a view at all, which is its own failure on a floor waiting on you.
+ */
+export const AMBIGUOUS_CONFIDENCE_FLOOR = 25;
+export const AMBIGUOUS_CONFIDENCE_CEILING = 65;
 
 export const KILL_CHAIN_STAGES = [
   'reconnaissance',
@@ -102,6 +136,68 @@ export interface ScenarioEvent {
    * Null at expert difficulty, where the student assigns it themselves.
    */
   claimedSeverity: AlertSeverity | null;
+
+  /*
+   * ------------------------------------------------------------------------
+   * EXPERT DIFFICULTY
+   *
+   * Everything below changes what is on the board rather than what help is
+   * offered beside it. That distinction is the whole design: withholding hints
+   * makes a scenario tedious, and changing the evidence makes it hard. Expert
+   * is not beginner with the scaffolding removed, it is a floor where the
+   * evidence is incomplete, partly hostile, and does not agree with itself.
+   *
+   * All four default to off, so an author who ignores them writes a scenario
+   * that runs identically at every tier.
+   * ------------------------------------------------------------------------
+   */
+
+  /**
+   * Only on the board at expert.
+   *
+   * For noise the ATTACKER generated, and for false flags. At lower tiers the
+   * decoys are accidental, a misconfigured collector nobody fixed, which
+   * teaches that noise exists. Here the noise has an author who wants the real
+   * signal buried, which is a different lesson and a much harder read.
+   */
+  expertOnly?: boolean;
+
+  /**
+   * Removed from the board at expert, and from every seat at once.
+   *
+   * The floor is left holding initial access and exfiltration with nothing in
+   * between. Noticing the SHAPE of that gap, and saying out loud that a stage
+   * must have happened unseen, is a different skill from reading what is in
+   * front of you, and it is the one that separates an analyst who works the
+   * queue from one who works the incident.
+   *
+   * The debrief still reports it, as a stage nobody could have caught. It is
+   * never counted against them.
+   */
+  withheldAtExpert?: boolean;
+
+  /**
+   * A degraded view of this same event, shown at expert in place of `detail`.
+   *
+   * Used to make two surfaces genuinely disagree: one seat gets a truncated,
+   * stale or partially-parsed record while another gets the full one. Real
+   * tooling does this constantly, through sampling, buffer loss and clock skew.
+   *
+   * The skill is noticing that two reports of the same moment do not match, and
+   * asking which source is weaker, rather than averaging them into a consensus
+   * that is wrong in a new way.
+   */
+  expertDetail?: string;
+
+  /**
+   * Surfaces this event is ALSO placed on at expert, beyond `surface`.
+   *
+   * Paired with `expertDetail` this is what manufactures the contradiction: the
+   * same moment reaches two seats through different pipelines, and the seats
+   * have to reconcile it between them rather than each trusting their own
+   * console.
+   */
+  expertAlsoOn?: EventSurface[];
 }
 
 /**
@@ -142,6 +238,28 @@ export interface EventTruth {
   escalateTo: SocRoleId[];
   /** Shown in the debrief, after the claim is committed. */
   why: string;
+
+  /**
+   * What this was built to look like, when that is not what it is.
+   *
+   * A false flag is evidence that points confidently at the wrong conclusion:
+   * a foreign-language string in a binary, a timestamp inside somebody else's
+   * working hours, tooling associated with a known group. The correct answer is
+   * to distrust the tidy story, and the debrief cannot teach that without
+   * saying what the story was and why it was persuasive.
+   *
+   * Set only on events that carry planted misdirection. Released at debrief.
+   */
+  appearsToBe?: string;
+
+  /**
+   * For `ambiguous` events: what would actually have settled it.
+   *
+   * The point of an unknowable event is not that nothing could resolve it, it
+   * is that the floor did not have that thing in the hour. Naming it turns
+   * "nobody knows" into a specific request, which is the reflex worth building.
+   */
+  wouldSettleIt?: string;
   /**
    * What the first responder would have reported, for when nobody is in that
    * seat.

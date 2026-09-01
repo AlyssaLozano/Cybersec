@@ -35,6 +35,8 @@
 
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
+import { COMMON_ACTIONS } from './actions.js';
+
 const ID = 'ridgeline';
 
 export const RIDGELINE: Scenario = {
@@ -62,37 +64,17 @@ export const RIDGELINE: Scenario = {
     // rather than a footnote to it.
   ],
 
-  actions: [
-    { id: 'act.triage-high', label: 'Raise the priority and route it', forRoles: ['soc-operator'] },
-    { id: 'act.dismiss', label: 'Dismiss as noise', forRoles: ['soc-operator'] },
-    { id: 'act.tune', label: 'Raise a tuning ticket against the rule', forRoles: ['soc-operator'] },
-    { id: 'act.timeline', label: 'Build the timeline from raw logs', forRoles: ['log-analyst'] },
-    { id: 'act.flow-map', label: 'Map the connection against baseline', forRoles: ['network-analyst'] },
-    { id: 'act.probe-pattern', label: 'Look for the same source on other ports and hosts', forRoles: ['network-analyst'] },
-    { id: 'act.decode', label: 'Decode and classify the payload', forRoles: ['malware-analyst'] },
-    { id: 'act.sandbox', label: 'Detonate in a sandbox to capture the second stage', forRoles: ['malware-analyst'] },
-    { id: 'act.iam-audit', label: 'Audit the principal and where it was called from', forRoles: ['cloud-security'] },
-    { id: 'act.revoke-key', label: 'Revoke the credential', forRoles: ['cloud-security'] },
-    /*
-     * Three different things, and only the last one is wrong.
-     *
-     * Mapping technique is concrete and checkable. Assessing a likely actor
-     * CLASS with a stated basis and a confidence is the job: it drives what you
-     * expect next, and a financially motivated actor and an espionage one
-     * behave differently from here. Asserting a specific named group as fact
-     * off an address is the failure, because it is unfalsifiable at this stage
-     * and it changes how everybody else reads the evidence.
-     */
-    { id: 'act.ttp-map', label: 'Map the observed tradecraft to ATT&CK techniques', forRoles: ['threat-intel'] },
-    { id: 'act.assess-actor', label: 'Assess likely actor class and motive, with basis and confidence', forRoles: ['threat-intel'] },
-    { id: 'act.predict', label: 'State the most likely next move, and what would confirm it', forRoles: ['threat-intel'] },
-    { id: 'act.attribute-named', label: 'Attribute to a specific named group as fact', forRoles: [] },
-    { id: 'act.preserve', label: 'Capture memory, then image, with custody recorded', forRoles: ['forensics'] },
-    { id: 'act.isolate', label: 'Isolate the host at the network layer', forRoles: ['ir-lead'] },
-    { id: 'act.power-off', label: 'Pull the power on the host', forRoles: [] },
-    { id: 'act.declare', label: 'Declare an incident', forRoles: ['ir-lead'] },
-    { id: 'act.write-rule', label: 'Write a detection rule for this pattern', forRoles: [] },
-  ],
+  /*
+   * The shared catalogue, not a bespoke list.
+   *
+   * A SOC operator's options do not change because tonight's intrusion is this
+   * one, and re-declaring them per scenario is how "dismiss" comes to mean
+   * something subtly different in the fourteenth. The attribution split lives
+   * there too: mapping technique, assessing an actor CLASS with a basis and a
+   * confidence, and predicting the next move are all in-lane for intel, and
+   * asserting a named group as fact is in-lane for nobody.
+   */
+  actions: COMMON_ACTIONS,
 
   events: [
     {
@@ -137,6 +119,12 @@ export const RIDGELINE: Scenario = {
       id: 'ev.4',
       atSeconds: 120,
       surface: 'network-flow',
+      // THE GAP. At expert this pivot never reaches a console, so the floor
+      // holds a compromised web host and a database shipping 6.3 GB out, with
+      // nothing linking them. Saying "something moved between these and we
+      // cannot see it" is the finding, and it is a different skill from
+      // reading what is in front of you.
+      withheldAtExpert: true,
       summary: 'SSH from rmg-web-02 to rmg-db-01, first time in the baseline window',
       detail:
         'A key-based SSH session opened from the web host to the patient records database. ' +
@@ -194,6 +182,17 @@ export const RIDGELINE: Scenario = {
         'the scheduler that normally drives this principal.',
       source: 'backup-automation',
       claimedSeverity: 'medium',
+      // THE CONTRADICTION. At expert this same moment also reaches the alert
+      // queue through the SIEM's cloud connector, which samples and truncates.
+      // Cloud Security reads five deletions inside retention; the operator
+      // reads two and a routine label. Both consoles are working correctly.
+      // The skill is noticing the two accounts do not match and asking which
+      // source is weaker, rather than averaging them into a third wrong answer.
+      expertAlsoOn: ['alert-queue'],
+      expertDetail:
+        'Cloud connector event: 2 snapshot delete calls by backup-automation. Classified ' +
+        'routine-lifecycle by the connector policy. Sampling note: this connector reports on a ' +
+        '5-minute rollup and drops calls beyond the first two in a window.',
     },
     {
       id: 'ev.8',
@@ -220,6 +219,61 @@ export const RIDGELINE: Scenario = {
       source: 'rmg-db-01',
       target: '198.51.100.60:443',
       claimedSeverity: 'high',
+    },
+
+    /*
+     * ----------------------------------------------------------------------
+     * EXPERT ONLY
+     *
+     * None of these exist below expert. They do not remove help, they change
+     * the evidence, which is the difference between a scenario that is tedious
+     * and one that is hard.
+     * ----------------------------------------------------------------------
+     */
+    {
+      id: 'ev.11',
+      atSeconds: 268,
+      surface: 'alert-queue',
+      expertOnly: true,
+      summary: 'Forty-one scan alerts from eleven external addresses in ninety seconds',
+      detail:
+        'A burst of port scan detections against the perimeter, all blocked, spread across ' +
+        'eleven source addresses in 203.0.113.0/24. Every one is a genuine detection and every ' +
+        'one was stopped. Rule history: fired 22 times in thirty days, all closed as not worth ' +
+        'acting on. The burst pushes seventeen minutes of queue history off the first page.',
+      source: '203.0.113.0/24',
+      target: 'perimeter',
+      claimedSeverity: 'medium',
+    },
+    {
+      id: 'ev.12',
+      atSeconds: 300,
+      surface: 'host-artefact',
+      expertOnly: true,
+      summary: 'Staging binary on rmg-db-01 carrying non-English strings and an off-hours build stamp',
+      detail:
+        'The archiving utility left on the database host contains resource strings in Cyrillic ' +
+        'and a compiler timestamp of 02:14 UTC. The packer is one publicly documented as ' +
+        'associated with a named criminal group in three vendor reports. The strings sit in a ' +
+        'resource section that is not referenced by any code path in the binary.',
+      source: 'rmg-db-01',
+      claimedSeverity: 'high',
+    },
+    {
+      id: 'ev.13',
+      atSeconds: 330,
+      surface: 'alert-queue',
+      expertOnly: true,
+      summary: 'VPN session for j.okafor from an address never seen on this account',
+      detail:
+        'A successful VPN authentication for a current employee in the finance team, from an ' +
+        'address in 198.51.100.0/24, at 03:40 local. MFA was satisfied. The account has ninety ' +
+        'days of history and has never authenticated from this address or outside 08:00 to ' +
+        '19:00. No failures preceded it. The session opened one file share and closed after ' +
+        'four minutes. HR records show approved leave for this employee starting yesterday.',
+      source: '198.51.100.31',
+      target: 'vpn-gw-01',
+      claimedSeverity: 'medium',
     },
   ],
 };
@@ -470,6 +524,109 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
         'database has egress the web host does not. Note what you can and cannot say. You can ' +
         'prove 6.3 GB left and where it went. You cannot prove what was in it, and the report ' +
         'should say so rather than assert the record count somebody will quote back to a regulator.',
+    },
+
+    /*
+     * ------------------------------------------------------------------------
+     * TRUTH FOR THE EXPERT-ONLY EVENTS
+     * ------------------------------------------------------------------------
+     */
+    {
+      eventId: 'ev.11',
+      verdict: 'decoy',
+      stage: 'exfiltration',
+      techniques: ['T1595', 'T1499'],
+      firstResponder: 'soc-operator',
+      alsoAppropriate: ['network-analyst'],
+      correctActions: ['act.dismiss', 'act.tune'],
+      outOfLaneActions: ['act.isolate', 'act.declare', 'act.preserve'],
+      escalateTo: [],
+      why:
+        'Forty-one real, blocked, harmless scan detections, arriving seventeen seconds before ' +
+        '6.3 GB leaves the database. Every one is a true positive and none of them matter. The ' +
+        'timing is the tell: this burst exists to push the queue over and bury what follows. ' +
+        'Below expert the noise on this floor is accidental, a collector nobody fixed. Here it ' +
+        'has an author. Working it carefully is the failure, and so is dismissing it without ' +
+        'noticing that a flood arriving at precisely this moment is itself a finding worth ' +
+        'saying out loud.',
+      standIn:
+        'Queue just took forty-one scan alerts across eleven sources, all blocked, all from the ' +
+        'documentation range. Rule has fired twenty-two times this month and every one closed as ' +
+        'nothing. I am closing them. Flagging that it arrived all at once and pushed the last ' +
+        'seventeen minutes off my first page.',
+      commandNudge:
+        'Compare when the burst arrived against when anything else on the board happened.',
+      guidance:
+        'A flood of harmless true positives is still a flood. Ask who benefits from the queue ' +
+        'being full right now.',
+    },
+    {
+      eventId: 'ev.12',
+      verdict: 'malicious',
+      stage: 'collection',
+      techniques: ['T1560', 'T1036'],
+      firstResponder: 'forensics',
+      alsoAppropriate: ['malware-analyst', 'threat-intel'],
+      correctActions: ['act.preserve', 'act.chain'],
+      outOfLaneActions: ['act.attribute-named', 'act.reimage-now', 'act.power-off'],
+      escalateTo: ['ir-lead'],
+      appearsToBe:
+        'A named criminal group, on three separate signals that all point the same way: Cyrillic ' +
+        'resource strings, a build stamp in the small hours of a Moscow working day, and a packer ' +
+        'three vendor reports tie to that group.',
+      why:
+        'The binary is real and the staging is real. The nationality is furniture. Strings sitting ' +
+        'in a resource section no code path reaches are not artefacts of how something was built, ' +
+        'they are cargo; a compiler timestamp is a field somebody can type; and a documented packer ' +
+        'is documented, which means anybody can read the report and use it. Three signals that ' +
+        'agree are more persuasive than one and no harder to plant, which is exactly why a tidy ' +
+        'story deserves more suspicion than a messy one. The correct finding is that an archive ' +
+        'was staged for exfiltration. The correct answer on attribution is that the evidence is ' +
+        'consistent with a financially motivated actor and that nothing here supports naming ' +
+        'anybody, and that stands whether or not the planted detail is real.',
+      standIn:
+        'Archiving utility on the database host, memory captured before disk, hashed and sealed. ' +
+        'It is a staging tool and it ran. I will note the binary carries Cyrillic strings in an ' +
+        'unreferenced resource section and an 02:14 build stamp. I am reporting those as present, ' +
+        'not as meaningful.',
+      commandNudge:
+        'Look at where in the binary those strings actually live, and whether anything reaches them.',
+      guidance:
+        'Three signals pointing one way is a story. Ask whether each one is a by-product of how it ' +
+        'was built or something somebody chose to put there.',
+    },
+    {
+      eventId: 'ev.13',
+      verdict: 'ambiguous',
+      firstResponder: 'soc-operator',
+      alsoAppropriate: ['log-analyst', 'ir-lead'],
+      correctActions: ['act.triage-high', 'act.investigate-hold'],
+      outOfLaneActions: ['act.reset-password', 'act.isolate', 'act.declare'],
+      escalateTo: ['ir-lead'],
+      wouldSettleIt:
+        'A phone call to the employee, or the device posture record for that session showing ' +
+        'whether it came from their managed laptop. Neither was available inside the hour.',
+      why:
+        'This one does not resolve, and it is not supposed to. Everything suspicious about it has ' +
+        'an innocent reading: people on leave travel, MFA was genuinely satisfied, and one file ' +
+        'share in four minutes is what checking something looks like. Everything innocent about it ' +
+        'has a hostile reading: approved leave is public inside the company, MFA fatigue and ' +
+        'session theft both survive a satisfied prompt, and four minutes is also what a look around ' +
+        'looks like. There is no evidence here that settles it and none was obtainable in the hour. ' +
+        'The mark is on the confidence, not the call. Escalating at 45% with a note on what would ' +
+        'settle it and dismissing at 40% with the same note are both good work. Either one asserted ' +
+        'at 90% is the failure, because that is the habit that produces a confident wrong story on ' +
+        'a night when it costs something.',
+      standIn:
+        'VPN login for a finance account from an address it has never used, 03:40 local, MFA ' +
+        'passed, four minutes, one file share. Employee is on approved leave as of yesterday. I ' +
+        'cannot call this either way on what I have. I would want the device posture record or ' +
+        'somebody to ring them.',
+      commandNudge:
+        'Check what the account did in the session, and what its ninety days of history look like.',
+      guidance:
+        'Some events do not resolve. Say how sure you are and what would change it, and make sure ' +
+        'the number matches the evidence rather than the feeling.',
     },
   ],
 };

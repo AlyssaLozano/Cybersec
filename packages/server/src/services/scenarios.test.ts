@@ -524,8 +524,133 @@ describe('terminal help is a function of difficulty', () => {
     const expert = eventsFor(ID, 'soc-operator', 99_999, 'expert');
     expect(normal.some((e) => e.claimedSeverity !== null)).toBe(true);
     expect(expert.every((e) => e.claimedSeverity === null)).toBe(true);
-    // Same events, same order: only the assertion is withheld.
-    expect(expert.map((e) => e.id)).toEqual(normal.map((e) => e.id));
+  });
+
+  /*
+   * Expert changes the EVIDENCE, not the scaffolding.
+   *
+   * Withholding hints makes a scenario tedious. These four make it hard, and
+   * each one is asserted separately because each is a flag an author can set
+   * and get silently wrong.
+   */
+  describe('expert difficulty', () => {
+    it('puts attacker-generated noise on the board, and only at expert', () => {
+      const below = eventsFor(ID, 'soc-operator', 99_999, 'advanced').map((e) => e.id);
+      const expert = eventsFor(ID, 'soc-operator', 99_999, 'expert').map((e) => e.id);
+      // The decoy flood does not exist below expert. It is not hidden from a
+      // seat, that run never had it.
+      expect(below).not.toContain('ev.11');
+      expect(expert).toContain('ev.11');
+      expect(truthFor(ID)!.events.find((e) => e.eventId === 'ev.11')!.verdict).toBe('decoy');
+    });
+
+    it('removes a stage from every seat, so the gap has to be inferred', () => {
+      for (const role of ['network-analyst', 'ir-lead', 'log-analyst'] as const) {
+        const ids = eventsFor(ID, role, 99_999, 'expert').map((e) => e.id);
+        expect(ids).not.toContain('ev.4');
+      }
+      // The lead sees every surface, so if anybody could still see it, they
+      // could. Nobody can, which is what makes it a gap rather than a secret.
+      expect(eventsFor(ID, 'ir-lead', 99_999, 'intermediate').map((e) => e.id)).toContain('ev.4');
+    });
+
+    it('makes two seats hold different accounts of one moment', () => {
+      const operator = eventsFor(ID, 'soc-operator', 99_999, 'expert').find((e) => e.id === 'ev.5');
+      const cloud = eventsFor(ID, 'cloud-security', 99_999, 'expert').find((e) => e.id === 'ev.5');
+      expect(operator).toBeDefined();
+      expect(cloud).toBeDefined();
+      // The seat that owns the surface keeps the full record; the seat reached
+      // through a lossy connector gets the degraded one. They disagree on the
+      // count, and both consoles are working correctly.
+      expect(operator!.detail).not.toBe(cloud!.detail);
+      expect(cloud!.detail).toMatch(/[Ff]ive snapshots?|deleted five/);
+      expect(operator!.detail).toMatch(/2 snapshot delete calls/);
+      // Below expert there is no contradiction to find.
+      expect(
+        eventsFor(ID, 'soc-operator', 99_999, 'intermediate').find((e) => e.id === 'ev.5'),
+      ).toBeUndefined();
+    });
+
+    it('stops telling a seat how many events are coming', () => {
+      // "Am I done" is a question expert makes the floor answer from evidence
+      // rather than from a progress bar.
+      expect(briefingFor(ID, 'soc-operator', 'intermediate')!.expectedEvents).toBeGreaterThan(0);
+      expect(briefingFor(ID, 'soc-operator', 'expert')!.expectedEvents).toBeNull();
+      expect(briefingFor(ID, 'soc-operator', 'expert')!.glossary).toEqual([]);
+    });
+
+    it('reports a withheld stage in the debrief and never counts it as missed', () => {
+      const debrief = buildDebrief(ID, [], 'expert')!;
+      expect(debrief.withheld).toContain('ev.4');
+      expect(debrief.missed).not.toContain('ev.4');
+      expect(debrief.summary).toMatch(/never reached any console/);
+      // Nobody claimed anything, so everything that WAS shown is missed. The
+      // withheld stage is the only malicious event exempt.
+      expect(debrief.stages.find((s) => s.eventId === 'ev.4')!.neverShown).toBe(true);
+    });
+
+    it('says what the planted evidence was built to suggest', () => {
+      const staged = buildDebrief(ID, [], 'expert')!.stages.find((s) => s.eventId === 'ev.12')!;
+      // Teaching "distrust the tidy story" requires stating the story.
+      expect(staged.appearsToBe).toMatch(/named criminal group/i);
+    });
+  });
+
+  describe('unsettled events', () => {
+    const ambiguous = 'ev.13';
+
+    function claim(confidence: number, reasoning: string) {
+      return {
+        eventId: ambiguous,
+        role: 'soc-operator' as const,
+        disposition: 'escalate' as const,
+        reasoning,
+        actionIds: ['act.triage-high'],
+        escalateTo: 'ir-lead' as const,
+        confidence,
+        atSeconds: 360,
+      };
+    }
+
+    const hedged = 'Cannot call this either way. MFA passed and they are on leave, which cuts ' +
+      'both ways. I would need the device posture record to settle it.';
+
+    it('marks calibration rather than correctness', () => {
+      const score = scoreClaim(ID, claim(45, hedged))!;
+      expect(score.lines[0].label).toBe('Calibration');
+    });
+
+    it('accepts either disposition when the confidence is honest', () => {
+      const escalated = scoreClaim(ID, claim(45, hedged))!;
+      const dismissed = scoreClaim(ID, { ...claim(45, hedged), disposition: 'dismiss', escalateTo: null })!;
+      // Both are good work. There is nothing here to be right about.
+      expect(escalated.lines[0].points).toEqual(dismissed.lines[0].points);
+      expect(escalated.lines[0].points).toBeGreaterThan(30);
+    });
+
+    it('punishes certainty the evidence does not support', () => {
+      const confident = scoreClaim(ID, claim(95, hedged))!;
+      const honest = scoreClaim(ID, claim(45, hedged))!;
+      expect(confident.lines[0].points).toBeLessThan(honest.lines[0].points);
+      expect(confident.lines[0].notes.join(' ')).toMatch(/does not support it/);
+    });
+
+    it('also marks down refusing to have a view at all', () => {
+      // Quieter failure, still a failure: it leaves the call with somebody
+      // holding less evidence than you.
+      const abdicated = scoreClaim(ID, claim(5, hedged))!;
+      expect(abdicated.lines[0].points).toBeLessThan(scoreClaim(ID, claim(45, hedged))!.lines[0].points);
+      expect(abdicated.lines[0].notes.join(' ')).toMatch(/declining to have a view/);
+    });
+
+    it('rewards naming what would settle it', () => {
+      const names = scoreClaim(ID, claim(45, hedged))!;
+      const does_not = scoreClaim(
+        ID,
+        claim(45, 'This is unclear to me and I am not confident about it in either direction at all.'),
+      )!;
+      expect(names.lines[0].points).toBeGreaterThan(does_not.lines[0].points);
+    });
   });
 
   it('withholds both from advanced and expert', () => {
