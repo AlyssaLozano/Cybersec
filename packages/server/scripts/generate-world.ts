@@ -45,10 +45,43 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const OUT_FILE = join(HERE, '..', 'src', 'vfs', 'data', 'generated.ts');
 
-const HOSTNAME = 'rmg-web-02';
-const LOG_DAY = 'Aug 15';
+/**
+ * One simulated host, described rather than hardcoded.
+ *
+ * WHY THIS IS A SPEC AND NOT CONSTANTS
+ *
+ * A scenario is only as real as the filesystem behind it. A cryptominer
+ * scenario needs a host with a mining process; a credential-theft scenario
+ * needs different accounts in /etc/passwd. One world cannot serve 25 scenarios,
+ * and 25 hand-written worlds would drift from the scenarios they belong to.
+ *
+ * So the generator takes a spec and the specs live in one list. Same script,
+ * one seed each, one committed output each, and every answer still derived from
+ * the seeded data rather than typed in.
+ *
+ * The first entry reproduces the original world EXACTLY. Exercise answers depend
+ * on its counts, so its output is asserted byte-identical after this refactor.
+ */
+interface WorldSpec {
+  id: string;
+  seed: number;
+  hostname: string;
+  logDay: string;
+  attackerIp: string;
+  compromisedUser: string;
+  backdoorUser: string;
+  exfilIp: string;
+  monitoringIp: string;
+  backupIp: string;
+  /** Path the generated module is written to, relative to scripts/. */
+  outFile: string;
+}
+
+// Bound per world by buildWorld(). Declared here because the builders below
+// read them the way they always did.
+let HOSTNAME = 'rmg-web-02';
+let LOG_DAY = 'Aug 15';
 
 // --- deterministic randomness ------------------------------------------------
 
@@ -64,7 +97,7 @@ function makeRandom(seed: number): () => number {
   };
 }
 
-const rand = makeRandom(20260815);
+let rand = makeRandom(20260815);
 
 function pick<T>(items: readonly T[]): T {
   return items[Math.floor(rand() * items.length)]!;
@@ -102,16 +135,16 @@ const SCANNED_USERS = [
 ] as const;
 
 /** The intrusion. One IP, one compromised account, one backdoor. */
-const ATTACKER_IP = '203.0.113.55';
-const COMPROMISED_USER = 'testuser';
-const BACKDOOR_USER = 'sysmon';
+let ATTACKER_IP = '203.0.113.55';
+let COMPROMISED_USER = 'testuser';
+let BACKDOOR_USER = 'sysmon';
 /** Where the attacker sends data. */
-const EXFIL_IP = '198.51.100.60';
+let EXFIL_IP = '198.51.100.60';
 
 /** The monitoring host with a stale password. Noisy, internal, and harmless. */
-const MONITORING_IP = '10.20.9.40';
+let MONITORING_IP = '10.20.9.40';
 /** Backup server, authenticates by key and always succeeds. */
-const BACKUP_IP = '10.20.9.15';
+let BACKUP_IP = '10.20.9.15';
 
 // --- event plumbing ----------------------------------------------------------
 
@@ -434,8 +467,62 @@ function asTemplateLiteral(text: string): string {
   return '`' + escaped + '`';
 }
 
-const authLog = buildAuthLog();
-const syslog = buildSyslog();
+/**
+ * The worlds.
+ *
+ * ridgeline is the original host and MUST keep producing byte-identical
+ * output: Package 1 through Incident Response derive their answers from its
+ * counts, so a change here silently invalidates an answer key. Everything
+ * after it is a new host for a new scenario.
+ */
+const WORLDS: WorldSpec[] = [
+  {
+    id: 'ridgeline',
+    seed: 20260815,
+    hostname: 'rmg-web-02',
+    logDay: 'Aug 15',
+    attackerIp: '203.0.113.55',
+    compromisedUser: 'testuser',
+    backdoorUser: 'sysmon',
+    exfilIp: '198.51.100.60',
+    monitoringIp: '10.20.9.40',
+    backupIp: '10.20.9.15',
+    outFile: join(HERE, '..', 'src', 'vfs', 'data', 'generated.ts'),
+  },
+  {
+    // Scenario 02: a stolen credential used from outside, no malware at all.
+    // Different host, different accounts, different noise floor, so a student
+    // who memorised rmg-web-02 recognises nothing here.
+    id: 'meridian',
+    seed: 20260902,
+    hostname: 'rmg-vpn-01',
+    logDay: 'Sep 02',
+    attackerIp: '203.0.113.90',
+    compromisedUser: 'jdelacruz',
+    backdoorUser: 'svc-report',
+    exfilIp: '198.51.100.112',
+    monitoringIp: '10.20.9.40',
+    backupIp: '10.20.9.15',
+    outFile: join(HERE, '..', 'src', 'vfs', 'data', 'worlds', 'meridian.generated.ts'),
+  },
+];
+
+function buildWorld(spec: WorldSpec): { authLog: string; syslog: string } {
+  // Rebind the per-world values, then reset the stream so each world is a pure
+  // function of its own seed and nothing leaks between them.
+  HOSTNAME = spec.hostname;
+  LOG_DAY = spec.logDay;
+  ATTACKER_IP = spec.attackerIp;
+  COMPROMISED_USER = spec.compromisedUser;
+  BACKDOOR_USER = spec.backdoorUser;
+  EXFIL_IP = spec.exfilIp;
+  MONITORING_IP = spec.monitoringIp;
+  BACKUP_IP = spec.backupIp;
+  rand = makeRandom(spec.seed);
+  sshdPid = 21_400;
+
+  return { authLog: buildAuthLog(), syslog: buildSyslog() };
+}
 
 const banner = `/**
  * GENERATED FILE -- DO NOT EDIT BY HAND.
@@ -448,32 +535,36 @@ const banner = `/**
  */
 `;
 
-const body = `${banner}
-/** ${authLog.split('\n').length} lines of authentication events for ${LOG_DAY}. */
+const countIn = (text: string, needle: string) =>
+  text.split('\n').filter((l) => l.includes(needle)).length;
+
+for (const spec of WORLDS) {
+  const { authLog, syslog } = buildWorld(spec);
+
+  const body = `${banner}
+/** ${authLog.split('\n').length} lines of authentication events for ${spec.logDay}. */
 export const AUTH_LOG = ${asTemplateLiteral(authLog)};
 
-/** ${syslog.split('\n').length} lines of system events for ${LOG_DAY}. */
+/** ${syslog.split('\n').length} lines of system events for ${spec.logDay}. */
 export const SYSLOG = ${asTemplateLiteral(syslog)};
 `;
 
-mkdirSync(dirname(OUT_FILE), { recursive: true });
-writeFileSync(OUT_FILE, body, 'utf8');
+  mkdirSync(dirname(spec.outFile), { recursive: true });
+  writeFileSync(spec.outFile, body, 'utf8');
 
-const authLines = authLog.split('\n').length;
-const sysLines = syslog.split('\n').length;
-const countIn = (text: string, needle: string) => text.split('\n').filter((l) => l.includes(needle)).length;
-
-process.stdout.write(
-  [
-    `Wrote ${OUT_FILE}`,
-    `  auth.log : ${authLines} lines`,
-    `    Failed password        : ${countIn(authLog, 'Failed password')}`,
-    `    Accepted               : ${countIn(authLog, 'Accepted')}`,
-    `    Invalid user           : ${countIn(authLog, 'Invalid user')}`,
-    `    sudo                   : ${countIn(authLog, 'sudo:')}`,
-    `    from ${ATTACKER_IP}    : ${countIn(authLog, ATTACKER_IP)}`,
-    `    from ${MONITORING_IP} (decoy): ${countIn(authLog, MONITORING_IP)}`,
-    `  syslog   : ${sysLines} lines`,
-    '',
-  ].join('\n'),
-);
+  process.stdout.write(
+    [
+      `Wrote ${spec.outFile}`,
+      `  ${spec.id} on ${spec.hostname}, seed ${spec.seed}`,
+      `  auth.log : ${authLog.split('\n').length} lines`,
+      `    Failed password        : ${countIn(authLog, 'Failed password')}`,
+      `    Accepted               : ${countIn(authLog, 'Accepted')}`,
+      `    Invalid user           : ${countIn(authLog, 'Invalid user')}`,
+      `    sudo                   : ${countIn(authLog, 'sudo:')}`,
+      `    from ${spec.attackerIp}  : ${countIn(authLog, spec.attackerIp)}`,
+      `    from ${spec.monitoringIp} (decoy): ${countIn(authLog, spec.monitoringIp)}`,
+      `  syslog   : ${syslog.split('\n').length} lines`,
+      '',
+    ].join('\n'),
+  );
+}
