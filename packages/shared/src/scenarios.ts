@@ -112,6 +112,9 @@ export const KILL_CHAIN_STAGES = [
   // and spray incidents live almost entirely here.
   'credential-access',
   'defense-evasion',
+  // Mapping what is reachable, once you are inside. Distinct from
+  // reconnaissance, which happens before you have a foothold.
+  'discovery',
   'lateral-movement',
   'collection',
   // Maintaining a channel is its own stage. Beaconing incidents spend weeks

@@ -14,6 +14,12 @@
 
 import { describe, expect, it } from 'vitest';
 
+// Imported at module load rather than inside the test. Reaching it through a
+// dynamic import charged the whole route graph, and therefore the scenario
+// catalogue, against this test's own timeout, which started failing under
+// parallel load once the catalogue reached twenty-five scenarios.
+import { toClientItem } from '../routes/assessment.js';
+
 import type { ItemResponse, LaneId } from '@soc/shared';
 import { DIMENSIONS, LANES, TRAITS } from '@soc/shared';
 
@@ -618,9 +624,7 @@ describe('item lookup', () => {
 // =========================================================================
 
 describe('client item view', () => {
-  it('strips every scoring field from every item', async () => {
-    const { toClientItem } = await import('../routes/assessment.js');
-
+  it('strips every scoring field from every item', () => {
     // A learner who can see that agreeing with e1 adds four points to
     // penetration testing can work backwards to whatever answer they wanted,
     // which turns a self-assessment into a wish list.
