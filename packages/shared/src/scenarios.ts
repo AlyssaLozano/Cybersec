@@ -107,6 +107,11 @@ export const KILL_CHAIN_STAGES = [
   'execution',
   'persistence',
   'privilege-escalation',
+  // Distinct from privilege escalation: harvesting a credential you were never
+  // given is a different stage from widening one you already hold, and phishing
+  // and spray incidents live almost entirely here.
+  'credential-access',
+  'defense-evasion',
   'lateral-movement',
   'collection',
   'exfiltration',

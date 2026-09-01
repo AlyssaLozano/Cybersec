@@ -13,13 +13,18 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { RIDGELINE, RIDGELINE_TRUTH } from './ridgeline.js';
+import { NO_PATCH, NO_PATCH_TRUTH } from './zero-day.js';
+import { KEY_RING, KEY_RING_TRUTH } from './cloud-creds.js';
+import { QUIET_CHANNEL, QUIET_CHANNEL_TRUTH } from './dns-exfil.js';
+import { LONG_WEATHER, LONG_WEATHER_TRUTH } from './apt.js';
+import { SECOND_POST, SECOND_POST_TRUTH } from './phishing.js';
 import { CHEAP_RENT, CHEAP_RENT_TRUTH } from './cryptominer.js';
 import { THIRD_PARTY, THIRD_PARTY_TRUTH } from './supply-chain.js';
 import { LONG_NOTICE, LONG_NOTICE_TRUTH } from './insider.js';
 import { LOW_TIDE, LOW_TIDE_TRUTH } from './dictionary.js';
 
-export const SCENARIOS: Scenario[] = [RIDGELINE, LOW_TIDE, LONG_NOTICE, THIRD_PARTY, CHEAP_RENT];
-export const SCENARIO_TRUTH: ScenarioTruth[] = [RIDGELINE_TRUTH, LOW_TIDE_TRUTH, LONG_NOTICE_TRUTH, THIRD_PARTY_TRUTH, CHEAP_RENT_TRUTH];
+export const SCENARIOS: Scenario[] = [RIDGELINE, LOW_TIDE, LONG_NOTICE, THIRD_PARTY, CHEAP_RENT, SECOND_POST, LONG_WEATHER, QUIET_CHANNEL, KEY_RING, NO_PATCH];
+export const SCENARIO_TRUTH: ScenarioTruth[] = [RIDGELINE_TRUTH, LOW_TIDE_TRUTH, LONG_NOTICE_TRUTH, THIRD_PARTY_TRUTH, CHEAP_RENT_TRUTH, SECOND_POST_TRUTH, LONG_WEATHER_TRUTH, QUIET_CHANNEL_TRUTH, KEY_RING_TRUTH, NO_PATCH_TRUTH];
 
 function validateScenarios(): void {
   const truthById = new Map(SCENARIO_TRUTH.map((t) => [t.scenarioId, t]));
