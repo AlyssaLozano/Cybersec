@@ -204,9 +204,12 @@ const TERMS: Record<string, Array<{ term: string; means: string }>> = {
     { term: 'Least privilege', means: 'A principal holding only the permissions it needs. A first use of an unused one is a signal.' },
   ],
   'threat-intel': [
-    { term: 'TTP', means: 'Tactics, techniques and procedures. How an actor works, which is harder to change than an address.' },
-    { term: 'Attribution', means: 'Naming who did it. Easy to assert, hard to justify, and expensive when wrong.' },
-    { term: 'IOC', means: 'Indicator of compromise. An address, hash or domain. Cheap for an attacker to change.' },
+    { term: 'TTP', means: 'Tactics, techniques and procedures. How an actor works, which is harder for them to change than an address.' },
+    { term: 'ATT&CK', means: 'A public catalogue of observed techniques with ids like T1110. Mapping to it makes a finding comparable across incidents and teams.' },
+    { term: 'IOC', means: 'Indicator of compromise. An address, hash or domain. Cheap for an attacker to change, so it ages badly.' },
+    { term: 'Actor class', means: 'What kind of adversary this behaves like: financially motivated, espionage, opportunistic. Drives what you expect next.' },
+    { term: 'Attribution', means: 'Assessing who did it. An assessment with a basis and a confidence is intelligence; a named group asserted as fact off an address is a guess wearing a suit.' },
+    { term: 'Analytic confidence', means: 'How much weight your assessment carries, and why. Stated explicitly so somebody else can disagree with the reasoning rather than the conclusion.' },
   ],
   'ai-security': [
     { term: 'Prompt injection', means: 'Input that a model treats as instruction rather than as data.' },
@@ -288,11 +291,16 @@ const REMIT: Record<string, { remit: string; questions: string[]; handsTo: SocRo
     handsTo: ['ir-lead'],
   },
   'threat-intel': {
-    remit: 'Map the tradecraft. Say what it resembles and be explicit about what you are not claiming.',
+    remit:
+      'Map the tradecraft to ATT&CK, assess who this is likely to be and what they want, and say ' +
+      'what they will probably do next.',
     questions: [
-      'Which techniques can you map, and which are you inferring?',
-      'What would you have to see to move from resembles to is?',
-      'What are you deliberately not attributing, and why?',
+      'Which ATT&CK techniques can you actually evidence, and which are you inferring?',
+      'Actor CLASS and motive first: does this read as financially motivated, espionage, or ' +
+        'opportunistic? What in the evidence says so?',
+      'What is the most likely next move, and what would you need to see to confirm it?',
+      'Where is the line between your assessment and a named group? State your confidence and ' +
+        'what would change it.',
     ],
     handsTo: ['ir-lead'],
   },

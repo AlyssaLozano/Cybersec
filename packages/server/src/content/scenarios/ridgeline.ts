@@ -68,8 +68,20 @@ export const RIDGELINE: Scenario = {
     { id: 'act.sandbox', label: 'Detonate in a sandbox to capture the second stage', forRoles: ['malware-analyst'] },
     { id: 'act.iam-audit', label: 'Audit the principal and where it was called from', forRoles: ['cloud-security'] },
     { id: 'act.revoke-key', label: 'Revoke the credential', forRoles: ['cloud-security'] },
-    { id: 'act.ttp-map', label: 'Map the tradecraft to technique, without naming an actor', forRoles: ['threat-intel'] },
-    { id: 'act.attribute', label: 'Attribute to a named threat group', forRoles: [] },
+    /*
+     * Three different things, and only the last one is wrong.
+     *
+     * Mapping technique is concrete and checkable. Assessing a likely actor
+     * CLASS with a stated basis and a confidence is the job: it drives what you
+     * expect next, and a financially motivated actor and an espionage one
+     * behave differently from here. Asserting a specific named group as fact
+     * off an address is the failure, because it is unfalsifiable at this stage
+     * and it changes how everybody else reads the evidence.
+     */
+    { id: 'act.ttp-map', label: 'Map the observed tradecraft to ATT&CK techniques', forRoles: ['threat-intel'] },
+    { id: 'act.assess-actor', label: 'Assess likely actor class and motive, with basis and confidence', forRoles: ['threat-intel'] },
+    { id: 'act.predict', label: 'State the most likely next move, and what would confirm it', forRoles: ['threat-intel'] },
+    { id: 'act.attribute-named', label: 'Attribute to a specific named group as fact', forRoles: [] },
     { id: 'act.preserve', label: 'Capture memory, then image, with custody recorded', forRoles: ['forensics'] },
     { id: 'act.isolate', label: 'Isolate the host at the network layer', forRoles: ['ir-lead'] },
     { id: 'act.power-off', label: 'Pull the power on the host', forRoles: [] },
@@ -222,6 +234,7 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.1',
       verdict: 'malicious',
+      techniques: ['T1110.001 Password Guessing', 'T1078.003 Valid Accounts: Local'],
       stage: 'initial-access',
       firstResponder: 'soc-operator',
       alsoAppropriate: ['log-analyst'],
@@ -238,6 +251,7 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.2',
       verdict: 'blocked-reconnaissance',
+      techniques: ['T1071.001 Application Layer Protocol: Web', 'T1041 Exfiltration Over C2 Channel'],
       stage: 'execution',
       firstResponder: 'network-analyst',
       alsoAppropriate: ['soc-operator', 'ir-lead'],
@@ -255,11 +269,12 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.3',
       verdict: 'malicious',
+      techniques: ['T1059 Command and Scripting Interpreter', 'T1105 Ingress Tool Transfer', 'T1027 Obfuscated Files or Information'],
       stage: 'execution',
       firstResponder: 'malware-analyst',
       alsoAppropriate: ['log-analyst', 'forensics'],
       correctActions: ['act.decode', 'act.sandbox'],
-      outOfLaneActions: ['act.dismiss', 'act.isolate', 'act.attribute'],
+      outOfLaneActions: ['act.dismiss', 'act.isolate', 'act.attribute-named'],
       escalateTo: ['ir-lead'],
       why:
         'Decoding the command is half the job and the easy half. The command is a loader: the ' +
@@ -270,6 +285,7 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.4',
       verdict: 'malicious',
+      techniques: ['T1021.004 Remote Services: SSH', 'T1570 Lateral Tool Transfer'],
       stage: 'lateral-movement',
       firstResponder: 'network-analyst',
       alsoAppropriate: ['log-analyst', 'ir-lead'],
@@ -303,6 +319,7 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.9',
       verdict: 'malicious',
+      techniques: ['T1098.004 Account Manipulation: SSH Authorized Keys'],
       stage: 'persistence',
       firstResponder: 'log-analyst',
       alsoAppropriate: ['forensics', 'ir-lead'],
@@ -318,6 +335,7 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.10',
       verdict: 'malicious',
+      techniques: ['T1098.004 Account Manipulation: SSH Authorized Keys', 'T1556 Modify Authentication Process'],
       stage: 'persistence',
       firstResponder: 'forensics',
       alsoAppropriate: ['log-analyst', 'ir-lead'],
@@ -332,6 +350,7 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.5',
       verdict: 'malicious',
+      techniques: ['T1485 Data Destruction', 'T1490 Inhibit System Recovery', 'T1078.004 Valid Accounts: Cloud'],
       stage: 'impact',
       firstResponder: 'cloud-security',
       alsoAppropriate: ['ir-lead', 'forensics'],
@@ -365,11 +384,12 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.6',
       verdict: 'malicious',
+      techniques: ['T1041 Exfiltration Over C2 Channel', 'T1030 Data Transfer Size Limits'],
       stage: 'exfiltration',
       firstResponder: 'network-analyst',
       alsoAppropriate: ['ir-lead', 'threat-intel'],
       correctActions: ['act.flow-map', 'act.probe-pattern'],
-      outOfLaneActions: ['act.dismiss', 'act.attribute', 'act.power-off'],
+      outOfLaneActions: ['act.dismiss', 'act.attribute-named', 'act.power-off'],
       escalateTo: ['ir-lead'],
       why:
         'The destination is the address rmg-web-02 was blocked from reaching at 00:30, which ties ' +

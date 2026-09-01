@@ -121,6 +121,13 @@ export interface EventTruth {
   verdict: EventVerdict;
   stage?: KillChainStage;
   /**
+   * ATT&CK technique ids this event demonstrates.
+   *
+   * On truth rather than on the event, because naming the technique is most of
+   * the intel seat's answer. Printing "T1110" on the board would hand it over.
+   */
+  techniques?: string[];
+  /**
    * The seat that should get to this FIRST. Claiming ahead of it is not wrong
    * knowledge, it is a lane violation, and the two are scored separately.
    */

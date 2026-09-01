@@ -468,6 +468,41 @@ describe('the investigation trace is reported, never scored', () => {
   });
 });
 
+describe('threat intel', () => {
+  it('maps techniques on truth, never on the board', () => {
+    // Naming the technique is most of the intel seat's answer, so printing
+    // "T1110" on the event would hand it over.
+    const withTech = truthFor(ID)!.events.filter((e) => e.techniques?.length);
+    expect(withTech.length).toBeGreaterThan(4);
+    const board = JSON.stringify(getScenario(ID)!.events);
+    for (const entry of withTech) {
+      for (const t of entry.techniques!) {
+        expect(board, `${entry.eventId} leaks ${t}`).not.toContain(t.split(' ')[0]!);
+      }
+    }
+  });
+
+  it('makes assessing an actor class in-lane and naming a group out-of-lane', () => {
+    const scenario = getScenario(ID)!;
+    const byId = new Map(scenario.actions.map((a) => [a.id, a]));
+    // Assessment with a stated basis is the job.
+    expect(byId.get('act.assess-actor')!.forRoles).toContain('threat-intel');
+    expect(byId.get('act.ttp-map')!.forRoles).toContain('threat-intel');
+    expect(byId.get('act.predict')!.forRoles).toContain('threat-intel');
+    // Asserting a named group as fact is in-lane for nobody, including them.
+    expect(byId.get('act.attribute-named')!.forRoles).toEqual([]);
+  });
+
+  it('briefs the intel seat on motive and next move, not just mapping', () => {
+    const b = briefingFor(ID, 'threat-intel')!;
+    expect(b.remit).toMatch(/ATT&CK/);
+    expect(JSON.stringify(b.questions)).toMatch(/motive|next move/i);
+    expect(b.glossary.map((g) => g.term)).toEqual(
+      expect.arrayContaining(['ATT&CK', 'Actor class', 'Analytic confidence']),
+    );
+  });
+});
+
 describe('the seat glossary', () => {
   it('defines all four dispositions for every seat', () => {
     for (const role of getScenario(ID)!.roles) {
