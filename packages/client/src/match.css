@@ -1,0 +1,348 @@
+/**
+ * The war room: red vs blue, one board.
+ *
+ * Everything is scoped under `.warroom` so this dark, committed theme cannot
+ * leak into the rest of the trainer. Colours are painted explicitly for the
+ * same reason the artifact mockup does it: the surface is a SOC floor, and a
+ * SOC floor is dark.
+ */
+
+.warroom {
+  --wr-ground: #080b14;
+  --wr-ground-2: #0d1220;
+  --wr-panel: #111828;
+  --wr-panel-2: #161f33;
+  --wr-line: #212c44;
+  --wr-line-soft: #1a2338;
+  --wr-ink: #d3dbec;
+  --wr-ink-dim: #8b96b0;
+  --wr-ink-faint: #59637d;
+  --wr-red: #ff3b52;
+  --wr-red-bright: #ff6377;
+  --wr-red-deep: #2a0d16;
+  --wr-blue: #3f9dff;
+  --wr-blue-bright: #6cb6ff;
+  --wr-blue-deep: #0a1f38;
+  --wr-violet: #9d7bff;
+  --wr-amber: #f5a623;
+  --wr-green: #35d08a;
+  --wr-r: 10px;
+
+  min-height: 100vh;
+  background:
+    radial-gradient(1100px 600px at 15% -5%, rgba(255, 59, 82, 0.14), transparent 55%),
+    radial-gradient(1100px 600px at 85% -5%, rgba(63, 157, 255, 0.14), transparent 55%),
+    var(--wr-ground);
+  color: var(--wr-ink);
+  font-size: 14px;
+}
+
+.warroom * { box-sizing: border-box; }
+
+.warroom .shell {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 16px clamp(12px, 3vw, 28px) 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* command bar */
+.warroom .cmdbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, var(--wr-panel-2), var(--wr-panel));
+  border: 1px solid var(--wr-line);
+  border-radius: var(--wr-r);
+}
+.warroom .brand { display: flex; align-items: center; gap: 11px; }
+.warroom .glyph {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: grid; place-items: center; font-weight: 700; font-size: 14px; color: #fff;
+  background: linear-gradient(135deg, var(--wr-red) 0 50%, var(--wr-blue) 50% 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+.warroom .brand h1 { font-size: 16px; font-weight: 700; margin: 0; }
+.warroom .brand .sub { font-size: 11px; color: var(--wr-ink-dim); margin-top: 1px; }
+.warroom .cmdbar .spacer { flex: 1; }
+.warroom .op-tag { display: flex; flex-direction: column; gap: 2px; text-align: right; }
+.warroom .op-tag .k { font-size: 14px; font-weight: 600; }
+.warroom .op-tag .small { font-size: 11px; color: var(--wr-ink-dim); }
+
+.warroom .wr-btn {
+  font-weight: 600; font-size: 12px; letter-spacing: 0.03em;
+  padding: 8px 14px; border-radius: 8px; cursor: pointer;
+  color: var(--wr-ink); background: var(--wr-ground-2); border: 1px solid var(--wr-line);
+}
+.warroom .wr-btn:hover { border-color: var(--wr-ink-faint); }
+.warroom .wr-btn.ghost { background: none; color: var(--wr-ink-dim); }
+.warroom .wr-btn.danger { color: var(--wr-red-bright); border-color: rgba(255, 59, 82, 0.35); }
+.warroom .wr-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* scene banner */
+.warroom .wr-scene {
+  display: block;
+  width: 100%;
+  height: 128px;
+  border: 1px solid var(--wr-line);
+  border-radius: var(--wr-r);
+}
+
+/* turn strip */
+.warroom .turnstrip {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 10px 15px; background: var(--wr-ground-2);
+  border: 1px solid var(--wr-line); border-radius: var(--wr-r);
+}
+.warroom .whose {
+  font-weight: 700; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 9px;
+}
+.warroom .whose.red { color: var(--wr-red); }
+.warroom .whose.blue { color: var(--wr-blue); }
+.warroom .dot { width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 0 3px currentColor; }
+.warroom .dot.live { animation: wr-pulse 1.8s ease-in-out infinite; }
+@keyframes wr-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 40%, transparent); }
+  50% { box-shadow: 0 0 0 6px transparent; }
+}
+.warroom .ticks { display: flex; gap: 5px; flex-wrap: wrap; }
+.warroom .tick {
+  font-size: 11px; padding: 4px 9px; border-radius: 5px;
+  border: 1px solid var(--wr-line); color: var(--wr-ink-dim); background: var(--wr-panel);
+}
+.warroom .tick.now { border-color: var(--wr-violet); color: #c3b0ff; }
+.warroom .tick .sig { color: var(--wr-amber); }
+.warroom .tick .clr { color: var(--wr-green); }
+
+/* battlefield */
+.warroom .field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 13px; align-items: start;
+}
+.warroom .col { display: flex; flex-direction: column; gap: 13px; }
+.warroom .col.dim { opacity: 0.5; filter: saturate(0.6); }
+
+.warroom .card {
+  background: linear-gradient(180deg, var(--wr-panel-2), var(--wr-panel));
+  border: 1px solid var(--wr-line); border-radius: var(--wr-r); overflow: hidden;
+}
+.warroom .card > .head {
+  display: flex; align-items: center; gap: 10px; padding: 11px 14px;
+  border-bottom: 1px solid var(--wr-line-soft);
+}
+.warroom .card > .head .title { font-size: 13px; font-weight: 600; letter-spacing: 0.03em; }
+.warroom .card > .head .spacer { flex: 1; }
+.warroom .card > .body { padding: 14px; }
+.warroom .side-red { border-top: 2px solid var(--wr-red); }
+.warroom .side-blue { border-top: 2px solid var(--wr-blue); }
+.warroom .side-red .head { background: linear-gradient(180deg, rgba(255, 59, 82, 0.10), transparent); }
+.warroom .side-blue .head { background: linear-gradient(180deg, rgba(63, 157, 255, 0.10), transparent); }
+.warroom .side-red .head .title { color: var(--wr-red-bright); }
+.warroom .side-blue .head .title { color: var(--wr-blue-bright); }
+
+.warroom .badge {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 5px; border: 1px solid var(--wr-line);
+  color: var(--wr-ink-dim); background: var(--wr-ground-2); white-space: nowrap;
+}
+.warroom .badge.turn-red { color: var(--wr-red-bright); border-color: rgba(255, 59, 82, 0.4); background: var(--wr-red-deep); }
+
+/* options */
+.warroom .decision-q { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.warroom .decision-sub { font-size: 12px; color: var(--wr-ink-dim); margin-bottom: 12px; }
+.warroom .opt {
+  display: grid; grid-template-columns: 1fr; gap: 2px; padding: 10px 12px; margin-bottom: 8px;
+  border: 1px solid var(--wr-line); border-radius: 8px; background: var(--wr-panel);
+  cursor: pointer; text-align: left; width: 100%; color: inherit;
+}
+.warroom .opt:hover { border-color: rgba(255, 59, 82, 0.45); }
+.warroom .side-blue .opt:hover { border-color: rgba(63, 157, 255, 0.45); }
+.warroom .opt.chosen { border-color: var(--wr-red); background: var(--wr-red-deep); }
+.warroom .side-blue .opt.chosen { border-color: var(--wr-blue); background: var(--wr-blue-deep); }
+.warroom .opt .label { font-size: 13px; font-weight: 500; }
+.warroom .opt .desc { font-size: 11.5px; color: var(--wr-ink-dim); }
+.warroom .opt:disabled { opacity: 0.5; cursor: default; }
+
+.warroom .why-label { font-size: 12px; color: var(--wr-ink-dim); margin: 12px 0 6px; }
+.warroom .why {
+  width: 100%; resize: vertical; min-height: 58px; font: inherit; font-size: 12.5px;
+  color: var(--wr-ink); background: var(--wr-ground-2);
+  border: 1px solid var(--wr-line); border-radius: 8px; padding: 9px 11px;
+}
+.warroom .why:focus { outline: 2px solid var(--wr-red); outline-offset: 1px; }
+
+.warroom .cta {
+  margin-top: 12px; width: 100%; font-weight: 600; font-size: 13px; letter-spacing: 0.04em;
+  padding: 11px; border-radius: 8px; cursor: pointer; color: #fff; text-transform: uppercase;
+  border: 1px solid var(--wr-red); background: linear-gradient(180deg, var(--wr-red), #d92840);
+}
+.warroom .cta:hover { filter: brightness(1.08); }
+.warroom .cta:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+
+.warroom .move-log { display: flex; flex-direction: column; gap: 8px; }
+.warroom .logrow {
+  padding: 9px 11px; border: 1px solid var(--wr-line); border-radius: 8px;
+  background: var(--wr-panel); border-left: 3px solid var(--wr-line);
+}
+.warroom .logrow.scored { border-left-color: var(--wr-green); }
+.warroom .logrow .t { font-size: 12.5px; font-weight: 500; }
+.warroom .logrow .d { font-size: 11.5px; color: var(--wr-ink-dim); margin-top: 2px; }
+.warroom .logrow .pts { font-size: 11px; color: var(--wr-green); font-weight: 600; }
+
+/* findings: what a side has discovered */
+.warroom .findings { margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
+.warroom .finding {
+  padding: 9px 11px; border: 1px solid var(--wr-line); border-radius: 8px;
+  background: var(--wr-panel); border-left: 3px solid var(--wr-ink-faint);
+}
+.warroom .finding.sev-high { border-left-color: var(--wr-red); }
+.warroom .finding.sev-medium { border-left-color: var(--wr-amber); }
+.warroom .finding.sev-low { border-left-color: var(--wr-blue); }
+.warroom .finding.kind-vuln { background: linear-gradient(180deg, rgba(255, 59, 82, 0.07), transparent); }
+.warroom .finding .ft { font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.warroom .finding .fd { font-size: 11.5px; color: var(--wr-ink-dim); margin-top: 2px; }
+.warroom .sev-chip {
+  font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 4px; color: var(--wr-ink-dim);
+  background: var(--wr-ground-2); border: 1px solid var(--wr-line);
+}
+.warroom .finding.sev-high .sev-chip { color: var(--wr-red-bright); border-color: rgba(255, 59, 82, 0.4); }
+.warroom .finding.sev-medium .sev-chip { color: var(--wr-amber); }
+
+/* defender investigation shell */
+.warroom .wr-term {
+  margin-bottom: 14px; border: 1px solid var(--wr-line); border-radius: 8px;
+  overflow: hidden; background: #05070d;
+}
+.warroom .wr-term-head {
+  font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--wr-ink-faint);
+  padding: 7px 10px; border-bottom: 1px solid var(--wr-line-soft); background: var(--wr-ground-2);
+}
+.warroom .wr-term-body {
+  max-height: 230px; overflow-y: auto; padding: 9px 10px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11.5px; line-height: 1.5;
+}
+.warroom .wr-term-hint { color: var(--wr-ink-faint); font-size: 11px; margin-bottom: 8px; }
+.warroom .wr-term-hint b { color: var(--wr-blue-bright); font-weight: 500; }
+.warroom .wr-term-cmd { color: var(--wr-ink); white-space: pre-wrap; word-break: break-word; }
+.warroom .wr-term-prompt { color: var(--wr-green); }
+.warroom .wr-term-out {
+  margin: 2px 0 8px; color: var(--wr-ink-dim); white-space: pre-wrap; word-break: break-word;
+  font: inherit;
+}
+.warroom .wr-term-input {
+  display: flex; align-items: center; gap: 7px; padding: 8px 10px;
+  border-top: 1px solid var(--wr-line-soft);
+  font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11.5px;
+}
+.warroom .wr-term-input input { flex: 1; background: none; border: none; color: var(--wr-ink); font: inherit; outline: none; }
+.warroom .wr-term-why { padding: 8px 10px 0; }
+.warroom .wr-term-why input {
+  width: 100%; font: inherit; font-size: 11.5px; color: var(--wr-ink);
+  background: var(--wr-ground-2); border: 1px solid var(--wr-line); border-radius: 6px; padding: 7px 9px;
+}
+.warroom .wr-term-why input:focus { outline: 2px solid var(--wr-red); outline-offset: 1px; }
+
+/* blue queue */
+.warroom .alert {
+  padding: 10px 11px; margin-bottom: 8px; border: 1px solid var(--wr-line); border-radius: 8px;
+  background: var(--wr-panel); border-left: 3px solid var(--wr-line);
+}
+.warroom .alert.clear { border-left-color: var(--wr-green); }
+.warroom .alert.warn { border-left-color: var(--wr-amber); }
+.warroom .alert .t { font-size: 12.5px; font-weight: 500; }
+.warroom .alert .d { font-size: 11.5px; color: var(--wr-ink-dim); margin-top: 2px; }
+
+/* center dossier */
+.warroom .dossier-hero {
+  padding: 14px; border-bottom: 1px solid var(--wr-line-soft);
+  background: linear-gradient(115deg, rgba(255, 59, 82, 0.08), transparent 42%),
+    linear-gradient(245deg, rgba(63, 157, 255, 0.08), transparent 42%);
+}
+.warroom .dossier-hero .org { font-size: 18px; font-weight: 700; }
+.warroom .dossier-hero .meta { font-size: 12px; color: var(--wr-ink-dim); margin-top: 3px; }
+.warroom .simchip {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 10.5px;
+  color: var(--wr-green); background: rgba(53, 208, 138, 0.09);
+  border: 1px solid rgba(53, 208, 138, 0.25); padding: 4px 9px; border-radius: 5px;
+}
+.warroom .kv { display: grid; grid-template-columns: 96px 1fr; gap: 6px 12px; padding: 14px; margin: 0; }
+.warroom .kv dt {
+  font-size: 11px; color: var(--wr-ink-faint); text-transform: uppercase; letter-spacing: 0.06em;
+}
+.warroom .kv dd { margin: 0; font-size: 12px; color: var(--wr-ink); }
+
+.warroom .eyebrow {
+  text-transform: uppercase; letter-spacing: 0.16em; font-size: 10px; font-weight: 600;
+  color: var(--wr-ink-faint);
+}
+
+/* avatars & presence */
+.warroom .ava { width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; }
+.warroom .ava.red { --ava-bg: #1a0e13; --ava-fg: #3a2029; --ava-ac: var(--wr-red); }
+.warroom .ava.blue { --ava-bg: #0a1626; --ava-fg: #1c2c46; --ava-ac: var(--wr-blue); }
+.warroom .operative { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.warroom .operative .cs { font-weight: 700; font-size: 13px; letter-spacing: 0.03em; display: flex; align-items: center; gap: 7px; }
+.warroom .operative .role { color: var(--wr-ink-faint); font-weight: 500; font-size: 11px; }
+.warroom .presence { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--wr-blue-bright); margin-top: 3px; }
+.warroom .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--wr-green); box-shadow: 0 0 0 3px rgba(53, 208, 138, 0.2); }
+
+/* lobby */
+.warroom .lobby { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 14px; align-items: start; }
+.warroom .panel {
+  background: linear-gradient(180deg, var(--wr-panel-2), var(--wr-panel));
+  border: 1px solid var(--wr-line); border-radius: var(--wr-r); padding: 16px;
+}
+.warroom .panel h2 { font-size: 15px; margin: 0 0 4px; }
+.warroom .panel p.muted { font-size: 12px; color: var(--wr-ink-dim); margin: 0 0 14px; }
+.warroom .fieldrow { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.warroom .fieldrow > label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--wr-ink-faint); }
+.warroom .fieldrow input, .warroom .fieldrow select {
+  font: inherit; font-size: 13px; color: var(--wr-ink); background: var(--wr-ground-2);
+  border: 1px solid var(--wr-line); border-radius: 8px; padding: 9px 11px;
+}
+.warroom .fieldrow input:focus, .warroom .fieldrow select:focus { outline: 2px solid var(--wr-blue); outline-offset: 1px; }
+.warroom .seg { display: flex; gap: 6px; }
+.warroom .seg button {
+  flex: 1; font: inherit; font-size: 12px; font-weight: 600; padding: 8px; border-radius: 7px;
+  cursor: pointer; color: var(--wr-ink-dim); background: var(--wr-ground-2); border: 1px solid var(--wr-line);
+}
+.warroom .seg button.on.red { color: var(--wr-red-bright); border-color: rgba(255, 59, 82, 0.4); background: var(--wr-red-deep); }
+.warroom .seg button.on.blue { color: var(--wr-blue-bright); border-color: rgba(63, 157, 255, 0.4); background: var(--wr-blue-deep); }
+.warroom .seg button.on.neutral { color: var(--wr-ink); border-color: var(--wr-ink-faint); }
+
+.warroom .match-list { display: flex; flex-direction: column; gap: 8px; }
+.warroom .match-row {
+  display: flex; align-items: center; gap: 10px; padding: 11px 12px; width: 100%; text-align: left;
+  border: 1px solid var(--wr-line); border-radius: 8px; background: var(--wr-panel); cursor: pointer; color: inherit;
+}
+.warroom .match-row:hover { border-color: var(--wr-ink-faint); }
+.warroom .match-row .grow { flex: 1; min-width: 0; }
+.warroom .match-row .mt { font-size: 13px; font-weight: 600; }
+.warroom .match-row .ms { font-size: 11px; color: var(--wr-ink-dim); }
+
+.warroom .codechip {
+  font-size: 20px; font-weight: 700; letter-spacing: 0.25em; color: var(--wr-ink);
+  background: var(--wr-ground-2); border: 1px dashed var(--wr-line);
+  border-radius: 8px; padding: 10px 14px; text-align: center;
+}
+
+.warroom .wr-error {
+  font-size: 12px; color: var(--wr-red-bright); background: rgba(255, 59, 82, 0.08);
+  border: 1px solid rgba(255, 59, 82, 0.3); border-radius: 8px; padding: 9px 11px;
+}
+.warroom .wr-note { font-size: 12px; color: var(--wr-ink-dim); text-align: center; padding: 16px; }
+
+@media (max-width: 960px) {
+  .warroom .field, .warroom .lobby { grid-template-columns: 1fr; }
+  .warroom .col.dim { opacity: 1; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .warroom .dot.live { animation: none; }
+}

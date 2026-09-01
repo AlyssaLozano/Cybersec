@@ -12,11 +12,13 @@ import {
   type AuthResponse,
   type PublicUser,
   type UserRole,
+  type UserTier,
 } from '@soc/shared';
 
 import { hashPassword, verifyPassword } from '../auth/password.js';
 import { clearSession, issueSession, readSession } from '../auth/session.js';
 import { prisma } from '../db/client.js';
+import { entryCodes } from '../env.js';
 import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
 
 export const authRouter = Router();
@@ -30,6 +32,7 @@ const registerSchema = z.object({
   password: z
     .string()
     .min(PASSWORD_MIN_LENGTH, `Use at least ${PASSWORD_MIN_LENGTH} characters.`),
+  entryCode: z.string().trim().min(1, 'Enter your access code.'),
 });
 
 const loginSchema = z.object({
@@ -44,12 +47,16 @@ function toPublicUser(user: {
   role: string;
   createdAt: Date;
   lastLoginAt: Date | null;
+  /** Optional so this compiles before the Prisma client is regenerated; a row
+   *  without the column reads as free, which is the safe default. */
+  tier?: string;
 }): PublicUser {
   return {
     id: user.id,
     username: user.username,
     email: user.email,
     role: user.role as UserRole,
+    tier: (user.tier ?? 'free') as UserTier,
     createdAt: user.createdAt.toISOString(),
     lastLoginAt: user.lastLoginAt?.toISOString() ?? null,
   };
@@ -94,6 +101,17 @@ authRouter.post(
   '/register',
   asyncRoute(async (request, response) => {
     const input = registerSchema.parse(request.body);
+
+    // The product is free, but only to people holding a code. A wrong code is
+    // refused the same way regardless of which one, so it leaks nothing.
+    if (!entryCodes.includes(input.entryCode.toUpperCase())) {
+      throw new HttpError(
+        403,
+        API_ERROR_CODES.invalidEntryCode,
+        'That access code is not valid. Check it and try again.',
+        { entryCode: 'Not a valid code.' },
+      );
+    }
 
     const existing = await prisma.user.findFirst({
       where: {

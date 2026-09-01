@@ -55,6 +55,12 @@ const schema = z.object({
     .min(32, 'JWT_SECRET must be at least 32 characters. Generate one with: node -e "console.log(require(\'crypto\').randomBytes(48).toString(\'hex\'))"'),
   JWT_EXPIRES_IN: z.string().default('7d'),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
+  /**
+   * Comma-separated access codes that gate registration. The product is free,
+   * but only to people holding a code. Overridden per deployment; the default
+   * is the single live code so local dev works without setup.
+   */
+  ENTRY_CODES: z.string().default('S3PT26'),
   COOKIE_SECURE: z
     .string()
     .default('false')
@@ -90,5 +96,10 @@ export const env = load();
 
 /** Origins allowed to call the API with credentials. */
 export const corsOrigins = env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean);
+
+/** Valid entry codes, upper-cased so comparison is case-insensitive. */
+export const entryCodes = env.ENTRY_CODES.split(',')
+  .map((code) => code.trim().toUpperCase())
+  .filter(Boolean);
 
 export const isProduction = env.NODE_ENV === 'production';

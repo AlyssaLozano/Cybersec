@@ -1,0 +1,735 @@
+{
+  "queue": {
+    "id": "q-intro",
+    "title": "First shift: twelve alerts",
+    "briefing": "A short slice of one morning at Ridgeline Medical Group. Twelve alerts, of the roughly nine hundred the stack raises in a day. Exactly one of them is an intrusion. Read every alert before you decide anything: the queue is not sorted by importance, and the rule that shouted loudest is not the one that matters.",
+    "alerts": [
+      {
+        "id": "A-5004",
+        "raisedAt": "2026-08-15T01:05:10Z",
+        "source": "auth-monitor",
+        "ruleId": "auth-failed-password",
+        "ruleName": "Failed SSH authentication",
+        "severity": "medium",
+        "confidence": 90,
+        "from": {
+          "ip": "10.20.9.40",
+          "host": "rmg-mon-01",
+          "user": "nagios"
+        },
+        "to": {
+          "ip": "10.20.6.40",
+          "host": "rmg-web-02",
+          "port": 22
+        },
+        "summary": "Failed SSH password for nagios from 10.20.9.40",
+        "detail": "sshd recorded an authentication failure for account \"nagios\" from 10.20.9.40 (rmg-mon-01, the monitoring collector). The account exists and is not locked. The same source has failed at a near-exact five-minute cadence since 00:00.",
+        "enrichment": {
+          "priorFirings": 8412,
+          "priorFalsePositives": 8398,
+          "reputation": "known-good",
+          "reputationNote": "Internal monitoring collector, inventory asset RMG-MON-01.",
+          "allowlisted": true
+        }
+      },
+      {
+        "id": "A-5005",
+        "raisedAt": "2026-08-15T01:10:08Z",
+        "source": "auth-monitor",
+        "ruleId": "auth-failed-password",
+        "ruleName": "Failed SSH authentication",
+        "severity": "medium",
+        "confidence": 90,
+        "from": {
+          "ip": "10.20.9.40",
+          "host": "rmg-mon-01",
+          "user": "nagios"
+        },
+        "to": {
+          "ip": "10.20.6.40",
+          "host": "rmg-web-02",
+          "port": 22
+        },
+        "summary": "Failed SSH password for nagios from 10.20.9.40",
+        "detail": "sshd recorded an authentication failure for account \"nagios\" from 10.20.9.40 (rmg-mon-01, the monitoring collector). The account exists and is not locked. The same source has failed at a near-exact five-minute cadence since 00:00.",
+        "enrichment": {
+          "priorFirings": 8412,
+          "priorFalsePositives": 8398,
+          "reputation": "known-good",
+          "reputationNote": "Internal monitoring collector, inventory asset RMG-MON-01.",
+          "allowlisted": true
+        }
+      },
+      {
+        "id": "A-5006",
+        "raisedAt": "2026-08-15T01:30:15Z",
+        "source": "auth-monitor",
+        "ruleId": "auth-service-account-login",
+        "ruleName": "Service account remote login",
+        "severity": "medium",
+        "confidence": 90,
+        "from": {
+          "ip": "10.20.9.15",
+          "host": "rmg-backup-01",
+          "user": "svc-backup"
+        },
+        "to": {
+          "ip": "10.20.6.40",
+          "host": "rmg-web-02",
+          "port": 22
+        },
+        "summary": "svc-backup logged in by public key from rmg-backup-01",
+        "detail": "Accepted publickey for svc-backup from 10.20.9.15. Followed at 01:52 by a 41.7 GB snapshot transfer to rmg-backup-01 and a clean service exit.",
+        "enrichment": {
+          "priorFirings": 730,
+          "priorFalsePositives": 730,
+          "reputation": "known-good",
+          "reputationNote": "Backup server, inventory asset RMG-BACKUP-01.",
+          "allowlisted": true
+        }
+      },
+      {
+        "id": "A-5001",
+        "raisedAt": "2026-08-15T02:06:52Z",
+        "source": "ids",
+        "ruleId": "fw-inbound-block",
+        "ruleName": "Blocked inbound connection to closed port",
+        "severity": "low",
+        "confidence": 99,
+        "from": {
+          "ip": "192.0.2.9"
+        },
+        "to": {
+          "ip": "10.20.6.40",
+          "host": "rmg-web-02",
+          "port": 5900
+        },
+        "summary": "Firewall blocked inbound 192.0.2.9 to port 5900",
+        "detail": "The host firewall dropped an inbound TCP connection from 192.0.2.9 to port 5900, which is closed. No service listens on that port and no packet reached userspace.",
+        "enrichment": {
+          "priorFirings": 19352,
+          "priorFalsePositives": 23528,
+          "reputation": "unknown",
+          "reputationNote": "No prior sightings. Consistent with commodity internet scanning."
+        }
+      },
+      {
+        "id": "A-5007",
+        "raisedAt": "2026-08-15T03:11:27Z",
+        "source": "auth-monitor",
+        "ruleId": "auth-outside-business-hours",
+        "ruleName": "Interactive login outside business hours",
+        "severity": "medium",
+        "confidence": 65,
+        "from": {
+          "ip": "10.20.4.12",
+          "user": "rchen"
+        },
+        "to": {
+          "ip": "10.20.6.40",
+          "host": "rmg-web-02",
+          "port": 22
+        },
+        "summary": "rchen logged in at 03:11 from the staff VLAN",
+        "detail": "Accepted password for rchen from 10.20.4.12 at 03:11. Session lasted 30 minutes and included one sudo: systemctl restart postgresql. Change record CHG-4471 schedules database maintenance for this window.",
+        "enrichment": {
+          "priorFirings": 88,
+          "priorFalsePositives": 84,
+          "reputation": "known-good"
+        }
+      },
+      {
+        "id": "A-5002",
+        "raisedAt": "2026-08-15T04:30:07Z",
+        "source": "ids",
+        "ruleId": "fw-inbound-block",
+        "ruleName": "Blocked inbound connection to closed port",
+        "severity": "low",
+        "confidence": 99,
+        "from": {
+          "ip": "198.51.100.202"
+        },
+        "to": {
+          "ip": "10.20.6.40",
+          "host": "rmg-web-02",
+          "port": 445
+        },
+        "summary": "Firewall blocked inbound 198.51.100.202 to port 445",
+        "detail": "The host firewall dropped an inbound TCP connection from 198.51.100.202 to port 445, which is closed. No service listens on that port and no packet reached userspace.",
+        "enrichment": {
+          "priorFirings": 23487,
+          "priorFalsePositives": 20131,
+          "reputation": "unknown",
+          "reputationNote": "No prior sightings. Consistent with commodity internet scanning."
+        }
+      },
+      {
+        "id": "A-5022",
+        "raisedAt": "2026-08-15T05:12:40Z",
+        "source": "av",
+        "ruleId": "av-signature-match",
+        "ruleName": "Malware signature match",
+        "severity": "critical",
+        "confidence": 99,
+        "from": {
+          "ip": "10.20.4.58",
+          "host": "rmg-ws-0058",
+          "user": "dokafor"
+        },
+        "summary": "EICAR test file quarantined in dokafor Downloads folder",
+        "detail": "Signature EICAR-Test-File matched at C:\\Users\\dokafor\\Downloads\\eicar.com. File quarantined. EICAR is the industry-standard antivirus test string and contains no executable payload. Security awareness training issued this file on 14 August.",
+        "enrichment": {
+          "priorFirings": 41,
+          "priorFalsePositives": 39,
+          "reputation": "known-good"
+        }
+      },
+      {
+        "id": "A-5003",
+        "raisedAt": "2026-08-15T06:35:16Z",
+        "source": "ids",
+        "ruleId": "web-known-scan-path",
+        "ruleName": "Request for known-vulnerable application path",
+        "severity": "medium",
+        "confidence": 70,
+        "from": {
+          "ip": "192.0.2.9"
+        },
+        "to": {
+          "ip": "10.20.6.40",
+          "host": "rmg-web-02",
+          "port": 443
+        },
+        "summary": "404 for /.env from 192.0.2.9",
+        "detail": "nginx returned 404 for GET /.env. This host runs the patient portal on a Node upstream and does not run WordPress, phpMyAdmin, or PHP of any kind.",
+        "enrichment": {
+          "priorFirings": 4827,
+          "priorFalsePositives": 4968,
+          "reputation": "unknown"
+        }
+      },
+      {
+        "id": "A-5008",
+        "raisedAt": "2026-08-15T08:15:33Z",
+        "source": "edr",
+        "ruleId": "sudo-privileged-command",
+        "ruleName": "Privileged command executed via sudo",
+        "severity": "medium",
+        "confidence": 95,
+        "from": {
+          "ip": "10.20.4.31",
+          "host": "rmg-web-02",
+          "user": "jmartel"
+        },
+        "summary": "jmartel ran apt-get upgrade -y as root",
+        "detail": "sudo apt-get upgrade -y by jmartel from pts/2, session open 08:15 to 08:22. jmartel is in the platform operations group and is listed in sudoers for package management.",
+        "enrichment": {
+          "priorFirings": 1190,
+          "priorFalsePositives": 1186,
+          "reputation": "known-good"
+        }
+      },
+      {
+        "id": "A-5009",
+        "raisedAt": "2026-08-15T09:02:31Z",
+        "source": "auth-monitor",
+        "ruleId": "auth-failed-password",
+        "ruleName": "Failed SSH authentication",
+        "severity": "medium",
+        "confidence": 90,
+        "from": {
+          "ip": "10.20.4.58",
+          "user": "dokafor"
+        },
+        "to": {
+          "ip": "10.20.6.40",
+          "host": "rmg-web-02",
+          "port": 22
+        },
+        "summary": "Two failed passwords for dokafor, then success, from their own workstation",
+        "detail": "Two authentication failures for dokafor from 10.20.4.58 at 09:02:14 and 09:02:31, followed by a successful login at 09:02:58 from the same address. 10.20.4.58 is dokafor's assigned workstation.",
+        "enrichment": {
+          "priorFirings": 8412,
+          "priorFalsePositives": 8398,
+          "reputation": "known-good"
+        }
+      },
+      {
+        "id": "A-5014",
+        "raisedAt": "2026-08-15T10:14:22Z",
+        "source": "auth-monitor",
+        "ruleId": "auth-success-after-failures",
+        "ruleName": "Successful login from source with prior failures",
+        "severity": "medium",
+        "confidence": 60,
+        "from": {
+          "ip": "203.0.113.55"
+        },
+        "to": {
+          "ip": "10.20.6.40",
+          "host": "rmg-web-02",
+          "port": 22,
+          "user": "testuser"
+        },
+        "summary": "Accepted password for testuser from 203.0.113.55 after 62 prior failures",
+        "detail": "SSH accepted a password for \"testuser\" from 203.0.113.55. The same source failed 62 times against this host between 09:12 and 09:47. testuser is a local account with UID 1004, last password change 619 days ago, no sudo entry of its own.",
+        "enrichment": {
+          "priorFirings": 9,
+          "priorFalsePositives": 4,
+          "reputation": "unknown"
+        }
+      },
+      {
+        "id": "A-5023",
+        "raisedAt": "2026-08-15T11:12:08Z",
+        "source": "ids",
+        "ruleId": "net-conntrack-exhaustion",
+        "ruleName": "Connection tracking table exhausted",
+        "severity": "high",
+        "confidence": 80,
+        "from": {
+          "ip": "10.20.6.40",
+          "host": "rmg-web-02"
+        },
+        "summary": "nf_conntrack table full, packets dropped",
+        "detail": "kernel: nf_conntrack: table full, dropping packet. The rule classifies conntrack exhaustion as a probable denial-of-service. Inbound request rate at the time was within one standard deviation of the weekly mean.",
+        "enrichment": {
+          "priorFirings": 96,
+          "priorFalsePositives": 88,
+          "reputation": "known-good"
+        }
+      }
+    ]
+  },
+  "analyses": {
+    "A-5004": {
+      "alertId": "A-5004",
+      "headline": "The detection is correct and the rule is the problem. Close it, and fix what generates it.",
+      "riskFactors": [
+        {
+          "text": "Remote-access port 22 is involved, which is where account compromise usually lands first.",
+          "basis": "observed"
+        },
+        {
+          "text": "Raised at 01:05, outside ordinary working hours.",
+          "basis": "observed"
+        }
+      ],
+      "mitigatingFactors": [
+        {
+          "text": "Reputation is known-good: Internal monitoring collector, inventory asset RMG-MON-01..",
+          "basis": "observed"
+        },
+        {
+          "text": "The destination is on the organisation’s egress allowlist.",
+          "basis": "observed"
+        },
+        {
+          "text": "The source 10.20.9.40 is internal address space, not the public internet.",
+          "basis": "observed"
+        },
+        {
+          "text": "This rule has fired 8,412 times in thirty days and 100% of those were closed as not worth acting on.",
+          "basis": "observed"
+        }
+      ],
+      "recommendation": "tune",
+      "confidence": 85,
+      "nextSteps": [
+        "Raise a ticket against rule \"auth-failed-password\" rather than closing these one at a time.",
+        "Propose a scoped exclusion for rmg-mon-01, not a rule deletion.",
+        "Longer term, baseline normal authentication behaviour for every host and raise an alert on any deviation from that baseline, which will catch this class of problem generically."
+      ],
+      "limits": [
+        "I can see this alert and the rule’s firing history. I cannot see change records, ticket queues, or what the person involved says they were doing.",
+        "I do not know whether \"nagios\" is a person, a service account, or a shared credential.",
+        "I have not read the other alerts in this queue, so I cannot tell you what this correlates with."
+      ]
+    },
+    "A-5005": {
+      "alertId": "A-5005",
+      "headline": "The detection is correct and the rule is the problem. Close it, and fix what generates it.",
+      "riskFactors": [
+        {
+          "text": "Remote-access port 22 is involved, which is where account compromise usually lands first.",
+          "basis": "observed"
+        },
+        {
+          "text": "Raised at 01:10, outside ordinary working hours.",
+          "basis": "observed"
+        }
+      ],
+      "mitigatingFactors": [
+        {
+          "text": "Reputation is known-good: Internal monitoring collector, inventory asset RMG-MON-01..",
+          "basis": "observed"
+        },
+        {
+          "text": "The destination is on the organisation’s egress allowlist.",
+          "basis": "observed"
+        },
+        {
+          "text": "The source 10.20.9.40 is internal address space, not the public internet.",
+          "basis": "observed"
+        },
+        {
+          "text": "This rule has fired 8,412 times in thirty days and 100% of those were closed as not worth acting on.",
+          "basis": "observed"
+        }
+      ],
+      "recommendation": "tune",
+      "confidence": 77,
+      "nextSteps": [
+        "Raise a ticket against rule \"auth-failed-password\" rather than closing these one at a time.",
+        "Propose a scoped exclusion for rmg-mon-01, not a rule deletion.",
+        "Longer term, baseline normal authentication behaviour for every host and raise an alert on any deviation from that baseline, which will catch this class of problem generically."
+      ],
+      "limits": [
+        "I can see this alert and the rule’s firing history. I cannot see change records, ticket queues, or what the person involved says they were doing.",
+        "I do not know whether \"nagios\" is a person, a service account, or a shared credential.",
+        "I have not read the other alerts in this queue, so I cannot tell you what this correlates with."
+      ]
+    },
+    "A-5006": {
+      "alertId": "A-5006",
+      "headline": "Privileged activity I cannot tie to an approved change. I would escalate this.",
+      "riskFactors": [
+        {
+          "text": "Privileged action by \"svc-backup\" on rmg-web-02 at 01:30.",
+          "basis": "observed"
+        },
+        {
+          "text": "Attackers who obtain credentials use them to do exactly this, and it looks identical from the log.",
+          "basis": "inferred"
+        },
+        {
+          "text": "I see no approved change record covering this window.",
+          "basis": "assumed"
+        }
+      ],
+      "mitigatingFactors": [
+        {
+          "text": "Reputation is known-good: Backup server, inventory asset RMG-BACKUP-01..",
+          "basis": "observed"
+        },
+        {
+          "text": "That reputation and allowlist status are worth something, though inventory records and allowlists are frequently stale and should not carry a disposition on their own.",
+          "basis": "assumed"
+        }
+      ],
+      "recommendation": "escalate",
+      "confidence": 84,
+      "nextSteps": [
+        "Escalate to tier two and ask them to confirm the activity with the account owner.",
+        "Consider disabling the account until somebody confirms it."
+      ],
+      "limits": [
+        "I can see this alert and the rule’s firing history. I cannot see change records, ticket queues, or what the person involved says they were doing.",
+        "I do not know whether \"svc-backup\" is a person, a service account, or a shared credential.",
+        "I have not read the other alerts in this queue, so I cannot tell you what this correlates with."
+      ]
+    },
+    "A-5001": {
+      "alertId": "A-5001",
+      "headline": "I read this as a correct detection of ordinary activity. I would close it.",
+      "riskFactors": [
+        {
+          "text": "Raised at 02:06, outside ordinary working hours.",
+          "basis": "observed"
+        }
+      ],
+      "mitigatingFactors": [
+        {
+          "text": "This rule has fired 19,352 times in thirty days and 100% of those were closed as not worth acting on.",
+          "basis": "observed"
+        }
+      ],
+      "recommendation": "dismiss",
+      "confidence": 81,
+      "nextSteps": [
+        "Close with a one-line disposition note saying what explained it.",
+        "No further action; the control behaved as designed."
+      ],
+      "limits": [
+        "I can see this alert and the rule’s firing history. I cannot see change records, ticket queues, or what the person involved says they were doing.",
+        "I have not read the other alerts in this queue, so I cannot tell you what this correlates with."
+      ]
+    },
+    "A-5007": {
+      "alertId": "A-5007",
+      "headline": "I read this as a correct detection of ordinary activity. I would close it.",
+      "riskFactors": [
+        {
+          "text": "Remote-access port 22 is involved, which is where account compromise usually lands first.",
+          "basis": "observed"
+        },
+        {
+          "text": "Raised at 03:11, outside ordinary working hours.",
+          "basis": "observed"
+        }
+      ],
+      "mitigatingFactors": [
+        {
+          "text": "Reputation is known-good: recognised asset.",
+          "basis": "observed"
+        },
+        {
+          "text": "The source 10.20.4.12 is internal address space, not the public internet.",
+          "basis": "observed"
+        },
+        {
+          "text": "This rule has fired 88 times in thirty days and 95% of those were closed as not worth acting on.",
+          "basis": "observed"
+        }
+      ],
+      "recommendation": "dismiss",
+      "confidence": 77,
+      "nextSteps": [
+        "Close with a one-line disposition note saying what explained it.",
+        "No further action; the control behaved as designed."
+      ],
+      "limits": [
+        "I can see this alert and the rule’s firing history. I cannot see change records, ticket queues, or what the person involved says they were doing.",
+        "I do not know whether \"rchen\" is a person, a service account, or a shared credential.",
+        "I have not read the other alerts in this queue, so I cannot tell you what this correlates with."
+      ]
+    },
+    "A-5002": {
+      "alertId": "A-5002",
+      "headline": "I read this as a correct detection of ordinary activity. I would close it.",
+      "riskFactors": [
+        {
+          "text": "Raised at 04:30, outside ordinary working hours.",
+          "basis": "observed"
+        }
+      ],
+      "mitigatingFactors": [
+        {
+          "text": "This rule has fired 23,487 times in thirty days and 86% of those were closed as not worth acting on.",
+          "basis": "observed"
+        }
+      ],
+      "recommendation": "dismiss",
+      "confidence": 62,
+      "nextSteps": [
+        "Close with a one-line disposition note saying what explained it.",
+        "No further action; the control behaved as designed."
+      ],
+      "limits": [
+        "I can see this alert and the rule’s firing history. I cannot see change records, ticket queues, or what the person involved says they were doing.",
+        "I have not read the other alerts in this queue, so I cannot tell you what this correlates with."
+      ]
+    },
+    "A-5022": {
+      "alertId": "A-5022",
+      "headline": "I read this as a correct detection of ordinary activity. I would close it.",
+      "riskFactors": [
+        {
+          "text": "Raised at 05:12, outside ordinary working hours.",
+          "basis": "observed"
+        },
+        {
+          "text": "The rule asserted critical severity at 99% confidence.",
+          "basis": "observed"
+        }
+      ],
+      "mitigatingFactors": [
+        {
+          "text": "Reputation is known-good: recognised asset.",
+          "basis": "observed"
+        },
+        {
+          "text": "The source 10.20.4.58 is internal address space, not the public internet.",
+          "basis": "observed"
+        },
+        {
+          "text": "This rule has fired 41 times in thirty days and 95% of those were closed as not worth acting on.",
+          "basis": "observed"
+        }
+      ],
+      "recommendation": "dismiss",
+      "confidence": 68,
+      "nextSteps": [
+        "Close with a one-line disposition note saying what explained it.",
+        "No further action; the control behaved as designed."
+      ],
+      "limits": [
+        "I can see this alert and the rule’s firing history. I cannot see change records, ticket queues, or what the person involved says they were doing.",
+        "I do not know whether \"dokafor\" is a person, a service account, or a shared credential.",
+        "I have not read the other alerts in this queue, so I cannot tell you what this correlates with."
+      ]
+    },
+    "A-5003": {
+      "alertId": "A-5003",
+      "headline": "I read this as a correct detection of ordinary activity. I would close it.",
+      "riskFactors": [
+        {
+          "text": "The rule \"Request for known-vulnerable application path\" fired, which is by definition activity somebody thought worth detecting.",
+          "basis": "observed"
+        }
+      ],
+      "mitigatingFactors": [
+        {
+          "text": "This rule has fired 4,827 times in thirty days and 100% of those were closed as not worth acting on.",
+          "basis": "observed"
+        }
+      ],
+      "recommendation": "dismiss",
+      "confidence": 89,
+      "nextSteps": [
+        "Close with a one-line disposition note saying what explained it.",
+        "No further action; the control behaved as designed."
+      ],
+      "limits": [
+        "I can see this alert and the rule’s firing history. I cannot see change records, ticket queues, or what the person involved says they were doing.",
+        "I have not read the other alerts in this queue, so I cannot tell you what this correlates with."
+      ]
+    },
+    "A-5008": {
+      "alertId": "A-5008",
+      "headline": "Privileged activity I cannot tie to an approved change. I would escalate this.",
+      "riskFactors": [
+        {
+          "text": "Privileged action by \"jmartel\" on rmg-web-02 at 08:15.",
+          "basis": "observed"
+        },
+        {
+          "text": "Attackers who obtain credentials use them to do exactly this, and it looks identical from the log.",
+          "basis": "inferred"
+        },
+        {
+          "text": "I see no approved change record covering this window.",
+          "basis": "assumed"
+        }
+      ],
+      "mitigatingFactors": [
+        {
+          "text": "Reputation is known-good: recognised asset.",
+          "basis": "observed"
+        },
+        {
+          "text": "That reputation and allowlist status are worth something, though inventory records and allowlists are frequently stale and should not carry a disposition on their own.",
+          "basis": "assumed"
+        }
+      ],
+      "recommendation": "escalate",
+      "confidence": 80,
+      "nextSteps": [
+        "Escalate to tier two and ask them to confirm the activity with the account owner.",
+        "Consider disabling the account until somebody confirms it."
+      ],
+      "limits": [
+        "I can see this alert and the rule’s firing history. I cannot see change records, ticket queues, or what the person involved says they were doing.",
+        "I do not know whether \"jmartel\" is a person, a service account, or a shared credential.",
+        "I have not read the other alerts in this queue, so I cannot tell you what this correlates with."
+      ]
+    },
+    "A-5009": {
+      "alertId": "A-5009",
+      "headline": "I read this as a correct detection of ordinary activity. I would close it.",
+      "riskFactors": [
+        {
+          "text": "Remote-access port 22 is involved, which is where account compromise usually lands first.",
+          "basis": "observed"
+        }
+      ],
+      "mitigatingFactors": [
+        {
+          "text": "Reputation is known-good: recognised asset.",
+          "basis": "observed"
+        },
+        {
+          "text": "The source 10.20.4.58 is internal address space, not the public internet.",
+          "basis": "observed"
+        },
+        {
+          "text": "This rule has fired 8,412 times in thirty days and 100% of those were closed as not worth acting on.",
+          "basis": "observed"
+        }
+      ],
+      "recommendation": "dismiss",
+      "confidence": 67,
+      "nextSteps": [
+        "Close with a one-line disposition note saying what explained it.",
+        "No further action; the control behaved as designed."
+      ],
+      "limits": [
+        "I can see this alert and the rule’s firing history. I cannot see change records, ticket queues, or what the person involved says they were doing.",
+        "I do not know whether \"dokafor\" is a person, a service account, or a shared credential.",
+        "I have not read the other alerts in this queue, so I cannot tell you what this correlates with."
+      ]
+    },
+    "A-5014": {
+      "alertId": "A-5014",
+      "headline": "This matches a known intrusion set. Escalate immediately.",
+      "riskFactors": [
+        {
+          "text": "Remote-access port 22 is involved, which is where account compromise usually lands first.",
+          "basis": "observed"
+        },
+        {
+          "text": "This rule has fired 9 times and only 4 were closed as noise, so its firings are usually worth reading.",
+          "basis": "inferred"
+        },
+        {
+          "text": "The sequence matches APT28 tradecraft catalogued in campaigns against financial services during the same period, including the interval between the failures and the success.",
+          "basis": "assumed"
+        },
+        {
+          "text": "Infrastructure overlapping 203.0.113.55 has been reported in prior activity by the same actor.",
+          "basis": "assumed"
+        }
+      ],
+      "mitigatingFactors": [
+        {
+          "text": "Nothing on the alert argues against it, which is not the same as evidence that it is real.",
+          "basis": "inferred"
+        }
+      ],
+      "recommendation": "escalate",
+      "confidence": 95,
+      "nextSteps": [
+        "Escalate as a suspected nation-state intrusion and reference the actor in the handover.",
+        "Confirm what account \"the source\" touched after 10:14."
+      ],
+      "limits": [
+        "I can see this alert and the rule’s firing history. I cannot see change records, ticket queues, or what the person involved says they were doing.",
+        "I have not read the other alerts in this queue, so I cannot tell you what this correlates with."
+      ]
+    },
+    "A-5023": {
+      "alertId": "A-5023",
+      "headline": "The detection is correct and the rule is the problem. Close it, and fix what generates it.",
+      "riskFactors": [
+        {
+          "text": "The rule asserted high severity at 80% confidence.",
+          "basis": "observed"
+        }
+      ],
+      "mitigatingFactors": [
+        {
+          "text": "Reputation is known-good: recognised asset.",
+          "basis": "observed"
+        },
+        {
+          "text": "The source 10.20.6.40 is internal address space, not the public internet.",
+          "basis": "observed"
+        },
+        {
+          "text": "This rule has fired 96 times in thirty days and 92% of those were closed as not worth acting on.",
+          "basis": "observed"
+        }
+      ],
+      "recommendation": "tune",
+      "confidence": 79,
+      "nextSteps": [
+        "Raise a ticket against rule \"net-conntrack-exhaustion\" rather than closing these one at a time.",
+        "Propose a scoped exclusion for rmg-web-02, not a rule deletion."
+      ],
+      "limits": [
+        "I can see this alert and the rule’s firing history. I cannot see change records, ticket queues, or what the person involved says they were doing.",
+        "I have not read the other alerts in this queue, so I cannot tell you what this correlates with."
+      ]
+    }
+  }
+}

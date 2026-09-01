@@ -9,6 +9,11 @@
 import type {
   AlertQueue,
   ApiError,
+  MatchSide,
+  MatchView,
+  RoomVisibility,
+  ScenarioDifficulty,
+  AvatarId,
   AttackSuite,
   DefenceId,
   HardeningScore,
@@ -87,10 +92,10 @@ export const auth = {
       body: JSON.stringify({ identifier, password }),
     }),
 
-  register: (username: string, email: string, password: string) =>
+  register: (username: string, email: string, password: string, entryCode: string) =>
     request<{ user: PublicUser }>('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ username, email, password }),
+      body: JSON.stringify({ username, email, password, entryCode }),
     }),
 
   logout: () => request<unknown>('/auth/logout', { method: 'POST' }),
@@ -479,5 +484,91 @@ export const assessment = {
     request<{ profile: LearnerProfile }>('/assessment/profile', {
       method: 'PATCH',
       body: JSON.stringify(patch),
+    }),
+};
+
+// --- matches (red vs blue) ---------------------------------------------------
+
+/** How the caller appears to their opponent. Never their real name. */
+export interface MatchIdentityInput {
+  callSign: string;
+  avatarId: AvatarId;
+}
+
+/**
+ * The target dossier and the caller's own move menu, scrubbed of scoring.
+ *
+ * Mirrors the server's RedBlueBrief. Defined here rather than imported because
+ * it lives in server content, not in @soc/shared: the browser only ever sees
+ * this scrubbed shape, never the resolver behind it.
+ */
+export interface MatchBrief {
+  scenarioId: string;
+  title: string;
+  brief: string;
+  you: MatchSide;
+  dossier: { org: string; summary: string; facts: Array<{ k: string; v: string }> };
+  options: Array<{ id: string; label: string; description: string }>;
+}
+
+/** A queue result also reports whether we joined a waiting match or opened one. */
+export type QueueResult = MatchView & { joined: boolean };
+
+export const matches = {
+  /** Every match the caller has a seat in, each already redacted to their side. */
+  list: () => request<MatchView[]>('/matches'),
+
+  /** The caller's redacted view of one match. Poll this to pick up a move. */
+  get: (id: string) => request<MatchView>(`/matches/${id}`),
+
+  /** Dossier and the caller's move menu. No scoring crosses the wire. */
+  brief: (id: string) => request<MatchBrief>(`/matches/${id}/brief`),
+
+  /** Open a match. Closed hands back a join code; open enters the queue. */
+  open: (body: {
+    scenarioId: string;
+    difficulty: ScenarioDifficulty;
+    visibility: RoomVisibility;
+    side: MatchSide;
+    identity: MatchIdentityInput;
+  }) => request<MatchView>('/matches', { method: 'POST', body: JSON.stringify(body) }),
+
+  /** Join the oldest waiting open match for this scenario, or open one and wait. */
+  queue: (body: {
+    scenarioId: string;
+    difficulty: ScenarioDifficulty;
+    side: MatchSide;
+    identity: MatchIdentityInput;
+  }) => request<QueueResult>('/matches/queue', { method: 'POST', body: JSON.stringify(body) }),
+
+  /** Join a specific closed match by its invite code. */
+  join: (body: { code: string; identity: MatchIdentityInput }) =>
+    request<MatchView>('/matches/join', { method: 'POST', body: JSON.stringify(body) }),
+
+  /** Take a turn. Rejected with 409 if it is not the caller's move. */
+  move: (id: string, optionId: string, justification: string) =>
+    request<MatchView>(`/matches/${id}/move`, {
+      method: 'POST',
+      body: JSON.stringify({ optionId, justification }),
+    }),
+
+  /** Forfeit or cancel. */
+  abandon: (id: string) => request<MatchView>(`/matches/${id}/abandon`, { method: 'POST' }),
+
+  /** Run one command in the defender's investigation terminal (higher tiers). */
+  terminal: (id: string, command: string) =>
+    request<{ output: string; cwd: string }>(`/matches/${id}/terminal`, {
+      method: 'POST',
+      body: JSON.stringify({ command }),
+    }),
+
+  /**
+   * Run one command in Red's recon console (higher tiers). A recognised recon
+   * command is a move, so this returns the tool output and the refreshed view.
+   */
+  attack: (id: string, command: string, justification: string) =>
+    request<{ output: string; view: MatchView }>(`/matches/${id}/attack`, {
+      method: 'POST',
+      body: JSON.stringify({ command, justification }),
     }),
 };

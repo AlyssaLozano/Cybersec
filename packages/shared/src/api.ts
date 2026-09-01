@@ -23,6 +23,10 @@ export const API_ERROR_CODES = {
   notFound: 'not_found',
   exerciseLocked: 'exercise_locked',
   rateLimited: 'rate_limited',
+  /** Registration was attempted without a valid entry code. */
+  invalidEntryCode: 'invalid_entry_code',
+  /** A free-tier account tried to use a paid feature. */
+  paymentRequired: 'payment_required',
   internal: 'internal_error',
 } as const;
 

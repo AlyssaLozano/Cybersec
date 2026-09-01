@@ -876,3 +876,14 @@ button.small {
   color: var(--fail);
   border-color: var(--fail);
 }
+
+/* Results-page disclaimer: this is an opinion, not advice. */
+.report-disclaimer {
+  margin: 30px auto 0;
+  max-width: 780px;
+  padding: 16px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-faint, #8790a3);
+}

@@ -22,6 +22,10 @@ model User {
   passwordHash String
   /// "student" | "instructor" | "admin" -- see UserRole in @soc/shared
   role         String    @default("student")
+  /// "free" | "paid" -- see UserTier in @soc/shared. Free opens the whole
+  /// learning platform and the war rooms; paid adds the career pack (the
+  /// assessment, the portfolio, the simulation interview).
+  tier         String    @default("free")
   createdAt    DateTime  @default(now())
   lastLoginAt  DateTime?
 
@@ -253,4 +257,52 @@ model ScenarioAttempt {
   @@index([userId, scenarioId])
   @@index([userId, completedAt])
   @@map("scenario_attempts")
+}
+
+/// One adversarial match between two students: one attacks (red), one defends
+/// (blue), turn for turn and asynchronously. See MatchState in @soc/shared.
+///
+/// WHY PLAYERS ARE PLAIN IDS, NOT RELATIONS
+/// A match references two users but is owned by neither, the same call the
+/// schema already makes for ScenarioAttempt.roomId. Storing red/blue/host as
+/// bare id strings avoids threading two nullable back-relations through the
+/// User model -- which two parallel sessions would both be editing -- and costs
+/// only referential cascade, which a walked-away match row does not need.
+///
+/// WHY ONE JSON BLOB
+/// The authoritative board (both sides' full move history and identities) is a
+/// single JSON string, never read piecemeal and never sent whole to a client:
+/// matchViewFor() redacts it per side. Only the fields the lobby and "my
+/// matches" queries filter on are promoted to columns, and those are derived
+/// from the blob on every write so they cannot drift from it.
+model Match {
+  id         String @id @default(uuid())
+  scenarioId String
+  /// ScenarioDifficulty
+  difficulty String
+  /// MatchStatus: "waiting" | "active" | "complete" | "abandoned"
+  status     String @default("waiting")
+  /// RoomVisibility: "open" (queue) | "closed" (invite code)
+  visibility String
+
+  /// Set for closed matches, null for open ones. Indexed for join-by-code.
+  joinCode String?
+
+  hostUserId String
+  redUserId  String?
+  blueUserId String?
+
+  /// The full MatchState as JSON: identities, every move, turn cursor, clocks.
+  /// Source of truth; the columns above are a queryable projection of it.
+  stateJson String @default("{}")
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastMoveAt DateTime?
+
+  @@index([joinCode])
+  @@index([status, visibility])
+  @@index([redUserId])
+  @@index([blueUserId])
+  @@map("matches")
 }

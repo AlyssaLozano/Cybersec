@@ -240,6 +240,13 @@ export function AssessmentReport({
           ) : null}
         </div>
       </section>
+
+      <footer className="report-disclaimer">
+        This is not professional, legal, medical, or financial advice. It is one tool&rsquo;s opinion,
+        based only on the answers you gave, and it is meant as a starting point for your own thinking,
+        not a verdict. No questionnaire knows your life the way you do. Weigh it, take what is useful,
+        and do what you feel is best for you.
+      </footer>
     </div>
   );
 }
@@ -269,7 +276,7 @@ function LaneCard({
         <div className="lane-scores">
           <span className="score-pill">{lane.score}</span>
           <span className={`confidence-pill${lane.confidence < 60 ? ' weak' : ''}`}>
-            {lane.confidence}% sure
+            {lane.confidence}% confidence
           </span>
         </div>
       </header>

@@ -22,7 +22,7 @@ import { trackFoundations, trackReadiness } from '../content/curriculum.js';
 import { getLaneProfile, LANE_PROFILES } from '../content/lanes.js';
 import { getTrack } from '../content/tracks.js';
 import { TOOL_PHILOSOPHY } from '../content/tools.js';
-import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import { asyncRoute, HttpError, requireAuth, requirePaid, sendOk } from '../http.js';
 import {
   getBaseline,
   resetBaseline,
@@ -42,6 +42,8 @@ import {
 export const assessmentRouter = Router();
 
 assessmentRouter.use(requireAuth);
+// The Career Fit Analyzer is part of the paid career pack.
+assessmentRouter.use(requirePaid);
 
 function userIdOf(request: { session?: { sub: string } }): string {
   const id = request.session?.sub;

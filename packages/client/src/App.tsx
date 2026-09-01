@@ -40,6 +40,8 @@ import { AlertQueue } from './components/AlertQueue';
 import { ModelLab } from './components/ModelLab';
 import { WrittenAnswer } from './components/WrittenAnswer';
 import { IncidentConsole } from './components/IncidentConsole';
+import { MatchConsole } from './components/MatchConsole';
+import { Home } from './components/Home';
 import {
   ApiCallError,
   assessment,
@@ -166,6 +168,8 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
    * a modal, because it is a twenty-minute activity and deserves the whole screen.
    */
   const [careerView, setCareerView] = useState<'none' | 'quiz' | 'report' | 'lane'>('none');
+  const [warRoom, setWarRoom] = useState(false);
+  const [landing, setLanding] = useState(true);
   const [report, setReport] = useState<ReportData | null>(null);
   const [lanes, setLanes] = useState<LaneProfile[] | null>(null);
   const [laneDetail, setLaneDetail] = useState<LaneDetailData | null>(null);
@@ -600,6 +604,41 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
    * the terminal would make it feel like a formality rather than the thing that
    * decides what somebody studies for the next year.
    */
+  if (warRoom) {
+    return <MatchConsole user={user} onExit={() => setWarRoom(false)} />;
+  }
+
+  if (landing) {
+    return (
+      <Home
+        username={user.username}
+        paid={user.tier === 'paid'}
+        onSignOut={signOut}
+        onTakeAssessment={() => {
+          setLanding(false);
+          setCareerView('quiz');
+        }}
+        onRisk={() => setLanding(false)}
+        onLinux={() => setLanding(false)}
+        onSoc={() => setLanding(false)}
+        onBrowseTracks={() => setLanding(false)}
+        onSocWarRoom={() => {
+          setLanding(false);
+          setWarRoom(true);
+        }}
+        onRedBlueWarRoom={() => {
+          setLanding(false);
+          setWarRoom(true);
+        }}
+        onRiskWarRoom={() => setLanding(false)}
+        onAiWarRoom={() => setLanding(false)}
+        onPortfolio={() => setLanding(false)}
+        onInterviewSim={() => setLanding(false)}
+        onInterviewPeer={() => setLanding(false)}
+      />
+    );
+  }
+
   if (careerView === 'quiz') {
     return (
       <div className="app">
@@ -689,11 +728,22 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
           <span className="dot" />
           Ridgeline SOC Trainer
         </span>
-        <button className="btn link" onClick={() => setTrackId(null)}>
-          All tracks
+        <button className="btn link iconbtn" title="Home" aria-label="Home" onClick={() => setLanding(true)}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 11l9-8 9 8" />
+            <path d="M5 10v10h14V10" />
+          </svg>
         </button>
-        <button className="btn link" onClick={() => setCareerView('quiz')}>
-          Career fit
+        <button className="btn link iconbtn" title="Career fit" aria-label="Career fit" onClick={() => setCareerView('quiz')}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M15.5 8.5l-2.2 4.8-4.8 2.2 2.2-4.8z" />
+          </svg>
+        </button>
+        <button className="btn link iconbtn" title="War room" aria-label="War room" onClick={() => setWarRoom(true)}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z" />
+          </svg>
         </button>
         <span className="spacer" />
         <span className="who">

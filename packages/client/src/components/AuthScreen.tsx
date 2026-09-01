@@ -24,6 +24,7 @@ export function AuthScreen({ onSignedIn }: AuthScreenProps) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [entryCode, setEntryCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -38,7 +39,7 @@ export function AuthScreen({ onSignedIn }: AuthScreenProps) {
       const result =
         mode === 'login'
           ? await auth.login(identifier, password)
-          : await auth.register(username, email, password);
+          : await auth.register(username, email, password, entryCode);
       onSignedIn(result.user);
     } catch (error) {
       if (error instanceof ApiCallError) {
@@ -102,6 +103,23 @@ export function AuthScreen({ onSignedIn }: AuthScreenProps) {
                 required
               />
               {fields.email && <div className="err">{fields.email}</div>}
+            </div>
+            <div className="field">
+              <label htmlFor="entryCode">Code</label>
+              <input
+                id="entryCode"
+                value={entryCode}
+                autoComplete="off"
+                placeholder="Your access code"
+                onChange={(event) => setEntryCode(event.target.value)}
+                required
+              />
+              {fields.entryCode && <div className="err">{fields.entryCode}</div>}
+              {!fields.entryCode && (
+                <div className="err" style={{ color: 'var(--text-faint)' }}>
+                  Ridgeline is invite-only. Enter the code you were given.
+                </div>
+              )}
             </div>
           </>
         )}

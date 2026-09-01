@@ -1,5 +1,5 @@
 /**
- * The item bank: 78 questions across six dimensions.
+ * The item bank: 84 questions across six dimensions.
  *
  * A NOTE ON COUNT
  *
@@ -158,6 +158,62 @@ export const ITEMS: AssessmentItem[] = [
     statement: 'I am good at spotting when something in a long list looks different from the rest.',
     trait: 'detail_orientation',
     lanes: { 'soc-ops': 3, forensics: 2, 'threat-intel': 2, 'network-security': 2, 'detection-engineering': 2 },
+  },
+  // --- how they think: cognitive-style items --------------------------------
+  // Each probes a distinct thinking style and routes it to the roles that
+  // reward it, so the report reflects how somebody reasons, not just what they
+  // like. Reuse existing traits; the lane weights carry the signal.
+  {
+    id: 's16',
+    kind: 'likert',
+    dimension: 'problem_solving',
+    statement:
+      'When something feels off, I would rather go dig for proof myself than wait to see whether an alarm goes off.',
+    trait: 'research_orientation',
+    lanes: { 'detection-engineering': 2, 'threat-intel': 2, 'soc-ops': 2, 'incident-response': 1 },
+  },
+  {
+    id: 's17',
+    kind: 'likert',
+    dimension: 'problem_solving',
+    statement:
+      'I can commit to a decision with only part of the picture, and change course as more becomes clear.',
+    trait: 'pressure_tolerance',
+    lanes: { 'incident-response': 3, 'red-team': 1, 'risk-compliance': 1, forensics: -1 },
+  },
+  {
+    id: 's18',
+    kind: 'likert',
+    dimension: 'problem_solving',
+    statement: 'I would rather be slow and certain than fast and mostly right.',
+    trait: 'depth_preference',
+    lanes: { forensics: 3, 'detection-engineering': 2, appsec: 2, 'soc-ops': -1, 'incident-response': -1 },
+  },
+  {
+    id: 's19',
+    kind: 'likert',
+    dimension: 'problem_solving',
+    statement: 'I naturally notice how a system could be tricked, misused, or broken.',
+    trait: 'adversarial_pull',
+    lanes: { 'red-team': 3, pentest: 3, appsec: 2, 'ai-security': 2 },
+  },
+  {
+    id: 's20',
+    kind: 'likert',
+    dimension: 'problem_solving',
+    statement:
+      'I am comfortable saying we do not have enough to know who did this, rather than naming someone to sound certain.',
+    trait: 'research_orientation',
+    lanes: { 'threat-intel': 3, forensics: 2 },
+  },
+  {
+    id: 's21',
+    kind: 'likert',
+    dimension: 'problem_solving',
+    statement:
+      'I enjoy understanding how all the pieces of a system connect more than mastering any single piece.',
+    trait: 'building_drive',
+    lanes: { 'security-architecture': 3, 'security-engineering': 2, 'cloud-security': 2, 'network-security': 1 },
   },
   {
     id: 's2',

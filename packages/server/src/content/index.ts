@@ -30,6 +30,7 @@ import { INCIDENT_RESPONSE } from './incident-response.js';
 import { AI_FOUNDATIONS } from './ai-foundations.js';
 import { AI_SECURITY } from './ai-security.js';
 import { RED_TEAM_FOUNDATIONS } from './red-team-foundations.js';
+import { SOC_FOUNDATIONS } from './soc-foundations.js';
 import { BLUE_TEAM_FOUNDATIONS } from './blue-team-foundations.js';
 
 /**
@@ -52,6 +53,7 @@ export const PACKAGES: LearningPackage[] = [
   AI_FOUNDATIONS,
   AI_SECURITY,
   RED_TEAM_FOUNDATIONS,
+  SOC_FOUNDATIONS,
   BLUE_TEAM_FOUNDATIONS,
 ];
 

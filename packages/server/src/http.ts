@@ -9,6 +9,7 @@ import { ZodError } from 'zod';
 import { API_ERROR_CODES, type ApiError, type ApiResponse, type UserRole } from '@soc/shared';
 
 import { readSession, type SessionClaims } from './auth/session.js';
+import { prisma } from './db/client.js';
 import { isProduction } from './env.js';
 
 declare global {
@@ -68,6 +69,39 @@ export function requireAuth(request: Request, response: Response, next: NextFunc
   }
   request.session = session;
   next();
+}
+
+/**
+ * Restricts a route to paid accounts. Must run after `requireAuth`.
+ *
+ * The tier is read from the database on the request rather than trusted from the
+ * session token, so granting somebody paid access takes effect on their next
+ * request instead of forcing them to sign in again. A missing column (before the
+ * migration is applied) reads as free, which fails closed.
+ */
+export function requirePaid(request: Request, response: Response, next: NextFunction): void {
+  const userId = request.session?.sub;
+  if (!userId) {
+    sendError(response, 401, {
+      code: API_ERROR_CODES.unauthenticated,
+      message: 'You need to sign in to do that.',
+    });
+    return;
+  }
+  prisma.user
+    .findUnique({ where: { id: userId } })
+    .then((user) => {
+      const tier = (user as { tier?: string } | null)?.tier ?? 'free';
+      if (tier !== 'paid') {
+        sendError(response, 402, {
+          code: API_ERROR_CODES.paymentRequired,
+          message: 'This is part of the paid career pack. Request access to unlock it.',
+        });
+        return;
+      }
+      next();
+    })
+    .catch(next);
 }
 
 /** Restricts a route to particular roles. Must run after requireAuth. */

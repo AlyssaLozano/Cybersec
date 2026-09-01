@@ -7,6 +7,8 @@ import './career.css';
 import './alerts.css';
 import './incidents.css';
 import './model-lab.css';
+import './match.css';
+import './home.css';
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Missing #root element in index.html');
