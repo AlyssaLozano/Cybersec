@@ -387,6 +387,27 @@ describe('escalation runs outward from the operator, never back to them', () => 
 });
 
 describe('the seat briefing', () => {
+  it('briefs every seated role of every scenario', () => {
+    /*
+     * Caught a real bug the first time it ran: detection-engineer and
+     * fusion-analyst were added to the role union and seated in a scenario
+     * without ever being given surfaces or a remit, so they would have sat
+     * through an hour with a null brief and an empty board. A role union and a
+     * projection table that can drift apart will.
+     */
+    for (const scenario of SCENARIOS) {
+      for (const role of scenario.roles) {
+        const brief = briefingFor(scenario.id, role);
+        expect(brief, `${scenario.id}: ${role} sits down with no brief`).not.toBeNull();
+        expect(brief!.remit, `${scenario.id}: ${role} has no remit`).not.toBe('');
+        expect(
+          brief!.surfaces.length,
+          `${scenario.id}: ${role} is briefed with no consoles`,
+        ).toBeGreaterThan(0);
+      }
+    }
+  });
+
   it('briefs every seated role', () => {
     const scenario = getScenario(ID)!;
     for (const role of scenario.roles) {

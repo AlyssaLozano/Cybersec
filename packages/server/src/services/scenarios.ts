@@ -134,6 +134,31 @@ const SURFACES_BY_ROLE: Record<string, string[]> = {
   'ai-security': ['alert-queue', 'process-tree'],
   'ir-lead': ['alert-queue', 'raw-log', 'network-flow', 'cloud-audit', 'process-tree', 'host-artefact'],
   'vulnerability-analyst': ['alert-queue', 'host-artefact'],
+  /*
+   * Detection engineering sees what fired and the data underneath it, and
+   * nothing else.
+   *
+   * The queue is their subject matter rather than their workload: they are the
+   * only seat whose job is the RULE rather than the event, and firing history
+   * is what tells them whether a proposed detection would have drowned the
+   * floor. Raw logs are there because a rule nobody backtested is a guess, and
+   * backtesting needs the thirty days the rule would have run against.
+   *
+   * They deliberately do not get network flows, cloud audit or host artefacts.
+   * A seat that can investigate everything will investigate instead of building
+   * the control, and the control is the only thing on this floor that outlives
+   * the hour.
+   */
+  'detection-engineer': ['alert-queue', 'raw-log'],
+  /*
+   * Fusion sees three surfaces that no single specialist holds together.
+   *
+   * Not all six. A fusion seat with the lead's view is a second lead, and the
+   * value of the seat is that they have to ASK, which is what makes the room
+   * talk to itself. Three overlapping surfaces is enough to notice that two
+   * seats are describing one event and neither knows it.
+   */
+  'fusion-analyst': ['alert-queue', 'raw-log', 'network-flow'],
 };
 
 /** The answer key. Never call this from a route before a claim is committed. */
@@ -271,6 +296,17 @@ const TERMS: Record<string, Array<{ term: string; means: string }>> = {
     { term: 'CVE', means: 'A catalogued vulnerability with an identifier. Not every way in has one.' },
     { term: 'Exploitability', means: 'Whether a weaponised exploit actually exists, as opposed to whether one theoretically could.' },
   ],
+  'detection-engineer': [
+    { term: 'Backtest', means: 'Replaying proposed logic over historical data to see what it would have fired on. A rule nobody backtested is a guess.' },
+    { term: 'False positive rate', means: 'What the rule costs per shift. A perfect detection nobody reads has caught nothing.' },
+    { term: 'Detection as code', means: 'Rules kept in version control and reviewed like software, so a change has an author and can be undone.' },
+    { term: 'Indicator vs behaviour', means: 'An address stops working when they change it. A technique keeps working, and is harder to write.' },
+  ],
+  'fusion-analyst': [
+    { term: 'Pivot', means: 'Moving from one finding to related ones through a shared host, account, address or time window.' },
+    { term: 'Corroboration', means: 'Two seats reaching the same conclusion from different evidence. Not the same as two seats agreeing.' },
+    { term: 'Intelligence gap', means: 'Something the picture needs and nobody has. Naming it is the output; guessing at it is not.' },
+  ],
   'ir-lead': [
     { term: 'Declare', means: 'State that this is an incident. Activates procedures and pulls people off other work.' },
     { term: 'Containment', means: 'Removing the attacker access without destroying what proves they were there.' },
@@ -371,6 +407,29 @@ const REMIT: Record<string, { remit: string; questions: string[]; handsTo: SocRo
       'Is this a CVE or a practice? Those get fixed by completely different work.',
       'How many other hosts have the same exposure right now?',
       'What can actually be changed this week, as opposed to what should be?',
+    ],
+    handsTo: ['ir-lead'],
+  },
+  'detection-engineer': {
+    remit:
+      'Build the control that stops this next time, and be honest about what it would cost the ' +
+      'floor to run.',
+    questions: [
+      'What would have caught this earlier, and would it have fired on anything else in thirty days?',
+      'Are you detecting the technique or the indicator? One of those still works next month.',
+      'What does this rule cost per shift, and is the floor that already ignores 8,000 alerts a ' +
+        'month going to read it?',
+    ],
+    handsTo: ['ir-lead'],
+  },
+  'fusion-analyst': {
+    remit:
+      'Hold the whole picture. Notice when two seats are describing the same thing and neither of ' +
+      'them knows it.',
+    questions: [
+      'Which two findings share a host, an account, an address or a five-minute window?',
+      'Who is working from an assumption that another seat has already disproved?',
+      'What does the sequence imply happened that nobody has evidence for yet?',
     ],
     handsTo: ['ir-lead'],
   },

@@ -13,9 +13,13 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { RIDGELINE, RIDGELINE_TRUTH } from './ridgeline.js';
+import { CHEAP_RENT, CHEAP_RENT_TRUTH } from './cryptominer.js';
+import { THIRD_PARTY, THIRD_PARTY_TRUTH } from './supply-chain.js';
+import { LONG_NOTICE, LONG_NOTICE_TRUTH } from './insider.js';
+import { LOW_TIDE, LOW_TIDE_TRUTH } from './dictionary.js';
 
-export const SCENARIOS: Scenario[] = [RIDGELINE];
-export const SCENARIO_TRUTH: ScenarioTruth[] = [RIDGELINE_TRUTH];
+export const SCENARIOS: Scenario[] = [RIDGELINE, LOW_TIDE, LONG_NOTICE, THIRD_PARTY, CHEAP_RENT];
+export const SCENARIO_TRUTH: ScenarioTruth[] = [RIDGELINE_TRUTH, LOW_TIDE_TRUTH, LONG_NOTICE_TRUTH, THIRD_PARTY_TRUTH, CHEAP_RENT_TRUTH];
 
 function validateScenarios(): void {
   const truthById = new Map(SCENARIO_TRUTH.map((t) => [t.scenarioId, t]));
