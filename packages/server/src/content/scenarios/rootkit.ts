@@ -37,6 +37,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -242,7 +243,7 @@ export const BELOW_THE_FLOOR_TRUTH: ScenarioTruth = {
         'The host is lying about its own traffic.',
       commandOptions: [
         { command: 'grep 198.51.100.88 /var/log/switch/flows.log | tail -20', correct: true, teaches: CORRECT_STEP },
-        { command: 'awk \'$2=="rmg-db-04" {print $1, $6}\' /var/log/switch/flows.log | tail', ...WRONG_TARGET },
+        { command: 'awk \'$2=="rmg-db-04" {print $1, $6}\' /var/log/switch/flows.log | tail', correct: true, teaches: ALSO_WORKS },
         { command: 'netstat -an | grep 443', ...WRONG_TARGET },
         { command: 'ss -tnp', ...WRONG_TARGET },
         { command: 'iptables -L -n -v', ...WRONG_TARGET },

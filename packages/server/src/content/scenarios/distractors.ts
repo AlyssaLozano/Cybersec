@@ -129,3 +129,24 @@ export const CORRECT_STEP =
   'raises, against the specific source that can answer it, and it comes back with something you ' +
   'can act on rather than something you have to read through. That shape is what to reach for ' +
   'next time: name the question first, then pick the narrowest command that answers it.';
+
+/**
+ * The lesson on an option that also works.
+ *
+ * WHY THERE ARE TWO CORRECT LESSONS AND NOT ONE
+ *
+ * `CORRECT_STEP` says why the shape was right. This says the same and adds the
+ * thing a student most needs to hear at the moment they picked the road less
+ * travelled: that they were not lucky and they were not wrong.
+ *
+ * Somebody who reaches a finding by a route the author did not have in mind and
+ * is told they made a mistake learns to stop trusting their own reasoning,
+ * which is the single most expensive thing this platform could teach. So an
+ * alternative that gets there is marked correct and says so plainly.
+ */
+export const ALSO_WORKS =
+  'This gets you there too. There is usually more than one route to a finding, and picking a ' +
+  'different tool than somebody else would have is not a mistake: what matters is that you named ' +
+  'the question first and then went at the source that could answer it. The review lists every ' +
+  'approach that worked on this event and what each one trades off, because knowing why two ' +
+  'commands both arrive is worth more than memorising one of them.';

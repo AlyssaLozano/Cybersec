@@ -45,8 +45,16 @@ export interface IdealStep {
   owner: SocRoleId;
   /** One line on what this event actually was. */
   what: string;
-  /** The command or action that answered it. */
+  /**
+   * Every command or action that answered it, joined with "or".
+   *
+   * Plural on purpose. Several commands often reach the same finding, and
+   * printing one of them as THE answer tells a student who took another route
+   * that they were wrong when they were not.
+   */
   move: string;
+  /** True when more than one approach reached this finding. */
+  alsoWorks: boolean;
   /** Whether this run got there, and how late. */
   actual: 'caught' | 'late' | 'misread' | 'missed' | 'not-shown';
   /** Seconds after landing, when somebody did take it. */

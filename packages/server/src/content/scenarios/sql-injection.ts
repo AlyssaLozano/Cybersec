@@ -36,6 +36,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -200,7 +201,7 @@ export const SELECT_STAR_TRUTH: ScenarioTruth = {
         'no other page affected, and it does not reproduce internally. Specific requests are ' +
         'expensive rather than the system being busy. Taking it.',
       commandOptions: [
-        { command: 'grep "reporting" /var/log/portal/access.log | tail -20', ...WRONG_TARGET },
+        { command: 'grep "reporting" /var/log/portal/access.log | tail -20', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'$10 > 5000 {print $7}\' /var/log/portal/access.log | sort | uniq -c | sort -rn', correct: true, teaches: CORRECT_STEP },
         { command: 'top -b -n1 | head', ...STATUS_CHECK },
         { command: 'systemctl status postgresql', ...STATUS_CHECK },
@@ -238,7 +239,7 @@ export const SELECT_STAR_TRUTH: ScenarioTruth = {
       commandOptions: [
         { command: 'grep -i union /var/log/postgresql/slow-query.log | head -20', correct: true, teaches: CORRECT_STEP },
         { command: 'grep -c UNION /var/log/postgresql/slow-query.log', ...COUNT_ONLY },
-        { command: 'awk \'/UNION/ {print $NF}\' /var/log/postgresql/slow-query.log | head', ...WRONG_TARGET },
+        { command: 'awk \'/UNION/ {print $NF}\' /var/log/postgresql/slow-query.log | head', correct: true, teaches: ALSO_WORKS },
         { command: 'grep -rn "SELECT.*+" /opt/portal/src/reporting.js', ...WRONG_TARGET },
         { command: 'psql -c "select count(*) from pg_stat_statements"', ...WRONG_TARGET },
       ],
@@ -272,7 +273,7 @@ export const SELECT_STAR_TRUTH: ScenarioTruth = {
         'control was ever going to see it.',
       commandOptions: [
         { command: 'awk \'{print $1}\' /var/log/portal/access.log | sort | uniq -c | sort -rn | head', correct: true, teaches: CORRECT_STEP },
-        { command: 'awk \'/reporting/ {print $4}\' /var/log/portal/access.log | cut -d: -f2 | sort | uniq -c', ...WRONG_TARGET },
+        { command: 'awk \'/reporting/ {print $4}\' /var/log/portal/access.log | cut -d: -f2 | sort | uniq -c', correct: true, teaches: ALSO_WORKS },
         { command: 'cat /etc/portal/rate-limit.conf', ...WRONG_TARGET },
         { command: 'grep -c reporting /var/log/portal/access.log', ...COUNT_ONLY },
         { command: 'netstat -an | grep 443', ...WRONG_TARGET },
@@ -397,7 +398,7 @@ export const SELECT_STAR_TRUTH: ScenarioTruth = {
         'minutes does not match a signature built for probing. Closing it.',
       commandOptions: [
         { command: 'grep -c BLOCK /var/log/waf/events.log', ...COUNT_ONLY },
-        { command: 'awk \'/BLOCK/ {print $7}\' /var/log/waf/events.log | sort | uniq -c | sort -rn | head', ...WRONG_TARGET },
+        { command: 'awk \'/BLOCK/ {print $7}\' /var/log/waf/events.log | sort | uniq -c | sort -rn | head', correct: true, teaches: ALSO_WORKS },
         { command: 'grep reporting /var/log/waf/events.log', correct: true, teaches: CORRECT_STEP },
         { command: 'cat /var/log/waf/monthly-summary.log', ...DUMP_ALL },
         { command: 'systemctl status waf', ...STATUS_CHECK },

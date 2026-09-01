@@ -36,6 +36,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -202,7 +203,7 @@ export const CHANGE_OF_BANK_TRUTH: ScenarioTruth = {
         'that is not the supplier. Raising it and asking finance to call the bank now, before we ' +
         'understand anything.',
       commandOptions: [
-        { command: 'grep 88214 /var/log/finance/payments.log', ...WRONG_TARGET },
+        { command: 'grep 88214 /var/log/finance/payments.log', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'/88214/ {print $1, $5, $7}\' /var/log/finance/payments.log', correct: true, teaches: CORRECT_STEP },
         { command: 'cat /var/log/servicedesk/tickets.log | grep -i 88214', ...WRONG_TARGET },
         { command: 'grep -i supplier /var/log/finance/audit.log | tail', ...WRONG_TARGET },
@@ -241,7 +242,7 @@ export const CHANGE_OF_BANK_TRUTH: ScenarioTruth = {
         'Their mailbox is compromised, not ours, and we cannot see their side.',
       commandOptions: [
         { command: 'grep -A5 88214 /var/log/mail/archive.log | head -40', correct: true, teaches: CORRECT_STEP },
-        { command: 'awk \'/88214/ {print $3, $5}\' /var/log/mail/archive.log', ...WRONG_TARGET },
+        { command: 'awk \'/88214/ {print $3, $5}\' /var/log/mail/archive.log', correct: true, teaches: ALSO_WORKS },
         { command: 'grep -i "dmarc\\\\|spf\\\\|dkim" /var/log/mail/auth-results.log | tail', ...WRONG_TARGET },
         { command: 'grep -c 88214 /var/log/mail/archive.log', ...COUNT_ONLY },
         { command: 'cat /var/log/mail/gateway.log | grep 88214', ...WRONG_TARGET },
@@ -400,7 +401,7 @@ export const CHANGE_OF_BANK_TRUTH: ScenarioTruth = {
         'working, and it is the opposite of what got us. Closing it.',
       commandOptions: [
         { command: 'grep -c BLOCKED /var/log/mail/gateway.log', ...COUNT_ONLY },
-        { command: 'awk \'/BLOCKED/ {print $6}\' /var/log/mail/gateway.log | sort | uniq -c | head', ...WRONG_TARGET },
+        { command: 'awk \'/BLOCKED/ {print $6}\' /var/log/mail/gateway.log | sort | uniq -c | head', correct: true, teaches: ALSO_WORKS },
         { command: 'grep 88214 /var/log/mail/gateway.log', correct: true, teaches: CORRECT_STEP },
         { command: 'cat /var/log/mail/monthly-summary.log', ...DUMP_ALL },
         { command: 'systemctl status mailgw', ...STATUS_CHECK },

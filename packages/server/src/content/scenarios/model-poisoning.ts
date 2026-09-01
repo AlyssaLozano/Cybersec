@@ -40,6 +40,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -279,7 +280,7 @@ export const BAD_TEACHER_TRUTH: ScenarioTruth = {
       commandOptions: [
         { command: 'awk \'/build-egress/ && /escalate/ {print $1}\' /var/log/queue/decisions.log | uniq -c', correct: true, teaches: CORRECT_STEP },
         { command: 'grep -c build-egress /var/log/queue/alerts.log', ...COUNT_ONLY },
-        { command: 'awk \'/build-egress/ {print $5}\' /var/log/queue/decisions.log | sort | uniq -c', ...WRONG_TARGET },
+        { command: 'awk \'/build-egress/ {print $5}\' /var/log/queue/decisions.log | sort | uniq -c', correct: true, teaches: ALSO_WORKS },
         { command: 'cat /var/log/queue/dashboard-state.json', ...DUMP_ALL },
         { command: 'date -d "19 days ago"', ...WRONG_TARGET },
       ],
@@ -411,7 +412,7 @@ export const BAD_TEACHER_TRUTH: ScenarioTruth = {
         'and latency does not change what the model recommends. Eighteen of eighteen this month ' +
         'were the same. Closing it.',
       commandOptions: [
-        { command: 'grep latency /var/log/model/serving.log | tail -20', ...WRONG_TARGET },
+        { command: 'grep latency /var/log/model/serving.log | tail -20', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'/latency/ {print $5}\' /var/log/model/serving.log | tail -30', correct: true, teaches: CORRECT_STEP },
         { command: 'grep -i migration /var/log/change-management.log', ...WRONG_TARGET },
         { command: 'cat /var/log/model/quality-review-monthly.json | grep -i latency', ...WRONG_TARGET },

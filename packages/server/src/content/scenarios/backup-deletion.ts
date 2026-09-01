@@ -37,6 +37,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -200,7 +201,7 @@ export const NOTHING_TO_RESTORE_TRUTH: ScenarioTruth = {
         'source set means somebody changed the selection. Raising it.',
       commandOptions: [
         { command: 'grep -i skipped /var/log/backup/verify.log | tail', correct: true, teaches: CORRECT_STEP },
-        { command: 'awk \'/verify/ {print $1, $5}\' /var/log/backup/verify.log | tail -20', ...WRONG_TARGET },
+        { command: 'awk \'/verify/ {print $1, $5}\' /var/log/backup/verify.log | tail -20', correct: true, teaches: ALSO_WORKS },
         { command: 'systemctl status backup-verify.timer', ...STATUS_CHECK },
         { command: 'df -h /backup', ...STATUS_CHECK },
         { command: 'ls -la /var/log/backup/', ...WRONG_TARGET },

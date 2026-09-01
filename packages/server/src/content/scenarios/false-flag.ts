@@ -37,6 +37,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -313,7 +314,7 @@ export const WRONG_ADDRESS_TRUTH: ScenarioTruth = {
         'people in research computing know it. That is inside knowledge, and it is the first thing ' +
         'tonight that could not have been planted.',
       commandOptions: [
-        { command: 'grep rmg-res-01 /var/log/fileaccess.log | head -30', ...WRONG_TARGET },
+        { command: 'grep rmg-res-01 /var/log/fileaccess.log | head -30', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'$4 ~ /research/ {print $1, $6}\' /var/log/fileaccess.log | head -20', correct: true, teaches: CORRECT_STEP },
         { command: 'ls -la /mnt/research/', ...WRONG_TARGET },
         { command: 'find /mnt/research -maxdepth 2 -type d', ...WRONG_TARGET },
@@ -418,8 +419,8 @@ export const WRONG_ADDRESS_TRUTH: ScenarioTruth = {
         { command: 'cat /var/log/feeds/quarterly-summary.txt | head -30', correct: true, teaches: CORRECT_STEP },
         { command: 'grep -c "sector" /var/log/feeds/quarterly-summary.txt', ...COUNT_ONLY },
         { command: 'ls /var/log/feeds/quarterly-*', ...WRONG_TARGET },
-        { command: 'grep -i healthcare /var/log/feeds/quarterly-summary.txt', ...WRONG_TARGET },
-        { command: 'diff /var/log/feeds/quarterly-summary.txt /var/log/feeds/quarterly-prev.txt', ...WRONG_TARGET },
+        { command: 'grep -i healthcare /var/log/feeds/quarterly-summary.txt', correct: true, teaches: ALSO_WORKS },
+        { command: 'diff /var/log/feeds/quarterly-summary.txt /var/log/feeds/quarterly-prev.txt', correct: true, teaches: ALSO_WORKS },
       ],
       commandNudge:
         'Check how specific that summary actually is, and how many sectors it names.',

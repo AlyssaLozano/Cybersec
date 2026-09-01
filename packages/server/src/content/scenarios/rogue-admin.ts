@@ -38,6 +38,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -407,7 +408,7 @@ export const OWN_KEYS_TRUTH: ScenarioTruth = {
       commandOptions: [
         { command: 'grep -c "ingestion error" /var/log/logging-platform/errors.log', ...COUNT_ONLY },
         { command: 'grep -i migration /var/log/change-management.log', ...WRONG_TARGET },
-        { command: 'awk \'/ingestion error/ {print $5}\' /var/log/logging-platform/errors.log | sort | uniq -c', ...WRONG_TARGET },
+        { command: 'awk \'/ingestion error/ {print $5}\' /var/log/logging-platform/errors.log | sort | uniq -c', correct: true, teaches: ALSO_WORKS },
         { command: 'cat /var/log/logging-platform/errors.log | tail -20', correct: true, teaches: CORRECT_STEP },
         { command: 'systemctl status log-ingest', ...STATUS_CHECK },
       ],

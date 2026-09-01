@@ -247,7 +247,27 @@ export interface ScenarioAction {
 export interface CommandOption {
   /** The command exactly as the student will type it. */
   command: string;
-  /** Exactly one option per event is the useful next step. */
+  /**
+   * Whether this option actually gets you there.
+   *
+   * MORE THAN ONE CAN BE TRUE, AND OFTEN IS
+   *
+   * The first version allowed exactly one. That was wrong in a way that teaches
+   * the wrong thing: on plenty of events two commands both reach the finding,
+   * and grading one of them as a mistake teaches a student to guess which
+   * approach the author had in mind rather than which approach works.
+   *
+   * Real analysis has more than one route. Somebody who reaches the accepted
+   * logins with `grep Accepted | grep testuser` and somebody who reaches them
+   * with `awk '/Accepted/ && $9=="testuser"'` have both done the job, and a
+   * platform that calls the second one wrong is teaching syntax preference as
+   * if it were tradecraft.
+   *
+   * So any number may be correct, and the review names all of them and says why
+   * each works. What stays wrong is the option that does not get there:
+   * the status check, the unbounded dump, the bare count, the thing that
+   * touches the attacker or changes the evidence.
+   */
   correct: boolean;
   /**
    * What choosing this taught, shown after the choice.

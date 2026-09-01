@@ -31,6 +31,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -230,7 +231,7 @@ export const NO_PATCH_TRUTH: ScenarioTruth = {
         'uploads are 900 bytes to 4 KB when real documents are far bigger. Forty-four crashed and ' +
         'three did not, at 14:02, 14:19 and 15:51. The three that did not are what I would look at.',
       commandOptions: [
-        { command: 'grep "documents/preview" /var/log/portal/access.log | tail -40', ...WRONG_TARGET },
+        { command: 'grep "documents/preview" /var/log/portal/access.log | tail -40', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'$9==200 && $7 ~ /preview/\' /var/log/portal/access.log', correct: true, teaches: CORRECT_STEP },
         { command: 'grep -c preview /var/log/portal/access.log', ...COUNT_ONLY },
         { command: 'tail -50 /var/log/portal/error.log', ...DUMP_ALL },
@@ -397,7 +398,7 @@ export const NO_PATCH_TRUTH: ScenarioTruth = {
         'and none of them at the portal. That is background. Closing it.',
       commandOptions: [
         { command: 'grep -c BLOCK /var/log/ips/events.log', ...COUNT_ONLY },
-        { command: 'awk \'/BLOCK/ {print $6}\' /var/log/ips/events.log | sort | uniq -c | sort -rn | head', ...WRONG_TARGET },
+        { command: 'awk \'/BLOCK/ {print $6}\' /var/log/ips/events.log | sort | uniq -c | sort -rn | head', correct: true, teaches: ALSO_WORKS },
         { command: 'grep portal /var/log/ips/events.log', correct: true, teaches: CORRECT_STEP },
         { command: 'cat /var/log/ips/daily-summary.log', ...DUMP_ALL },
         { command: 'systemctl status ips', ...STATUS_CHECK },

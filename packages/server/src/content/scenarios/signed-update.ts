@@ -37,6 +37,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -241,7 +242,7 @@ export const SIGNED_AND_TRUSTED_TRUTH: ScenarioTruth = {
         'It is the update.',
       commandOptions: [
         { command: 'whois 198.51.100.117', ...WRONG_TARGET },
-        { command: 'awk \'$4 ~ /198.51.100.117/ {print $2}\' /var/log/flows.log | sort -u | wc -l', ...WRONG_TARGET },
+        { command: 'awk \'$4 ~ /198.51.100.117/ {print $2}\' /var/log/flows.log | sort -u | wc -l', correct: true, teaches: ALSO_WORKS },
         { command: 'grep "02:40" /var/log/flows.log | head -20', correct: true, teaches: CORRECT_STEP },
         { command: 'dig +short mon-update-cdn.example', ...WRONG_TARGET },
         { command: 'cat /var/log/monitoring/update-history.log', ...DUMP_ALL },

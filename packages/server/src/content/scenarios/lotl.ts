@@ -35,6 +35,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -203,7 +204,7 @@ export const NOTHING_INSTALLED_TRUTH: ScenarioTruth = {
         'that contained instructions.',
       commandOptions: [
         { command: 'grep -B2 -A5 "wscript" /var/log/edr/process.log', correct: true, teaches: CORRECT_STEP },
-        { command: 'awk \'/wscript|cscript/ {print $2, $6}\' /var/log/edr/process.log | tail -20', ...WRONG_TARGET },
+        { command: 'awk \'/wscript|cscript/ {print $2, $6}\' /var/log/edr/process.log | tail -20', correct: true, teaches: ALSO_WORKS },
         { command: 'ps -ef | grep office', ...WRONG_TARGET },
         { command: 'sigcheck C:\\\\Windows\\\\System32\\\\wscript.exe', ...WRONG_TARGET },
         { command: 'ls -la /home/finance/Documents/', ...WRONG_TARGET },
@@ -237,7 +238,7 @@ export const NOTHING_INSTALLED_TRUTH: ScenarioTruth = {
         'because certificate enrolment needs it. Nothing was bypassed. It was used for something ' +
         'other than its job.',
       commandOptions: [
-        { command: 'grep -i certutil /var/log/edr/process.log', ...WRONG_TARGET },
+        { command: 'grep -i certutil /var/log/edr/process.log', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'/certutil/ {print $0}\' /var/log/edr/process.log | tail', correct: true, teaches: CORRECT_STEP },
         { command: 'sigcheck C:\\\\Windows\\\\System32\\\\certutil.exe', ...WRONG_TARGET },
         { command: 'cat /etc/appcontrol/allowlist.conf | grep -i cert', ...WRONG_TARGET },
@@ -340,7 +341,7 @@ export const NOTHING_INSTALLED_TRUTH: ScenarioTruth = {
         'under the finance account. Infrastructure use that daily and we cannot remove it. This ' +
         'account is not an administrator and has never run it before. They are mapping the domain.',
       commandOptions: [
-        { command: 'grep -i "powershell" /var/log/edr/process.log | tail -20', ...WRONG_TARGET },
+        { command: 'grep -i "powershell" /var/log/edr/process.log | tail -20', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'$5=="finance\\\\\\\\\\\\\\\\j.reyes" {print $6}\' /var/log/edr/process.log | sort -u', correct: true, teaches: CORRECT_STEP },
         { command: 'net user j.reyes /domain', ...WRONG_TARGET },
         { command: 'last | grep reyes', ...WRONG_TARGET },
@@ -402,7 +403,7 @@ export const NOTHING_INSTALLED_TRUTH: ScenarioTruth = {
         'unsigned. Closing it.',
       commandOptions: [
         { command: 'grep -c BLOCKED /var/log/appcontrol/events.log', ...COUNT_ONLY },
-        { command: 'awk \'/BLOCKED/ {print $5}\' /var/log/appcontrol/events.log | sort | uniq -c | sort -rn', ...WRONG_TARGET },
+        { command: 'awk \'/BLOCKED/ {print $5}\' /var/log/appcontrol/events.log | sort | uniq -c | sort -rn', correct: true, teaches: ALSO_WORKS },
         { command: 'grep RMG-WS-1180 /var/log/appcontrol/events.log', correct: true, teaches: CORRECT_STEP },
         { command: 'cat /var/log/appcontrol/weekly-summary.log', ...DUMP_ALL },
         { command: 'systemctl status appcontrol', ...STATUS_CHECK },

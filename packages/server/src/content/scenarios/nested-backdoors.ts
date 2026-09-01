@@ -31,6 +31,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -263,7 +264,7 @@ export const SECOND_FLOOR_TRUTH: ScenarioTruth = {
         'at 04:01 on the 24th. Four days after the rebuild. Neither cleanup rotated that ' +
         'credential, because both were scoped to the host.',
       commandOptions: [
-        { command: 'grep svc_app09_deploy /var/log/auth.log', ...WRONG_TARGET },
+        { command: 'grep svc_app09_deploy /var/log/auth.log', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'$5=="svc_app09_deploy" {print $1, $9}\' /var/log/auth.log | tail -20', correct: true, teaches: CORRECT_STEP },
         { command: 'cat ~svc_app09_deploy/.ssh/authorized_keys', ...WRONG_TARGET },
         { command: 'last | grep deploy', ...WRONG_TARGET },

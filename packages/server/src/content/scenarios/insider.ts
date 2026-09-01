@@ -32,6 +32,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -290,7 +291,7 @@ export const LONG_NOTICE_TRUTH: ScenarioTruth = {
         'destination, against a 60 MB daily baseline for that workstation. I can prove the volume ' +
         'and the destination. I cannot prove the contents from flow data.',
       commandOptions: [
-        { command: 'grep 198.51.100.24 /var/log/flows.log', ...WRONG_TARGET },
+        { command: 'grep 198.51.100.24 /var/log/flows.log', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'$2=="RMG-WS-4417" {sum+=$6} END {print sum}\' /var/log/flows.log', correct: true, teaches: CORRECT_STEP },
         { command: 'netstat -an', ...WRONG_TARGET },
         { command: 'tcpdump -r /var/cap/today.pcap -c 20', ...WRONG_TARGET },

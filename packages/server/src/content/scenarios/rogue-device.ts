@@ -37,6 +37,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -278,7 +279,7 @@ export const FOUND_IN_THE_CAR_PARK_TRUTH: ScenarioTruth = {
         'the seating. Anybody could have plugged this in. We need somebody to physically go and get ' +
         'it, and the corridor footage around 08:14 is worth pulling.',
       commandOptions: [
-        { command: 'grep 2F-114 /etc/facilities/cable-plant.csv', ...WRONG_TARGET },
+        { command: 'grep 2F-114 /etc/facilities/cable-plant.csv', correct: true, teaches: ALSO_WORKS },
         { command: 'awk -F, \'$1=="2F-114" {print $3, $4}\' /etc/facilities/cable-plant.csv', correct: true, teaches: CORRECT_STEP },
         { command: 'cat /etc/facilities/camera-coverage.csv | grep 2F', ...WRONG_TARGET },
         { command: 'grep -i outpatient /etc/facilities/access-control.csv', ...WRONG_TARGET },

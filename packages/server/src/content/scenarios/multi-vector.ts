@@ -38,6 +38,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -244,7 +245,7 @@ export const ALL_AT_ONCE_TRUTH: ScenarioTruth = {
       commandOptions: [
         { command: 'grep -c "login failed" /var/log/portal/auth.log', ...COUNT_ONLY },
         { command: 'awk \'/login ok/ {print $5}\' /var/log/portal/auth.log | sort -u', correct: true, teaches: CORRECT_STEP },
-        { command: 'awk \'{print $1}\' /var/log/portal/auth.log | sort -u | wc -l', ...WRONG_TARGET },
+        { command: 'awk \'{print $1}\' /var/log/portal/auth.log | sort -u | wc -l', correct: true, teaches: ALSO_WORKS },
         { command: 'systemctl status rate-limiter', ...STATUS_CHECK },
         { command: 'grep -c 200 /var/log/portal/access.log', ...COUNT_ONLY },
       ],

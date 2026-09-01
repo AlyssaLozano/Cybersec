@@ -29,6 +29,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -195,7 +196,7 @@ export const SECOND_POST_TRUTH: ScenarioTruth = {
         'domain one letter off a real supplier, links to a sign-in page. Gateway passed it clean. ' +
         'Raising it and asking who clicked.',
       commandOptions: [
-        { command: 'grep "Remittance advice 4471" /var/log/mail/delivery.log', ...WRONG_TARGET },
+        { command: 'grep "Remittance advice 4471" /var/log/mail/delivery.log', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'/4471/ {print $5}\' /var/log/mail/delivery.log | sort -u | wc -l', correct: true, teaches: CORRECT_STEP },
         { command: 'cat /var/log/mail/gateway.log | tail -40', ...WRONG_TARGET },
         { command: 'dig supplier-domain.example TXT', ...WRONG_TARGET },
@@ -262,7 +263,7 @@ export const SECOND_POST_TRUTH: ScenarioTruth = {
         'host posted to the page. Push prompt approved in three seconds. Five other accounts ' +
         'posted credentials and their prompts were never approved.',
       commandOptions: [
-        { command: 'grep marchetti /var/log/auth.log', ...WRONG_TARGET },
+        { command: 'grep marchetti /var/log/auth.log', correct: true, teaches: ALSO_WORKS },
         { command: 'grep \'Accepted\' /var/log/auth.log | grep 203.0.113.212', correct: true, teaches: CORRECT_STEP },
         { command: 'last -30', ...WRONG_TARGET },
         { command: 'grep -c push /var/log/mfa.log', ...COUNT_ONLY },
@@ -378,7 +379,7 @@ export const SECOND_POST_TRUTH: ScenarioTruth = {
         'campaign. That is the gateway working. Closing it.',
       commandOptions: [
         { command: 'grep -c BLOCKED /var/log/mail/gateway.log', ...COUNT_ONLY },
-        { command: 'awk \'/BLOCKED/ {print $6}\' /var/log/mail/gateway.log | sort | uniq -c', ...WRONG_TARGET },
+        { command: 'awk \'/BLOCKED/ {print $6}\' /var/log/mail/gateway.log | sort | uniq -c', correct: true, teaches: ALSO_WORKS },
         { command: 'cat /var/log/mail/stats-daily.log', ...DUMP_ALL },
         { command: 'grep 4471 /var/log/mail/gateway.log', correct: true, teaches: CORRECT_STEP },
         { command: 'systemctl status mailgw', ...STATUS_CHECK },

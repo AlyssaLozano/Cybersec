@@ -38,6 +38,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -356,7 +357,7 @@ export const CRY_WOLF_TRUTH: ScenarioTruth = {
         'at 01:19, mailbox rule at 01:24, permission grant at 01:31. Four different rules, none in ' +
         'the top four. That is a compromise.',
       commandOptions: [
-        { command: 'awk \'$6=="r.kowalczyk" {print $1, $4}\' /var/log/queue/alerts.log', ...WRONG_TARGET },
+        { command: 'awk \'$6=="r.kowalczyk" {print $1, $4}\' /var/log/queue/alerts.log', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'{print $6}\' /var/log/queue/alerts.log | sort | uniq -c | sort -rn | head -20', correct: true, teaches: CORRECT_STEP },
         { command: 'grep kowalczyk /var/log/auth.log', ...WRONG_TARGET },
         { command: 'grep -c kowalczyk /var/log/queue/alerts.log', ...COUNT_ONLY },

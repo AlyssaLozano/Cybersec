@@ -13,6 +13,7 @@
 import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { RIDGELINE, RIDGELINE_TRUTH } from './ridgeline.js';
+import { NOTHING_LEFT, NOTHING_LEFT_TRUTH } from './wiper.js';
 import { FOUND_IN_THE_CAR_PARK, FOUND_IN_THE_CAR_PARK_TRUTH } from './rogue-device.js';
 import { SELECT_STAR, SELECT_STAR_TRUTH } from './sql-injection.js';
 import { OWN_KEYS, OWN_KEYS_TRUTH } from './rogue-admin.js';
@@ -38,8 +39,8 @@ import { THIRD_PARTY, THIRD_PARTY_TRUTH } from './supply-chain.js';
 import { LONG_NOTICE, LONG_NOTICE_TRUTH } from './insider.js';
 import { LOW_TIDE, LOW_TIDE_TRUTH } from './dictionary.js';
 
-export const SCENARIOS: Scenario[] = [RIDGELINE, LOW_TIDE, LONG_NOTICE, THIRD_PARTY, CHEAP_RENT, SECOND_POST, LONG_WEATHER, QUIET_CHANNEL, KEY_RING, NO_PATCH, LAST_FRIDAY, NOTHING_INSTALLED, NOTHING_TO_RESTORE, SIGNED_AND_TRUSTED, SECOND_FLOOR, WRONG_ADDRESS, BAD_TEACHER, ALL_AT_ONCE, BELOW_THE_FLOOR, CRY_WOLF, CHANGE_OF_BANK, INFUSION, OWN_KEYS, SELECT_STAR, FOUND_IN_THE_CAR_PARK];
-export const SCENARIO_TRUTH: ScenarioTruth[] = [RIDGELINE_TRUTH, LOW_TIDE_TRUTH, LONG_NOTICE_TRUTH, THIRD_PARTY_TRUTH, CHEAP_RENT_TRUTH, SECOND_POST_TRUTH, LONG_WEATHER_TRUTH, QUIET_CHANNEL_TRUTH, KEY_RING_TRUTH, NO_PATCH_TRUTH, LAST_FRIDAY_TRUTH, NOTHING_INSTALLED_TRUTH, NOTHING_TO_RESTORE_TRUTH, SIGNED_AND_TRUSTED_TRUTH, SECOND_FLOOR_TRUTH, WRONG_ADDRESS_TRUTH, BAD_TEACHER_TRUTH, ALL_AT_ONCE_TRUTH, BELOW_THE_FLOOR_TRUTH, CRY_WOLF_TRUTH, CHANGE_OF_BANK_TRUTH, INFUSION_TRUTH, OWN_KEYS_TRUTH, SELECT_STAR_TRUTH, FOUND_IN_THE_CAR_PARK_TRUTH];
+export const SCENARIOS: Scenario[] = [RIDGELINE, LOW_TIDE, LONG_NOTICE, THIRD_PARTY, CHEAP_RENT, SECOND_POST, LONG_WEATHER, QUIET_CHANNEL, KEY_RING, NO_PATCH, LAST_FRIDAY, NOTHING_INSTALLED, NOTHING_TO_RESTORE, SIGNED_AND_TRUSTED, SECOND_FLOOR, WRONG_ADDRESS, BAD_TEACHER, ALL_AT_ONCE, BELOW_THE_FLOOR, CRY_WOLF, CHANGE_OF_BANK, INFUSION, OWN_KEYS, SELECT_STAR, FOUND_IN_THE_CAR_PARK, NOTHING_LEFT];
+export const SCENARIO_TRUTH: ScenarioTruth[] = [RIDGELINE_TRUTH, LOW_TIDE_TRUTH, LONG_NOTICE_TRUTH, THIRD_PARTY_TRUTH, CHEAP_RENT_TRUTH, SECOND_POST_TRUTH, LONG_WEATHER_TRUTH, QUIET_CHANNEL_TRUTH, KEY_RING_TRUTH, NO_PATCH_TRUTH, LAST_FRIDAY_TRUTH, NOTHING_INSTALLED_TRUTH, NOTHING_TO_RESTORE_TRUTH, SIGNED_AND_TRUSTED_TRUTH, SECOND_FLOOR_TRUTH, WRONG_ADDRESS_TRUTH, BAD_TEACHER_TRUTH, ALL_AT_ONCE_TRUTH, BELOW_THE_FLOOR_TRUTH, CRY_WOLF_TRUTH, CHANGE_OF_BANK_TRUTH, INFUSION_TRUTH, OWN_KEYS_TRUTH, SELECT_STAR_TRUTH, FOUND_IN_THE_CAR_PARK_TRUTH, NOTHING_LEFT_TRUTH];
 
 function validateScenarios(): void {
   const truthById = new Map(SCENARIO_TRUTH.map((t) => [t.scenarioId, t]));
@@ -121,19 +122,38 @@ function validateScenarios(): void {
       const event = byEventId.get(entry.eventId)!;
 
       /*
-       * Exactly one option is the answer.
+       * At least one option has to work, and not all of them.
        *
-       * Zero means a beginner picks from five candidates and every one of them
-       * is graded wrong, which reads as the exercise being broken. Two means
-       * the debrief contradicts itself. Both are invisible at runtime, because
-       * the flag is stripped before the options ship, and both are obvious here.
+       * Zero means a beginner picks from five candidates and every one is
+       * graded wrong, which reads as the exercise being broken. All five means
+       * the choice teaches nothing. Between those, any number is fine: several
+       * commands genuinely reach the same finding, and grading a working
+       * approach as a mistake teaches students to guess the author's syntax
+       * preference rather than to investigate.
+       *
+       * Both failures are invisible at runtime, because the flag is stripped
+       * before the options ship, and both are obvious here.
        */
       if (entry.commandOptions) {
         const right = entry.commandOptions.filter((o) => o.correct).length;
-        if (right !== 1) {
+        if (right < 1) {
           throw new Error(
-            `Scenario "${scenario.id}" event "${entry.eventId}" has ${right} correct command options. Exactly one option must be the useful next step.`,
+            `Scenario "${scenario.id}" event "${entry.eventId}" has no correct command option, so every choice a student makes is graded wrong.`,
           );
+        }
+        if (right === entry.commandOptions.length) {
+          throw new Error(
+            `Scenario "${scenario.id}" event "${entry.eventId}" marks every command option correct, so the choice teaches nothing.`,
+          );
+        }
+        // Destroying evidence or alerting the attacker is never an acceptable
+        // route to a finding, however well it works.
+        for (const option of entry.commandOptions) {
+          if (option.correct && option.harmful) {
+            throw new Error(
+              `Scenario "${scenario.id}" event "${entry.eventId}" marks a harmful option correct.`,
+            );
+          }
         }
         if (entry.commandOptions.some((o) => !o.teaches.trim())) {
           throw new Error(

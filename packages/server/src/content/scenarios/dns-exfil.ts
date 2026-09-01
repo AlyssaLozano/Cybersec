@@ -30,6 +30,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -403,7 +404,7 @@ export const QUIET_CHANNEL_TRUTH: ScenarioTruth = {
       commandOptions: [
         { command: 'grep -c MATCH /var/log/dns-feed/matches.log', ...COUNT_ONLY },
         { command: 'awk \'{print $5}\' /var/log/dns-feed/matches.log | sort | uniq -c | sort -rn | head', correct: true, teaches: CORRECT_STEP },
-        { command: 'grep 203.0.113.166 /var/log/dns-feed/matches.log', ...WRONG_TARGET },
+        { command: 'grep 203.0.113.166 /var/log/dns-feed/matches.log', correct: true, teaches: ALSO_WORKS },
         { command: 'cat /etc/feeds/subscription.conf', ...WRONG_TARGET },
         { command: 'systemctl status dns-feed', ...STATUS_CHECK },
       ],

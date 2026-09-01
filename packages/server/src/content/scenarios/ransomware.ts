@@ -35,6 +35,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -204,7 +205,7 @@ export const LAST_FRIDAY_TRUTH: ScenarioTruth = {
         'silent parameters every time. Signed and legitimate. We do not use this product, and it is ' +
         'eleven servers in forty minutes on a Friday. Raising it.',
       commandOptions: [
-        { command: 'grep -i "installed" /var/log/software/inventory.log | tail -20', ...WRONG_TARGET },
+        { command: 'grep -i "installed" /var/log/software/inventory.log | tail -20', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'/remoteaccess/ {print $1, $5}\' /var/log/software/inventory.log', correct: true, teaches: CORRECT_STEP },
         { command: 'systemctl list-units --type=service | head', ...WRONG_TARGET },
         { command: 'ps aux | grep -i remote', ...WRONG_TARGET },
@@ -312,7 +313,7 @@ export const LAST_FRIDAY_TRUTH: ScenarioTruth = {
         'preparation and the encryption has not happened yet.',
       commandOptions: [
         { command: 'grep -i "vssadmin\\\\|shadow" /var/log/audit/audit.log', correct: true, teaches: CORRECT_STEP },
-        { command: 'awk \'/delete shadows/ {print $1, $3}\' /var/log/audit/audit.log', ...WRONG_TARGET },
+        { command: 'awk \'/delete shadows/ {print $1, $3}\' /var/log/audit/audit.log', correct: true, teaches: ALSO_WORKS },
         { command: 'ls -la /var/backups/', ...WRONG_TARGET },
         { command: 'systemctl status vss', ...STATUS_CHECK },
         { command: 'df -h', ...STATUS_CHECK },
@@ -402,7 +403,7 @@ export const LAST_FRIDAY_TRUTH: ScenarioTruth = {
         'platform has an open ticket for timeouts on that segment. Workstations, not servers. 138 ' +
         'of 140 this month were the same. Closing it.',
       commandOptions: [
-        { command: 'grep FAILED /var/log/backup/jobs.log | tail -20', ...WRONG_TARGET },
+        { command: 'grep FAILED /var/log/backup/jobs.log | tail -20', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'/FAILED/ {print $4}\' /var/log/backup/jobs.log | sort | uniq -c', correct: true, teaches: CORRECT_STEP },
         { command: 'grep -i switch /var/log/platform/tickets.log', ...WRONG_TARGET },
         { command: 'ping -c2 rmg-ws-3301', ...TOUCH_ATTACKER },

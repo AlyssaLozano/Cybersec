@@ -515,7 +515,15 @@ describe('terminal help is a function of difficulty', () => {
       // Exactly one is the answer, and every one of the five says what it
       // taught. A distractor that teaches nothing is a wrong answer with no
       // lesson in it, which is the whole reason the format exists.
-      expect(entry.commandOptions!.filter((c) => c.correct)).toHaveLength(1);
+      // At least one has to work and not all of them. More than one is fine and
+      // common: several commands reach the same finding, and grading a working
+      // approach as a mistake teaches students to guess the author's syntax
+      // preference rather than to investigate.
+      const working = entry.commandOptions!.filter((c) => c.correct).length;
+      expect(working).toBeGreaterThanOrEqual(1);
+      expect(working).toBeLessThan(entry.commandOptions!.length);
+      // Destroying evidence is never an acceptable route to a finding.
+      expect(entry.commandOptions!.every((c) => !(c.correct && c.harmful))).toBe(true);
       expect(entry.commandOptions!.every((c) => c.teaches.length > 40)).toBe(true);
     }
   });

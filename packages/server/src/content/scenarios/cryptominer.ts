@@ -33,6 +33,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -328,7 +329,7 @@ export const CHEAP_RENT_TRUTH: ScenarioTruth = {
         'server side. Seven minutes before the miner started.',
       commandOptions: [
         { command: 'grep "report/preview" /var/log/nginx/access.log', correct: true, teaches: CORRECT_STEP },
-        { command: 'grep 203.0.113.19 /var/log/nginx/access.log', ...WRONG_TARGET },
+        { command: 'grep 203.0.113.19 /var/log/nginx/access.log', correct: true, teaches: ALSO_WORKS },
         { command: 'tail -50 /var/log/nginx/error.log', ...DUMP_ALL },
         { command: 'curl -I http://localhost/api/report/preview', ...TOUCH_ATTACKER },
         { command: 'cat /etc/nginx/nginx.conf', ...WRONG_TARGET },
@@ -421,7 +422,7 @@ export const CHEAP_RENT_TRUTH: ScenarioTruth = {
         'talked to it. The intrusion starts at 23:19, not 23:31.',
       commandOptions: [
         { command: 'grep 203.0.113.19 /var/log/flows.log', correct: true, teaches: CORRECT_STEP },
-        { command: 'awk \'$3<"23:32"\' /var/log/flows.log | tail -30', ...WRONG_TARGET },
+        { command: 'awk \'$3<"23:32"\' /var/log/flows.log | tail -30', correct: true, teaches: ALSO_WORKS },
         { command: 'ss -tn', ...WRONG_TARGET },
         { command: 'cat /var/log/nginx/access.log | tail -20', ...WRONG_TARGET },
         { command: 'ping -c 2 203.0.113.19', ...TOUCH_ATTACKER },

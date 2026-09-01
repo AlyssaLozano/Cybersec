@@ -35,6 +35,7 @@ import type { Scenario, ScenarioTruth } from '@soc/shared';
 
 import { COMMON_ACTIONS } from './actions.js';
 import {
+  ALSO_WORKS,
   BROAD_SEARCH,
   COUNT_ONLY,
   CORRECT_STEP,
@@ -198,7 +199,7 @@ export const THIRD_PARTY_TRUTH: ScenarioTruth = {
         'build, 4 KB out. Rule has been wrong six of six this month. Raising it because build ' +
         'agents normally talk to four places and this is not one of them.',
       commandOptions: [
-        { command: 'grep 203.0.113.140 /var/log/flows.log', ...WRONG_TARGET },
+        { command: 'grep 203.0.113.140 /var/log/flows.log', correct: true, teaches: ALSO_WORKS },
         { command: 'awk \'$2=="rmg-ci-03" {print $4}\' /var/log/flows.log | sort -u', correct: true, teaches: CORRECT_STEP },
         { command: 'netstat -an | grep 8443', ...WRONG_TARGET },
         { command: 'systemctl status build-agent', ...STATUS_CHECK },
@@ -231,7 +232,7 @@ export const THIRD_PARTY_TRUTH: ScenarioTruth = {
         'and made a network call. Post-install scripts are normal here. This package has never had ' +
         'one before.',
       commandOptions: [
-        { command: 'cat /var/log/ci/build-4417.log | grep -A5 postinstall', ...WRONG_TARGET },
+        { command: 'cat /var/log/ci/build-4417.log | grep -A5 postinstall', correct: true, teaches: ALSO_WORKS },
         { command: 'diff <(cat /var/log/ci/build-4416.log) <(cat /var/log/ci/build-4417.log)', correct: true, teaches: CORRECT_STEP },
         { command: 'ps aux', ...WRONG_TARGET },
         { command: 'cat package.json', ...WRONG_TARGET },

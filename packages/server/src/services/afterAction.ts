@@ -102,11 +102,20 @@ export function buildAfterAction(input: ReviewInput): AfterActionReview | null {
       // ideal run cannot describe a step the scoring would not have credited.
       move:
         [
-          entry.commandOptions?.find((o) => o.correct)?.command,
+          // Every command that reaches the finding, not just the first. Naming
+          // one where two work implies the other was a mistake, and a student
+          // who took it would learn to distrust a correct instinct.
+          (entry.commandOptions ?? [])
+            .filter((o) => o.correct)
+            .map((o) => o.command)
+            .join('   or   ') || null,
           entry.correctActions.map(actionLabel).join('; ') || null,
         ]
           .filter(Boolean)
           .join('  then  ') || 'No action required beyond reading it correctly.',
+      // Listed separately so the review can say what each route trades off,
+      // rather than presenting one of several working approaches as the answer.
+      alsoWorks: (entry.commandOptions ?? []).filter((o) => o.correct).length > 1,
       actual,
       afterSeconds: claim ? Math.max(0, claim.atSeconds - event.atSeconds) : null,
     });
