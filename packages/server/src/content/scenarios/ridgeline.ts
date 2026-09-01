@@ -239,6 +239,16 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.1',
       verdict: 'malicious',
+      commandOptions: [
+        'grep "Failed password" /var/log/auth.log | wc -l',
+        'grep "Accepted" /var/log/auth.log | grep testuser',
+        'cat /var/log/auth.log',
+        'systemctl restart sshd',
+        'passwd -l testuser',
+      ],
+      commandNudge:
+        'A run of failures only matters if you know how it ended. Find out whether any attempt on ' +
+        'that account was ever accepted.',
       standIn:
         'Triage: sixty-two failed passwords for testuser from one external address in eleven ' +
         'minutes. The account exists and is not locked. Rule has a thin history, so it has not ' +
@@ -322,6 +332,16 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.7',
       verdict: 'benign-true-positive',
+      commandOptions: [
+        'grep 192.0.2.44 /var/log/syslog | wc -l',
+        'iptables -L -n | head',
+        'grep "3389" /var/log/syslog | tail',
+        'nmap 192.0.2.44',
+        'ping 192.0.2.44',
+      ],
+      commandNudge:
+        'Before you decide, check how often this rule has fired and how often that turned out to ' +
+        'be nothing.',
       standIn:
         'Triage: inbound scan to a closed port, dropped. That rule has fired 23,487 times and been ' +
         'closed as noise almost every one. Dismissing it.',
@@ -343,6 +363,16 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.9',
       verdict: 'malicious',
+      commandOptions: [
+        'grep -A2 "Accepted password for testuser" /var/log/auth.log',
+        'ls -l /home/testuser/.ssh/',
+        'last -a | head',
+        'rm /home/testuser/.ssh/authorized_keys',
+        'journalctl -u ssh --since today',
+      ],
+      commandNudge:
+        'Look at what happened in the seconds AFTER the successful login, not before it. ' +
+        'Persistence is usually established immediately.',
       standIn:
         'Logs: an accepted password for testuser at 10:14:22 after sixty-two failures, and four ' +
         'seconds later a write to that account authorized_keys. Nothing else touched that file in ' +

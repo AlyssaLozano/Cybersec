@@ -33,6 +33,7 @@ import type {
   Scenario,
   ScenarioEvent,
   ScenarioTruth,
+  ScenarioDifficulty,
   SocRoleId,
   KillChainStage,
   TriageDecision,
@@ -63,13 +64,20 @@ export function eventsFor(
   scenarioId: string,
   role: SocRoleId,
   atSeconds: number,
+  runAt?: ScenarioDifficulty,
 ): ScenarioEvent[] {
   const scenario = BY_ID.get(scenarioId);
   if (!scenario) return [];
   const surfaces = SURFACES_BY_ROLE[role] ?? [];
-  return scenario.events.filter(
+  const difficulty = runAt ?? scenario.difficulty;
+  const visible = scenario.events.filter(
     (event) => event.atSeconds <= atSeconds && surfaces.includes(event.surface),
   );
+  // At expert the tooling stops telling you how worried to be. Severity is an
+  // assertion by whoever wrote the rule, and reading it off the row is the
+  // habit expert difficulty exists to remove.
+  if (difficulty !== 'expert') return visible;
+  return visible.map((event) => ({ ...event, claimedSeverity: null }));
 }
 
 /**
@@ -378,9 +386,11 @@ export function guidanceFor(
   scenarioId: string,
   eventId: string,
   role: SocRoleId,
+  runAt?: ScenarioDifficulty,
 ): string | null {
   const scenario = BY_ID.get(scenarioId);
-  if (!scenario || scenario.difficulty !== 'beginner') return null;
+  if (!scenario) return null;
+  if ((runAt ?? scenario.difficulty) !== 'beginner') return null;
   // Hints reach the lead and nobody else. The lead decides what to pass on and
   // to whom, which is the job: a floor where everyone is fed the same prompt
   // does not need a lead, and a lead who has nothing the others lack cannot
@@ -477,6 +487,52 @@ export function standInsFor(
   }
 
   return due.sort((a, b) => a.dueAtSeconds - b.dueAtSeconds);
+}
+
+/**
+ * What help the terminal offers, which is entirely a function of difficulty.
+ *
+ *   beginner      five candidate commands, one of them useful. They still type.
+ *   intermediate  no commands, one line on what to go looking for.
+ *   advanced      nothing.
+ *   expert        nothing.
+ *
+ * The progression is the point. A career changer with Security+ has read about
+ * grep and never had to reach for it under time pressure, and dropping them at
+ * a bare prompt teaches them they are bad at this rather than teaching them the
+ * shell. Naming the question without the syntax is the middle rung: knowing you
+ * want the accepted logins after a run of failures is the analysis, and
+ * composing the pipeline is a skill that only transfers if you do it yourself.
+ *
+ * Unlike `guidanceFor`, this is NOT restricted to the lead. It is scaffolding
+ * for using a console, not a hint about the incident, and withholding it from
+ * everyone but the lead would just mean nobody investigates.
+ */
+export interface TerminalAid {
+  /** Beginner only. Five candidates; one is the useful next step. */
+  options: string[];
+  /** Intermediate only. What to look for, never how. */
+  nudge: string | null;
+}
+
+export function terminalAidFor(
+  scenarioId: string,
+  eventId: string,
+  runAt?: ScenarioDifficulty,
+): TerminalAid {
+  const scenario = BY_ID.get(scenarioId);
+  const entry = eventTruth(scenarioId, eventId);
+  if (!scenario || !entry) return { options: [], nudge: null };
+
+  const difficulty = runAt ?? scenario.difficulty;
+  if (difficulty === 'beginner') {
+    return { options: entry.commandOptions ?? [], nudge: null };
+  }
+  if (difficulty === 'intermediate') {
+    return { options: [], nudge: entry.commandNudge ?? null };
+  }
+  // Advanced and expert are on their own, which is the whole difference.
+  return { options: [], nudge: null };
 }
 
 /**

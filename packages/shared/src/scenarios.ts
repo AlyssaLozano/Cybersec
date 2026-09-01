@@ -163,6 +163,28 @@ export interface EventTruth {
    */
   standIn?: string;
   /**
+   * Candidate commands offered at the terminal, at beginner only.
+   *
+   * Somebody who has never used a shell cannot investigate an event, and
+   * "here is a prompt, good luck" teaches them they are bad at this. Five
+   * options, typed rather than clicked, so the muscle memory is still theirs:
+   * they choose the approach and the shell still has to be used.
+   *
+   * Exactly one is the useful next step. The rest are plausible and wrong in
+   * instructive ways, because a menu where four options are obviously silly is
+   * a button with extra steps.
+   */
+  commandOptions?: string[];
+  /**
+   * What to go looking for, at intermediate only.
+   *
+   * No commands. Names the question rather than the syntax: somebody who knows
+   * they want the accepted logins after a run of failures can compose that
+   * themselves, and composing it is the skill. Advanced and expert get neither
+   * this nor the options.
+   */
+  commandNudge?: string;
+  /**
    * A coaching line offered WHILE the event is open, not after.
    *
    * This is the difference between "here is the output" and "here is what the

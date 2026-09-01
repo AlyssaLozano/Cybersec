@@ -24,6 +24,7 @@ import {
   guidanceFor,
   scoreClaim,
   standInsFor,
+  terminalAidFor,
   truthFor,
 } from './scenarios.js';
 
@@ -466,6 +467,85 @@ describe('the investigation trace is reported, never scored', () => {
 
   it('is absent entirely when no trace was recorded', () => {
     expect(scoreClaim(ID, c)!.investigation).toBeUndefined();
+  });
+});
+
+describe('terminal help is a function of difficulty', () => {
+  it('gives intermediate the question and never the command', () => {
+    // Ridgeline is intermediate. Naming what to look for is the analysis;
+    // composing the pipeline is the skill, and it only transfers if they do it.
+    const aid = terminalAidFor(ID, 'ev.1');
+    expect(aid.options).toEqual([]);
+    expect(aid.nudge).toMatch(/whether any attempt/i);
+    // No command syntax leaked into the nudge.
+    expect(aid.nudge).not.toMatch(/grep|cat |\||wc -l/);
+  });
+
+  it('offers five distinct, plausible candidates at beginner', () => {
+    const authored = truthFor(ID)!.events.filter((e) => e.commandOptions?.length);
+    expect(authored.length).toBeGreaterThan(0);
+    for (const entry of authored) {
+      expect(entry.commandOptions!.length, `${entry.eventId}`).toBe(5);
+      // A menu where four options are obviously silly is a button with extra
+      // steps, so every candidate has to be a real command somebody might run.
+      expect(entry.commandOptions!.every((c) => c.trim().length > 6)).toBe(true);
+      expect(new Set(entry.commandOptions!).size).toBe(5);
+    }
+  });
+
+  it('runs the same scenario at any difficulty', () => {
+    // Difficulty is a setting on the RUN, not a property of the incident. The
+    // same intrusion is worth meeting again with less help, and authoring one
+    // incident four times over would be four chances to contradict yourself.
+    expect(terminalAidFor(ID, 'ev.1', 'beginner').options).toHaveLength(5);
+    expect(terminalAidFor(ID, 'ev.1', 'beginner').nudge).toBeNull();
+
+    expect(terminalAidFor(ID, 'ev.1', 'intermediate').options).toEqual([]);
+    expect(terminalAidFor(ID, 'ev.1', 'intermediate').nudge).not.toBeNull();
+
+    for (const hard of ['advanced', 'expert'] as const) {
+      expect(terminalAidFor(ID, 'ev.1', hard).options).toEqual([]);
+      expect(terminalAidFor(ID, 'ev.1', hard).nudge).toBeNull();
+    }
+  });
+
+  it('gives the lead a coaching line only when the run is set to beginner', () => {
+    const withGuidance = truthFor(ID)!.events.find((e) => e.guidance)!;
+    expect(guidanceFor(ID, withGuidance.eventId, 'ir-lead', 'beginner')).not.toBeNull();
+    expect(guidanceFor(ID, withGuidance.eventId, 'ir-lead', 'advanced')).toBeNull();
+    // Still lead-only, even at beginner.
+    expect(guidanceFor(ID, withGuidance.eventId, 'soc-operator', 'beginner')).toBeNull();
+  });
+
+  it('stops asserting a severity at expert', () => {
+    // The claimed severity is whoever wrote the rule guessing. Reading it off
+    // the row is the habit expert difficulty exists to remove.
+    const normal = eventsFor(ID, 'soc-operator', 99_999, 'intermediate');
+    const expert = eventsFor(ID, 'soc-operator', 99_999, 'expert');
+    expect(normal.some((e) => e.claimedSeverity !== null)).toBe(true);
+    expect(expert.every((e) => e.claimedSeverity === null)).toBe(true);
+    // Same events, same order: only the assertion is withheld.
+    expect(expert.map((e) => e.id)).toEqual(normal.map((e) => e.id));
+  });
+
+  it('withholds both from advanced and expert', () => {
+    // Asserted by construction: only beginner reaches options and only
+    // intermediate reaches the nudge, so a harder scenario cannot leak either
+    // however much its content defines.
+    for (const scenario of SCENARIOS) {
+      if (scenario.difficulty === 'beginner' || scenario.difficulty === 'intermediate') continue;
+      for (const entry of truthFor(scenario.id)!.events) {
+        const aid = terminalAidFor(scenario.id, entry.eventId);
+        expect(aid.options).toEqual([]);
+        expect(aid.nudge).toBeNull();
+      }
+    }
+  });
+
+  it('is available to every seat, not just the lead', () => {
+    // Unlike guidanceFor. This is scaffolding for using a console, not a hint
+    // about the incident: restricting it would mean nobody investigates.
+    expect(terminalAidFor(ID, 'ev.9').nudge).not.toBeNull();
   });
 });
 
