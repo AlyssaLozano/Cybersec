@@ -17,6 +17,7 @@ import type { Claim, SocRoleId } from '@soc/shared';
 import { SCENARIOS, SCENARIO_TRUTH } from '../content/scenarios/index.js';
 import {
   briefingFor,
+  contestedEvents,
   eventsFor,
   getScenario,
   guidanceFor,
@@ -322,6 +323,63 @@ describe('escalation', () => {
       atSeconds: 240,
     });
     expect(line(ID, c, 'Escalation').points).toBeLessThan(10);
+  });
+});
+
+describe('two operators reading one alert differently', () => {
+  const grepwitch = claim({
+    eventId: 'ev.7',
+    role: 'soc-operator',
+    disposition: 'dismiss',
+    reasoning: 'Inbound to a closed port, dropped, on a rule closed as noise twenty thousand times.',
+    confidence: 85,
+    atSeconds: 200,
+  });
+  const nullroute = {
+    ...grepwitch,
+    disposition: 'escalate' as const,
+    reasoning: 'Blocked or not, somebody is probing us. Raising it.',
+    confidence: 70,
+  };
+
+  it('is surfaced as contested rather than resolved or overwritten', () => {
+    const contested = contestedEvents([grepwitch, nullroute]);
+    expect(contested).toHaveLength(1);
+    expect(contested[0]!.eventId).toBe('ev.7');
+    expect(contested[0]!.readings.map((r) => r.disposition).sort()).toEqual(['dismiss', 'escalate']);
+    // Both readings survive with their reasoning, so the lead adjudicates on
+    // the arguments rather than on who claimed second.
+    expect(contested[0]!.readings.every((r) => r.reasoning.length > 0)).toBe(true);
+  });
+
+  it('does not treat agreement as contested, however many seats agree', () => {
+    expect(contestedEvents([grepwitch, { ...grepwitch, role: 'log-analyst' }])).toEqual([]);
+  });
+
+  it('scores each seat against ground truth, not against each other', () => {
+    // Being outvoted is not being wrong. ev.7 is genuinely noise, so the seat
+    // that dismissed it scores well and the one that escalated does not,
+    // regardless of what the other said.
+    const dismissed = scoreClaim(ID, grepwitch)!;
+    const escalated = scoreClaim(ID, nullroute)!;
+    expect(dismissed.total).toBeGreaterThan(escalated.total);
+  });
+});
+
+describe('escalation runs outward from the operator, never back to them', () => {
+  it('never routes an event to the soc operator', () => {
+    // Tier 1 is the entry point. A specialist who found something in deep
+    // analysis has already done the work triage would have done, so handing it
+    // back is a round trip that costs time and teaches the wrong reflex.
+    for (const scenario of SCENARIOS) {
+      const truth = truthFor(scenario.id)!;
+      for (const entry of truth.events) {
+        expect(
+          entry.escalateTo,
+          `${scenario.id} ${entry.eventId} escalates back to the operator`,
+        ).not.toContain('soc-operator');
+      }
+    }
   });
 });
 

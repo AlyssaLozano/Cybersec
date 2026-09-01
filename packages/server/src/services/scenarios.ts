@@ -289,6 +289,61 @@ function treatsAsThreat(decision: TriageDecision): boolean {
 }
 
 /**
+ * Events two seats read differently.
+ *
+ * WHY DISAGREEMENT IS ROUTED UP RATHER THAN RESOLVED
+ *
+ * Two operators working one queue will sometimes reach opposite dispositions on
+ * the same alert, and that is not a bug in either of them. One dismissed a
+ * blocked scan as noise and one escalated it as reconnaissance; both can give
+ * you a defensible account. Resolving it automatically, or letting the second
+ * claim overwrite the first, throws away the most useful thing on the floor.
+ *
+ * So a contested event goes to the lead with both readings attached. That is
+ * the lead's actual job, and it is the one decision on the board that cannot be
+ * made by any single seat.
+ *
+ * Note this is deliberately not scored as a failure for either seat. They are
+ * each scored against ground truth independently; being outvoted is not being
+ * wrong, and being agreed with is not being right.
+ */
+export interface ContestedEvent {
+  eventId: string;
+  readings: Array<{
+    role: SocRoleId;
+    disposition: TriageDecision;
+    reasoning: string;
+    confidence: number;
+  }>;
+}
+
+export function contestedEvents(claims: Claim[]): ContestedEvent[] {
+  const byEvent = new Map<string, Claim[]>();
+  for (const claim of claims) {
+    const list = byEvent.get(claim.eventId) ?? [];
+    list.push(claim);
+    byEvent.set(claim.eventId, list);
+  }
+
+  const contested: ContestedEvent[] = [];
+  for (const [eventId, group] of byEvent) {
+    if (group.length < 2) continue;
+    // Two seats agreeing is not contested, however many of them there are.
+    if (new Set(group.map((c) => c.disposition)).size < 2) continue;
+    contested.push({
+      eventId,
+      readings: group.map((c) => ({
+        role: c.role,
+        disposition: c.disposition,
+        reasoning: c.reasoning,
+        confidence: c.confidence,
+      })),
+    });
+  }
+  return contested;
+}
+
+/**
  * Say how a claim was reached, without scoring it.
  *
  * The four score lines are blind to method. A correct dismissal reached in nine
