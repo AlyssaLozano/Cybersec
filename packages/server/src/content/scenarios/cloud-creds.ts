@@ -305,6 +305,7 @@ export const KEY_RING_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.5',
+      critical: true,
       verdict: 'malicious',
       stage: 'persistence',
       techniques: ['T1136.003', 'T1098.001'],

@@ -352,6 +352,7 @@ export const INFUSION_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.6',
+      critical: true,
       verdict: 'malicious',
       stage: 'lateral-movement',
       techniques: ['T1021', 'T1078.001'],

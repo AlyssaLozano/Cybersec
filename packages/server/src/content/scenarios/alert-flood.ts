@@ -331,6 +331,7 @@ export const CRY_WOLF_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.6',
+      critical: true,
       verdict: 'malicious',
       stage: 'credential-access',
       techniques: ['T1078.004', 'T1564.008'],
@@ -369,6 +370,7 @@ export const CRY_WOLF_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.7',
+      critical: true,
       verdict: 'malicious',
       stage: 'privilege-escalation',
       techniques: ['T1098.003', 'T1114.002'],

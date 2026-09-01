@@ -301,6 +301,7 @@ export const NOTHING_TO_RESTORE_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.5',
+      critical: true,
       verdict: 'malicious',
       stage: 'impact',
       techniques: ['T1485', 'T1490'],

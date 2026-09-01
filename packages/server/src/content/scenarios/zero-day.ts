@@ -348,6 +348,7 @@ export const NO_PATCH_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.6',
+      critical: true,
       verdict: 'malicious',
       stage: 'persistence',
       techniques: ['T1505.003'],

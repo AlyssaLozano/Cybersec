@@ -255,6 +255,7 @@ export const ALL_AT_ONCE_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.3',
+      critical: true,
       verdict: 'malicious',
       stage: 'impact',
       techniques: ['T1486', 'T1562.001', 'T1053.005'],

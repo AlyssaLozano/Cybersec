@@ -287,6 +287,7 @@ export const LONG_WEATHER_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.4',
+      critical: true,
       verdict: 'malicious',
       stage: 'lateral-movement',
       techniques: ['T1078.002', 'T1021.002'],
@@ -352,6 +353,7 @@ export const LONG_WEATHER_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.6',
+      critical: true,
       verdict: 'malicious',
       stage: 'exfiltration',
       techniques: ['T1041', 'T1030'],

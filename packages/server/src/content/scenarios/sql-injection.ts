@@ -313,6 +313,7 @@ export const SELECT_STAR_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.5',
+      critical: true,
       verdict: 'malicious',
       stage: 'exfiltration',
       techniques: ['T1030'],

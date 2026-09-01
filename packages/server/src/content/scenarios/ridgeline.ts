@@ -426,6 +426,7 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.9',
+      critical: true,
       verdict: 'malicious',
       commandOptions: [
         { command: 'grep -A2 "Accepted password for testuser" /var/log/auth.log', correct: true, teaches: CORRECT_STEP },
@@ -516,6 +517,7 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.6',
+      critical: true,
       verdict: 'malicious',
       standIn:
         'Network: 6.3 GB from the database host to the same address rmg-web-02 was blocked from ' +

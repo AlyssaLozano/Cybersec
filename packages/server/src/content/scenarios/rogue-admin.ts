@@ -247,6 +247,7 @@ export const OWN_KEYS_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.3',
+      critical: true,
       verdict: 'malicious',
       stage: 'defense-evasion',
       techniques: ['T1070.001'],

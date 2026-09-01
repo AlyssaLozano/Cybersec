@@ -354,6 +354,7 @@ export const WRONG_ADDRESS_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.6',
+      critical: true,
       verdict: 'malicious',
       stage: 'defense-evasion',
       techniques: ['T1562', 'T1083'],

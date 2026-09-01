@@ -276,6 +276,7 @@ export const SECOND_FLOOR_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.4',
+      critical: true,
       verdict: 'malicious',
       stage: 'persistence',
       techniques: ['T1098.001', 'T1078.004'],
@@ -303,6 +304,7 @@ export const SECOND_FLOOR_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.5',
+      critical: true,
       verdict: 'malicious',
       stage: 'persistence',
       techniques: ['T1195.002', 'T1554'],

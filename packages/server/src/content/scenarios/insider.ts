@@ -268,6 +268,7 @@ export const LONG_NOTICE_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.4',
+      critical: true,
       verdict: 'malicious',
       stage: 'exfiltration',
       techniques: ['T1567.002'],

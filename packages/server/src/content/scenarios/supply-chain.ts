@@ -278,6 +278,7 @@ export const THIRD_PARTY_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.4',
+      critical: true,
       verdict: 'malicious',
       stage: 'collection',
       techniques: ['T1552.001', 'T1132.001'],
@@ -312,6 +313,7 @@ export const THIRD_PARTY_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.5',
+      critical: true,
       verdict: 'malicious',
       stage: 'impact',
       techniques: ['T1195.002'],

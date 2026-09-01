@@ -306,6 +306,7 @@ export const CHEAP_RENT_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.4',
+      critical: true,
       verdict: 'malicious',
       stage: 'initial-access',
       techniques: ['T1190', 'T1059'],
@@ -340,6 +341,7 @@ export const CHEAP_RENT_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.5',
+      critical: true,
       verdict: 'malicious',
       stage: 'privilege-escalation',
       techniques: ['T1528', 'T1613'],

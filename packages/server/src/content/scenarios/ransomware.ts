@@ -253,6 +253,7 @@ export const LAST_FRIDAY_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.3',
+      critical: true,
       verdict: 'malicious',
       stage: 'defense-evasion',
       techniques: ['T1562.001'],
@@ -353,6 +354,7 @@ export const LAST_FRIDAY_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.6',
+      critical: true,
       verdict: 'malicious',
       stage: 'execution',
       techniques: ['T1053.005', 'T1027'],

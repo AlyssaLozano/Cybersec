@@ -340,6 +340,7 @@ export const CHANGE_OF_BANK_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.6',
+      critical: true,
       verdict: 'malicious',
       stage: 'impact',
       techniques: ['T1657', 'T1534'],

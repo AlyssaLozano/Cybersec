@@ -315,6 +315,7 @@ export const QUIET_CHANNEL_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.5',
+      critical: true,
       verdict: 'malicious',
       stage: 'exfiltration',
       techniques: ['T1132.001', 'T1030'],

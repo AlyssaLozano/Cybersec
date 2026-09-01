@@ -353,6 +353,7 @@ export const NOTHING_INSTALLED_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.6',
+      critical: true,
       verdict: 'malicious',
       stage: 'defense-evasion',
       techniques: ['T1027.011', 'T1140'],

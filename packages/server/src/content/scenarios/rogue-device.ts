@@ -327,6 +327,7 @@ export const FOUND_IN_THE_CAR_PARK_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.5',
+      critical: true,
       verdict: 'malicious',
       stage: 'credential-access',
       techniques: ['T1557.001', 'T1110.002'],

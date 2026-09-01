@@ -285,6 +285,7 @@ export const LOW_TIDE_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.4',
+      critical: true,
       verdict: 'malicious',
       stage: 'initial-access',
       techniques: ['T1078.004', 'T1110.003'],

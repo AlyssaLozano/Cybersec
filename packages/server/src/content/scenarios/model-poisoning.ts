@@ -253,6 +253,7 @@ export const BAD_TEACHER_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.3',
+      critical: true,
       verdict: 'malicious',
       stage: 'impact',
       techniques: ['T1565.001', 'T1562'],
@@ -357,6 +358,7 @@ export const BAD_TEACHER_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.6',
+      critical: true,
       verdict: 'malicious',
       stage: 'impact',
       techniques: ['T1565.001'],

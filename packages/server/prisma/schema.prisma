@@ -30,6 +30,7 @@ model User {
   terminalSessions TerminalSession[]
   attempts         AttemptLog[]
   copilotConsults  CopilotConsult[]
+  scenarioAttempts ScenarioAttempt[]
   assessment       AssessmentSession?
 
   @@map("users")
@@ -215,4 +216,41 @@ model CopilotConsult {
   @@unique([userId, exerciseId, alertId])
   @@index([userId, exerciseId])
   @@map("copilot_consults")
+}
+
+/// One completed run of one scenario, at one tier, from one seat.
+///
+/// NOT UNIQUE ON (user, scenario, tier). Repeating is the intended progression:
+/// the same incident at a harder tier is the whole point of the difficulty
+/// design, and running it again from a different chair is different practice
+/// because no seat sees the whole board. Every run is its own row, and the
+/// picker derives its badges from the set.
+model ScenarioAttempt {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Content id such as "cheap-rent". Not a foreign key: scenarios live in
+  /// version-controlled code rather than in the database.
+  scenarioId String
+  /// "beginner" | "intermediate" | "advanced" | "expert" -- ScenarioDifficulty.
+  difficulty String
+  /// The seat they held, e.g. "forensics" -- see SocRoleId in @soc/shared.
+  role       String
+
+  /// Out of 100, across every event they claimed.
+  score Int
+  /// Whether this run reached the findings that decided the incident.
+  /// Stored rather than derived because the answer key can be re-authored, and
+  /// a student's history should not change when content does.
+  caughtCritical Boolean @default(false)
+
+  /// The room this was run in, so an instructor can reach the whole session.
+  roomId String?
+
+  completedAt DateTime @default(now())
+
+  @@index([userId, scenarioId])
+  @@index([userId, completedAt])
+  @@map("scenario_attempts")
 }

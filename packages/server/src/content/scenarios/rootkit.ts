@@ -288,6 +288,7 @@ export const BELOW_THE_FLOOR_TRUTH: ScenarioTruth = {
     },
     {
       eventId: 'ev.4',
+      critical: true,
       verdict: 'malicious',
       stage: 'persistence',
       techniques: ['T1014', 'T1547.006'],
