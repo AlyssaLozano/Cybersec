@@ -29,6 +29,8 @@ import { NETWORKING } from './networking.js';
 import { INCIDENT_RESPONSE } from './incident-response.js';
 import { AI_FOUNDATIONS } from './ai-foundations.js';
 import { AI_SECURITY } from './ai-security.js';
+import { RED_TEAM_FOUNDATIONS } from './red-team-foundations.js';
+import { BLUE_TEAM_FOUNDATIONS } from './blue-team-foundations.js';
 
 /**
  * NAMING: every package id is a NAME, never a number.
@@ -49,6 +51,8 @@ export const PACKAGES: LearningPackage[] = [
   INCIDENT_RESPONSE,
   AI_FOUNDATIONS,
   AI_SECURITY,
+  RED_TEAM_FOUNDATIONS,
+  BLUE_TEAM_FOUNDATIONS,
 ];
 
 /** Every exercise across every package, in curriculum order. */

@@ -641,6 +641,11 @@ code {
   margin: 0 0 13px;
   font-size: 13.5px;
   color: var(--text);
+  /* Concept prose may carry blank-line paragraph breaks (the red-team
+   * foundations package writes a couple of paragraphs per idea). pre-line
+   * renders those breaks while still wrapping normally; single-line concepts
+   * elsewhere are unaffected. */
+  white-space: pre-line;
 }
 
 .learn .tag {
