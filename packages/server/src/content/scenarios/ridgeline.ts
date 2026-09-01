@@ -55,6 +55,11 @@ export const RIDGELINE: Scenario = {
     'threat-intel',
     'forensics',
     'ir-lead',
+    // AI Security is deliberately NOT seated here. Ridgeline involves no
+    // deployed model, so that seat would be padding: they would sit through an
+    // hour with nothing that is theirs to find. They belong in the AI Security
+    // scenarios, where validating whether detection was evaded is the incident
+    // rather than a footnote to it.
   ],
 
   actions: [

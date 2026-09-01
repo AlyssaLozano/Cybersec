@@ -480,6 +480,204 @@ export function standInsFor(
 }
 
 /**
+ * What the lead reads out before anything starts.
+ *
+ * SKIPPABLE, AND DERIVED
+ *
+ * A returning team does not need to hear it, so the UI can skip it. A first
+ * team cannot start without it: eleven people who do not know who owns what
+ * will all take the first alert.
+ *
+ * Built from the roster and the projection table rather than written out,
+ * because a checklist that names a seat the scenario did not fill, or promises
+ * a console somebody does not have, is worse than no checklist.
+ */
+export interface OpeningChecklist {
+  scenarioId: string;
+  situation: string;
+  /** Who is here, what they own, and where they look. */
+  roster: Array<{ role: SocRoleId; owns: string; surfaces: string[] }>;
+  /** How work moves. Fixed, because it does not vary by scenario. */
+  flow: string[];
+  /** The clock, and what happens at the end of it. */
+  timing: string[];
+  /** Ground rules worth saying out loud once. */
+  rules: string[];
+}
+
+export function openingChecklist(scenarioId: string): OpeningChecklist | null {
+  const scenario = BY_ID.get(scenarioId);
+  if (!scenario) return null;
+
+  return {
+    scenarioId,
+    situation: scenario.situation,
+    roster: scenario.roles.map((role) => ({
+      role,
+      owns: REMIT[role]?.remit ?? '',
+      surfaces: (SURFACES_BY_ROLE[role] ?? []).map((s) => SURFACE_LABELS[s] ?? s),
+    })),
+    flow: [
+      'Alerts land on triage first. Triage decides what deserves a human and hands it outward.',
+      'Nothing comes back to triage. If you found it in deep analysis, you have already done their job.',
+      'Everything that matters ends up with me. I decide, and I will tell you what I decided and why.',
+      'If two of you read the same thing differently, that is mine to settle. Say so rather than arguing it out.',
+      'When your board goes quiet, write your report. Filing it does not mean anybody has read it: I will call you to present.',
+    ],
+    timing: [
+      `${scenario.durationMinutes} minutes on the clock. Events keep arriving inside it.`,
+      'You may stay longer, but you are scored on what you had dispositioned at the hour.',
+      'We are not done when the attacker stops. We are done when every report is in and somebody has proposed a control.',
+    ],
+    rules: [
+      'Say what you cannot prove as clearly as what you can. "I do not know yet" is an answer.',
+      'Stay in your seat. Working somebody else queue leaves yours unwatched, and it is scored.',
+      'Dismissing is a decision, not a shrug. Escalating everything is the same as triaging nothing.',
+      'Nobody names a threat group. Assess the class and say your confidence.',
+    ],
+  };
+}
+
+/**
+ * How the hour ends.
+ *
+ * WORKING    events land, seats claim them, nothing is written yet
+ * REPORTING  each seat writes when its own board goes quiet, and the lead
+ *            calls people to present. Filing is not presenting.
+ * CONTROL    detection engineering proposes what stops it next time. This
+ *            phase exists separately because that seat's input is everybody
+ *            else's output: they cannot sensibly go before the reports are in.
+ * CLOSED     the lead declares it, with the three numbers below attached.
+ *
+ * WHY PUBLISHING DOES NOT MEAN EVERYBODY READS
+ *
+ * Filing makes a report exist and visible as filed. It does not push it into
+ * eleven people's faces, because a floor where every publish interrupts
+ * everyone converges on whoever writes fastest and stops working. The lead
+ * calls people to present, which is what a bridge does, and it is the lead's
+ * job precisely because deciding what the room needs to hear next is a
+ * judgement.
+ */
+export const SHIFT_PHASES = ['working', 'reporting', 'control', 'closed'] as const;
+export type ShiftPhase = (typeof SHIFT_PHASES)[number];
+
+/**
+ * The three numbers a debrief is actually about.
+ *
+ * Everybody quotes dwell time and almost nobody separates the parts. A floor
+ * that detects in four minutes and then takes fifty to work out what it means
+ * has a different problem from one that takes fifty to notice, and one number
+ * hides which.
+ */
+export interface ShiftTimings {
+  /** First malicious event landing to the first correct claim on any of them. */
+  detectSeconds: number | null;
+  /** That first correct claim to the last specialist report filed. */
+  analyseSeconds: number | null;
+  /** Last report to a control being proposed. */
+  correctSeconds: number | null;
+  /** Landing to close. The number that gets quoted. */
+  totalSeconds: number | null;
+}
+
+export interface ShiftClose {
+  phase: ShiftPhase;
+  timings: ShiftTimings;
+  /** Seats that owed a report and have not filed. */
+  awaitingReports: SocRoleId[];
+  /** True when a control has been proposed. */
+  controlProposed: boolean;
+  /** Whether the lead may close it, and if not, why not. */
+  canClose: boolean;
+  blockers: string[];
+}
+
+/**
+ * Where the shift is, and whether the lead is allowed to call it done.
+ *
+ * The gate is deliberate: an incident is not over because the attacker
+ * stopped, it is over when somebody has written down what happened and
+ * somebody else has changed something so it does not happen the same way
+ * twice. A lead who can close with four reports outstanding will.
+ */
+export function closeState(
+  scenarioId: string,
+  claims: Claim[],
+  filedReports: SocRoleId[],
+  controlProposedAtSeconds: number | null,
+  closedAtSeconds: number | null,
+  lastReportAtSeconds: number | null = null,
+): ShiftClose | null {
+  const scenario = BY_ID.get(scenarioId);
+  const truth = truthFor(scenarioId);
+  if (!scenario || !truth) return null;
+
+  const malicious = truth.events.filter(
+    (e) => e.verdict === 'malicious' || e.verdict === 'blocked-reconnaissance',
+  );
+  const maliciousIds = new Set(malicious.map((e) => e.eventId));
+
+  const firstLanded = Math.min(
+    ...scenario.events.filter((e) => maliciousIds.has(e.id)).map((e) => e.atSeconds),
+  );
+
+  // A correct claim means the seat treated a real threat as one. Claiming it
+  // and dismissing it is not detection.
+  const correctClaims = claims.filter((c) => {
+    const entry = truth.events.find((e) => e.eventId === c.eventId);
+    if (!entry || !maliciousIds.has(c.eventId)) return false;
+    return treatsAsThreat(c.disposition);
+  });
+  const firstCorrectAt = correctClaims.length
+    ? Math.min(...correctClaims.map((c) => c.atSeconds))
+    : null;
+
+  const owed = scenario.roles.filter((r) => r !== 'ir-lead');
+  const awaitingReports = owed.filter((r) => !filedReports.includes(r));
+
+  const blockers: string[] = [];
+  if (awaitingReports.length > 0) {
+    blockers.push(`${awaitingReports.length} report(s) outstanding: ${awaitingReports.join(', ')}.`);
+  }
+  if (controlProposedAtSeconds === null) {
+    blockers.push('No control proposed. Nothing has changed to stop this happening the same way.');
+  }
+
+  const phase: ShiftPhase =
+    closedAtSeconds !== null
+      ? 'closed'
+      : controlProposedAtSeconds !== null
+        ? 'control'
+        : filedReports.length > 0
+          ? 'reporting'
+          : 'working';
+
+  return {
+    phase,
+    timings: {
+      detectSeconds: firstCorrectAt === null ? null : firstCorrectAt - firstLanded,
+      // Analysis runs from the moment somebody knew it was real to the moment
+      // the last specialist had written down what they knew.
+      analyseSeconds:
+        firstCorrectAt === null || lastReportAtSeconds === null
+          ? null
+          : Math.max(0, lastReportAtSeconds - firstCorrectAt),
+      // Correction is the part almost nobody measures: understanding it and
+      // changing something so it does not recur are different jobs.
+      correctSeconds:
+        lastReportAtSeconds === null || controlProposedAtSeconds === null
+          ? null
+          : Math.max(0, controlProposedAtSeconds - lastReportAtSeconds),
+      totalSeconds: closedAtSeconds === null ? null : closedAtSeconds - firstLanded,
+    },
+    awaitingReports,
+    controlProposed: controlProposedAtSeconds !== null,
+    canClose: blockers.length === 0,
+    blockers,
+  };
+}
+
+/**
  * Events two seats read differently.
  *
  * WHY DISAGREEMENT IS ROUTED UP RATHER THAN RESOLVED

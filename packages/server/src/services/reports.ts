@@ -210,15 +210,110 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
   {
     role: 'malware-analyst',
     title: 'Sample analysis',
-    audience: 'The lead, and detection engineering afterwards.',
+    audience:
+      'The lead now, and detection engineering afterwards. The second half of this report is what ' +
+      'somebody turns into a rule, so it has to be usable by a person who never saw the sample.',
     sections: [
       {
-        id: 'behaviour',
-        heading: 'What it does',
-        prompt: 'Capability, not just classification. What would it have done if it had run to completion?',
+        id: 'what',
+        heading: 'What it is',
+        prompt:
+          'File type, how it arrived, how it was packaged, and whether this is something known or ' +
+          'something new. A hash on its own is not an identification.',
         minChars: 80,
+        maxChars: 700,
+        rubric: [['script', 'binary', 'executable', 'command', 'document', 'archive'],
+                 ['known', 'new', 'variant', 'family', 'unknown', 'match']],
+      },
+      {
+        id: 'how',
+        heading: 'How it works',
+        prompt:
+          'The execution chain in order: what runs, what it calls, what it writes, what it talks ' +
+          'to. Say where the capability actually lives, because a loader that fetches its payload ' +
+          'has almost none of its own.',
+        minChars: 120,
+        maxChars: 1000,
+        rubric: [['then', 'first', 'next', 'after', 'chain'],
+                 ['download', 'fetch', 'execut', 'write', 'connect', 'spawn']],
+      },
+      {
+        id: 'capability',
+        heading: 'What it would have done',
+        prompt:
+          'Capability, not classification. If it had run to completion, what would you have lost? ' +
+          'If you cannot say because the second stage was never retrieved, that is the answer.',
+        minChars: 80,
+        maxChars: 700,
+        rubric: [['persist', 'steal', 'encrypt', 'exfil', 'credential', 'access', 'control'],
+                 ['stage', 'payload', 'second', 'unknown', 'cannot']],
+      },
+      {
+        id: 'detection',
+        heading: 'How to catch it next time',
+        prompt:
+          'What detection engineering can actually build on. Prefer behaviour over indicators: a ' +
+          'hash changes for free and a spawn pattern does not. Say which of these you expect to ' +
+          'survive the attacker changing something.',
+        minChars: 100,
         maxChars: 800,
-        rubric: [['download', 'execut', 'fetch', 'connect', 'persist'], ['stage', 'payload', 'second', 'loader']],
+        rubric: [['behaviour', 'behavior', 'pattern', 'parent', 'spawn', 'sequence'],
+                 ['hash', 'domain', 'address', 'indicator', 'string', 'signature']],
+      },
+      LIMITS_SECTION,
+    ],
+  },
+  {
+    role: 'detection-engineer',
+    title: 'Detection proposal',
+    audience:
+      'The lead, and every operator who will work the queue this rule lands in. They will live ' +
+      'with it long after this incident is closed.',
+    sections: [
+      {
+        id: 'gap',
+        heading: 'What we missed, and why',
+        prompt:
+          'Which stage went undetected, and whether that is because no rule covered it or because ' +
+          'a rule fired and nobody believed it. Those have completely different fixes.',
+        minChars: 100,
+        maxChars: 800,
+        rubric: [['no rule', 'not cover', 'gap', 'missed', 'undetect', 'fired', 'ignored'],
+                 ['stage', 'step', 'movement', 'access', 'persist', 'exfil']],
+      },
+      {
+        id: 'logic',
+        heading: 'What the rule would look for',
+        prompt:
+          'The logic in plain terms: what condition, over what data, in what window. Somebody ' +
+          'should be able to argue with it without reading a query language.',
+        minChars: 100,
+        maxChars: 900,
+        rubric: [['when', 'if', 'condition', 'threshold', 'matches'],
+                 ['window', 'minute', 'hour', 'within', 'count', 'repeat']],
+      },
+      {
+        id: 'cost',
+        heading: 'What it will cost the queue',
+        prompt:
+          'How often would this have fired over the last thirty days, and how many of those would ' +
+          'have been nothing? A rule that catches this attack and fires four hundred times a day ' +
+          'has made the queue worse. If you have not backtested it, say so.',
+        minChars: 100,
+        maxChars: 800,
+        rubric: [['fired', 'would have', 'backtest', 'replay', 'historical', 'thirty'],
+                 ['false positive', 'noise', 'benign', 'nothing', 'legitimate']],
+      },
+      {
+        id: 'evasion',
+        heading: 'How an attacker gets around it',
+        prompt:
+          'Assume they read your rule. What is the cheapest change that defeats it, and is your ' +
+          'detection anchored to something they would have to give up?',
+        minChars: 80,
+        maxChars: 700,
+        rubric: [['change', 'avoid', 'evade', 'bypass', 'defeat', 'around'],
+                 ['cheap', 'easy', 'trivial', 'hard', 'expensive', 'cost']],
       },
       LIMITS_SECTION,
     ],
@@ -325,6 +420,103 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
         minChars: 40,
         maxChars: 500,
         rubric: [['need', 'require', 'authoris', 'authoriz', 'decision', 'approve', 'nothing']],
+      },
+      LIMITS_SECTION,
+    ],
+  },
+  {
+    role: 'fusion-analyst',
+    title: 'Fusion assessment',
+    audience:
+      'The lead, and only the lead. This is the one document assembled from all the others, so it ' +
+      'is the only place the whole picture exists.',
+    sections: [
+      {
+        id: 'picture',
+        heading: 'What the floor collectively knows',
+        prompt:
+          'One account of the incident assembled from every seat, not a list of who said what. If ' +
+          'two findings only make sense together, say so: that connection is the entire reason ' +
+          'this seat exists.',
+        minChars: 150,
+        maxChars: 1200,
+        rubric: [
+          ['together', 'combined', 'connect', 'same', 'both', 'link'],
+          ['network', 'log', 'forensic', 'cloud', 'intel', 'triage'],
+        ],
+      },
+      {
+        id: 'conflicts',
+        heading: 'Where seats disagree, and which reading you take',
+        prompt:
+          'Two people looked at the same thing and concluded differently. Name it, take a side, ' +
+          'and say why. Reporting the disagreement without resolving it hands the lead your job.',
+        minChars: 80,
+        maxChars: 800,
+        rubric: [
+          ['disagree', 'conflict', 'differ', 'contradict', 'versus', 'both read'],
+          ['because', 'prefer', 'take', 'weight', 'stronger', 'evidence'],
+        ],
+      },
+      {
+        id: 'gaps',
+        heading: 'What nobody looked at',
+        prompt:
+          'The questions no seat owns. This is the gap only somebody reading every report can see, ' +
+          'and it is usually more useful than anything in them.',
+        minChars: 80,
+        maxChars: 700,
+        rubric: [
+          ['nobody', 'no one', 'not covered', 'unassigned', 'gap', 'missing'],
+          ['should', 'need', 'worth', 'recommend', 'suggest'],
+        ],
+      },
+      LIMITS_SECTION,
+    ],
+  },
+  {
+    role: 'ai-security',
+    title: 'Detection integrity review',
+    audience: 'The lead, and detection engineering. Answers whether the tooling can still be trusted.',
+    sections: [
+      {
+        id: 'gaps',
+        heading: 'What the tooling missed, and whether that is a gap or a blind spot',
+        prompt:
+          'A gap is a rule that should have fired and did not. A blind spot is data nobody is ' +
+          'collecting. They have completely different fixes and get confused constantly.',
+        minChars: 100,
+        maxChars: 800,
+        rubric: [
+          ['gap', 'blind', 'not collect', 'no rule', 'no visibility', 'coverage'],
+          ['fired', 'missed', 'detect', 'alert', 'raise'],
+        ],
+      },
+      {
+        id: 'evasion',
+        heading: 'Whether anybody tried to evade detection',
+        prompt:
+          'Avoiding detection and evading it are different. Encoding a command to defeat a string ' +
+          'match is evasion; simply doing something nothing watches is not. Say which you saw.',
+        minChars: 80,
+        maxChars: 700,
+        rubric: [
+          ['encod', 'obfusc', 'evade', 'evasion', 'bypass', 'defeat'],
+          ['no evidence', 'did not', 'simply', 'unwatched', 'avoided'],
+        ],
+      },
+      {
+        id: 'trust',
+        heading: 'Whether the monitoring can still be trusted',
+        prompt:
+          'The attacker had access. Could they have altered what the tooling sees, and how would ' +
+          'you know? If you cannot rule it out, say so plainly.',
+        minChars: 80,
+        maxChars: 700,
+        rubric: [
+          ['trust', 'reliab', 'integrity', 'altered', 'tamper', 'modif'],
+          ['cannot', 'unable', 'rule out', 'confirm', 'verif'],
+        ],
       },
       LIMITS_SECTION,
     ],

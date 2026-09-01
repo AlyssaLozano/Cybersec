@@ -36,6 +36,8 @@ export const SOC_ROLE_IDS = [
   'malware-analyst',
   'cloud-security',
   'ai-security',
+  'detection-engineer',
+  'fusion-analyst',
 ] as const;
 
 export type SocRoleId = (typeof SOC_ROLE_IDS)[number];
@@ -58,6 +60,10 @@ export const ROLE_SURFACES = [
   'sample-view',
   'cloud-view',
   'model-lab',
+  /** The Detection Engineer's surface: rule logic, cost, and a backtest. */
+  'rule-workbench',
+  /** The Fusion seat: every other seat's findings side by side. */
+  'fusion-view',
 ] as const;
 
 export type RoleSurface = (typeof ROLE_SURFACES)[number];
@@ -100,6 +106,10 @@ export const ROLE_METRICS = [
    */
   'bypass-discovery',
   'defence-selection',
+  /** Whether a shipped rule is worth what it costs the queue. */
+  'rule-quality',
+  /** Whether the assembled picture held together and named its own gaps. */
+  'synthesis-quality',
 ] as const;
 
 export type RoleMetric = (typeof ROLE_METRICS)[number];
@@ -321,6 +331,57 @@ export const SOC_ROLES: SocRole[] = [
     poorFitIf:
       'you want to be in the room when something is happening. This role sits outside the incident queue by design, its wins are launches that did not go wrong, and a week that ends in "I could not break it" is a normal week rather than a failed one.',
     playable: true,
+  },
+  {
+    id: 'detection-engineer',
+    title: 'Detection Engineer',
+    oneLine:
+      'Turns an incident nobody caught in time into a rule that catches the next one automatically.',
+    reality:
+      'The only seat on the floor whose output is preventive rather than investigative, and the ' +
+      'only one graded on what does NOT happen next month. Most of the work is tuning: a rule that ' +
+      'catches the attack and also fires four hundred times a day has made the queue worse, not ' +
+      'better. Expect to spend more time removing detections than writing them, and to be argued ' +
+      'with by the people whose alerts you are deleting.',
+    surface: 'rule-workbench',
+    sees: [
+      'The logic behind every rule that fired, and every rule that did not',
+      'What each rule has cost: how often it fired, and how often that was nothing',
+      'A backtest surface for replaying a proposed rule over historical data before it ships',
+      'Coverage against technique, so a gap is visible as a gap rather than as silence',
+    ],
+    metrics: ['detection-coverage', 'false-positive-rate', 'rule-quality'],
+    keyFoundations: ['log-analysis', 'regex', 'siem', 'threat-modelling'],
+    poorFitIf:
+      'you want to be in the incident. This seat arrives after the noise, and the reward for doing ' +
+      'it well is a quieter queue that nobody thanks you for.',
+    playable: false,
+  },
+  {
+    id: 'fusion-analyst',
+    title: 'Fusion Analyst',
+    oneLine:
+      'Holds the whole picture: joins what intel knows to what the floor is actually seeing, and tells the lead what it adds up to.',
+    reality:
+      'Synthesis, and almost no tooling of your own. You work from other people findings: four ' +
+      'analysts who each looked at a different surface, none of whom saw the same thing, and you ' +
+      'produce the one assessment a decision gets made on. Most of the day is chasing context and ' +
+      'reconciling sources that contradict each other, and the discipline is separating what is ' +
+      'known from what is merely consistent. When you are right, somebody else made the call; when ' +
+      'you are wrong, the call was yours.',
+    surface: 'fusion-view',
+    sees: [
+      'Every analyst current findings side by side, and where two of them disagree',
+      'The intel picture mapped onto what the floor has actually observed',
+      'The live incident picture: scope, confidence, and what is still unproven',
+      'Which questions are open, who owns each, and how long they have been open',
+    ],
+    metrics: ['synthesis-quality', 'communication-clarity'],
+    keyFoundations: ['incident-concepts', 'security-writing', 'threat-modelling'],
+    poorFitIf:
+      'you want depth in one discipline. Fusion is broad by definition, you will rarely be the ' +
+      'most expert person on any single surface, and you own an assessment rather than a system.',
+    playable: false,
   },
 ];
 
