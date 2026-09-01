@@ -67,6 +67,7 @@ export const WRONG_ADDRESS: Scenario = {
     'threat-intel',
     'forensics',
     'fusion-analyst',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

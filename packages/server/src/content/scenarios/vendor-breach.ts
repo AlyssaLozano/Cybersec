@@ -64,6 +64,7 @@ export const SOMEBODY_ELSES_BREACH: Scenario = {
     'cloud-security',
     'threat-intel',
     'fusion-analyst',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

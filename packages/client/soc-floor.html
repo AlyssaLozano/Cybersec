@@ -507,7 +507,7 @@ button.run:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
     </div>
     <div class="readout">
       <div class="stat"><b>08:15</b><span>Shift start</span></div>
-      <div class="stat"><b id="occ">13/14</b><span>Seats filled</span></div>
+      <div class="stat"><b id="occ">&nbsp;</b><span>Seats filled</span></div>
       <div class="stat"><b style="color:var(--crit)">INC-0815</b><span>Active</span></div>
       <div class="stat" id="whoami"><b style="color:var(--accent)">&mdash;</b><span>Your seat</span></div>
     </div>
@@ -517,7 +517,7 @@ button.run:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
     <section class="panel">
       <div class="panel-head">
         <h2>Watch floor &middot; Level 2 West</h2>
-        <span class="scale">14 seats &middot; 3 rows &middot; command pod</span>
+        <span class="scale" id="scale-note">&nbsp;</span>
       </div>
       <div class="scene" id="scene">
         <svg class="room" id="room" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet" aria-label="View of the security operations floor"></svg>
@@ -790,8 +790,27 @@ const SEATS = [
   /* Fusion sits at the command pod rather than in a row, because the job is to
      face the lead rather than a queue: it turns several analysts' findings into
      the one assessment a decision gets made on. */
-  { ref:"FUS", cmd:true, x:836, y:700, s:1.14, av:2, handle:"@joinkey", role:"fusion-analyst" }
+  { ref:"FUS", cmd:true, x:836, y:700, s:1.14, av:2, handle:"@joinkey", role:"fusion-analyst" },
+  /* Mitigation sits opposite Fusion, both facing the lead, because the two
+     halves of a decision arrive from either side of it: Fusion turns several
+     analysts' findings into one assessment, and Mitigation turns that
+     assessment into an action with a price on it. Putting either in a row would
+     point them at a queue, and neither of them works a queue. */
+  { ref:"MIT", cmd:true, x:364, y:700, s:1.14, av:12, handle:"@blastradius", role:"mitigation-specialist" }
 ];
+
+/* Seat counts are derived rather than typed. Both were hand-written numbers and
+   both went stale the moment a seat was added to the pod, which is exactly the
+   kind of quiet wrongness a mockup should not teach. */
+(function seatCounts() {
+  const total = SEATS.length;
+  const filled = SEATS.filter((s) => s.av !== null).length;
+  const rows = new Set(SEATS.filter((s) => !s.cmd).map((s) => s.row)).size;
+  const occ = document.getElementById('occ');
+  if (occ) occ.textContent = filled + '/' + total;
+  const note = document.getElementById('scale-note');
+  if (note) note.innerHTML = total + ' seats &middot; ' + rows + ' rows &middot; command pod';
+})();
 
 function seatXY(s) {
   if (s.cmd) return { x:s.x, y:s.y, s:s.s };
@@ -916,6 +935,11 @@ const ROLES = {
     poorFitIf:"you want to be in the room when something is happening. This role sits outside the incident queue by design, and a week that ends in &ldquo;I could not break it&rdquo; is a normal week rather than a failed one." },
   /* NOT in roles.ts. Written for this mockup and marked as such in the UI, so
      nobody mistakes a proposal for something the catalogue already contains. */
+  "mitigation-specialist": { title:"Mitigation Specialist", short:"Mitigation", playable:false, proposed:true,
+    oneLine:"Owns what changes. Finds the narrowest action that stops it, says what that breaks, and covers whatever cannot be fixed today.",
+    reality:"You are the person who has to say what the remedy costs, to a room that has just decided something must be done. Everybody else on the floor is working out what happened; you are working out what to do about it, which means most of your day is spent finding out what depends on the thing somebody wants switched off. The work is unglamorous and it is where incidents are actually won or lost: the difference between isolating a segment and revoking one credential is invisible to the attacker and enormous to the ward, the branch or the depot. You will regularly be the only person in the room arguing for a smaller action than the one being proposed.",
+    sees:["What is happening, what can reach what, and what is on the affected hosts","What depends on anything you are about to disconnect, before you disconnect it","Compensating controls available for the things that cannot be fixed today","Your own rollback for every change, confirmed before it is needed"],
+    poorFitIf:"you want to find things. This seat does not investigate, and the satisfaction is in an outage that did not happen rather than a discovery you made." },
   "fusion-analyst": { title:"Fusion Analyst", short:"Fusion", playable:false, proposed:true,
     oneLine:"Holds the whole picture: joins what intel knows to what the floor is actually seeing, and tells the lead what it adds up to.",
     reality:"Synthesis, and almost no tooling of your own. You work from other people's findings: four analysts who each looked at a different surface, none of whom saw the same thing, and produce the one assessment a decision gets made on. Most of the day is chasing context and reconciling sources that contradict each other, and the discipline is separating what is known from what is merely consistent. When you are right, somebody else made the call; when you are wrong, the call was yours.",
@@ -923,7 +947,7 @@ const ROLES = {
     poorFitIf:"you want depth in one discipline. Fusion is broad by definition, you will rarely be the most expert person on any single surface, and you own an assessment rather than a system." }
 };
 const ZONE = { A:"Front row &middot; Triage", B:"Middle row &middot; Investigation",
-  C:"Back row &middot; Specialist", CMD:"Command pod", FUS:"Command pod" };
+  C:"Back row &middot; Specialist", CMD:"Command pod", FUS:"Command pod", MIT:"Command pod" };
 
 /* ── nameplates as clickable hotspots ─────────────────── */
 const scene = document.getElementById("scene");

@@ -319,6 +319,76 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
     ],
   },
   {
+    role: 'mitigation-specialist',
+    title: 'Containment and remediation plan',
+    audience:
+      'The lead, who will authorise it, and the teams who will be interrupted by it. At least one ' +
+      'person reading this is going to lose their afternoon to what you propose.',
+    sections: [
+      {
+        id: 'stops-it',
+        heading: 'The narrowest thing that stops this',
+        prompt:
+          'What is the smallest action that ends the bleeding, rather than the most thorough one? ' +
+          'Isolating a segment and revoking one credential can have the same effect on the ' +
+          'attacker and very different effects on everybody else.',
+        minChars: 100,
+        maxChars: 800,
+        rubric: [['revoke', 'block', 'disable', 'isolate', 'remove', 'suspend', 'segment'],
+                 ['narrow', 'smallest', 'instead of', 'rather than', 'only', 'specific']],
+      },
+      {
+        id: 'breaks',
+        heading: 'What it breaks and who pays',
+        prompt:
+          'Name the people and the work this interrupts. A containment action with no stated cost ' +
+          'reads as free, and the person who finds out it was not is the one whose shift it ' +
+          'ruined. If you genuinely believe nothing breaks, say how you checked.',
+        minChars: 100,
+        maxChars: 800,
+        rubric: [['break', 'stop', 'interrupt', 'outage', 'unavailable', 'lose', 'cannot'],
+                 ['team', 'ward', 'branch', 'customer', 'member', 'clinic', 'shift', 'user']],
+      },
+      {
+        id: 'cannot-fix',
+        heading: 'What cannot be fixed today, and what holds until it is',
+        prompt:
+          'Some of this will not be fixable in the hour: an appliance that cannot be patched, a ' +
+          'key that needs an app release, a device the vendor owns. For each one, what reduces the ' +
+          'risk in the meantime? A date is not a compensating control.',
+        minChars: 100,
+        maxChars: 900,
+        rubric: [['cannot', 'unable', 'not today', 'requires', 'waiting', 'vendor', 'window'],
+                 ['meanwhile', 'until', 'interim', 'compensating', 'in front of', 'restrict', 'monitor']],
+      },
+      {
+        id: 'rollback',
+        heading: 'How you undo it',
+        prompt:
+          'If this containment breaks something worse than the incident, what is the way back and ' +
+          'have you confirmed it works? A rollback designed during an outage is a plan you are ' +
+          'testing for the first time under pressure.',
+        minChars: 80,
+        maxChars: 700,
+        rubric: [['revert', 'restore', 'undo', 'roll back', 'reinstate', 'reverse'],
+                 ['confirmed', 'tested', 'checked', 'verified', 'before']],
+      },
+      {
+        id: 'order',
+        heading: 'The order, and what you are deliberately leaving undone',
+        prompt:
+          'Sequence the actions and say why that order. Then name what is not being done today. A ' +
+          'plan that quietly omits two hundred unpatched hosts reads as complete, and the gap ' +
+          'somebody discovers later is worse than the one you declared.',
+        minChars: 100,
+        maxChars: 800,
+        rubric: [['first', 'then', 'before', 'after', 'order', 'sequence', 'priority'],
+                 ['not doing', 'leaving', 'deferring', 'remain', 'still', 'outstanding', 'accept']],
+      },
+      LIMITS_SECTION,
+    ],
+  },
+  {
     role: 'ir-lead',
     title: 'Incident executive summary',
     audience:

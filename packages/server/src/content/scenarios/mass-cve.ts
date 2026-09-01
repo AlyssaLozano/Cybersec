@@ -60,6 +60,7 @@ export const EVERYONE_HAS_IT: Scenario = {
     'vulnerability-analyst',
     'detection-engineer',
     'forensics',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,
@@ -361,7 +362,7 @@ export const EVERYONE_HAS_IT_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.6',
       verdict: 'benign-true-positive',
-      firstResponder: 'vulnerability-analyst',
+      firstResponder: 'mitigation-specialist',
       alsoAppropriate: ['ir-lead'],
       correctActions: ['act.scope-estate'],
       outOfLaneActions: ['act.isolate', 'act.declare', 'act.reimage-now', 'act.dismiss'],

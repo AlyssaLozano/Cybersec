@@ -68,6 +68,7 @@ export const ALL_AT_ONCE: Scenario = {
     'cloud-security',
     'forensics',
     'fusion-analyst',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

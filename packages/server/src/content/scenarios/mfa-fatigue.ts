@@ -65,6 +65,7 @@ export const APPROVE_APPROVE_APPROVE: Scenario = {
     'cloud-security',
     'detection-engineer',
     'forensics',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

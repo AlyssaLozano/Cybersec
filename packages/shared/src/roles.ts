@@ -38,6 +38,23 @@ export const SOC_ROLE_IDS = [
   'ai-security',
   'detection-engineer',
   'fusion-analyst',
+  /*
+   * The seat that owns what changes, and what that costs.
+   *
+   * Distinct from Detection Engineering, which owns how we SEE this next time.
+   * This seat owns what we DO about it now: the narrowest action that stops the
+   * bleeding, what breaks when it is taken, and the compensating control for
+   * everything that cannot be fixed today.
+   *
+   * It exists because that work was homeless. Across the scenario set the same
+   * sentence kept appearing in somebody else's mouth: isolating the pump is a
+   * clinical decision, rotating the key locks out thirteen thousand members,
+   * patching the appliance misses the customs window, disabling the monitoring
+   * agent blinds the estate. Every one of those is a containment decision with a
+   * cost attached, and leaving them with the lead meant the person adjudicating
+   * the incident was also the person costing the remedy.
+   */
+  'mitigation-specialist',
 ] as const;
 
 export type SocRoleId = (typeof SOC_ROLE_IDS)[number];

@@ -64,6 +64,7 @@ export const LAST_FRIDAY: Scenario = {
     'malware-analyst',
     'cloud-security',
     'forensics',
+    'mitigation-specialist',
     'ir-lead',
     // Threat Intel is deliberately unseated. Everything tonight is host,
     // identity and backup configuration, and the tradecraft question is
@@ -329,7 +330,7 @@ export const LAST_FRIDAY_TRUTH: ScenarioTruth = {
       stage: 'impact',
       techniques: ['T1490', 'T1485'],
       firstResponder: 'cloud-security',
-      alsoAppropriate: ['ir-lead'],
+      alsoAppropriate: ['ir-lead', 'mitigation-specialist'],
       correctActions: ['act.iam-audit', 'act.revoke-key'],
       outOfLaneActions: ['act.dismiss', 'act.preserve', 'act.isolate', 'act.reimage-now'],
       escalateTo: ['ir-lead'],

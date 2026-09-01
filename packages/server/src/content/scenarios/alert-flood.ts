@@ -68,6 +68,7 @@ export const CRY_WOLF: Scenario = {
     'detection-engineer',
     'fusion-analyst',
     'forensics',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

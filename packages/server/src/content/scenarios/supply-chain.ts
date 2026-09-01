@@ -64,6 +64,7 @@ export const THIRD_PARTY: Scenario = {
     'malware-analyst',
     'vulnerability-analyst',
     'detection-engineer',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

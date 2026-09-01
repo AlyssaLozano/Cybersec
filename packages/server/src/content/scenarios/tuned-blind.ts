@@ -59,6 +59,7 @@ export const TUNED_TO_NOTHING: Scenario = {
     'malware-analyst',
     'detection-engineer',
     'forensics',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

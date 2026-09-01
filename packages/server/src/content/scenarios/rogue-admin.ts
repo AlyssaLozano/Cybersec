@@ -67,6 +67,7 @@ export const OWN_KEYS: Scenario = {
     'cloud-security',
     'forensics',
     'fusion-analyst',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

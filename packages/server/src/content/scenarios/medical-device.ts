@@ -65,6 +65,7 @@ export const INFUSION: Scenario = {
     'vulnerability-analyst',
     'forensics',
     'threat-intel',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

@@ -67,6 +67,7 @@ export const BELOW_THE_FLOOR: Scenario = {
     'forensics',
     'detection-engineer',
     'vulnerability-analyst',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

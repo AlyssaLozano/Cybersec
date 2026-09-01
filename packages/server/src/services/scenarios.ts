@@ -159,6 +159,18 @@ const SURFACES_BY_ROLE: Record<string, string[]> = {
    * seats are describing one event and neither knows it.
    */
   'fusion-analyst': ['alert-queue', 'raw-log', 'network-flow'],
+  /*
+   * Mitigation sees what is happening, what can reach what, and what is on the
+   * box. Nothing else.
+   *
+   * Those three answer the only questions containment actually needs: what is
+   * the thing, what would cutting it off disconnect, and what is on it that
+   * matters. Raw logs and process trees are deliberately absent, because this
+   * seat is not here to work out what happened. A seat that can investigate
+   * will investigate, and the whole value of it is somebody whose attention is
+   * on the remedy while everybody else is on the cause.
+   */
+  'mitigation-specialist': ['alert-queue', 'network-flow', 'host-artefact'],
 };
 
 /** The answer key. Never call this from a route before a claim is committed. */
@@ -307,6 +319,13 @@ const TERMS: Record<string, Array<{ term: string; means: string }>> = {
     { term: 'Corroboration', means: 'Two seats reaching the same conclusion from different evidence. Not the same as two seats agreeing.' },
     { term: 'Intelligence gap', means: 'Something the picture needs and nobody has. Naming it is the output; guessing at it is not.' },
   ],
+  'mitigation-specialist': [
+    { term: 'Containment', means: 'Stopping it getting worse. Not the same as fixing it, and usually reversible where a fix is not.' },
+    { term: 'Compensating control', means: 'Something that reduces the risk while the real fix waits. A proxy in front of an unpatchable appliance is one; a promise to patch on Thursday is not.' },
+    { term: 'Blast radius', means: 'What your containment action disconnects, not what the attacker reached. These are different lists and the second one is usually shorter.' },
+    { term: 'Rollback', means: 'How you undo it if the containment breaks something worse. Checked before the change, not designed during the outage.' },
+    { term: 'Eradication', means: 'Removing the access rather than the symptom. A cleaned host with the credential still live is not eradicated.' },
+  ],
   'ir-lead': [
     { term: 'Declare', means: 'State that this is an incident. Activates procedures and pulls people off other work.' },
     { term: 'Containment', means: 'Removing the attacker access without destroying what proves they were there.' },
@@ -430,6 +449,18 @@ const REMIT: Record<string, { remit: string; questions: string[]; handsTo: SocRo
       'Which two findings share a host, an account, an address or a five-minute window?',
       'Who is working from an assumption that another seat has already disproved?',
       'What does the sequence imply happened that nobody has evidence for yet?',
+    ],
+    handsTo: ['ir-lead'],
+  },
+  'mitigation-specialist': {
+    remit:
+      'Own what changes. Find the narrowest action that stops this, say what it breaks, and put ' +
+      'something in place for everything that cannot be fixed today.',
+    questions: [
+      'What is the smallest thing that stops this, rather than the most thorough thing?',
+      'Who pays for this containment, and do they know it is being proposed?',
+      'If the real fix cannot happen today, what buys time until it can?',
+      'What is your rollback, and have you checked it before you change anything?',
     ],
     handsTo: ['ir-lead'],
   },

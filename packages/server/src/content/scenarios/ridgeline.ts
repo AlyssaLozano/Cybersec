@@ -66,6 +66,7 @@ export const RIDGELINE: Scenario = {
     'cloud-security',
     'threat-intel',
     'forensics',
+    'mitigation-specialist',
     'ir-lead',
     // AI Security is deliberately NOT seated here. Ridgeline involves no
     // deployed model, so that seat would be padding: they would sit through an
@@ -484,7 +485,7 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
       techniques: ['T1485 Data Destruction', 'T1490 Inhibit System Recovery', 'T1078.004 Valid Accounts: Cloud'],
       stage: 'impact',
       firstResponder: 'cloud-security',
-      alsoAppropriate: ['ir-lead', 'forensics'],
+      alsoAppropriate: ['ir-lead', 'forensics', 'mitigation-specialist'],
       correctActions: ['act.iam-audit', 'act.revoke-key'],
       outOfLaneActions: ['act.dismiss', 'act.decode', 'act.write-rule'],
       escalateTo: ['ir-lead'],

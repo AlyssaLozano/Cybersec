@@ -62,6 +62,7 @@ export const THE_PRINTER: Scenario = {
     'vulnerability-analyst',
     'forensics',
     'detection-engineer',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

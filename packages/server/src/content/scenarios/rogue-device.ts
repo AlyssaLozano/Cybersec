@@ -67,6 +67,7 @@ export const FOUND_IN_THE_CAR_PARK: Scenario = {
     'vulnerability-analyst',
     'forensics',
     'threat-intel',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

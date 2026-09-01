@@ -65,6 +65,7 @@ export const NOTHING_INSTALLED: Scenario = {
     'forensics',
     'detection-engineer',
     'threat-intel',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

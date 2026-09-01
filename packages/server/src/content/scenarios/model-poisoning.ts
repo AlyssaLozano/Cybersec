@@ -69,6 +69,7 @@ export const BAD_TEACHER: Scenario = {
     'cloud-security',
     'detection-engineer',
     'fusion-analyst',
+    'mitigation-specialist',
     'ir-lead',
     // Threat Intel is unseated. There is no external tradecraft to map here and
     // no traffic to work: the whole incident happens inside a feedback table.
@@ -296,7 +297,7 @@ export const BAD_TEACHER_TRUTH: ScenarioTruth = {
       stage: 'impact',
       techniques: ['T1565.001'],
       firstResponder: 'cloud-security',
-      alsoAppropriate: ['ai-security', 'ir-lead'],
+      alsoAppropriate: ['ai-security', 'ir-lead', 'mitigation-specialist'],
       correctActions: ['act.iam-audit', 'act.revoke-key'],
       outOfLaneActions: ['act.reset-password', 'act.isolate', 'act.attribute-named', 'act.dismiss'],
       escalateTo: ['ir-lead', 'fusion-analyst'],

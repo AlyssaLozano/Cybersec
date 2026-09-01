@@ -61,6 +61,7 @@ export const NO_PATCH: Scenario = {
     'threat-intel',
     'vulnerability-analyst',
     'forensics',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

@@ -66,6 +66,7 @@ export const SELECT_STAR: Scenario = {
     'detection-engineer',
     'forensics',
     'fusion-analyst',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

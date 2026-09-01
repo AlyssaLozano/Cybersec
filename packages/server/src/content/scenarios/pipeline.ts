@@ -64,6 +64,7 @@ export const THE_BUILD_SAYS_SO: Scenario = {
     'detection-engineer',
     'vulnerability-analyst',
     'forensics',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,

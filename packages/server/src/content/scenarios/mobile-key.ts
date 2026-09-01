@@ -64,6 +64,7 @@ export const THE_APP_KNOWS: Scenario = {
     'detection-engineer',
     'cloud-security',
     'forensics',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,
@@ -363,7 +364,7 @@ export const THE_APP_KNOWS_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.6',
       verdict: 'benign-true-positive',
-      firstResponder: 'vulnerability-analyst',
+      firstResponder: 'mitigation-specialist',
       alsoAppropriate: ['ir-lead', 'detection-engineer'],
       correctActions: ['act.scope-estate'],
       outOfLaneActions: ['act.dismiss', 'act.isolate', 'act.declare', 'act.reimage-now'],

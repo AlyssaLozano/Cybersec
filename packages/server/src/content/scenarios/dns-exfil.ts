@@ -60,6 +60,7 @@ export const QUIET_CHANNEL: Scenario = {
     'threat-intel',
     'detection-engineer',
     'forensics',
+    'mitigation-specialist',
     'ir-lead',
   ],
   actions: COMMON_ACTIONS,
