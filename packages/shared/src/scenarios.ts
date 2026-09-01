@@ -196,6 +196,35 @@ export interface Claim {
   atSeconds: number;
 }
 
+/**
+ * What a seat actually did before they claimed.
+ *
+ * RECORDED, NEVER SCORED
+ *
+ * Grading this would make people type for the transcript, and the number of
+ * commands somebody runs is not a measure of anything: an analyst who knows
+ * exactly which grep to run is better than one who runs nine.
+ *
+ * It is worth recording because the score cannot tell a reasoned call from a
+ * lucky one. Dismissing the inbound scan correctly in nine seconds without
+ * opening a log and dismissing it after checking the rule history produce an
+ * identical disposition and an identical score. Only this says which happened.
+ */
+export interface InvestigationTrace {
+  /** Commands run against the simulated host while this event was open. */
+  commandCount: number;
+  /** Evidence surfaces actually opened, e.g. "/var/log/auth.log". */
+  opened: string[];
+  /** Wall-clock spent with the event open, before committing. */
+  secondsSpent: number;
+}
+
+/** The reported, unscored observation about how a claim was reached. */
+export interface InvestigationNote {
+  looked: boolean;
+  note: string;
+}
+
 /** One scored dimension, with the reason attached so a number is never bare. */
 export interface ClaimScoreLine {
   label: string;
@@ -213,6 +242,11 @@ export interface ClaimScore {
   outOf: number;
   /** Set when the seat claimed something another seat should have taken first. */
   laneViolation: SocRoleId | null;
+  /**
+   * How the claim was reached. Sits outside `total` on purpose: it is a
+   * debrief observation, not a mark.
+   */
+  investigation?: InvestigationNote;
   /** Released only once the claim is committed. */
   why: string;
 }

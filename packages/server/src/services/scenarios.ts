@@ -35,6 +35,8 @@ import type {
   ScenarioTruth,
   SocRoleId,
   TriageDecision,
+  InvestigationNote,
+  InvestigationTrace,
 } from '@soc/shared';
 import { CLAIM_GRACE_SECONDS, CLAIM_LATE_SECONDS } from '@soc/shared';
 
@@ -130,6 +132,43 @@ function treatsAsThreat(decision: TriageDecision): boolean {
 }
 
 /**
+ * Say how a claim was reached, without scoring it.
+ *
+ * The four score lines are blind to method. A correct dismissal reached in nine
+ * seconds with no commands and one reached after checking the rule history are
+ * the same disposition and the same number. This is the only place the
+ * difference is visible, and it is the difference between a habit and a guess.
+ *
+ * Deliberately does not reward volume. Somebody who runs one precise grep has
+ * investigated; somebody who runs nine has not necessarily investigated more.
+ */
+export function describeInvestigation(
+  trace: InvestigationTrace,
+  claim: Claim,
+): InvestigationNote {
+  const looked = trace.commandCount > 0 || trace.opened.length > 0;
+  if (!looked) {
+    const fast = trace.secondsSpent < 20;
+    return {
+      looked: false,
+      note: fast
+        ? 'Committed in under twenty seconds without opening any evidence. If the call was right, ' +
+          'it was right by recognition rather than by checking, and recognition does not transfer ' +
+          'to the scenario you have not seen.'
+        : 'No evidence opened before committing. The disposition may be sound; nothing here shows ' +
+          'how it was reached.',
+    };
+  }
+  const where = trace.opened.length > 0 ? ` Opened: ${trace.opened.join(', ')}.` : '';
+  return {
+    looked: true,
+    note:
+      `Checked the evidence before committing: ${trace.commandCount} command(s) over ` +
+      `${Math.round(trace.secondsSpent)}s.${where}`,
+  };
+}
+
+/**
  * Score one claim.
  *
  * Four lines out of 100. Accuracy carries the most weight because being wrong
@@ -137,7 +176,11 @@ function treatsAsThreat(decision: TriageDecision): boolean {
  * weighted heavily enough that a floor of individually brilliant people who all
  * grab the same event cannot score well.
  */
-export function scoreClaim(scenarioId: string, claim: Claim): ClaimScore | null {
+export function scoreClaim(
+  scenarioId: string,
+  claim: Claim,
+  trace?: InvestigationTrace,
+): ClaimScore | null {
   const scenario = BY_ID.get(scenarioId);
   const truth = eventTruth(scenarioId, claim.eventId);
   if (!scenario || !truth) return null;
@@ -261,6 +304,7 @@ export function scoreClaim(scenarioId: string, claim: Claim): ClaimScore | null 
     total,
     outOf: 100,
     laneViolation,
+    ...(trace ? { investigation: describeInvestigation(trace, claim) } : {}),
     why: truth.why,
   };
 }

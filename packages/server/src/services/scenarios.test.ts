@@ -282,6 +282,51 @@ describe('escalation', () => {
   });
 });
 
+describe('the investigation trace is reported, never scored', () => {
+  const c = claim({
+    eventId: 'ev.7',
+    role: 'soc-operator',
+    disposition: 'dismiss',
+    reasoning:
+      'Inbound to a closed port and dropped, on a rule closed as noise more than twenty thousand ' +
+      'times. Nothing to investigate.',
+    actionIds: ['act.dismiss'],
+    escalateTo: null,
+    confidence: 85,
+    atSeconds: 200,
+  });
+
+  it('gives an identical mark whether they looked or guessed', () => {
+    const guessed = scoreClaim(ID, c, { commandCount: 0, opened: [], secondsSpent: 9 })!;
+    const checked = scoreClaim(ID, c, {
+      commandCount: 3,
+      opened: ['/var/log/auth.log'],
+      secondsSpent: 95,
+    })!;
+    // Same disposition, same reasoning, same seat: the score cannot tell them
+    // apart, and it should not try. Grading method makes people type for the
+    // transcript.
+    expect(guessed.total).toBe(checked.total);
+  });
+
+  it('says which one happened, which the score cannot', () => {
+    const guessed = scoreClaim(ID, c, { commandCount: 0, opened: [], secondsSpent: 9 })!;
+    const checked = scoreClaim(ID, c, {
+      commandCount: 3,
+      opened: ['/var/log/auth.log'],
+      secondsSpent: 95,
+    })!;
+    expect(guessed.investigation?.looked).toBe(false);
+    expect(guessed.investigation?.note).toMatch(/recognition/i);
+    expect(checked.investigation?.looked).toBe(true);
+    expect(checked.investigation?.note).toContain('/var/log/auth.log');
+  });
+
+  it('is absent entirely when no trace was recorded', () => {
+    expect(scoreClaim(ID, c)!.investigation).toBeUndefined();
+  });
+});
+
 describe('coaching lines are gated by difficulty', () => {
   it('withholds guidance above beginner, even where the content defines it', () => {
     const scenario = getScenario(ID)!;
