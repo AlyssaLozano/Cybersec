@@ -100,6 +100,163 @@ function eventTruth(scenarioId: string, eventId: string): EventTruth | null {
 }
 
 /**
+ * What a seat is told when they sit down, before anything happens.
+ *
+ * WHY THIS IS NOT A HINT
+ *
+ * Telling somebody what their job is and where to look is orientation. Telling
+ * them what they will find is a spoiler. A real analyst arrives knowing their
+ * remit and their tooling and knowing nothing about tonight, and that is
+ * exactly the line this draws: the brief names the surfaces, the questions the
+ * role exists to answer, and who they hand to. It never names an event.
+ *
+ * It is also DERIVED rather than authored, so it cannot drift. The surfaces
+ * come from the same table the projection uses, so a brief can never promise a
+ * seat something the projection will not give them.
+ */
+export interface SeatBriefing {
+  role: SocRoleId;
+  title: string;
+  /** One line on what this seat is for. */
+  remit: string;
+  /** The consoles they have, named the way the UI names them. */
+  surfaces: string[];
+  /** What to be asking, not what the answer is. */
+  questions: string[];
+  /** Who normally receives their findings. */
+  handsTo: SocRoleId[];
+  /** How many events will reach this seat over the shift. */
+  expectedEvents: number;
+}
+
+const SURFACE_LABELS: Record<string, string> = {
+  'alert-queue': 'Alert queue',
+  'raw-log': 'Raw logs',
+  'network-flow': 'Connection flows',
+  'cloud-audit': 'Cloud audit trail',
+  'process-tree': 'Process tree',
+  'host-artefact': 'Host artefacts',
+};
+
+const REMIT: Record<string, { remit: string; questions: string[]; handsTo: SocRoleId[] }> = {
+  'soc-operator': {
+    remit: 'First read on everything the tooling raises. Decide what deserves a human, quickly.',
+    questions: [
+      'Is this real, or is it a rule that cries wolf? Check the firing history before the content.',
+      'Does anything here share a source, an account, or a five-minute window with anything else?',
+      'If you escalate everything you have triaged nothing. What are you willing to close?',
+    ],
+    handsTo: ['log-analyst', 'ir-lead'],
+  },
+  'log-analyst': {
+    remit: 'Build the timeline. Establish what happened, in order, and what the logs do not prove.',
+    questions: [
+      'What is the earliest event you can stand behind, as opposed to the earliest you suspect?',
+      'What happened in the seconds after a success? That is usually where persistence lands.',
+      'Which of your claims rests on one source, and can you corroborate it in a second one?',
+    ],
+    handsTo: ['ir-lead', 'forensics'],
+  },
+  'network-analyst': {
+    remit: 'Answer what is talking to what, and whether it should be.',
+    questions: [
+      'Direction first. Inbound noise and outbound contact are not the same finding.',
+      'Is this path in the baseline? A connection is only unusual against what is usual.',
+      'Can you prove anything left? If you cannot prove it either way, say neither.',
+    ],
+    handsTo: ['ir-lead', 'threat-intel'],
+  },
+  'malware-analyst': {
+    remit: 'Determine what a payload actually does, and what it would do next.',
+    questions: [
+      'Decoding it is the easy half. What capability does the decoded thing actually have?',
+      'Is the payload in the command, or does the command fetch it? Those are different problems.',
+      'How would you capture the stage you cannot see?',
+    ],
+    handsTo: ['ir-lead', 'forensics'],
+  },
+  forensics: {
+    remit: 'Preserve what proves it, in an order that does not destroy what comes next.',
+    questions: [
+      'What disappears first? Collect in order of volatility, not order of convenience.',
+      'What is the timestamp relationship between artefacts? That is usually the finding.',
+      'Would this survive somebody rebuilding the host in an hour?',
+    ],
+    handsTo: ['ir-lead'],
+  },
+  'cloud-security': {
+    remit: 'Everything is an API call and an identity. Work out which principal did what, from where.',
+    questions: [
+      'Did this principal ever do this before? A first use of a permission is the signal.',
+      'Where did the call come from? Inside the estate and from the scheduler are different answers.',
+      'Is this administration that looks like an attack, or an attack that looks like administration?',
+    ],
+    handsTo: ['ir-lead'],
+  },
+  'threat-intel': {
+    remit: 'Map the tradecraft. Say what it resembles and be explicit about what you are not claiming.',
+    questions: [
+      'Which techniques can you map, and which are you inferring?',
+      'What would you have to see to move from resembles to is?',
+      'What are you deliberately not attributing, and why?',
+    ],
+    handsTo: ['ir-lead'],
+  },
+  'ai-security': {
+    remit: 'Validate that the detection stack itself was not evaded or fooled.',
+    questions: [
+      'What did the tooling miss, and is that a gap or a blind spot?',
+      'Is there evidence anybody tried to evade detection rather than just avoid it?',
+      'Can the monitoring still be trusted while the estate is compromised?',
+    ],
+    handsTo: ['ir-lead'],
+  },
+  'vulnerability-analyst': {
+    remit: 'Work out whether the way in is a one-off or a class of problem across the estate.',
+    questions: [
+      'Is this a CVE or a practice? Those get fixed by completely different work.',
+      'How many other hosts have the same exposure right now?',
+      'What can actually be changed this week, as opposed to what should be?',
+    ],
+    handsTo: ['ir-lead'],
+  },
+  'ir-lead': {
+    remit: 'Decide. Pace the floor, adjudicate disagreements, and own the call on incomplete information.',
+    questions: [
+      'Do several seats independently point the same way, or is one seat loud?',
+      'What is the cost of declaring, and what is the cost of waiting another ten minutes?',
+      'Who has not reported, and is that because they found nothing or because they are stuck?',
+    ],
+    handsTo: [],
+  },
+};
+
+/**
+ * Build a seat's opening brief.
+ *
+ * Returns null for a role the scenario has not seated, because briefing
+ * somebody for a chair they are not in is its own kind of confusing.
+ */
+export function briefingFor(scenarioId: string, role: SocRoleId): SeatBriefing | null {
+  const scenario = BY_ID.get(scenarioId);
+  if (!scenario || !scenario.roles.includes(role)) return null;
+  const spec = REMIT[role];
+  if (!spec) return null;
+
+  return {
+    role,
+    title: role,
+    remit: spec.remit,
+    // Derived from the projection table, so a brief cannot promise a console
+    // the seat will not actually be given.
+    surfaces: (SURFACES_BY_ROLE[role] ?? []).map((s) => SURFACE_LABELS[s] ?? s),
+    questions: spec.questions,
+    handsTo: spec.handsTo,
+    expectedEvents: eventsFor(scenarioId, role, Number.MAX_SAFE_INTEGER).length,
+  };
+}
+
+/**
  * The coaching line for an event, if this scenario is allowed to give one.
  *
  * WHY DIFFICULTY GATES THIS AND NOT THE AUTHOR

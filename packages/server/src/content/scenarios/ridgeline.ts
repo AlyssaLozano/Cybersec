@@ -142,6 +142,30 @@ export const RIDGELINE: Scenario = {
       claimedSeverity: 'low',
     },
     {
+      id: 'ev.9',
+      atSeconds: 95,
+      surface: 'raw-log',
+      summary: 'Accepted password for testuser, immediately followed by a key being added',
+      detail:
+        'auth.log on rmg-web-02. An accepted password at 10:14:22 after sixty-two failures, then ' +
+        'four seconds later a write to /home/testuser/.ssh/authorized_keys. Nothing else touched ' +
+        'that file in the ninety days before today.',
+      source: 'rmg-web-02',
+      claimedSeverity: null,
+    },
+    {
+      id: 'ev.10',
+      atSeconds: 180,
+      surface: 'host-artefact',
+      summary: 'A key in authorized_keys that no configuration system issued',
+      detail:
+        'The added key carries a comment matching no inventory entry, and its file timestamp sits ' +
+        'four seconds after the accepted password. The account it belongs to is still able to log ' +
+        'in without one.',
+      source: 'rmg-web-02',
+      claimedSeverity: null,
+    },
+    {
       id: 'ev.5',
       atSeconds: 210,
       surface: 'cloud-audit',
@@ -275,6 +299,35 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
         'during a live intrusion is worse than useless: it spends the one thing the floor is ' +
         'shortest of. Compare it with ev.2, which is also blocked and is not noise, and the ' +
         'difference is direction.',
+    },
+    {
+      eventId: 'ev.9',
+      verdict: 'malicious',
+      stage: 'persistence',
+      firstResponder: 'log-analyst',
+      alsoAppropriate: ['forensics', 'ir-lead'],
+      correctActions: ['act.timeline'],
+      outOfLaneActions: ['act.dismiss', 'act.decode', 'act.write-rule'],
+      escalateTo: ['ir-lead', 'forensics'],
+      why:
+        'Two lines four seconds apart, and the second one is the incident. The accepted password ' +
+        'is how they got in once; the key is how they get in from now on, and it survives the ' +
+        'password reset everybody reaches for first. Reporting the login without the key means ' +
+        'the response closes the door and leaves the window open.',
+    },
+    {
+      eventId: 'ev.10',
+      verdict: 'malicious',
+      stage: 'persistence',
+      firstResponder: 'forensics',
+      alsoAppropriate: ['log-analyst', 'ir-lead'],
+      correctActions: ['act.preserve'],
+      outOfLaneActions: ['act.dismiss', 'act.isolate', 'act.power-off', 'act.write-rule'],
+      escalateTo: ['ir-lead'],
+      why:
+        'The artefact that proves persistence, and the one most easily destroyed by the response. ' +
+        'Capture it with the timestamp intact before anybody rebuilds or resets: file times are ' +
+        'what tie the key to the login four seconds earlier, and a rebuild takes that with it.',
     },
     {
       eventId: 'ev.5',

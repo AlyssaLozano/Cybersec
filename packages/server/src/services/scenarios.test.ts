@@ -15,7 +15,14 @@ import { describe, expect, it } from 'vitest';
 import type { Claim, SocRoleId } from '@soc/shared';
 
 import { SCENARIOS, SCENARIO_TRUTH } from '../content/scenarios/index.js';
-import { eventsFor, getScenario, guidanceFor, scoreClaim, truthFor } from './scenarios.js';
+import {
+  briefingFor,
+  eventsFor,
+  getScenario,
+  guidanceFor,
+  scoreClaim,
+  truthFor,
+} from './scenarios.js';
 
 const ID = 'ridgeline';
 
@@ -72,6 +79,42 @@ describe('projection: no seat sees the whole board', () => {
     for (const role of roles) {
       const seen = eventsFor(ID, role, 3600).length;
       expect(seen, `${role} can see the entire board alone`).toBeLessThan(scenario.events.length);
+    }
+  });
+
+  /*
+   * Found by asking what the Log Analyst does for the first ten minutes: the
+   * answer was that Forensics had nothing to do for the entire hour. No event
+   * existed on `host-artefact` or `raw-log`, which are the only surfaces that
+   * seat can see, so it was seated in the scenario and permanently idle.
+   *
+   * A seated role with no events is worse than an unbalanced one. That person
+   * paid for the session and is watching other people work.
+   */
+  it('gives every seated role something to do', () => {
+    for (const scenario of SCENARIOS) {
+      for (const role of scenario.roles) {
+        const seen = eventsFor(scenario.id, role, 99_999);
+        expect(
+          seen.length,
+          `${scenario.id}: ${role} is seated and sees ${seen.length} events`,
+        ).toBeGreaterThanOrEqual(2);
+      }
+    }
+  });
+
+  it('starts every seat inside the first quarter of the shift', () => {
+    // Somebody whose first event lands at minute forty has spent most of the
+    // session watching.
+    for (const scenario of SCENARIOS) {
+      const cutoff = (scenario.durationMinutes * 60) / 4;
+      for (const role of scenario.roles) {
+        const seen = eventsFor(scenario.id, role, 99_999);
+        const first = Math.min(...seen.map((e) => e.atSeconds));
+        expect(first, `${scenario.id}: ${role} waits ${first}s for anything`).toBeLessThanOrEqual(
+          cutoff,
+        );
+      }
     }
   });
 
@@ -279,6 +322,45 @@ describe('escalation', () => {
       atSeconds: 240,
     });
     expect(line(ID, c, 'Escalation').points).toBeLessThan(10);
+  });
+});
+
+describe('the seat briefing', () => {
+  it('briefs every seated role', () => {
+    const scenario = getScenario(ID)!;
+    for (const role of scenario.roles) {
+      expect(briefingFor(ID, role), `${role} sits down with no brief`).not.toBeNull();
+    }
+  });
+
+  it('promises only consoles the projection actually gives that seat', () => {
+    // A brief that names a console the seat cannot open is worse than no brief.
+    const b = briefingFor(ID, 'soc-operator')!;
+    expect(b.surfaces).toEqual(['Alert queue']);
+    expect(briefingFor(ID, 'forensics')!.surfaces).toEqual(['Host artefacts', 'Raw logs']);
+  });
+
+  it('tells them what to ask, never what they will find', () => {
+    const truth = truthFor(ID)!;
+    for (const role of getScenario(ID)!.roles) {
+      const text = JSON.stringify(briefingFor(ID, role));
+      // No event id, and no phrase lifted from the answer key.
+      for (const entry of truth.events) {
+        expect(text).not.toContain(entry.eventId);
+        expect(text).not.toContain(entry.why.slice(0, 30));
+      }
+      expect(text).not.toMatch(/203\.0\.113|198\.51\.100|testuser|sysmon/);
+    }
+  });
+
+  it('says how much work is coming, so an empty seat is visible up front', () => {
+    for (const role of getScenario(ID)!.roles) {
+      expect(briefingFor(ID, role)!.expectedEvents).toBeGreaterThan(0);
+    }
+  });
+
+  it('does not brief a role this scenario has not seated', () => {
+    expect(briefingFor(ID, 'vulnerability-analyst')).toBeNull();
   });
 });
 
