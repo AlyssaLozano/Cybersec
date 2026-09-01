@@ -114,6 +114,10 @@ export const KILL_CHAIN_STAGES = [
   'defense-evasion',
   'lateral-movement',
   'collection',
+  // Maintaining a channel is its own stage. Beaconing incidents spend weeks
+  // here doing nothing else, and folding it into persistence loses the
+  // distinction between how they stay and how they steer.
+  'command-and-control',
   'exfiltration',
   'impact',
 ] as const;
