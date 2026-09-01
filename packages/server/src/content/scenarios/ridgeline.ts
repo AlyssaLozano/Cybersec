@@ -261,6 +261,9 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.7',
       verdict: 'benign-true-positive',
+      guidance:
+        'Direction decides this one. Ask which way the connection was going before you ask whether ' +
+        'it was blocked.',
       firstResponder: 'soc-operator',
       alsoAppropriate: [],
       correctActions: ['act.dismiss'],
@@ -292,6 +295,9 @@ export const RIDGELINE_TRUTH: ScenarioTruth = {
     {
       eventId: 'ev.8',
       verdict: 'false-positive',
+      guidance:
+        'The monitoring collector produces more failures than the attacker does. Counting is not ' +
+        'triage.',
       firstResponder: 'soc-operator',
       alsoAppropriate: [],
       correctActions: ['act.dismiss', 'act.tune'],

@@ -135,6 +135,18 @@ export interface EventTruth {
   escalateTo: SocRoleId[];
   /** Shown in the debrief, after the claim is committed. */
   why: string;
+  /**
+   * A coaching line offered WHILE the event is open, not after.
+   *
+   * This is the difference between "here is the output" and "here is what the
+   * output means", and the second one is training wheels. It reads like part of
+   * the console, which is exactly why it has to be gated: an author writing an
+   * expert scenario will reach for an explanatory sentence out of habit and
+   * quietly hand over the answer.
+   *
+   * Released at `beginner` only. See `guidanceFor()`.
+   */
+  guidance?: string;
 }
 
 export interface ScenarioTruth {

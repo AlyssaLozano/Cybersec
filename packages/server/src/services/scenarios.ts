@@ -98,6 +98,27 @@ function eventTruth(scenarioId: string, eventId: string): EventTruth | null {
 }
 
 /**
+ * The coaching line for an event, if this scenario is allowed to give one.
+ *
+ * WHY DIFFICULTY GATES THIS AND NOT THE AUTHOR
+ *
+ * "The monitoring collector produces more failures than the attacker. Counting
+ * is not triage." is a good line to read at beginner and a spoiler at
+ * intermediate: it names the decoy, states the lesson, and points at the
+ * address that mattered. A student who is meant to be learning to find that
+ * themselves has just been told.
+ *
+ * Authors will keep writing these, because explaining is the instinct. So the
+ * gate lives here rather than in a style rule nobody enforces, and a scenario
+ * above beginner cannot emit one even if its content defines it.
+ */
+export function guidanceFor(scenarioId: string, eventId: string): string | null {
+  const scenario = BY_ID.get(scenarioId);
+  if (!scenario || scenario.difficulty !== 'beginner') return null;
+  return eventTruth(scenarioId, eventId)?.guidance ?? null;
+}
+
+/**
  * Which dispositions treat an event as worth somebody's time.
  *
  * `tune` counts as not-a-threat on purpose: raising a tuning ticket is what you

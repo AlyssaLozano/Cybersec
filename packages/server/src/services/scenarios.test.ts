@@ -15,7 +15,7 @@ import { describe, expect, it } from 'vitest';
 import type { Claim, SocRoleId } from '@soc/shared';
 
 import { SCENARIOS, SCENARIO_TRUTH } from '../content/scenarios/index.js';
-import { eventsFor, getScenario, scoreClaim, truthFor } from './scenarios.js';
+import { eventsFor, getScenario, guidanceFor, scoreClaim, truthFor } from './scenarios.js';
 
 const ID = 'ridgeline';
 
@@ -279,6 +279,32 @@ describe('escalation', () => {
       atSeconds: 240,
     });
     expect(line(ID, c, 'Escalation').points).toBeLessThan(10);
+  });
+});
+
+describe('coaching lines are gated by difficulty', () => {
+  it('withholds guidance above beginner, even where the content defines it', () => {
+    const scenario = getScenario(ID)!;
+    expect(scenario.difficulty).not.toBe('beginner');
+
+    const defined = truthFor(ID)!.events.filter((e) => e.guidance);
+    expect(defined.length, 'no guidance authored, so this test proves nothing').toBeGreaterThan(0);
+
+    for (const entry of defined) {
+      expect(
+        guidanceFor(ID, entry.eventId),
+        `${entry.eventId} leaked its coaching line at ${scenario.difficulty}`,
+      ).toBeNull();
+    }
+  });
+
+  it('never puts a coaching line in the shipped event detail', () => {
+    // The interpretation must not migrate into `detail` to dodge the gate.
+    const board = JSON.stringify(getScenario(ID)!.events);
+    for (const entry of truthFor(ID)!.events) {
+      if (!entry.guidance) continue;
+      expect(board).not.toContain(entry.guidance.slice(0, 30));
+    }
   });
 });
 
