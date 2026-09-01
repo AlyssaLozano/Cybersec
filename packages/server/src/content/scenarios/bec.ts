@@ -41,7 +41,7 @@ const ID = 'change-of-bank';
 export const CHANGE_OF_BANK: Scenario = {
   id: ID,
   title: 'Change Of Bank',
-  difficulty: 'beginner',
+  difficulty: 'intermediate',
   durationMinutes: 60,
   situation:
     'It is 15:30 on a Friday. Finance called the service desk because a supplier says they have ' +

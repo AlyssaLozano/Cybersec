@@ -41,7 +41,7 @@ const ID = 'select-star';
 export const SELECT_STAR: Scenario = {
   id: ID,
   title: 'Select Star',
-  difficulty: 'beginner',
+  difficulty: 'intermediate',
   durationMinutes: 60,
   situation:
     'It is 11:45. A developer raised a performance ticket about the research portal reporting page ' +

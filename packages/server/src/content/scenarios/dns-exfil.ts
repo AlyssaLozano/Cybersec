@@ -35,7 +35,7 @@ const ID = 'quiet-channel';
 export const QUIET_CHANNEL: Scenario = {
   id: ID,
   title: 'Quiet Channel',
-  difficulty: 'beginner',
+  difficulty: 'intermediate',
   durationMinutes: 60,
   situation:
     'It is 15:40. The infrastructure team raised a capacity ticket because an internal DNS ' +

@@ -43,7 +43,7 @@ const ID = 'all-at-once';
 export const ALL_AT_ONCE: Scenario = {
   id: ID,
   title: 'All At Once',
-  difficulty: 'beginner',
+  difficulty: 'expert',
   durationMinutes: 60,
   situation:
     'It is 13:20 on a Tuesday and four separate things are on the board. You do not have enough ' +

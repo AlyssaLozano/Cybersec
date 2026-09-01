@@ -42,7 +42,7 @@ const ID = 'signed-and-trusted';
 export const SIGNED_AND_TRUSTED: Scenario = {
   id: ID,
   title: 'Signed And Trusted',
-  difficulty: 'beginner',
+  difficulty: 'advanced',
   durationMinutes: 60,
   situation:
     'It is 08:00. The monitoring platform auto-updated across the estate at 02:00 on Sunday, six ' +

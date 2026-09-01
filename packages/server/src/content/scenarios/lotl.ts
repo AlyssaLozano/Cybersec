@@ -40,7 +40,7 @@ const ID = 'nothing-installed';
 export const NOTHING_INSTALLED: Scenario = {
   id: ID,
   title: 'Nothing Installed',
-  difficulty: 'beginner',
+  difficulty: 'advanced',
   durationMinutes: 60,
   situation:
     'It is 11:15. Antivirus has found nothing, application control has blocked nothing, and the ' +

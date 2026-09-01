@@ -40,7 +40,7 @@ const ID = 'last-friday';
 export const LAST_FRIDAY: Scenario = {
   id: ID,
   title: 'Last Friday',
-  difficulty: 'beginner',
+  difficulty: 'intermediate',
   durationMinutes: 60,
   situation:
     'It is 17:10 on the Friday of a bank holiday weekend. Most of the organisation has gone home ' +

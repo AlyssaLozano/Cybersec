@@ -42,7 +42,7 @@ const ID = 'below-the-floor';
 export const BELOW_THE_FLOOR: Scenario = {
   id: ID,
   title: 'Below The Floor',
-  difficulty: 'beginner',
+  difficulty: 'expert',
   durationMinutes: 60,
   situation:
     'It is 14:00. A network capacity reconciliation found a host that is sending more than it ' +

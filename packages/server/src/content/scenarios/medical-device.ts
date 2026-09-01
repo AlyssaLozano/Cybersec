@@ -41,7 +41,7 @@ const ID = 'infusion';
 export const INFUSION: Scenario = {
   id: ID,
   title: 'Infusion',
-  difficulty: 'beginner',
+  difficulty: 'intermediate',
   durationMinutes: 60,
   situation:
     'It is 20:15. A biomedical engineering technician raised a ticket because four infusion pumps ' +

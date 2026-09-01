@@ -45,7 +45,7 @@ const ID = 'bad-teacher';
 export const BAD_TEACHER: Scenario = {
   id: ID,
   title: 'Bad Teacher',
-  difficulty: 'beginner',
+  difficulty: 'advanced',
   durationMinutes: 60,
   situation:
     'It is 11:00. The triage assistance model has been in production for eight months and its ' +

@@ -38,7 +38,7 @@ const ID = 'key-ring';
 export const KEY_RING: Scenario = {
   id: ID,
   title: 'Key Ring',
-  difficulty: 'beginner',
+  difficulty: 'intermediate',
   durationMinutes: 60,
   situation:
     'It is 10:05. The cloud provider sent an automated notice twenty minutes ago that one of our ' +

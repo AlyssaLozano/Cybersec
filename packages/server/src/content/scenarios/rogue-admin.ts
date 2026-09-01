@@ -43,7 +43,7 @@ const ID = 'own-keys';
 export const OWN_KEYS: Scenario = {
   id: ID,
   title: 'Own Keys',
-  difficulty: 'beginner',
+  difficulty: 'advanced',
   durationMinutes: 60,
   situation:
     'It is 16:00. An internal audit found nine days of missing records in the privileged access ' +

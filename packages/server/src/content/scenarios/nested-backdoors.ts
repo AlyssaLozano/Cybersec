@@ -36,7 +36,7 @@ const ID = 'second-floor';
 export const SECOND_FLOOR: Scenario = {
   id: ID,
   title: 'Second Floor',
-  difficulty: 'beginner',
+  difficulty: 'advanced',
   durationMinutes: 60,
   situation:
     'It is 07:45. This host has been cleaned twice: once on the 8th when a scheduled task was ' +

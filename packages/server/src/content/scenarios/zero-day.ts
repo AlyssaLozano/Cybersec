@@ -36,7 +36,7 @@ const ID = 'no-patch';
 export const NO_PATCH: Scenario = {
   id: ID,
   title: 'No Patch',
-  difficulty: 'beginner',
+  difficulty: 'intermediate',
   durationMinutes: 60,
   situation:
     'It is 16:20. The patient portal has been slow since lunchtime and the application team ' +

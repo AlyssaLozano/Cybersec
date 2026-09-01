@@ -42,7 +42,7 @@ const ID = 'wrong-address';
 export const WRONG_ADDRESS: Scenario = {
   id: ID,
   title: 'Wrong Address',
-  difficulty: 'beginner',
+  difficulty: 'advanced',
   durationMinutes: 60,
   situation:
     'It is 10:30. Overnight something moved through the research network and took data out. The ' +

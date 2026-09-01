@@ -43,7 +43,7 @@ const ID = 'cry-wolf';
 export const CRY_WOLF: Scenario = {
   id: ID,
   title: 'Cry Wolf',
-  difficulty: 'beginner',
+  difficulty: 'expert',
   durationMinutes: 60,
   situation:
     'It is 06:00 and the overnight queue has 11,400 unworked alerts against a normal 600. Two ' +

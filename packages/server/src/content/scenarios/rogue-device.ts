@@ -42,7 +42,7 @@ const ID = 'found-in-the-car-park';
 export const FOUND_IN_THE_CAR_PARK: Scenario = {
   id: ID,
   title: 'Found In The Car Park',
-  difficulty: 'beginner',
+  difficulty: 'advanced',
   durationMinutes: 60,
   situation:
     'It is 12:30. An unrecognised device appeared on the network this morning and network access ' +

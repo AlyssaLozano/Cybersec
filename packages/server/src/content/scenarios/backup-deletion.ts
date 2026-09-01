@@ -42,7 +42,7 @@ const ID = 'nothing-to-restore';
 export const NOTHING_TO_RESTORE: Scenario = {
   id: ID,
   title: 'Nothing To Restore',
-  difficulty: 'beginner',
+  difficulty: 'intermediate',
   durationMinutes: 60,
   situation:
     'It is 09:00 on a Tuesday. A quarterly recovery assurance review flagged that a restore test ' +

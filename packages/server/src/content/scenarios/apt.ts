@@ -39,7 +39,7 @@ const ID = 'long-weather';
 export const LONG_WEATHER: Scenario = {
   id: ID,
   title: 'Long Weather',
-  difficulty: 'beginner',
+  difficulty: 'intermediate',
   durationMinutes: 60,
   situation:
     'It is 13:00. A firewall replacement last night rebuilt the egress rules from scratch, and ' +
