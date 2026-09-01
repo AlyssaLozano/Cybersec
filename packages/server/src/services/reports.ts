@@ -225,31 +225,103 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
   },
   {
     role: 'ir-lead',
-    title: 'Executive brief',
-    audience: 'People who will not read past the first paragraph and may have to answer for this.',
+    title: 'Incident executive summary',
+    audience:
+      'The executive team, legal, and possibly a regulator. People who were not in the room, will ' +
+      'not read past the first section, and may have to answer for this in public.',
     sections: [
       {
-        id: 'bottom-line',
-        heading: 'Bottom line',
+        id: 'status',
+        heading: 'Status, as of now',
         prompt:
-          'What happened, what it means, and what you are doing. Three sentences. Everything else ' +
-          'in this report supports these.',
+          'Contained, ongoing, or resolved, and at what time. This is the first thing they will ' +
+          'ask and the last thing they will remember. If you do not know whether it is over, say ' +
+          'that: "ongoing" is an answer.',
+        minChars: 40,
+        maxChars: 300,
+        // The status words are named in the prompt, because it is a controlled
+        // vocabulary rather than an answer. So the rubric grades the part that
+        // is NOT given away: whether they pinned it to a time. "Contained" with
+        // no "as of" is the sentence that gets quoted back six months later.
+        rubric: [['as of', 'at ', 'since', ':', 'time']],
+      },
+      {
+        id: 'what-happened',
+        heading: 'What happened',
+        prompt:
+          'Plain language, no jargon, three or four sentences. Somebody who has never heard of ' +
+          'authorized_keys has to be able to repeat this accurately to a journalist.',
+        minChars: 120,
+        maxChars: 800,
+        rubric: [
+          ['account', 'credential', 'password', 'login'],
+          ['access', 'entered', 'got in', 'compromis'],
+        ],
+      },
+      {
+        id: 'timeline',
+        heading: 'How long, and how we found out',
+        prompt:
+          'First known activity, when it was detected, when it was contained. Dwell time is the ' +
+          'number that gets quoted, so give it rather than letting somebody compute it wrongly. ' +
+          'Say whether we found it or somebody told us.',
         minChars: 80,
-        maxChars: 500,
-        rubric: [['incident', 'intrusion', 'compromis', 'breach'], ['contain', 'isolat', 'declar', 'respond']],
+        maxChars: 600,
+        rubric: [
+          ['first', 'earliest', 'began', 'started'],
+          ['detect', 'noticed', 'found', 'alert'],
+          ['contain', 'stopped', 'isolat'],
+        ],
       },
       {
         id: 'impact',
-        heading: 'What is affected, and what that means for the business',
-        prompt: 'In their terms, not yours. "Patient records" rather than "the database".',
+        heading: 'What is affected, in their terms',
+        prompt:
+          '"Patient records", not "the database". Systems, data, people, and whether service was ' +
+          'disrupted. Give numbers only where you can defend them.',
+        minChars: 100,
+        maxChars: 800,
+        // Grades business language and scope. Deliberately does NOT require
+        // "database" or "server": the section asks them to translate out of
+        // system language, so rewarding system language contradicted it.
+        rubric: [
+          ['patient', 'record', 'customer', 'client', 'people'],
+          ['disrupt', 'available', 'outage', 'access', 'affected', 'exposed'],
+        ],
+      },
+      {
+        id: 'obligations',
+        heading: 'Regulatory and legal exposure',
+        prompt:
+          'Whether a notification clock has started, what it is, and who owns it. For regulated ' +
+          'data this is the section that decides what the next seventy-two hours look like. If ' +
+          'legal owns the decision rather than you, say so.',
         minChars: 80,
         maxChars: 700,
-        rubric: [['patient', 'record', 'data', 'service', 'portal'], ['risk', 'impact', 'affect', 'exposure', 'obligation']],
+        rubric: [
+          ['notif', 'report', 'disclos', 'regulat', 'legal', 'counsel'],
+          ['clock', 'deadline', 'hours', 'days', 'obligation', 'requirement'],
+        ],
+      },
+      {
+        id: 'doing',
+        heading: 'What we are doing, and who owns it',
+        prompt:
+          'Actions underway with a name against each. Separate what is already done from what is ' +
+          'planned, because those get read as the same thing otherwise.',
+        minChars: 100,
+        maxChars: 800,
+        rubric: [
+          ['done', 'complete', 'already', 'has been'],
+          ['next', 'will', 'plan', 'underway', 'ongoing'],
+        ],
       },
       {
         id: 'asks',
-        heading: 'What you need from them',
-        prompt: 'Decisions only they can make. If you need nothing, say so.',
+        heading: 'What we need from you',
+        prompt:
+          'Decisions only they can make: an outage window, external help, a public statement, ' +
+          'money. If you need nothing, say so plainly rather than leaving it blank.',
         minChars: 40,
         maxChars: 500,
         rubric: [['need', 'require', 'authoris', 'authoriz', 'decision', 'approve', 'nothing']],
