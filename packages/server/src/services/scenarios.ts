@@ -34,6 +34,7 @@ import type {
   ScenarioEvent,
   ScenarioTruth,
   SocRoleId,
+  KillChainStage,
   TriageDecision,
   InvestigationNote,
   InvestigationTrace,
@@ -127,7 +128,100 @@ export interface SeatBriefing {
   handsTo: SocRoleId[];
   /** How many events will reach this seat over the shift. */
   expectedEvents: number;
+  /**
+   * The vocabulary this seat is about to be judged on.
+   *
+   * Somebody cannot choose between "dismiss" and "tune the rule" if nobody has
+   * told them those are different things, and a career changer with Security+
+   * has read the words without ever having to act on them. Skippable in the UI:
+   * a returning student should not read it eleven times.
+   */
+  glossary: Array<{ term: string; means: string }>;
 }
+
+/**
+ * The four dispositions, which every seat needs and nobody is born knowing.
+ * These are the actual choices on the alert queue, so getting them wrong is not
+ * a vocabulary problem, it is a scored one.
+ */
+const DISPOSITIONS: Array<{ term: string; means: string }> = [
+  {
+    term: 'Escalate',
+    means:
+      'Hand it to somebody with more time or more access. Says "this is real enough to spend ' +
+      'another person on". Escalating everything is the same as triaging nothing.',
+  },
+  {
+    term: 'Investigate',
+    means:
+      'Keep it and dig. Says "I cannot close this yet and I am the right person to find out".',
+  },
+  {
+    term: 'Dismiss',
+    means:
+      'Close it as not worth acting on. This is a real decision, not a shrug, and it is the one ' +
+      'that is invisible when you get it wrong.',
+  },
+  {
+    term: 'Tune the rule',
+    means:
+      'The detection is the problem, not the event. Raise a ticket to change what fires, so this ' +
+      'stops arriving. Dismissing the same alert forty times is what tuning exists to replace.',
+  },
+];
+
+const TERMS: Record<string, Array<{ term: string; means: string }>> = {
+  'soc-operator': [
+    { term: 'Firing history', means: 'How often this rule has fired before and how often that was nothing. The number under each row.' },
+    { term: 'True positive', means: 'The detection was right about what it saw. Says nothing about whether it matters.' },
+    { term: 'Benign true positive', means: 'Correctly detected, and harmless. The firewall doing its job is the usual case.' },
+    { term: 'False positive', means: 'The detection was simply wrong about what it saw.' },
+  ],
+  'log-analyst': [
+    { term: 'Timeline', means: 'Events in the order they happened, each tied to a log line you can point at.' },
+    { term: 'Correlation', means: 'Two records that describe the same moment from different sources. Corroboration, not coincidence.' },
+    { term: 'authorized_keys', means: 'The file listing keys allowed to log in as an account. A write to it usually means persistence.' },
+  ],
+  'network-analyst': [
+    { term: 'Flow', means: 'A record that two addresses spoke: source, destination, port, volume, direction. Not what was said.' },
+    { term: 'Baseline', means: 'What normal looks like for this host. A connection is only unusual against one.' },
+    { term: 'Egress', means: 'Traffic leaving your estate. Outbound to somewhere unexpected is a different finding from inbound noise.' },
+    { term: 'C2', means: 'Command and control. Infrastructure an intrusion calls back to.' },
+  ],
+  'malware-analyst': [
+    { term: 'Loader', means: 'Code whose only job is to fetch and run the real payload. What it fetches can change hourly.' },
+    { term: 'Detonation', means: 'Running a sample in an isolated sandbox to watch what it actually does.' },
+    { term: 'Static vs dynamic', means: 'Reading the code versus running it. Obfuscation defeats the first and rarely the second.' },
+  ],
+  forensics: [
+    { term: 'Order of volatility', means: 'Collect what disappears fastest first. Memory before disk, always.' },
+    { term: 'Chain of custody', means: 'The record of who held the evidence and when. Without it, the evidence may not be usable.' },
+    { term: 'Write blocker', means: 'Hardware that lets you read a disk without altering it.' },
+  ],
+  'cloud-security': [
+    { term: 'Principal', means: 'The identity that made an API call. A user, a role, or a service account.' },
+    { term: 'Audit trail', means: 'The provider log of who called which API, from where, with what result.' },
+    { term: 'Least privilege', means: 'A principal holding only the permissions it needs. A first use of an unused one is a signal.' },
+  ],
+  'threat-intel': [
+    { term: 'TTP', means: 'Tactics, techniques and procedures. How an actor works, which is harder to change than an address.' },
+    { term: 'Attribution', means: 'Naming who did it. Easy to assert, hard to justify, and expensive when wrong.' },
+    { term: 'IOC', means: 'Indicator of compromise. An address, hash or domain. Cheap for an attacker to change.' },
+  ],
+  'ai-security': [
+    { term: 'Prompt injection', means: 'Input that a model treats as instruction rather than as data.' },
+    { term: 'Evasion', means: 'Changing an attack so detection does not recognise it, without changing what it does.' },
+  ],
+  'vulnerability-analyst': [
+    { term: 'CVE', means: 'A catalogued vulnerability with an identifier. Not every way in has one.' },
+    { term: 'Exploitability', means: 'Whether a weaponised exploit actually exists, as opposed to whether one theoretically could.' },
+  ],
+  'ir-lead': [
+    { term: 'Declare', means: 'State that this is an incident. Activates procedures and pulls people off other work.' },
+    { term: 'Containment', means: 'Removing the attacker access without destroying what proves they were there.' },
+    { term: 'Corroboration', means: 'Two seats reaching the same conclusion from different evidence. Worth more than one seat being loud.' },
+  ],
+};
 
 const SURFACE_LABELS: Record<string, string> = {
   'alert-queue': 'Alert queue',
@@ -253,6 +347,7 @@ export function briefingFor(scenarioId: string, role: SocRoleId): SeatBriefing |
     questions: spec.questions,
     handsTo: spec.handsTo,
     expectedEvents: eventsFor(scenarioId, role, Number.MAX_SAFE_INTEGER).length,
+    glossary: [...DISPOSITIONS, ...(TERMS[role] ?? [])],
   };
 }
 
@@ -271,9 +366,18 @@ export function briefingFor(scenarioId: string, role: SocRoleId): SeatBriefing |
  * gate lives here rather than in a style rule nobody enforces, and a scenario
  * above beginner cannot emit one even if its content defines it.
  */
-export function guidanceFor(scenarioId: string, eventId: string): string | null {
+export function guidanceFor(
+  scenarioId: string,
+  eventId: string,
+  role: SocRoleId,
+): string | null {
   const scenario = BY_ID.get(scenarioId);
   if (!scenario || scenario.difficulty !== 'beginner') return null;
+  // Hints reach the lead and nobody else. The lead decides what to pass on and
+  // to whom, which is the job: a floor where everyone is fed the same prompt
+  // does not need a lead, and a lead who has nothing the others lack cannot
+  // direct anybody. Relaying it badly is a real failure mode worth rehearsing.
+  if (role !== 'ir-lead') return null;
   return eventTruth(scenarioId, eventId)?.guidance ?? null;
 }
 
@@ -341,6 +445,103 @@ export function contestedEvents(claims: Claim[]): ContestedEvent[] {
     });
   }
   return contested;
+}
+
+/**
+ * The end-of-shift debrief.
+ *
+ * TWO HALVES, AND ONLY ONE OF THEM VARIES
+ *
+ * "How would you write this when every run goes differently" has a tidy answer:
+ * you do not write the variable half.
+ *
+ * What the attacker did is fixed. The intrusion ran the same way whether the
+ * floor caught it in nine minutes or missed it entirely, so that is authored
+ * once as `ScenarioTruth.narrative` and read back verbatim. It is the thing
+ * everybody wants to know at the end and nobody could see from one seat.
+ *
+ * How it was found is computed from what the team actually did: who spotted
+ * which stage, in what order, what was left on the board, and where two people
+ * read the same thing differently. That half writes itself from the claims,
+ * which means it is right every time and costs nothing per scenario.
+ */
+export interface DebriefStage {
+  eventId: string;
+  stage?: KillChainStage;
+  /** What it was. Released now, never before. */
+  why: string;
+  /** Who got to it, or nobody. */
+  spottedBy: SocRoleId | null;
+  /** Seconds after it landed. Null when it was never claimed. */
+  spottedAfterSeconds: number | null;
+  /** True when the seat that took it read it correctly. */
+  readCorrectly: boolean;
+}
+
+export interface Debrief {
+  scenarioId: string;
+  /** Authored once. The same every run. */
+  whatHappened: string[];
+  /** Computed. Different every run. */
+  stages: DebriefStage[];
+  missed: string[];
+  contested: string[];
+  /** The plain summary line, derived rather than written. */
+  summary: string;
+}
+
+export function buildDebrief(scenarioId: string, claims: Claim[]): Debrief | null {
+  const scenario = BY_ID.get(scenarioId);
+  const truth = truthFor(scenarioId);
+  if (!scenario || !truth) return null;
+
+  const firstClaim = new Map<string, Claim>();
+  for (const claim of claims) {
+    const held = firstClaim.get(claim.eventId);
+    if (!held || claim.atSeconds < held.atSeconds) firstClaim.set(claim.eventId, claim);
+  }
+
+  const stages: DebriefStage[] = truth.events.map((entry) => {
+    const event = scenario.events.find((e) => e.id === entry.eventId)!;
+    const claim = firstClaim.get(entry.eventId) ?? null;
+    const shouldTreatAsThreat =
+      entry.verdict === 'malicious' || entry.verdict === 'blocked-reconnaissance';
+    return {
+      eventId: entry.eventId,
+      stage: entry.stage,
+      why: entry.why,
+      spottedBy: claim?.role ?? null,
+      spottedAfterSeconds: claim ? Math.max(0, claim.atSeconds - event.atSeconds) : null,
+      readCorrectly: claim
+        ? treatsAsThreat(claim.disposition) === shouldTreatAsThreat
+        : false,
+    };
+  });
+
+  // Only malicious stages count as "missed". Nobody needs telling they failed
+  // to escalate the noise.
+  const missed = stages
+    .filter((s) => {
+      const entry = truth.events.find((e) => e.eventId === s.eventId)!;
+      const matters = entry.verdict === 'malicious' || entry.verdict === 'blocked-reconnaissance';
+      return matters && (s.spottedBy === null || !s.readCorrectly);
+    })
+    .map((s) => s.eventId);
+
+  const contested = contestedEvents(claims).map((c) => c.eventId);
+
+  const caught = stages.filter((s) => s.readCorrectly).length;
+  const total = truth.events.filter(
+    (e) => e.verdict === 'malicious' || e.verdict === 'blocked-reconnaissance',
+  ).length;
+
+  const summary =
+    missed.length === 0
+      ? `Every stage of the intrusion was caught and read correctly, ${caught} of ${total}.`
+      : `${total - missed.length} of ${total} stages caught. ${missed.length} went unread: ` +
+        `${missed.join(', ')}. An intrusion does not need every stage to be missed to succeed.`;
+
+  return { scenarioId, whatHappened: truth.narrative, stages, missed, contested, summary };
 }
 
 /**

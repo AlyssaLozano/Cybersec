@@ -17,6 +17,7 @@ import type { Claim, SocRoleId } from '@soc/shared';
 import { SCENARIOS, SCENARIO_TRUTH } from '../content/scenarios/index.js';
 import {
   briefingFor,
+  buildDebrief,
   contestedEvents,
   eventsFor,
   getScenario,
@@ -467,6 +468,91 @@ describe('the investigation trace is reported, never scored', () => {
   });
 });
 
+describe('the seat glossary', () => {
+  it('defines all four dispositions for every seat', () => {
+    for (const role of getScenario(ID)!.roles) {
+      const terms = briefingFor(ID, role)!.glossary.map((g) => g.term);
+      expect(terms).toEqual(expect.arrayContaining(['Escalate', 'Investigate', 'Dismiss', 'Tune the rule']));
+    }
+  });
+
+  it('adds vocabulary specific to the seat', () => {
+    const forensics = briefingFor(ID, 'forensics')!.glossary.map((g) => g.term);
+    expect(forensics).toContain('Order of volatility');
+    expect(forensics).not.toContain('Prompt injection');
+  });
+
+  it('explains terms without giving away the scenario', () => {
+    for (const role of getScenario(ID)!.roles) {
+      const text = JSON.stringify(briefingFor(ID, role)!.glossary);
+      expect(text).not.toMatch(/203\.0\.113|198\.51\.100|testuser|sysmon|ev\./);
+    }
+  });
+});
+
+describe('hints reach the lead and nobody else', () => {
+  it('gives a beginner lead the coaching line and gives every other seat nothing', () => {
+    const beginner = SCENARIOS.find((s) => s.difficulty === 'beginner');
+    if (!beginner) {
+      // Ridgeline is intermediate, so assert the shape holds on it instead.
+      expect(guidanceFor(ID, 'ev.8', 'ir-lead')).toBeNull();
+      return;
+    }
+    const withGuidance = truthFor(beginner.id)!.events.find((e) => e.guidance)!;
+    expect(guidanceFor(beginner.id, withGuidance.eventId, 'ir-lead')).not.toBeNull();
+    for (const role of beginner.roles.filter((r) => r !== 'ir-lead')) {
+      expect(guidanceFor(beginner.id, withGuidance.eventId, role)).toBeNull();
+    }
+  });
+
+  it('still gives the lead nothing above beginner', () => {
+    for (const entry of truthFor(ID)!.events.filter((e) => e.guidance)) {
+      expect(guidanceFor(ID, entry.eventId, 'ir-lead')).toBeNull();
+    }
+  });
+});
+
+describe('the debrief', () => {
+  const claims = [
+    claim({ eventId: 'ev.1', role: 'soc-operator', disposition: 'escalate', confidence: 85, atSeconds: 40 }),
+    claim({ eventId: 'ev.7', role: 'soc-operator', disposition: 'dismiss', confidence: 80, atSeconds: 200 }),
+  ];
+
+  it('reads back what happened, identically regardless of how the run went', () => {
+    const good = buildDebrief(ID, claims)!;
+    const nobody = buildDebrief(ID, [])!;
+    // The attacker did the same thing whether or not anybody noticed.
+    expect(good.whatHappened).toEqual(nobody.whatHappened);
+    expect(good.whatHappened.length).toBeGreaterThan(3);
+  });
+
+  it('computes how this floor found it, which does differ', () => {
+    const good = buildDebrief(ID, claims)!;
+    const nobody = buildDebrief(ID, [])!;
+    expect(good.missed.length).toBeLessThan(nobody.missed.length);
+
+    const ev1 = good.stages.find((s) => s.eventId === 'ev.1')!;
+    expect(ev1.spottedBy).toBe('soc-operator');
+    expect(ev1.spottedAfterSeconds).toBe(40);
+    expect(ev1.readCorrectly).toBe(true);
+  });
+
+  it('does not count noise as a missed stage', () => {
+    // Nobody needs telling they failed to escalate the monitoring collector.
+    const nobody = buildDebrief(ID, [])!;
+    expect(nobody.missed).not.toContain('ev.8');
+    expect(nobody.missed).not.toContain('ev.7');
+    expect(nobody.missed).toContain('ev.1');
+  });
+
+  it('releases the explanation only now', () => {
+    const d = buildDebrief(ID, claims)!;
+    expect(d.stages.every((s) => s.why.length > 0)).toBe(true);
+    const board = JSON.stringify(getScenario(ID)!.events);
+    for (const s of d.stages) expect(board).not.toContain(s.why.slice(0, 30));
+  });
+});
+
 describe('coaching lines are gated by difficulty', () => {
   it('withholds guidance above beginner, even where the content defines it', () => {
     const scenario = getScenario(ID)!;
@@ -477,7 +563,7 @@ describe('coaching lines are gated by difficulty', () => {
 
     for (const entry of defined) {
       expect(
-        guidanceFor(ID, entry.eventId),
+        guidanceFor(ID, entry.eventId, 'ir-lead'),
         `${entry.eventId} leaked its coaching line at ${scenario.difficulty}`,
       ).toBeNull();
     }
