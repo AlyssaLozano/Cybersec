@@ -62,8 +62,22 @@ export const COMMON_ACTIONS: ScenarioAction[] = [
   // --- vulnerability -------------------------------------------------------
   { id: 'act.scope-estate', label: 'Establish how many other hosts share this exposure', forRoles: ['vulnerability-analyst'] },
 
+  /*
+   * --- mitigation ----------------------------------------------------------
+   *
+   * Proposing containment is in lane for this seat; deciding to accept its cost
+   * is the lead's. That split is deliberate. A specialist who can both propose
+   * and authorise a change that stops a customs filing has no reason to state
+   * the cost honestly, and a lead who has to invent the options themselves will
+   * reach for the one they can name rather than the one that is narrowest.
+   */
+  { id: 'act.contain-scoped', label: 'Propose the narrowest containment that stops this, and what it breaks', forRoles: ['mitigation-specialist'] },
+  { id: 'act.compensating-control', label: 'Put a compensating control around what cannot be fixed today', forRoles: ['mitigation-specialist'] },
+  { id: 'act.check-rollback', label: 'Establish the rollback before anything is changed', forRoles: ['mitigation-specialist'] },
+  { id: 'act.sequence-remedy', label: 'Order the remediation and say what is deliberately left undone', forRoles: ['mitigation-specialist', 'ir-lead'] },
+
   // --- command -------------------------------------------------------------
-  { id: 'act.isolate', label: 'Isolate the host at the network layer', forRoles: ['ir-lead'] },
+  { id: 'act.isolate', label: 'Isolate the host at the network layer', forRoles: ['ir-lead', 'mitigation-specialist'] },
   { id: 'act.declare', label: 'Declare an incident', forRoles: ['ir-lead'] },
   { id: 'act.notify-legal', label: 'Hand the notification question to legal', forRoles: ['ir-lead'] },
 
