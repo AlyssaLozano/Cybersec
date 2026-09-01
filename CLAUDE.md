@@ -81,6 +81,11 @@ toolchain. Do not upgrade without a reason.
 ## Conventions
 
 - `npm run typecheck` and `npm test` must both pass before committing.
+- Every test file gets its own database, copied from a migrated template by
+  `packages/server/test/database.ts`. Never point a test at `prisma/dev.db`, and
+  never make a test depend on a clean table or a fixed row id: files run in
+  parallel processes, and a shared database turns an unrelated change into a
+  flake somebody else has to chase.
 - Comments explain *why*, not *what*. The existing files set the density.
 - Practice drills must never affect unlocking or the completion percentage.
 - A pass is permanent. Nothing may downgrade `status: 'passed'`.

@@ -1,10 +1,15 @@
 /**
  * Assessment flow tests: persistence, resume, retake, and the leak check.
  *
- * These run against the real SQLite database, creating and deleting their own
+ * These run against a real SQLite database, creating and deleting their own
  * users, because the behaviour under test IS the persistence. Mocking Prisma
  * here would only prove the mock works.
+ *
+ * The database is this file's alone -- test/database.ts hands every test file a
+ * private copy -- so nothing here can be disturbed by, or disturb, another file.
  */
+
+import { randomUUID } from 'node:crypto';
 
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 
@@ -24,7 +29,9 @@ const TEST_USER_PREFIX = 'vitest-assessment-';
 const createdUserIds: string[] = [];
 
 async function makeUser(): Promise<string> {
-  const suffix = `${createdUserIds.length}-${ITEMS.length}`;
+  // Random rather than a counter: a fixed name is a unique-constraint failure
+  // waiting for the first run that shares a database with anything else.
+  const suffix = randomUUID();
   const user = await prisma.user.create({
     data: {
       username: `${TEST_USER_PREFIX}${suffix}`,
@@ -37,8 +44,10 @@ async function makeUser(): Promise<string> {
 }
 
 afterAll(async () => {
-  // Cascade deletes the assessment session with the user.
-  await prisma.user.deleteMany({ where: { username: { startsWith: TEST_USER_PREFIX } } });
+  // Cascade deletes the assessment session with the user. Scoped to the ids
+  // this run created, never to the prefix: a prefix match would also delete
+  // rows belonging to anyone else pointed at the same database.
+  await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
   await prisma.$disconnect();
 });
 

@@ -9,6 +9,8 @@ build/
 *.db
 *.db-journal
 packages/server/prisma/*.db*
+# Per-test-file databases (see packages/server/test/globalDatabase.ts)
+packages/server/prisma/.vitest/
 
 # Editor / OS
 .DS_Store
