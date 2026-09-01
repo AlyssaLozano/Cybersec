@@ -11,8 +11,9 @@ import {
   seatingFor,
   takeSeat,
 } from './rooms.js';
-import { checkCallSign } from '@soc/shared';
+import { checkCallSign, SOC_ROLE_IDS } from '@soc/shared';
 import type { FloorIdentity, RoomSession } from '@soc/shared';
+import { SCENARIOS } from '../content/scenarios/index.js';
 
 const NOW = new Date('2026-09-01T18:00:00Z');
 const START = '2026-09-01T19:00:00Z';
@@ -127,6 +128,47 @@ describe('seating', () => {
     const lead = view.find((s) => s.role === 'ir-lead')!;
     expect(lead.occupant?.callSign).toBe('Cinder');
     expect(lead.selectable).toBe(false);
+  });
+
+  /*
+   * A seat a scenario does not use must not exist in the room at all.
+   *
+   * Not merely unselectable: absent. A malware analyst chair on a floor whose
+   * incident has no malware invites somebody to sit in it, wait an hour for
+   * evidence that is never going to arrive, and conclude they were bad at the
+   * job. The scenario declares which seats it runs and the room is built from
+   * that declaration, so the guarantee is structural. These tests exist because
+   * it is structural: nothing downstream re-checks it, and a seat chart built
+   * from the role catalogue instead of the scenario would look correct on
+   * screen and be wrong for every scenario that does not seat all thirteen.
+   */
+  it('never offers a chair the scenario does not use', () => {
+    const scenario = SCENARIOS.find((s) => s.id === 'ridgeline')!;
+    const view = seatingFor(room(), GUEST.userId, seatingOpen);
+    expect(view.map((s) => s.role).sort()).toEqual([...scenario.roles].sort());
+    // The point of the assertion: the catalogue is bigger than this scenario.
+    expect(scenario.roles.length).toBeLessThan(SOC_ROLE_IDS.length);
+    for (const role of SOC_ROLE_IDS) {
+      if (scenario.roles.includes(role)) continue;
+      expect(view.some((s) => s.role === role)).toBe(false);
+    }
+  });
+
+  it('refuses a chair the scenario does not use, even when it is free', () => {
+    const scenario = SCENARIOS.find((s) => s.id === 'ridgeline')!;
+    const absent = SOC_ROLE_IDS.find((r) => !scenario.roles.includes(r))!;
+    expect(() => takeSeat(room(), absent, GUEST, seatingOpen)).toThrow(RoomError);
+  });
+
+  it('builds every scenario room from the roles that scenario declares', () => {
+    for (const scenario of SCENARIOS) {
+      const view = seatingFor(
+        room({ scenarioId: scenario.id, difficulty: scenario.difficulty }),
+        GUEST.userId,
+        seatingOpen,
+      );
+      expect(view.map((s) => s.role).sort()).toEqual([...scenario.roles].sort());
+    }
   });
 
   it('gives one person one chair', () => {
