@@ -369,3 +369,31 @@
   border-color: var(--good, #57b894);
   color: var(--good, #57b894);
 }
+
+/* Tier bands. The heading carries what the tier IS, not just its number: a
+   label reading "Tier 2" alone tells a newcomer nothing they did not already
+   fail to know. */
+.tierband {
+  margin: 0 0 1.1rem;
+}
+
+.tierband__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 0.45rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--rule, #2a3138);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tierband__what {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--muted, #8b97a3);
+  font-size: 0.78rem;
+}

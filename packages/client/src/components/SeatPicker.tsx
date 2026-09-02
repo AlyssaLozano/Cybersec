@@ -72,6 +72,25 @@ const TIER: Record<string, { tier: string; entry?: boolean }> = {
   'ir-lead': { tier: 'Tier 3' },
 };
 
+/**
+ * The floor is grouped by tier, and the groups are labelled.
+ *
+ * An ungrouped list of thirteen chairs teaches nothing about how a SOC is
+ * actually arranged, and worse, its order gets read as a ranking. Grouped and
+ * labelled, the picker says the thing the product needs a career changer to
+ * understand before they choose anything: an alert arrives at Tier 1, and only
+ * the few that survive triage ever reach the seats behind it.
+ *
+ * Tier 1 comes first because it is the front of the queue and because it is the
+ * job most people using this will be hired into. That is the opposite of the
+ * order seniority would suggest, which is the point.
+ */
+const TIER_ORDER = [
+  { tier: 'Tier 1', what: 'Triage. First eyes on every alert. Where nearly everybody starts.' },
+  { tier: 'Tier 2', what: 'Investigation. Works what Tier 1 escalates, with the logs and the context.' },
+  { tier: 'Tier 3', what: 'Specialists and the lead. Reached when an incident is real and moving.' },
+];
+
 function seatLabel(role: string): string {
   return role
     .split('-')
@@ -183,8 +202,17 @@ export function SeatPicker({ roomId, joinCode = null, onSeated }: Props) {
         This incident runs {seating.length} seats. Roles it does not use are not on this floor.
       </p>
 
-      <ul className="seatgrid">
-        {seating.map((seat) => {
+      {TIER_ORDER.map((band) => {
+        const inBand = seating.filter((s) => (TIER[s.role]?.tier ?? 'Tier 2') === band.tier);
+        if (inBand.length === 0) return null;
+        return (
+          <section key={band.tier} className="tierband">
+            <h3 className="tierband__head">
+              <span className="tierband__name">{band.tier}</span>
+              <span className="tierband__what">{band.what}</span>
+            </h3>
+            <ul className="seatgrid">
+              {inBand.map((seat) => {
           const mine = room.mySeat === seat.role;
           const state = mine
             ? 'mine'
@@ -222,10 +250,13 @@ export function SeatPicker({ roomId, joinCode = null, onSeated }: Props) {
                   )}
                 </span>
               </button>
-            </li>
-          );
-        })}
-      </ul>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        );
+      })}
 
       {room.mySeat ? (
         <p className="seat-note">

@@ -765,27 +765,45 @@ const YOU = 'A1';
 
 const SEATS = [
   /*
-   * Two operators, not four. Triage is genuinely the biggest row in a real SOC
-   * because the queue is the bottleneck, but every operator sees the SAME
-   * surface, so a row of four is four people reading one queue and the "no seat
-   * sees the whole board" property collapses. Two split the queue between them,
-   * which is both realistic and still forces them to talk.
+   * The rows are tiers, front to back, and that is the whole point of the
+   * layout rather than a decoration.
+   *
+   * An alert lands at the front and only the few that survive triage travel
+   * backwards. Somebody looking at this floor should be able to read the
+   * escalation model off it without being told, because the alternative is what
+   * we had: rows that mixed tiers, and a role list whose order got read as
+   * seniority.
+   *
+   * Row A is Tier 1 and it is the widest, because triage is the biggest row in
+   * a real SOC and because it is the seat almost everybody is hired into. Four
+   * desks with two filled is the honest picture: the queue is the bottleneck
+   * and the row is usually short. A single exercise seats one operator; the
+   * floor still has four triage desks, and those are different facts.
    */
-  { ref:"C1", row:0, i:0, av:7,  handle:"@lowconf",     role:"threat-intel" },
-  { ref:"C2", row:0, i:1, av:8,  handle:"@leastpriv",   role:"cloud-security" },
-  { ref:"C3", row:0, i:2, av:9,  handle:"@softprompt",  role:"ai-security" },
-  { ref:"C4", row:0, i:3, av:10, handle:"@patchdebt",   role:"vulnerability-analyst" },
+  { ref:"A1", row:2, i:0, av:0,    handle:"@grepwitch",   role:"soc-operator" },
+  { ref:"A2", row:2, i:1, av:1,    handle:"@nullroute",   role:"soc-operator" },
+  { ref:"A3", row:2, i:2, av:null, handle:null,           role:"soc-operator" },
+  { ref:"A4", row:2, i:3, av:null, handle:null,           role:"soc-operator" },
 
+  /* Row B is Tier 2: the four seats that investigate what triage escalates,
+     each holding a different surface. */
   { ref:"B1", row:1, i:0, av:3,  handle:"@tailf",       role:"log-analyst" },
   { ref:"B2", row:1, i:1, av:4,  handle:"@dropped_syn", role:"network-analyst" },
-  { ref:"B3", row:1, i:2, av:5,  handle:"@entropy",     role:"malware-analyst" },
-  { ref:"B4", row:1, i:3, av:6,  handle:"@writeblock",  role:"forensics" },
+  { ref:"B3", row:1, i:2, av:8,  handle:"@leastpriv",   role:"cloud-security" },
+  { ref:"B4", row:1, i:3, av:10, handle:"@patchdebt",   role:"vulnerability-analyst" },
 
-  { ref:"A1", row:2, i:0, av:0,  handle:"@grepwitch",   role:"soc-operator" },
-  { ref:"A2", row:2, i:1, av:1,  handle:"@nullroute",   role:"soc-operator" },
-  { ref:"A3", row:2, i:2, av:2,  handle:"@sigmarule",   role:"detection-engineer" },
-  { ref:"A4", row:2, i:3, av:null, handle:null,         role:"soc-operator" },
+  /* Row C is Tier 3 at the desks: the specialists reached when an incident is
+     real and moving. Five across rather than four, because that is how many
+     there are and a row that lies about its own size to keep a grid tidy is
+     the kind of quiet wrongness a mockup should not teach. */
+  { ref:"C1", row:0, i:0, av:6,  handle:"@writeblock",  role:"forensics" },
+  { ref:"C2", row:0, i:1, av:5,  handle:"@entropy",     role:"malware-analyst" },
+  { ref:"C3", row:0, i:2, av:7,  handle:"@lowconf",     role:"threat-intel" },
+  { ref:"C4", row:0, i:3, av:9,  handle:"@softprompt",  role:"ai-security" },
+  { ref:"C5", row:0, i:4, av:2,  handle:"@sigmarule",   role:"detection-engineer" },
 
+  /* The command pod is also Tier 3, and sits apart because none of these three
+     works a queue. */
   { ref:"CMD", cmd:true, x:600, y:726, s:1.30, av:11, handle:"@bridge", role:"ir-lead" },
   /* Fusion sits at the command pod rather than in a row, because the job is to
      face the lead rather than a queue: it turns several analysts' findings into
@@ -815,7 +833,10 @@ const SEATS = [
 function seatXY(s) {
   if (s.cmd) return { x:s.x, y:s.y, s:s.s };
   const g = ROWS_GEO[s.row];
-  const spread = [-1, -0.34, 0.34, 1][s.i];
+  /* Spread is derived from how many seats the row actually holds, so a row can
+     be five wide without the geometry lying about it. */
+  const n = SEATS.filter((o) => !o.cmd && o.row === s.row).length;
+  const spread = n === 1 ? 0 : (s.i / (n - 1)) * 2 - 1;
   return { x: 600 + spread * g.half, y: g.y, s: g.s };
 }
 
@@ -870,9 +891,61 @@ function drawStation(s, g) {
   el("circle", { cx:x, cy:y+dh-7*k, r:15*k, fill:a.hair, opacity:.92 }, g);
 }
 
+/*
+ * Tier zones, drawn under the desks.
+ *
+ * Without them the rows are three rows. With them they are the escalation
+ * model, readable at a glance: an alert lands at the front and only what
+ * survives triage travels backwards. The band is deliberately faint and the
+ * label sits out at the edge, because this has to be legible without competing
+ * with the seats, which are the thing somebody is actually here to click.
+ */
+const TIER_ZONES = [
+  { row:2, label:"TIER 1", what:"Triage · entry level", entry:true },
+  { row:1, label:"TIER 2", what:"Investigation" },
+  { row:0, label:"TIER 3", what:"Specialists" }
+];
+
+
+
 // draw back-to-front so nearer stations occlude further ones
 const ordered = [...SEATS].sort((p, q) => seatXY(p).y - seatXY(q).y);
 ordered.forEach((s) => drawStation(s, el("g", {})));
+
+(function drawTierZones() {
+  const zg = el("g", { class:"tierzones", "aria-hidden":"true" });
+  TIER_ZONES.forEach((z) => {
+    const g = ROWS_GEO[z.row];
+    const pad = 46 * g.s;
+    el("rect", {
+      x: 600 - g.half - pad, y: g.y - 62 * g.s,
+      width: 2 * (g.half + pad), height: 116 * g.s,
+      rx: 26 * g.s,
+      fill: z.entry ? "var(--good, #57b894)" : "var(--ink, #8b97a3)",
+      opacity: z.entry ? 0.075 : 0.045
+    }, zg);
+    /* The band scales with the row's perspective; the label deliberately does
+       not. A zone label is chrome rather than part of the scene, and scaling it
+       rendered the back row at nine pixels, which is present in the DOM and
+       invisible on the screen. */
+    const lx = 600 - g.half - pad + 10;
+    const ly = g.y - 62 * g.s + 26;
+    el("text", {
+      x: lx, y: ly,
+      /* Sized in viewBox units against how the room actually renders, which is
+         about 0.62 of the 1200 unit width. The seat labels are HTML overlays
+         and stay crisp at any size; SVG text does not, and 13 here came out at
+         eight pixels on screen. */
+      "font-size": 23, "font-weight": 700, "letter-spacing": 2,
+      fill: z.entry ? "var(--good, #57b894)" : "var(--ink, #8b97a3)",
+      opacity: z.entry ? 0.95 : 0.72
+    }, zg).textContent = z.label;
+    el("text", {
+      x: lx, y: ly + 24,
+      "font-size": 17, fill: "var(--ink, #8b97a3)", opacity: 0.6
+    }, zg).textContent = z.what;
+  });
+})();
 
 /* ── role copy (verbatim from the platform catalogue) ─── */
 const ROLES = {
