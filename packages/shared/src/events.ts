@@ -1,5 +1,5 @@
 /**
- * The event centre: things people schedule for each other.
+ * The event center: things people schedule for each other.
  *
  * WHY THIS IS NOT THE WAR ROOM SCHEDULE
  *

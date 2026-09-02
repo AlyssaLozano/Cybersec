@@ -143,9 +143,19 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
     return () => window.clearInterval(timer);
   }, [identity, headingFor, beat]);
 
-  /* Leave on the way out, rather than fading from the room over 75 seconds. */
+  /**
+   * Whether this unmount is somebody stepping through a doorway.
+   *
+   * A ref rather than state because it is read in a cleanup that must not
+   * re-run: going through a door leaves your presence standing, marked for the
+   * room you went to, so the people still in the corridor can see somebody went
+   * that way. Leaving the lobby outright clears it.
+   */
+  const walkedThrough = useRef(false);
+
   useEffect(() => {
     return () => {
+      if (walkedThrough.current) return;
       void lobby.leave().catch(() => undefined);
     };
   }, []);
@@ -284,10 +294,15 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
       <Hall
         view={view}
         me={identity}
-        headingFor={headingFor}
         onHeadFor={setHeadingFor}
-        onSocFloor={onSocFloor}
-        onRedBlue={onRedBlue}
+        onSocFloor={() => {
+          walkedThrough.current = true;
+          onSocFloor();
+        }}
+        onRedBlue={() => {
+          walkedThrough.current = true;
+          onRedBlue();
+        }}
         onOpenChat={() => setPane('chat')}
         onOpenEvents={() => setPane('events')}
       />
@@ -329,37 +344,36 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
 /**
  * The hall.
  *
- * A corridor in one-point perspective: lit walls running back to a gate at the
- * far end, with the war rooms set into alcoves down either side and everybody
- * currently here standing in front of the gate.
+ * A corridor you are standing in. The chat rooms are the lit ring at the end of
+ * it, the event center sits just off it, the war rooms are doorways down the
+ * walls, and everybody currently here stands on the floor between them.
  *
  * WHY A ROOM AND NOT A PAGE
  *
  * The metaphor is doing real work rather than decoration. A list of four links
- * tells somebody the war rooms exist. A corridor they are standing in, with
- * three other people in it and a lit doorway with "2 heading here" under it,
- * tells them the war room is somewhere other people are going, and that is the
- * only fact that ever gets a six-seat session filled.
+ * tells somebody the war rooms exist. A corridor with three other people
+ * standing in it and a lit doorway saying "2 heading here" tells them the war
+ * room is somewhere other people are going, and that is the only fact that
+ * gets a six-seat session filled.
  *
  * WHY THE SEALED ROOMS ARE THE FURTHEST AWAY
  *
  * Depth carries the meaning. The two war rooms that are not built yet sit at
- * the far end of the corridor, small and unlit, which says "later" without a
- * label. They are drawn at all, rather than omitted, because somebody can still
- * mark that they want one and be counted.
+ * the far end, small and unlit, which says "later" without a label. They are
+ * drawn at all, rather than omitted, because a doorway somebody can see is a
+ * thing they can look forward to.
  *
  * WHY NONE OF IT COSTS THE EXIT
  *
- * Every part of the scenery is aria-hidden and every portal is a real button
+ * Every part of the scenery is aria-hidden and every doorway is a real button
  * with a real label, so this is a corridor to somebody who can see it and a
- * list of six labelled buttons to somebody using a screen reader. Below 60rem
- * the perspective is dropped entirely and the same six portals stack. Theatre
- * must never be the only way through a door.
+ * list of six labelled buttons to somebody using a screen reader. Below the
+ * size the corridor needs, the same six stack. Theatre must never be the only
+ * way through a door.
  */
 function Hall({
   view,
   me,
-  headingFor,
   onHeadFor,
   onSocFloor,
   onRedBlue,
@@ -368,7 +382,6 @@ function Hall({
 }: {
   view: LobbyView | null;
   me: FloorIdentity;
-  headingFor: LobbyDoorId | null;
   onHeadFor: (door: LobbyDoorId | null) => void;
   onSocFloor: () => void;
   onRedBlue: () => void;
@@ -378,25 +391,22 @@ function Hall({
   if (!view) return <p className="seat-note">Walking in…</p>;
 
   /**
-   * Going through a portal tells the corridor first.
+   * Going through a doorway tells the corridor first.
    *
-   * The point of a shared hall is that somebody heading for a SOC room is
-   * visible to the two other people who wanted one. Marking it on the way out
-   * is what turns three separate abandonments into one session.
+   * This is now the ONLY thing that sets what somebody is heading for, which is
+   * why presence survives the walk through: see `walkedThrough` in the lobby.
    */
   const walkThrough = (door: LobbyDoorId, go: () => void) => () => {
     onHeadFor(door);
     go();
   };
 
-  /** One war room, in the alcove it stands in. */
   const warRoom = (id: LobbyDoorId, slot: BaySlot, go?: () => void) => {
     const door = view.doors.find((entry) => entry.id === id);
     if (!door) return null;
     const open = door.state === 'open' && go !== undefined;
     return (
       <Portal
-        key={id}
         slot={slot}
         accent={door.accent}
         title={door.title}
@@ -404,8 +414,6 @@ function Hall({
         dormant={!open}
         footnote={door.heading === 0 ? 'nobody heading here' : `${door.heading} heading here`}
         onEnter={open ? walkThrough(id, go) : undefined}
-        wanted={headingFor === id}
-        onWant={() => onHeadFor(headingFor === id ? null : id)}
       />
     );
   };
@@ -414,51 +422,55 @@ function Hall({
     <section className="hall" aria-label="The lobby">
       <div className="hall__scene">
         {/* Scenery. Painted with gradients rather than shipped as art: an image
-            is a download and a fixed resolution, and this recolours itself per
-            portal and scales to any size. */}
+            is a download at one fixed resolution, and this recolours itself per
+            doorway and scales to any size. */}
         <span className="hall__ceiling" aria-hidden="true" />
         <span className="hall__wall hall__wall--l" aria-hidden="true" />
         <span className="hall__wall hall__wall--r" aria-hidden="true" />
         <span className="hall__floor" aria-hidden="true" />
 
-        {/* The gate at the end of the corridor, and the people in front of it. */}
-        <div className="gate">
+        {/*
+          The chat rooms are the ring at the end of the corridor.
+          They are the thing everybody in a lobby is actually here for, so they
+          are the biggest thing in it and the one you walk towards.
+        */}
+        <button
+          type="button"
+          className="gate"
+          onClick={onOpenChat}
+          aria-label="Enter the chat rooms"
+        >
           <span className="gate__halo" aria-hidden="true" />
           <span className="gate__ring" aria-hidden="true" />
           <span className="gate__field" aria-hidden="true" />
           <span className="gate__dais" aria-hidden="true" />
-        </div>
+          <span className="gate__plate">
+            <span className="gate__title">Chat rooms</span>
+            <span className="gate__foot">
+              {view.rooms.length} rooms open
+            </span>
+          </span>
+        </button>
 
         <div className="hall__bays">
-          {/* Nearest the viewer, and the only two with a full plate: the war
-              rooms that are open. They are what the corridor is for, and their
-              blurb is the one somebody actually needs to read. */}
-          {warRoom('soc', 'l1', onSocFloor)}
-          {warRoom('redblue', 'r1', onRedBlue)}
-
-          {/* Mid-corridor: the two places somebody uses every visit, and needs
-              no explanation of. */}
+          {/* Just off the ring, and deliberately small: a calendar is something
+              you check, not somewhere you spend an evening. */}
           <Portal
-            slot="l2"
-            accent="cyan"
-            title="Chat rooms"
-            blurb="Step inside to see what each room is for, and say something."
-            footnote={`${view.rooms.length} rooms open`}
-            onEnter={onOpenChat}
-          />
-          <Portal
-            slot="r2"
+            slot="ev"
             accent="amber"
-            title="Event centre"
+            title="Event center"
             blurb="What is on this month, and the thing you wish somebody had scheduled."
             footnote="post and RSVP"
             onEnter={onOpenEvents}
           />
 
-          {/* The far end: the two that are not built yet. Depth carries the
-              meaning, so neither needs the word "later" on it. */}
-          {warRoom('grc', 'l3')}
-          {warRoom('ai', 'r3')}
+          {/* The open war rooms, nearest and largest. */}
+          {warRoom('soc', 'l1', onSocFloor)}
+          {warRoom('redblue', 'r1', onRedBlue)}
+
+          {/* The far end: the two that are not built yet. */}
+          {warRoom('grc', 'l2')}
+          {warRoom('ai', 'r2')}
         </div>
 
         <Drifters occupants={view.occupants} meId={me.userId} />
@@ -469,28 +481,27 @@ function Hall({
             : `${view.occupants.length} in the hall`}
         </span>
       </div>
-
-      {view.occupants.length === 1 ? (
-        <p className="seat-note hall__alone">
-          Nobody else is here yet. Leave something in a chat room or put an event on the calendar,
-          and the next person through will find it waiting.
-        </p>
-      ) : null}
     </section>
   );
 }
 
 /**
- * Where a portal stands.
+ * Where a doorway stands.
  *
- * `l`/`r` is the wall, `1` to `3` is how far down the corridor. Depth is the
- * only thing the number changes, and it changes it in CSS: the ring gets
- * smaller and dimmer, the plate does not, because a label somebody cannot read
- * is not a label.
+ * `l`/`r` is the wall and `1`/`2` is how far down the corridor; `ev` is the
+ * small one beside the ring. Depth is the only thing the number changes, and it
+ * changes it in CSS.
  */
-type BaySlot = 'l1' | 'l2' | 'l3' | 'r1' | 'r2' | 'r3';
+type BaySlot = 'l1' | 'l2' | 'r1' | 'r2' | 'ev';
 
-/** One doorway in one alcove. */
+/**
+ * One doorway.
+ *
+ * There is no second control on it. Clicking the doorway is the whole
+ * interaction: a button under a portal saying "I want this one" was a form
+ * control in a room, and it made somebody choose between two things when there
+ * was only ever one thing to do.
+ */
 function Portal({
   slot,
   accent,
@@ -499,8 +510,6 @@ function Portal({
   footnote,
   dormant = false,
   onEnter,
-  wanted,
-  onWant,
 }: {
   slot: BaySlot;
   accent: string;
@@ -509,8 +518,6 @@ function Portal({
   footnote: string;
   dormant?: boolean;
   onEnter?: () => void;
-  wanted?: boolean;
-  onWant?: () => void;
 }) {
   return (
     <div className={`bay bay--${slot} bay--${accent}${dormant ? ' bay--sealed' : ''}`}>
@@ -530,11 +537,6 @@ function Portal({
         <span className="bay__title">{title}</span>
         <span className="bay__blurb">{blurb}</span>
         <span className="bay__foot">{footnote}</span>
-        {onWant ? (
-          <button type="button" className={wanted ? 'linkish is-on' : 'linkish'} onClick={onWant}>
-            {wanted ? 'Heading here' : 'I want this one'}
-          </button>
-        ) : null}
       </div>
     </div>
   );
@@ -543,14 +545,18 @@ function Portal({
 /**
  * The people in the corridor.
  *
- * Position comes from a hash of the user id rather than from Math.random, so
- * nobody teleports across the floor every twenty seconds when the poll lands.
- * One id always stands in the same place, which is also what makes "the person
- * by the red portal" a thing somebody can say out loud.
+ * They stand on the floor in the middle of the hallway, between the doorways
+ * and below the ring, because that is where people in a room stand. Position
+ * comes from a hash of the user id rather than from Math.random, so nobody
+ * teleports across the floor every twenty seconds when the poll lands, and "the
+ * person by the red door" is a thing somebody can say out loud.
+ *
+ * Nothing here takes a click. The floor is scenery with names on it, and the
+ * only things worth clicking in this room are its doors.
  */
 function Drifters({ occupants, meId }: { occupants: LobbyOccupant[]; meId: string }) {
   return (
-    <div className="drifters">
+    <div className="drifters" aria-hidden="true">
       {occupants.map((occupant) => {
         const spot = placeOf(occupant.identity.userId);
         return (
@@ -560,8 +566,8 @@ function Drifters({ occupants, meId }: { occupants: LobbyOccupant[]; meId: strin
             style={{
               left: `${spot.x}%`,
               top: `${spot.y}%`,
-              // Further back in the corridor means smaller, so a crowd reads as
-              // a crowd standing in a space rather than as a row of stickers.
+              // Further back in the hallway means smaller, so a crowd reads as
+              // people standing in a space rather than a row of stickers.
               '--scale': spot.scale,
               zIndex: Math.round(spot.scale * 100),
               animationDelay: `${spot.delay}s`,
@@ -573,12 +579,9 @@ function Drifters({ occupants, meId }: { occupants: LobbyOccupant[]; meId: strin
               aria-hidden="true"
             />
             <span className="drifter__name">{occupant.identity.callSign}</span>
-
-            {/* Held badges, on hover. The corridor stays a place, and the fact
-                somebody actually wants about a stranger is one gesture away. */}
             {occupant.badges.length > 0 ? (
               <span className="drifter__badges">
-                {occupant.badges.map((badge) => (
+                {occupant.badges.slice(0, 2).map((badge) => (
                   <BadgePip key={badge.id} badge={badge} />
                 ))}
               </span>
@@ -610,11 +613,10 @@ function placeOf(userId: string): Spot {
   const c = (hash >>> 20) % 1000;
   const depth = b / 1000;
   return {
-    // Kept off the edges so a call sign never runs under an alcove plate.
     x: 8 + (a / 1000) * 84,
-    // Further up the corridor is further away, so y and scale move together.
-    y: 6 + depth * 68,
-    scale: 0.72 + (1 - depth) * 0.5,
+    // Further up the hallway is further away, so y and scale move together.
+    y: 8 + depth * 74,
+    scale: 0.74 + (1 - depth) * 0.46,
     delay: -(c / 1000) * 9,
     duration: 7 + (a / 1000) * 6,
   };

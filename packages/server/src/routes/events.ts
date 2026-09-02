@@ -1,5 +1,5 @@
 /**
- * Event centre routes.
+ * Event center routes.
  *
  * Everything an event can point at is inside the platform. There is no URL
  * field anywhere on this router, and that is deliberate rather than unbuilt:

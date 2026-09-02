@@ -85,6 +85,21 @@ export async function ensureCoreRooms(): Promise<void> {
       update: { title: room.title, topic: room.topic, kind: 'core', status: 'approved' },
     });
   }
+
+  /*
+   * A core room dropped from the list is CLOSED, never deleted.
+   *
+   * The list shrinks as well as grows, and a deployment that had six seeded
+   * rooms must end up showing the two that are left. Closing takes them off the
+   * list and stops new posts while keeping every message anybody wrote in them:
+   * deleting would cascade the transcript, and a decision to simplify a room
+   * list is not a decision to destroy conversations. A room that comes back
+   * later reopens with its history intact, because the id is the same.
+   */
+  await prisma.chatRoom.updateMany({
+    where: { kind: 'core', id: { notIn: CORE_CHAT_ROOMS.map((room) => room.id) } },
+    data: { status: 'closed' },
+  });
 }
 
 interface ChatRoomRow {

@@ -832,7 +832,7 @@ export const lobby = {
     }),
 };
 
-// --- the event centre --------------------------------------------------------
+// --- the event center --------------------------------------------------------
 
 export const events = {
   list: (query: { from?: string; to?: string; audience?: EventAudience; kind?: EventKind } = {}) => {

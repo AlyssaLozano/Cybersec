@@ -152,40 +152,14 @@ export interface ChatRoom {
 export const CORE_CHAT_ROOMS: ReadonlyArray<{ id: string; title: string; topic: string }> = [
   {
     id: 'main-hall',
-    title: 'Main hall',
+    title: 'Main Hall',
     topic: 'Everybody, from every war room. Say hello, find people for a session, talk shop.',
   },
   {
-    id: 'newcomers',
-    title: 'First week',
+    id: 'i-need-a-job',
+    title: 'I need a Job',
     topic:
-      'New here, or new to security. No question is too basic in this room, and answering them is how people learn to explain things.',
-  },
-  {
-    id: 'blue-floor',
-    title: 'Blue floor',
-    topic: 'SOC work: triage, detections, log analysis, and the shifts they happen on.',
-  },
-  {
-    id: 'red-side',
-    title: 'Red side',
-    topic: 'Offensive work: red/blue matches, tradecraft, and what the defenders caught.',
-  },
-  {
-    id: 'risk-desk',
-    title: 'Risk desk',
-    topic: 'GRC, audit, privacy, and policy. The path into security that never opens a terminal.',
-  },
-  {
-    id: 'model-lab',
-    title: 'Model lab',
-    topic: 'AI security: prompt injection, model abuse, and defending deployed models.',
-  },
-  {
-    id: 'the-hunt',
-    title: 'The hunt',
-    topic:
-      'Job hunting: openings people have seen, interviews they have sat, and what actually worked. No recruiting spam.',
+      'For people looking: what you have applied for, what the interview actually asked, what got you through and what did not. Experiences from the hunt, not recruiting spam.',
   },
 ];
 

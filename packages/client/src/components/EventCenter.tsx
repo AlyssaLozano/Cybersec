@@ -1,5 +1,5 @@
 /**
- * The event centre: a month at a glance, and the things on it.
+ * The event center: a month at a glance, and the things on it.
  *
  * WHY A CALENDAR AND NOT JUST A LIST
  *
@@ -103,7 +103,7 @@ export function EventCenter({ identity, rooms }: EventCenterProps) {
   return (
     <section className="events">
       <header className="events__head">
-        <h2 className="lobby__h">Event centre</h2>
+        <h2 className="lobby__h">Event center</h2>
         <div className="events__controls">
           <label className="events__filter">
             Kind

@@ -1,5 +1,5 @@
 /**
- * The event centre: creating things, listing them, and saying you will be there.
+ * The event center: creating things, listing them, and saying you will be there.
  *
  * WHY CAPACITY ONLY GATES "GOING"
  *

@@ -1,5 +1,5 @@
 /*
- * The lobby, the chat rooms, and the event centre.
+ * The lobby, the chat rooms, and the event center.
  *
  * The lobby is drawn as a hall with portals around it and people standing in
  * the middle, rather than as a page with a list of links on it. That is a
@@ -246,6 +246,19 @@
   aspect-ratio: 16 / 10;
   min-height: 30rem;
   max-height: 44rem;
+
+  /*
+   * The scale of the room.
+   *
+   * `cqh` is a percentage of the scene's own height, so the corridor grows and
+   * shrinks with the window in proportion. The `max` against a rem is a floor,
+   * not a preference: below it the alcoves are smaller than the text inside
+   * them, and a doorway you cannot read the name of is not a doorway. Every
+   * band height and offset below is a multiple of this one number, which is
+   * what keeps them from ever colliding at any size.
+   */
+  container-type: size;
+  --u: max(1rem, 2.35cqh);
 }
 
 /* --- the corridor takes the whole page ----------------------------------- */
@@ -261,11 +274,11 @@
  * is the thing this is not.
  *
  * The condition is a floor on BOTH dimensions. The corridor needs 72rem across
- * (see the stack rule at the end of this file) and 44rem down, because the
- * alcoves are stacked in rem from the floor and the far one needs somewhere to
- * be. Below either, the same six doors stack and scroll.
+ * (see the stack rule at the end of this file) and 40rem down, which is what
+ * the three bands come to at the smallest scale unit they are allowed. Below
+ * either, the same six doors stack and scroll.
  */
-@media (min-width: 72rem) and (min-height: 44rem) {
+@media (min-width: 72rem) and (min-height: 40rem) {
   .lobby--hall {
     max-width: none;
     margin: 0;
@@ -468,14 +481,67 @@
 
 /* --- the gate at the end ------------------------------------------------- */
 
+/*
+ * The chat rooms, as the ring at the end of the corridor.
+ *
+ * The biggest thing in the room and the one everybody walks towards, because it
+ * is the thing a lobby is actually for. It is a real button; the ring, the
+ * field inside it and the light on the floor are scenery hung off it.
+ */
 .gate {
   position: absolute;
   left: 50%;
   top: 40%;
   transform: translate(-50%, -50%);
-  width: min(30%, 17rem);
+  /* Capped against the scene's width too, so a short wide window cannot put the
+     ring through the doorways on either side of it. */
+  width: min(30cqw, calc(var(--u) * 18));
   aspect-ratio: 1;
-  z-index: 2;
+  z-index: 3;
+  border: none;
+  padding: 0;
+  background: none;
+  transition: transform 200ms ease, filter 200ms ease;
+}
+
+.gate:hover,
+.gate:focus-visible {
+  transform: translate(-50%, -50%) scale(1.03);
+  filter: brightness(1.12);
+}
+
+.gate__plate {
+  position: absolute;
+  left: 50%;
+  /* Below the dais, not on it. The pool of light under the ring is the
+     brightest thing in the room, and pale text laid over it is unreadable. */
+  top: calc(100% + var(--u) * 1.7);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.05rem;
+  white-space: nowrap;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.95),
+    0 0 10px rgba(0, 0, 0, 0.9);
+}
+
+.gate__title {
+  font-weight: 600;
+  font-size: max(1rem, calc(var(--u) * 0.62));
+  color: #ffb3ec;
+  text-shadow:
+    0 0 16px rgba(255, 110, 214, 0.75),
+    0 1px 3px rgba(0, 0, 0, 0.95);
+}
+
+.gate__foot {
+  font-family: var(--mono);
+  font-size: max(10px, calc(var(--u) * 0.36));
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(255, 200, 235, 0.7);
 }
 
 .gate__halo {
@@ -564,8 +630,8 @@
  * a label.
  */
 .bay {
-  --ring: 7rem;
-  --bay-h: 14.5rem;
+  --ring: calc(var(--u) * 6.5);
+  --bay-h: calc(var(--u) * 14.5);
   --p1: #7cc4ff;
   --p2: #1f5fc4;
   position: absolute;
@@ -601,16 +667,41 @@
  * percentage offset would let the far alcove drift up through the ceiling on a
  * tall screen and collide with its neighbour on a short one.
  */
-.bay--l1, .bay--r1 { --ring: 6.5rem; --bay-h: 14.5rem; width: 12rem; bottom: 2.5rem; }
-.bay--l2, .bay--r2 { --ring: 4.8rem; --bay-h: 9rem; width: 10.5rem; bottom: 17.5rem; }
-.bay--l3, .bay--r3 { --ring: 3.4rem; --bay-h: 7.25rem; width: 10rem; bottom: 27rem; opacity: 0.9; }
+.bay--l1, .bay--r1 {
+  --ring: calc(var(--u) * 6.5);
+  --bay-h: calc(var(--u) * 14.5);
+  width: calc(var(--u) * 12);
+  bottom: calc(var(--u) * 2.5);
+}
+
+.bay--l2, .bay--r2 {
+  --ring: calc(var(--u) * 4.8);
+  --bay-h: calc(var(--u) * 9);
+  width: calc(var(--u) * 10.5);
+  bottom: calc(var(--u) * 17.5);
+  opacity: 0.92;
+}
 
 .bay--l1 { left: 0.5%; }
 .bay--l2 { left: 12%; }
-.bay--l3 { left: 20%; }
 .bay--r1 { right: 0.5%; }
 .bay--r2 { right: 12%; }
-.bay--r3 { right: 20%; }
+
+/*
+ * The event center, just off the ring and deliberately small.
+ *
+ * A calendar is something somebody checks on the way past, not somewhere they
+ * spend an evening, and sizing it like a war room would say the opposite. It
+ * sits low and to the right of the ring so it clears both the ring above it and
+ * the people standing in the middle of the hallway.
+ */
+.bay--ev {
+  --ring: calc(var(--u) * 3.4);
+  --bay-h: calc(var(--u) * 6);
+  width: calc(var(--u) * 8);
+  left: calc(50% + var(--u) * 8.5);
+  bottom: calc(var(--u) * 7);
+}
 
 /* Two lines and no more, so the near plate has a height that can be budgeted. */
 .bay--l1 .bay__blurb,
@@ -624,9 +715,8 @@
 /* Titles shrink with depth, so a two-word room name stays on one line. */
 .bay--l2 .bay__title,
 .bay--r2 .bay__title,
-.bay--l3 .bay__title,
-.bay--r3 .bay__title {
-  font-size: 0.8rem;
+.bay--ev .bay__title {
+  font-size: max(0.78rem, calc(var(--u) * 0.44));
 }
 
 /*
@@ -637,44 +727,21 @@
  */
 .bay--l2 .bay__blurb,
 .bay--r2 .bay__blurb,
-.bay--l3 .bay__blurb,
-.bay--r3 .bay__blurb {
+.bay--ev .bay__blurb {
   display: none;
 }
 
 /*
- * Past the near band the plate is a title and a count.
- *
- * The blurb and the "I want this one" control come back on hover or focus.
- * Both are worth having and neither is worth the height at a distance, and
- * keyboard focus reveals them too so they are not mouse-only.
+ * Past the near doorways the plate is a title and a count; the blurb comes back
+ * on hover or focus. Worth having, not worth the height at a distance, and
+ * keyboard focus reveals it too so it is not mouse-only.
  */
-.bay--l3 .bay__plate .linkish,
-.bay--r3 .bay__plate .linkish,
-.bay--l2 .bay__plate .linkish,
-.bay--r2 .bay__plate .linkish {
-  display: none;
-}
-
-.bay--l3:hover .bay__plate .linkish,
-.bay--r3:hover .bay__plate .linkish,
-.bay--l2:hover .bay__plate .linkish,
-.bay--r2:hover .bay__plate .linkish,
-.bay--l3:focus-within .bay__plate .linkish,
-.bay--r3:focus-within .bay__plate .linkish,
-.bay--l2:focus-within .bay__plate .linkish,
-.bay--r2:focus-within .bay__plate .linkish {
-  display: inline;
-}
-
 .bay--l2:hover .bay__blurb,
 .bay--r2:hover .bay__blurb,
-.bay--l3:hover .bay__blurb,
-.bay--r3:hover .bay__blurb,
+.bay--ev:hover .bay__blurb,
 .bay--l2:focus-within .bay__blurb,
 .bay--r2:focus-within .bay__blurb,
-.bay--l3:focus-within .bay__blurb,
-.bay--r3:focus-within .bay__blurb {
+.bay--ev:focus-within .bay__blurb {
   display: block;
   position: absolute;
   top: 100%;
@@ -690,8 +757,7 @@
 
 .bay--l2 .bay__plate,
 .bay--r2 .bay__plate,
-.bay--l3 .bay__plate,
-.bay--r3 .bay__plate {
+.bay--ev .bay__plate {
   position: relative;
 }
 
@@ -862,7 +928,9 @@
 .bay__title {
   font-weight: 600;
   color: var(--p1);
-  font-size: 0.9rem;
+  /* Scales with the room, with a floor: a label is the one thing in here that
+     has a size below which it stops doing its job. */
+  font-size: max(0.85rem, calc(var(--u) * 0.52));
   letter-spacing: 0.01em;
   /* The name of a door in a neon corridor glows. */
   text-shadow:
@@ -871,14 +939,14 @@
 }
 
 .bay__blurb {
-  font-size: 0.75rem;
+  font-size: max(0.72rem, calc(var(--u) * 0.44));
   color: var(--text-dim);
   line-height: 1.4;
 }
 
 .bay__foot {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: max(10px, calc(var(--u) * 0.36));
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--text-faint);
@@ -891,15 +959,34 @@
  *
  * Inset well away from the walls so nobody stands inside an alcove plate.
  */
+/*
+ * The middle of the hallway, on the floor.
+ *
+ * BELOW the ring rather than across it: people standing on a glowing portal
+ * read as decals stuck to it, and people standing in front of one read as
+ * people. The top edge is derived from the ring's own width, so the two can
+ * never drift into each other at any size.
+ *
+ * Nothing in here takes a pointer. The floor is scenery with names on it, and
+ * the only things worth clicking in this room are its doors.
+ */
 .drifters {
   position: absolute;
-  /* Clear of the far alcoves, which reach in to roughly 35%. Somebody standing
-     inside a portal plate is worse than a slightly narrow crowd. */
-  left: 37%;
-  right: 37%;
-  top: 22%;
-  bottom: 8%;
+  /*
+   * The band is derived from the same numbers as the things around it rather
+   * than from percentages picked by eye, so it clears them at EVERY size
+   * instead of at the sizes somebody happened to check. Its right edge stops
+   * half a unit short of where the event center starts (50% + 8.5u), and its
+   * left edge mirrors that.
+   */
+  left: calc(50% - var(--u) * 8.5);
+  right: calc(50% - var(--u) * 8);
+  /* The ring's own radius, plus the label hanging under it, so nobody ever
+     stands on the words "Chat rooms". */
+  top: calc(40% + min(15cqw, var(--u) * 9) + var(--u) * 4);
+  bottom: calc(var(--u) * 4);
   z-index: 4;
+  pointer-events: none;
 }
 
 .drifter {
@@ -916,8 +1003,8 @@
 }
 
 .drifter__face {
-  width: 2.1rem;
-  height: 2.1rem;
+  width: max(1.7rem, calc(var(--u) * 1.35));
+  height: max(1.7rem, calc(var(--u) * 1.35));
   box-shadow: 0 0 0 2px rgba(4, 7, 12, 0.9), 0 8px 18px -6px #000;
 }
 
@@ -926,7 +1013,7 @@
 }
 
 .drifter__name {
-  font-size: 11px;
+  font-size: max(11px, calc(var(--u) * 0.42));
   color: #cfe9f7;
   white-space: nowrap;
   letter-spacing: 0.04em;
@@ -943,21 +1030,19 @@
 }
 
 /* Badges are one gesture away, so the corridor stays a place and not a table. */
+/*
+ * What somebody has earned, under their name.
+ *
+ * Shown rather than hidden behind a hover, because the floor no longer takes a
+ * pointer and because "SOC Analyst" is the one fact worth knowing about a
+ * stranger you are deciding whether to talk to.
+ */
 .drifter__badges {
-  position: absolute;
-  top: calc(100% + 0.25rem);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 120ms ease;
-}
-
-.drifter:hover .drifter__badges,
-.drifter:focus-within .drifter__badges {
-  opacity: 1;
+  gap: 0.1rem;
+  opacity: 0.9;
 }
 
 @keyframes drift {
@@ -1003,7 +1088,7 @@
  * Anything narrower than the lobby's own max width gets the same six doors,
  * stacked.
  *
- * The corridor needs 72rem across and 44rem down. Below either it does not run
+ * The corridor needs 72rem across and 40rem down. Below either it does not run
  * at all, rather than running badly: the alcoves are blocks of text stacked in
  * rem from the floor, and on a screen too small to hold three of them they walk
  * into each other. Chasing that with a dozen breakpoints would be a worse trade
@@ -1012,12 +1097,15 @@
  * The corridor is the nice version, never the only version: a portal somebody
  * cannot reach on a laptop is a war room they cannot join.
  */
-@media (max-width: 71.99rem), (max-height: 43.99rem) {
+@media (max-width: 71.99rem), (max-height: 39.99rem) {
   .hall__scene {
+    container-type: normal;
     aspect-ratio: auto;
+    height: auto;
     min-height: 0;
     max-height: none;
     padding: 1rem 0;
+    --u: 1rem;
   }
 
   .hall__ceiling,
@@ -1587,7 +1675,7 @@
   flex: 1;
 }
 
-/* --- the event centre ---------------------------------------------------- */
+/* --- the event center ---------------------------------------------------- */
 
 .events__head {
   display: flex;
