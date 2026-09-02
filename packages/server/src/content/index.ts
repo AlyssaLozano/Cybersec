@@ -34,6 +34,7 @@ import { SOC_FOUNDATIONS } from './soc-foundations.js';
 import { BLUE_TEAM_FOUNDATIONS } from './blue-team-foundations.js';
 import { AI_SECURITY_PATHWAY } from './ai-security-pathway.js';
 import { RISK_GOVERNANCE_PATHWAY } from './risk-governance-pathway.js';
+import { MALWARE_ANALYSIS } from './malware-analysis.js';
 
 /**
  * NAMING: every package id is a NAME, never a number.
@@ -59,6 +60,7 @@ export const PACKAGES: LearningPackage[] = [
   BLUE_TEAM_FOUNDATIONS,
   AI_SECURITY_PATHWAY,
   RISK_GOVERNANCE_PATHWAY,
+  MALWARE_ANALYSIS,
 ];
 
 /** Every exercise across every package, in curriculum order. */

@@ -445,3 +445,85 @@ and module 11 grades tabletop design, observation, and folding findings back
 into the register rather than the facilitation itself. `rmg.12.4` grades a
 decision made at speed on partial information, which is the readiness the
 specification's Risk Gaming venue actually needs.
+
+## 28. The malware specification's labs need live samples, a sandbox, and a debugger
+
+Its assignments are built on detonating real malware in a sandbox and stepping
+through real samples in a debugger. Neither can be delivered here. Shipping
+working malware to everybody who registers is an unacceptable distribution risk
+whatever the packaging, and a simulated debugger that cannot surprise you
+teaches a confidence the real one removes within a day.
+
+**Done:** `malware-analysis` grades the reading and the judgement instead, over
+the artefacts the war-room sample view actually shows and an analyst actually
+reads: static summaries, disassembly listings, sandbox reports, monitor output,
+proxy and DNS records, and rule text. `mal.2.3` grades the containment decisions
+a real lab is built from, and `mal.4.1` grades breakpoint choice as the question
+it answers, which is the part students get wrong long before the tooling is the
+constraint. `malware-analysis.test.ts` asserts the package stays judgement-only,
+so the decision is visible to whoever tries to add a terminal exercise later.
+
+## 29. The classification table files Conficker as a virus, and the Mirai entry is wrong
+
+The specification lists Conficker as an example of a virus. It spread across
+networks by exploiting a service, with no host program and no user, which is the
+definition of a worm. Melissa is described simply as an email worm, losing the
+macro-virus half that explains how it travelled. The Mirai entry credits the
+botnet with the outages at Dyn, GitHub, and Twitter; the record-setting flood
+against GitHub in 2018 was memcached reflection, with no botnet behind it.
+
+**Done:** `mal.1.2` uses the table as the scenario and makes the three
+corrections the answer, with "every sample belongs in exactly one category" as
+the wrong option, since the deeper problem is the assumption that delivery,
+control, and payload are one question rather than three.
+
+## 30. The worked disassembly listing contradicts its own bytes
+
+The specification prints `68 04120040  PUSH 0x40120204` and `FF15 80200040
+CALL DWORD [0x40208080]`. x86 is little-endian, so those byte sequences encode
+0x40001204 and 0x40002080. Both printed operands are wrong, and the second one
+matters more than it looks: that instruction is an indirect call through an
+import thunk, so a misread address names the wrong API and therefore describes
+the wrong behaviour in a report.
+
+**Done:** `mal.3.2` is built on the error rather than on a corrected listing.
+The student is asked which statements about the listing are true, the byte-order
+statement in reverse is the wrong option, and the habit being taught is that
+where a rendering and the bytes disagree, the bytes are the program.
+
+## 31. Attribution is treated as a student deliverable
+
+The capstone asks for a threat actor profile with a confidence level, and the
+module on indicators presents attribution as a normal output of analysing a
+sample. Every artefact available inside a binary, the language of its strings,
+its build timestamps, its hosting, its code overlap, was chosen by the person
+being identified, and false flags in real operations have taken in analysts with
+better evidence than this. The specification also lists free multi-engine
+scanning services without saying what a submission from a live incident
+discloses.
+
+**Done:** attribution is taught as a bounded skill rather than dropped.
+`mal.6.3` grades the weight of each signal and makes "four weak signals pointing
+the same way add up to a strong conclusion" the wrong option, because the four
+are not independent when one person controls all of them. `mal.6.4` grades
+writing the claim at the confidence it earned, with what would change it.
+`mal.2.4` grades the submission question directly: what an upload makes
+available to others, what the timing tells the operator, and the hash search
+that asks the question without giving anything away.
+
+## 32. The capstone asks for sixty to seventy-five pages, and awards points for speed
+
+This is the limit already recorded against the AI Security and risk
+specifications in items 19 and 27: a rubric cannot honestly mark sixty pages.
+The incident assignment additionally awards five points for speed of analysis,
+which rewards exactly the behaviour that produces a confident wrong answer in
+the first hour of an incident.
+
+**Done:** module 12 grades the reasoning the report would have to contain
+(`mal.12.1` on who reads which part, `mal.12.2` on the executive paragraph,
+`mal.12.3` on turning a finding into a control change with a test) and
+`mal.12.4` is a last pass over the claims that end up in real reports. Speed is
+taught in module 11 as sequencing rather than as haste: `mal.11.1` grades
+getting searchable artefacts to the hunt team within minutes so that scoping
+runs in parallel, and makes "finish the analysis before saying anything" the
+wrong option.

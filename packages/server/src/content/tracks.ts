@@ -101,7 +101,7 @@ export const TRACKS: Track[] = [
       'Go deep on confirmed compromise: preserve evidence, reconstruct exactly what happened, and prove it well enough for a report or a court.',
     audience:
       'People who prefer depth over breadth and are comfortable being the person called at 2am when something is genuinely wrong.',
-    roles: ['Incident Responder', 'DFIR Analyst', 'Forensic Examiner', 'Threat Hunter'],
+    roles: ['Incident Responder', 'DFIR Analyst', 'Forensic Examiner', 'Malware Analyst', 'Threat Hunter'],
     foundations: [
       'linux',
       'regex',
@@ -116,6 +116,7 @@ export const TRACKS: Track[] = [
       { title: 'Evidence Handling and Chain of Custody', summary: 'Acquire and preserve evidence so it survives challenge.', plannedExercises: 14 },
       { title: 'Host Forensics', summary: 'Disk, registry, and filesystem artefacts: what happened on this machine and when.', plannedExercises: 20 },
       { title: 'Memory Forensics', summary: 'Find what only ever existed in RAM, using Volatility.', plannedExercises: 16 },
+      { title: 'Malware Analysis', summary: 'What a suspicious file does and how the answer becomes a detection: methodology, disassembly, runtime analysis, packing, families, command and control, and the report.', packageId: 'malware-analysis' },
       { title: 'Full Investigation', summary: 'Run a multi-host intrusion end to end and write the report.', plannedExercises: 12 },
     ],
     certifications: ['sec-plus', 'gcih', 'btl1', 'gcfa'],
