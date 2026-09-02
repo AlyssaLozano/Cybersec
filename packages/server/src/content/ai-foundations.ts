@@ -1226,14 +1226,21 @@ const MODULE_6_3: Exercise[] = [
     checks: [
       {
         type: 'answer-mentions',
+        /*
+         * Graded on what the answer ADDS. The prompt already says "query",
+         * "confidence score" and "copy", so groups built on those words passed
+         * when the question was pasted back as the answer, which
+         * ai-foundations.test.ts caught. What the student has to supply is the
+         * systematic collection, the training step, and a named control.
+         */
         conceptGroups: [
-          ['quer', 'api call', 'requests'],
-          ['train', 'dataset', 'labelled', 'labeled', 'copy', 'clone', 'surrogate', 'substitute'],
-          ['rate limit', 'rate-limit', 'throttl', 'confidence', 'score', 'quota', 'monitor'],
+          ['systematic', 'many', 'thousands', 'repeatedly', 'enough', 'record each', 'harvest'],
+          ['train', 'dataset', 'labelled', 'labeled', 'clone', 'surrogate', 'substitute'],
+          ['rate limit', 'rate-limit', 'throttl', 'quota', 'rounded', 'withhold', 'alerting', 'without the score'],
         ],
         hint:
-          'Cover all three: how the data is collected, what is done with it, and one control that ' +
-          'makes the attack more expensive.',
+          'Cover all three: collecting the answers systematically, training something on them, and ' +
+          'one named control that makes the attack more expensive.',
       },
     ],
     debrief:
@@ -1692,6 +1699,874 @@ const MODULE_6_4: Exercise[] = [
   },
 ];
 
+// --- Module 6.5: from data to a deployed model -------------------------------
+
+const MODULE_6_5: Exercise[] = [
+  {
+    id: 'aif.5.1',
+    moduleId: 'aif.5',
+    packageId: 'ai-foundations',
+    order: 1,
+    title: 'What each stage of the pipeline decides',
+    kind: 'multiple-choice',
+    goal: 'Know where in the pipeline a given property of a model gets fixed.',
+    prompt:
+      'A model goes from raw data to serving traffic. Which of the following correctly place a ' +
+      'decision at the stage that actually makes it? Select all that apply.',
+    teach: {
+      concept:
+        'Building a model is four stages, and each one fixes something that is expensive to change ' +
+        'later. Knowing which stage owns which property is what lets you say whether a problem can ' +
+        'be fixed this week or needs a retrain.\n\n' +
+        'DATA COLLECTION decides what the model can possibly learn. Anything absent from the corpus ' +
+        'is invisible to the finished model, and any skew in who is represented is baked in before ' +
+        'a single weight moves. TRAINING decides what it actually learned, driven by the objective: ' +
+        'the model minimises the loss it was given, not the outcome you wanted, and the gap between ' +
+        'those two is where most surprising behaviour comes from.\n\n' +
+        'EVALUATION decides what you know about it. A model is not good or bad in the abstract; it ' +
+        'scored a number on a particular held-out set, and everything you claim rests on how ' +
+        'representative that set was. DEPLOYMENT decides what it can reach: which inputs arrive, ' +
+        'what it is allowed to do with the output, and what sits between it and a user. That last ' +
+        'stage is the only one you can usually change quickly, which is why nearly all real ' +
+        'remediation happens there.',
+    },
+    options: [
+      { id: 'a', label: 'What the model can possibly learn is fixed at data collection: what is absent cannot be learned.' },
+      { id: 'b', label: 'What it actually learned is decided by the objective it was trained to minimise, which may not be the outcome you wanted.' },
+      { id: 'c', label: 'What you know about it comes from evaluation, and is only as good as how representative the held-out set was.' },
+      { id: 'd', label: 'What it can reach is decided at deployment, which is usually the only stage you can change quickly.' },
+      { id: 'e', label: 'A skew in the training data can be corrected at deployment by adjusting the system prompt.' },
+    ],
+    hints: [
+      'Four place the decision correctly. One tries to fix a training-time problem at serving time.',
+      'Ask which stage you could redo this afternoon, and which would take weeks.',
+      'If a group is missing from the corpus entirely, what could any amount of prompting do about it?',
+    ],
+    solution:
+      'A, B, C, and D. Each stage fixes something, and the cost of changing it rises the earlier it ' +
+      'sat in the pipeline. E is the wishful one: a system prompt sits in front of a model that has ' +
+      'already learned what it learned, and it can shape tone, refuse categories, and add ' +
+      'instructions, but it cannot supply knowledge the model never saw or unlearn a skew that is ' +
+      'distributed across every weight. Some of it can be mitigated at deployment, by thresholding ' +
+      'or routing to a human, and mitigating is not correcting.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option proposes fixing a training-time property with a runtime instruction.',
+      },
+    ],
+    debrief:
+      'This is the map you use to price a finding. "Change the prompt" is days, "change the ' +
+      'deployment" is weeks, "change the training data" is a quarter and a budget, and saying which ' +
+      'one a problem needs is most of what makes a recommendation useful.',
+    practice: [],
+  },
+  {
+    id: 'aif.5.2',
+    moduleId: 'aif.5',
+    packageId: 'ai-foundations',
+    order: 2,
+    title: 'Why the test set has to be held out',
+    kind: 'multiple-choice',
+    goal: 'Understand data leakage, and why it produces excellent numbers and bad models.',
+    prompt:
+      'A team reports 99% accuracy on their test set, and the model performs poorly in production. ' +
+      'Which of the following could explain it? Select all that apply.',
+    teach: {
+      concept:
+        'Data is split so that the number you report means something. The model learns from the ' +
+        'TRAINING set, choices about it are made using the VALIDATION set, and the TEST set is ' +
+        'touched once, at the end, to produce a figure nobody tuned against.\n\n' +
+        'Leakage is when information from the test set reaches the model, and it is much easier to ' +
+        'do by accident than people expect. Duplicate records across the split mean the model has ' +
+        'already seen the answers. Feature engineering performed before splitting lets statistics ' +
+        'from the test rows influence the training ones. And a feature that would not exist at ' +
+        'prediction time, such as a field only filled in after the outcome is known, produces a ' +
+        'model that is superb in evaluation and useless in production.\n\n' +
+        'The other explanation is distribution shift: the test set fairly measured a world that no ' +
+        'longer exists. Both produce the same symptom, which is a number nobody can reproduce once ' +
+        'the model is live.',
+    },
+    options: [
+      { id: 'a', label: 'Duplicate or near-duplicate records appear in both the training and the test split.' },
+      { id: 'b', label: 'A feature was used that is only available after the outcome is known, so it will not exist at prediction time.' },
+      { id: 'c', label: 'Preprocessing statistics were computed over all the data before splitting it.' },
+      { id: 'd', label: 'Production traffic has drifted away from the distribution the test set was drawn from.' },
+      { id: 'e', label: 'The test set was too small to be worth taking seriously, so 99% is meaningless by definition.' },
+    ],
+    hints: [
+      'Four are real explanations. One rejects the number without knowing anything about the set.',
+      'Three of the four are the same underlying fault with different mechanisms. What is it called?',
+      'Ask which of these you could detect by looking at the data rather than at the model.',
+    ],
+    solution:
+      'A, B, C, and D. The first three are leakage in three of its most common disguises, and the ' +
+      'fourth is drift, which is not leakage at all but produces the same symptom. B is the one ' +
+      'that catches experienced teams: a field that is only populated after the fact makes ' +
+      'prediction trivial in the lab and impossible in production. E is not an explanation, it is a ' +
+      'dismissal: a small test set widens the uncertainty around 99% and does not by itself make ' +
+      'the figure meaningless, and you would need to know its size to say anything at all.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option dismisses the result rather than explaining it, and does so without knowing ' +
+          'how large the set was.',
+      },
+    ],
+    debrief:
+      'When somebody shows you an impressive evaluation number, the first question is not how the ' +
+      'model works. It is how the data was split, and whether anything in the test set could have ' +
+      'reached the training one.',
+    practice: [],
+  },
+  {
+    id: 'aif.5.3',
+    moduleId: 'aif.5',
+    packageId: 'ai-foundations',
+    order: 3,
+    title: 'Fine-tuning, prompting, and retrieval',
+    kind: 'multiple-choice',
+    goal: 'Tell three ways of changing behaviour apart by what they actually alter.',
+    prompt:
+      'A team wants a model to answer questions about their internal documentation. Which of the ' +
+      'following are accurate? Select all that apply.',
+    teach: {
+      concept:
+        'Three things get called "customising the model" and only one of them touches the model.\n\n' +
+        'PROMPTING changes the instructions sent with each request. Nothing about the model is ' +
+        'altered, it is the cheapest thing to change, and it is where most behaviour actually gets ' +
+        'shaped in practice.\n\n' +
+        'RETRIEVAL, usually called RAG, fetches relevant documents at request time and puts them in ' +
+        'the context alongside the question. The model is unchanged; what changed is what it can ' +
+        'see. This is the right answer for internal documentation, because the corpus can be ' +
+        'updated the moment a document changes and the answer can cite its source.\n\n' +
+        'FINE-TUNING continues training on new examples and does alter the weights. It is good at ' +
+        'teaching a FORMAT or a style, and it is a poor and expensive way to teach FACTS, because ' +
+        'the facts get distributed across the weights where they cannot be updated, cited, or ' +
+        'removed. A document that changes next week means retraining; a document that should not ' +
+        'have been included means retraining as well.',
+    },
+    options: [
+      { id: 'a', label: 'Prompting changes nothing about the model; it changes the instructions sent with each request.' },
+      { id: 'b', label: 'Retrieval leaves the model unchanged and changes what it can see at request time.' },
+      { id: 'c', label: 'Fine-tuning alters the weights, and suits teaching a format or style more than teaching facts.' },
+      { id: 'd', label: 'For documentation that changes often, retrieval is easier to keep current than fine-tuning.' },
+      { id: 'e', label: 'Fine-tuning on the documents is the best way to make sure answers can cite their source.' },
+    ],
+    hints: [
+      'Four are accurate. One picks the method that makes citation hardest.',
+      'Ask which method still knows WHERE an answer came from once it has been applied.',
+      'What happens to a fine-tuned fact when the underlying document is corrected next week?',
+    ],
+    solution:
+      'A, B, C, and D. Only fine-tuning touches the weights, and it is the wrong tool for facts that ' +
+      'change. E inverts the citation point: once information is fine-tuned in, it is spread across ' +
+      'the parameters with no record of which document it came from, so the model cannot cite a ' +
+      'source and you cannot remove a document by deleting it. Retrieval keeps the document ' +
+      'identifiable, which is exactly what makes citation and correction possible.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option claims the method that dissolves facts into weights is the best way to cite ' +
+          'their source.',
+      },
+    ],
+    debrief:
+      'The removal question is worth carrying into privacy work. Data that was fine-tuned in cannot ' +
+      'be deleted on request in any meaningful sense, which is a very different position from data ' +
+      'sitting in a retrieval corpus you can drop a row from.',
+    practice: [],
+  },
+  {
+    id: 'aif.5.4',
+    moduleId: 'aif.5',
+    packageId: 'ai-foundations',
+    order: 4,
+    title: 'What retraining actually costs',
+    kind: 'short-answer',
+    goal: 'Say why "we will retrain it" is a bigger sentence than it sounds.',
+    prompt:
+      'A colleague proposes fixing a model problem by retraining. In three or four sentences, say ' +
+      'what that commits the team to beyond the training run itself.',
+    teach: {
+      concept:
+        'Retraining sounds like re-running a command and is a project. The compute is usually the ' +
+        'smallest part of it.\n\n' +
+        'It commits you to DATA WORK first: finding, cleaning, and often labelling the examples that ' +
+        'will change the behaviour, and labelling is slow, expensive, and needs people who ' +
+        'understand the domain. Then to RE-EVALUATION, because a new model is a new model: it has to ' +
+        'be measured all over again, including on the cases the old one handled correctly, since ' +
+        'fixing one behaviour routinely breaks another. Then to a DEPLOYMENT AND ROLLBACK PATH, ' +
+        'because you are replacing something that currently works well enough for production.\n\n' +
+        'And it commits you to the calendar. Between deciding to retrain and serving the new model ' +
+        'there is a period, often weeks, during which the original problem is still live and has to ' +
+        'be mitigated some other way. That interim mitigation is the part nobody plans, and it is ' +
+        'why the deployment-layer fix is so often the right first move even when retraining is the ' +
+        'right eventual one.',
+    },
+    hints: [
+      'The training run is the cheap part. What has to happen before it and after it?',
+      'A new model is not the old model with one thing fixed. What does that mean for testing?',
+      'A good answer names the data and labelling work, the need to re-evaluate everything rather than just the fix, and the gap in time during which the problem is still live.',
+    ],
+    solution:
+      'It commits the team to the data work first: finding and labelling enough examples to actually ' +
+      'change the behaviour, which is slow and needs people who understand the domain rather than ' +
+      'just the model. It then commits them to re-evaluating the whole model rather than the one ' +
+      'fix, because a retrained model can regress on cases the current one gets right, and nobody ' +
+      'finds that out without measuring it. There is also a deployment and rollback path to build, ' +
+      'since this replaces something already serving production traffic. And it commits them to a ' +
+      'period of weeks during which the original problem is still live, so an interim mitigation at ' +
+      'the deployment layer is needed regardless of whether retraining is the right eventual answer.',
+    expectedOutput:
+      'An answer naming the data and labelling effort, full re-evaluation rather than testing only ' +
+      'the fix, and the interim period during which the problem remains live.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['label', 'data work', 'gather', 'clean', 'collect examples', 'annotat'],
+          ['re-evaluat', 'regress', 'measure again', 'whole model', 'test everything', 'break another'],
+          ['weeks', 'meantime', 'interim', 'still live', 'until then', 'in the gap'],
+        ],
+        hint:
+          'Three ideas: the data effort before the run, the re-measurement after it, and what ' +
+          'happens to the problem while all that takes place.',
+      },
+    ],
+    debrief:
+      'Say the interim part out loud whenever retraining is proposed. The question "and what do we ' +
+      'do about it between now and then" is the one that produces a plan rather than an intention.',
+    practice: [],
+  },
+  {
+    id: 'aif.5.5',
+    moduleId: 'aif.5',
+    packageId: 'ai-foundations',
+    order: 5,
+    title: 'Which model is actually serving',
+    kind: 'multiple-choice',
+    goal: 'Understand why a model needs a version and a record, mechanically.',
+    prompt:
+      'An organisation runs several models. Which of the following are true about model versioning? ' +
+      'Select all that apply.',
+    teach: {
+      concept:
+        'A deployed model is a specific artefact: a particular set of weights, produced by a ' +
+        'particular training run, on particular data, served behind a particular preprocessing ' +
+        'step. Change any of those and the behaviour changes, often subtly, and nothing about the ' +
+        'service looks different from outside.\n\n' +
+        'That is why a version is not bureaucracy. Without one you cannot answer the two questions ' +
+        'that matter after anything goes wrong: which artefact produced this output, and what did ' +
+        'it score when it was tested. You also cannot roll back, because rolling back requires ' +
+        'knowing what to roll back to.\n\n' +
+        'The preprocessing step deserves special attention. The model expects inputs prepared ' +
+        'exactly as they were during training, so a pipeline updated independently of the weights ' +
+        'produces a service that is up, fast, and quietly wrong. Versioning the model without ' +
+        'versioning what feeds it solves half a problem.',
+    },
+    options: [
+      { id: 'a', label: 'A deployed model is a specific artefact, and small changes to it alter behaviour invisibly from outside.' },
+      { id: 'b', label: 'Without a version record you cannot say which artefact produced a given output.' },
+      { id: 'c', label: 'The preprocessing pipeline has to be versioned with the weights, or a mismatch produces plausible wrong output.' },
+      { id: 'd', label: 'Rollback requires knowing what the previous known-good version was.' },
+      { id: 'e', label: 'Because the model is deterministic at inference, its version does not need recording.' },
+    ],
+    hints: [
+      'Four are true. One draws the wrong conclusion from a true premise.',
+      'Determinism means the same model gives the same answer. Does it tell you which model answered?',
+      'What breaks if the preprocessing is updated and the weights are not?',
+    ],
+    solution:
+      'A, B, C, and D. The artefact is specific, the record is what lets you attribute an output, ' +
+      'the preprocessing has to move with the weights, and rollback needs a target. E confuses two ' +
+      'different things: a frozen model does give the same answer to the same input, and that says ' +
+      'nothing about WHICH frozen model was loaded when a particular decision was made. Determinism ' +
+      'is precisely why the version matters, because it means the output was fully determined by an ' +
+      'artefact you now need to be able to name.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option argues that determinism removes the need for a version record. Ask what ' +
+          'determinism actually tells you about which artefact ran.',
+      },
+    ],
+    debrief:
+      'The pipeline point is the one that bites in practice. A model restored or updated without ' +
+      'its matching preprocessing does not error, it scores, and the scores are wrong in a way that ' +
+      'takes weeks to notice.',
+    practice: [],
+  },
+];
+
+// --- Module 6.6: the system around the model ---------------------------------
+
+const MODULE_6_6: Exercise[] = [
+  {
+    id: 'aif.6.1',
+    moduleId: 'aif.6',
+    packageId: 'ai-foundations',
+    order: 1,
+    title: 'What the context window is',
+    kind: 'multiple-choice',
+    goal: 'Understand the one buffer everything the model sees has to fit into.',
+    prompt:
+      'Which of the following are true of a context window? Select all that apply.',
+    teach: {
+      concept:
+        'The context window is the maximum number of tokens the model can attend to for a single ' +
+        'request. Everything goes in it: the system prompt, the conversation so far, any retrieved ' +
+        'documents, any tool output, and the question. It is one flat buffer.\n\n' +
+        'Two consequences follow and both matter. First, it is a BUDGET, and things get pushed out ' +
+        'when it fills. Most chat systems drop or summarise the oldest turns, which means an ' +
+        'instruction given early in a long conversation can silently stop being present, and the ' +
+        'model is not withholding it or forgetting it, it genuinely no longer has it.\n\n' +
+        'Second, the model has no memory between requests other than what is in that buffer. A ' +
+        'conversation feels continuous because the whole history is resent every time. Nothing ' +
+        'persists in the model itself, which is why a "conversation" and a "single long prompt" are ' +
+        'closer to the same thing than they appear.',
+    },
+    options: [
+      { id: 'a', label: 'The system prompt, the history, retrieved documents and the question all share the same window.' },
+      { id: 'b', label: 'When it fills, content is dropped or summarised, so an early instruction can stop being present.' },
+      { id: 'c', label: 'Nothing persists between requests except what is resent in the window.' },
+      { id: 'd', label: 'A longer window costs more per request, because the whole thing is processed.' },
+      { id: 'e', label: 'The model remembers earlier conversations even when they are not resent, having learned from them.' },
+    ],
+    hints: [
+      'Four are true. One imagines a memory that does not exist.',
+      'If the model learned from your conversation, what would that mean for every other user of it?',
+      'Ask what is physically sent to the model on the second message of a chat.',
+    ],
+    solution:
+      'A, B, C, and D. It is one shared buffer, it evicts when full, nothing carries over except ' +
+      'what is resent, and it is paid for by the token. E is the most common misconception about ' +
+      'these systems: serving a request does not update any weights, so a model cannot remember ' +
+      'yesterday. What can happen is that a SEPARATE system stores your conversation and resends ' +
+      'parts of it, or that logs are later used to train a future model, and both of those are ' +
+      'decisions somebody made rather than something the model does.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option gives the model a memory across requests that it does not have.',
+      },
+    ],
+    debrief:
+      'The eviction point explains a lot of odd behaviour in long conversations. Rules given at the ' +
+      'start of a very long chat are not being ignored, they have fallen out of the window, which is ' +
+      'also why a safety instruction placed only at the top is not a control.',
+    practice: [],
+  },
+  {
+    id: 'aif.6.2',
+    moduleId: 'aif.6',
+    packageId: 'ai-foundations',
+    order: 2,
+    title: 'System prompt and user text are the same material',
+    kind: 'multiple-choice',
+    goal: 'See why there is no privilege boundary inside a context window.',
+    prompt:
+      'A developer says their system prompt is trusted and user input is untrusted, and that the ' +
+      'model treats them accordingly. Which of the following are accurate? Select all that apply.',
+    teach: {
+      concept:
+        'A system prompt is text placed at the start of the context. Marking it "system" is a ' +
+        'convention of the API, and modern models are trained to weight it more heavily, which is a ' +
+        'tendency rather than an enforcement.\n\n' +
+        'Mechanically it is all one token sequence. There is no privilege bit travelling with each ' +
+        'token, no memory protection, and nothing that stops attention flowing from a later token ' +
+        'to an earlier one or the reverse. That is the whole reason prompt injection works: text ' +
+        'that arrives as data can read as instruction, because at the level the model operates ' +
+        'there is no difference between the two.\n\n' +
+        'This is unlike every boundary a security engineer is used to. A user cannot write to kernel ' +
+        'memory because the hardware refuses; a user CAN influence a system prompt behaviour ' +
+        'because the model has nothing that refuses. Understanding that is the difference between ' +
+        'treating injection as a bug to be patched and treating it as a property of the ' +
+        'architecture to be designed around.',
+    },
+    options: [
+      { id: 'a', label: 'The system prompt and user input become one token sequence with no enforced boundary between them.' },
+      { id: 'b', label: 'Training makes the model weight system instructions more heavily, which is a tendency rather than a guarantee.' },
+      { id: 'c', label: 'This is why text arriving as data can be read as instruction.' },
+      { id: 'd', label: 'It is unlike memory protection, where the hardware actually refuses the crossing.' },
+      { id: 'e', label: 'Placing the instruction in the system role guarantees user text cannot override it.' },
+    ],
+    hints: [
+      'Four are accurate. One claims a guarantee the architecture cannot make.',
+      'Ask what physically prevents attention flowing between the two sections.',
+      'If the system role were a guarantee, prompt injection would not exist.',
+    ],
+    solution:
+      'A, B, C, and D. One sequence, a trained tendency rather than an enforced rule, injection as ' +
+      'the direct consequence, and a useful contrast with real memory protection. E is the belief ' +
+      'that produces vulnerable systems: the system role raises the cost of an override and does ' +
+      'not prevent one, and any design whose safety depends on it being absolute is depending on ' +
+      'something the model cannot provide.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option treats the system role as an enforced boundary rather than a strong ' +
+          'preference.',
+      },
+    ],
+    debrief:
+      'Carry the hardware comparison into design conversations. Engineers understand that a ' +
+      'boundary either is enforced or is not, and this one is not, which usually lands better than ' +
+      'a list of jailbreak examples.',
+    practice: [],
+  },
+  {
+    id: 'aif.6.3',
+    moduleId: 'aif.6',
+    packageId: 'ai-foundations',
+    order: 3,
+    title: 'How retrieval actually works',
+    kind: 'multiple-choice',
+    goal: 'Follow a retrieval request through its steps, mechanically.',
+    prompt:
+      'A support assistant answers from an indexed document corpus. Which of the following describe ' +
+      'what actually happens on a request? Select all that apply.',
+    teach: {
+      concept:
+        'Retrieval augmented generation is four mechanical steps and no magic. Ahead of time, ' +
+        'documents are split into chunks and each chunk is turned into an embedding, a vector ' +
+        'capturing roughly what it is about, and stored.\n\n' +
+        'On a request: the question is embedded the same way; the store is searched for the chunks ' +
+        'whose vectors are nearest to it; those chunks are pasted into the context alongside the ' +
+        'question; and the model generates an answer from the whole assembly.\n\n' +
+        'Two consequences fall straight out of that. The retrieved text enters the context as plain ' +
+        'text, indistinguishable from anything else there, which is why a document containing a ' +
+        'sentence shaped like an instruction is a real problem. And retrieval selects by SIMILARITY ' +
+        'rather than by truth or authority: the nearest chunk is the nearest chunk, whether it is ' +
+        'the current policy or a draft from four years ago that happens to use the same words.',
+    },
+    options: [
+      { id: 'a', label: 'Documents are chunked and embedded ahead of time, and the question is embedded the same way at request time.' },
+      { id: 'b', label: 'The nearest chunks by vector similarity are pasted into the context alongside the question.' },
+      { id: 'c', label: 'Retrieved text arrives in the context as ordinary text, not as a separate protected channel.' },
+      { id: 'd', label: 'Similarity is not authority: an outdated document that uses the right words can be retrieved over the current one.' },
+      { id: 'e', label: 'The model verifies the retrieved documents against its training data and discards ones that conflict.' },
+    ],
+    hints: [
+      'Four describe the mechanism. One describes a fact-checking step that does not exist.',
+      'Ask what would have to be true for a model to know which of two conflicting documents is correct.',
+      'What does "nearest" actually measure?',
+    ],
+    solution:
+      'A, B, C, and D. Chunk, embed, retrieve by similarity, concatenate, generate. E is the step ' +
+      'people assume is there and is not: the model has no mechanism for adjudicating between a ' +
+      'retrieved document and its training, and in practice retrieved context tends to win because ' +
+      'it is right there in the window. That is exactly what makes retrieval useful for current ' +
+      'information and exactly what makes a poisoned corpus effective.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option adds a verification step between retrieval and generation that no such system ' +
+          'performs.',
+      },
+    ],
+    debrief:
+      'Option D is the quiet operational problem. Most retrieval failures in real deployments are ' +
+      'not attacks, they are the assistant confidently citing a document that was superseded in ' +
+      '2023 and never removed from the index.',
+    practice: [],
+  },
+  {
+    id: 'aif.6.4',
+    moduleId: 'aif.6',
+    packageId: 'ai-foundations',
+    order: 4,
+    title: 'What a tool call is',
+    kind: 'multiple-choice',
+    goal: 'Understand how a model that only emits text ends up taking actions.',
+    prompt:
+      'An assistant can look up orders and issue refunds. Which of the following describe how that ' +
+      'works? Select all that apply.',
+    teach: {
+      concept:
+        'A model produces text. It cannot call an API, read a database, or move money. Tool use is ' +
+        'a convention built on top of that limitation, and understanding the convention tells you ' +
+        'exactly where the security boundary is.\n\n' +
+        'The application tells the model, in its context, which tools exist and what arguments they ' +
+        'take. When the model wants one used, it emits structured text naming the tool and the ' +
+        'arguments. THE APPLICATION parses that, decides whether to perform it, performs it, and ' +
+        'puts the result back into the context for the next step.\n\n' +
+        'So every actual action is taken by ordinary application code, and the model only ever ' +
+        'suggests. That is good news, because it means the enforcement point is a normal piece of ' +
+        'software where normal authorisation applies. It is also the thing teams skip: an ' +
+        'application that performs whatever the model emits has delegated its authorisation ' +
+        'decisions to a text predictor that anything in its context window can influence.',
+    },
+    options: [
+      { id: 'a', label: 'The model is told which tools exist and what arguments they take, in its context.' },
+      { id: 'b', label: 'The model emits structured text requesting a tool; it does not execute anything itself.' },
+      { id: 'c', label: 'The application parses that request, decides whether to perform it, and returns the result into the context.' },
+      { id: 'd', label: 'Because the application performs the action, that is where authorisation has to be enforced.' },
+      { id: 'e', label: 'The model authenticates to the refund API directly using credentials it holds.' },
+    ],
+    hints: [
+      'Four describe the convention. One gives the model a capability it does not have.',
+      'What can a next-token predictor physically do other than produce tokens?',
+      'If every action is taken by application code, where does the authorisation check belong?',
+    ],
+    solution:
+      'A, B, C, and D. Declared tools, a structured request, application-side execution, and ' +
+      'therefore application-side authorisation. E is not how any of this works, and the ' +
+      'misconception is dangerous in a specific way: teams who believe the model holds credentials ' +
+      'reason about the problem as though the model were a service account, when the real question ' +
+      'is whether their own code will issue a refund because a sentence in a retrieved document ' +
+      'asked it to.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option has the model holding credentials and calling an API itself, which it cannot ' +
+          'do.',
+      },
+    ],
+    debrief:
+      'This is the most useful thing in the module. The model is never the enforcement point, your ' +
+      'code is, and "the AI issued the refund" always decomposes into an application that performed ' +
+      'an action without checking whether it should.',
+    practice: [],
+  },
+  {
+    id: 'aif.6.5',
+    moduleId: 'aif.6',
+    packageId: 'ai-foundations',
+    order: 5,
+    title: 'Where the model ends',
+    kind: 'short-answer',
+    goal: 'Draw the boundary between the model and the system it sits in.',
+    prompt:
+      'Somebody says an AI assistant leaked customer data. In three or four sentences, explain what ' +
+      'parts of such a system could be responsible, and why "the model leaked it" is rarely the ' +
+      'useful description.',
+    teach: {
+      concept:
+        'Almost everything called an AI incident is a system failure with a model somewhere inside ' +
+        'it. Separating the components is what turns an unactionable sentence into a finding.\n\n' +
+        'A deployed assistant is at least four things. THE MODEL, a frozen function from tokens to ' +
+        'tokens. THE CONTEXT ASSEMBLY, application code deciding what goes into the window: the ' +
+        'system prompt, the history, and any retrieved material. THE RETRIEVAL LAYER, which chooses ' +
+        'documents and enforces, or fails to enforce, whether this user may see them. And THE TOOL ' +
+        'AND OUTPUT LAYER, which performs actions and decides what reaches the user.\n\n' +
+        'Data can leak from three of those four without the model doing anything unusual. Retrieval ' +
+        'that ignores per-user permissions puts another customer record in the window and the model ' +
+        'faithfully reads it out. Context assembly that includes the whole conversation history of ' +
+        'a shared session does the same. A tool that returns more than was asked for does it again. ' +
+        'Only memorisation of training data is genuinely the model, and it is the rarest of the ' +
+        'four. A good answer separates the model from the retrieval or context layer, and names ' +
+        'permissions or what was put into the context as the likelier cause.',
+    },
+    hints: [
+      'List the parts of the system before you decide which one failed.',
+      'If the record was in the context window, the model reading it out is not the failure.',
+      'A good answer distinguishes the model from the retrieval and context assembly around it, and points at permissions or what was placed in the window as the more likely cause.',
+    ],
+    solution:
+      'An assistant is a model plus the code that assembles its context, a retrieval layer that ' +
+      'chooses documents, and a tool and output layer that acts and returns text. If a customer ' +
+      'record reached the user, the most likely cause is that the record reached the CONTEXT: ' +
+      'retrieval that does not filter by the permissions of the person asking, or context assembly ' +
+      'that included history or documents from another session. In that case the model did exactly ' +
+      'what it does, which is read what it was given, and calling it a model leak points ' +
+      'remediation at the one component that behaved normally. The model itself is only genuinely ' +
+      'responsible in the narrower case of memorised training data, which is worth testing for and ' +
+      'is far rarer than a permissions failure in the retrieval path.',
+    expectedOutput:
+      'An answer separating the model from the context assembly and retrieval around it, and ' +
+      'naming permissions or context contents as the more likely cause than the model itself.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['retrieval', 'context', 'assembl', 'window', 'documents chosen', 'history'],
+          ['permission', 'filter', 'authoris', 'authoriz', 'access control', 'per-user', 'entitle'],
+          ['memoris', 'memoriz', 'training data', 'the model itself', 'rarer', 'narrower'],
+        ],
+        hint:
+          'Three ideas: the layers other than the model, the permissions failure that usually ' +
+          'explains it, and the narrower case where the model really is responsible.',
+      },
+    ],
+    debrief:
+      'Insist on the decomposition every time. "The AI did it" is not a finding anybody can fix, ' +
+      'and it is almost always shorthand for a retrieval layer that never checked who was asking.',
+    practice: [],
+  },
+];
+
+// --- Module 6.7: reading a claim about a model -------------------------------
+
+const MODULE_6_7: Exercise[] = [
+  {
+    id: 'aif.7.1',
+    moduleId: 'aif.7',
+    packageId: 'ai-foundations',
+    order: 1,
+    title: 'Ninety-nine per cent accurate',
+    kind: 'multiple-choice',
+    goal: 'Work out what an accuracy figure means when the thing being detected is rare.',
+    prompt:
+      'A detector catches 99 of every 100 malicious files and wrongly flags 1% of benign ones. In a ' +
+      'population of 100,000 files, 100 are malicious. Which of the following are correct? Select ' +
+      'all that apply.',
+    teach: {
+      concept:
+        'Accuracy is close to meaningless when the thing you are looking for is rare, and security ' +
+        'is almost entirely rare things. Work the numbers rather than trusting the percentage.\n\n' +
+        'Here: 100 malicious files, of which the detector catches 99. And 99,900 benign files, of ' +
+        'which it wrongly flags 1%, which is 999. So the alert queue contains 99 + 999 = 1,098 ' +
+        'items, and only 99 of them are real. Roughly nine out of ten alerts are false, from a ' +
+        'detector that is 99% accurate on both classes.\n\n' +
+        'That gap is the base rate at work, and it is why "99% accurate" is a marketing sentence ' +
+        'rather than an engineering one. The number an operator actually cares about is precision: ' +
+        'of the things it flagged, how many were real. Note also what a 1% false positive rate ' +
+        'means at scale: on a million files a day it is ten thousand alerts, which is not a queue, ' +
+        'it is a wall.',
+    },
+    options: [
+      { id: 'a', label: 'It produces about 999 false positives, from the 1% of 99,900 benign files.' },
+      { id: 'b', label: 'The alert queue is roughly 1,098 items, of which 99 are genuinely malicious.' },
+      { id: 'c', label: 'Roughly nine out of ten alerts an operator opens will be false.' },
+      { id: 'd', label: 'A low false positive RATE can still mean an unworkable queue, because it applies to a much larger population.' },
+      { id: 'e', label: 'Because it is 99% accurate, about 99% of its alerts will be genuine threats.' },
+    ],
+    hints: [
+      'Do the arithmetic on both populations separately: 100 malicious, 99,900 benign.',
+      '1% of 99,900 is a bigger number than 99.',
+      'Accuracy is about the files. What the operator experiences is about the alerts.',
+    ],
+    solution:
+      'A, B, C, and D. 999 false positives against 99 true ones gives a queue of 1,098 that is about ' +
+      '91% noise. E is the error the whole exercise exists for: it confuses accuracy, which is ' +
+      'measured over the files, with precision, which is measured over the alerts. When the thing ' +
+      'being detected is rare, the false positives are drawn from a vastly larger pool and swamp ' +
+      'the true ones, however good the percentages look.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option assumes accuracy over the population equals precision over the alerts. Work ' +
+          'out how many alerts there are in total first.',
+      },
+    ],
+    debrief:
+      'Do this arithmetic every time somebody quotes an accuracy figure for a rare event. It takes ' +
+      'thirty seconds and it is the difference between buying a product and buying a queue nobody ' +
+      'can work.',
+    practice: [],
+  },
+  {
+    id: 'aif.7.2',
+    moduleId: 'aif.7',
+    packageId: 'ai-foundations',
+    order: 2,
+    title: 'Precision against recall',
+    kind: 'multiple-choice',
+    goal: 'Choose which error to prefer, knowing you cannot avoid both.',
+    prompt:
+      'You are tuning a detector and can move its threshold. Which of the following are accurate? ' +
+      'Select all that apply.',
+    teach: {
+      concept:
+        'Two numbers describe a detector and they pull against each other. PRECISION is, of the ' +
+        'things it flagged, how many were real: high precision means a quiet, trustworthy queue. ' +
+        'RECALL is, of the real things, how many it flagged: high recall means few misses.\n\n' +
+        'The threshold trades one for the other. Make it stricter and precision rises while recall ' +
+        'falls: fewer alerts, more misses. Loosen it and the reverse happens. There is no setting ' +
+        'that maximises both, and a vendor quoting one number without the other is quoting the ' +
+        'flattering half.\n\n' +
+        'Which to prefer is a business decision, not a technical one, and it depends entirely on the ' +
+        'cost of each error. For ransomware detection a miss is catastrophic and a false alarm ' +
+        'costs an analyst ten minutes, so recall wins. For an automated account lockout a false ' +
+        'positive locks out a real user mid-shift, so precision wins. The mistake is not picking ' +
+        'wrong, it is not noticing that a choice is being made at all: leaving the default is ' +
+        'choosing whatever the vendor thought was reasonable for somebody else.',
+    },
+    options: [
+      { id: 'a', label: 'Precision is how many flagged items were real; recall is how many real items were flagged.' },
+      { id: 'b', label: 'Tightening the threshold usually raises precision and lowers recall.' },
+      { id: 'c', label: 'Which one to favour depends on the relative cost of a miss against a false alarm.' },
+      { id: 'd', label: 'Leaving the default threshold is still a choice, made by somebody who did not know your costs.' },
+      { id: 'e', label: 'A good enough model can maximise both at once, so the tradeoff is a sign of a weak model.' },
+    ],
+    hints: [
+      'Four are accurate. One denies that the tradeoff exists.',
+      'Ask what happens to the misses when you make a detector fussier.',
+      'For ransomware, which error would you rather make? For locking out a surgeon?',
+    ],
+    solution:
+      'A, B, C, and D. The definitions, the direction of the tradeoff, the cost-based choice, and ' +
+      'the fact that a default is a decision somebody else made. E is wrong in an interesting way: a ' +
+      'better model does shift the whole curve outward, so you get more of both than a worse model ' +
+      'would, and at any fixed model the tradeoff along the threshold remains. Believing it can be ' +
+      'eliminated is how teams end up buying products on a single headline number.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option claims a sufficiently good model removes the tradeoff between the two errors.',
+      },
+    ],
+    debrief:
+      'When somebody quotes one of these numbers, ask for the other. A detector described only by ' +
+      'its recall is being described by whoever wanted it to sound good.',
+    practice: [],
+  },
+  {
+    id: 'aif.7.3',
+    moduleId: 'aif.7',
+    packageId: 'ai-foundations',
+    order: 3,
+    title: 'What a benchmark score tells you',
+    kind: 'multiple-choice',
+    goal: 'Read a leaderboard number for what it supports and what it does not.',
+    prompt:
+      'A vendor cites a strong score on a public benchmark. Which of the following are accurate? ' +
+      'Select all that apply.',
+    teach: {
+      concept:
+        'A benchmark is a fixed set of questions with known answers. A score on one supports exactly ' +
+        'one claim: this model did well on those questions, under those conditions, at that time.\n\n' +
+        'Three things weaken the leap from there to your use case. CONTAMINATION: public benchmarks ' +
+        'end up in training corpora, and a model that has seen the answers scores well without ' +
+        'having the ability being measured, which is the same fault as data leakage wearing a ' +
+        'different hat. DISTRIBUTION: your documents, your users and your vocabulary are not the ' +
+        'benchmark, and the gap can be enormous in a specialist domain. And SELECTION: the vendor ' +
+        'chose which benchmark to quote, from many, after seeing all the results.\n\n' +
+        'None of that makes benchmarks useless. They are a reasonable first filter for shortlisting ' +
+        'and a terrible basis for a decision. The evidence that supports a decision is an evaluation ' +
+        'you ran, on your data, on the task you actually care about, which is more work and is the ' +
+        'only thing that answers the question you have.',
+    },
+    options: [
+      { id: 'a', label: 'It supports a claim about those questions under those conditions, and not directly about your use case.' },
+      { id: 'b', label: 'Public benchmarks can end up in training data, so a high score may reflect having seen the answers.' },
+      { id: 'c', label: 'The vendor chose which benchmark to quote after seeing all the results.' },
+      { id: 'd', label: 'An evaluation on your own data and task is what actually supports a procurement decision.' },
+      { id: 'e', label: 'A benchmark score is worthless and should be ignored entirely.' },
+    ],
+    hints: [
+      'Four are accurate. One overcorrects from scepticism into dismissal.',
+      'Ask what a benchmark is genuinely useful for, even knowing all its problems.',
+      'Contamination is the same underlying fault as something from the pipeline module. Which one?',
+    ],
+    solution:
+      'A, B, C, and D. Narrow claim, contamination risk, selection by the seller, and your own ' +
+      'evaluation as the thing that actually decides. E is the overcorrection: benchmarks are a ' +
+      'perfectly reasonable first filter for deciding which two or three models are worth the ' +
+      'expense of evaluating properly. Treating them as worthless leaves you with no way to ' +
+      'shortlist at all, and treating them as decisive leaves you buying whichever vendor optimised ' +
+      'hardest for the leaderboard.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option moves from healthy scepticism to dismissing benchmarks entirely.',
+      },
+    ],
+    debrief:
+      'Contamination is the pipeline module leakage lesson again, at internet scale. Any time a ' +
+      'model is tested on data it might have trained on, the number stops measuring ability and ' +
+      'starts measuring memory.',
+    practice: [],
+  },
+  {
+    id: 'aif.7.4',
+    moduleId: 'aif.7',
+    packageId: 'ai-foundations',
+    order: 4,
+    title: 'Interrogate the claim',
+    kind: 'short-answer',
+    goal: 'Ask the questions that turn a marketing number into evidence.',
+    prompt:
+      'A vendor says their model is 99.9% accurate at detecting fraudulent transactions. In three or ' +
+      'four sentences, say what you would ask before believing it means anything for you.',
+    teach: {
+      concept:
+        'The number is not a lie and it is not evidence. Turning one into the other takes three or ' +
+        'four questions, and asking them is a large part of what a technical person contributes to ' +
+        'a procurement conversation.\n\n' +
+        'Ask about the BASE RATE and the resulting queue: fraud is rare, so what are the precision ' +
+        'and recall, and how many alerts a day does that produce at our volume? Ask what DATA it was ' +
+        'measured on: their held-out set or ours, and how similar is their population to our ' +
+        'customers? Ask what COUNTS as accurate: is a transaction correctly declined the same event ' +
+        'as one correctly approved, and are they weighting a class that is 99.9% of the traffic? ' +
+        'And ask WHEN it was measured, since fraud patterns move and a model measured a year ago ' +
+        'has been drifting since.\n\n' +
+        'A good answer reaches for precision, recall, or the false positive volume rather than ' +
+        'accepting accuracy, asks whose data the figure came from, and asks about the alert load ' +
+        'the deployment would actually produce.',
+    },
+    hints: [
+      'The word accuracy is doing a lot of work here. What would you rather be told?',
+      'Fraud is rare. What does that do to the alert queue, whatever the percentage is?',
+      'A good answer asks for precision and recall or the false positive volume, asks whose data the number was measured on, and asks what the daily alert load would be at your volume.',
+    ],
+    solution:
+      'I would ask for precision and recall rather than accuracy, because fraud is rare and a model ' +
+      'that approves everything is already 99.9% accurate on a population where one transaction in ' +
+      'a thousand is fraudulent. Then what that means in practice at our volume: how many alerts a ' +
+      'day would this produce, and how many of them would be false, since that is the number that ' +
+      'decides whether the team can work the queue at all. I would ask whose data it was measured ' +
+      'on and how similar their population is to our customers, because a figure from a different ' +
+      'merchant profile tells me very little. And I would ask when it was measured and how they ' +
+      'monitor for drift, because fraud patterns change faster than most models are retrained.',
+    expectedOutput:
+      'An answer asking for precision and recall or the false positive volume instead of accuracy, ' +
+      'asking whose data produced the figure, and asking about the alert load at real volume.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['precision', 'recall', 'false positive', 'false alarm'],
+          ['rare', 'base rate', 'one in a thousand', 'approves everything', 'imbalanc'],
+          ['whose data', 'their data', 'our data', 'our customers', 'population', 'measured on'],
+        ],
+        hint:
+          'Three ideas: the numbers you want instead of accuracy, why rarity makes accuracy ' +
+          'flattering, and whose data the figure came from.',
+      },
+    ],
+    debrief:
+      'None of these questions require you to know anything about their model, which is the point. ' +
+      'They are questions about measurement, and being the person in the room who asks them is a ' +
+      'reputation worth having early.',
+    practice: [],
+  },
+];
+
 // --- the package ------------------------------------------------------------
 
 export const AI_FOUNDATIONS: LearningPackage = {
@@ -1710,6 +2585,10 @@ export const AI_FOUNDATIONS: LearningPackage = {
     'Recognise adversarial examples, data poisoning, backdoors, and model extraction from their symptoms',
     'Identify prompt injection, in-context attacks, and retrieval poisoning in production traffic',
     'Sort injection defences into normalising, pattern, and structural, and say what each can and cannot do',
+    'Place a decision at the pipeline stage that makes it, and price the fix accordingly',
+    'Tell fine-tuning, prompting, and retrieval apart by what each one actually changes',
+    'Describe the context window, tool calling, and retrieval mechanically, and say where the enforcement point is',
+    'Work out what an accuracy figure means when the thing being detected is rare',
   ],
   prerequisites: ['linux-fundamentals'],
   modules: [
@@ -1748,6 +2627,36 @@ export const AI_FOUNDATIONS: LearningPackage = {
       summary:
         'Prompt injection, in-context attacks, encoding bypasses, and retrieval poisoning: ending with your first live probe.',
       exercises: MODULE_6_4,
+    },
+    {
+      id: 'aif.5',
+      packageId: 'ai-foundations',
+      order: 5,
+      title: 'From data to a deployed model',
+      summary:
+        'What each stage of the pipeline decides and how expensive it is to change: leakage, the ' +
+        'difference between fine-tuning and retrieval, what retraining really costs, and why a model needs a version.',
+      exercises: MODULE_6_5,
+    },
+    {
+      id: 'aif.6',
+      packageId: 'ai-foundations',
+      order: 6,
+      title: 'The system around the model',
+      summary:
+        'The context window as one flat buffer, why the system prompt is not a boundary, how ' +
+        'retrieval and tool calls actually work, and where the model ends and your code begins.',
+      exercises: MODULE_6_6,
+    },
+    {
+      id: 'aif.7',
+      packageId: 'ai-foundations',
+      order: 7,
+      title: 'Reading a claim about a model',
+      summary:
+        'Base rates and why 99% accurate produces a queue that is 91% noise, precision against ' +
+        'recall, what a benchmark supports, and the questions that turn a vendor number into evidence.',
+      exercises: MODULE_6_7,
     },
   ],
 };

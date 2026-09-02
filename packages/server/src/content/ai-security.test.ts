@@ -260,9 +260,9 @@ describe('the AI packages are registered and sized as claimed', () => {
     expect(ids).toContain('ai-security');
   });
 
-  it('AI Foundations has 26 exercises across 4 modules', () => {
-    expect(AI_FOUNDATIONS.modules).toHaveLength(4);
-    expect(AI_FOUNDATIONS.modules.reduce((n, m) => n + m.exercises.length, 0)).toBe(26);
+  it('AI Foundations has 40 exercises across 7 modules', () => {
+    expect(AI_FOUNDATIONS.modules).toHaveLength(7);
+    expect(AI_FOUNDATIONS.modules.reduce((n, m) => n + m.exercises.length, 0)).toBe(40);
   });
 
   it('AI Security has 20 exercises across 5 modules', () => {
