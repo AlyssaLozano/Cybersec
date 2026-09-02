@@ -1249,6 +1249,518 @@ const MODULE_4: Exercise[] = [
   },
 ];
 
+// --- module ir.5: timeline and root cause ------------------------------------
+
+const MODULE_IR_5: Exercise[] = [
+  {
+    id: 'ir.5.1',
+    moduleId: 'ir.5',
+    packageId: PKG,
+    order: 1,
+    title: 'Put the privileged actions in order',
+    kind: 'terminal',
+    goal: 'Build the spine of a timeline out of the events that required privilege.',
+    prompt:
+      'Pull every command that was run through sudo on rmg-web-02, in the order the log recorded them.',
+    teach: {
+      concept:
+        'A timeline is not a list of everything that happened. It is the shortest ordered sequence that explains how the incident got from nothing to now, and the fastest way to build its spine is to start with the actions that needed privilege, because those are the ones that changed the machine.\n\nsudo records the account, the working directory, and the exact command line, and it is written in time order already. Read the whole set before interpreting any of it: the entries that turn out to be routine administration are what let you recognise the ones that are not.',
+      syntax: 'grep PATTERN FILE',
+      examples: [
+        {
+          command: "grep 'session opened' /var/log/auth.log | tail -n 5",
+          explains: 'The other spine of a timeline: when sessions started, rather than what was run inside them.',
+        },
+      ],
+    },
+    hints: [
+      'Every sudo line that records a command contains the same literal marker.',
+      'Print the lines rather than counting them. There are few enough to read in full.',
+    ],
+    solution: "grep 'COMMAND=' /var/log/auth.log",
+    expectedOutput: 'Five sudo commands, in time order.',
+    checks: [
+      {
+        type: 'output-line-count',
+        count: 5,
+        hint: 'There are five sudo command entries in the log.',
+      },
+      {
+        type: 'output-contains',
+        text: 'useradd',
+        hint: 'One of them creates an account and must be in your output.',
+      },
+    ],
+    debrief:
+      'Two of those five are ordinary administration and three are the incident: an account created, that account given sudo, and then that account archiving the exports directory. Your timeline now has three fixed points and you have not opened a forensic tool.',
+    practice: [],
+  },
+  {
+    id: 'ir.5.2',
+    moduleId: 'ir.5',
+    packageId: PKG,
+    order: 2,
+    title: 'Find the moment access was gained',
+    kind: 'terminal',
+    goal: 'Locate the first successful authentication from the hostile source.',
+    prompt:
+      'Show the FIRST successful login from 203.0.113.55. One line.',
+    teach: {
+      concept:
+        'Every incident has a moment where the attacker stopped being outside and started being inside, and finding it is what turns a pile of alerts into a story. Everything before it is attempts; everything after it is activity you have to account for.\n\nThe log is in time order, so the earliest matching entry is simply the first one that comes back. Narrowing to successes and then taking the head of the result is the whole technique. Getting this timestamp right matters more than almost anything else you will do, because every other question in the investigation is asked relative to it.',
+      syntax: 'grep SUCCESS FILE | grep SOURCE | head -n 1',
+      examples: [
+        {
+          command: "grep 'Accepted' /var/log/auth.log | tail -n 1",
+          explains: 'The opposite end: the most recent successful login on the host, whoever it was.',
+        },
+      ],
+    },
+    hints: [
+      'Narrow to successful logins, then to the address, then take the first line.',
+      'sshd writes "Accepted" when authentication succeeds.',
+    ],
+    solution: "grep 'Accepted' /var/log/auth.log | grep '203.0.113.55' | head -n 1",
+    expectedOutput: 'A password login as testuser at 10:14:22.',
+    checks: [
+      {
+        type: 'output-line-count',
+        count: 1,
+        hint: 'You want one line: the earliest success from that address.',
+      },
+      {
+        type: 'output-contains',
+        text: '10:14:22',
+        hint: 'The first success from that address happened at 10:14:22.',
+      },
+      {
+        type: 'output-contains',
+        text: 'testuser',
+        hint: 'The account that was first compromised should be named in the line.',
+      },
+    ],
+    debrief:
+      '10:14:22, as testuser, with a password. That is the boundary of your incident. Everything testuser did after that time is suspect, and everything it did before is probably a real person doing their job.',
+    practice: [],
+  },
+  {
+    id: 'ir.5.3',
+    moduleId: 'ir.5',
+    packageId: PKG,
+    order: 3,
+    title: 'Measure how long they were in',
+    kind: 'terminal',
+    goal: 'Establish first contact, which is what dwell time is measured from.',
+    prompt:
+      'Show the earliest line in auth.log mentioning 203.0.113.55, whatever kind of line it is.',
+    teach: {
+      concept:
+        'Dwell time is how long the attacker was present before anybody noticed, and it is one of the few numbers an executive will remember from your report. It needs two timestamps: first contact, and detection.\n\nFirst contact is not the same as first success. The earliest line involving the source is usually a failure or a probe, and it is the honest start of the story because it is the first moment the host and the attacker interacted. Reporting dwell from the successful login instead quietly shortens the incident and makes detection look better than it was.',
+      syntax: 'grep SOURCE FILE | head -n 1',
+      examples: [
+        {
+          command: "grep '10.20.9.15' /var/log/auth.log | head -n 1",
+          explains: 'The same first-contact question for the backup server, which is the benign comparison.',
+        },
+      ],
+    },
+    hints: [
+      'Do not filter by event type this time. You want the earliest line of any kind.',
+      'The file is in time order, so the first match is the earliest.',
+    ],
+    solution: "grep '203.0.113.55' /var/log/auth.log | head -n 1",
+    expectedOutput: 'A probe at 09:12:03, an hour before the successful login.',
+    checks: [
+      {
+        type: 'output-line-count',
+        count: 1,
+        hint: 'One line: the earliest mention of that address.',
+      },
+      {
+        type: 'output-contains',
+        text: '09:12:03',
+        hint: 'First contact from that address was at 09:12:03.',
+      },
+    ],
+    debrief:
+      'First contact at 09:12, first success at 10:14, first privileged action at 10:22. An hour of brute force against a host that did not lock anybody out and did not alert anybody. That hour is the finding, not the intrusion.',
+    practice: [],
+  },
+  {
+    id: 'ir.5.4',
+    moduleId: 'ir.5',
+    packageId: PKG,
+    order: 4,
+    title: 'Root cause, not symptom',
+    kind: 'short-answer',
+    goal: 'State the cause somebody can fix, rather than the event everybody noticed.',
+    prompt:
+      'The incident is being written up. In three or four sentences, state the root cause of this intrusion, and say why the exfiltration is not the answer.',
+    teach: {
+      concept:
+        'Root cause is the condition whose absence would have prevented the incident, and it is almost never the thing people noticed first. The exfiltration is the last event in the chain and the one that caused the alarm; fixing it means nothing, because it was made possible by everything upstream.\n\nWalk the chain backwards. Data left the host because an archive was staged. The archive was staged because an account had sudo. That account existed because a compromised account created it. That account was compromised because a password was guessed over an hour of unimpeded attempts. So the causes worth writing down are the ones that allowed that hour: password authentication exposed with no rate limiting and no lockout, and no alert on repeated failure. Everything after that follows.\n\nA good answer names the guessable password or the unlimited attempts as the entry, notes the absence of detection or alerting on the failures, and says explicitly that the exfiltration was the consequence rather than the cause.',
+    },
+    hints: [
+      'Walk the chain backwards from the upload and keep asking what made the previous step possible.',
+      'Stop when you reach something that, if it had been different, would have prevented everything after it.',
+      'A good answer names password guessing over an hour of unthrottled attempts, the lack of any alert on those failures, and says the exfiltration is the consequence rather than the cause.',
+    ],
+    solution:
+      'The root cause is that an internet-facing SSH service accepted unlimited password attempts against a valid account, and nothing alerted on an hour of failures from a single external address, so the password was eventually guessed at 10:14. Everything after that follows from it: the compromised account had sudo, so it created a second account, gave that account sudo, and used it to archive the exports directory and upload it. The exfiltration is the last link in the chain and the one that triggered the alarm, which is exactly why it is not the root cause: blocking that upload would have left the same account, the same access, and the same hour of undetected guessing in place. The fixes that matter are rate limiting or key-only authentication on SSH, and detection on repeated authentication failure.',
+    expectedOutput:
+      'An answer naming the unthrottled password guessing and the absent alerting as the cause, and stating that the exfiltration is a consequence rather than the cause.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['password', 'guess', 'brute', 'credential'],
+          ['no alert', 'nothing alerted', 'undetected', 'not detected', 'no lockout', 'rate limit', 'unlimited', 'unthrottled'],
+          ['consequence', 'last link', 'follows from', 'not the root', 'symptom', 'end of the chain'],
+        ],
+        hint:
+          'Three ideas: how they got in, what let it continue unnoticed, and why the upload is the consequence rather than the cause.',
+      },
+    ],
+    debrief:
+      'Notice which recommendations fall out of that answer: rate limiting and alerting. Neither of them mentions the archive, the account, or the upload, which is how you know you have reached a cause rather than a symptom.',
+    practice: [],
+  },
+  {
+    id: 'ir.5.5',
+    moduleId: 'ir.5',
+    packageId: PKG,
+    order: 5,
+    title: 'Say what you cannot establish',
+    kind: 'short-answer',
+    goal: 'State the limits of your evidence, before somebody else finds them.',
+    prompt:
+      'Your timeline is built entirely from auth.log, syslog and the nginx logs on the host itself. In three or four sentences, say what those sources cannot tell you.',
+    teach: {
+      concept:
+        'Every incident report contains claims the evidence does not support, unless somebody deliberately writes down the limits. Doing it yourself is not modesty, it is self-defence: the person who finds the gap after you published is going to doubt everything else you wrote.\n\nThree limits apply here and they are worth naming precisely. Host logs are on the host, so anybody with root could have edited or deleted them, which means absence of evidence is weak. Rotation has already discarded whatever came before the retained window, so you cannot say when this really started. And the logs record that an upload happened, not what was in it: proving whether patient data actually left needs network capture or the destination, neither of which you have.\n\nA good answer names at least the log integrity problem, the retention or rotation boundary, and the inability to confirm what was actually transferred.',
+    },
+    hints: [
+      'Ask who could have changed these files, and with what privilege.',
+      'Ask what happened to the logs older than the ones you read.',
+      'A good answer names that root could have altered the logs, that rotation limits how far back you can see, and that the logs show an upload occurred but not what it contained.',
+    ],
+    solution:
+      'These are all logs held on the compromised host, and the attacker had root, so they could have removed or altered entries and I cannot treat an absence of evidence as evidence of absence. Rotation also bounds what I can see: anything older than the retained generations is gone, so I can say when activity starts in the RETAINED logs but not when it truly began. And the auth log records that a transfer command ran, not what was transferred, so I cannot confirm from the host alone that patient data actually reached the external address. Establishing that would need network capture, egress logs from the firewall, or the destination itself, and until then the transfer should be treated as probable rather than proven.',
+    expectedOutput:
+      'An answer naming the possibility that logs were altered on a host the attacker had root on, the rotation or retention boundary, and the inability to confirm what was actually transferred.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['root', 'altered', 'edited', 'deleted', 'tamper', 'modified'],
+          ['rotation', 'rotated', 'retained', 'retention', 'older than', 'how far back'],
+          ['what was transferred', 'what it contained', 'not what', 'network capture', 'egress', 'confirm', 'contents'],
+        ],
+        hint:
+          'Three limits: who could have changed the logs, how far back they go, and what the transfer record does not prove.',
+      },
+    ],
+    debrief:
+      'The last one changes what you can say to a regulator. "Data was exfiltrated" and "a transfer of an archive of exports was initiated to an external address" are different claims, and only one of them is supported by what you have.',
+    practice: [],
+  },
+  {
+    id: 'ir.5.6',
+    moduleId: 'ir.5',
+    packageId: PKG,
+    order: 6,
+    title: 'Which source answers which question',
+    kind: 'multiple-choice',
+    goal: 'Choose the right evidence source for the question being asked.',
+    prompt:
+      'You have four questions still open. Which of the following pair a question with a source that can actually answer it? Select all that apply.',
+    teach: {
+      concept:
+        'Half of investigative speed is knowing where an answer lives before you go looking. Sources are not interchangeable, and pointing the wrong one at a question wastes an hour and often produces a confident wrong answer.\n\nThe authentication log answers who logged in, from where, and when. The sudo record answers what was run with privilege. The web server logs answer what was requested over HTTP and what the server returned. The process table and socket table answer what is happening RIGHT NOW, and they are volatile: reboot the host and they are gone.\n\nWhat none of them answers is the contents of a network transfer, which needs capture at the network layer, and none of them tells you whether the same actor is on other hosts, which needs the same questions asked elsewhere. Knowing what a source cannot answer is as useful as knowing what it can.',
+      },
+    options: [
+      { id: 'a', label: 'When the attacker first authenticated successfully: the authentication log.' },
+      { id: 'b', label: 'What was run with root privilege: the sudo entries in the authentication log.' },
+      { id: 'c', label: 'Whether the upload is still running right now: the process and socket tables on the host.' },
+      { id: 'd', label: 'What paths were probed over HTTP: the web server access log.' },
+      { id: 'e', label: 'What was inside the uploaded archive: the authentication log.' },
+    ],
+    hints: [
+      'Four pair correctly. One asks a log to know something it never saw.',
+      'For each source, ask what it physically records at the moment it writes a line.',
+      'The authentication log records that a command ran. Does it record what the command sent?',
+    ],
+    solution:
+      'A, B, C, and D. Each names a source that genuinely observed the thing being asked about. E is the one to reject, and it is the mistake that produces overstated reports: the authentication log recorded that a transfer command was executed, and it never had visibility of a single byte of what that command sent. Answering that question needs network capture, firewall egress records, or the destination, and if none of those exist then the honest answer is that it cannot currently be established.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option expects a log to know the contents of a transfer it only observed being launched.',
+      },
+    ],
+    debrief:
+      'Option C is worth one more thought: the process and socket tables answer that question only until the host is rebooted. Volatile sources have to be captured before you contain, which is the whole reason the containment module puts memory acquisition first.',
+    practice: [],
+  },
+];
+
+// --- module ir.6: the written record -----------------------------------------
+
+const MODULE_IR_6: Exercise[] = [
+  {
+    id: 'ir.6.1',
+    moduleId: 'ir.6',
+    packageId: PKG,
+    order: 1,
+    title: 'Preserve the evidence before you interpret it',
+    kind: 'terminal',
+    goal: 'Capture command output to a file, so the evidence survives the shell session.',
+    prompt:
+      'Save the sudo command entries from auth.log into a file called sudo-evidence.txt in your home directory.',
+    teach: {
+      concept:
+        'Anything that exists only in your scrollback is not evidence. Terminals close, sessions time out, and the host you are reading may be about to be rebuilt. Redirecting output to a file makes the result something you can attach to a ticket and something a second analyst can check.\n\nThe `>` operator sends output to a file instead of the screen, creating it or overwriting it. `>>` appends instead, which is what you want for a running log you add to through a shift. Write to your own home directory rather than into the evidence you are reading: writing to the host you are investigating changes it, and on a real engagement the capture belongs somewhere else entirely.',
+      syntax: 'COMMAND > FILE',
+      examples: [
+        {
+          command: 'ps aux > /home/student/process-snapshot.txt',
+          explains: 'Capturing volatile state, which is the case where this matters most: the process table will not exist after a reboot.',
+        },
+      ],
+      flags: [
+        { flag: '>', means: 'Write output to a file, replacing what was there.' },
+        { flag: '>>', means: 'Append output to a file, keeping what was there.' },
+      ],
+    },
+    hints: [
+      'The command that finds the sudo entries has not changed. Send its output somewhere.',
+      'A single greater-than sign writes to a file.',
+    ],
+    solution: "grep 'COMMAND=' /var/log/auth.log > sudo-evidence.txt",
+    expectedOutput: 'No output on screen: it went into the file.',
+    checks: [
+      {
+        type: 'fs-exists',
+        path: '/home/student/sudo-evidence.txt',
+        exists: true,
+        kind: 'file',
+        hint: 'The file should exist in your home directory afterwards.',
+      },
+    ],
+    debrief:
+      'Note that nothing appeared on screen, which is correct and disconcerting the first time. Check the file rather than assuming: a redirect that silently captured an error message instead of your results is a mistake you only find later.',
+    practice: [],
+  },
+  {
+    id: 'ir.6.2',
+    moduleId: 'ir.6',
+    packageId: PKG,
+    order: 2,
+    title: 'Write the running log entry',
+    kind: 'short-answer',
+    goal: 'Record an action so somebody else can reconstruct what you did and why.',
+    prompt:
+      'At 11:47 you isolated rmg-web-02 from the network, after capturing memory, and failed the portal over to rmg-web-01. In two or three sentences, write the entry for the incident running log.',
+    teach: {
+      concept:
+        'A running log is written as you go, not reconstructed afterwards, and it is the artefact that turns a chaotic afternoon into a defensible account. Four things go in every entry: the TIME, the ACTION taken, the REASON at the time, and the EFFECT observed.\n\nThe reason matters more than people expect. Decisions during an incident are made on incomplete information, and they will be reviewed by people who know how it turned out. An entry that records why the call looked right at 11:47, with what was known at 11:47, is the difference between a defensible decision and one that looks reckless in hindsight.\n\nWrite in plain past tense, name yourself, and do not editorialise. A good entry here names the time, the isolation, the memory capture that preceded it, and what happened to the service.',
+    },
+    hints: [
+      'The facts are in the question. What the log entry has to add is the part nobody else can reconstruct later.',
+      'Say why this was the right call at 11:47, on what was known at 11:47.',
+      'A good entry states that memory was captured before isolation, gives the reason it was done in that order, and records what you observed happening to the attacker session and to the service.',
+    ],
+    solution:
+      'At 11:47 I captured a memory image from rmg-web-02 and then isolated the host at the network layer, leaving it powered on. The reason was that an active session from 203.0.113.55 was still established and a staged archive of patient exports was present, so stopping further transfer was urgent, while a shutdown would have destroyed the volatile evidence needed to establish what had been accessed. The patient portal failed over to rmg-web-01 and remained available; the attacker session dropped at the point of isolation.',
+    expectedOutput:
+      'An entry giving the time, the memory capture before isolation, the reason it was done then, and the effect on the service and the session.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        /*
+         * These groups deliberately do NOT grade the facts in the prompt.
+         * The prompt already states the time, the isolation, the memory
+         * capture and the failover, so a rubric built on those passes when a
+         * student pastes the question back, which is exactly what
+         * incident-response.test.ts caught. What the entry has to ADD is the
+         * reasoning and the observed outcome, so that is what is graded.
+         */
+        conceptGroups: [
+          ['memory', 'ram', 'volatile', 'image'],
+          ['because', 'reason', 'so that', 'in order to', 'would have destroyed', 'urgent'],
+          ['session dropped', 'lost access', 'remained available', 'attacker session', 'stayed up'],
+        ],
+        hint:
+          'The entry has to add what the prompt does not: why the call was made at that moment, and what you observed happening as a result.',
+      },
+    ],
+    debrief:
+      'The sentence that will matter in three months is the middle one, the reason. Nobody disputes what you did; they dispute whether it was reasonable, and only the contemporaneous note answers that.',
+    practice: [],
+  },
+  {
+    id: 'ir.6.3',
+    moduleId: 'ir.6',
+    packageId: PKG,
+    order: 3,
+    title: 'What goes in the ticket, and what does not',
+    kind: 'multiple-choice',
+    goal: 'Separate the working record from the finished report.',
+    prompt:
+      'You are keeping an incident ticket during a live response. Which of the following belong in it? Select all that apply.',
+    teach: {
+      concept:
+        'The ticket is the working record: contemporaneous, complete, and messy. The report is the finished account: edited, structured, and written afterwards for somebody who was not there. Confusing them costs you either way. A ticket that is written like a report loses the raw detail that makes it credible; a report that reads like a ticket does not get read at all.\n\nInto the ticket goes every action with a timestamp, every command run, every artefact captured and where it was put, and the decisions with their reasoning. Also into the ticket: things you tried that found nothing, because that is what stops the next person repeating them.\n\nWhat does NOT belong is speculation stated as fact, and the names of individuals framed as blame. Write "the account testuser authenticated from 203.0.113.55", not "Dana clicked a phishing link", unless you have established it. Tickets are disclosable, they get read by people outside the team, and an unsupported accusation in one is a serious problem separately from the incident.',
+    },
+    options: [
+      { id: 'a', label: 'Every action taken, with the time it was taken.' },
+      { id: 'b', label: 'The exact commands run, so a second analyst can reproduce the result.' },
+      { id: 'c', label: 'Checks that found nothing, so the next person does not repeat them.' },
+      { id: 'd', label: 'Where each captured artefact was stored, and who has it.' },
+      { id: 'e', label: 'A working theory about which employee was careless, recorded as the cause.' },
+    ],
+    hints: [
+      'Four belong. One states something unestablished about a named person.',
+      'Ask who else reads this document, and when.',
+      'Negative results are worth writing down for the same reason positive ones are.',
+    ],
+    solution:
+      'A, B, C, and D. Times, commands, negative results, and artefact custody are exactly what the working record is for, and the negative results in C are the most commonly omitted and among the most useful. E is the one to keep out. A theory about a named individual, written as though it were established, is disclosable, is frequently wrong, and does damage that survives the correction. Record what the evidence shows about the ACCOUNT, and leave the question of how the credential was obtained open until something supports an answer.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option records an unestablished theory about a named person as though it were the cause.',
+      },
+    ],
+    debrief:
+      'Write about accounts and hosts, not about people, until you can prove otherwise. It costs nothing, it is more accurate, and it keeps the investigation about the evidence.',
+    practice: [],
+  },
+  {
+    id: 'ir.6.4',
+    moduleId: 'ir.6',
+    packageId: PKG,
+    order: 4,
+    title: 'Hand over mid-incident',
+    kind: 'short-answer',
+    goal: 'Write the handover that lets the next shift continue without losing an hour.',
+    prompt:
+      'Your shift ends with the host isolated, memory captured, and the question of whether the database was reached still open. In three or four sentences, write the handover for the analyst taking over.',
+    teach: {
+      concept:
+        'Most incidents outlive a shift, and the handover is where they most often go wrong: the next analyst re-derives what you already knew, or worse, assumes something is done because nobody said it was not.\n\nA handover has three parts and they are all short. WHERE IT STANDS: what is established, and what has been done to the environment. WHAT IS OPEN: the specific questions still unanswered, phrased as questions rather than as topics. WHAT IS NEXT: the single most useful thing to do first, and anything time-critical, including who has been told and who has not.\n\nBe explicit about what is NOT done. "Memory captured, not yet analysed" prevents an hour of somebody assuming otherwise, and it is the sentence most often left out.',
+    },
+    hints: [
+      'Three parts: where it stands, what is still open, and what to do next.',
+      'Say what has been done to the environment, because that changes what the next person is looking at.',
+      'A good handover states the containment already performed, names the open question about the database, and gives a concrete next action.',
+    ],
+    solution:
+      'Where it stands: rmg-web-02 is isolated at the network layer and still powered on, a memory image was captured at 11:47 and has not yet been analysed, and the portal is running on rmg-web-01. Established so far: the account testuser was compromised at 10:14 from 203.0.113.55, a second account called sysmon was created through sudo and used to archive the exports directory and start an upload. Still open: whether the database itself was reached, and whether any of the archive actually left the network. Next: check the database logs for access from the host during the 10:14 to 11:47 window, and ask the network team for egress records to 198.51.100.60 for the same period. Legal and the privacy lead have been notified; clinical staff have not.',
+    expectedOutput:
+      'A handover stating the containment already performed, what has been established, the open question about the database or the transfer, and a concrete next action.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['isolated', 'contained', 'captured', 'powered on', 'not yet analysed'],
+          ['still open', 'unanswered', 'whether the database', 'not yet known', 'unknown', 'unclear'],
+          ['next', 'check', 'ask', 'request', 'egress', 'database logs'],
+        ],
+        hint:
+          'Three parts: what has been done to the environment, what question is still open, and the concrete next step.',
+      },
+    ],
+    debrief:
+      'The most valuable line in that handover is "captured and not yet analysed". Everything else could be reconstructed from the ticket; that one prevents the incoming analyst from believing a job is finished when it has not started.',
+    practice: [],
+  },
+  {
+    id: 'ir.6.5',
+    moduleId: 'ir.6',
+    packageId: PKG,
+    order: 5,
+    title: 'Make the evidence defensible',
+    kind: 'short-answer',
+    goal: 'Say what has to be true of an artefact for it to survive challenge.',
+    prompt:
+      'The memory image may end up in front of a regulator or a court. In three or four sentences, say what has to be recorded about it for it to be worth anything.',
+    teach: {
+      concept:
+        'An artefact is only as good as the account of where it came from. Chain of custody is that account, and it is boring, contemporaneous paperwork rather than anything technical.\n\nFour things have to be recorded. WHAT was collected, precisely, including which host and which volume. WHEN and by WHOM, with the time taken from a clock somebody can vouch for. HOW, meaning the tool and its version, because a known-buggy acquisition tool is a real challenge to your evidence. And INTEGRITY: a cryptographic hash computed at collection, so anybody can later demonstrate the copy they are looking at is the copy you took.\n\nThen every subsequent transfer is logged: who held it, who they gave it to, when. A gap in that record does not prove anything was altered. It means nobody can prove it was not, which is enough to lose the argument.\n\nA good answer names the hash, the collector and time, and the unbroken record of who has held it since.',
+    },
+    hints: [
+      'Think about what somebody hostile would ask about this file in a year.',
+      'One of the four items is what lets anybody prove the file has not changed since collection.',
+      'A good answer names a hash taken at collection, who collected it and when, and the record of everyone who has held it since.',
+    ],
+    solution:
+      'It needs a record of exactly what was collected and from which host, who collected it and at what time, and the tool and version used to acquire it, because the acquisition method itself can be challenged. It also needs a cryptographic hash computed at the moment of collection, so that anybody can later demonstrate the image they are examining is bit-for-bit the one that was taken. From that point every transfer has to be logged: who held it, who they passed it to, and when, with no unexplained gaps. A break in that record does not prove the image was altered, it just means nobody can prove it was not, and that is usually enough for the evidence to be set aside.',
+    expectedOutput:
+      'An answer naming a hash computed at collection, the collector and time, the acquisition method, and an unbroken record of custody.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['hash', 'checksum', 'sha', 'md5', 'bit-for-bit', 'integrity'],
+          ['who collected', 'collector', 'by whom', 'at what time', 'when it was taken'],
+          ['transfer', 'custody', 'who held', 'handed', 'passed', 'gap'],
+        ],
+        hint:
+          'Three ideas: what proves the image is unchanged, who took it and when, and the record of everyone who has held it since.',
+      },
+    ],
+    debrief:
+      'None of this is technical work and all of it is the difference between an image that proves something and an expensive file nobody can rely on. Do it at collection time: it cannot be added convincingly afterwards.',
+    practice: [],
+  },
+  {
+    id: 'ir.6.6',
+    moduleId: 'ir.6',
+    packageId: PKG,
+    order: 6,
+    title: 'Close it honestly',
+    kind: 'short-answer',
+    goal: 'Write a closing summary that says what was established and what was not.',
+    prompt:
+      'The incident is being closed. In three or four sentences, write the summary paragraph, covering what happened, what the impact was, and what remains uncertain.',
+    teach: {
+      concept:
+        'The closing summary is the paragraph that gets quoted for years, in board papers, in regulatory correspondence, and by whoever writes the next report. It has to be short, specific, and honest about its own limits.\n\nThree things go in it. WHAT HAPPENED, as a sequence with times, in language a non-specialist can follow. WHAT THE IMPACT WAS, stated as what is established rather than what is feared. And WHAT IS STILL UNCERTAIN, which is the part most often dropped and the part that protects everybody, because a summary that reads as complete will be treated as complete.\n\nResist two temptations. Do not inflate: describing a probable transfer as a confirmed breach commits the organisation to a position the evidence may not support. Do not minimise either: an hour of undetected brute force against an internet-facing service is a real failure and saying so is what gets it fixed.',
+    },
+    hints: [
+      'Three parts: the sequence with times, the established impact, and what remains unknown.',
+      'Be careful with the word confirmed. What do you actually have evidence for?',
+      'A good summary gives the sequence from the guessed password through to the upload, states the impact in terms of what is established, and names what could not be determined.',
+    ],
+    solution:
+      'Between 09:12 and 10:14 on 15 August an external address brute-forced SSH on the patient portal server and guessed the password for the testuser account. Using that access it created a second account with sudo, archived the portal exports directory, and started an upload of that archive to an external host; the host was isolated at 11:47, roughly ninety minutes after the first successful login. What is established is that patient export data was collected and staged on the host and that a transfer was initiated; what could not be determined from the available logs is how much of it reached the destination, or whether the database itself was accessed, because the host logs record the transfer starting and not its contents. The failures that allowed it were unlimited password attempts on an internet-facing service and no alerting on repeated authentication failure, both of which are being remediated.',
+    expectedOutput:
+      'A summary giving the sequence with times, the established impact, and an explicit statement of what could not be determined.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['brute', 'guessed', 'password attempts', 'authentication failure'],
+          ['staged', 'archive', 'upload', 'transfer', 'exports'],
+          ['could not be determined', 'not established', 'uncertain', 'unknown', 'unable to confirm', 'not confirmed'],
+        ],
+        hint:
+          'Three parts: how they got in, what happened to the data, and what you could not establish.',
+      },
+    ],
+    debrief:
+      'Read your last sentence again and check it does not claim more than the evidence supports. The summary is the one part of the report that will be quoted without its context, so it has to survive being read alone.',
+    practice: [],
+  },
+];
+
 export const INCIDENT_RESPONSE: LearningPackage = {
   id: PKG,
   order: 5,
@@ -1302,6 +1814,26 @@ export const INCIDENT_RESPONSE: LearningPackage = {
       title: 'Communication and closure',
       summary: 'Legal, the executives, the timeline, and the playbook for the next one.',
       exercises: MODULE_4,
+    },
+    {
+      id: 'ir.5',
+      packageId: PKG,
+      order: 5,
+      title: 'Timeline and root cause',
+      summary:
+        'Order the privileged actions, find the moment access was gained, measure dwell, separate ' +
+        'cause from symptom, and state what the evidence cannot show.',
+      exercises: MODULE_IR_5,
+    },
+    {
+      id: 'ir.6',
+      packageId: PKG,
+      order: 6,
+      title: 'The written record',
+      summary:
+        'Preserving output, the running log, what belongs in a ticket, handing over mid-incident, ' +
+        'chain of custody, and closing honestly.',
+      exercises: MODULE_IR_6,
     },
   ],
 };
