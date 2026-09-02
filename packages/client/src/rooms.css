@@ -1,0 +1,348 @@
+/*
+ * War room floor: finding a room, and choosing a chair on it.
+ *
+ * The seat grid is deliberately not a picture of a room. An accurate floor plan
+ * looks impressive and reads badly: people scan a list far faster than they
+ * scan a diagram, and the thing somebody needs in the ninety seconds before a
+ * session is which chairs are free and what each one is for.
+ */
+
+.roomboard,
+.seatpicker,
+.identityform {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.roomboard__head,
+.seatpicker__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  border-bottom: 1px solid var(--rule, #2a3138);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.roomboard__head h1,
+.seatpicker__head h2 {
+  margin: 0 0 0.15rem;
+  font-size: 1.35rem;
+}
+
+.roomboard__meta,
+.seatpicker__meta {
+  margin: 0;
+  color: var(--muted, #8b97a3);
+  font-size: 0.85rem;
+}
+
+.roomboard__tabs {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.roomboard__tabs button {
+  background: transparent;
+  border: 1px solid var(--rule, #2a3138);
+  color: inherit;
+  padding: 0.35rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.roomboard__tabs button.is-on {
+  background: var(--accent-soft, #1d2a35);
+  border-color: var(--accent, #4c9be8);
+}
+
+.seatpicker__count {
+  text-align: right;
+  line-height: 1.2;
+}
+
+.seatpicker__count strong {
+  display: block;
+  font-size: 1.5rem;
+  /* Seat counts sit above one another as the chart refreshes. */
+  font-variant-numeric: tabular-nums;
+}
+
+.seatpicker__count span,
+.seatpicker__scope {
+  color: var(--muted, #8b97a3);
+  font-size: 0.8rem;
+}
+
+.seatpicker__scope {
+  margin: 0 0 1rem;
+}
+
+/* --- the chart ----------------------------------------------------------- */
+
+.seatgrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 0.6rem;
+}
+
+.seat__button {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  gap: 0.3rem;
+  text-align: left;
+  padding: 0.75rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--rule, #2a3138);
+  background: var(--panel, #161b21);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.seat__button:disabled {
+  cursor: default;
+}
+
+.seat--free .seat__button:hover,
+.seat--free .seat__button:focus-visible {
+  border-color: var(--accent, #4c9be8);
+  outline: none;
+}
+
+/* Taken and shut look different on purpose: one is somebody else's chair, the
+   other is a chair nobody can have yet. */
+.seat--taken .seat__button {
+  opacity: 0.75;
+}
+
+.seat--shut .seat__button {
+  opacity: 0.45;
+}
+
+.seat--mine .seat__button {
+  border-color: var(--good, #57b894);
+  background: var(--accent-soft, #17241f);
+}
+
+.seat__role {
+  font-weight: 600;
+}
+
+.seat__remit {
+  color: var(--muted, #8b97a3);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.seat__status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--muted, #8b97a3);
+}
+
+.seat--mine .seat__status {
+  color: var(--good, #57b894);
+}
+
+/* --- rooms list ---------------------------------------------------------- */
+
+.roomlist {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.roomcard__button {
+  width: 100%;
+  display: grid;
+  gap: 0.25rem;
+  text-align: left;
+  padding: 0.8rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--rule, #2a3138);
+  background: var(--panel, #161b21);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.roomcard__button:hover,
+.roomcard__button:focus-visible {
+  border-color: var(--accent, #4c9be8);
+  outline: none;
+}
+
+.roomcard__title {
+  font-weight: 600;
+}
+
+.roomcard__meta,
+.roomcard__seats {
+  color: var(--muted, #8b97a3);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- forms --------------------------------------------------------------- */
+
+.roomform,
+.identityform {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 34rem;
+}
+
+.roomform label,
+.identityform label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.roomform select,
+.roomform input,
+.identityform input {
+  padding: 0.45rem 0.55rem;
+  border-radius: 4px;
+  border: 1px solid var(--rule, #2a3138);
+  background: var(--panel, #161b21);
+  color: inherit;
+  font: inherit;
+}
+
+.roomform__brief {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--muted, #8b97a3);
+}
+
+.roomform__seats {
+  font-size: 0.78rem;
+}
+
+.roomform__visibility {
+  border: 1px solid var(--rule, #2a3138);
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.roomform__visibility label {
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0.5rem;
+  line-height: 1.4;
+}
+
+.avatarpick {
+  border: 1px solid var(--rule, #2a3138);
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.avatarpick label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.avatarpick label.is-on {
+  border-color: var(--accent, #4c9be8);
+  background: var(--accent-soft, #1d2a35);
+}
+
+.avatarpick input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.avatarpick__name {
+  font-size: 0.78rem;
+  color: var(--muted, #8b97a3);
+}
+
+.avatar {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: var(--rule, #2a3138);
+  display: inline-block;
+  flex: none;
+}
+
+.joincode {
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+}
+
+.joincode__body {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.joincode__body input {
+  flex: 1 1 10rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--rule, #2a3138);
+  background: var(--panel, #161b21);
+  color: inherit;
+  font: inherit;
+}
+
+/* --- notes --------------------------------------------------------------- */
+
+.seat-note {
+  font-size: 0.85rem;
+  color: var(--muted, #8b97a3);
+  margin: 0.75rem 0 0;
+}
+
+.seat-note--bad {
+  color: var(--bad, #e0705f);
+}
+
+.seat-note--warn {
+  color: var(--warn, #d9a441);
+}
+
+.linkish {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent, #4c9be8);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seat__button,
+  .roomcard__button {
+    transition: none;
+  }
+}
