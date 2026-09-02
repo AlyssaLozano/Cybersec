@@ -59,7 +59,7 @@ export function Terminal({
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Keep the newest output in view, the way a real terminal does.
   useEffect(() => {
@@ -81,6 +81,9 @@ export function Terminal({
     onPrefillConsumed?.();
   }, [prefill, onPrefillConsumed]);
 
+  /** True once the buffer holds more than one line, e.g. a here-document. */
+  const multiline = value.includes('\n');
+
   const submit = () => {
     const trimmed = value.trim();
     if (trimmed === '' || busy || disabled) return;
@@ -90,12 +93,23 @@ export function Terminal({
     onRun(trimmed);
   };
 
-  const handleKey = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
+  const handleKey = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    // Enter runs, Shift+Enter adds a line. That is the wrong way round for a
+    // text box and the right way round for a prompt, which is what this is:
+    // every command is one line until somebody opens a here-document, and
+    // making the common case need a modifier would tax every student to serve
+    // the few exercises that author a rule file.
+    if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       submit();
       return;
     }
+    if (event.key === 'Enter') return;
+
+    // History navigation only makes sense while the buffer is a single line.
+    // Inside a here-document the arrows have to move the cursor, or the body
+    // cannot be edited.
+    if (multiline) return;
 
     if (event.key === 'ArrowUp') {
       event.preventDefault();
@@ -171,11 +185,12 @@ export function Terminal({
         {busy && <div className="sys">running…</div>}
       </div>
 
-      <div className="input-row">
+      <div className={`input-row${multiline ? ' multiline' : ''}`}>
         <Prompt cwd={cwd} />
-        <input
+        <textarea
           ref={inputRef}
           value={value}
+          rows={multiline ? Math.min(value.split('\n').length + 1, 16) : 1}
           spellCheck={false}
           autoComplete="off"
           autoCapitalize="off"
@@ -187,6 +202,12 @@ export function Terminal({
           onKeyDown={handleKey}
         />
       </div>
+      {multiline && (
+        <div className="input-hint">
+          Shift+Enter for a new line, Enter to run. A here-document ends when you type its
+          terminator on a line of its own.
+        </div>
+      )}
     </div>
   );
 }

@@ -29,6 +29,15 @@ export interface ShellOptions {
   cwd: string;
   user?: string;
   groups?: string[];
+  /**
+   * Input piped into the first stage of the pipeline.
+   *
+   * Carries a here-document body, so that `cat > rules.yar <<'EOF'` has
+   * something for `cat` to read. Empty for an ordinary command, which is what
+   * makes a bare `cat` with no operands and no here-doc print nothing rather
+   * than hanging the way a real one would.
+   */
+  stdin?: string;
 }
 
 /** Commands that write to the filesystem, so the overlay needs saving. */
@@ -90,7 +99,7 @@ export function runLine(input: string, options: ShellOptions): ShellResult {
   };
 
   let mutated = false;
-  let carried = '';
+  let carried = options.stdin ?? '';
   let last: CommandResult = { stdout: '', stderr: '', exitCode: 0 };
   const stderrParts: string[] = [];
 

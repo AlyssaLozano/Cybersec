@@ -468,7 +468,8 @@ code {
   color: var(--accent);
 }
 
-.input-row input {
+.input-row input,
+.input-row textarea {
   flex: 1;
   background: transparent;
   border: 0;
@@ -478,7 +479,42 @@ code {
   padding: 0;
 }
 
-.input-row input:disabled {
+/* Once the buffer is multi-line the prompt moves above it, so the body starts at
+   the true left margin.
+   Kept inline on a single line and stacked here for a reason that is not
+   cosmetic: with the prompt beside it, every continuation line is pushed right
+   by the width of "student@rmg-web-02:~$ ", and a student writing a YARA or
+   Sigma rule aligns their indentation against an edge that is not the edge of
+   the file. Indentation is content in both those formats. */
+.input-row.multiline {
+  display: block;
+}
+
+.input-row.multiline .ps1 {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.input-row.multiline textarea {
+  display: block;
+  width: 100%;
+}
+
+.input-row textarea {
+  resize: none;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+.input-row input:disabled,
+.input-row textarea:disabled {
+  color: var(--text-faint);
+}
+
+.input-hint {
+  padding: 0 16px 10px;
+  background: var(--bg-input);
+  font-size: 12px;
   color: var(--text-faint);
 }
 
