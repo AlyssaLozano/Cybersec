@@ -92,7 +92,7 @@ describe('Networking structure', () => {
   it('gives every drill a unique id', () => {
     const ids = EXERCISES.flatMap((exercise) => exercise.practice.map((drill) => drill.id));
     expect(new Set(ids).size).toBe(ids.length);
-    expect(ids.length).toBe(195);
+    expect(ids.length).toBe(200);
   });
 
   it('satisfies the content rules the catalogue validator enforces', () => {

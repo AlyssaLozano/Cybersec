@@ -1841,7 +1841,108 @@ const MODULE_4_9: Exercise[] = [
     ],
     debrief:
       'This is the single most common false positive in beaconing detection, and the reason a detection engineer tunes on direction and destination reputation rather than on interval regularity alone.',
-    practice: [],
+    practice: [
+      drill(
+        'net.9.4-p1',
+        `A third regular pattern turns up: this host contacts ${BACKUP_IP} on port 22 at exactly the same time every night, moving several megabytes. In two or three sentences, say whether it is an incident and what makes you sure.`,
+        {
+          note:
+            'A pattern with every superficial marker of exfiltration: outbound, regular, and high volume. The distinguishing facts are that the far end is a named internal host in the management range and somebody can point at the schedule that causes it, which is the same test as the parent exercise applied to a case where volume points the wrong way.',
+        },
+        'It is not an incident. It is outbound and it moves far more data than the exfiltration did, so volume and direction alone would flag it, but the far end is a named internal backup server in the management range and the schedule is somebody\'s configured backup job that they can show you. The test that separates it from the real finding is not the shape of the traffic, it is whether the destination can be accounted for.',
+        [
+          {
+            type: 'answer-mentions',
+            conceptGroups: [
+              ['not an incident', 'not', 'benign', 'legitimate', 'no', 'fine'],
+              ['internal', 'named', 'backup', 'management', 'known', 'accounted'],
+              ['schedule', 'configur', 'job', 'explain', 'owner', 'point at', 'documented'],
+            ],
+            hint: 'Give a verdict, then say what about the far end settles it rather than what the traffic looks like.',
+          },
+        ],
+      ),
+      drill(
+        'net.9.4-p2',
+        'Your beaconing detection is built on "regular interval, low jitter". In two or three sentences, say what it would flag in this capture and what that tells you about the rule.',
+        {
+          note:
+            'Running the rule in your head against real data before shipping it. Both regular patterns here match the logic, and the loudest match is the harmless one, so the rule as written creates work and buries the finding.',
+        },
+        'It would flag both regular patterns: the monitoring poll every 60 seconds and the command-and-control check-in every 300 seconds. The monitoring one produces far more matches, so an operator working the output by volume meets the false positive first and repeatedly, and learns to dismiss this alert before ever reaching the real one. That tells me interval regularity is a necessary condition and not a sufficient one, and the rule needs direction and destination reputation before it is worth shipping.',
+        [
+          {
+            type: 'answer-mentions',
+            conceptGroups: [
+              ['both', 'two', 'monitoring', 'and the', 'flag both'],
+              ['more', 'louder', 'volume', 'first', 'dismiss', 'buried', 'fatigue'],
+              ['direction', 'destination', 'reputation', 'not sufficient', 'necessary', 'add', 'narrow'],
+            ],
+            hint: 'Say what the rule catches, which match an operator meets most, and what the rule needs added.',
+          },
+        ],
+      ),
+      drill(
+        'net.9.4-p3',
+        `The beacon interval is changed from a fixed ${C2_INTERVAL} seconds to a random interval between 200 and 400 seconds. In two or three sentences, say what that does to a detection built on regularity, and what you would use instead.`,
+        {
+          note:
+            'Jitter is the standard evasion and it is cheap for the attacker. What survives it is that the outbound contact keeps happening at all, to a destination nobody can name, which is a property of the conversation rather than of its timing.',
+        },
+        'Jitter defeats a detection built on low variance in the gap, because the intervals no longer cluster and the statistical signature the rule looks for disappears. What does not change is that this host keeps initiating outbound connections to an external address with no reverse record and no owner, over a long period, which is a property of the conversation rather than of its timing. I would detect on that instead: outbound connections from a server to unaccounted external destinations, ranked by how long the relationship persists rather than by how regular it is.',
+        [
+          {
+            type: 'answer-mentions',
+            conceptGroups: [
+              ['jitter', 'random', 'variance', 'defeat', 'no longer', 'disappear', 'evade'],
+              ['outbound', 'initiat', 'external', 'unaccounted', 'no reverse', 'unknown', 'destination'],
+              ['instead', 'persist', 'over time', 'repeated', 'relationship', 'detect on', 'rank'],
+            ],
+            hint: 'Say what the evasion breaks, what it cannot change, and what you would key the rule on.',
+          },
+        ],
+      ),
+      drill(
+        'net.9.4-p4',
+        'Write the two sentences you would put in a ticket to escalate the outbound pattern, for an on-call responder who has not seen this capture.',
+        {
+          note:
+            'The written deliverable. A responder woken at 3am needs the host, the destination, the shape of the evidence and why it is not the monitoring agent, in the fewest words that survive being read on a phone.',
+        },
+        'rmg-web-02 (10.20.6.40) has been making outbound connections to 203.0.113.55 on port 443 at a fixed 300-second interval, eight times so far, beginning at 11:05 and roughly two minutes after a successful SSH login from that same address. This is not the monitoring traffic: that is inbound from 10.20.9.40 on port 9100 and accounted for, whereas 203.0.113.55 is external, has no reverse DNS record, and no owner has been identified.',
+        [
+          {
+            type: 'answer-mentions',
+            conceptGroups: [
+              ['10.20.6.40', 'rmg-web-02', 'this host', 'the web server'],
+              ['203.0.113.55', 'outbound', 'external', '443'],
+              ['not', 'monitoring', 'inbound', '10.20.9.40', 'accounted', 'differs', 'unlike'],
+            ],
+            hint: 'Name the host, name the destination and the pattern, and pre-empt the obvious "is this the monitoring agent" question.',
+          },
+        ],
+      ),
+      drill(
+        'net.9.4-p5',
+        'A colleague says the monitoring traffic should be excluded from the capture before analysis, since it is known-benign noise. In two or three sentences, say whether you agree.',
+        {
+          note:
+            'The tuning question applied to evidence rather than to a rule. Excluding noise from a live rule is sound; excluding it from a stored capture destroys the baseline you need to argue that the other pattern is abnormal.',
+        },
+        'For a live detection rule, yes, excluding an accounted-for internal source is exactly the right tuning. For the capture itself, no: the monitoring traffic is the baseline that lets me show what normal regular automation on this host looks like, and without it I cannot demonstrate that the outbound pattern is different in kind rather than just different in my judgement. Filter it at analysis time with a tcpdump expression, and keep it in the stored evidence.',
+        [
+          {
+            type: 'answer-mentions',
+            conceptGroups: [
+              ['rule', 'detection', 'live', 'tuning', 'agree', 'yes'],
+              ['baseline', 'normal', 'compare', 'contrast', 'evidence', 'show', 'demonstrate'],
+              ['keep', 'not remove', 'filter at', 'analysis', 'retain', 'stored', 'no'],
+            ],
+            hint: 'Separate the rule from the evidence, and say what the noise is worth as a baseline.',
+          },
+        ],
+      ),
+    ],
   },
   {
     id: 'net.9.5',

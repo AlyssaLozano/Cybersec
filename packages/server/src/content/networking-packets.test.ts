@@ -37,7 +37,19 @@ const TERMINAL_EXERCISES = PACKET_MODULES.flatMap((module) => module.exercises).
   (exercise) => exercise.kind === 'terminal',
 );
 
-const DRILLS = PACKET_MODULES.flatMap((module) => module.exercises).flatMap((exercise) =>
+/**
+ * Drills whose solution is a command.
+ *
+ * net.9.4 is a written exercise and its drills are written too, so their
+ * "solution" is prose. Running that through the shell asserts nothing. They are
+ * graded instead by written-practice.test.ts, which submits them as answers.
+ */
+const DRILLS = TERMINAL_EXERCISES.flatMap((exercise) =>
+  (exercise.practice ?? []).map((drill) => ({ exercise: exercise.id, drill })),
+);
+
+/** Every drill in these modules, whatever kind its parent is. */
+const ALL_DRILLS = PACKET_MODULES.flatMap((module) => module.exercises).flatMap((exercise) =>
   (exercise.practice ?? []).map((drill) => ({ exercise: exercise.id, drill })),
 );
 
@@ -83,14 +95,14 @@ describe('every drill solution passes its own checks', () => {
 
 describe('drills teach rather than only test', () => {
   it('every packet drill carries a teaching note', () => {
-    const untaught = DRILLS.filter(({ drill }) => !drill.teach?.note);
+    const untaught = ALL_DRILLS.filter(({ drill }) => !drill.teach?.note);
     expect(untaught.map(({ drill }) => drill.id)).toEqual([]);
   });
 
   it('a teaching note says something, rather than restating the prompt', () => {
     // Sixty characters is not a quality bar, but it does catch a note that was
     // added to satisfy the test above and left as a stub.
-    const thin = DRILLS.filter(({ drill }) => (drill.teach?.note.length ?? 0) < 60);
+    const thin = ALL_DRILLS.filter(({ drill }) => (drill.teach?.note.length ?? 0) < 60);
     expect(thin.map(({ drill }) => drill.id)).toEqual([]);
   });
 });
