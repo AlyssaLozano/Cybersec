@@ -561,6 +561,19 @@ function session(
   exchanges: number,
   bytesEach: number,
   /**
+   * Cleartext the first client packet carries, e.g. a TLS server name or an SSH
+   * client banner.
+   *
+   * Everything else in this capture is a header. These two fields are the only
+   * payload a real sensor can read on an encrypted session, and they are what
+   * signature rules on 443 and 22 actually match, so without them a Suricata
+   * exercise could only ever key on addresses and ports and would teach a
+   * distorted version of the tool.
+   */
+  clientBanner = '',
+  /** Cleartext the first server packet carries, e.g. an SSH server banner. */
+  serverBanner = '',
+  /**
    * Seconds between exchanges.
    *
    * Exists because "how long were they in" is a question worth grading, and it
@@ -581,12 +594,19 @@ function session(
   // Each end's sequence number advances by the bytes it has sent, and a SYN or
   // FIN consumes one. An exercise asks students to prove which end opened a
   // connection; that is only provable if the numbers behave.
+  let clientSaid = false;
+  let serverSaid = false;
+
   const fromClient = (flags: string, len: number) => {
-    pkt(t, 'tcp', client, sport, server, port, flags, len, clientSeq, clientWindow);
+    const info = !clientSaid && len > 0 ? clientBanner : '';
+    if (info !== '') clientSaid = true;
+    pkt(t, 'tcp', client, sport, server, port, flags, len, clientSeq, clientWindow, info);
     clientSeq += len + (flags.includes('S') || flags.includes('F') ? 1 : 0);
   };
   const fromServer = (flags: string, len: number) => {
-    pkt(t, 'tcp', server, port, client, sport, flags, len, serverSeq, serverWindow);
+    const info = !serverSaid && len > 0 ? serverBanner : '';
+    if (info !== '') serverSaid = true;
+    pkt(t, 'tcp', server, port, client, sport, flags, len, serverSeq, serverWindow, info);
     serverSeq += len + (flags.includes('S') || flags.includes('F') ? 1 : 0);
   };
 
@@ -664,14 +684,29 @@ function buildCapture(): string {
   // Staff using the portal this host serves.
   for (const staff of STAFF) {
     for (let n = 0; n < between(4, 7); n += 1) {
-      session(at(10, 0) + between(0, 6000) + rand(), staff.ip, LOCAL_IP, 443, between(3, 9), 1400);
+      session(
+        at(10, 0) + between(0, 6000) + rand(),
+        staff.ip,
+        LOCAL_IP,
+        443,
+        between(3, 9),
+        1400,
+        'TLS SNI: portal.ridgelinemed.example',
+      );
     }
   }
 
   // Outbound HTTPS: package metadata and the sites everyone has open anyway.
-  for (const target of ['192.0.2.10', '192.0.2.20', '192.0.2.30']) {
+  // Names come from the documentation domain, not from real ones, for the same
+  // reason the addresses come from RFC 5737.
+  const OUTBOUND_SITES = [
+    ['192.0.2.10', 'TLS SNI: www.example.com'],
+    ['192.0.2.20', 'TLS SNI: search.example.net'],
+    ['192.0.2.30', 'TLS SNI: packages.example.org'],
+  ] as const;
+  for (const [target, sni] of OUTBOUND_SITES) {
     for (let n = 0; n < between(2, 4); n += 1) {
-      session(at(10, 0) + between(0, 6200) + rand(), LOCAL_IP, target, 443, between(2, 6), 1200);
+      session(at(10, 0) + between(0, 6200) + rand(), LOCAL_IP, target, 443, between(2, 6), 1200, sni);
     }
   }
 
@@ -681,7 +716,7 @@ function buildCapture(): string {
   // A student taught that "regular interval means beacon" has to meet this
   // before they meet the real one, or what they learn is a false positive.
   for (let t = at(10, 0, 7); t < at(11, 45); t += 60) {
-    session(t, MONITORING_IP, LOCAL_IP, 9100, 1, 900);
+    session(t, MONITORING_IP, LOCAL_IP, 9100, 1, 900, 'GET /metrics HTTP/1.1');
   }
 
   // Monitoring pings too, which is why ICMP on its own proves nothing.
@@ -696,7 +731,16 @@ function buildCapture(): string {
 
   // The backup pulls a large volume over SSH: the second biggest transfer in the
   // capture, internal, authorised, and completely uninteresting.
-  session(at(10, 15, 4), BACKUP_IP, LOCAL_IP, 22, 140, 4000);
+  session(
+    at(10, 15, 4),
+    BACKUP_IP,
+    LOCAL_IP,
+    22,
+    140,
+    4000,
+    'SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.10',
+    'SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.10',
+  );
 
   // Internet background radiation: SYN, RST, nothing. Never a session.
   for (const source of NOISE_IPS) {
@@ -716,22 +760,51 @@ function buildCapture(): string {
   // Password guessing against SSH: many short sessions, all failing. The same
   // event auth.log records, seen from the wire instead of from the daemon.
   for (let n = 0; n < between(60, 90); n += 1) {
-    session(at(10, 47) + n * between(8, 14) + rand(), ATTACKER_IP, LOCAL_IP, 22, 2, 300);
+    session(
+      at(10, 47) + n * between(8, 14) + rand(),
+      ATTACKER_IP,
+      LOCAL_IP,
+      22,
+      2,
+      300,
+      'SSH-2.0-libssh2_1.10.0',
+      'SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.10',
+    );
   }
 
   // The session that succeeded: long, interactive, small packets each way. The
   // shape of somebody typing.
-  session(at(11, 3, 18), ATTACKER_IP, LOCAL_IP, 22, 220, 180, 2.1);
+  session(
+    at(11, 3, 18),
+    ATTACKER_IP,
+    LOCAL_IP,
+    22,
+    220,
+    180,
+    'SSH-2.0-libssh2_1.10.0',
+    'SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.10',
+    2.1,
+  );
 
   // Command and control. Every 300 seconds exactly, a few hundred bytes, over
   // port 443 so it passes for HTTPS. The interval is the tell, not the port.
   for (let t = at(11, 5, 41); t < at(11, 45); t += 300) {
-    session(t, LOCAL_IP, ATTACKER_IP, 443, 1, 340);
+    session(t, LOCAL_IP, ATTACKER_IP, 443, 1, 340, 'TLS SNI: cdn-sync.example');
   }
 
   // Exfiltration: one destination, one direction, more bytes than anything else
   // in the file. Whoever totals bytes per external address finds it.
-  session(at(11, 28, 9), LOCAL_IP, EXFIL_IP, 443, 400, 1400, 0.9);
+  session(
+    at(11, 28, 9),
+    LOCAL_IP,
+    EXFIL_IP,
+    443,
+    400,
+    1400,
+    'TLS SNI: updates-cdn.example',
+    '',
+    0.9,
+  );
 
   // --- render ---------------------------------------------------------------
   return packets

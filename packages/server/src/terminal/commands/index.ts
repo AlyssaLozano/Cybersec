@@ -9,6 +9,7 @@
 import { fromLines, ok, type CommandResult, type ExecContext } from '../context.js';
 import * as capture from './capture.js';
 import * as fs from './filesystem.js';
+import * as ids from './suricata.js';
 import * as net from './network.js';
 import * as sys from './system.js';
 import * as text from './text.js';
@@ -88,6 +89,12 @@ export const COMMANDS: Record<string, CommandSpec> = {
     handler: capture.tcpdump,
     summary: 'Read a saved packet capture, with an optional filter',
     usage: "tcpdump -r FILE [-n] [-q] [-t] [-c COUNT] ['FILTER']",
+    group: 'network',
+  },
+  suricata: {
+    handler: ids.suricata,
+    summary: 'Run signature rules against a saved capture',
+    usage: 'suricata -r CAPTURE -S RULES',
     group: 'network',
   },
 };

@@ -134,6 +134,29 @@ SUPPORT_URL="https://help.ubuntu.com/"
 UBUNTU_CODENAME=jammy
 `;
 
+/**
+ * A small vendor ruleset, of the kind that arrives already enabled.
+ *
+ * Deliberately mixed quality, because that is what a detection engineer inherits
+ * rather than what they would write. Two of these are sound, one fires on every
+ * TLS session on the estate, one has no threshold and will fire once per packet
+ * of a brute force, and one is aimed at a service this host does not run. Sorting
+ * them out against real traffic is the exercise.
+ */
+const SURICATA_RULES = `# Emerging Example ruleset, v2026.08.14
+# Enabled by default. Tune locally in local.rules.
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET 22 (msg:"ET SCAN Potential SSH Scan"; flags:S; sid:2001219; rev:4; classtype:attempted-recon;)
+
+alert tcp any any -> any any (msg:"ET POLICY TLS session observed"; content:"TLS SNI:"; sid:2010935; rev:2; classtype:policy-violation;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET 3389 (msg:"ET POLICY Outbound RDP"; flags:S; sid:2012710; rev:3; classtype:policy-violation;)
+
+alert icmp $HOME_NET any -> $HOME_NET any (msg:"ET INFO Internal ICMP echo"; itype:8; sid:2100384; rev:8; classtype:misc-activity;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET 443 (msg:"ET MALWARE Possible outbound beacon"; flags:S; threshold: type threshold, track by_src, count 5, seconds 1800; sid:2029001; rev:1; classtype:trojan-activity;)
+`;
+
 const RESOLV_CONF = `# Managed by systemd-resolved.
 nameserver 10.20.1.10
 nameserver 10.20.1.11
@@ -315,6 +338,21 @@ export function buildBaseImage(): BaseImage {
   b.file('/var/log/dpkg.log', DPKG_LOG, { mtime: onAugust15(8, 22, 47) });
   b.file('/var/log/wtmp', '(binary login records)\n', { size: 41_472, mtime: onAugust15(11, 31) });
   b.file('/var/log/lastlog', '(binary)\n', { size: 292_876, mtime: onAugust15(11, 5) });
+  // --- /etc/suricata ---------------------------------------------------------
+  //
+  // The vendor ruleset is world-readable and the local one is where a student
+  // writes. Splitting them is not decoration: it is the distinction between
+  // content you inherit and content you own, and tuning the first by editing it
+  // in place is how an upgrade silently reverts your work.
+  b.dir('/etc/suricata');
+  b.dir('/etc/suricata/rules');
+  b.file('/etc/suricata/rules/emerging-example.rules', SURICATA_RULES, { mtime: daysAgo(1) });
+  b.file(
+    '/etc/suricata/rules/local.rules',
+    '# Local rules. Nothing here yet.\n# sid range 1000000-1999999 is reserved for local use.\n',
+    { owner: 'student', group: 'student', mode: 0o644, mtime: daysAgo(30) },
+  );
+
   // --- /var/captures ---------------------------------------------------------
   //
   // Kept out of /var/log on purpose: a capture is evidence somebody chose to
