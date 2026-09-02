@@ -73,7 +73,7 @@ const terminalExercises = ALL_EXERCISES.filter((exercise) => exercise.kind === '
  */
 const EXPECTED_EXERCISE_COUNTS: Record<string, number> = {
   'linux-fundamentals': 22,
-  'log-analysis': 14,
+  'log-analysis': 40,
   'incident-triage': 26,
   networking: 15,
 };
