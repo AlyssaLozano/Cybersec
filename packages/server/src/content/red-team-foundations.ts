@@ -67,7 +67,7 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
     'Reason about detection: which action is loud, which is silent, and why.',
     'State what authorisation and scope must be in place before any testing begins.',
   ],
-  prerequisites: [],
+  prerequisites: ['linux-fundamentals'],
   modules: [
     {
       id: 'rtf.1',

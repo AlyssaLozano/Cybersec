@@ -1711,7 +1711,7 @@ export const AI_FOUNDATIONS: LearningPackage = {
     'Identify prompt injection, in-context attacks, and retrieval poisoning in production traffic',
     'Sort injection defences into normalising, pattern, and structural, and say what each can and cannot do',
   ],
-  prerequisites: [],
+  prerequisites: ['linux-fundamentals'],
   modules: [
     {
       id: 'aif.1',

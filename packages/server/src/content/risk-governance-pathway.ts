@@ -85,8 +85,8 @@ const AI_RISK_TEACH = {
     'register has to be able to hold.',
 } as const;
 
-export const RISK_GOVERNANCE: LearningPackage = {
-  id: 'risk-governance',
+export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
+  id: 'risk-governance-pathway',
   order: 12,
   title: 'Risk Management and AI Governance',
   summary:
@@ -109,16 +109,22 @@ export const RISK_GOVERNANCE: LearningPackage = {
     'Brief an executive on a mixed portfolio of traditional and AI risk in a paragraph they can act on.',
   ],
   /*
-   * The specification names SOC Foundations as the orientation prerequisite, and
-   * it is right to: most of this material is about how findings move through an
-   * organisation, and a student who has not yet seen what a SOC is has no mental
-   * model of the organisation to hang it on.
+   * The only package in the catalogue with no prerequisite at all, and that is
+   * deliberate rather than an omission.
+   *
+   * Every other package sits behind Linux Fundamentals, because every other
+   * route eventually puts somebody in front of a terminal. This one never does.
+   * Its audience arrives from audit, finance, law, or operations, and the
+   * fastest way to lose them is to make them clear a shell module before they
+   * are allowed to read about a risk register. The source specification asks for
+   * SOC Foundations as orientation; that is worth doing and is not worth
+   * gating, so it stays a recommendation rather than a lock.
    */
-  prerequisites: ['soc-foundations'],
+  prerequisites: [],
   modules: [
     {
       id: 'rmg.1',
-      packageId: 'risk-governance',
+      packageId: 'risk-governance-pathway',
       order: 1,
       title: 'Risk fundamentals, and where AI sits in the picture',
       summary:
@@ -129,7 +135,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.1.1',
           moduleId: 'rmg.1',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 1,
           title: 'Five words that are not synonyms',
           kind: 'multiple-choice',
@@ -178,7 +184,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.1.2',
           moduleId: 'rmg.1',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 2,
           title: 'What the frameworks actually give you',
           kind: 'multiple-choice',
@@ -240,7 +246,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.1.3',
           moduleId: 'rmg.1',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 3,
           title: 'We passed the audit, so we are low risk',
           kind: 'short-answer',
@@ -306,7 +312,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.1.4',
           moduleId: 'rmg.1',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 4,
           title: 'Why AI arrived as a risk category',
           kind: 'multiple-choice',
@@ -355,7 +361,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
     },
     {
       id: 'rmg.2',
-      packageId: 'risk-governance',
+      packageId: 'risk-governance-pathway',
       order: 2,
       title: 'Assets, criticality, and the failures nobody drew',
       summary:
@@ -365,7 +371,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.2.1',
           moduleId: 'rmg.2',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 1,
           title: 'What makes an asset critical',
           kind: 'multiple-choice',
@@ -427,7 +433,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.2.2',
           moduleId: 'rmg.2',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 2,
           title: 'Finding the single point of failure',
           kind: 'multiple-choice',
@@ -492,7 +498,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.2.3',
           moduleId: 'rmg.2',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 3,
           title: 'What an AI system consists of',
           kind: 'multiple-choice',
@@ -555,7 +561,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.2.4',
           moduleId: 'rmg.2',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 4,
           title: 'Two models, two tiers',
           kind: 'short-answer',
@@ -622,7 +628,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
     },
     {
       id: 'rmg.3',
-      packageId: 'risk-governance',
+      packageId: 'risk-governance-pathway',
       order: 3,
       title: 'Threat modelling, from STRIDE to the AI lifecycle',
       summary:
@@ -632,7 +638,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.3.1',
           moduleId: 'rmg.3',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 1,
           title: 'STRIDE over a model pipeline',
           kind: 'multiple-choice',
@@ -697,7 +703,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.3.2',
           moduleId: 'rmg.3',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 2,
           title: 'What PASTA adds, and what it costs',
           kind: 'multiple-choice',
@@ -759,7 +765,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.3.3',
           moduleId: 'rmg.3',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 3,
           title: 'Threats by lifecycle phase',
           kind: 'multiple-choice',
@@ -821,7 +827,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.3.4',
           moduleId: 'rmg.3',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 4,
           title: 'From a threat to a register line',
           kind: 'short-answer',
@@ -888,7 +894,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
     },
     {
       id: 'rmg.4',
-      packageId: 'risk-governance',
+      packageId: 'risk-governance-pathway',
       order: 4,
       title: 'Vulnerability assessment and gap analysis',
       summary:
@@ -898,7 +904,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.4.1',
           moduleId: 'rmg.4',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 1,
           title: 'What each method can establish',
           kind: 'multiple-choice',
@@ -962,7 +968,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.4.2',
           moduleId: 'rmg.4',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 2,
           title: 'A CVSS score is not a risk score',
           kind: 'multiple-choice',
@@ -1027,7 +1033,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.4.3',
           moduleId: 'rmg.4',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 3,
           title: 'Testing an AI system for weaknesses',
           kind: 'multiple-choice',
@@ -1090,7 +1096,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.4.4',
           moduleId: 'rmg.4',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 4,
           title: 'A gap finding somebody can close',
           kind: 'short-answer',
@@ -1156,7 +1162,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
     },
     {
       id: 'rmg.5',
-      packageId: 'risk-governance',
+      packageId: 'risk-governance-pathway',
       order: 5,
       title: 'Scoring risk so the number survives scrutiny',
       summary:
@@ -1166,7 +1172,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.5.1',
           moduleId: 'rmg.5',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 1,
           title: 'Annualised loss, and the decision it supports',
           kind: 'multiple-choice',
@@ -1232,7 +1238,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.5.2',
           moduleId: 'rmg.5',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 2,
           title: 'The number nobody believes',
           kind: 'multiple-choice',
@@ -1299,7 +1305,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.5.3',
           moduleId: 'rmg.5',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 3,
           title: 'What a heat map can carry',
           kind: 'multiple-choice',
@@ -1361,7 +1367,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.5.4',
           moduleId: 'rmg.5',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 4,
           title: 'Accepting a risk on the record',
           kind: 'short-answer',
@@ -1427,7 +1433,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
     },
     {
       id: 'rmg.6',
-      packageId: 'risk-governance',
+      packageId: 'risk-governance-pathway',
       order: 6,
       title: 'Controls: choosing them, and knowing they work',
       summary:
@@ -1437,7 +1443,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.6.1',
           moduleId: 'rmg.6',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 1,
           title: 'Five kinds of control',
           kind: 'multiple-choice',
@@ -1502,7 +1508,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.6.2',
           moduleId: 'rmg.6',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 2,
           title: 'Selecting from a catalogue without ordering everything',
           kind: 'multiple-choice',
@@ -1566,7 +1572,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.6.3',
           moduleId: 'rmg.6',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 3,
           title: 'The controls that make AI governable',
           kind: 'multiple-choice',
@@ -1629,7 +1635,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.6.4',
           moduleId: 'rmg.6',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 4,
           title: 'A control set, and how you would know it works',
           kind: 'short-answer',
@@ -1700,7 +1706,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
     },
     {
       id: 'rmg.7',
-      packageId: 'risk-governance',
+      packageId: 'risk-governance-pathway',
       order: 7,
       title: 'Business continuity, including for a service that learned its behaviour',
       summary:
@@ -1710,7 +1716,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.7.1',
           moduleId: 'rmg.7',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 1,
           title: 'What the continuity numbers mean',
           kind: 'multiple-choice',
@@ -1775,7 +1781,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.7.2',
           moduleId: 'rmg.7',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 2,
           title: 'Reading a schedule against a target',
           kind: 'multiple-choice',
@@ -1840,7 +1846,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.7.3',
           moduleId: 'rmg.7',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 3,
           title: 'Continuity for a model in the decision path',
           kind: 'multiple-choice',
@@ -1904,7 +1910,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.7.4',
           moduleId: 'rmg.7',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 4,
           title: 'What a model outage actually costs',
           kind: 'short-answer',
@@ -1969,7 +1975,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
     },
     {
       id: 'rmg.8',
-      packageId: 'risk-governance',
+      packageId: 'risk-governance-pathway',
       order: 8,
       title: 'Disaster recovery, and recovering something that was trained',
       summary:
@@ -1979,7 +1985,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.8.1',
           moduleId: 'rmg.8',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 1,
           title: 'What a standby arrangement buys',
           kind: 'multiple-choice',
@@ -2042,7 +2048,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.8.2',
           moduleId: 'rmg.8',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 2,
           title: 'What it takes to rebuild a model',
           kind: 'multiple-choice',
@@ -2107,7 +2113,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.8.3',
           moduleId: 'rmg.8',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 3,
           title: 'An untested backup is a hypothesis',
           kind: 'multiple-choice',
@@ -2170,7 +2176,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.8.4',
           moduleId: 'rmg.8',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 4,
           title: 'The service is back. Is it recovered?',
           kind: 'short-answer',
@@ -2241,7 +2247,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
     },
     {
       id: 'rmg.9',
-      packageId: 'risk-governance',
+      packageId: 'risk-governance-pathway',
       order: 9,
       title: 'Compliance mapping, and what the AI rules actually say',
       summary:
@@ -2252,7 +2258,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.9.1',
           moduleId: 'rmg.9',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 1,
           title: 'From obligation to evidence',
           kind: 'multiple-choice',
@@ -2314,7 +2320,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.9.2',
           moduleId: 'rmg.9',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 2,
           title: 'Getting the regulatory claims right',
           kind: 'multiple-choice',
@@ -2379,7 +2385,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.9.3',
           moduleId: 'rmg.9',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 3,
           title: 'Compliant and safe are different claims',
           kind: 'multiple-choice',
@@ -2442,7 +2448,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.9.4',
           moduleId: 'rmg.9',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 4,
           title: 'One gap, two audiences',
           kind: 'short-answer',
@@ -2511,7 +2517,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
     },
     {
       id: 'rmg.10',
-      packageId: 'risk-governance',
+      packageId: 'risk-governance-pathway',
       order: 10,
       title: 'Treatment, budget, and the case you take upstairs',
       summary:
@@ -2521,7 +2527,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.10.1',
           moduleId: 'rmg.10',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 1,
           title: 'Four things you can do with a risk',
           kind: 'multiple-choice',
@@ -2593,7 +2599,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.10.2',
           moduleId: 'rmg.10',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 2,
           title: 'What a control really costs',
           kind: 'multiple-choice',
@@ -2657,7 +2663,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.10.3',
           moduleId: 'rmg.10',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 3,
           title: 'A roadmap that survives delivery',
           kind: 'multiple-choice',
@@ -2719,7 +2725,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.10.4',
           moduleId: 'rmg.10',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 4,
           title: 'Asking an executive for a decision',
           kind: 'short-answer',
@@ -2786,7 +2792,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
     },
     {
       id: 'rmg.11',
-      packageId: 'risk-governance',
+      packageId: 'risk-governance-pathway',
       order: 11,
       title: 'Tabletop exercises, and testing the assessment itself',
       summary:
@@ -2796,7 +2802,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.11.1',
           moduleId: 'rmg.11',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 1,
           title: 'What a tabletop can establish',
           kind: 'multiple-choice',
@@ -2860,7 +2866,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.11.2',
           moduleId: 'rmg.11',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 2,
           title: 'Designing injects that force decisions',
           kind: 'multiple-choice',
@@ -2924,7 +2930,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.11.3',
           moduleId: 'rmg.11',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 3,
           title: 'Reading the room for findings',
           kind: 'multiple-choice',
@@ -2987,7 +2993,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.11.4',
           moduleId: 'rmg.11',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 4,
           title: 'Folding an exercise finding back in',
           kind: 'short-answer',
@@ -3053,7 +3059,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
     },
     {
       id: 'rmg.12',
-      packageId: 'risk-governance',
+      packageId: 'risk-governance-pathway',
       order: 12,
       title: 'Capstone: the assessment, the brief, and the call you make at speed',
       summary:
@@ -3063,7 +3069,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.12.1',
           moduleId: 'rmg.12',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 1,
           title: 'Three documents, three audiences',
           kind: 'multiple-choice',
@@ -3124,7 +3130,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.12.2',
           moduleId: 'rmg.12',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 2,
           title: 'Prioritising a mixed portfolio',
           kind: 'multiple-choice',
@@ -3190,7 +3196,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.12.3',
           moduleId: 'rmg.12',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 3,
           title: 'The paragraph the board reads',
           kind: 'short-answer',
@@ -3256,7 +3262,7 @@ export const RISK_GOVERNANCE: LearningPackage = {
         {
           id: 'rmg.12.4',
           moduleId: 'rmg.12',
-          packageId: 'risk-governance',
+          packageId: 'risk-governance-pathway',
           order: 4,
           title: 'The call you make at speed',
           kind: 'short-answer',

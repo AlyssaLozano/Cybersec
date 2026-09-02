@@ -42,7 +42,7 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
     'Read logs and network traffic to build a timeline and spot an attacker in the noise.',
     'Triage an alert, escalate it with context, and reason through the incident-response lifecycle.',
   ],
-  prerequisites: [],
+  prerequisites: ['linux-fundamentals'],
   modules: [
     {
       id: 'btf.1',

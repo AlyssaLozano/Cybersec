@@ -85,7 +85,7 @@ export const SOC_FOUNDATIONS: LearningPackage = {
     'Match the core SOC jobs to what each one actually does.',
     'Explain why a role like the log analyst can sit inside the SOC or in a separate team.',
   ],
-  prerequisites: [],
+  prerequisites: ['linux-fundamentals'],
   modules: [
     {
       id: 'soc.1',

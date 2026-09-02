@@ -21,8 +21,9 @@ import { describe, expect, it } from 'vitest';
 
 import type { Exercise } from '@soc/shared';
 
-import { RISK_GOVERNANCE } from './risk-governance.js';
+import { RISK_GOVERNANCE_PATHWAY } from './risk-governance-pathway.js';
 import { PACKAGES } from './index.js';
+import { TRACKS } from './tracks.js';
 import { evaluate } from './validate.js';
 import { BASE_IMAGE } from '../vfs/image.js';
 import { emptyOverlay } from '../vfs/types.js';
@@ -30,7 +31,7 @@ import { Vfs } from '../vfs/vfs.js';
 
 const HOME = '/home/student';
 
-const EXERCISES = RISK_GOVERNANCE.modules.flatMap((module) => module.exercises);
+const EXERCISES = RISK_GOVERNANCE_PATHWAY.modules.flatMap((module) => module.exercises);
 
 /** Grade a written answer through the real grader. */
 function gradeAnswer(exercise: Exercise, answerText: string) {
@@ -50,11 +51,11 @@ function gradeAnswer(exercise: Exercise, answerText: string) {
 
 describe('the risk package is registered and sized as claimed', () => {
   it('ships in the catalogue', () => {
-    expect(PACKAGES.map((pkg) => pkg.id)).toContain('risk-governance');
+    expect(PACKAGES.map((pkg) => pkg.id)).toContain('risk-governance-pathway');
   });
 
   it('has 48 exercises across 12 modules', () => {
-    expect(RISK_GOVERNANCE.modules).toHaveLength(12);
+    expect(RISK_GOVERNANCE_PATHWAY.modules).toHaveLength(12);
     expect(EXERCISES).toHaveLength(48);
   });
 
@@ -62,13 +63,13 @@ describe('the risk package is registered and sized as claimed', () => {
     for (const exercise of EXERCISES) {
       expect(exercise.id).toMatch(/^rmg\.\d+\.\d+$/);
     }
-    for (const module of RISK_GOVERNANCE.modules) {
+    for (const module of RISK_GOVERNANCE_PATHWAY.modules) {
       expect(module.id).toMatch(/^rmg\.\d+$/);
     }
   });
 
   it('numbers each module\'s exercises from one, in order', () => {
-    for (const module of RISK_GOVERNANCE.modules) {
+    for (const module of RISK_GOVERNANCE_PATHWAY.modules) {
       expect(module.exercises.map((exercise) => exercise.order)).toEqual(
         module.exercises.map((_, index) => index + 1),
       );
@@ -77,7 +78,7 @@ describe('the risk package is registered and sized as claimed', () => {
       // which is the kind of drift only a test catches.
       for (const exercise of module.exercises) {
         expect(exercise.moduleId).toBe(module.id);
-        expect(exercise.packageId).toBe('risk-governance');
+        expect(exercise.packageId).toBe('risk-governance-pathway');
       }
     }
   });
@@ -88,10 +89,18 @@ describe('the risk package is registered and sized as claimed', () => {
     }
   });
 
-  it('names SOC Foundations as its prerequisite, and names a package that exists', () => {
-    expect(RISK_GOVERNANCE.prerequisites).toEqual(['soc-foundations']);
-    const ids = new Set(PACKAGES.map((pkg) => pkg.id));
-    for (const id of RISK_GOVERNANCE.prerequisites) expect(ids.has(id)).toBe(true);
+  it('gates on nothing, because its audience never needs a terminal', () => {
+    // Every other package requires Linux Fundamentals. This is the one route
+    // that never opens a shell, and gating it behind one would turn away the
+    // audit, finance, and legal backgrounds it exists for.
+    expect(RISK_GOVERNANCE_PATHWAY.prerequisites).toEqual([]);
+  });
+
+  it('is reachable: a track curriculum stage points at it', () => {
+    // A package nothing points at is written but unplayable, which is the state
+    // every pathway package sat in before the curriculum was rewired.
+    const stages = TRACKS.flatMap((track) => track.curriculum);
+    expect(stages.map((stage) => stage.packageId)).toContain('risk-governance-pathway');
   });
 
   it('teaches both halves in every module, never AI in an appendix', () => {
@@ -99,7 +108,7 @@ describe('the risk package is registered and sized as claimed', () => {
     // separate discipline, and the whole structure depends on it: a module that
     // never mentions an AI system would be the start of the split register this
     // package exists to argue against.
-    for (const module of RISK_GOVERNANCE.modules) {
+    for (const module of RISK_GOVERNANCE_PATHWAY.modules) {
       const prose = module.exercises
         .map((exercise) => `${exercise.title} ${exercise.prompt} ${exercise.teach.concept}`)
         .join(' ')
@@ -137,7 +146,7 @@ describe('short-answer exercises grade against their own worked answer', () => {
     // Risk work is writing. A student who passed 48 exercises by clicking would
     // have practised none of the skill this package claims to teach.
     expect(written.length).toBeGreaterThanOrEqual(12);
-    for (const module of RISK_GOVERNANCE.modules) {
+    for (const module of RISK_GOVERNANCE_PATHWAY.modules) {
       expect(
         module.exercises.some((exercise) => exercise.kind === 'short-answer'),
         `${module.id} has no written exercise`,

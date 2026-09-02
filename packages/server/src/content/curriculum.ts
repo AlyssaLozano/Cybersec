@@ -11,6 +11,7 @@
 import type { Foundation, Track } from '@soc/shared';
 
 import { FOUNDATIONS, getFoundation } from './foundations.js';
+import { PACKAGES } from './index.js';
 import { getTrack, TRACKS, trackPackageIds as resolveTrackPackages } from './tracks.js';
 
 /** Map a foundation id to its package id, when one exists. */
@@ -81,4 +82,24 @@ export function foundationsWithDemand(): Array<Foundation & { requiredBy: string
     playable: typeof foundation.packageId === 'string',
     requiredBy: TRACKS.filter((track) => track.foundations.includes(foundation.id)).map((track) => track.id),
   }));
+}
+
+/**
+ * Where a named skill is actually taught, and whether it exists yet.
+ *
+ * Capabilities used to name a foundation, which worked while most built content
+ * hung off the foundation pool. It does not any more: Linux is the only
+ * foundation there is, and everything else a student works through is a stage in
+ * a track's own curriculum. So an anchor is now either a foundation id or a
+ * package id, and this is the one place that knows how to resolve both.
+ */
+export function teachingSource(id: string): { title: string; built: boolean } | null {
+  const foundation = getFoundation(id);
+  if (foundation) return { title: foundation.title, built: typeof foundation.packageId === 'string' };
+
+  const pkg = PACKAGES.find((candidate) => candidate.id === id);
+  // A package in PACKAGES is written and graded by definition, so it is built.
+  if (pkg) return { title: pkg.title, built: true };
+
+  return null;
 }

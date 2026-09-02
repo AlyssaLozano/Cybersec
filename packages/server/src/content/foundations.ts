@@ -1,21 +1,27 @@
 /**
- * The shared pool of foundational skills.
+ * The foundation pool.
  *
- * THE POINT OF THIS FILE
+ * WHAT A FOUNDATION IS, AND WHAT IT IS NOT
  *
- * The original curriculum was one straight line: everybody starts at Linux and
- * walks to the end. That is wrong, and it fails the exact people this platform
- * is for. Someone heading into risk and governance does not need `grep`. Someone
- * heading into identity work needs Windows and directory services far more than
- * they need a Linux terminal. Forcing a future GRC analyst through four packages
- * of shell commands teaches them they are bad at security, which is false.
+ * A foundation is a prerequisite SKILL that several tracks need before their own
+ * material makes sense. It is not a course in its own right. That distinction
+ * was blurred for a while: Log Analysis, Networking, Alert Triage, Incident
+ * Response and the AI packages all sat here as "foundations", when each of them
+ * is really a stage of somebody's career route. They have moved into the tracks
+ * that teach them, and this file is now what it was meant to be.
  *
- * So foundations live here as a shared pool, and each TRACK declares which ones
- * it requires. A student's required foundations are therefore a consequence of
- * the route they chose, not a fixed queue.
+ * LINUX IS THE ONLY BUILT FOUNDATION, ON PURPOSE
  *
- * Foundations with a `packageId` are built and playable today. The rest are
- * outlined with honest sizes so the roadmap is visible rather than implied.
+ * Almost every route eventually puts a student in front of a terminal, so Linux
+ * is the one thing that genuinely sits underneath the others, and it is the
+ * prerequisite on every package except the risk route, which never opens a
+ * shell and gates on nothing.
+ *
+ * The remaining entries are unbuilt skills with honest sizes attached, so the
+ * roadmap is visible rather than implied. A track declares which ones it needs,
+ * which is what stops the curriculum being one long line everybody walks: a
+ * future GRC analyst is not made to clear four packages of shell commands to
+ * reach material that never uses one.
  */
 
 import type { Foundation } from '@soc/shared';
@@ -28,14 +34,6 @@ export const FOUNDATIONS: Foundation[] = [
       'Move around a Linux server, work with files, read logs, and search them with grep and pipes. The substrate almost all security tooling sits on.',
     packageId: 'linux-fundamentals',
     tools: ['scripting'],
-  },
-  {
-    id: 'log-analysis',
-    title: 'Log Analysis and Parsing',
-    summary:
-      'Read the logs a real server produces, filter thousands of lines down to the few that matter, and pull structured facts out of unstructured text.',
-    packageId: 'log-analysis',
-    tools: ['siem-search'],
   },
   {
     id: 'regex',
@@ -62,14 +60,6 @@ export const FOUNDATIONS: Foundation[] = [
     tools: ['windows-forensics', 'siem-search'],
   },
   {
-    id: 'networking',
-    title: 'Networking Basics',
-    summary:
-      'Addresses, ports, routing, and DNS from the command line. Work out what a host is talking to, and whether it should be.',
-    packageId: 'networking',
-    tools: ['packet-analysis'],
-  },
-  {
     id: 'packet-analysis',
     title: 'Packet Analysis',
     summary:
@@ -93,14 +83,6 @@ export const FOUNDATIONS: Foundation[] = [
     plannedExercises: 18,
     tools: ['endpoint-visibility'],
   },
-  {
-    id: 'incident-concepts',
-    title: 'Security Incident Concepts',
-    summary:
-      'Severity, triage, correlation, and escalation. The judgement layer that turns log reading into a decision about whether something is real.',
-    packageId: 'incident-triage',
-    tools: ['case-management'],
-  },
   /*
    * Split from `incident-concepts` when the Incident Response package landed.
    *
@@ -112,14 +94,6 @@ export const FOUNDATIONS: Foundation[] = [
    * The boundary is the one the content already draws: `incident-concepts` is
    * deciding whether something is real, this is what you do once it is.
    */
-  {
-    id: 'incident-response',
-    title: 'Incident Response and Remediation',
-    summary:
-      'Containment under time pressure, evidence preservation, scoping an intrusion, and the writing that closes it out. What happens after triage decides something is real.',
-    packageId: 'incident-response',
-    tools: ['case-management'],
-  },
   {
     id: 'scripting',
     title: 'Scripting and Automation',
@@ -189,22 +163,6 @@ export const FOUNDATIONS: Foundation[] = [
       'Query, join, and aggregate security data. The difference between reading alerts and finding the pattern across a million of them.',
     plannedExercises: 18,
     tools: ['siem-search'],
-  },
-  {
-    id: 'ai-foundations',
-    title: 'How AI Systems Work',
-    summary:
-      'Weights, forward passes, tokens, embeddings, attention, and next-token prediction: the mechanics, computed by hand rather than described. Then the failure modes that fall out of each: overfitting, adversarial examples, poisoned training data, and prompt injection.',
-    packageId: 'ai-foundations',
-    tools: ['scripting'],
-  },
-  {
-    id: 'ai-security-testing',
-    title: 'AI Security Testing',
-    summary:
-      'Attack and defend a deployed model: find the injection, prove it is a class rather than a payload, deploy controls under a cost budget, and turn what you found into a deployment decision.',
-    packageId: 'ai-security',
-    tools: ['scripting', 'case-management'],
   },
   {
     id: 'adversarial-ml',

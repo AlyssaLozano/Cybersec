@@ -20,7 +20,7 @@ import {
   probesForCapability,
   probesForLane,
 } from './capabilities.js';
-import { getFoundation } from './foundations.js';
+import { teachingSource } from './curriculum.js';
 import { ALL_EXERCISES } from './index.js';
 import { buildReadinessReport } from './readiness.js';
 
@@ -32,8 +32,11 @@ describe('capability catalogue', () => {
     expect(new Set(PROBES.map((p) => p.id)).size).toBe(PROBES.length);
   });
 
-  it('points every capability at a real foundation', () => {
-    const broken = CAPABILITIES.filter((c) => !getFoundation(c.foundationId)).map((c) => c.id);
+  it('points every capability at somewhere the skill is actually taught', () => {
+    // The anchor used to have to be a foundation. Linux is now the only
+    // foundation there is, so an anchor is a foundation OR the package a track
+    // stage points at, and either has to resolve to something real.
+    const broken = CAPABILITIES.filter((c) => !teachingSource(c.foundationId)).map((c) => c.id);
     expect(broken).toEqual([]);
   });
 
@@ -62,8 +65,8 @@ describe('capability catalogue', () => {
   it('only claims exercises for foundations that are actually built', () => {
     for (const capability of CAPABILITIES) {
       if (capability.exerciseIds.length === 0) continue;
-      const foundation = getFoundation(capability.foundationId)!;
-      expect(foundation.packageId, `${capability.id} routes to exercises but its foundation is unbuilt`).toBeTruthy();
+      const source = teachingSource(capability.foundationId)!;
+      expect(source.built, `${capability.id} routes to exercises but what teaches it is unbuilt`).toBe(true);
     }
   });
 
@@ -73,15 +76,15 @@ describe('capability catalogue', () => {
    * An empty `exerciseIds` is correct while a foundation is unbuilt -- there is
    * genuinely nowhere to send anybody. It stops being correct the moment the
    * package lands, and nothing noticed: the test above skips empty arrays, so
-   * four capabilities on the built `incident-concepts` foundation measured a
+   * four capabilities on the built `incident-triage` package measured a
    * student and then routed them nowhere, silently, for as long as Alert Triage
    * and Incident Response had been shipping.
    *
    * A capability whose foundation is built has no excuse for routing nowhere.
    */
-  it('routes somewhere whenever the foundation behind it is built', () => {
+  it('routes somewhere whenever what teaches it is built', () => {
     const stranded = CAPABILITIES.filter(
-      (c) => getFoundation(c.foundationId)?.packageId && c.exerciseIds.length === 0,
+      (c) => teachingSource(c.foundationId)?.built && c.exerciseIds.length === 0,
     ).map((c) => c.id);
     expect(stranded).toEqual([]);
   });

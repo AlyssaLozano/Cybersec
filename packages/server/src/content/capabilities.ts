@@ -338,7 +338,7 @@ export const CAPABILITIES: Capability[] = [
     id: 'cap-triage',
     title: 'Triage by severity',
     summary: 'Decide what to look at first when six things are on fire.',
-    foundationId: 'incident-concepts',
+    foundationId: 'incident-triage',
     lanes: {
       'detection-engineering': 'supporting',
       'soc-ops': 'core',
@@ -352,7 +352,7 @@ export const CAPABILITIES: Capability[] = [
     id: 'cap-kill-chain',
     title: 'Follow a kill chain',
     summary: 'Put scattered events in order and name what stage of an intrusion each one is.',
-    foundationId: 'incident-concepts',
+    foundationId: 'incident-triage',
     lanes: {
       'detection-engineering': 'core',
       'soc-ops': 'core',
@@ -432,7 +432,7 @@ export const CAPABILITIES: Capability[] = [
     title: 'Explain why encoding defeats a filter',
     summary:
       'Reason about normalisation and pattern matching together: a defence that does not normalise a carrier is blind to it.',
-    foundationId: 'ai-security-testing',
+    foundationId: 'ai-security',
     lanes: { 'ai-security': 'core', appsec: 'supporting', 'red-team': 'peripheral' },
     exerciseIds: ['aif.2.3', 'ais.1.2', 'ais.3.2'],
   },
@@ -441,7 +441,7 @@ export const CAPABILITIES: Capability[] = [
     title: 'Turn a finding into a deployment decision',
     summary:
       'Assess a defended deployment under a budget and say plainly whether it is safe to put in front of a real decision.',
-    foundationId: 'ai-security-testing',
+    foundationId: 'ai-security',
     // Deliberately NOT weighted toward security-architecture. That lane is a
     // senior destination with no entry-level baseline, and one capability would
     // produce a readiness figure of 0% or 100% off a single probe -- more

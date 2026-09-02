@@ -29,6 +29,7 @@ import { score, scoreEnvironments, scoreTraits } from './assessment/scoring.js';
 import { CERTIFICATIONS, getCertification } from './certifications.js';
 import { foundationsWithDemand, trackFoundations, trackPackages, trackReadiness } from './curriculum.js';
 import { FOUNDATIONS, getFoundation } from './foundations.js';
+import { PACKAGES } from './index.js';
 import { getLaneProfile, LANE_PROFILES } from './lanes.js';
 import { getToolMapping, TOOL_MAPPINGS } from './tools.js';
 import { getTrack, TRACKS } from './tracks.js';
@@ -70,10 +71,53 @@ describe('catalogue integrity', () => {
     expect(broken).toEqual([]);
   });
 
-  it('marks a track available only when it has a playable foundation', () => {
+  it('marks a track available only when something on it can actually be started', () => {
+    /*
+     * This used to demand a playable FOUNDATION, which stopped being the right
+     * question once Linux became the only foundation there is. Everything else a
+     * student works through is now a stage in a track's own curriculum, so a
+     * foundation-only rule would have marked Risk and Governance unavailable
+     * forever while a complete 48-exercise package sat inside it, and it would
+     * have done that to exactly the no-terminal tracks the per-track model was
+     * built to serve.
+     *
+     * What "available" has always meant is the honest claim in tracks.ts: a
+     * student can start something on this route today. Either kind of playable
+     * content satisfies that.
+     */
     for (const track of TRACKS.filter((t) => t.status === 'available')) {
-      expect(trackReadiness(track.id).foundationsPlayable, `${track.id}`).toBeGreaterThan(0);
+      const { foundationsPlayable, stagesPlayable } = trackReadiness(track.id);
+      expect(
+        foundationsPlayable + stagesPlayable,
+        `${track.id} is marked available with nothing playable on it`,
+      ).toBeGreaterThan(0);
     }
+  });
+
+  it('leaves no package written but unreachable', () => {
+    /*
+     * The guard that would have caught the state this catalogue was actually in:
+     * five complete packages, 226 graded exercises between them, written and
+     * tested and registered, and not one of them reachable by a student on any
+     * of the sixteen tracks. Everything type-checked and every test passed,
+     * because nothing asserted that content could be opened.
+     *
+     * A package is reachable through a foundation or through a track curriculum
+     * stage. Written and wired to neither is the same as not written.
+     */
+    const reachable = new Set(TRACKS.flatMap((track) => trackPackages(track.id)));
+    const orphans = PACKAGES.filter((pkg) => !reachable.has(pkg.id)).map((pkg) => pkg.id);
+    expect(orphans).toEqual([]);
+  });
+
+  it('does not leave a track with playable content marked as unstarted', () => {
+    // The inverse, and the one that catches a package wired into a track whose
+    // status nobody remembered to update: content the student can open, behind a
+    // label telling them it does not exist yet.
+    const understated = TRACKS.filter(
+      (t) => t.status !== 'available' && trackReadiness(t.id).stagesPlayable > 0,
+    );
+    expect(understated.map((t) => t.id)).toEqual([]);
   });
 });
 
@@ -112,16 +156,19 @@ describe('foundations are per-track, not universal', () => {
    */
   it('resolves a track to its playable packages, foundations first', () => {
     const soc = trackPackages('soc');
-    const declared = trackFoundations('soc')
-      .filter((foundation) => foundation.playable)
-      .map((foundation) => foundation.packageId);
+    const declared = [
+      ...trackFoundations('soc')
+        .filter((foundation) => foundation.playable)
+        .map((foundation) => foundation.packageId),
+      ...getTrack('soc')!.curriculum.map((stage) => stage.packageId).filter(Boolean),
+    ];
 
     expect(soc).toEqual(declared);
     expect(new Set(soc).size, 'a package should not be reachable twice').toBe(soc.length);
     // Spot-checks of the ordering the track declares, which no reordering of
     // PACKAGES can satisfy by accident.
     expect(soc.indexOf('linux-fundamentals')).toBeLessThan(soc.indexOf('log-analysis'));
-    expect(soc.indexOf('incident-triage')).toBeLessThan(soc.indexOf('incident-response'));
+    expect(soc.indexOf('log-analysis')).toBeLessThan(soc.indexOf('incident-triage'));
 
     expect(trackPackages('privacy')).toEqual([]);
   });
@@ -373,7 +420,9 @@ describe('detection engineering routing', () => {
     expect(lane.trackId).toBe('detection-engineering');
     const foundations = trackFoundations('detection-engineering').map((foundation) => foundation.id);
     expect(foundations).toContain('siem');
-    expect(foundations).toContain('log-analysis');
+    // Log analysis is a package a track stage points at now, not a foundation,
+    // and a detection engineer still cannot do the job without it.
+    expect(trackPackages('detection-engineering')).toContain('log-analysis');
   });
 });
 

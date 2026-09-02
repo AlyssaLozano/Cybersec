@@ -6,11 +6,16 @@
  * A route into a specific kind of security job, expressed as: the foundations it
  * requires, its own curriculum, and the certifications that sector asks for.
  *
- * The foundations are the important part. They are declared PER TRACK, drawn
- * from the shared pool in foundations.ts, which is what makes it possible for a
- * risk analyst to never open a terminal while a penetration tester needs Linux,
- * networking, web, and scripting before they start. A single linear curriculum
- * would have failed both of them.
+ * Foundations are declared PER TRACK, drawn from the shared pool in
+ * foundations.ts, which is what makes it possible for a risk analyst to never
+ * open a terminal while a penetration tester needs Linux before they start. A
+ * single linear curriculum would have failed both of them.
+ *
+ * A track's own CURRICULUM is where its packages live. A stage with a packageId
+ * is playable today; a stage with plannedExercises is an outline with an honest
+ * size on it. Every package in the catalogue is reachable through exactly this
+ * mechanism, and `career.test.ts` fails the build if one is written but wired to
+ * nothing, because content nobody can open is content nobody has.
  *
  * HONESTY RULES FOR THIS FILE
  *
@@ -41,16 +46,17 @@ export const TRACKS: Track[] = [
     roles: ['SOC Analyst (Tier 1 / Tier 2)', 'Security Analyst', 'Security Monitoring Analyst'],
     foundations: [
       'linux',
-      'log-analysis',
       'regex',
-      'networking',
       'windows-events',
       'siem',
       'investigation-tools',
-      'incident-concepts',
-      'incident-response',
     ],
     curriculum: [
+      { title: 'SOC Foundations', summary: 'What a SOC is, how work moves through it, and which of the many jobs are the SOC itself.', packageId: 'soc-foundations' },
+      { title: 'Log Analysis and Parsing', summary: 'Read what a real server writes, filter thousands of lines to the few that matter, and pull facts out of unstructured text.', packageId: 'log-analysis' },
+      { title: 'Networking Basics', summary: 'Work out what a host is talking to, and whether it should be.', packageId: 'networking' },
+      { title: 'Incident Detection and Alert Triage', summary: 'Work a queue: signal from noise, correlation, a full shift, and a copilot that is sometimes wrong.', packageId: 'incident-triage' },
+      { title: 'Blue Team Foundations', summary: 'The defender mindset end to end: timelines, triage, intelligence, forensics, and defensive maturity.', packageId: 'blue-team-foundations' },
       {
         title: 'Live SOC Scenarios',
         summary:
@@ -98,17 +104,15 @@ export const TRACKS: Track[] = [
     roles: ['Incident Responder', 'DFIR Analyst', 'Forensic Examiner', 'Threat Hunter'],
     foundations: [
       'linux',
-      'log-analysis',
       'regex',
       'windows',
       'windows-events',
       'investigation-tools',
       'packet-analysis',
-      'incident-concepts',
-      'incident-response',
       'scripting',
     ],
     curriculum: [
+      { title: 'Incident Response and Remediation', summary: 'Contain, gather evidence on the host, scope and eradicate, then communicate and close.', packageId: 'incident-response' },
       { title: 'Evidence Handling and Chain of Custody', summary: 'Acquire and preserve evidence so it survives challenge.', plannedExercises: 14 },
       { title: 'Host Forensics', summary: 'Disk, registry, and filesystem artefacts: what happened on this machine and when.', plannedExercises: 20 },
       { title: 'Memory Forensics', summary: 'Find what only ever existed in RAM, using Volatility.', plannedExercises: 16 },
@@ -125,7 +129,7 @@ export const TRACKS: Track[] = [
         note: 'Small organisations rarely staff dedicated DFIR. This work usually sits at a consultancy or IR retainer firm, which means travel and variable hours but very fast learning.',
       },
     ],
-    status: 'in_development',
+    status: 'available',
     workRhythm:
       'Bursty. Quiet periods of preparation punctuated by intense multi-day incidents. On-call is normal, and an active case does not respect your calendar.',
     entryDifficulty: 'moderate',
@@ -139,8 +143,9 @@ export const TRACKS: Track[] = [
     audience:
       'People who like building systems and working with data more than answering alerts, and who want to reduce the queue rather than work it.',
     roles: ['Detection Engineer', 'Security Data Analyst', 'SIEM Engineer', 'Threat Hunter'],
-    foundations: ['linux', 'log-analysis', 'regex', 'siem', 'data-sql', 'scripting', 'threat-modelling'],
+    foundations: ['linux', 'regex', 'siem', 'data-sql', 'scripting', 'threat-modelling'],
     curriculum: [
+      { title: 'Log Analysis and Parsing', summary: 'Before you can write a detection you have to be able to read what the source actually emits.', packageId: 'log-analysis' },
       { title: 'SIEM Fundamentals', summary: 'Query a SIEM, decide what is worth indexing against what it costs, and normalise sources that disagree about what a username is called.', plannedExercises: 10 },
       { title: 'Writing Detection Logic', summary: 'Author a threshold rule from scratch, exclude a known benign cause without blinding it, and replay it over a month of old logs before anyone deploys it.', plannedExercises: 14 },
       { title: 'Correlation and Behavioural Detection', summary: 'Rules that need several events to mean anything, baselines that separate an odd-but-normal user from a compromised one, and one ATT&CK technique covered across every way it shows up.', plannedExercises: 16 },
@@ -154,7 +159,7 @@ export const TRACKS: Track[] = [
         note: 'This role mostly exists at organisations big enough to have outgrown out-of-the-box rules. It is frequently a promotion from SOC rather than a first job.',
       },
     ],
-    status: 'in_development',
+    status: 'available',
     workRhythm: 'Project work with business hours. Rarely on-call. Deadlines come from engineering cycles rather than incidents.',
     // Rarely entered cold: tuning a rule well needs to have felt the queue first.
     entryDifficulty: 'hard',
@@ -168,7 +173,7 @@ export const TRACKS: Track[] = [
     audience:
       'Strong writers and researchers, especially people arriving from journalism, academia, military intelligence, or analysis-heavy roles.',
     roles: ['Threat Intelligence Analyst', 'CTI Researcher', 'Intelligence Officer'],
-    foundations: ['threat-modelling', 'log-analysis', 'regex', 'security-writing', 'data-sql'],
+    foundations: ['threat-modelling', 'regex', 'security-writing', 'data-sql'],
     curriculum: [
       { title: 'Intelligence Tradecraft', summary: 'Source reliability, analytic confidence, and avoiding your own bias.', plannedExercises: 16 },
       { title: 'Adversary Tracking', summary: 'Cluster activity, map it to ATT&CK, and attribute carefully.', plannedExercises: 18 },
@@ -196,8 +201,9 @@ export const TRACKS: Track[] = [
     audience:
       'People who genuinely enjoy taking things apart and are prepared for a long technical runway. Rarely a first security job, and worth knowing that early.',
     roles: ['Penetration Tester', 'Red Team Operator', 'Security Consultant', 'Offensive Security Engineer'],
-    foundations: ['linux', 'networking', 'web-fundamentals', 'scripting', 'windows', 'crypto-basics'],
+    foundations: ['linux', 'web-fundamentals', 'scripting', 'windows', 'crypto-basics'],
     curriculum: [
+      { title: 'Red Team Foundations', summary: 'Offensive methodology as graded reasoning: lifecycle, OSINT, access, persistence, movement, evasion, and the ethics that bound it.', packageId: 'red-team-foundations' },
       { title: 'Methodology and Scoping', summary: 'Rules of engagement, legal authorisation, and why scope discipline matters more than technique.', plannedExercises: 12 },
       { title: 'Enumeration and Exploitation', summary: 'Find the way in, methodically, against a lab network.', plannedExercises: 24 },
       { title: 'Post-Exploitation and Privilege Escalation', summary: 'Turn a foothold into meaningful access.', plannedExercises: 20 },
@@ -214,7 +220,7 @@ export const TRACKS: Track[] = [
         note: 'Most testers work at consultancies rather than in-house, because a single company rarely needs full-time testing. Expect client travel and a steady stream of new environments.',
       },
     ],
-    status: 'planned',
+    status: 'available',
     workRhythm:
       'Project-based in one to three week engagements, with hard report deadlines. Mostly business hours, though testing windows are sometimes out of hours to avoid disrupting production.',
     entryDifficulty: 'hard',
@@ -255,7 +261,7 @@ export const TRACKS: Track[] = [
     audience:
       'Organised people who are good at follow-through and comfortable chasing other teams. One of the most accessible entry points in security.',
     roles: ['Vulnerability Management Analyst', 'Security Operations Engineer', 'Patch Management Analyst'],
-    foundations: ['networking', 'linux', 'windows', 'risk-fundamentals', 'scripting', 'security-writing'],
+    foundations: ['linux', 'windows', 'risk-fundamentals', 'scripting', 'security-writing'],
     curriculum: [
       { title: 'Scanning and Asset Discovery', summary: 'You cannot protect what you do not know exists.', plannedExercises: 16 },
       { title: 'Prioritisation That Survives Scrutiny', summary: 'Move beyond the CVSS score to exploitability and real exposure.', plannedExercises: 16 },
@@ -283,7 +289,7 @@ export const TRACKS: Track[] = [
     audience:
       'People arriving from IT operations, sysadmin, or DevOps work. One of the highest-demand and best-paid areas for a career changer with an ops background.',
     roles: ['Cloud Security Engineer', 'Cloud Security Analyst', 'DevSecOps Engineer'],
-    foundations: ['cloud-fundamentals', 'identity-fundamentals', 'linux', 'networking', 'scripting'],
+    foundations: ['cloud-fundamentals', 'identity-fundamentals', 'linux', 'scripting'],
     curriculum: [
       { title: 'Cloud Identity and Permissions', summary: 'IAM is the new perimeter, and over-permissioning is the most common real finding.', plannedExercises: 20 },
       { title: 'Posture and Misconfiguration', summary: 'Audit an account with Prowler and ScoutSuite, then judge what matters.', plannedExercises: 18 },
@@ -342,7 +348,7 @@ export const TRACKS: Track[] = [
       'Build and harden the infrastructure itself: network segmentation, endpoint hardening, logging pipelines, and the tooling everyone else depends on.',
     audience: 'People arriving from systems or network administration who would rather build controls than monitor them.',
     roles: ['Security Engineer', 'Infrastructure Security Engineer', 'Security Operations Engineer'],
-    foundations: ['linux', 'networking', 'windows', 'cloud-fundamentals', 'scripting', 'crypto-basics'],
+    foundations: ['linux', 'windows', 'cloud-fundamentals', 'scripting', 'crypto-basics'],
     curriculum: [
       { title: 'Hardening and Baselines', summary: 'CIS benchmarks applied to real systems, and what breaks when you do.', plannedExercises: 18 },
       { title: 'Network Segmentation', summary: 'Design boundaries that contain an incident instead of decorating a diagram.', plannedExercises: 16 },
@@ -362,7 +368,7 @@ export const TRACKS: Track[] = [
     audience:
       'People arriving from engineering, manufacturing, utilities, or the military. Prior industrial experience is worth more here than security experience.',
     roles: ['OT Security Analyst', 'ICS Security Engineer', 'Critical Infrastructure Analyst'],
-    foundations: ['networking', 'packet-analysis', 'risk-fundamentals', 'incident-concepts'],
+    foundations: ['packet-analysis', 'risk-fundamentals'],
     curriculum: [
       { title: 'How OT Differs From IT', summary: 'Availability outranks confidentiality, and you cannot patch a turbine on Tuesday.', plannedExercises: 16 },
       { title: 'Industrial Protocols', summary: 'Modbus, DNP3, and what normal traffic looks like on a plant network.', plannedExercises: 16 },
@@ -396,8 +402,7 @@ export const TRACKS: Track[] = [
     roles: ['GRC Analyst', 'Risk Analyst', 'Compliance Analyst', 'Security Governance Specialist'],
     foundations: ['risk-fundamentals', 'frameworks', 'security-writing'],
     curriculum: [
-      { title: 'Running a Risk Assessment', summary: 'Assess a real environment and produce a register somebody will use.', plannedExercises: 18 },
-      { title: 'Control Design and Testing', summary: 'Decide whether a control genuinely works, rather than whether it exists.', plannedExercises: 16 },
+      { title: 'Risk Management and AI Governance', summary: 'The whole assessment: vocabulary, assets, threat modelling, scoring, controls, continuity, compliance, budget, and the brief that gets a decision. AI risk throughout.', packageId: 'risk-governance-pathway' },
       { title: 'Policy and Third-Party Risk', summary: 'Write a workable policy and assess a vendor without rubber-stamping them.', plannedExercises: 14 },
     ],
     certifications: ['sec-plus', 'crisc', 'cisa', 'cism'],
@@ -411,7 +416,7 @@ export const TRACKS: Track[] = [
         note: 'Large regulated firms (finance, healthcare, pharma) run substantial GRC functions with clear progression. A background in audit or finance transfers almost directly.',
       },
     ],
-    status: 'in_development',
+    status: 'available',
     workRhythm:
       'Business hours, deadline-driven around audit and reporting cycles. No on-call. Among the most predictable schedules in security.',
     entryDifficulty: 'accessible',
@@ -512,8 +517,6 @@ export const TRACKS: Track[] = [
       'People with real technical depth who want to work on something that is still being figured out. NOT an entry point: it needs the AI mechanics and enough security grounding to know what a finding is worth.',
     roles: ['AI Security Analyst', 'AI Red Teamer', 'ML Security Engineer', 'AI Assurance Analyst'],
     foundations: [
-      'ai-foundations',
-      'ai-security-testing',
       'adversarial-ml',
       'scripting',
       'threat-modelling',
@@ -521,6 +524,9 @@ export const TRACKS: Track[] = [
       'ai-governance',
     ],
     curriculum: [
+      { title: 'AI Foundations', summary: 'What a model actually is, computed by hand: tokens, embeddings, attention, and how machine learning fails.', packageId: 'ai-foundations' },
+      { title: 'AI Security Pathway', summary: 'The judgement half: attack surface, training data and privacy, regulation and fairness, real incidents, and governance.', packageId: 'ai-security-pathway' },
+      { title: 'AI Security Analyst', summary: 'In the Model Lab: find the bypass, harden under a budget, and assess a production deployment.', packageId: 'ai-security' },
       {
         title: 'Red Teaming a Production AI System',
         summary:

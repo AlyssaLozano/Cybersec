@@ -75,7 +75,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
     'Turn findings across all four domains into a prioritised assessment somebody can act on.',
     'State what readiness for adversarial AI practice means, and what evidence you would demand before trusting a deployment.',
   ],
-  prerequisites: [],
+  prerequisites: ['linux-fundamentals'],
   modules: [
     {
       id: 'aisp.1',

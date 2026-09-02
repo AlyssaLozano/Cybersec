@@ -34,7 +34,7 @@ import type {
 import { CAPABILITY_WEIGHTS } from '@soc/shared';
 
 import { capabilitiesForLane, probesForCapability } from './capabilities.js';
-import { getFoundation } from './foundations.js';
+import { teachingSource } from './curriculum.js';
 import { getLaneProfile } from './lanes.js';
 
 /** Weighted readiness across a set of capability results. */
@@ -66,8 +66,8 @@ function resultFor(
   const answered = probes.filter((probe) => answers.has(probe.id));
   const correct = answered.filter((probe) => answers.get(probe.id) === probe.answerId);
 
-  const foundation = getFoundation(capability.foundationId);
-  const teachable = typeof foundation?.packageId === 'string' && capability.exerciseIds.length > 0;
+  const source = teachingSource(capability.foundationId);
+  const teachable = source?.built === true && capability.exerciseIds.length > 0;
 
   return {
     capabilityId: capability.id,
@@ -83,7 +83,7 @@ function resultFor(
     importance: capability.lanes[laneId] ?? 'peripheral',
     exerciseIds: capability.exerciseIds,
     foundationId: capability.foundationId,
-    foundationTitle: foundation?.title ?? capability.foundationId,
+    foundationTitle: source?.title ?? capability.foundationId,
     teachable,
   };
 }
