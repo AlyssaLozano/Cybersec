@@ -13,12 +13,22 @@
  * is recorded and the turn passes, it simply is not yet graded.
  */
 
-import type { ResolveMove } from './matchEngine.js';
+import type { BoardState } from '@soc/shared';
+
+import type { ResolveBoardMove, ResolveMove } from './matchEngine.js';
 
 interface RegisteredScenario {
-  resolve: ResolveMove;
+  /** Linear scoring. Absent for a positional scenario, which is not played on a menu. */
+  resolve?: ResolveMove;
   /** How many rounds this scenario runs, if it fixes its own budget. */
   maxTurns?: number;
+  /**
+   * A FACTORY, not a board. Every match needs its own targets to mark up, and a
+   * shared object would let one match's compromises show up in another's.
+   */
+  board?: () => BoardState;
+  /** Positional scoring: the same seam, for the board actions. */
+  resolveBoard?: ResolveBoardMove;
 }
 
 const registry = new Map<string, RegisteredScenario>();
@@ -30,6 +40,35 @@ export function registerMatchScenario(
   options: { maxTurns?: number } = {},
 ): void {
   registry.set(scenarioId, { resolve, maxTurns: options.maxTurns });
+}
+
+/**
+ * Register a positional (board) scenario: its starting board and its scoring.
+ *
+ * Separate from `registerMatchScenario` because the two modes score different
+ * things -- a menu pick versus a shot at a system -- and collapsing them into
+ * one resolver would mean every scenario carrying a branch it never takes.
+ */
+export function registerPositionalScenario(
+  scenarioId: string,
+  options: { board: () => BoardState; resolveBoard: ResolveBoardMove; maxTurns?: number },
+): void {
+  registry.set(scenarioId, {
+    board: options.board,
+    resolveBoard: options.resolveBoard,
+    maxTurns: options.maxTurns,
+  });
+}
+
+/** A fresh starting board for a positional scenario, or null if it is not one. */
+export function boardFor(scenarioId: string): BoardState | null {
+  const board = registry.get(scenarioId)?.board;
+  return board ? board() : null;
+}
+
+/** Whether a scenario is played on a board. Decides the mode a match opens in. */
+export function isPositional(scenarioId: string): boolean {
+  return registry.get(scenarioId)?.board !== undefined;
 }
 
 /** Test hook: forget registrations so a suite starts clean. */
@@ -59,6 +98,29 @@ const UNGRADED: ResolveMove = () => ({
 export function resolveMoveFor(scenarioId: string): ResolveMove {
   return registry.get(scenarioId)?.resolve ?? UNGRADED;
 }
+
+/**
+ * The board resolver for a positional scenario.
+ *
+ * Falls back to the same honest zero-of-zero as the linear path, so a board can
+ * be played end to end before its scoring is authored -- the mechanics are the
+ * engine's, and they work with or without a rubric on top.
+ */
+export function resolveBoardFor(scenarioId: string): ResolveBoardMove {
+  return registry.get(scenarioId)?.resolveBoard ?? UNGRADED_BOARD;
+}
+
+/** The board equivalent of UNGRADED: recorded, not graded, and nothing leaked. */
+const UNGRADED_BOARD: ResolveBoardMove = () => ({
+  score: {
+    objectivePoints: 0,
+    maxObjective: 0,
+    judgePoints: null,
+    maxJudge: 0,
+    note: 'Scoring for this scenario has not been authored yet.',
+  },
+  signal: null,
+});
 
 /** A scenario's own turn budget, or undefined to let the match default apply. */
 export function maxTurnsFor(scenarioId: string): number | undefined {

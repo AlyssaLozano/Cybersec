@@ -15,12 +15,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   AVATARS,
+  BLUE_BOARD_ACTIONS,
   MATCH_SIDES,
   ROOM_VISIBILITIES,
   SCENARIO_DIFFICULTIES,
 } from '@soc/shared';
 import type {
   AvatarId,
+  BlueBoardAction,
+  BoardViewForSide,
   MatchSide,
   MatchView,
   PublicUser,
@@ -28,10 +31,10 @@ import type {
   ScenarioDifficulty,
 } from '@soc/shared';
 
-import { ApiCallError, matches, type MatchBrief } from '../lib/api';
+import { ApiCallError, matches, type MatchBrief, type MatchScenarioInfo } from '../lib/api';
 
-/** The only red-blue scenario so far. A picker replaces this when there are more. */
-const SCENARIO = { id: 'rt-recon-northwind', title: 'Operation Tidewater: Recon' };
+/** The scenario a fresh lobby defaults to before the list loads. */
+const DEFAULT_SCENARIO_ID = 'rt-recon-northwind';
 
 /** A headset-operator portrait, tinted per side. Purely a game avatar. */
 function Avatar({ side, className = 'ava' }: { side: MatchSide; className?: string }) {
@@ -307,6 +310,95 @@ function MatchAttackConsole({
   );
 }
 
+/**
+ * The board, as this side is allowed to see it.
+ *
+ * Every tile renders straight off `view.board`, which the server already
+ * redacted -- there is no "hide this from Red" branch here and there must never
+ * be one, because a client-side secret is not a secret. Red's tiles simply never
+ * arrive with `covered` set.
+ */
+function BoardGrid({
+  board,
+  you,
+  selected,
+  from,
+  placing,
+  onPick,
+  interactive,
+}: {
+  board: BoardViewForSide;
+  you: MatchSide;
+  selected: string | null;
+  from: string | null;
+  placing: string[];
+  onPick: (targetId: string) => void;
+  interactive: boolean;
+}) {
+  return (
+    <div className="bgrid">
+      {board.targets.map((t) => {
+        const marks = [
+          t.contained ? 'walled' : '',
+          t.compromised ? 'held' : '',
+          t.detectedHere ? 'seen' : '',
+          t.covered ? 'covered' : '',
+          placing.includes(t.id) ? 'placing' : '',
+          selected === t.id ? 'sel' : '',
+          from === t.id ? 'from' : '',
+          t.crown ? 'crown' : '',
+        ]
+          .filter(Boolean)
+          .join(' ');
+        return (
+          <button
+            key={t.id}
+            type="button"
+            className={`btile ${marks}`}
+            disabled={!interactive}
+            onClick={() => onPick(t.id)}
+          >
+            <span className="bt-top">
+              <span className="bt-label">{t.label}</span>
+              {t.crown && <span className="bt-crown" title="the objective">&#9733;</span>}
+            </span>
+            <span className="bt-note">{t.note}</span>
+            <span className="bt-state">
+              {t.contained && <span className="bt-chip walled">walled</span>}
+              {t.compromised && <span className="bt-chip held">{you === 'red' ? 'yours' : 'compromised'}</span>}
+              {t.detectedHere && <span className="bt-chip seen">shot seen</span>}
+              {t.covered && <span className="bt-chip covered">covered</span>}
+              {!t.contained && !t.compromised && !t.detectedHere && !t.covered && (
+                <span className="bt-chip quiet">quiet</span>
+              )}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** The one line under the grid that says what a click will currently do. */
+function boardPrompt(
+  board: BoardViewForSide,
+  you: MatchSide,
+  yourTurn: boolean,
+  action: BlueBoardAction,
+): string {
+  if (board.phase === 'done') return 'The board is closed.';
+  if (board.phase === 'placement') {
+    return you === 'blue'
+      ? `Pick ${board.coverageBudget} systems to cover. Red never learns which.`
+      : 'Blue is placing its defences. You will not be told where they land.';
+  }
+  if (!yourTurn) return you === 'red' ? 'Blue is deciding.' : 'Red is choosing a target.';
+  if (you === 'red') return 'Pick a system to fire at. Land on coverage and they see you.';
+  if (action === 'reposition') return 'Click a covered system to move a defence off, then where it goes.';
+  if (action === 'investigate') return 'Pick a system to look at. You only find what you go and look for.';
+  return 'Pick a system you have already found them on.';
+}
+
 export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () => void }) {
   const [phase, setPhase] = useState<'lobby' | 'match'>('lobby');
   const [list, setList] = useState<MatchView[] | null>(null);
@@ -316,6 +408,8 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
   const [busy, setBusy] = useState(false);
 
   // Lobby form.
+  const [scenarios, setScenarios] = useState<MatchScenarioInfo[]>([]);
+  const [scenarioId, setScenarioId] = useState<string>(DEFAULT_SCENARIO_ID);
   const [callSign, setCallSign] = useState('');
   const [avatarId, setAvatarId] = useState<AvatarId>(AVATARS[0]);
   const [difficulty, setDifficulty] = useState<ScenarioDifficulty>('beginner');
@@ -326,6 +420,12 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
   // Board move.
   const [chosen, setChosen] = useState<string | null>(null);
   const [justification, setJustification] = useState('');
+
+  // Positional (battleship) mode: what is selected on the board right now.
+  const [placing, setPlacing] = useState<string[]>([]);
+  const [pick, setPick] = useState<string | null>(null);
+  const [pickFrom, setPickFrom] = useState<string | null>(null);
+  const [blueAction, setBlueAction] = useState<BlueBoardAction>('investigate');
 
   const loadList = useCallback(() => {
     matches
@@ -338,6 +438,22 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
     if (phase === 'lobby') loadList();
   }, [phase, loadList]);
 
+  // The scenario catalogue, loaded once for the picker and the match-list labels.
+  useEffect(() => {
+    matches
+      .scenarios()
+      .then((s) => {
+        setScenarios(s);
+        setScenarioId((prev) => (s.some((x) => x.id === prev) ? prev : s[0]?.id ?? prev));
+      })
+      .catch(() => setScenarios([]));
+  }, []);
+
+  const scenarioTitle = useCallback(
+    (id: string) => scenarios.find((s) => s.id === id)?.title ?? id,
+    [scenarios],
+  );
+
   const identity = () => ({ callSign, avatarId });
 
   const enter = useCallback(async (view: MatchView) => {
@@ -345,6 +461,9 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
     setBrief(null);
     setChosen(null);
     setJustification('');
+    setPlacing([]);
+    setPick(null);
+    setPickFrom(null);
     setPhase('match');
     try {
       setBrief(await matches.brief(view.id));
@@ -410,6 +529,53 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
     } finally {
       setBusy(false);
     }
+  }
+
+  /** Clear whatever was selected once a board action has landed. */
+  function afterBoardMove(next: MatchView) {
+    setActive(next);
+    setPick(null);
+    setPickFrom(null);
+    setJustification('');
+  }
+
+  const boardCall = async (work: () => Promise<MatchView>) => {
+    setBusy(true);
+    setError(null);
+    try {
+      afterBoardMove(await work());
+    } catch (e) {
+      setError(errText(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /**
+   * What a click on a tile means depends on the phase, your side, and which of
+   * the three things Blue is doing. Placement collects a set; Red picks one
+   * target; Blue picks a target, and for a reposition a covered tile picks the
+   * defence being moved instead.
+   */
+  function tapTile(view: MatchView, targetId: string) {
+    const board = view.board;
+    if (!board) return;
+    if (board.phase === 'placement') {
+      setPlacing((cur) =>
+        cur.includes(targetId)
+          ? cur.filter((id) => id !== targetId)
+          : cur.length >= board.coverageBudget
+            ? cur
+            : [...cur, targetId],
+      );
+      return;
+    }
+    const tile = board.targets.find((t) => t.id === targetId);
+    if (view.you === 'blue' && blueAction === 'reposition' && tile?.covered) {
+      setPickFrom(targetId);
+      return;
+    }
+    setPick(targetId);
   }
 
   async function forfeit() {
@@ -478,6 +644,22 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
               </div>
 
               <div className="fieldrow">
+                <label htmlFor="wr-scenario">Scenario</label>
+                <select id="wr-scenario" value={scenarioId} onChange={(e) => setScenarioId(e.target.value)}>
+                  {scenarios.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.title}
+                      {s.mode === 'positional' ? ' · board' : ''}
+                    </option>
+                  ))}
+                </select>
+              <p className="muted" style={{ marginTop: -4 }}>
+                A <b>board</b> scenario is the hidden-information game: Blue places defences Red
+                cannot see, and Red fires blind at the estate. The others are played from a move menu.
+              </p>
+              </div>
+
+              <div className="fieldrow">
                 <label>Your side</label>
                 <div className="seg">
                   {MATCH_SIDES.map((s) => (
@@ -531,7 +713,7 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
                   visibility === 'closed'
                     ? guarded(() =>
                         matches.open({
-                          scenarioId: SCENARIO.id,
+                          scenarioId,
                           difficulty,
                           visibility,
                           side,
@@ -540,7 +722,7 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
                       )
                     : guarded(() =>
                         matches.queue({
-                          scenarioId: SCENARIO.id,
+                          scenarioId,
                           difficulty,
                           side,
                           identity: identity(),
@@ -583,11 +765,11 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
                     <Avatar side={m.you} className="ava" />
                     <span className="grow">
                       <span className="mt">
-                        You are {m.you} &middot; {SCENARIO.title}
+                        You are {m.you} &middot; {scenarioTitle(m.scenarioId)}
                       </span>
                       <span className="ms">
                         {m.status} &middot; turn {m.turn}/{m.maxTurns}
-                        {m.status === 'active' && (m.yourTurn ? ' &middot; your move' : ' · waiting on them')}
+                        {m.status === 'active' && (m.yourTurn ? ' · your move' : ' · waiting on them')}
                       </span>
                     </span>
                   </button>
@@ -610,6 +792,130 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
   const yourScore = v.yourMoves.reduce((sum, m) => sum + (m.score?.objectivePoints ?? 0), 0);
   const yourMax = v.yourMoves.reduce((sum, m) => sum + (m.score?.maxObjective ?? 0), 0);
 
+  // --- positional mode -------------------------------------------------------
+  const board = v.board ?? null;
+  const tileLabel = (id: string) => board?.targets.find((t) => t.id === id)?.label ?? id;
+
+  /**
+   * A board move id back into words: `fire:dc` reads as "Fire &middot; Domain
+   * controller". The linear log labels moves from the brief's option menu, and a
+   * board match has no menu to look them up in.
+   */
+  const boardMoveLabel = (optionId: string) => {
+    const [verb, rest] = optionId.split(':');
+    if (!rest) return optionId;
+    const [fromId, toId] = rest.split('->');
+    const verbLabel = (verb ?? '').charAt(0).toUpperCase() + (verb ?? '').slice(1);
+    return toId
+      ? `${verbLabel} · ${tileLabel(fromId ?? '')} → ${tileLabel(toId)}`
+      : `${verbLabel} · ${tileLabel(rest)}`;
+  };
+
+  const moveLabel = board ? boardMoveLabel : optionLabel;
+
+  const canFire = v.yourTurn && !busy && pick !== null && justification.trim().length > 0;
+  const canBlueAct =
+    v.yourTurn &&
+    !busy &&
+    pick !== null &&
+    justification.trim().length > 0 &&
+    (blueAction !== 'reposition' || pickFrom !== null);
+
+  const boardControls = !board ? null : board.phase === 'placement' ? (
+    v.you === 'blue' ? (
+      <>
+        <div className="why-label">
+          Coverage &middot; {placing.length}/{board.coverageBudget} placed
+        </div>
+        <p className="muted">
+          Pick the systems you will actively watch. Red is never told where they are, and a shot
+          that lands on one is how you catch them.
+        </p>
+        <button
+          className="cta"
+          disabled={busy || placing.length !== board.coverageBudget}
+          onClick={() => void boardCall(() => matches.place(v.id, placing))}
+        >
+          Lock in coverage
+        </button>
+      </>
+    ) : (
+      <div className="decision-sub">
+        Blue is laying its defences. When it locks in, you fire first &mdash; blind.
+      </div>
+    )
+  ) : v.you === 'red' ? (
+    <>
+      <div className="why-label">Target</div>
+      <div className="bsel">{pick ? tileLabel(pick) : 'Pick a system on the board.'}</div>
+      <div className="why-label">Why this shot?</div>
+      <textarea
+        className="why"
+        value={justification}
+        disabled={!v.yourTurn || busy}
+        onChange={(e) => setJustification(e.target.value)}
+        placeholder={v.yourTurn ? 'Where do you think their two defences are, and why?' : 'Wait for your turn.'}
+      />
+      <button
+        className="cta"
+        disabled={!canFire}
+        onClick={() => void boardCall(() => matches.fire(v.id, pick!, justification.trim()))}
+      >
+        {v.yourTurn ? 'Fire → end turn' : 'Not your turn'}
+      </button>
+    </>
+  ) : (
+    <>
+      <div className="why-label">Your move this round &middot; one of three</div>
+      <div className="seg">
+        {BLUE_BOARD_ACTIONS.map((a) => (
+          <button
+            key={a}
+            type="button"
+            className={`blue${blueAction === a ? ' on' : ''}`}
+            disabled={!v.yourTurn || busy}
+            onClick={() => {
+              setBlueAction(a);
+              setPick(null);
+              setPickFrom(null);
+            }}
+          >
+            {a}
+          </button>
+        ))}
+      </div>
+      <div className="bsel">
+        {blueAction === 'reposition'
+          ? `${pickFrom ? tileLabel(pickFrom) : 'a covered system'} → ${pick ? tileLabel(pick) : 'somewhere new'}`
+          : pick
+            ? tileLabel(pick)
+            : 'Pick a system on the board.'}
+      </div>
+      <div className="muted">
+        Repositions left: {board.movesLeft ?? 0}. Containment only works where you have already found them.
+      </div>
+      <div className="why-label">Why this move?</div>
+      <textarea
+        className="why"
+        value={justification}
+        disabled={!v.yourTurn || busy}
+        onChange={(e) => setJustification(e.target.value)}
+        placeholder={v.yourTurn ? 'What do you think they are doing, and why answer it this way?' : 'Wait for your turn.'}
+      />
+      <button
+        className="cta"
+        disabled={!canBlueAct}
+        onClick={() =>
+          void boardCall(() =>
+            matches.blueAct(v.id, blueAction, pick!, justification.trim(), pickFrom ?? undefined),
+          )
+        }
+      >
+        {v.yourTurn ? `${blueAction} → end turn` : 'Not your turn'}
+      </button>
+    </>
+  );
+
   const yourConsole = (
     <div className={`card side-${you}`}>
       <div className="head">
@@ -627,7 +933,22 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
       <div className="body">
         {finished ? (
           <>
-            <div className="decision-q">{v.status === 'complete' ? 'Match complete' : 'Match ended'}</div>
+            <div className="decision-q">
+              {v.winner
+                ? v.winner === you
+                  ? 'You took it'
+                  : `${v.winner === 'red' ? 'Red' : 'Blue'} took it`
+                : v.status === 'complete'
+                  ? 'Match complete'
+                  : 'Match ended'}
+            </div>
+            {v.winner && (
+              <div className="decision-sub">
+                {v.winner === 'red'
+                  ? 'Red reached the core without ever being seen.'
+                  : 'The clock ran out with the core still theirs. Blue holds.'}
+              </div>
+            )}
             <div className="decision-sub">
               Your objective score: {yourScore}/{yourMax || '—'} across {v.yourMoves.length} move(s).
             </div>
@@ -645,12 +966,20 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
           </>
         ) : (
           <>
-            <div className="decision-q">Your move &middot; turn {v.turn}</div>
+            <div className="decision-q">
+              {board && board.phase === 'placement'
+                ? you === 'blue'
+                  ? 'Place your defences'
+                  : 'Waiting on their placement'
+                : `Your move · turn ${v.turn}`}
+            </div>
             <div className="decision-sub">
               {brief ? brief.brief : 'Pick a move, then say why in a line. The reasoning is half of what is scored.'}
             </div>
             {v.terminal?.kind === 'defender' && <MatchTerminal matchId={v.id} initialCwd={v.terminal.cwd} />}
-            {v.terminal?.kind === 'attacker' ? (
+            {board ? (
+              boardControls
+            ) : v.terminal?.kind === 'attacker' ? (
               <MatchAttackConsole view={v} onResult={setActive} />
             ) : (
               <>
@@ -705,7 +1034,7 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
             {v.yourMoves.map((m) => (
               <div key={m.seq} className={`logrow${m.score && m.score.maxObjective > 0 ? ' scored' : ''}`}>
                 <div className="t">
-                  T{m.turn} {optionLabel(m.optionId)}
+                  T{m.turn} {moveLabel(m.optionId)}
                   {m.score && m.score.maxObjective > 0 && (
                     <span className="pts"> &nbsp;{m.score.objectivePoints}/{m.score.maxObjective}</span>
                   )}
@@ -780,7 +1109,7 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
             <div className="glyph">R</div>
             <div>
               <h1>Ridgeline War Room</h1>
-              <div className="sub">{SCENARIO.title}</div>
+              <div className="sub">{scenarioTitle(v.scenarioId)}</div>
             </div>
           </div>
           <div className="spacer" />
@@ -830,6 +1159,28 @@ export function MatchConsole({ user, onExit }: { user: PublicUser; onExit: () =>
           <div className={`col${you !== 'red' ? ' dim' : ''}`}>{you === 'red' ? yourConsole : opponentPanel}</div>
 
           <div className="col">
+            {board && (
+              <div className="card bcard">
+                <div className="eyebrow">
+                  The estate &middot; {board.coverageBudget} of {board.targets.length} covered
+                  {board.movesLeft !== null && ` · ${board.movesLeft} repositions left`}
+                </div>
+                <BoardGrid
+                  board={board}
+                  you={you}
+                  selected={pick}
+                  from={pickFrom}
+                  placing={placing}
+                  onPick={(id) => tapTile(v, id)}
+                  interactive={
+                    !finished &&
+                    !busy &&
+                    (board.phase === 'placement' ? you === 'blue' : v.yourTurn)
+                  }
+                />
+                <div className="bprompt">{boardPrompt(board, you, v.yourTurn, blueAction)}</div>
+              </div>
+            )}
             <div className="card">
               {brief ? (
                 <>

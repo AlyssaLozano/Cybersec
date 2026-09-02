@@ -8,9 +8,9 @@
  * ship to the browser, the resolver never does.
  */
 
-import type { MatchSide } from '@soc/shared';
+import type { BoardState, MatchMode, MatchSide } from '@soc/shared';
 
-import type { ResolveMove } from '../../services/matchEngine.js';
+import type { ResolveBoardMove, ResolveMove } from '../../services/matchEngine.js';
 
 /** One move a side can pick. Public: nothing here reveals what it scores. */
 export interface MoveOption {
@@ -73,6 +73,73 @@ export interface RedBlueScenario {
 }
 
 /**
+ * One system on a positional board, as content declares it.
+ *
+ * Deliberately not a `BoardTarget`: the four state flags on a target belong to a
+ * match in progress, and a scenario has no business shipping them. The board a
+ * match starts on is built from these, clean, one per match.
+ */
+export interface PositionalTargetSpec {
+  id: string;
+  label: string;
+  /** One line on what the system is. Shown to both sides; it is the map. */
+  note: string;
+  /** Red's objective. Exactly one target carries it. */
+  crown?: boolean;
+}
+
+/**
+ * A scenario played on a board rather than a menu.
+ *
+ * Sibling to `RedBlueScenario`, not a variant of it, because almost nothing
+ * carries over: there is no move menu (the board is the menu), no attacker
+ * console (there is no host to scan), and scoring answers a mechanical outcome
+ * rather than an option id. What they do share is the dossier and the rule that
+ * the resolver never leaves the server.
+ */
+export interface PositionalScenario {
+  id: string;
+  title: string;
+  /** One paragraph of framing, shown to both sides. */
+  brief: string;
+  /** How many rounds (red fires, blue answers) before the clock runs out. */
+  maxTurns: number;
+  dossier: TargetDossier;
+  targets: PositionalTargetSpec[];
+  /** How many systems Blue may cover at once. */
+  coverageBudget: number;
+  /** How many times Blue may move a defence across the whole match. */
+  movesLeft: number;
+  /** How a board action scores and what it leaks. Server-only; never serialised out. */
+  resolveBoard: ResolveBoardMove;
+}
+
+/**
+ * A clean starting board for one match.
+ *
+ * Built fresh every time on purpose: two matches on the same scenario must not
+ * be able to see each other's compromises, which sharing one object would allow.
+ */
+export function startingBoard(scenario: PositionalScenario): BoardState {
+  return {
+    phase: 'placement',
+    targets: scenario.targets.map((t) => ({
+      id: t.id,
+      label: t.label,
+      note: t.note,
+      crown: t.crown === true,
+      compromised: false,
+      detectedHere: false,
+      contained: false,
+    })),
+    coverage: [],
+    coverageBudget: scenario.coverageBudget,
+    movesLeft: scenario.movesLeft,
+    found: [],
+  };
+}
+
+/**
  * The scrubbed brief one side may receive.
  *
  * The dossier and the side's own option menu, and nothing about scoring or the
@@ -84,6 +151,8 @@ export interface RedBlueBrief {
   title: string;
   brief: string;
   you: MatchSide;
+  /** Which game this is. `positional` briefs carry no options: the board is the menu. */
+  mode: MatchMode;
   dossier: TargetDossier;
   options: MoveOption[];
 }

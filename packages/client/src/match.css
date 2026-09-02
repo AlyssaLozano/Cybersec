@@ -346,3 +346,71 @@
 @media (prefers-reduced-motion: reduce) {
   .warroom .dot.live { animation: none; }
 }
+
+/* ---------------------------------------------------------------------------
+ * The board (positional mode).
+ *
+ * One tile per system, and the tile's state is the whole game surface: quiet,
+ * shot at, quietly held, walled, or (Blue only) covered. Red's tiles simply
+ * never arrive with `covered` set, so there is no styling here that has to be
+ * "hidden from Red" -- the server already decided what this side can paint.
+ * ------------------------------------------------------------------------- */
+
+.warroom .bcard { display: flex; flex-direction: column; gap: 10px; }
+
+.warroom .bgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 8px;
+}
+
+.warroom .btile {
+  display: flex; flex-direction: column; gap: 5px; align-items: flex-start;
+  padding: 10px 11px; min-height: 96px; text-align: left; cursor: pointer;
+  font: inherit; color: var(--wr-ink);
+  background: var(--wr-ground-2);
+  border: 1px solid var(--wr-line);
+  border-radius: 9px;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.warroom .btile:hover:not(:disabled) { border-color: var(--wr-ink-faint); }
+.warroom .btile:disabled { cursor: default; opacity: 0.72; }
+
+.warroom .btile .bt-top { display: flex; align-items: center; gap: 6px; width: 100%; }
+.warroom .btile .bt-label { font-size: 13px; font-weight: 700; }
+.warroom .btile .bt-crown { margin-left: auto; color: var(--wr-amber); font-size: 13px; }
+.warroom .btile .bt-note { font-size: 11px; color: var(--wr-ink-dim); line-height: 1.35; }
+.warroom .btile .bt-state { display: flex; flex-wrap: wrap; gap: 4px; margin-top: auto; }
+
+.warroom .bt-chip {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 999px; border: 1px solid var(--wr-line);
+  color: var(--wr-ink-faint); background: var(--wr-panel);
+}
+.warroom .bt-chip.quiet { color: var(--wr-ink-faint); }
+.warroom .bt-chip.held { color: var(--wr-red-bright); border-color: rgba(255, 59, 82, 0.4); background: var(--wr-red-deep); }
+.warroom .bt-chip.seen { color: var(--wr-amber); border-color: rgba(245, 166, 35, 0.4); background: rgba(245, 166, 35, 0.1); }
+.warroom .bt-chip.covered { color: var(--wr-blue-bright); border-color: rgba(63, 157, 255, 0.4); background: var(--wr-blue-deep); }
+.warroom .bt-chip.walled { color: var(--wr-green); border-color: rgba(53, 208, 138, 0.4); background: rgba(53, 208, 138, 0.1); }
+
+/* The objective is marked from the first turn: both sides are playing for it. */
+.warroom .btile.crown { border-color: rgba(245, 166, 35, 0.35); background: linear-gradient(180deg, rgba(245, 166, 35, 0.07), var(--wr-ground-2)); }
+.warroom .btile.held { border-color: rgba(255, 59, 82, 0.45); }
+.warroom .btile.walled { border-color: rgba(53, 208, 138, 0.4); }
+.warroom .btile.covered { box-shadow: inset 0 0 0 1px rgba(63, 157, 255, 0.3); }
+
+/* Selection: what this click has already chosen, before you commit the turn. */
+.warroom .btile.sel { border-color: var(--wr-violet); box-shadow: 0 0 0 1px var(--wr-violet); }
+.warroom .btile.from { border-color: var(--wr-blue); box-shadow: 0 0 0 1px var(--wr-blue); }
+.warroom .btile.placing { border-color: var(--wr-blue-bright); background: var(--wr-blue-deep); }
+
+.warroom .bprompt {
+  font-size: 11.5px; color: var(--wr-ink-dim); line-height: 1.5;
+  border-top: 1px solid var(--wr-line-soft); padding-top: 9px;
+}
+
+.warroom .bsel {
+  font-size: 12.5px; font-weight: 600; color: var(--wr-ink);
+  background: var(--wr-ground-2); border: 1px solid var(--wr-line);
+  border-radius: 7px; padding: 8px 10px; margin-bottom: 8px;
+}

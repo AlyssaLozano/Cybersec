@@ -159,6 +159,11 @@ export interface MatchState {
   id: string;
   scenarioId: string;
   difficulty: ScenarioDifficulty;
+  /**
+   * Which game this match is playing. Absent on rows written before the board
+   * mode existed, which is why every reader defaults it to `linear`.
+   */
+  mode: MatchMode;
   status: MatchStatus;
   visibility: RoomVisibility;
   /** Set for closed matches (invite by code), null for open (queue) ones. */
@@ -182,6 +187,12 @@ export interface MatchState {
   hostLog: string[];
   /** Each side's terminal working directory, so the shell survives page reloads. */
   terminalCwd: Record<MatchSide, string>;
+  /**
+   * The hidden-information board. Present only when `mode === 'positional'`, and
+   * it rides in the same `stateJson` blob as everything else, which is why the
+   * whole mode needs no migration.
+   */
+  board?: BoardState;
   /** Epoch ms. */
   createdAt: number;
   /** Epoch ms of the last committed move, or null before the first. */
@@ -250,9 +261,128 @@ export interface MatchView {
    * which case the side works from the findings panel instead.
    */
   terminal: MatchTerminalView | null;
+  /** Which game this is, so the client knows whether to render a menu or a board. */
+  mode: MatchMode;
+  /**
+   * The board, redacted to your side. Present only in a positional match, and
+   * never the raw `BoardState`: Blue's coverage is the secret the mode is built
+   * on, and `matchViewFor` is the one place that decides what survives.
+   */
+  board?: BoardViewForSide;
+  /**
+   * Who took it, once a match is decided. Null while it is still being played,
+   * and null for a linear match, which is scored rather than won.
+   */
+  winner: MatchSide | null;
   /**
    * The join code, surfaced ONLY to the host of a still-waiting closed match so
    * they can pass it on. Null in every other case.
    */
   joinCode: string | null;
+}
+
+/**
+ * WHICH GAME A MATCH IS PLAYING.
+ *
+ * `linear` is the original: a menu of moves per side, a resolver scores the pick,
+ * and the opponent's move only sets the threat level you answer. `positional` is
+ * the board game -- hidden placement, probing, and adaptation, in the shape of
+ * Battleship. They share the engine's turn machinery, the redaction boundary and
+ * the move log; they differ only in what a move IS. A match declares its mode at
+ * creation and never changes it, so the two never have to reason about each other.
+ */
+export const MATCH_MODES = ['linear', 'positional'] as const;
+export type MatchMode = (typeof MATCH_MODES)[number];
+
+/**
+ * Where a positional match is in its life.
+ *
+ * placement  Blue is secretly laying coverage. No shot can be fired yet, because
+ *            firing at a board nobody has defended is not a game.
+ * play       Red fires, Blue answers, turn for turn.
+ * done       An objective decided it, or the clock ran out.
+ */
+export const BOARD_PHASES = ['placement', 'play', 'done'] as const;
+export type BoardPhase = (typeof BOARD_PHASES)[number];
+
+/** What Blue may do on its half of a round. */
+export const BLUE_BOARD_ACTIONS = ['reposition', 'investigate', 'contain'] as const;
+export type BlueBoardAction = (typeof BLUE_BOARD_ACTIONS)[number];
+
+/**
+ * One system on the board. SERVER TRUTH -- never sent to a client as-is.
+ *
+ * The three state flags are deliberately independent rather than one status
+ * enum, because a target really can be several of these at once: Red can be
+ * detected at a system on turn 2 and quietly own it on turn 6.
+ */
+export interface BoardTarget {
+  id: string;
+  label: string;
+  /** One line on what this system is, shown to both sides. */
+  note: string;
+  /** Red's objective. Compromising a crown target undetected wins the match. */
+  crown: boolean;
+  /** Red has compromised it (a quiet hit). Redacted per side in the view. */
+  compromised: boolean;
+  /** Red fired here and it was covered. Public: both players saw the shot land. */
+  detectedHere: boolean;
+  /** Blue found the compromise and walled it. Public, and it clears `compromised`. */
+  contained: boolean;
+}
+
+/**
+ * The hidden-information board. SERVER TRUTH -- `coverage` and `investigated`
+ * are the two secrets the whole mode rests on, and neither ever crosses whole.
+ */
+export interface BoardState {
+  phase: BoardPhase;
+  targets: BoardTarget[];
+  /** Target ids Blue currently covers. HIDDEN FROM RED. */
+  coverage: string[];
+  /** How many targets Blue may cover at once. Public: you can see a fleet's size. */
+  coverageBudget: number;
+  /** Coverage repositions Blue has left. Blue-only. */
+  movesLeft: number;
+  /**
+   * Compromises Blue has UNCOVERED. Blue-only.
+   *
+   * Deliberately not "targets Blue has investigated": a standing permission to
+   * see a target would hand Blue every future hit there for free, which is the
+   * hidden information the mode is made of. This records only what an
+   * investigation actually turned up, so a target that looked clean and was
+   * taken later still has to be looked at again.
+   */
+  found: string[];
+}
+
+/** One target as ONE side is allowed to see it. */
+export interface BoardTargetView {
+  id: string;
+  label: string;
+  note: string;
+  crown: boolean;
+  /** Public: a shot that landed on coverage is a fact both players witnessed. */
+  detectedHere: boolean;
+  /** Public: a wall goes up where everyone can see it. */
+  contained: boolean;
+  /**
+   * Whether THE VIEWER knows this target is compromised. Red always knows its
+   * own hits; Blue knows only what it has investigated. This is the redaction.
+   */
+  compromised: boolean;
+  /** Blue only: coverage sits here right now. Always false in Red's view. */
+  covered: boolean;
+}
+
+/** The board as ONE side may receive it. The positional `toStudentView`. */
+export interface BoardViewForSide {
+  phase: BoardPhase;
+  targets: BoardTargetView[];
+  /** Public, as a fleet's composition is in Battleship: it makes probing mean something. */
+  coverageBudget: number;
+  /** Blue's remaining repositions. Null for Red, who is not told. */
+  movesLeft: number | null;
+  /** Set once the board is `done`. Null while it is still being played. */
+  winner: MatchSide | null;
 }

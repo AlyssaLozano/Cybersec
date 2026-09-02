@@ -23,6 +23,7 @@
 import { randomUUID } from 'node:crypto';
 
 import type {
+  BlueBoardAction,
   FloorIdentity,
   MatchSide,
   MatchState,
@@ -41,14 +42,17 @@ import { Vfs } from '../vfs/vfs.js';
 import {
   MatchError,
   abandonMatch,
+  blueAct,
   commitMove,
   createMatch,
+  fire,
   joinMatch,
   matchViewFor,
+  placeCoverage,
   sideOf,
   terminalKindFor,
 } from './matchEngine.js';
-import { maxTurnsFor, resolveMoveFor } from './matchContent.js';
+import { boardFor, maxTurnsFor, resolveBoardFor, resolveMoveFor } from './matchContent.js';
 
 const TERMINAL_HOME = '/home/student';
 /** Where Red's activity lands, for the defender to read with the real shell. */
@@ -101,9 +105,12 @@ function rowData(state: MatchState) {
 /** The blob is the truth; the columns are only for querying. */
 function fromRow(row: { stateJson: string }): MatchState {
   const state = JSON.parse(row.stateJson) as MatchState;
-  // Defensive: a row written before these fields existed has none of them.
+  // Defensive: a row written before these fields existed has none of them. Every
+  // match that predates the board mode is a linear one, which is why `mode`
+  // defaults rather than being backfilled by a migration.
   return {
     ...state,
+    mode: state.mode ?? 'linear',
     findings: state.findings ?? [],
     hostLog: state.hostLog ?? [],
     terminalCwd: state.terminalCwd ?? { red: TERMINAL_HOME, blue: TERMINAL_HOME },
@@ -122,8 +129,16 @@ export interface OpenMatchInput {
   maxTurns?: number;
 }
 
-/** Open a new match with the host seated and one chair waiting. */
+/**
+ * Open a new match with the host seated and one chair waiting.
+ *
+ * The scenario decides which game gets played: a scenario that registered a
+ * board opens positional and carries a fresh one, anything else opens linear.
+ * The client never chooses the mode, so a crafted request cannot ask for a board
+ * on a menu scenario or the reverse.
+ */
 export async function openMatch(input: OpenMatchInput): Promise<MatchState> {
+  const board = boardFor(input.scenarioId);
   const state = createMatch({
     id: randomUUID(),
     scenarioId: input.scenarioId,
@@ -133,6 +148,8 @@ export async function openMatch(input: OpenMatchInput): Promise<MatchState> {
     hostIdentity: input.hostIdentity,
     hostSide: input.hostSide,
     maxTurns: input.maxTurns ?? maxTurnsFor(input.scenarioId),
+    mode: board ? 'positional' : 'linear',
+    ...(board ? { board } : {}),
     now: Date.now(),
   });
   await prisma.match.create({ data: { id: state.id, ...rowData(state) } });
@@ -220,6 +237,69 @@ export async function move(
       fromRow(row),
       { userId, optionId, justification, now: Date.now() },
       resolveMoveFor(row.scenarioId),
+    );
+    await tx.match.update({ where: { id: matchId }, data: rowData(next) });
+    return next;
+  });
+}
+
+/**
+ * Blue lays its coverage, and the board opens for play.
+ *
+ * Same transaction discipline as a move: two players share one row, and the
+ * engine's phase check is what makes a lost update fail loudly rather than
+ * silently replace somebody's placement.
+ */
+export async function place(
+  matchId: string,
+  userId: string,
+  targetIds: string[],
+): Promise<MatchState> {
+  return prisma.$transaction(async (tx) => {
+    const row = await tx.match.findUnique({ where: { id: matchId } });
+    if (!row) throw new MatchError('No such match.');
+    const next = placeCoverage(fromRow(row), userId, targetIds);
+    await tx.match.update({ where: { id: matchId }, data: rowData(next) });
+    return next;
+  });
+}
+
+/** Red fires at one system. Scored by the scenario's board resolver. */
+export async function fireAt(
+  matchId: string,
+  userId: string,
+  targetId: string,
+  justification: string,
+): Promise<MatchState> {
+  return prisma.$transaction(async (tx) => {
+    const row = await tx.match.findUnique({ where: { id: matchId } });
+    if (!row) throw new MatchError('No such match.');
+    const next = fire(
+      fromRow(row),
+      { userId, targetId, justification, now: Date.now() },
+      resolveBoardFor(row.scenarioId),
+    );
+    await tx.match.update({ where: { id: matchId }, data: rowData(next) });
+    return next;
+  });
+}
+
+/** Blue repositions, investigates, or contains. One of the three, per round. */
+export async function blueBoardMove(
+  matchId: string,
+  userId: string,
+  action: BlueBoardAction,
+  targetId: string,
+  fromId: string | undefined,
+  justification: string,
+): Promise<MatchState> {
+  return prisma.$transaction(async (tx) => {
+    const row = await tx.match.findUnique({ where: { id: matchId } });
+    if (!row) throw new MatchError('No such match.');
+    const next = blueAct(
+      fromRow(row),
+      { userId, action, targetId, fromId, justification, now: Date.now() },
+      resolveBoardFor(row.scenarioId),
     );
     await tx.match.update({ where: { id: matchId }, data: rowData(next) });
     return next;

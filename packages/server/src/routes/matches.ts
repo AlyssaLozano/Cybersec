@@ -14,21 +14,30 @@
 import { Router } from 'express';
 import { z } from 'zod';
 
-import { API_ERROR_CODES, MATCH_SIDES, ROOM_VISIBILITIES, SCENARIO_DIFFICULTIES } from '@soc/shared';
+import {
+  API_ERROR_CODES,
+  BLUE_BOARD_ACTIONS,
+  MATCH_SIDES,
+  ROOM_VISIBILITIES,
+  SCENARIO_DIFFICULTIES,
+} from '@soc/shared';
 import type { FloorIdentity } from '@soc/shared';
 import { AVATARS, checkCallSign } from '@soc/shared';
 
 import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
-import { getRedBlueScenario, redBlueBriefFor } from '../content/redblue/index.js';
+import { matchBriefFor, matchScenarioList } from '../content/redblue/index.js';
 import { matchViewFor } from '../services/matchEngine.js';
 import {
   MatchError,
   abandon,
+  blueBoardMove,
+  fireAt,
   joinByCode,
   listFor,
   matchmake,
   move,
   openMatch,
+  place,
   runRedTerminal,
   runTerminal,
   viewFor,
@@ -144,6 +153,19 @@ matchesRouter.post(
   }),
 );
 
+/**
+ * The scenarios a match can be opened on. Names and framing only.
+ *
+ * Both catalogues, each tagged with its mode, so the lobby can say which are
+ * played on a menu and which on a board without a second round trip.
+ */
+matchesRouter.get(
+  '/scenarios',
+  asyncRoute(async (_request, response) => {
+    sendOk(response, matchScenarioList());
+  }),
+);
+
 /** Every match the caller has a seat in, each redacted to their side. */
 matchesRouter.get(
   '/',
@@ -173,9 +195,9 @@ matchesRouter.get(
   asyncRoute(async (request, response) => {
     const userId = userIdOf(request);
     const view = await guard(() => viewFor(matchIdOf(request), userId));
-    const scenario = getRedBlueScenario(view.scenarioId);
-    if (!scenario) throw new HttpError(404, API_ERROR_CODES.notFound, 'No brief for this scenario yet.');
-    sendOk(response, redBlueBriefFor(scenario, view.you));
+    const brief = matchBriefFor(view.scenarioId, view.you);
+    if (!brief) throw new HttpError(404, API_ERROR_CODES.notFound, 'No brief for this scenario yet.');
+    sendOk(response, brief);
   }),
 );
 
@@ -192,6 +214,71 @@ matchesRouter.post(
     const body = moveSchema.parse(request.body);
     const state = await guard(() =>
       move(matchIdOf(request), userId, body.optionId, body.justification),
+    );
+    sendOk(response, matchViewFor(state, userId));
+  }),
+);
+
+const placeSchema = z.object({ targetIds: z.array(z.string().min(1)).min(1) });
+
+/**
+ * Blue lays its coverage on a board match, which opens it for play.
+ *
+ * The response is the caller's own redacted view, so Blue gets its placement
+ * back and Red -- who cannot call this at all -- could learn nothing from it if
+ * it did. Every rule (side, phase, count) is the engine's, surfaced as a 409.
+ */
+matchesRouter.post(
+  '/:id/place',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const body = placeSchema.parse(request.body);
+    const state = await guard(() => place(matchIdOf(request), userId, body.targetIds));
+    sendOk(response, matchViewFor(state, userId));
+  }),
+);
+
+const fireSchema = z.object({
+  targetId: z.string().min(1),
+  justification: z.string().min(1),
+});
+
+/** Red fires at one system. Refused with 409 off-turn, out of phase, or wrong side. */
+matchesRouter.post(
+  '/:id/fire',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const body = fireSchema.parse(request.body);
+    const state = await guard(() =>
+      fireAt(matchIdOf(request), userId, body.targetId, body.justification),
+    );
+    sendOk(response, matchViewFor(state, userId));
+  }),
+);
+
+const blueActSchema = z.object({
+  action: z.enum(BLUE_BOARD_ACTIONS),
+  targetId: z.string().min(1),
+  /** Reposition only: the system coverage moves off. The engine requires it there. */
+  fromId: z.string().min(1).optional(),
+  justification: z.string().min(1),
+});
+
+/** Blue's half of a board round: reposition, investigate, or contain. */
+matchesRouter.post(
+  '/:id/blue-act',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const body = blueActSchema.parse(request.body);
+    const state = await guard(() =>
+      blueBoardMove(
+        matchIdOf(request),
+        userId,
+        body.action,
+        body.targetId,
+        body.fromId,
+        body.justification,
+      ),
     );
     sendOk(response, matchViewFor(state, userId));
   }),

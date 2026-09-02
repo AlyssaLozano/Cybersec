@@ -9,6 +9,18 @@
 import type {
   AlertQueue,
   ApiError,
+  BadgeCase,
+  BadgeDefinition,
+  ChatMessage,
+  ChatRoom,
+  CommunityEvent,
+  EventAudience,
+  EventKind,
+  LobbyDoorId,
+  LobbyView,
+  RsvpStatus,
+  BlueBoardAction,
+  MatchMode,
   MatchSide,
   MatchView,
   RoomVisibility,
@@ -217,6 +229,13 @@ export interface RunResult {
   exitCode: number;
   cwd: string;
   evaluation?: Evaluation;
+  /**
+   * Badges this pass just earned, present only when it earned any.
+   *
+   * Carried on the pass rather than polled from the case, so the badge lands in
+   * the same moment as the pass instead of being found later on a shelf.
+   */
+  earnedBadges?: BadgeDefinition[];
   solution?: string;
   expectedOutput?: string;
   debrief?: string;
@@ -341,6 +360,13 @@ export const learning = {
 /** What the server returns from a non-terminal submission. */
 export interface SubmitResult {
   evaluation: Evaluation;
+  /**
+   * Badges this pass just earned, present only when it earned any.
+   *
+   * Carried on the pass rather than polled from the case, so the badge lands in
+   * the same moment as the pass instead of being found later on a shelf.
+   */
+  earnedBadges?: BadgeDefinition[];
   /**
    * Per-alert explanation of everything the student got wrong.
    *
@@ -620,6 +646,8 @@ export interface MatchBrief {
   title: string;
   brief: string;
   you: MatchSide;
+  /** `positional` briefs carry no options: the board in the view is the menu. */
+  mode: MatchMode;
   dossier: { org: string; summary: string; facts: Array<{ k: string; v: string }> };
   options: Array<{ id: string; label: string; description: string }>;
 }
@@ -627,7 +655,20 @@ export interface MatchBrief {
 /** A queue result also reports whether we joined a waiting match or opened one. */
 export type QueueResult = MatchView & { joined: boolean };
 
+/** A red-vs-blue scenario a match can be opened on. */
+export interface MatchScenarioInfo {
+  id: string;
+  title: string;
+  org: string;
+  brief: string;
+  /** Which game it is, so the lobby can say so before anyone commits to a seat. */
+  mode: MatchMode;
+}
+
 export const matches = {
+  /** The scenarios a match can be opened on. */
+  scenarios: () => request<MatchScenarioInfo[]>('/matches/scenarios'),
+
   /** Every match the caller has a seat in, each already redacted to their side. */
   list: () => request<MatchView[]>('/matches'),
 
@@ -665,6 +706,38 @@ export const matches = {
       body: JSON.stringify({ optionId, justification }),
     }),
 
+  /**
+   * Blue locks in its coverage on a board match, which opens it for play.
+   *
+   * The ids never come back out to Red: the response is the caller's own
+   * redacted view, and the server is the only thing that ever holds the board.
+   */
+  place: (id: string, targetIds: string[]) =>
+    request<MatchView>(`/matches/${id}/place`, {
+      method: 'POST',
+      body: JSON.stringify({ targetIds }),
+    }),
+
+  /** Red fires at one system. Rejected with 409 off-turn or out of phase. */
+  fire: (id: string, targetId: string, justification: string) =>
+    request<MatchView>(`/matches/${id}/fire`, {
+      method: 'POST',
+      body: JSON.stringify({ targetId, justification }),
+    }),
+
+  /** Blue's half of a board round. One of the three, and it costs the round. */
+  blueAct: (
+    id: string,
+    action: BlueBoardAction,
+    targetId: string,
+    justification: string,
+    fromId?: string,
+  ) =>
+    request<MatchView>(`/matches/${id}/blue-act`, {
+      method: 'POST',
+      body: JSON.stringify({ action, targetId, justification, fromId }),
+    }),
+
   /** Forfeit or cancel. */
   abandon: (id: string) => request<MatchView>(`/matches/${id}/abandon`, { method: 'POST' }),
 
@@ -684,4 +757,132 @@ export const matches = {
       method: 'POST',
       body: JSON.stringify({ command, justification }),
     }),
+};
+
+// --- the lobby ---------------------------------------------------------------
+
+/**
+ * The lobby is polled, not subscribed to.
+ *
+ * `presence` is both the heartbeat and the read: one call rather than a POST
+ * followed by a GET, because they always happen together on a timer and
+ * splitting them doubles the traffic while opening a window where the viewer is
+ * missing from the list they were just added to.
+ */
+export const lobby = {
+  /** Read the room without announcing yourself. Used before the first beat. */
+  read: () => request<{ lobby: LobbyView; notice: string }>('/lobby'),
+
+  /** Walk in, or say you are still here, and get the room back. */
+  presence: (headingFor: LobbyDoorId | null) =>
+    request<{ lobby: LobbyView; notice: string }>('/lobby/presence', {
+      method: 'POST',
+      body: JSON.stringify({ headingFor }),
+    }),
+
+  /** Leave deliberately, rather than fading out over seventy-five seconds. */
+  leave: () => request<{ left: boolean }>('/lobby/presence', { method: 'DELETE' }),
+
+  /**
+   * Read a chat room.
+   *
+   * `after` is a message id and not a timestamp: two messages can share a
+   * millisecond, and a timestamp cursor silently drops one of them.
+   */
+  messages: (roomId: string, after?: string | null) =>
+    request<{ messages: ChatMessage[] }>(
+      `/lobby/rooms/${encodeURIComponent(roomId)}/messages${after ? `?after=${encodeURIComponent(after)}` : ''}`,
+    ),
+
+  say: (roomId: string, body: string, eventId?: string | null) =>
+    request<{ message: ChatMessage }>(`/lobby/rooms/${encodeURIComponent(roomId)}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ body, eventId: eventId ?? null }),
+    }),
+
+  /** Ask for a new room. It is public, and it waits for a reviewer. */
+  requestRoom: (title: string, topic: string) =>
+    request<{ room: ChatRoom }>('/lobby/rooms', {
+      method: 'POST',
+      body: JSON.stringify({ title, topic }),
+    }),
+
+  /** This person's own requests, so a decision reaches them. */
+  myRequests: () => request<{ requests: ChatRoom[] }>('/lobby/rooms/mine'),
+
+  /** Staff only. A 403 here is the client asking a question it should not have. */
+  reviewQueue: () => request<{ pending: ChatRoom[] }>('/lobby/review'),
+
+  review: (roomId: string, decision: 'approve' | 'reject', note: string | null) =>
+    request<{ room: ChatRoom }>(`/lobby/review/${encodeURIComponent(roomId)}`, {
+      method: 'POST',
+      body: JSON.stringify({ decision, note }),
+    }),
+
+  closeRoom: (roomId: string, note: string) =>
+    request<{ closed: boolean }>(`/lobby/review/${encodeURIComponent(roomId)}/close`, {
+      method: 'POST',
+      body: JSON.stringify({ note }),
+    }),
+
+  hideMessage: (messageId: string) =>
+    request<{ hidden: boolean }>(`/lobby/review/messages/${encodeURIComponent(messageId)}/hide`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    }),
+};
+
+// --- the event centre --------------------------------------------------------
+
+export const events = {
+  list: (query: { from?: string; to?: string; audience?: EventAudience; kind?: EventKind } = {}) => {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) {
+      if (value) params.set(key, value);
+    }
+    const suffix = params.toString();
+    return request<{ events: CommunityEvent[] }>(`/events${suffix ? `?${suffix}` : ''}`);
+  },
+
+  get: (id: string) => request<{ event: CommunityEvent }>(`/events/${encodeURIComponent(id)}`),
+
+  create: (body: {
+    title: string;
+    description: string;
+    kind: EventKind;
+    audience: EventAudience;
+    startsAt: string;
+    durationMinutes: number;
+    roomId: string | null;
+    capacity: number | null;
+  }) => request<{ event: CommunityEvent }>('/events', { method: 'POST', body: JSON.stringify(body) }),
+
+  rsvp: (id: string, status: RsvpStatus) =>
+    request<{ event: CommunityEvent }>(`/events/${encodeURIComponent(id)}/rsvp`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }),
+
+  withdraw: (id: string) =>
+    request<{ event: CommunityEvent }>(`/events/${encodeURIComponent(id)}/rsvp`, {
+      method: 'DELETE',
+    }),
+
+  cancel: (id: string) =>
+    request<{ event: CommunityEvent }>(`/events/${encodeURIComponent(id)}/cancel`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    }),
+};
+
+// --- badges ------------------------------------------------------------------
+
+/**
+ * Read-only, deliberately.
+ *
+ * Badges are awarded on the server when an exercise passes. A client route that
+ * could grant one would make the badge evidence of nothing.
+ */
+export const badges = {
+  case: () => request<BadgeCase>('/badges'),
 };
