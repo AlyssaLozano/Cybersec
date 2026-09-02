@@ -53,6 +53,10 @@ const ERADICATE_SOUND = optionsWithQuality('dp.eradicate', 'sound');
 const ERADICATE_HARMFUL = optionsWithQuality('dp.eradicate', 'harmful');
 const NOTIFY_SOUND = optionsWithQuality('dp.notify', 'sound');
 const NOTIFY_HARMFUL = optionsWithQuality('dp.notify', 'harmful');
+const SCOPE_SOUND = optionsWithQuality('dp.scope', 'sound');
+const SCOPE_HARMFUL = optionsWithQuality('dp.scope', 'harmful');
+const RECOVER_SOUND = optionsWithQuality('dp.recover', 'sound');
+const RECOVER_HARMFUL = optionsWithQuality('dp.recover', 'harmful');
 const VALIDATE_SOUND = optionsWithQuality('dp.validate', 'sound');
 const VALIDATE_HARMFUL = optionsWithQuality('dp.validate', 'harmful');
 
@@ -1761,6 +1765,660 @@ const MODULE_IR_6: Exercise[] = [
   },
 ];
 
+// --- module ir.7: how far did it go ------------------------------------------
+
+const MODULE_IR_7: Exercise[] = [
+  {
+    id: 'ir.7.1',
+    moduleId: 'ir.7',
+    packageId: PKG,
+    order: 1,
+    title: 'Four hosts, two analysts',
+    kind: 'incident-decision',
+    decisionPointId: 'dp.scope',
+    goal: 'Direct limited people at the host that answers the blocking question.',
+    prompt:
+      'It is 12:15. The compromised host is isolated and captured, and you have two analysts and ' +
+      'four systems the attacker could have reached. Decide where they go first. Read the unknown ' +
+      'list before you choose: one of those questions is holding up every other decision.',
+    teach: {
+      concept:
+        'Scoping is a resourcing decision wearing technical clothes. You almost never have enough ' +
+        'people to look at everything properly, so the question is not "what could have been ' +
+        'reached" but "which answer unblocks the most other decisions, and can I get it today".\n\n' +
+        'Two things separate a good scope from a thorough one. Depth beats coverage: four shallow ' +
+        'looks produce four inconclusive answers, and inconclusive means the work has to be done ' +
+        'again. And cheap estate-wide checks are different in kind from investigations: asking one ' +
+        'narrow question everywhere, such as whether an account or a key exists, costs almost ' +
+        'nothing and scales, so it runs alongside the deep work rather than competing with it.',
+      examples: [
+        {
+          command: 'Depth on the host that matters',
+          explains: 'One conclusive answer about the highest-value system, inside the window where it is useful.',
+        },
+        {
+          command: 'A narrow sweep everywhere else',
+          explains: 'One specific indicator checked across the estate. Fast, mechanical, and it finds spread.',
+        },
+      ],
+    },
+    hints: [
+      'Read the pressures. One question is named as the thing leadership is waiting on, and only one host can answer it.',
+      'One option is thorough and produces nothing usable. Ask what an hour per host actually buys you.',
+      'One option follows the loudest host rather than the most consequential one, and its noise was already explained before today.',
+    ],
+    solution:
+      'Put the depth on rmg-db-01, because whether patient records were accessed is the question ' +
+      'blocking notification and every leadership conversation, and it was reachable from the ' +
+      'compromised host. Run the credential and key sweep across the estate alongside it, because ' +
+      'it is cheap, mechanical, and finds persistence that has already spread. Splitting two people ' +
+      'across four hosts produces four answers you cannot rely on, and starting with the noisy ' +
+      'monitoring box spends the afternoon on a misconfiguration that was understood yesterday.',
+    expectedOutput: 'Depth on the database host, plus an estate-wide sweep for the account and key.',
+    checks: [
+      {
+        type: 'decision-selects',
+        optionIds: SCOPE_SOUND,
+        hint:
+          'One host answers the question everything else is waiting on, and one check is cheap ' +
+          'enough to run everywhere at the same time. You have not chosen both.',
+      },
+      {
+        type: 'decision-avoids',
+        optionIds: SCOPE_HARMFUL,
+        hint:
+          'One of your choices spreads two people so thin that nothing gets established, or follows ' +
+          'the noisiest host rather than the one that matters.',
+      },
+      {
+        type: 'decision-justifies',
+        conceptGroups: [
+          ['database', 'db-01', 'records', 'patient data'],
+          ['block', 'waiting', 'notification', 'leadership', 'cannot answer', 'unblock'],
+          ['sweep', 'key', 'account', 'estate', 'everywhere', 'spread'],
+        ],
+        hint:
+          'Say why in the box: which host answers the blocking question, and why the estate-wide ' +
+          'check runs alongside rather than instead.',
+      },
+    ],
+    debrief:
+      'Notice that the defensible option, the backup host, is not wrong. It is genuinely important ' +
+      'and it is not first, and knowing the difference between "wrong" and "not yet" is most of ' +
+      'what scoping is.',
+    practice: [],
+  },
+  {
+    id: 'ir.7.2',
+    moduleId: 'ir.7',
+    packageId: PKG,
+    order: 2,
+    title: 'Check whether the account spread',
+    kind: 'terminal',
+    goal: 'Run the cheap estate-wide question against the evidence you have.',
+    prompt:
+      'Check whether the account the attacker created exists in the local account list on this host, ' +
+      'and show the line if it does.',
+    teach: {
+      concept:
+        'The sweep decided on in the previous exercise is made of questions like this one: narrow, ' +
+        'mechanical, with an answer shape you know in advance. On a real estate it runs against ' +
+        'every host through configuration management; the question asked of each one is identical ' +
+        'to what you run here by hand.\n\n' +
+        '/etc/passwd holds the local accounts, one per line, colon-separated. It is world-readable ' +
+        'by design, which is what makes this check cheap. What you are looking for is the account ' +
+        'name, and what you are reading on the line is the UID and the shell: an account with a real ' +
+        'login shell was made for somebody to use.',
+      syntax: 'grep NAME /etc/passwd',
+      examples: [
+        {
+          command: 'grep www-data /etc/passwd',
+          explains: 'The same check for a legitimate service account, which has no interactive shell.',
+        },
+      ],
+    },
+    hints: [
+      'The local account list is a plain text file you can read.',
+      'The account created during the intrusion is called sysmon.',
+    ],
+    solution: 'grep sysmon /etc/passwd',
+    expectedOutput: 'One line, with UID 1501 and an interactive shell.',
+    checks: [
+      {
+        type: 'output-contains',
+        text: 'sysmon',
+        hint: 'The account should be found in the local account list.',
+      },
+      {
+        type: 'output-contains',
+        text: '1501',
+        hint: 'Read the whole line: the UID is part of what makes this account suspicious.',
+      },
+    ],
+    debrief:
+      'A login shell and a UID in the human range, on an account named to look like monitoring ' +
+      'software. Real monitoring accounts are usually system accounts with no shell, which is the ' +
+      'comparison that makes this one stand out.',
+    practice: [],
+  },
+  {
+    id: 'ir.7.3',
+    moduleId: 'ir.7',
+    packageId: PKG,
+    order: 3,
+    title: 'What clearing a host actually means',
+    kind: 'short-answer',
+    goal: 'State a scoping conclusion at the strength the evidence supports.',
+    prompt:
+      'Your colleague checked rmg-db-01 and reports it is clean. In three or four sentences, say ' +
+      'what that claim needs to mean before it can go in the report.',
+    teach: {
+      concept:
+        '"Clean" is the most dangerous word in a scoping conversation, because it sounds like a ' +
+        'conclusion and is usually a summary of whatever somebody happened to look at.\n\n' +
+        'A usable clearing statement has three parts. WHAT WAS CHECKED: which artefacts, on which ' +
+        'host. OVER WHAT PERIOD: a clearing that covers the last hour says nothing about the ' +
+        'intrusion window, and the window here runs from 09:12 to isolation. AND WITH WHAT ' +
+        'LIMITS: which sources were unavailable, and what would still be invisible if the attacker ' +
+        'was careful.\n\n' +
+        'The strong form is not "the database is clean". It is "no authentication from web-02 ' +
+        'appears in the database logs between 09:12 and 11:42, and those logs are retained for ' +
+        'thirty days and were not writable by the compromised host". That is a claim somebody can ' +
+        'check, and it is honest about being narrower than the sentence it replaces.',
+    },
+    hints: [
+      'Ask three questions of the claim: what was looked at, over what period, and what would not have shown up.',
+      'The intrusion window is not the same as the last hour, and a check that covers the wrong period proves nothing.',
+      'A good answer names the specific artefacts examined, pins the time window to the intrusion, and states what the check could not have seen.',
+    ],
+    solution:
+      'It has to say what was actually examined rather than that the host is clean: which logs and ' +
+      'artefacts on rmg-db-01 were reviewed, and whether that included authentication records, ' +
+      'query activity, and local account changes. It has to state the period, and that period has ' +
+      'to be the intrusion window from 09:12 through to isolation, because a review of the last ' +
+      'hour would have found nothing whether or not anything happened. And it has to name its ' +
+      'limits: which sources were missing or too short in retention, and the fact that an attacker ' +
+      'with credentials could have made a legitimate-looking connection that no log would ' +
+      'distinguish. Written that way it supports a conclusion; written as "clean" it supports ' +
+      'nothing and will be quoted as though it did.',
+    expectedOutput:
+      'An answer naming the specific artefacts checked, the intrusion time window they were checked ' +
+      'over, and the limits of what such a check could have detected.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['which logs', 'artefact', 'artifact', 'authentication records', 'what was examined', 'query'],
+          ['window', 'period', '09:12', 'intrusion window', 'time range', 'retention'],
+          ['limits', 'would not', 'could not', 'missing', 'legitimate-looking', 'indistinguish', 'not distinguish'],
+        ],
+        hint:
+          'Three parts: what was examined, over what period, and what such a check could not have seen.',
+      },
+    ],
+    debrief:
+      'Push back on "clean" every time you hear it, including when you say it. The person quoting ' +
+      'your report in six months will not have the conversation you had; they will only have the ' +
+      'sentence.',
+    practice: [],
+  },
+  {
+    id: 'ir.7.4',
+    moduleId: 'ir.7',
+    packageId: PKG,
+    order: 4,
+    title: 'Which indicators are worth pivoting on',
+    kind: 'multiple-choice',
+    goal: 'Choose indicators that will still be true tomorrow over ones that change hourly.',
+    prompt:
+      'You are about to sweep the estate. Which of these indicators are worth searching on? Select ' +
+      'all that apply.',
+    teach: {
+      concept:
+        'Not every fact about an attacker is worth searching for. The useful ones are specific ' +
+        'enough that a hit means something, and stable enough that the attacker cannot trivially ' +
+        'change them between now and when your sweep runs.\n\n' +
+        'Strong indicators here: the account name, because it had to be created and would have to be ' +
+        'created again; the public key, because it is a fixed string the attacker needs to keep ' +
+        'using; the crontab entry, because persistence has to persist. Each of those costs the ' +
+        'attacker real effort to change.\n\n' +
+        'Weak ones: a source address, which is a rented server and changes for the price of a coffee, ' +
+        'and a file hash of something that is trivially recompiled. Neither is useless, and both ' +
+        'produce a lot of confident false negatives if you treat absence as evidence. Search on ' +
+        'behaviour and on what the attacker must keep, rather than on what they can discard.',
+    },
+    options: [
+      { id: 'a', label: 'The sysmon account name, which had to be created and would have to be created again.' },
+      { id: 'b', label: 'The public key added to authorized_keys, which the attacker needs in order to keep using it.' },
+      { id: 'c', label: 'The crontab entry that re-fetches a script, because persistence has to keep running.' },
+      { id: 'd', label: 'The pattern of a login immediately followed by an account creation, whatever the names are.' },
+      { id: 'e', label: 'The source address 203.0.113.55, treating its absence elsewhere as evidence nothing else was touched.' },
+    ],
+    hints: [
+      'Four are worth it. One is fine to search for and dangerous to draw a conclusion from.',
+      'Ask what each indicator costs the attacker to change.',
+      'The problem with the last one is not the search, it is the word "absence".',
+    ],
+    solution:
+      'A, B, C, and D. Each is either something the attacker had to create or something they have to ' +
+      'keep in order to retain access, which makes a hit meaningful and a miss informative. D is the ' +
+      'strongest of the four and the one people forget: behaviour survives every cosmetic change to ' +
+      'names and addresses. E is the trap, and the trap is in the second half of the sentence: ' +
+      'searching for the address is fine and cheap, but a rented address changes hourly, so ' +
+      'concluding from its absence that nothing else was touched is exactly the false negative that ' +
+      'ends investigations early.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option treats the absence of an easily-changed indicator as proof that nothing else ' +
+          'was reached.',
+      },
+    ],
+    debrief:
+      'This is the pyramid of pain in one exercise: the higher up you search, the more it costs the ' +
+      'attacker to evade you, and behaviour costs them the most.',
+    practice: [],
+  },
+  {
+    id: 'ir.7.5',
+    moduleId: 'ir.7',
+    packageId: PKG,
+    order: 5,
+    title: 'Write the scoping statement',
+    kind: 'short-answer',
+    goal: 'State how far the incident reached, and how far you actually looked.',
+    prompt:
+      'The scope work is finished: the database showed no authentication from the compromised host ' +
+      'in the window, and the estate sweep found the account and key nowhere else. In three or four ' +
+      'sentences, write the scoping statement for the report.',
+    teach: {
+      concept:
+        'The scoping statement is the paragraph a regulator reads to decide how large this was, and ' +
+        'it is the one most likely to be wrong in the reassuring direction.\n\n' +
+        'It needs three things. WHAT WAS AFFECTED, stated positively and specifically. WHAT WAS ' +
+        'CHECKED AND NOT AFFECTED, with the check named rather than implied, because "no evidence of ' +
+        'access" without saying what you looked at is not a finding. And THE BOUNDARY OF THE SEARCH: ' +
+        'which systems were in scope at all, and what would have been missed by the methods used.\n\n' +
+        'Write it so that somebody could disagree with it. A statement nobody could challenge is ' +
+        'usually one that does not say anything, and the ones that get organisations into trouble ' +
+        'are the ones that read as broader guarantees than the work supports.',
+    },
+    hints: [
+      'Three parts: what was affected, what you checked and found clear, and where you did not look.',
+      'Name the check rather than implying it: "no authentication from web-02 in the window" beats "no evidence of access".',
+      'A good statement confines the confirmed compromise to the one host, names the database and estate checks with their method, and states the limits of the search.',
+    ],
+    solution:
+      'Confirmed compromise is limited to rmg-web-02: the account creation, privilege escalation, ' +
+      'persistence and data staging all occurred on that host. rmg-db-01 was examined for ' +
+      'authentication and query activity originating from web-02 across the intrusion window of ' +
+      '09:12 to 11:42, and none was found; an estate-wide check for the sysmon account and for the ' +
+      'attacker SSH key returned no matches on any other system. The boundary of that work is worth ' +
+      'stating: the sweep covered systems under configuration management and the database review ' +
+      'relied on logs retained for thirty days, so activity outside that retention, or a connection ' +
+      'made with valid credentials that looked routine, would not have been distinguished. On the ' +
+      'evidence available the incident is contained to one host.',
+    expectedOutput:
+      'A statement confining confirmed compromise to the one host, naming the database and sweep ' +
+      'checks with their method and window, and stating the limits of the search.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['web-02', 'one host', 'single host', 'limited to'],
+          ['no authentication', 'none was found', 'no matches', 'returned nothing', 'not found'],
+          ['boundary', 'limits', 'retention', 'would not have been', 'outside that', 'covered systems'],
+        ],
+        hint:
+          'Three parts: what is confirmed, what was checked and came back clear, and what the search ' +
+          'could not have covered.',
+      },
+    ],
+    debrief:
+      'The last sentence is the one that protects everybody. "On the evidence available" is not ' +
+      'hedging, it is the accurate scope of every claim in the paragraph above it.',
+    practice: [],
+  },
+];
+
+// --- module ir.8: recovery and afterwards ------------------------------------
+
+const MODULE_IR_8: Exercise[] = [
+  {
+    id: 'ir.8.1',
+    moduleId: 'ir.8',
+    packageId: PKG,
+    order: 1,
+    title: 'Putting the host back',
+    kind: 'incident-decision',
+    decisionPointId: 'dp.recover',
+    goal: 'Choose a recovery that does not depend on your eradication list being complete.',
+    prompt:
+      'It is 15:00. The portal is running on one server with no redundancy and leadership wants a ' +
+      'restoration time. Decide how rmg-web-02 comes back. Read what is still unknown before you ' +
+      'choose.',
+    teach: {
+      concept:
+        'Recovery decisions are made under the strongest pressure in the whole incident, because ' +
+        'the outage is now visible to everybody and the attacker is not. The question underneath ' +
+        'every option is the same: does this plan work even if my list of what the attacker did is ' +
+        'incomplete?\n\n' +
+        'That reframing settles it. You found four persistence mechanisms on a host where somebody ' +
+        'else had root for ninety minutes, and they could have altered any binary, service unit or ' +
+        'library in that time. Removing four known things does not address the unknown ones, and no ' +
+        'amount of careful enumeration turns "I found four" into "there were four".\n\n' +
+        'A rebuild makes the question irrelevant instead of answering it, which is why it is the ' +
+        'sound answer even though it is slower. Credential rotation is necessary alongside whatever ' +
+        'you choose, because anything readable by root while the attacker was present has to be ' +
+        'treated as theirs.',
+      examples: [
+        {
+          command: 'Rebuild from known-good',
+          explains: 'Costs hours you can state up front, and does not rely on your enumeration being complete.',
+        },
+        {
+          command: 'Clean in place',
+          explains: 'Fast, feels complete, and assumes the list of four was exhaustive.',
+        },
+      ],
+    },
+    hints: [
+      'Ask of each option: does this still work if I missed a fifth persistence mechanism?',
+      'One option restores redundancy fastest and relies on detection that has already failed once today.',
+      'One thing has to happen whichever way the host comes back, and it is easy to defer and then never do.',
+    ],
+    solution:
+      'Rebuild rmg-web-02 from a known-good image and redeploy the application from source control, ' +
+      'and rotate every credential and key that was readable on the host. The rebuild is the only ' +
+      'option that does not depend on the four persistence mechanisms being all of them, on a host ' +
+      'where an attacker held root for ninety minutes and could have modified anything. Cleaning in ' +
+      'place is faster and returns a possibly-compromised host to service; returning it now and ' +
+      'watching relies on the same detection that missed an hour of brute force this morning.',
+    expectedOutput: 'Rebuild from a known-good image, with credentials and keys rotated.',
+    checks: [
+      {
+        type: 'decision-selects',
+        optionIds: RECOVER_SOUND,
+        hint:
+          'One option survives your eradication list being incomplete, and one has to happen no ' +
+          'matter which recovery you choose. You have not chosen both.',
+      },
+      {
+        type: 'decision-avoids',
+        optionIds: RECOVER_HARMFUL,
+        hint:
+          'One of your choices returns a host to service on the assumption that everything the ' +
+          'attacker left has been found.',
+      },
+      {
+        type: 'decision-justifies',
+        conceptGroups: [
+          ['rebuild', 'known-good', 'from scratch', 'wipe'],
+          ['root', 'ninety minutes', 'binary', 'modified', 'anything', 'incomplete', 'missed'],
+          ['credential', 'key', 'rotate', 'password', 'token'],
+        ],
+        hint:
+          'Say why in the box: what a rebuild buys that cleaning does not, and what has to happen ' +
+          'regardless of which route you take.',
+      },
+    ],
+    debrief:
+      'The restore-from-backup option is deliberately defensible rather than sound. It is a real ' +
+      'answer if you can show the backup predates first access, and the same timeline that lets you ' +
+      'argue that also says you cannot be certain 10:14 was the first login. Defensible with ' +
+      'evidence; dangerous as a reflex.',
+    practice: [],
+  },
+  {
+    id: 'ir.8.2',
+    moduleId: 'ir.8',
+    packageId: PKG,
+    order: 2,
+    title: 'What has to change before it goes back',
+    kind: 'multiple-choice',
+    goal: 'Separate restoring service from removing the conditions that allowed the incident.',
+    prompt:
+      'rmg-web-02 is being rebuilt. Which of the following should be true before it carries traffic ' +
+      'again? Select all that apply.',
+    teach: {
+      concept:
+        'A host restored to exactly the state it was in on the morning of the incident is a host ' +
+        'that can be compromised the same way this afternoon. Recovery is not "back to normal", it ' +
+        'is "back to better than it was", and the difference is a short list of specific changes ' +
+        'traceable to the root cause.\n\n' +
+        'Here the root cause was unlimited password attempts against an internet-facing service with ' +
+        'no alerting, reaching a stale account that should not have existed. So the list writes ' +
+        'itself: key-based authentication or rate limiting on SSH, an alert on repeated failure, ' +
+        'and the removal of accounts nobody can account for. Add monitoring you know works, because ' +
+        'the monitoring you had did not fire once all morning.\n\n' +
+        'What does not belong on the list is anything that is not traceable to how this happened. ' +
+        'Recovery is the moment when every unrelated project tries to attach itself to an incident, ' +
+        'and a hardening list nobody can finish delays the restoration for no security benefit.',
+    },
+    options: [
+      { id: 'a', label: 'SSH accepts keys only, or rate-limits and locks out repeated password failures.' },
+      { id: 'b', label: 'An alert fires on repeated authentication failure from one source, and somebody has seen it fire.' },
+      { id: 'c', label: 'Stale accounts with sudo rights have been reviewed and removed across the estate.' },
+      { id: 'd', label: 'Credentials and keys that were readable on the host have been rotated.' },
+      { id: 'e', label: 'A full estate-wide migration to a new identity platform is completed first.' },
+    ],
+    hints: [
+      'Four are traceable to how this incident actually happened. One is a project.',
+      'Every item should answer "and that would have stopped or caught this".',
+      'Ask which of these could realistically be true before the host returns.',
+    ],
+    solution:
+      'A, B, C, and D. Each maps directly onto a link in the chain: the guessing, the silence while ' +
+      'it happened, the stale account it reached, and the credentials the attacker could read once ' +
+      'inside. B is worth insisting on in its exact wording, because an alert nobody has watched ' +
+      'fire is a hypothesis. E is the one to push back on: it may well be a good idea, it is not ' +
+      'traceable to this incident, and attaching it here means either the host stays down for ' +
+      'months or the condition is quietly dropped and the credibility of the whole list goes with it.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option is a large programme of work that is not traceable to how this incident ' +
+          'happened.',
+      },
+    ],
+    debrief:
+      'Keep the recovery list short and causally connected. The fastest way to have none of it ' +
+      'implemented is to make it long enough that finishing it is somebody else problem.',
+    practice: [],
+  },
+  {
+    id: 'ir.8.3',
+    moduleId: 'ir.8',
+    packageId: PKG,
+    order: 3,
+    title: 'Know that eradication worked',
+    kind: 'short-answer',
+    goal: 'Say what evidence would show the attacker is actually gone.',
+    prompt:
+      'The rebuilt host is back in service. In three or four sentences, say how you would establish ' +
+      'over the following days that the attacker no longer has access.',
+    teach: {
+      concept:
+        'Eradication is a claim, and like every other claim in this package it needs evidence rather ' +
+        'than confidence. The evidence is mostly the absence of specific things you decided to watch ' +
+        'for in advance, which only counts if you can show the watching was working.\n\n' +
+        'Three kinds of evidence matter. WATCHING FOR RETURN: alerting specifically on the indicators ' +
+        'from this incident, the account name, the key, the source, and on the behaviour, so a return ' +
+        'produces a signal rather than a silence. WATCHING THE ROUTE BACK IN: authentication ' +
+        'attempts against the rebuilt host, so a resumed brute force is visible on the first day ' +
+        'rather than the fortieth. And PROVING THE DETECTION WORKS: firing a test through it, because ' +
+        'the alerting that existed this morning was also silent and nobody had ever confirmed it ' +
+        'would not be.\n\n' +
+        'Give it a defined period and a defined end. "We watched for a while and nothing happened" is ' +
+        'not a finding; "no indicator from this incident appeared over thirty days, on detection ' +
+        'we verified was firing" is.',
+    },
+    hints: [
+      'Absence only counts as evidence if you can show you were actually looking.',
+      'One of the three things to do is about the detection itself rather than about the attacker.',
+      'A good answer names monitoring for the specific indicators, watching authentication against the rebuilt host, verifying the alerting actually fires, and gives a defined period.',
+    ],
+    solution:
+      'I would alert specifically on the indicators from this incident, the sysmon account name, the ' +
+      'attacker key, and the pattern of a login followed by an account creation, so that a return ' +
+      'produces a signal rather than passing unnoticed. I would watch authentication against the ' +
+      'rebuilt host closely for the first weeks, since a resumed brute force from the same actor is ' +
+      'the cheapest thing for them to try and the easiest thing for us to see. Crucially I would ' +
+      'test that this detection actually fires, by generating a matching event, because the ' +
+      'monitoring in place this morning was silent through an hour of failures and nobody had ever ' +
+      'confirmed it would not be. I would set a defined period, thirty days, and record at the end ' +
+      'that no indicator appeared on detection we had verified, which is a finding rather than an ' +
+      'impression.',
+    expectedOutput:
+      'An answer naming alerting on the incident indicators, watching authentication on the rebuilt ' +
+      'host, verifying the detection actually fires, and a defined review period.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['alert', 'monitor', 'watch', 'detect'],
+          ['test', 'verify', 'confirm', 'fires', 'firing', 'generating'],
+          ['thirty days', '30 days', 'defined period', 'for the first weeks', 'period'],
+        ],
+        hint:
+          'Three ideas: what you watch for, how you prove the watching works, and over what period.',
+      },
+    ],
+    debrief:
+      'The middle one is the one teams skip. An untested alert and no alert produce identical output ' +
+      'on a quiet network, and you cannot tell them apart until the day it matters.',
+    practice: [],
+  },
+  {
+    id: 'ir.8.4',
+    moduleId: 'ir.8',
+    packageId: PKG,
+    order: 4,
+    title: 'Run the review without blame',
+    kind: 'short-answer',
+    goal: 'Write a post-incident finding about the system rather than about a person.',
+    prompt:
+      'The stale testuser account had sudo rights and a guessable password, and had been unused for ' +
+      '619 days. In three or four sentences, write that up as a post-incident finding.',
+    teach: {
+      concept:
+        'Somebody created that account, and somebody else did not remove it. Naming them achieves ' +
+        'nothing and costs you the next incident, because the analyst who watches a colleague blamed ' +
+        'for a mistake learns to raise things later and more quietly.\n\n' +
+        'The alternative is not pretending nothing went wrong. It is asking why the system made the ' +
+        'outcome likely: the account survived 619 days because nothing reviewed dormant accounts, ' +
+        'nothing flagged sudo rights on an account that had not logged in, and nothing expired ' +
+        'credentials that were never rotated. Those are three missing controls, and each one is ' +
+        'fixable in a way that "somebody should have noticed" is not.\n\n' +
+        'A good finding therefore states the condition, states the absent control that allowed it to ' +
+        'persist, and proposes something specific and mechanical, without naming an individual.',
+    },
+    hints: [
+      'Do not ask who. Ask what would have had to exist for this to be caught without anybody being vigilant.',
+      'The gap is not that somebody forgot. It is that nothing ever looked.',
+      'A good finding names the dormant privileged account as the condition, names the missing review or expiry control, and proposes a specific recurring mechanism.',
+    ],
+    solution:
+      'An account with sudo rights remained active and unused for 619 days with a password that had ' +
+      'never been rotated, and it was the entry point for this incident. The condition persisted ' +
+      'because no control existed to find it: nothing reviewed dormant accounts, nothing flagged ' +
+      'privileged rights on an account with no recent login, and nothing forced credential rotation ' +
+      'or expiry. This is a missing process rather than an individual failure, and it would have ' +
+      'survived any amount of care from the people involved, because nobody was ever prompted to ' +
+      'look. The remediation is a recurring automated review that disables accounts with no ' +
+      'authentication in ninety days and reports privileged accounts that are dormant.',
+    expectedOutput:
+      'A finding naming the dormant privileged account as the condition, the absence of any review or ' +
+      'expiry control as the reason it persisted, and a specific recurring remediation, without ' +
+      'naming an individual.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['dormant', 'unused', '619', 'stale', 'no recent login'],
+          ['no control', 'nothing reviewed', 'missing process', 'nothing flagged', 'never prompted', 'no review'],
+          ['automat', 'recurring', 'disable', 'expiry', 'ninety days', '90 days', 'quarterly'],
+        ],
+        hint:
+          'Three parts: the condition, the control whose absence let it persist, and a specific ' +
+          'recurring remediation.',
+      },
+    ],
+    debrief:
+      'Read your answer back and check no person appears in it. If one does, the finding is about ' +
+      'them and it will be read as an accusation, which is both less useful and less true than the ' +
+      'version about the missing control.',
+    practice: [],
+  },
+  {
+    id: 'ir.8.5',
+    moduleId: 'ir.8',
+    packageId: PKG,
+    order: 5,
+    title: 'Make the lessons survive the week',
+    kind: 'short-answer',
+    goal: 'Turn review findings into commitments that actually get done.',
+    prompt:
+      'The review produced eleven recommendations. In three or four sentences, say how you would ' +
+      'hand them over so that they are still real in three months.',
+    teach: {
+      concept:
+        'Almost every incident produces a good list of recommendations and almost none of them get ' +
+        'implemented, because the list is written by people with no budget, handed to people with no ' +
+        'context, at the exact moment everybody wants to stop thinking about it.\n\n' +
+        'Three things change that. AN OWNER PER ITEM, by name and role, and never the security team ' +
+        'for work the security team cannot do. A DATE, because an item with no date is a wish, and a ' +
+        'realistic one, because a list of dates nobody believes is worse than no dates. And ' +
+        'RUTHLESS PRIORITISATION: eleven recommendations will not happen, so name the two or three ' +
+        'that address the actual chain of this incident and mark the rest explicitly as accepted or ' +
+        'deferred, so their absence is a decision rather than a drift.\n\n' +
+        'Then track them somewhere that is reviewed, in the risk register or the normal engineering ' +
+        'backlog, not in the incident document. Incident documents get archived; backlogs get read.',
+    },
+    hints: [
+      'Eleven items will not get done. Which of them address the chain that actually happened?',
+      'Two fields turn a recommendation into a commitment.',
+      'A good answer assigns a named owner and a date per item, cuts the list to the few that address the root cause, and moves them somewhere that is actually reviewed.',
+    ],
+    solution:
+      'I would cut the eleven down to the two or three that address the chain this incident actually ' +
+      'used, which here is rate limiting or key-only authentication on SSH, alerting on repeated ' +
+      'failure, and dormant privileged account review, and mark the remainder explicitly as ' +
+      'accepted or deferred so their absence is a recorded decision rather than a drift. Each ' +
+      'surviving item gets a named owner who can actually deliver it, which for infrastructure ' +
+      'changes is not the security team, and a realistic date. Then they move out of the incident ' +
+      'report and into the risk register or the engineering backlog, because that is what gets ' +
+      'reviewed after the incident stops being interesting. Finally I would put a date in the diary ' +
+      'to check them, since an unreviewed commitment is indistinguishable from one nobody made.',
+    expectedOutput:
+      'An answer that cuts the list to the items addressing the root cause, assigns a named owner and ' +
+      'a date to each, and moves them somewhere that is routinely reviewed.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['cut', 'two or three', 'prioritis', 'prioritiz', 'the few', 'reduce', 'shortlist'],
+          ['owner', 'named', 'who can deliver', 'accountable'],
+          ['risk register', 'backlog', 'reviewed', 'diary', 'date', 'tracked'],
+        ],
+        hint:
+          'Three ideas: which items survive the cut, who owns each one, and where they are tracked ' +
+          'so somebody looks at them again.',
+      },
+    ],
+    debrief:
+      'That is the end of the incident and the beginning of the next one not happening. The measure ' +
+      'of a response is not how well it was run, it is whether the same route works again in March.',
+    practice: [],
+  },
+];
+
 export const INCIDENT_RESPONSE: LearningPackage = {
   id: PKG,
   order: 5,
@@ -1834,6 +2492,26 @@ export const INCIDENT_RESPONSE: LearningPackage = {
         'Preserving output, the running log, what belongs in a ticket, handing over mid-incident, ' +
         'chain of custody, and closing honestly.',
       exercises: MODULE_IR_6,
+    },
+    {
+      id: 'ir.7',
+      packageId: PKG,
+      order: 7,
+      title: 'How far did it go',
+      summary:
+        'Directing limited people at the host that answers the blocking question, sweeping for what ' +
+        'the attacker cannot discard, and stating scope at the strength the evidence supports.',
+      exercises: MODULE_IR_7,
+    },
+    {
+      id: 'ir.8',
+      packageId: PKG,
+      order: 8,
+      title: 'Recovery and afterwards',
+      summary:
+        'Rebuilding rather than cleaning, what has to change before a host returns, proving ' +
+        'eradication worked, and turning review findings into commitments somebody keeps.',
+      exercises: MODULE_IR_8,
     },
   ],
 };

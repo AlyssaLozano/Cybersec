@@ -100,6 +100,66 @@ const AT_1330: IncidentSnapshot = {
   ],
 };
 
+/**
+ * Scoping, at 12:30. Containment is done and the question has changed from
+ * "stop it" to "how far did it go", which is the point at which most incidents
+ * quietly lose a day to the wrong host.
+ */
+const AT_1230: IncidentSnapshot = {
+  incidentId: INCIDENT,
+  asOf: '12:15: web-02 is isolated and captured, and nothing has been established about any other host',
+  systems: [
+    { host: 'rmg-web-02', role: 'Internet-facing patient portal', state: 'Isolated; evidence captured' },
+    { host: 'rmg-db-01', role: 'Patient records database', state: 'Not yet examined; was reachable from web-02' },
+    { host: 'rmg-backup-01', role: 'Nightly backup target', state: 'Not yet examined; holds portal snapshots' },
+    { host: 'rmg-mon-01', role: 'Monitoring collector', state: 'Noisy, and its noise was already explained before today' },
+  ],
+  known: [
+    'The compromised host could reach rmg-db-01 on the database port; the portal application connects to it constantly.',
+    'The staged archive was generated FROM exports, which are produced from the database.',
+    'The attacker had root on web-02 for roughly ninety minutes.',
+    'Two analysts are available for the remainder of the day.',
+  ],
+  unknown: [
+    'Whether any authentication to rmg-db-01 came from web-02 during the intrusion window.',
+    'Whether the sysmon account or the attacker key exists anywhere other than web-02.',
+    'Whether the backup host was reached, which would matter for recovery as well as for scope.',
+  ],
+  pressures: [
+    'Leadership has asked whether patient records were accessed, and that question cannot be answered without the database host.',
+    'Notification clocks, if they start at all, start at discovery rather than at conclusion.',
+    'Two people cannot examine four hosts properly in one afternoon, and pretending otherwise produces four inconclusive answers.',
+  ],
+};
+
+/** Recovery, at 15:00: the host has to come back, and how it comes back is the decision. */
+const AT_1500: IncidentSnapshot = {
+  incidentId: INCIDENT,
+  asOf: '15:00: eradication is enumerated, and the portal is running with no redundancy',
+  systems: [
+    { host: 'rmg-web-02', role: 'Internet-facing patient portal', state: 'Isolated; four persistence mechanisms identified' },
+    { host: 'rmg-web-01', role: 'Portal, carrying all traffic alone', state: 'Healthy; single point of failure' },
+    { host: 'rmg-db-01', role: 'Patient records database', state: 'Examined; no authentication from web-02 in the window' },
+    { host: 'rmg-backup-01', role: 'Nightly backup target', state: 'Examined; no findings' },
+  ],
+  known: [
+    'Four persistence mechanisms were found and documented: the account, its sudo membership, its crontab, and the SSH key.',
+    'The attacker held root on the host for roughly ninety minutes.',
+    'Backups of web-02 run nightly, and first contact from the hostile address was at 09:12 that morning.',
+    'Evidence capture is complete and hashed, so the host itself is no longer needed as evidence.',
+  ],
+  unknown: [
+    'Whether the four persistence mechanisms are all of them.',
+    'Whether any binary, service unit, or library on the host was modified while the attacker had root.',
+    'Whether any credential readable from the host has been used elsewhere since.',
+  ],
+  pressures: [
+    'The portal has no redundancy until web-02 returns. A failure on web-01 is a full clinical outage.',
+    'Leadership has asked for a restoration time and will hold you to the first number you give them.',
+    'The fastest option and the safest option are not the same one, and the difference is hours.',
+  ],
+};
+
 export const DECISION_POINTS: DecisionPoint[] = [
   {
     id: 'dp.contain',
@@ -445,6 +505,154 @@ export const DECISION_POINTS: DecisionPoint[] = [
           'attacker; it was created by your own organisation and left in place for 619 days. Without ' +
           'a post-mortem that finding never becomes a control, and the next intrusion uses the next ' +
           'stale account. Response only matters if it prevents recurrence.',
+      },
+    ],
+  },
+
+  /*
+   * Scoping, at 12:15. The decision nobody trains for and everybody has to make:
+   * four hosts, two analysts, and no way to look at all of them properly at
+   * once. The wrong answers here are not reckless, they are thorough in the
+   * wrong order, which is what makes this worth grading.
+   */
+  {
+    id: 'dp.scope',
+    title: 'Four hosts, two analysts',
+    situation:
+      'It is 12:15. rmg-web-02 is isolated and its evidence is captured. You have two analysts for ' +
+      'the rest of the day and four systems the attacker could plausibly have reached. Nobody can ' +
+      'tell you yet whether the database was touched. Decide where those two people go first.',
+    snapshot: AT_1230,
+    options: [
+      {
+        id: 'db-first',
+        label: 'Both analysts onto rmg-db-01, checking for access from web-02 in the 10:14 to 11:42 window',
+        detail:
+          'The database holds the records the staged archive was generated from. Reachable from the compromised host.',
+        quality: 'sound',
+        consequence:
+          'This is the right first move and for the right reason: it is the host with the most to ' +
+          'lose, it was reachable from the compromised one, and the question about it is the one ' +
+          'blocking every other decision, including what leadership has to be told. You get an ' +
+          'answer within the window that matters, and if it is clean you have removed the worst case ' +
+          'from the board.',
+      },
+      {
+        id: 'credential-sweep',
+        label: 'Sweep every host for the sysmon account and the attacker SSH key',
+        detail: 'A narrow, mechanical check across the whole estate rather than a deep look at one host.',
+        quality: 'sound',
+        consequence:
+          'Cheap, fast, and it scales: you are asking one specific question with a known answer ' +
+          'shape rather than investigating. It is the correct companion to the database work, ' +
+          'because persistence that has already spread somewhere else will keep letting the attacker ' +
+          'back in no matter what you do to web-02.',
+      },
+      {
+        id: 'backup-first',
+        label: 'Start with rmg-backup-01, because it holds copies of everything',
+        detail: 'The backup target holds portal snapshots going back weeks.',
+        quality: 'defensible',
+        consequence:
+          'Not wrong, and not first. The backup host matters enormously for RECOVERY, and it is a ' +
+          'serious problem if it was reached, but nothing about it answers the question that is ' +
+          'currently blocking the incident. Doing this before the database means the "was patient ' +
+          'data accessed" question stays open for several more hours while you work.',
+      },
+      {
+        id: 'all-four',
+        label: 'Split the two analysts across all four hosts, an hour each',
+        detail: 'Cover everything at once so nothing is missed.',
+        quality: 'harmful',
+        consequence:
+          'Four shallow looks produce four inconclusive answers, which is worse than one conclusive ' +
+          'one, because now nothing can be ruled out and the work has to be redone. Coverage feels ' +
+          'like rigour and is its opposite when the time per host falls below what an answer costs. ' +
+          'Depth first, on the host that matters most, then move.',
+      },
+      {
+        id: 'monitor-noise',
+        label: 'Start with rmg-mon-01, since it is generating the most alerts',
+        detail: 'The monitoring collector has been noisy all morning.',
+        quality: 'harmful',
+        consequence:
+          'The noise from that host is the misconfiguration that has been failing to authenticate ' +
+          'against web-02 for weeks, and it was already explained before the incident started. ' +
+          'Following the loudest signal rather than the most consequential one is the single most ' +
+          'reliable way to spend a day of an incident on nothing.',
+      },
+    ],
+  },
+
+  /*
+   * Recovery, at 15:00. Rebuild against clean-in-place. The trap is that
+   * cleaning is faster, appears complete, and rests on the assumption the
+   * eradication list is exhaustive, which is exactly what nobody can promise.
+   */
+  {
+    id: 'dp.recover',
+    title: 'Putting the portal back',
+    situation:
+      'It is 15:00. Persistence has been enumerated on rmg-web-02 and evidence is captured. The ' +
+      'portal is running on rmg-web-01 with no redundancy, and leadership wants a restoration time. ' +
+      'Decide how rmg-web-02 comes back.',
+    snapshot: AT_1500,
+    options: [
+      {
+        id: 'rebuild',
+        label: 'Rebuild rmg-web-02 from a known-good image and redeploy the application',
+        detail: 'Wipe it. Nothing carries forward except the application and configuration from source control.',
+        quality: 'sound',
+        consequence:
+          'The only option that does not rest on your eradication list being complete. You found ' +
+          'four persistence mechanisms; the honest position is that you do not know whether there ' +
+          'was a fifth, and a rebuild makes that question irrelevant rather than answering it. It ' +
+          'costs hours you can state up front, which is exactly what leadership asked for.',
+      },
+      {
+        id: 'rotate-credentials',
+        label: 'Rotate every credential and key that touched the host before it returns',
+        detail: 'Service account passwords, SSH keys, API tokens, and the testuser password.',
+        quality: 'sound',
+        consequence:
+          'Necessary regardless of how the host comes back, and easy to leave until later and then ' +
+          'never do. Anything the attacker could read while they had root has to be treated as ' +
+          'theirs, and a rebuilt host that trusts the same stolen key is not recovered.',
+      },
+      {
+        id: 'restore-backup',
+        label: 'Restore rmg-web-02 from last night\'s backup',
+        detail: 'Faster than a rebuild and returns the host to a known state.',
+        quality: 'defensible',
+        consequence:
+          'Reasonable only if you can establish that the backup predates first access, and the ' +
+          'timeline says first contact was 09:12 that morning, so last night is probably clean. ' +
+          '"Probably" is doing a lot of work in that sentence: the same timeline also says you ' +
+          'cannot be sure the 10:14 login was the first one. Defensible with evidence, dangerous as ' +
+          'a reflex.',
+      },
+      {
+        id: 'clean-in-place',
+        label: 'Remove the four persistence mechanisms and return the host to service',
+        detail: 'Delete the account, the sudo entry, the crontab and the key. Fastest path back.',
+        quality: 'harmful',
+        consequence:
+          'This is the option that returns the host to service still compromised often enough that ' +
+          'it has its own name in incident reports. It assumes the list of four is exhaustive, on a ' +
+          'host where an attacker had root for ninety minutes and could have modified any binary, ' +
+          'any service unit, or any library on it. You cannot enumerate your way to certainty about ' +
+          'a system somebody else owned.',
+      },
+      {
+        id: 'return-now',
+        label: 'Return it to service now and keep watching it closely',
+        detail: 'Restores redundancy immediately; monitoring will catch anything that comes back.',
+        quality: 'harmful',
+        consequence:
+          'Detection did not catch an hour of brute force, the account creation, the privilege ' +
+          'escalation, or the archive being staged. Relying on that same detection to catch a ' +
+          'careful attacker returning to a host they already own is not a plan, it is the previous ' +
+          'failure repeated with more confidence.',
       },
     ],
   },
