@@ -52,7 +52,7 @@ export const LEFT_THE_BUILDING: Scenario = {
   difficulty: 'beginner',
   durationMinutes: 60,
   situation:
-    'It is 09:15 at Ridgeline Medical Group. A attending had a work laptop taken from her car ' +
+    'It is 09:15 at Ridgeline Medical Group. An attending had a work laptop taken from her car ' +
     'overnight. Everybody in the room already believes this is fine because the estate is ' +
     'encrypted.',
   roles: [
@@ -166,7 +166,7 @@ export const LEFT_THE_BUILDING: Scenario = {
 export const LEFT_THE_BUILDING_TRUTH: ScenarioTruth = {
   scenarioId: ID,
   narrative: [
-    'A attending laptop was taken from a car overnight, and the service desk closed the ticket in twelve minutes as device encrypted, no further action.',
+    'An attending laptop was taken from a car overnight, and the service desk closed the ticket in twelve minutes as device encrypted, no further action.',
     'The management console does say encrypted, and the console is describing the last state it observed rather than the current one.',
     'On 3 September the firmware update process suspended disk encryption so the machine could reboot unattended, which is normal and is meant to resume at the next successful boot.',
     'It never resumed. There is no resume event in the twelve days since, and eleven other devices are in the same state.',

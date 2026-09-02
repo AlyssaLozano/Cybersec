@@ -315,7 +315,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
       why:
         'The resolution of ev.2, and it takes one query. Twenty-two minutes, four actions, one ' +
         'patient record, and the record is for a patient on the account own admission list. ' +
-        'Somebody who has bought or stolen a attending login does not spend it sending two emails ' +
+        'Somebody who has bought or stolen an attending login does not spend it sending two emails ' +
         'to a resident group and setting an out-of-office. The behaviour is not merely innocuous, ' +
         'it is specifically the behaviour of the person whose account this is, doing the small ' +
         'catching-up that people do on leave. Close it, and notice what closed it: not the ' +
@@ -324,7 +324,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
       standIn:
         'Duthie is fine. Twenty-two minutes, four actions: calendar, two emails to her own ' +
         'resident group, one record for a patient on her own admission list, out-of-office set. ' +
-        'Nobody buys a attending login to email a resident group. What cleared her is what she ' +
+        'Nobody buys an attending login to email a resident group. What cleared her is what she ' +
         'did, not where she did it from. Closing it.',
       commandOptions: [
         { command: "awk -F, '$2==\"r.duthie\" && $1 ~ /06:[1-4]/ {print $1, $4, $5}' /var/log/ehr/audit.csv", correct: true, teaches: CORRECT_STEP },
@@ -354,7 +354,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
         'across a whole clinic day, and across six wards when the account has ever worked in two. ' +
         'That is thirty-eight records a minute, which is not a person reading anything. It is a ' +
         'person moving through a list. The two wards with no history in twelve months are the ' +
-        'part that removes any remaining doubt, because a attending with a legitimate reason to ' +
+        'part that removes any remaining doubt, because an attending with a legitimate reason to ' +
         'look wide still looks where her patients are. Note carefully what is absent: no edit, no ' +
         'print, no export through the application, which means the loss is whatever was on screen ' +
         'and there is no export log to bound it with. That absence will tempt somebody to call the ' +

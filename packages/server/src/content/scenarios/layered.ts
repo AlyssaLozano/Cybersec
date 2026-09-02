@@ -137,7 +137,7 @@ export const THREE_THINGS_AT_ONCE: Scenario = {
       id: 'ev.4',
       atSeconds: 480,
       surface: 'cloud-audit',
-      summary: 'A attending working her notice pulled 4.1 GB off the research share at 22:10',
+      summary: 'An attending working her notice pulled 4.1 GB off the research share at 22:10',
       detail:
         'The e.hargate account downloaded 4.1 gigabytes from the oncology research share between ' +
         '22:04 and 22:19, comprising four dataset directories. The account holder resigned on 18 ' +
@@ -417,7 +417,7 @@ export const THREE_THINGS_AT_ONCE_TRUTH: ScenarioTruth = {
         'of what moved she is the person whose work it is. And the timing that seems damning ' +
         'points the other way once ev.2 is settled: the encryption started at 21:05 and she ' +
         'downloaded at 22:04, so she cannot have taken data and then covered it. Hold it open, ' +
-        'audit the entitlements, and do not revoke anything: cutting a attending off her own ' +
+        'audit the entitlements, and do not revoke anything: cutting an attending off her own ' +
         'research at midnight on a suspicion the evidence does not support is a decision that ' +
         'cannot be taken back in the morning.',
       standIn:
