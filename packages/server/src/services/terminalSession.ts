@@ -11,6 +11,7 @@
  */
 
 import type {
+  BadgeDefinition,
   Evaluation,
   Exercise,
   RunCommandResponse,
@@ -22,6 +23,7 @@ import { getExercise } from '../content/index.js';
 import { evaluate } from '../content/validate.js';
 import { prisma } from '../db/client.js';
 import { HttpError } from '../http.js';
+import { runScript } from '../terminal/script.js';
 import { runLine, runLines } from '../terminal/shell.js';
 import { BASE_IMAGE } from '../vfs/image.js';
 import { MACHINE } from '../vfs/machine.js';
@@ -35,7 +37,15 @@ const HOME = '/home/student';
 const MAX_SCROLLBACK = 400;
 
 /** Reject absurdly long input before it reaches the parser. */
-const MAX_INPUT_LENGTH = 2_000;
+/**
+ * Longest submission accepted.
+ *
+ * Raised from 2,000 when here-documents arrived: a YARA rule with a dozen
+ * strings and a condition runs past two thousand characters on its own, and a
+ * limit that rejects the file the exercise asks for is a limit that fails the
+ * exercise.
+ */
+const MAX_INPUT_LENGTH = 8_000;
 
 function parseOverlay(json: string): Overlay {
   try {
@@ -162,7 +172,9 @@ export async function runCommand(
   if (!record) throw new HttpError(500, 'internal_error', 'Session vanished mid-request.');
 
   const vfs = new Vfs(BASE_IMAGE, parseOverlay(record.overlayJson), HOME);
-  const result = runLine(input, { vfs, machine: MACHINE, cwd: record.cwd });
+  // runScript rather than runLine: a submission may be several lines and may
+  // carry a here-document, which is how a multi-line rule file gets authored.
+  const result = runScript(input, { vfs, machine: MACHINE, cwd: record.cwd });
 
   // Grade against the state *after* the command ran.
   const progress = await prisma.exerciseProgress.findUnique({
@@ -179,6 +191,8 @@ export async function runCommand(
   };
 
   let evaluation: Evaluation | undefined;
+  /** Empty unless this pass finished a package or a track. See services/badges.ts. */
+  let earnedBadges: BadgeDefinition[] = [];
 
   if (drill && input.trim() !== '') {
     // A drill is graded against its own checks, and never touches the parent
@@ -193,7 +207,7 @@ export async function runCommand(
   } else if (input.trim() !== '' && (!alreadyPassed || options.regrade)) {
     const attemptNumber = (progress?.attempts ?? 0) + 1;
     evaluation = evaluate(exercise, attempt, attemptNumber);
-    await recordAttempt(userId, exercise, input, evaluation);
+    earnedBadges = await recordAttempt(userId, exercise, input, evaluation);
   }
 
   const scrollback = parseScrollback(record.scrollbackJson);
@@ -217,6 +231,7 @@ export async function runCommand(
     exitCode: result.exitCode,
     cwd: result.cwd,
     ...(evaluation ? { evaluation } : {}),
+    ...(earnedBadges.length > 0 ? { earnedBadges } : {}),
   };
 }
 

@@ -352,3 +352,192 @@ model RoomSession {
   @@index([status, startsAt])
   @@map("room_sessions")
 }
+
+/// A badge somebody has earned.
+///
+/// WHY THIS IS A ROW AND NOT A QUERY
+///
+/// Badge requirements grow: a package written next month becomes part of a
+/// track badge somebody already holds. Derived badges would quietly vanish from
+/// their case when that happens, which is the same failure the platform refuses
+/// everywhere else -- nothing may downgrade a pass. The award is written once
+/// and never recomputed, so what somebody earned stays earned.
+///
+/// The badge id is content, not a foreign key, for the same reason exercise ids
+/// are: the catalogue lives in version-controlled code.
+model EarnedBadge {
+  id      String @id @default(uuid())
+  userId  String
+  badgeId String
+
+  earnedAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@map("earned_badges")
+}
+
+/// A public chat room off the lobby.
+///
+/// ALWAYS PUBLIC. There is no visibility column and no join code here on
+/// purpose: see the note in @soc/shared/lobby.ts. Anything scoped and private
+/// is a war room, which ends.
+///
+/// Core rooms are seeded and cannot be reviewed or closed. Community rooms are
+/// requested by a student, sit in `pending`, and become real only when a
+/// reviewer approves them.
+model ChatRoom {
+  /// Slug. Permanent: messages reference it.
+  id    String @id
+  title String
+  /// What the room is for, in the requester's own words. Required, including
+  /// for core rooms: a list of bare names makes everybody guess, and the guess
+  /// is what fills a lobby with six rooms for the same idea.
+  topic String
+
+  /// "core" | "community" -- ChatRoomKind in @soc/shared.
+  kind   String @default("community")
+  /// "pending" | "approved" | "rejected" | "closed" -- ChatRoomStatus.
+  status String @default("pending")
+
+  /// Null for core rooms, which nobody requested. Plain ids rather than
+  /// relations, following the Match precedent: no back-relations threaded
+  /// through User, which parallel sessions are usually editing.
+  requestedByUserId String?
+  /// The requester's floor identity, captured at request time so a rename does
+  /// not rewrite the review queue.
+  requestedCallSign String?
+  requestedAvatarId String?
+
+  reviewedByUserId String?
+  reviewedAt       DateTime?
+  /// Shown to the requester. A refusal without a reason is not a decision, it
+  /// is a disappearance.
+  reviewNote       String?
+
+  createdAt DateTime @default(now())
+
+  messages ChatMessage[]
+
+  @@index([status])
+  @@map("chat_rooms")
+}
+
+/// One line said in one room.
+///
+/// The author's call sign and avatar are DENORMALISED onto the row. A
+/// transcript that rewrites itself when somebody renames is a transcript nobody
+/// can follow, and joining to the live identity would do exactly that.
+model ChatMessage {
+  id     String   @id @default(uuid())
+  roomId String
+  room   ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  userId   String
+  callSign String
+  avatarId String
+
+  body   String
+  /// Set when an event was shared into the room, so the client draws the card
+  /// rather than a line of text. A plain id: the event may be cancelled later
+  /// and the message still happened.
+  eventId String?
+
+  /// Hidden by a reviewer rather than deleted, so moderation is auditable and
+  /// a mistake is reversible. Hidden rows never leave the server.
+  hidden   Boolean  @default(false)
+  sentAt   DateTime @default(now())
+
+  @@index([roomId, sentAt])
+  @@map("chat_messages")
+}
+
+/// Who is standing in the lobby right now.
+///
+/// Presence is a heartbeat, not a connection: one row per person, overwritten
+/// every twenty seconds, and treated as gone after seventy-five. A socket would
+/// be more accurate and would cost connection state, reconnect logic and a
+/// deployment story this product does not have yet.
+model LobbyPresence {
+  userId String @id
+
+  callSign String
+  avatarId String
+
+  /// Which war room door they say they are heading for, or null. Drives the
+  /// "three people waiting for a SOC room" count that is the whole reason the
+  /// lobby exists.
+  headingFor String?
+
+  /// When they walked in. Distinct from lastSeenAt: the arrival is what the
+  /// room animates, and a heartbeat must not restart it.
+  arrivedAt  DateTime @default(now())
+  lastSeenAt DateTime @updatedAt
+
+  @@index([lastSeenAt])
+  @@map("lobby_presence")
+}
+
+/// Something somebody scheduled for other people.
+///
+/// Deliberately NOT a war room: most of what a group of career changers wants
+/// to arrange has no seats, no scenario and no grader. An event can point at a
+/// war room with `roomId` when that is what it is for.
+///
+/// There is no URL field, and that is a decision. A user-posted link in a feed
+/// strangers read is the exact thing this platform teaches people to distrust.
+model CommunityEvent {
+  id          String @id @default(uuid())
+  title       String
+  description String
+  /// EventKind in @soc/shared.
+  kind        String
+  /// LobbyDoorId or "all" -- EventAudience.
+  audience    String @default("all")
+
+  startsAt        DateTime
+  durationMinutes Int
+
+  hostUserId   String
+  hostCallSign String
+  hostAvatarId String
+
+  /// The war room this is for, when it is for one. A plain id: an event
+  /// outlives the room it pointed at, and a cascade that deleted somebody's
+  /// calendar entry because a room was cancelled would be worse than a dangling
+  /// reference the client renders as "that room is gone".
+  roomId String?
+
+  /// Null means no limit, which is the common case.
+  capacity Int?
+
+  /// A cancelled event stays visible and struck through rather than vanishing.
+  /// People planned around it, and silence is the worst way to tell them.
+  cancelledAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  rsvps EventRsvp[]
+
+  @@index([startsAt])
+  @@map("community_events")
+}
+
+/// One person's answer to one event.
+///
+/// "interested" exists so capacity does not throw away the signal: somebody
+/// marking interest in a full session is how a host learns to run a second one.
+model EventRsvp {
+  id      String         @id @default(uuid())
+  eventId String
+  event   CommunityEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  userId String
+  /// "going" | "interested" -- RsvpStatus in @soc/shared.
+  status String
+
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+  @@index([userId])
+  @@map("event_rsvps")
+}

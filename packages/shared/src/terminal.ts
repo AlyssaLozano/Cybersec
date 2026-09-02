@@ -5,6 +5,8 @@
  * state, because a student who can edit that state can pass any exercise.
  */
 
+import type { BadgeDefinition } from './badges.js';
+
 export interface RunCommandRequest {
   /** Raw text the student typed. */
   input: string;
@@ -21,6 +23,14 @@ export interface RunCommandResponse {
   cwd: string;
   /** Present only when the command triggered exercise evaluation. */
   evaluation?: Evaluation;
+  /**
+   * Badges this pass just earned, present only when it earned any.
+   *
+   * Carried on the pass itself rather than left for the badge screen to
+   * discover: finishing a package is the moment worth marking, and a shelf
+   * somebody has no reason to open that evening is not that moment.
+   */
+  earnedBadges?: BadgeDefinition[];
 }
 
 export interface FailedCheck {

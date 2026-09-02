@@ -19,6 +19,8 @@
 
 import { useState } from 'react';
 
+import type { LobbyDoorId } from '@soc/shared';
+
 function SocRoomIcon() {
   return (
     <svg className="room-icon" viewBox="0 0 48 48" aria-hidden="true">
@@ -114,6 +116,30 @@ function AiRoomIcon() {
   );
 }
 
+function LobbyIcon() {
+  return (
+    <svg className="room-icon room-icon--big" viewBox="0 0 48 48" aria-hidden="true">
+      {/* a doorway with people in front of it */}
+      <path d="M14 40 V14 a10 10 0 0 1 20 0 V40" className="ri-arch" fill="none" />
+      <line x1="8" y1="40" x2="40" y2="40" className="ri-base" />
+      <circle cx="19" cy="27" r="3" className="ri-node" />
+      <path d="M14 37 a5 5 0 0 1 10 0" className="ri-arc" fill="none" />
+      <circle cx="30" cy="27" r="3" className="ri-node" />
+      <path d="M25 37 a5 5 0 0 1 10 0" className="ri-arc" fill="none" />
+    </svg>
+  );
+}
+
+function BadgeShelfIcon() {
+  return (
+    <svg className="room-icon" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="18" r="11" className="ri-seal" />
+      <path d="M19 18 l4 4 l8 -8" className="ri-check" fill="none" />
+      <path d="M17 28 L14 44 L24 39 L34 44 L31 28" className="ri-ribbon" fill="none" />
+    </svg>
+  );
+}
+
 interface HomeProps {
   username: string;
   onSignOut: () => void;
@@ -122,10 +148,16 @@ interface HomeProps {
   onLinux: () => void;
   onSoc: () => void;
   onBrowseTracks: () => void;
-  onSocWarRoom: () => void;
-  onRedBlueWarRoom: () => void;
-  onRiskWarRoom: () => void;
-  onAiWarRoom: () => void;
+  /**
+   * Every war room tile goes through here.
+   *
+   * The door somebody pressed rides along, so the lobby can show that intent to
+   * the other people standing in it. A room needs several people at once, and
+   * before the lobby existed each of them arrived alone at an empty schedule
+   * ten minutes apart and concluded the whole thing was dead.
+   */
+  onLobby: (door: LobbyDoorId | null) => void;
+  onBadges: () => void;
   onPortfolio: () => void;
   onInterviewSim: () => void;
   onInterviewPeer: () => void;
@@ -163,10 +195,8 @@ export function Home({
   onLinux,
   onSoc,
   onBrowseTracks,
-  onSocWarRoom,
-  onRedBlueWarRoom,
-  onRiskWarRoom,
-  onAiWarRoom,
+  onLobby,
+  onBadges,
   onPortfolio,
   onInterviewSim,
   onInterviewPeer,
@@ -310,6 +340,29 @@ export function Home({
                 close to the real thing as you will get before the job.
               </span>
             </div>
+
+            {/*
+              One door in front of four.
+
+              Every room here needs several people at the same time, and each of
+              them used to arrive alone at an empty schedule ten minutes apart
+              and conclude the whole thing was dead. The lobby is where they
+              find each other first.
+            */}
+            <button className="lobbygate" onClick={() => onLobby(null)}>
+              <LobbyIcon />
+              <span className="lg-body">
+                <span className="lg-tag">Everybody, from every room</span>
+                <span className="lg-name">Take the lobby to the war rooms</span>
+                <span className="lg-desc">
+                  Walk in as your call sign, see who else is here and what they are heading for,
+                  talk in the chat rooms, and find people for a session. Every war room below is a
+                  door off it.
+                </span>
+                <span className="lg-enter">Enter the lobby &rsaquo;&rsaquo;</span>
+              </span>
+            </button>
+
             <div className="stage-tiles">
               <div className="roomcol">
                 <button className="prereq-gate" onClick={onSoc}>
@@ -317,7 +370,7 @@ export function Home({
                   <span className="pg-name">SOC Foundations</span>
                   <span className="pg-open">Open module &rsaquo;&rsaquo;</span>
                 </button>
-                <button className="roomtile soc" onClick={onSocWarRoom}>
+                <button className="roomtile soc" onClick={() => onLobby('soc')}>
                   <SocRoomIcon />
                   <span className="rt-body">
                     <span className="rt-name">SOC War Room</span>
@@ -330,7 +383,7 @@ export function Home({
                 </button>
               </div>
 
-              <button className="roomtile rb" onClick={onRedBlueWarRoom}>
+              <button className="roomtile rb" onClick={() => onLobby('redblue')}>
                 <RedBlueRoomIcon />
                 <span className="rt-body">
                   <span className="rt-name">Red / Blue War Room</span>
@@ -342,21 +395,21 @@ export function Home({
                 </span>
               </button>
 
-              <button className="roomtile risk" onClick={onRiskWarRoom}>
+              <button className="roomtile risk" onClick={() => onLobby('grc')}>
                 <RiskRoomIcon />
                 <span className="rt-body">
                   <span className="rt-name">Risk War Room</span>
                   <span className="rt-desc">Argue a risk call against the clock: accept, mitigate, or escalate.</span>
-                  <span className="rt-status muted">coming soon</span>
+                  <span className="rt-status muted">not open yet &middot; wait in the lobby</span>
                 </span>
               </button>
 
-              <button className="roomtile ai" onClick={onAiWarRoom}>
+              <button className="roomtile ai" onClick={() => onLobby('ai')}>
                 <AiRoomIcon />
                 <span className="rt-body">
                   <span className="rt-name">AI Security War Room</span>
                   <span className="rt-desc">Break a deployed model&rsquo;s guardrails, or harden them, turn for turn.</span>
-                  <span className="rt-status muted">coming soon</span>
+                  <span className="rt-status muted">not open yet &middot; wait in the lobby</span>
                 </span>
               </button>
             </div>
@@ -367,6 +420,22 @@ export function Home({
             <div className="stage-node">05</div>
             <div className="stage-label">Land the job</div>
             <div className="stage-tiles">
+              {/* Free, and deliberately so: the badges are the record of work
+                  already done, and putting a price on somebody's own history
+                  would be indefensible. */}
+              <button className="roomtile badges" onClick={onBadges}>
+                <BadgeShelfIcon />
+                <span className="rt-body">
+                  <span className="rt-name">Your badges</span>
+                  <span className="rt-desc">
+                    One for every module you finish, and one for every career track you complete.
+                    Each carries a line written for somebody who did not do the work, which is the
+                    line you can hand an interviewer.
+                  </span>
+                  <span className="rt-status muted">collected as you go</span>
+                </span>
+              </button>
+
               <button
                 className={`roomtile portfolio${paid ? '' : ' locked'}`}
                 onClick={gate('Your portfolio', onPortfolio)}
@@ -399,7 +468,11 @@ export function Home({
                 </span>
               </button>
 
-              <button className="roomtile interview" onClick={onInterviewPeer}>
+              <button
+                className={`roomtile interview${paid ? '' : ' locked'}`}
+                onClick={gate('The peer interview', onInterviewPeer)}
+              >
+                {lockChip}
                 <InterviewIcon />
                 <span className="rt-body">
                   <span className="rt-name">Peer interview</span>

@@ -1,0 +1,365 @@
+/*
+ * The badge case, the pips beside a name in the lobby, and the banner that
+ * fires the moment a badge lands.
+ *
+ * The shelf shows unearned badges as well as held ones, because an empty trophy
+ * cabinet in week one is discouraging in a way an empty page is not.
+ *
+ * Every badge keeps its own colour whether or not it has been earned. What
+ * separates the two is LIGHT: a held badge is a struck disc with a highlight on
+ * it and a glow under it, and an unearned one is the same object with the lamp
+ * off. Draining the colour instead would take away the thing that makes
+ * somebody want the badge they do not have yet.
+ */
+
+.badgecase {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 4rem;
+}
+
+.badgecase__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.85rem;
+}
+
+.badgecase__head h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.badgecase__meta {
+  margin: 0.15rem 0 0;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  max-width: 60ch;
+}
+
+.badgecase__h {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-faint);
+  margin: 2rem 0 0.4rem;
+}
+
+.badgegrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.75rem;
+}
+
+.badgetile {
+  --badge-accent: var(--b1);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--badge-accent) 26%, var(--border));
+  border-radius: 10px;
+  /* The tile keeps its colour even unearned: a shelf of grey discs is a table,
+     and the colour is what makes somebody want the one they do not have. */
+  background:
+    radial-gradient(120% 90% at 50% -25%, color-mix(in srgb, var(--badge-accent) 16%, transparent), transparent 70%),
+    var(--bg-panel);
+  padding: 1.1rem 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.badgetile:hover {
+  transform: translateY(-2px);
+}
+
+/*
+ * What separates held from not is light, not colour.
+ *
+ * Draining the colour out of an unearned badge would take away the thing that
+ * makes the shelf worth looking at. So an unearned one is the same badge with
+ * the lamp off: flat, unlit, no glow, and its emblem in outline.
+ */
+.badgetile--held {
+  border-color: color-mix(in srgb, var(--badge-accent) 70%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--badge-accent) 20%, transparent),
+    0 14px 34px -22px var(--badge-accent);
+}
+
+.badgetile__disc {
+  position: relative;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: color-mix(in srgb, var(--b1) 55%, var(--text-faint));
+  /* A lit rim at the top left and a shadowed one at the bottom right, so the
+     disc reads as a struck object rather than as a coloured circle. */
+  background:
+    linear-gradient(150deg, color-mix(in srgb, var(--b1) 30%, var(--bg-input)), color-mix(in srgb, var(--b2) 34%, var(--bg-input)));
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--b2) 45%, transparent);
+}
+
+.badgetile--held .badgetile__disc {
+  color: #0b0f14;
+  background: linear-gradient(150deg, var(--b1), var(--b2));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 0 0 2px color-mix(in srgb, var(--b1) 60%, transparent),
+    0 6px 18px -8px var(--badge-accent);
+}
+
+/* A specular highlight, only on a badge somebody actually holds. */
+.badgetile--held .badgetile__disc::after {
+  content: '';
+  position: absolute;
+  inset: 8% 8% 45% 8%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent);
+  pointer-events: none;
+}
+
+/*
+ * A track badge is the one an interviewer cares about, so it is physically
+ * bigger on the shelf and carries a ring. Rank should be visible before any
+ * label is read.
+ */
+.badgetile--track {
+  padding-top: 1.4rem;
+}
+
+.badgetile--track .badgetile__disc {
+  width: 4.6rem;
+  height: 4.6rem;
+  outline: 2px solid color-mix(in srgb, var(--badge-accent) 40%, transparent);
+  outline-offset: 4px;
+}
+
+.badgetile--track.badgetile--held .badgetile__disc {
+  outline-color: var(--badge-accent);
+}
+
+.emblem {
+  width: 58%;
+  height: 58%;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: currentColor;
+  fill-opacity: 0.14;
+}
+
+.badgetile--held .emblem {
+  fill-opacity: 0.3;
+  stroke-width: 2.2;
+}
+
+.badgetile__title {
+  margin: 0.25rem 0 0;
+  font-size: 1rem;
+}
+
+.badgetile__title {
+  color: color-mix(in srgb, var(--badge-accent) 45%, var(--text));
+}
+
+.badgetile--held .badgetile__title {
+  color: var(--badge-accent);
+}
+
+.badgetile__citation {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
+.badgetile__earned {
+  margin: 0.3rem 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.badgetile__bar {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg-input);
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.badgetile__bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--b2), var(--b1));
+}
+
+.badgetile__todo {
+  margin: 0.3rem 0 0;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+/* --- the palette --------------------------------------------------------- */
+
+/*
+ * Two stops per badge, not one.
+ *
+ * A flat disc in a single colour reads as a status chip, which is what the rest
+ * of the product uses colour for. Two stops make it an object with a light on
+ * it, and that is the difference between a legend key and something worth
+ * collecting. `--b1` is the light edge, `--b2` the shadowed one.
+ */
+.badgetile,
+.pip,
+.badgetoast__item {
+  --b1: #8496aa;
+  --b2: #5a6b7f;
+}
+
+.badgetile--green, .pip--green, .badgetoast__item--green { --b1: #6ee7a5; --b2: #17915c; }
+.badgetile--blue, .pip--blue, .badgetoast__item--blue { --b1: #7cc4ff; --b2: #1f6fc4; }
+.badgetile--red, .pip--red, .badgetoast__item--red { --b1: #ff9576; --b2: #c73a1c; }
+.badgetile--amber, .pip--amber, .badgetoast__item--amber { --b1: #f5cd63; --b2: #b47c10; }
+.badgetile--violet, .pip--violet, .badgetoast__item--violet { --b1: #bda3ff; --b2: #6b45d6; }
+.badgetile--cyan, .pip--cyan, .badgetoast__item--cyan { --b1: #6ee6dd; --b2: #14908a; }
+.badgetile--rose, .pip--rose, .badgetoast__item--rose { --b1: #ff9ab5; --b2: #c62a5c; }
+.badgetile--teal, .pip--teal, .badgetoast__item--teal { --b1: #74d6c0; --b2: #11816e; }
+.badgetile--lime, .pip--lime, .badgetoast__item--lime { --b1: #c3e86b; --b2: #6f9410; }
+.badgetile--gold, .pip--gold, .badgetoast__item--gold { --b1: #ffd97a; --b2: #a97b06; }
+.badgetile--magenta, .pip--magenta, .badgetoast__item--magenta { --b1: #f394e8; --b2: #a52a9a; }
+.badgetile--orange, .pip--orange, .badgetoast__item--orange { --b1: #ffb066; --b2: #c96a0d; }
+.badgetile--indigo, .pip--indigo, .badgetoast__item--indigo { --b1: #9fa8ff; --b2: #4249c9; }
+.badgetile--sky, .pip--sky, .badgetoast__item--sky { --b1: #8ad7ff; --b2: #1785c0; }
+
+/* --- the pip beside a name ---------------------------------------------- */
+
+.pip {
+  --pip-accent: var(--b1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  border: 1px solid color-mix(in srgb, var(--pip-accent) 60%, transparent);
+  border-radius: 999px;
+  padding: 0 0.35rem 0 0.2rem;
+  font-size: 10px;
+  color: var(--pip-accent);
+  background: color-mix(in srgb, var(--b2) 22%, transparent);
+  max-width: 8.5rem;
+}
+
+
+.pip .emblem {
+  width: 0.85rem;
+  height: 0.85rem;
+  stroke-width: 2.5;
+}
+
+.pip__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- the moment it lands -------------------------------------------------- */
+
+/*
+ * Fired by the pass response rather than by a poll of the case. Finishing a
+ * package is the moment worth marking, and a shelf somebody has no reason to
+ * open that evening is not that moment.
+ */
+.badgetoast {
+  position: fixed;
+  top: 4.5rem;
+  right: 1.25rem;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 24rem;
+}
+
+.badgetoast__item {
+  --toast-accent: var(--b1);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border: 1px solid var(--toast-accent);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  padding: 0.7rem 0.85rem;
+  box-shadow: 0 12px 32px -18px #000;
+  animation: badge-land 480ms cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+
+
+.badgetoast__disc {
+  width: 2.6rem;
+  height: 2.6rem;
+  flex: none;
+  border-radius: 50%;
+  color: #0b0f14;
+  background: linear-gradient(150deg, var(--b1), var(--b2));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  display: grid;
+  place-items: center;
+}
+
+.badgetoast__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.85rem;
+}
+
+.badgetoast__text strong {
+  color: var(--toast-accent);
+}
+
+.badgetoast__text span {
+  color: var(--text-dim);
+}
+
+.badgetoast__close {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-raised);
+  color: var(--text-dim);
+  line-height: 1;
+}
+
+@keyframes badge-land {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badgetoast__item {
+    animation: none;
+  }
+  .badgetile {
+    transition: none;
+  }
+  .badgetile:hover {
+    transform: none;
+  }
+}

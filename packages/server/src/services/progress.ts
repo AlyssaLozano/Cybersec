@@ -7,6 +7,7 @@
  */
 
 import type {
+  BadgeDefinition,
   Evaluation,
   Exercise,
   ExerciseProgress,
@@ -18,14 +19,22 @@ import type {
 
 import { PACKAGES } from '../content/index.js';
 import { prisma } from '../db/client.js';
+import { awardFor } from './badges.js';
 
-/** Persist one attempt and update the exercise's status. */
+/**
+ * Persist one attempt and update the exercise's status.
+ *
+ * Returns any badges the pass just earned. The award hangs off this function
+ * rather than off a route because there are two paths to a pass -- the terminal
+ * and the answer submitter -- and hooking one of them would leave the other
+ * silently awarding nothing.
+ */
 export async function recordAttempt(
   userId: string,
   exercise: Exercise,
   input: string,
   evaluation: Evaluation,
-): Promise<void> {
+): Promise<BadgeDefinition[]> {
   const now = new Date();
   const status: ExerciseStatus = evaluation.passed ? 'passed' : 'in_progress';
 
@@ -60,6 +69,9 @@ export async function recordAttempt(
       },
     }),
   ]);
+
+  // Only a pass can complete a package, so a failure does no badge work at all.
+  return evaluation.passed ? awardFor(userId) : [];
 }
 
 /**

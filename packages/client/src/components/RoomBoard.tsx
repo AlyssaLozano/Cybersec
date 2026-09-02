@@ -21,9 +21,10 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { ApiCallError, rooms } from '../lib/api';
 import type { ClientRoom, RoomScenarioSummary } from '../lib/api';
-import { AVATARS, SCENARIO_DIFFICULTIES, checkCallSign } from '@soc/shared';
-import type { AvatarId, FloorIdentity, RoomVisibility, ScenarioDifficulty } from '@soc/shared';
+import { SCENARIO_DIFFICULTIES } from '@soc/shared';
+import type { FloorIdentity, RoomVisibility, ScenarioDifficulty } from '@soc/shared';
 
+import { IdentityForm } from './IdentityForm';
 import { SeatPicker } from './SeatPicker';
 
 type Pane = 'list' | 'create';
@@ -308,74 +309,3 @@ function JoinByCode({ onOpen }: { onOpen: (id: string, code: string) => void }) 
   );
 }
 
-function IdentityForm({ onChosen }: { onChosen: (identity: FloorIdentity) => void }) {
-  const [callSign, setCallSign] = useState('');
-  const [avatarId, setAvatar] = useState<AvatarId>(AVATARS[0]);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  // Checked locally for immediate feedback and again on the server, which owns
-  // uniqueness. Two people picking one name in the same second is exactly what
-  // a client-side check cannot catch.
-  const local = checkCallSign(callSign.trim());
-
-  async function submit(event: React.FormEvent) {
-    event.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      const { identity } = await rooms.setIdentity(callSign.trim(), avatarId);
-      onChosen(identity);
-    } catch (caught) {
-      setError(caught instanceof ApiCallError ? caught.error.message : 'Could not save that.');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <form className="identityform" onSubmit={(e) => void submit(e)}>
-      <h1>Pick a call sign</h1>
-      <p>
-        It is how the floor addresses you out loud. Short enough to say over a microphone, and not a
-        word already used to address the room.
-      </p>
-
-      <label>
-        Call sign
-        <input
-          value={callSign}
-          onChange={(e) => setCallSign(e.target.value)}
-          maxLength={14}
-          autoFocus
-          required
-        />
-      </label>
-      {callSign.trim() && !local.ok ? (
-        <p className="seat-note seat-note--bad">{local.problem}</p>
-      ) : null}
-
-      <fieldset className="avatarpick">
-        <legend>Face</legend>
-        {AVATARS.map((id) => (
-          <label key={id} className={avatarId === id ? 'is-on' : ''}>
-            <input
-              type="radio"
-              name="avatar"
-              checked={avatarId === id}
-              onChange={() => setAvatar(id)}
-            />
-            <span className={`avatar avatar--${id}`} aria-hidden="true" />
-            <span className="avatarpick__name">{id}</span>
-          </label>
-        ))}
-      </fieldset>
-
-      {error ? <p className="seat-note seat-note--bad">{error}</p> : null}
-
-      <button type="submit" className="primary" disabled={busy || !local.ok}>
-        {busy ? 'Saving…' : 'Use this'}
-      </button>
-    </form>
-  );
-}

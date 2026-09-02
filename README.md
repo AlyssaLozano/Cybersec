@@ -26,6 +26,10 @@ touched a live system.
 | AI Security Analyst, 20 exercises, with the Model Lab | Done |
 | Red Team, SOC, and Blue Team Foundations pathways | Done |
 | AI Security Pathway, 52 exercises across 12 modules | Done |
+| The lobby: one portal hall in front of every war room, with presence | Done |
+| Public chat rooms, requested by students and approved by staff | Done |
+| Event centre: a shared calendar people post to and RSVP against | Done |
+| Badges for finishing a package and for finishing a career track | Done |
 | Remaining foundations (regex, Windows, SIEM, cloud, GRC, …) | Outlined, not written |
 
 **319 exercises across 11 packages** today.

@@ -17,3 +17,6 @@ export * from './reports.js';
 export * from './rooms.js';
 export * from './match.js';
 export * from './afterAction.js';
+export * from './badges.js';
+export * from './lobby.js';
+export * from './events.js';

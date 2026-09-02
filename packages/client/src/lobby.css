@@ -1,0 +1,1302 @@
+/*
+ * The lobby, the chat rooms, and the event centre.
+ *
+ * The lobby is drawn as a hall with portals around it and people standing in
+ * the middle, rather than as a page with a list of links on it. That is a
+ * deliberate cost: a list is denser and reads as a user directory, and a
+ * directory is not somewhere anybody strikes up a conversation. Every war room
+ * needs several people at the same time, and a lit doorway with two people
+ * walking towards it says so in a way a link never does.
+ *
+ * All of it is painted with gradients against the app's own tokens, in the one
+ * committed dark look the rest of the product uses. No images, no libraries.
+ */
+
+.lobby {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 4rem;
+}
+
+.lobby--gate {
+  max-width: 40rem;
+}
+
+.lobby__top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.lobby__tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+.lobby__tabs button {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lobby__tabs button:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.lobby__tabs button.is-on {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.lobby__badgecount {
+  background: var(--warn);
+  color: #1c1405;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 1.15rem;
+  text-align: center;
+  padding: 0 0.3rem;
+}
+
+.lobby__h {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-faint);
+  margin: 1.75rem 0 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.lobby__count {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 0.45rem;
+  font-size: 11px;
+  letter-spacing: 0;
+  color: var(--text);
+}
+
+.lobby__hint {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+  max-width: 62ch;
+}
+
+.lobby__notice {
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--warn);
+  background: var(--bg-panel);
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius);
+  margin: 0 0 1rem;
+  max-width: 70ch;
+}
+
+/* --- walking in ---------------------------------------------------------- */
+
+/*
+ * You, crossing the floor.
+ *
+ * It runs once, on the way in, and never again. The point is not decoration: it
+ * tells somebody they are visible to the other people in the room, which is the
+ * fact that changes how they behave in it.
+ */
+.arrival {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--accent-dim);
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, var(--accent-dim), transparent 70%);
+  animation: walk-in 2.6s ease-out both;
+}
+
+.arrival__face {
+  width: 2.1rem;
+  height: 2.1rem;
+  animation: face-pop 700ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.arrival__text {
+  font-size: 1rem;
+}
+
+.arrival__text strong {
+  color: var(--accent);
+}
+
+@keyframes walk-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes face-pop {
+  0% {
+    transform: scale(0.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.arrivals {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.arrivals__line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.7rem;
+  font-size: 0.85rem;
+  animation: face-pop 260ms ease-out both;
+}
+
+.arrivals__face {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrival,
+  .arrival__face,
+  .arrivals__line {
+    animation: none;
+  }
+}
+
+/* --- the hall ------------------------------------------------------------ */
+
+/*
+ * A room, not a page.
+ *
+ * The perspective floor, the horizon glow and the portal rings are all painted
+ * with gradients rather than shipped as art: an image is a download and a
+ * dependency, and this is a handful of gradients that scale to any size and
+ * recolour themselves per portal.
+ *
+ * Everything decorative is aria-hidden and every portal is a real button, so
+ * the room is a ring of doorways to a sighted person and a list of six labelled
+ * buttons to a screen reader. The theatre must not cost anybody the exit.
+ */
+.hall {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  background:
+    radial-gradient(90% 60% at 50% 8%, rgba(78, 163, 240, 0.13), transparent 62%),
+    linear-gradient(180deg, #070b11 0%, #0a1018 46%, #070a0f 100%);
+  padding: 1.5rem 1.25rem 2rem;
+  min-height: 34rem;
+}
+
+/* The receding floor. A skewed grid fading out towards the horizon. */
+.hall__grid {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  bottom: -6%;
+  height: 58%;
+  z-index: 0;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(78, 163, 240, 0.18) 0 1px, transparent 1px 7%),
+    repeating-linear-gradient(0deg, rgba(78, 163, 240, 0.14) 0 1px, transparent 1px 12%);
+  transform: perspective(48rem) rotateX(66deg);
+  transform-origin: bottom center;
+  mask-image: linear-gradient(to top, #000 5%, transparent 78%);
+  pointer-events: none;
+}
+
+.hall__horizon {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 42%;
+  height: 1px;
+  z-index: 0;
+  background: linear-gradient(90deg, transparent, rgba(120, 200, 255, 0.5), transparent);
+  box-shadow: 0 0 26px 4px rgba(78, 163, 240, 0.16);
+  pointer-events: none;
+}
+
+/*
+ * Six portals around one middle.
+ *
+ * A grid rather than absolute positioning, so it degrades to a single readable
+ * column on a narrow screen instead of overlapping itself.
+ */
+.hall__ring {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr minmax(14rem, 1.15fr) 1fr;
+  grid-template-areas:
+    'nw n  ne'
+    'w  c  e'
+    'sw s  se';
+  gap: 0.75rem 1.25rem;
+  align-items: start;
+}
+
+.portal--nw { grid-area: nw; }
+.portal--ne { grid-area: ne; }
+.portal--w  { grid-area: w; }
+.portal--e  { grid-area: e; }
+.portal--sw { grid-area: sw; }
+.portal--se { grid-area: se; }
+
+.hall__centre {
+  grid-area: c;
+  position: relative;
+  min-height: 20rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.hall__count {
+  position: relative;
+  z-index: 2;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-faint);
+}
+
+.hall__alone {
+  position: relative;
+  z-index: 1;
+  max-width: 46ch;
+  margin: 1.25rem auto 0;
+  text-align: center;
+}
+
+/* --- one portal ---------------------------------------------------------- */
+
+.portal {
+  --p1: #7cc4ff;
+  --p2: #1f6fc4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.portal--blue { --p1: #7cc4ff; --p2: #1f5fc4; }
+.portal--red { --p1: #ff9576; --p2: #b8321a; }
+.portal--amber { --p1: #f5cd63; --p2: #a06d0c; }
+.portal--violet { --p1: #bda3ff; --p2: #5b37c4; }
+.portal--cyan { --p1: #6ee6dd; --p2: #0f7a76; }
+
+/* The doorway itself: an upright ellipse with a lit rim and a churning mouth. */
+.portal__arch {
+  position: relative;
+  width: 8.5rem;
+  height: 11rem;
+  border: none;
+  background: none;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 0 26px color-mix(in srgb, var(--p1) 28%, transparent));
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+.portal__arch:not(:disabled):hover {
+  transform: translateY(-3px) scale(1.03);
+  filter: drop-shadow(0 0 38px color-mix(in srgb, var(--p1) 50%, transparent));
+}
+
+.portal__mouth {
+  position: absolute;
+  inset: 6% 8%;
+  border-radius: 50% 50% 46% 46% / 58% 58% 42% 42%;
+  background:
+    radial-gradient(60% 55% at 50% 42%, color-mix(in srgb, var(--p1) 55%, transparent), transparent 72%),
+    conic-gradient(
+      from 0deg,
+      color-mix(in srgb, var(--p2) 85%, transparent),
+      color-mix(in srgb, var(--p1) 70%, transparent),
+      color-mix(in srgb, var(--p2) 85%, transparent),
+      color-mix(in srgb, var(--p1) 70%, transparent),
+      color-mix(in srgb, var(--p2) 85%, transparent)
+    );
+  animation: portal-churn 14s linear infinite;
+  opacity: 0.85;
+}
+
+/* The rim, brightest at the top where the light would be. */
+.portal__ring {
+  position: absolute;
+  inset: 2% 4%;
+  border-radius: 50% 50% 46% 46% / 58% 58% 42% 42%;
+  border: 2px solid transparent;
+  background: linear-gradient(180deg, var(--p1), var(--p2)) border-box;
+  mask:
+    linear-gradient(#000 0 0) padding-box exclude,
+    linear-gradient(#000 0 0);
+  -webkit-mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+}
+
+.portal__label {
+  position: relative;
+  z-index: 2;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: #05090e;
+  background: color-mix(in srgb, var(--p1) 88%, #fff);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.portal__arch:not(:disabled):hover .portal__label,
+.portal__arch:focus-visible .portal__label {
+  opacity: 1;
+}
+
+/* A sealed portal is visibly the same doorway, unlit. */
+.portal--dormant .portal__mouth {
+  animation: none;
+  opacity: 0.22;
+  filter: saturate(0.35);
+}
+
+.portal--dormant .portal__arch {
+  filter: none;
+  cursor: default;
+}
+
+.portal--dormant .portal__label {
+  opacity: 0.65;
+  background: var(--bg-raised);
+  color: var(--text-faint);
+}
+
+@keyframes portal-churn {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.portal__plate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  text-align: center;
+  max-width: 15rem;
+}
+
+.portal__title {
+  font-weight: 600;
+  color: var(--p1);
+}
+
+.portal__blurb {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
+.portal__foot {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+}
+
+/* --- the people in it ---------------------------------------------------- */
+
+.drifters {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/*
+ * Somebody standing in the hall.
+ *
+ * Position is set inline from a hash of their user id, so it is stable across
+ * polls; the animation only bobs them a little around that spot. Anything more
+ * energetic turns a room of twelve people into a screensaver.
+ */
+.drifter {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  transform: translate(-50%, -50%);
+  animation-name: drift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.drifter__face {
+  width: 2.1rem;
+  height: 2.1rem;
+  box-shadow: 0 0 0 2px rgba(10, 16, 24, 0.9), 0 6px 16px -6px #000;
+}
+
+.drifter--me .drifter__face {
+  box-shadow: 0 0 0 2px var(--accent), 0 0 18px -2px var(--accent);
+}
+
+.drifter__name {
+  font-size: 11px;
+  color: var(--text);
+  background: rgba(8, 13, 20, 0.78);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 0.4rem;
+  white-space: nowrap;
+}
+
+.drifter--me .drifter__name {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Badges are one gesture away, so the hall stays a room rather than a table. */
+.drifter__badges {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.drifter:hover .drifter__badges,
+.drifter:focus-within .drifter__badges {
+  opacity: 1;
+}
+
+@keyframes drift {
+  from {
+    transform: translate(-50%, -50%);
+  }
+  to {
+    transform: translate(-50%, calc(-50% - 14px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drifter,
+  .portal__mouth {
+    animation: none;
+  }
+  .portal__arch:not(:disabled):hover {
+    transform: none;
+  }
+}
+
+/*
+ * Narrow screens get the same room as one column.
+ *
+ * The ring is the nice version, not the only version: a portal somebody cannot
+ * reach on a phone is a war room they cannot join.
+ */
+@media (max-width: 60rem) {
+  .hall {
+    min-height: 0;
+    padding: 1rem;
+  }
+  .hall__ring {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'nw' 'ne' 'c' 'w' 'e' 'sw' 'se';
+  }
+  .hall__centre {
+    min-height: 14rem;
+  }
+  .hall__grid {
+    display: none;
+  }
+}
+
+/* --- chat rooms ---------------------------------------------------------- */
+
+.roomstep {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  text-align: left;
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  color: inherit;
+}
+
+.roomstep:hover {
+  border-color: var(--accent);
+}
+
+.roomstep__title {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.roomstep__tag {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 0.4rem;
+}
+
+.roomstep__topic {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.roomstep__meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.roomsteps {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* --- asking for a room --------------------------------------------------- */
+
+.roomrequest,
+.eventform {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  padding: 1rem 1.1rem;
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 44rem;
+}
+
+.roomrequest h3,
+.eventform h3,
+.myrequests h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.roomrequest label,
+.eventform label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.roomrequest input,
+.roomrequest textarea,
+.eventform input,
+.eventform textarea,
+.eventform select,
+.reviewrow input,
+.events__filter select,
+.eventcard__share select,
+.chatroom__row input {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font: inherit;
+  padding: 0.4rem 0.55rem;
+}
+
+.roomrequest input:focus,
+.roomrequest textarea:focus,
+.eventform input:focus,
+.eventform textarea:focus,
+.chatroom__row input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.roomrequest__count {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  margin: -0.35rem 0 0;
+}
+
+.roomrequest__actions,
+.reviewrow__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.myrequests {
+  margin-top: 1.5rem;
+}
+
+.myrequests ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.myrequests li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+
+.myrequests__note {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.reqstate {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 999px;
+  padding: 0 0.45rem;
+  border: 1px solid var(--border);
+  color: var(--text-faint);
+}
+
+.reqstate--approved {
+  color: var(--pass);
+  border-color: var(--pass);
+}
+.reqstate--rejected {
+  color: var(--fail);
+  border-color: var(--fail);
+}
+.reqstate--pending {
+  color: var(--warn);
+  border-color: var(--warn);
+}
+
+/* --- the review queue ---------------------------------------------------- */
+
+.reviewlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.reviewrow {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 50rem;
+}
+
+.reviewrow__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.reviewrow__id {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.reviewrow__topic {
+  margin: 0;
+  border-left: 2px solid var(--border-strong);
+  padding-left: 0.7rem;
+  color: var(--text);
+}
+
+.reviewrow__by {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.reviewrow__face {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.reviewrow__note {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+/* --- a chat room --------------------------------------------------------- */
+
+.chatroom {
+  max-width: 58rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatroom__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.75rem;
+}
+
+.chatroom__head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.chatroom__topic {
+  margin: 0.1rem 0 0;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  max-width: 60ch;
+}
+
+.chatroom__log {
+  flex: 1;
+  min-height: 18rem;
+  overflow-y: auto;
+  padding: 0.85rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.say {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.15rem 0.3rem;
+  border-radius: var(--radius);
+}
+
+.say:hover {
+  background: var(--bg-panel);
+}
+
+.say--runon {
+  margin-top: 0;
+}
+
+.say:not(.say--runon) {
+  margin-top: 0.65rem;
+}
+
+.say__face {
+  width: 1.7rem;
+  height: 1.7rem;
+  margin-top: 0.15rem;
+}
+
+/* Keeps a run-on line aligned under the first one, without repeating the face. */
+.say__spacer {
+  width: 1.7rem;
+  flex: none;
+}
+
+.say__body {
+  min-width: 0;
+  flex: 1;
+}
+
+.say__who {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.say__who time {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+.say__text {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.say--mine .say__who strong {
+  color: var(--accent);
+}
+
+.say__hide {
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  font-size: 11px;
+  opacity: 0;
+  align-self: flex-start;
+}
+
+.say:hover .say__hide {
+  opacity: 1;
+}
+
+.say__hide:hover {
+  color: var(--fail);
+}
+
+.sharedevent {
+  margin-top: 0.4rem;
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  padding: 0.5rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  max-width: 26rem;
+}
+
+.sharedevent--off {
+  border-left-color: var(--fail);
+  opacity: 0.7;
+}
+
+.sharedevent__when {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+}
+
+.sharedevent__title {
+  font-weight: 600;
+}
+
+.sharedevent__meta {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.chatroom__compose {
+  border-top: 1px solid var(--border);
+  padding-top: 0.7rem;
+}
+
+/*
+ * The public notice sits directly above the box, not in a policy page. The
+ * moment before somebody types is the only moment it is worth anything.
+ */
+.chatroom__public {
+  margin: 0 0 0.5rem;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.chatroom__row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chatroom__row input {
+  flex: 1;
+}
+
+/* --- the event centre ---------------------------------------------------- */
+
+.events__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.events__controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.events__filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+}
+
+.events__split {
+  display: grid;
+  grid-template-columns: minmax(18rem, 24rem) 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 62rem) {
+  .events__split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.calendar {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  padding: 0.75rem;
+}
+
+.calendar__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.calendar__dow,
+.calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calendar__dow span {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-faint);
+  padding-bottom: 0.25rem;
+}
+
+.calendar__cell {
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: var(--bg-input);
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 2px;
+}
+
+.calendar__cell:hover {
+  border-color: var(--border-strong);
+}
+
+.calendar__cell--outside {
+  opacity: 0.35;
+}
+
+.calendar__cell--today {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.calendar__cell--on {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.calendar__num {
+  font-size: 12px;
+}
+
+.calendar__dots {
+  display: flex;
+  gap: 2px;
+  min-height: 5px;
+}
+
+.calendar__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.calendar__dot--war-room {
+  background: var(--fail);
+}
+.calendar__dot--study-group {
+  background: var(--pass);
+}
+.calendar__dot--mock-interview {
+  background: #9d7bff;
+}
+.calendar__dot--ctf {
+  background: var(--warn);
+}
+.calendar__dot--off {
+  background: var(--text-faint);
+}
+
+.events__list h3 {
+  font-size: 1rem;
+  margin: 0 0 0.6rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.eventlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.eventcard {
+  display: flex;
+  gap: 0.85rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  padding: 0.75rem 0.9rem;
+}
+
+.eventcard--war-room {
+  border-left-color: var(--fail);
+}
+.eventcard--study-group {
+  border-left-color: var(--pass);
+}
+.eventcard--mock-interview {
+  border-left-color: #9d7bff;
+}
+.eventcard--ctf {
+  border-left-color: var(--warn);
+}
+
+.eventcard--off {
+  opacity: 0.65;
+}
+
+.eventcard--off .eventcard__body h4 {
+  text-decoration: line-through;
+}
+
+.eventcard__when {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 3.5rem;
+  font-family: var(--mono);
+}
+
+.eventcard__date {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.eventcard__time {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.eventcard__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.eventcard__body h4 {
+  margin: 0 0 0.2rem;
+  font-size: 0.98rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.eventcard__kind,
+.eventcard__cancelled {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 0.4rem;
+}
+
+.eventcard__cancelled {
+  color: var(--fail);
+  border-color: var(--fail);
+}
+
+.eventcard__desc {
+  margin: 0 0 0.3rem;
+  color: var(--text-dim);
+  font-size: 0.87rem;
+}
+
+.eventcard__meta {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.eventcard__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.eventcard__share {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.eventform__row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.eventform__row label {
+  flex: 1 1 8rem;
+}
+
+button.primary.is-on {
+  background: var(--pass);
+  border-color: var(--pass);
+}
+
+/* --- avatars ------------------------------------------------------------- */
+
+/*
+ * Twenty faces, twenty colours.
+ *
+ * They were all one grey circle until the lobby existed, which was fine on a
+ * seat chart where the name does the work and wrong here: the whole premise of
+ * the floor is recognising somebody across a room, and twenty identical discs
+ * are not a crowd, they are a bullet list. The hues are spread evenly and kept
+ * low-saturation so they read against the dark ground without competing with
+ * the status colours, which have to keep meaning something.
+ */
+.avatar {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.avatar--ash { background: #8a94a6; }
+.avatar--birch { background: #c3b28a; }
+.avatar--cedar { background: #a1663f; }
+.avatar--delta { background: #4ea3f0; }
+.avatar--ember { background: #e0653f; }
+.avatar--flint { background: #6b7a8c; }
+.avatar--gable { background: #b5794f; }
+.avatar--harbor { background: #3f88b0; }
+.avatar--indigo { background: #6a63d8; }
+.avatar--juniper { background: #4fa06a; }
+.avatar--kestrel { background: #c8973f; }
+.avatar--lumen { background: #e3c451; }
+.avatar--marlow { background: #9d7bff; }
+.avatar--nocturne { background: #3d4360; }
+.avatar--onyx { background: #2f333c; }
+.avatar--pike { background: #3fb0a5; }
+.avatar--quarry { background: #9aa39b; }
+.avatar--rowan { background: #cf5a63; }
+.avatar--sable { background: #59463f; }
+.avatar--tundra { background: #7fb7c9; }

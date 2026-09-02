@@ -25,6 +25,7 @@
  */
 
 import type {
+  BadgeDefinition,
   Check,
   CollaborationScore,
   CopilotDebriefEntry,
@@ -78,6 +79,13 @@ export interface SubmissionInput {
 
 export interface SubmissionResult {
   evaluation: Evaluation;
+  /**
+   * Badges this pass just earned, present only when it earned any.
+   *
+   * See services/badges.ts: the award happens inside recordAttempt, and it is
+   * carried back here so the badge lands in the same moment as the pass.
+   */
+  earnedBadges?: BadgeDefinition[];
   /**
    * What happened to each submitted probe.
    *
@@ -307,12 +315,17 @@ export async function submitAnswer(
 
   const evaluation = evaluate(exercise, attempt, (progress?.attempts ?? 0) + 1);
 
+  // Empty unless this pass completed a package or a whole track. Carried back
+  // to the client so the badge lands in the same moment as the pass rather than
+  // being discovered later on a shelf somebody had no reason to open.
+  let earnedBadges: BadgeDefinition[] = [];
   if (!alreadyPassed || options.regrade) {
-    await recordAttempt(userId, exercise, attempt.input, evaluation);
+    earnedBadges = await recordAttempt(userId, exercise, attempt.input, evaluation);
   }
 
   return {
     evaluation,
+    ...(earnedBadges.length > 0 ? { earnedBadges } : {}),
     // The debriefs explain every alert the student got wrong, and every
     // suggestion that was not worth taking. Both are released only once
     // decisions have been committed -- handing either over beforehand would be

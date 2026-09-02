@@ -10,6 +10,9 @@ import { ALL_EXERCISES, PACKAGES } from './content/index.js';
 import { corsOrigins, env } from './env.js';
 import { errorHandler, sendError } from './http.js';
 import { authRouter } from './routes/auth.js';
+import { badgesRouter } from './routes/badges.js';
+import { eventsRouter } from './routes/events.js';
+import { lobbyRouter } from './routes/lobby.js';
 import { assessmentRouter } from './routes/assessment.js';
 import { learningRouter } from './routes/learning.js';
 import { matchesRouter } from './routes/matches.js';
@@ -47,6 +50,9 @@ export function createApp() {
   app.use('/api/assessment', assessmentRouter);
   app.use('/api/matches', matchesRouter);
   app.use('/api/rooms', roomsRouter);
+  app.use('/api/lobby', lobbyRouter);
+  app.use('/api/events', eventsRouter);
+  app.use('/api/badges', badgesRouter);
 
   app.use((_request, response) => {
     sendError(response, 404, { code: 'not_found', message: 'No such endpoint.' });

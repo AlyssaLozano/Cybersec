@@ -19,6 +19,8 @@ import type {
   ModelCard,
   ProbeEntry,
   ProbeResult,
+  BadgeDefinition,
+  LobbyDoorId,
   ProgressOverview,
   PublicUser,
   DecisionSubmission,
@@ -42,6 +44,8 @@ import { WrittenAnswer } from './components/WrittenAnswer';
 import { IncidentConsole } from './components/IncidentConsole';
 import { MatchConsole } from './components/MatchConsole';
 import { RoomBoard } from './components/RoomBoard';
+import { Lobby } from './components/Lobby';
+import { BadgeCase, BadgeToast } from './components/BadgeCase';
 import { Home } from './components/Home';
 import {
   ApiCallError,
@@ -176,6 +180,25 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
    * scenario rather than from the role catalogue.
    */
   const [floor, setFloor] = useState(false);
+  /*
+   * The lobby, which is now the only way in to any war room.
+   *
+   * Every room needs several people at the same time, and before this existed
+   * each of them arrived alone at an empty schedule ten minutes apart and
+   * concluded the feature was dead. One shared room in front of all of them is
+   * the fix. `lobbyHeading` carries which door somebody clicked to get here, so
+   * the lobby can show that intent to everybody else standing in it.
+   */
+  const [inLobby, setInLobby] = useState(false);
+  const [lobbyHeading, setLobbyHeading] = useState<LobbyDoorId | null>(null);
+  const [badgeCase, setBadgeCase] = useState(false);
+  /**
+   * Badges a pass just earned, waiting to be shown.
+   *
+   * Carried on the pass response rather than polled, so the moment lands with
+   * the pass instead of being discovered later on a shelf.
+   */
+  const [freshBadges, setFreshBadges] = useState<BadgeDefinition[]>([]);
   const [landing, setLanding] = useState(true);
   const [report, setReport] = useState<ReportData | null>(null);
   const [lanes, setLanes] = useState<LaneProfile[] | null>(null);
@@ -478,6 +501,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
       setProbeResults(result.probeResults ?? null);
       setHardening(result.hardening);
       setPostMortem(result.postMortem ?? null);
+      if (result.earnedBadges?.length) setFreshBadges(result.earnedBadges);
       if (regrade) setRegrade(false);
       if (result.evaluation.passed) {
         if (!practiceId) {
@@ -528,6 +552,8 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
         ...(result.output ? [{ kind: 'output' as const, text: result.output, exitCode: result.exitCode }] : []),
       ]);
       setCwd(result.cwd);
+
+      if (result.earnedBadges?.length) setFreshBadges(result.earnedBadges);
 
       if (result.evaluation) {
         setEvaluation(result.evaluation);
@@ -611,11 +637,45 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
    * the terminal would make it feel like a formality rather than the thing that
    * decides what somebody studies for the next year.
    */
+  if (badgeCase) {
+    return (
+      <div className="floorshell">
+        <BadgeCase onBack={() => setBadgeCase(false)} />
+      </div>
+    );
+  }
+
+  /*
+   * The lobby sits in front of every war room, so leaving one goes back to it
+   * rather than to the landing map: somebody who has just finished a session is
+   * far more likely to want the next one than to want the home page.
+   */
+  if (inLobby) {
+    return (
+      <Lobby
+        initialHeading={lobbyHeading}
+        onSocFloor={() => {
+          setInLobby(false);
+          setFloor(true);
+        }}
+        onRedBlue={() => {
+          setInLobby(false);
+          setWarRoom(true);
+        }}
+        onExit={() => {
+          setInLobby(false);
+          setLobbyHeading(null);
+          setLanding(true);
+        }}
+      />
+    );
+  }
+
   if (floor) {
     return (
       <div className="floorshell">
-        <button type="button" className="linkish" onClick={() => { setFloor(false); setLanding(true); }}>
-          ← Back
+        <button type="button" className="linkish" onClick={() => { setFloor(false); setInLobby(true); }}>
+          ← Back to the lobby
         </button>
         <RoomBoard />
       </div>
@@ -623,7 +683,15 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
   }
 
   if (warRoom) {
-    return <MatchConsole user={user} onExit={() => setWarRoom(false)} />;
+    return (
+      <MatchConsole
+        user={user}
+        onExit={() => {
+          setWarRoom(false);
+          setInLobby(true);
+        }}
+      />
+    );
   }
 
   if (landing) {
@@ -640,16 +708,18 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
         onLinux={() => setLanding(false)}
         onSoc={() => setLanding(false)}
         onBrowseTracks={() => setLanding(false)}
-        onSocWarRoom={() => {
+        onLobby={(door) => {
+          // Every war room tile lands here. The door somebody pressed rides
+          // along so the lobby can show that intent to the other people in it,
+          // which is the entire point of putting one room in front of four.
           setLanding(false);
-          setFloor(true);
+          setLobbyHeading(door);
+          setInLobby(true);
         }}
-        onRedBlueWarRoom={() => {
+        onBadges={() => {
           setLanding(false);
-          setWarRoom(true);
+          setBadgeCase(true);
         }}
-        onRiskWarRoom={() => setLanding(false)}
-        onAiWarRoom={() => setLanding(false)}
         onPortfolio={() => setLanding(false)}
         onInterviewSim={() => setLanding(false)}
         onInterviewPeer={() => setLanding(false)}
@@ -741,6 +811,9 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
 
   return (
     <div className="app">
+      {/* Fires the instant a pass completes a package or a track. Rendered at
+          the shell so it is not clipped by whichever panel was open. */}
+      <BadgeToast badges={freshBadges} onDismiss={() => setFreshBadges([])} />
       <header className="topbar">
         <span className="brand">
           <span className="dot" />
@@ -758,7 +831,13 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
             <path d="M15.5 8.5l-2.2 4.8-4.8 2.2 2.2-4.8z" />
           </svg>
         </button>
-        <button className="btn link iconbtn" title="War room" aria-label="War room" onClick={() => setWarRoom(true)}>
+        <button className="btn link iconbtn" title="Badges" aria-label="Badges" onClick={() => setBadgeCase(true)}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="9" r="6" />
+            <path d="M8.5 14.5L7 22l5-2.5L17 22l-1.5-7.5" />
+          </svg>
+        </button>
+        <button className="btn link iconbtn" title="Lobby" aria-label="Lobby" onClick={() => setInLobby(true)}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z" />
           </svg>
