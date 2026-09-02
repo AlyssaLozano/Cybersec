@@ -24,9 +24,11 @@ touched a live system.
 | Incident Response and Remediation | Done |
 | AI Foundations, 26 exercises | Done |
 | AI Security Analyst, 20 exercises, with the Model Lab | Done |
+| Red Team, SOC, and Blue Team Foundations pathways | Done |
+| AI Security Pathway, 52 exercises across 12 modules | Done |
 | Remaining foundations (regex, Windows, SIEM, cloud, GRC, …) | Outlined, not written |
 
-**141 exercises across 7 packages** today.
+**319 exercises across 11 packages** today.
 
 See [docs/content-issues.md](docs/content-issues.md) for problems found in the
 source specifications and what was done about each, and [docs/roles/](docs/roles)

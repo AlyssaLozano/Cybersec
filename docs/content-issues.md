@@ -261,3 +261,110 @@ rather than enthusiasm: comfort with the mathematics, comfort where no method
 exists yet, and willingness to spend a week proving a negative, because
 "does AI interest you" would currently route half the population into a
 specialism that cannot absorb them.
+
+## 18. The AI Security Pathway spec re-teaches two packages that already exist
+
+The twelve-module AI security curriculum arrived after AI Foundations (26
+exercises) and AI Security Analyst (20, with the Model Lab) were already built.
+Its modules 1, 2, 4, and 6 cover ground both of those already teach, in most
+cases more concretely: neural network mechanics, transformers and attention,
+adversarial examples, prompt injection, jailbreaks, extraction, and membership
+inference.
+
+Written literally, the platform would have shipped two treatments of a forward
+pass and three of prompt injection, and a student would have had no way to know
+which one to do.
+
+**Done:** `ai-security-pathway` keeps all twelve modules of the specification and
+its module order, and where a module overlaps it stays at the level of judgement
+-- which control, which evidence, which finding goes first -- and points at the
+lab for the doing. Nothing in it re-teaches a forward pass, and no exercise in it
+asks for a payload. The half neither existing package covered is where the new
+writing went: threat modelling a whole system, privacy and data lineage,
+regulation and fairness, real incidents, integrated risk assessment, and
+organisational governance.
+
+## 19. The pathway's lab assignments cannot be graded here, for the reason in #14
+
+Three assignments assume infrastructure this platform does not have. "Create
+adversarial examples" needs gradient access to an image model. "Extract a model
+in the lab" needs an unmetered query API and a training run. Both are real
+exercises in a real lab and neither can be graded reproducibly here, which is the
+same finding as #14: a grader that depends on a live model tells a student
+nothing about whether they learned something.
+
+**Done:** each becomes the reasoning the assignment was there to produce.
+`aisp.2.4` grades what transfers and what the defences cost rather than a
+generated perturbation; `aisp.6.1` and `aisp.6.2` grade the economics of
+extraction and what each defence actually buys. Students who want to send
+payloads at a deployment have the Model Lab in `ai-security`, which is
+deterministic and already graded.
+
+The capstone has the same problem in a different form: the specification asks for
+a 50 to 60 page assessment report scored out of 100. A rubric cannot honestly
+mark fifty pages, and an unbounded box invites an essay that hits every keyword by
+accident (see `answerFormatFor` in `content/index.ts`). `aisp.12.3` asks for the
+one paragraph a product owner actually reads instead: the finding, what it
+reaches, the smallest change that breaks the path, and the residual risk.
+
+## 20. Several figures and legal outcomes in the pathway spec are wrong
+
+The specification's case studies and regulatory section carry claims that would
+have been taught as fact:
+
+- **"GPT-3: trained on 45TB of text data."** 45TB is the raw crawl before
+  filtering. The filtered training corpus was far smaller, and the figure that
+  matters pedagogically is token count, not disk size.
+- **"SEC AI Disclosure (US public companies)"** is listed as a regulation
+  alongside the GDPR and the EU AI Act. There is no SEC AI disclosure rule.
+  What exists is the general materiality and risk-factor regime, plus
+  enforcement against overstated AI claims.
+- **"EU AI Act: fines up to 6% of global revenue."** 6% is from the 2021 draft.
+  The adopted text reaches 7% of worldwide annual turnover or 35 million euro for
+  prohibited practices, with lower ceilings for other breaches.
+- **Amazon's recruiting model: "Result: Lawsuit, reputational damage, system
+  shut down."** As reported in 2018 it was an internal experimental tool that
+  was abandoned, and Amazon said it was never used to evaluate candidates. No
+  lawsuit is documented.
+- **Google Photos labelling: "Legal risk: Discrimination claim."** No such claim
+  is documented. The label was removed.
+- **Facial recognition: "Error rate: 1% for white faces, 30% for Black faces."**
+  Not a published figure. NIST's 2019 evaluation reported false positive
+  differentials, often an order of magnitude or more and varying widely by
+  algorithm, which is the accurate and more useful claim.
+
+**Done:** module 8 names the incidents, because a student who can go and read the
+reporting learns something a parable cannot teach, and every claim in it is held
+to what was widely reported. Where the specification asserted a legal outcome
+that did not happen, the exercise asks about the technical and process failure
+instead, which is the transferable part. `aisp.5.1` carries the corrected
+penalty ceilings.
+
+## 21. The spec's membership inference example does not work as described
+
+The specification demonstrates membership inference by querying a model once with
+one person's record, once with a similar record, and concluding from the
+difference that the first was in the training data. That is not a sound
+inference. A confidence score means nothing without a baseline for what member
+and non-member confidences look like, which is why real attacks train shadow
+models on similar data first.
+
+Taught as written, a student would report a privacy finding they could not
+defend, which is worse than reporting nothing.
+
+**Done:** `aisp.6.3` grades the mechanism (the member and non-member confidence
+gap), the requirement for a baseline, the role of overfitting, and the fact that
+membership can itself be the sensitive disclosure. The single-query shortcut is
+one of the wrong options.
+
+## 22. Two mechanisms are stated as settled that are not
+
+The specification explains adversarial examples with "models are based on linear
+math" and lists detection of adversarial inputs as a defence with one stated
+weakness. The linear explanation is one hypothesis among several and is
+contested; detection defences have a long history of being defeated by attackers
+who adapt to the detector, which is a stronger statement than "attacker adapts".
+
+**Done:** `aisp.2.4` teaches the mechanism as a property of decision boundaries
+in a high-dimensional space without adopting a contested explanation, and makes
+"detecting adversarial inputs is a settled defence" one of the wrong options.
