@@ -127,9 +127,47 @@ export const ROLE_METRICS = [
   'rule-quality',
   /** Whether the assembled picture held together and named its own gaps. */
   'synthesis-quality',
+  /*
+   * Whether the remedy was the narrowest one that actually stopped it.
+   *
+   * The only metric on this floor that can be failed by being right. Isolating
+   * the host stops the intrusion and is graded badly when a scoped block would
+   * have stopped it too and not taken the chemistry analyser off the network.
+   * Scored together with whether the cost and the deliberately-undone were
+   * stated out loud, because a containment nobody priced is a containment
+   * somebody else pays for.
+   */
+  'containment-cost',
 ] as const;
 
 export type RoleMetric = (typeof ROLE_METRICS)[number];
+
+/**
+ * Where a seat sits in the tiered escalation model.
+ *
+ * WHY THIS IS ON THE ROLE AND NOT LEFT IMPLICIT
+ *
+ * The role list has to be printed in some order, and any order reads as a
+ * ranking to somebody who does not yet know the field. Listing the SOC Operator
+ * first, directly above the specialists and below the incident lead, was read
+ * by exactly the audience this product is for as "senior, one below the lead".
+ * It is the opposite: it is the seat almost everybody is hired into first.
+ *
+ * A career changer who misreads that plans the wrong year. So the tier is a
+ * field, it is stated in plain words on every profile, and it is shown wherever
+ * a role is offered.
+ *
+ * TIER IS NOT RANK
+ *
+ * Tier 1 is not junior in the sense of doing lesser work. It is the seat with
+ * the shortest clock and the widest funnel: everything arrives there, and
+ * deciding correctly in two minutes what deserves an hour is a hard skill that
+ * a lot of Tier 3 specialists could not do well. What changes with tier is the
+ * clock, the depth, and how much of the picture you hold, not how good anybody
+ * has to be.
+ */
+export const SOC_TIERS = ['tier-1', 'tier-2', 'tier-3'] as const;
+export type SocTier = (typeof SOC_TIERS)[number];
 
 export interface SocRole {
   id: SocRoleId;
@@ -155,6 +193,16 @@ export interface SocRole {
   poorFitIf: string;
   /** True when playable exercises exist for this role's branch today. */
   playable: boolean;
+  /** Where this seat sits in the escalation model. See SOC_TIERS. */
+  tier: SocTier;
+  /**
+   * Whether people are commonly hired straight into this seat with no prior
+   * security job. Exactly one seat on this floor is normally a true entry
+   * point, and saying so plainly is the whole reason the field exists.
+   */
+  entryPoint: boolean;
+  /** How somebody actually reaches this seat, in one honest sentence. */
+  howYouGetHere: string;
 }
 
 export const SOC_ROLES: SocRole[] = [
@@ -177,6 +225,10 @@ export const SOC_ROLES: SocRole[] = [
     poorFitIf:
       'you need to finish what you start. Triage is deliberately shallow: you hand the interesting ones to somebody else and go back to the queue.',
     playable: true,
+    tier: 'tier-1',
+    entryPoint: true,
+    howYouGetHere:
+      'This is the way in. Most people are hired here with no prior security job, from a help desk, a support role, the military, or a career change, and it is the seat this whole platform is preparing you for first.',
   },
   {
     id: 'log-analyst',
@@ -195,6 +247,10 @@ export const SOC_ROLES: SocRole[] = [
     poorFitIf:
       'ambiguity frustrates you. Logs are incomplete and contradictory, and much of the job is being honest about what they do not prove.',
     playable: false,
+    tier: 'tier-2',
+    entryPoint: false,
+    howYouGetHere:
+      'Usually a year or two of triage first. It is the commonest promotion out of the operator chair, because the skill it needs is the one triage builds: reading a log and knowing what is missing from it.',
   },
   {
     id: 'threat-intel',
@@ -214,6 +270,10 @@ export const SOC_ROLES: SocRole[] = [
     poorFitIf:
       'you want to fix things. Intel informs decisions other people make, and you rarely touch the systems involved.',
     playable: false,
+    tier: 'tier-3',
+    entryPoint: false,
+    howYouGetHere:
+      'Two or three years of investigation first, or sideways from a non-technical intelligence background, which is why it takes more people from unexpected careers than any other seat here.',
   },
   {
     id: 'forensics',
@@ -234,6 +294,10 @@ export const SOC_ROLES: SocRole[] = [
     poorFitIf:
       'you dislike process for its own sake. Much of the rigour exists for legal reasons rather than technical ones, and none of it is optional.',
     playable: false,
+    tier: 'tier-3',
+    entryPoint: false,
+    howYouGetHere:
+      'Years, usually. It is the seat where being slow and exhaustive is the job, and it is reached by people who were already the ones writing everything down.',
   },
   {
     id: 'ir-lead',
@@ -254,6 +318,10 @@ export const SOC_ROLES: SocRole[] = [
     poorFitIf:
       'you want to do the technical work yourself. Leading means delegating the interesting parts and living with somebody else’s analysis.',
     playable: false,
+    tier: 'tier-3',
+    entryPoint: false,
+    howYouGetHere:
+      'Years in the seats below it, and the promotion is not technical: it is being trusted to decide on incomplete information and to carry the decision afterwards.',
   },
   {
     id: 'network-analyst',
@@ -272,6 +340,10 @@ export const SOC_ROLES: SocRole[] = [
     poorFitIf:
       'you want definitive answers. Flow data tells you that two hosts spoke, rarely what they said.',
     playable: false,
+    tier: 'tier-2',
+    entryPoint: false,
+    howYouGetHere:
+      'Often sideways from network engineering rather than up from triage, which is why it is one of the few security seats a non-security career can enter directly.',
   },
   {
     id: 'vulnerability-analyst',
@@ -291,6 +363,10 @@ export const SOC_ROLES: SocRole[] = [
     poorFitIf:
       'you find repetition draining. The cycle is monthly and the backlog never reaches zero.',
     playable: false,
+    tier: 'tier-2',
+    entryPoint: false,
+    howYouGetHere:
+      'Reached from triage or from systems administration. It is one of the more accessible second seats, and one of the easiest to do badly by reporting scanner output as findings.',
   },
   {
     id: 'malware-analyst',
@@ -310,6 +386,10 @@ export const SOC_ROLES: SocRole[] = [
     poorFitIf:
       'you want breadth. This is a narrow, deep specialism, and entry-level positions in it are genuinely rare.',
     playable: false,
+    tier: 'tier-3',
+    entryPoint: false,
+    howYouGetHere:
+      'The steepest entry on the floor: it needs assembly, operating system internals and patience, and is usually reached deliberately rather than by promotion.',
   },
   {
     id: 'cloud-security',
@@ -328,6 +408,10 @@ export const SOC_ROLES: SocRole[] = [
     poorFitIf:
       'you prefer systems you can hold. Cloud work is abstract, and the evidence you get is whatever the provider chose to record.',
     playable: false,
+    tier: 'tier-2',
+    entryPoint: false,
+    howYouGetHere:
+      'Commonly sideways from cloud or platform engineering. The security part is learnable; the part that is not is knowing how the platform actually behaves under load.',
   },
   {
     id: 'ai-security',
@@ -348,6 +432,10 @@ export const SOC_ROLES: SocRole[] = [
     poorFitIf:
       'you want to be in the room when something is happening. This role sits outside the incident queue by design, its wins are launches that did not go wrong, and a week that ends in "I could not break it" is a normal week rather than a failed one.',
     playable: true,
+    tier: 'tier-3',
+    entryPoint: false,
+    howYouGetHere:
+      'New enough that there is no established path. People arrive from data science, from application security, and from triage seats that started seeing model incidents nobody else understood.',
   },
   {
     id: 'detection-engineer',
@@ -373,6 +461,42 @@ export const SOC_ROLES: SocRole[] = [
       'you want to be in the incident. This seat arrives after the noise, and the reward for doing ' +
       'it well is a quieter queue that nobody thanks you for.',
     playable: false,
+    tier: 'tier-3',
+    entryPoint: false,
+    howYouGetHere:
+      'Almost always from triage or log analysis, because the qualification that matters is having personally suffered a bad rule at three in the morning.',
+  },
+  {
+    id: 'mitigation-specialist',
+    title: 'Mitigation Specialist',
+    oneLine:
+      'Owns what changes, what that change breaks, and who pays for it while the incident is still running.',
+    reality:
+      'The seat that says no to the obvious action, in front of people who want it taken now. ' +
+      'Isolating the host is right until the host is the only chemistry analyser in the building; ' +
+      'rotating the key is right until it locks out thirteen thousand members before a payment ' +
+      'run. Most of the work is establishing what a proposed remedy actually costs and finding a ' +
+      'narrower one, and the output is frequently a list of what is deliberately being left ' +
+      'undone. Expect to be the least popular voice in the room for the first twenty minutes and ' +
+      'the reason nobody caused an outage by the end of it.',
+    surface: 'alert-queue',
+    sees: [
+      'What is happening, what it can reach, and what is on it, and deliberately not the raw logs',
+      'Dependency and blast radius for any host, account or control being proposed for change',
+      'The rollback for a change, before the change',
+      'Operational context: what runs tonight, who needs it, and what a missed window costs',
+    ],
+    metrics: ['containment-cost', 'decision-quality'],
+    keyFoundations: ['networking', 'systems-administration', 'risk'],
+    poorFitIf:
+      'you want to be the person who acts. This seat mostly narrows or delays an action ' +
+      'somebody else wants taken now, and is graded on outages that did not happen, ' +
+      'which nobody notices.',
+    playable: false,
+    tier: 'tier-3',
+    entryPoint: false,
+    howYouGetHere:
+      'Rarely a first security job. It comes from operations, platform engineering or incident response, and the qualification that matters is having personally caused or cleaned up an outage.',
   },
   {
     id: 'fusion-analyst',
@@ -399,6 +523,10 @@ export const SOC_ROLES: SocRole[] = [
       'you want depth in one discipline. Fusion is broad by definition, you will rarely be the ' +
       'most expert person on any single surface, and you own an assessment rather than a system.',
     playable: false,
+    tier: 'tier-3',
+    entryPoint: false,
+    howYouGetHere:
+      'Not a first seat or a second one. It needs enough time in several others to know what each of them is likely to have missed.',
   },
 ];
 

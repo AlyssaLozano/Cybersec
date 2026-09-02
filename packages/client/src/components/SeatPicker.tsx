@@ -45,6 +45,33 @@ const REMIT: Record<string, string> = {
   'ir-lead': 'Adjudicate, sequence the response, and cover the chairs nobody took.',
 };
 
+/**
+ * Which tier each chair belongs to, and which one is the job somebody would
+ * actually be hired into first.
+ *
+ * Shown on the chair itself because the seat list has to be printed in some
+ * order, and any order reads as a ranking to somebody who does not yet know the
+ * field. Without this, the operator chair sitting at the top of the list next
+ * to the incident lead reads as senior, and it is the opposite: it is the entry
+ * point, and for most people using this product it is the job they are training
+ * for right now.
+ */
+const TIER: Record<string, { tier: string; entry?: boolean }> = {
+  'soc-operator': { tier: 'Tier 1', entry: true },
+  'log-analyst': { tier: 'Tier 2' },
+  'network-analyst': { tier: 'Tier 2' },
+  'cloud-security': { tier: 'Tier 2' },
+  'vulnerability-analyst': { tier: 'Tier 2' },
+  forensics: { tier: 'Tier 3' },
+  'malware-analyst': { tier: 'Tier 3' },
+  'threat-intel': { tier: 'Tier 3' },
+  'ai-security': { tier: 'Tier 3' },
+  'detection-engineer': { tier: 'Tier 3' },
+  'fusion-analyst': { tier: 'Tier 3' },
+  'mitigation-specialist': { tier: 'Tier 3' },
+  'ir-lead': { tier: 'Tier 3' },
+};
+
 function seatLabel(role: string): string {
   return role
     .split('-')
@@ -175,7 +202,13 @@ export function SeatPicker({ roomId, joinCode = null, onSeated }: Props) {
                 onClick={() => void choose(seat)}
                 aria-label={`${seatLabel(seat.role)}: ${seat.blockedBecause ?? 'free'}`}
               >
-                <span className="seat__role">{seatLabel(seat.role)}</span>
+                <span className="seat__role">
+                  {seatLabel(seat.role)}
+                  <span className={`seat__tier${TIER[seat.role]?.entry ? ' seat__tier--entry' : ''}`}>
+                    {TIER[seat.role]?.tier ?? ''}
+                    {TIER[seat.role]?.entry ? ' · entry level' : ''}
+                  </span>
+                </span>
                 <span className="seat__remit">{REMIT[seat.role] ?? ''}</span>
                 <span className="seat__status">
                   {seat.occupant ? (

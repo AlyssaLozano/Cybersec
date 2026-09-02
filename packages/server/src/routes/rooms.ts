@@ -31,6 +31,8 @@ import {
 } from '@soc/shared';
 import type { SocRoleId } from '@soc/shared';
 
+import { SOC_ROLES } from '@soc/shared';
+
 import { SCENARIOS } from '../content/scenarios/index.js';
 import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
 import {
@@ -106,8 +108,20 @@ roomsRouter.get(
         defaultDifficulty: scenario.difficulty,
         durationMinutes: scenario.durationMinutes,
         // The seat list ships so the picker can show the floor before anybody
-        // commits. It is the same list the room is built from.
+        // commits. It is the same list the room is built from, and it carries
+        // the tier so somebody choosing a chair can see which one is the job
+        // they would actually be hired into.
         roles: scenario.roles,
+        seats: scenario.roles.map((role) => {
+          const profile = SOC_ROLES.find((r) => r.id === role);
+          return {
+            role,
+            title: profile?.title ?? role,
+            tier: profile?.tier ?? 'tier-2',
+            entryPoint: profile?.entryPoint ?? false,
+            oneLine: profile?.oneLine ?? '',
+          };
+        }),
       })),
     );
   }),

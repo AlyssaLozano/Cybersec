@@ -37,7 +37,19 @@ const TIER_TEACH = {
     'escalating the few that matter. Tier 2 investigates what Tier 1 escalates, pulling in logs, ' +
     'network flows, and context. Tier 3 is the specialists and the incident lead, reached for the ' +
     'incidents that are real and moving. An alert travels up the tiers, and a good one comes back ' +
-    'down as a new detection so it is caught automatically next time.',
+    'down as a new detection so it is caught automatically next time.\n\n' +
+    'Two things about tiers that are easy to get backwards, and both matter to you ' +
+    'specifically.\n\n' +
+    'Tier 1 is where you start. The SOC Operator seat is the one people are hired into with no ' +
+    'prior security job, from a help desk, a support role, the military, or a career change. If ' +
+    'you get a SOC job in the next year, this is almost certainly the job. Every other seat on ' +
+    'the floor is reached from somewhere: two years of triage, or sideways from network ' +
+    'engineering, or from a career in intelligence analysis. None of them is a first job.\n\n' +
+    'And tier is not rank. Tier 1 is not junior in the sense of doing lesser work: it is the seat ' +
+    'with the shortest clock and the widest funnel. Everything arrives there, and deciding ' +
+    'correctly in two minutes what deserves an hour is genuinely hard, and plenty of Tier 3 ' +
+    'specialists would do it badly. What changes as you go up is the clock, the depth, and how ' +
+    'much of the picture you hold. Not how good you have to be.',
 } as const;
 
 const ROLE_TEACH = {

@@ -350,3 +350,22 @@
 .floorshell {
   padding: 1rem 1.5rem 0;
 }
+
+/* Tier badge on a chair. Quiet by default; the entry-level chair is the one
+   somebody new needs to find, so that one is the only coloured badge. */
+.seat__tier {
+  display: inline-block;
+  margin-left: 0.45rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule, #2a3138);
+  font-size: 0.68rem;
+  font-weight: 400;
+  color: var(--muted, #8b97a3);
+  vertical-align: middle;
+}
+
+.seat__tier--entry {
+  border-color: var(--good, #57b894);
+  color: var(--good, #57b894);
+}
