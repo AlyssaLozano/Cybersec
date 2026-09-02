@@ -16,6 +16,32 @@ import { LATERAL_NORTHWIND } from './lateral-northwind.js';
 import { EXFIL_NORTHWIND } from './exfil-northwind.js';
 import { PERSIST_NORTHWIND } from './persist-northwind.js';
 import { REACH_THE_CORE } from './reach-the-core.js';
+import {
+  INTAKE_TIDEWATER,
+  REGISTRY_HAVENPORT,
+  THESIS_KINGSBRIDGE,
+  WARD_MERIDIAN,
+} from './boards-healthcare-public.js';
+import {
+  CLAIMS_PINNACLE,
+  SUBSCRIBER_ORBIT,
+  SWITCH_CASTLEBAY,
+  TILL_HALLORAN,
+} from './boards-finance-retail.js';
+import {
+  AIRSIDE_PORTMORE,
+  FORMULA_VERITY,
+  SIGNING_SUMMIT,
+  SUBSTATION_FAIRHAVEN,
+} from './boards-industry-ot.js';
+import { MATTER_KESTREL, SOURCE_BEACON, TENANT_LUMEN } from './boards-information.js';
+import {
+  CONSOLE_ARGENT,
+  FLEET_ARDEN,
+  PROGRAMME_HALSTEAD,
+  TERMINAL_KESTRELPORT,
+  VAULT_MERIDIANEX,
+} from './boards-specialist.js';
 
 const SCENARIOS = new Map<string, RedBlueScenario>([
   [RECON_NORTHWIND.id, RECON_NORTHWIND],
@@ -33,7 +59,31 @@ const SCENARIOS = new Map<string, RedBlueScenario>([
  * a narrowing branch in every caller. Both self-register their scoring on
  * import; this file's job is only to make sure the import happens.
  */
-const POSITIONAL = new Map<string, PositionalScenario>([[REACH_THE_CORE.id, REACH_THE_CORE]]);
+const POSITIONAL_LIST: PositionalScenario[] = [
+  REACH_THE_CORE,
+  WARD_MERIDIAN,
+  INTAKE_TIDEWATER,
+  THESIS_KINGSBRIDGE,
+  REGISTRY_HAVENPORT,
+  SWITCH_CASTLEBAY,
+  TILL_HALLORAN,
+  CLAIMS_PINNACLE,
+  SUBSCRIBER_ORBIT,
+  SUBSTATION_FAIRHAVEN,
+  SIGNING_SUMMIT,
+  FORMULA_VERITY,
+  AIRSIDE_PORTMORE,
+  SOURCE_BEACON,
+  MATTER_KESTREL,
+  TENANT_LUMEN,
+  VAULT_MERIDIANEX,
+  FLEET_ARDEN,
+  TERMINAL_KESTRELPORT,
+  PROGRAMME_HALSTEAD,
+  CONSOLE_ARGENT,
+];
+
+const POSITIONAL = new Map<string, PositionalScenario>(POSITIONAL_LIST.map((s) => [s.id, s]));
 
 /** Every linear red-blue scenario. */
 export const RED_BLUE_SCENARIOS: RedBlueScenario[] = [...SCENARIOS.values()];

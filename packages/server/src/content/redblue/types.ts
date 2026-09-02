@@ -84,6 +84,8 @@ export interface PositionalTargetSpec {
   label: string;
   /** One line on what the system is. Shown to both sides; it is the map. */
   note: string;
+  /** ATT&CK technique this system falls to, e.g. "T1003.006 DCSync". Public. */
+  technique: string;
   /** Red's objective. Exactly one target carries it. */
   crown?: boolean;
 }
@@ -127,6 +129,7 @@ export function startingBoard(scenario: PositionalScenario): BoardState {
       id: t.id,
       label: t.label,
       note: t.note,
+      technique: t.technique,
       crown: t.crown === true,
       compromised: false,
       detectedHere: false,

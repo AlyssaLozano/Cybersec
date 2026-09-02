@@ -363,6 +363,9 @@ function BoardGrid({
               {t.crown && <span className="bt-crown" title="the objective">&#9733;</span>}
             </span>
             <span className="bt-note">{t.note}</span>
+            <span className="bt-tech" title="the ATT&amp;CK technique this system falls to">
+              {t.technique}
+            </span>
             <span className="bt-state">
               {t.contained && <span className="bt-chip walled">walled</span>}
               {t.compromised && <span className="bt-chip held">{you === 'red' ? 'yours' : 'compromised'}</span>}

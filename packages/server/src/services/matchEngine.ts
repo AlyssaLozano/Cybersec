@@ -498,6 +498,7 @@ export function boardViewFor(board: BoardState, side: MatchSide): BoardViewForSi
     id: t.id,
     label: t.label,
     note: t.note,
+    technique: t.technique,
     crown: t.crown,
     detectedHere: t.detectedHere,
     contained: t.contained,

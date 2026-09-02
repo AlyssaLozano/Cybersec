@@ -321,6 +321,15 @@ export interface BoardTarget {
   label: string;
   /** One line on what this system is, shown to both sides. */
   note: string;
+  /**
+   * The ATT&CK technique this system is taken by, e.g. "T1003.006 DCSync".
+   *
+   * PUBLIC to both sides, and deliberately so. It is not a hint about where the
+   * defences are; it is the vocabulary. A student who plays a board should come
+   * out able to say "I took the DC by DCSync and they caught it on 4662", which
+   * is the sentence an interview actually asks for.
+   */
+  technique: string;
   /** Red's objective. Compromising a crown target undetected wins the match. */
   crown: boolean;
   /** Red has compromised it (a quiet hit). Redacted per side in the view. */
@@ -361,6 +370,8 @@ export interface BoardTargetView {
   id: string;
   label: string;
   note: string;
+  /** The ATT&CK technique this system falls to. Public: it is the vocabulary. */
+  technique: string;
   crown: boolean;
   /** Public: a shot that landed on coverage is a fact both players witnessed. */
   detectedHere: boolean;
