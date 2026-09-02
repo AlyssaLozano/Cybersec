@@ -29,6 +29,15 @@ model User {
   createdAt    DateTime  @default(now())
   lastLoginAt  DateTime?
 
+  /// How the floor addresses this person over the microphone. Nullable because
+  /// it is chosen when somebody first takes a seat rather than at signup: the
+  /// learning platform never needs it, and asking for one during registration
+  /// is a question about a product the person has not seen yet.
+  callSign     String?   @unique
+  /// See AVATARS in @soc/shared. Plain string, not an enum, for Postgres
+  /// portability.
+  avatarId     String?
+
   progress         ExerciseProgress[]
   practiceProgress PracticeProgress[]
   terminalSessions TerminalSession[]
@@ -36,6 +45,7 @@ model User {
   copilotConsults  CopilotConsult[]
   scenarioAttempts ScenarioAttempt[]
   assessment       AssessmentSession?
+  hostedRooms      RoomSession[]
 
   @@map("users")
 }
@@ -305,4 +315,40 @@ model Match {
   @@index([redUserId])
   @@index([blueUserId])
   @@map("matches")
+}
+
+/// A scheduled war room: one scenario, run at one tier, at one start time.
+///
+/// The seat chart is built from the scenario's own declared roles and never
+/// from the role catalogue, so a scenario that seats six has six chairs and a
+/// seventh cannot be offered or taken. See the seating tests in
+/// services/rooms.test.ts, which hold that for every scenario in the
+/// catalogue.
+model RoomSession {
+  id         String   @id @default(uuid())
+  scenarioId String
+  /// "beginner" | "intermediate" | "advanced" | "expert" -- ScenarioDifficulty
+  /// in @soc/shared. On the run, not the scenario: the same incident is worth
+  /// playing at more than one tier.
+  difficulty String
+  startsAt   DateTime
+  /// "open" | "closed" -- RoomVisibility in @soc/shared.
+  visibility String
+  /// Set for closed rooms and null for open ones. Stored rather than derived so
+  /// a leaked code can be rotated without moving everybody to a new room.
+  joinCode   String?
+  /// "scheduled" | "running" | "complete" | "cancelled" -- RoomStatus.
+  status     String   @default("scheduled")
+  hostUserId String
+  /// SeatAssignment[] as JSON. Seats are read and written as one unit and are
+  /// never queried across rooms, so a table would buy nothing and cost a join
+  /// on every seat change.
+  seatsJson  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  host User @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
+
+  @@index([status, startsAt])
+  @@map("room_sessions")
 }

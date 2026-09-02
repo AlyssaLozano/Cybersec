@@ -12,6 +12,8 @@ import type {
   MatchSide,
   MatchView,
   RoomVisibility,
+  FloorIdentity,
+  SocRoleId,
   ScenarioDifficulty,
   AvatarId,
   AttackSuite,
@@ -484,6 +486,117 @@ export const assessment = {
     request<{ profile: LearnerProfile }>('/assessment/profile', {
       method: 'PATCH',
       body: JSON.stringify(patch),
+    }),
+};
+
+// --- war rooms ---------------------------------------------------------------
+
+/**
+ * A room as the browser is allowed to see it.
+ *
+ * `joinCode` is null for everybody except the host. The server decides that in
+ * `toClientRoom`; nothing here should try to reconstruct it.
+ */
+export interface ClientRoom {
+  id: string;
+  scenarioId: string;
+  scenarioTitle: string;
+  difficulty: ScenarioDifficulty;
+  startsAt: string;
+  visibility: RoomVisibility;
+  joinCode: string | null;
+  status: 'scheduled' | 'running' | 'complete' | 'cancelled';
+  hostUserId: string;
+  seats: Array<{ role: SocRoleId; occupant: FloorIdentity | null }>;
+  seatsTotal: number;
+  seatsFilled: number;
+  isHost: boolean;
+  mySeat: SocRoleId | null;
+}
+
+/**
+ * One chair as this viewer sees it.
+ *
+ * There is no entry here for a role the scenario does not seat, because the
+ * room was built from the scenario's own role list. The picker renders this
+ * array and never the role catalogue: a chart built from SOC_ROLE_IDS would
+ * look right and would offer a chair with no evidence behind it.
+ */
+export interface SeatView {
+  role: SocRoleId;
+  occupant: FloorIdentity | null;
+  selectable: boolean;
+  blockedBecause: string | null;
+}
+
+export interface RoomDetail {
+  room: ClientRoom;
+  seating: SeatView[];
+  readiness: {
+    canStart: boolean;
+    filled: number;
+    total: number;
+    /** Chairs nobody took. The lead reads a stand-in for each of these. */
+    empty: SocRoleId[];
+    /** Only the lead chair ever blocks a start. */
+    blockers: string[];
+    /** Costs of running short, which are warnings and not refusals. */
+    notes: string[];
+  };
+  identity: FloorIdentity | null;
+}
+
+export interface RoomScenarioSummary {
+  id: string;
+  title: string;
+  situation: string;
+  defaultDifficulty: ScenarioDifficulty;
+  durationMinutes: number;
+  roles: SocRoleId[];
+}
+
+export const rooms = {
+  /** Scenarios that can be scheduled, each with the seats it actually runs. */
+  scenarios: () => request<RoomScenarioSummary[]>('/rooms/scenarios'),
+
+  /** Open rooms, plus closed ones the caller hosts or holds a seat in. */
+  list: () => request<{ rooms: ClientRoom[] }>('/rooms'),
+
+  /** Room plus seat chart in one response, so the chart cannot go stale between two fetches. */
+  get: (id: string, code?: string | null) =>
+    request<RoomDetail>(`/rooms/${id}${code ? `?code=${encodeURIComponent(code)}` : ''}`),
+
+  create: (body: {
+    scenarioId: string;
+    difficulty: ScenarioDifficulty;
+    startsAt: string;
+    visibility: RoomVisibility;
+  }) => request<{ room: ClientRoom }>('/rooms', { method: 'POST', body: JSON.stringify(body) }),
+
+  takeSeat: (id: string, role: SocRoleId, code?: string | null) =>
+    request<Omit<RoomDetail, 'identity'>>(`/rooms/${id}/seat`, {
+      method: 'POST',
+      body: JSON.stringify({ role, code: code ?? null }),
+    }),
+
+  leaveSeat: (id: string) =>
+    request<Omit<RoomDetail, 'identity'>>(`/rooms/${id}/seat`, { method: 'DELETE' }),
+
+  handOver: (id: string, toUserId: string) =>
+    request<Omit<RoomDetail, 'identity'>>(`/rooms/${id}/handover`, {
+      method: 'POST',
+      body: JSON.stringify({ toUserId }),
+    }),
+
+  /** The call sign and face this person uses on a floor. Null until they choose one. */
+  identity: () => request<{ identity: FloorIdentity | null; avatars: readonly AvatarId[] }>(
+    '/rooms/identity',
+  ),
+
+  setIdentity: (callSign: string, avatarId: AvatarId) =>
+    request<{ identity: FloorIdentity }>('/rooms/identity', {
+      method: 'PUT',
+      body: JSON.stringify({ callSign, avatarId }),
     }),
 };
 

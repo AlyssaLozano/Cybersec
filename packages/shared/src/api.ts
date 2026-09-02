@@ -21,6 +21,14 @@ export const API_ERROR_CODES = {
   emailTaken: 'email_taken',
   validationFailed: 'validation_failed',
   notFound: 'not_found',
+  /**
+   * Asked for something real that this person may not have.
+   *
+   * Distinct from notFound on purpose: a closed war room that refuses a wrong
+   * join code is not missing, and telling somebody it is missing means the
+   * client cannot offer them the code box.
+   */
+  forbidden: 'forbidden',
   exerciseLocked: 'exercise_locked',
   rateLimited: 'rate_limited',
   /** Registration was attempted without a valid entry code. */

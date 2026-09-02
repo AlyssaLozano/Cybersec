@@ -13,6 +13,7 @@ import { authRouter } from './routes/auth.js';
 import { assessmentRouter } from './routes/assessment.js';
 import { learningRouter } from './routes/learning.js';
 import { matchesRouter } from './routes/matches.js';
+import { roomsRouter } from './routes/rooms.js';
 
 export function createApp() {
   const app = express();
@@ -45,6 +46,7 @@ export function createApp() {
   app.use('/api/learning', learningRouter);
   app.use('/api/assessment', assessmentRouter);
   app.use('/api/matches', matchesRouter);
+  app.use('/api/rooms', roomsRouter);
 
   app.use((_request, response) => {
     sendError(response, 404, { code: 'not_found', message: 'No such endpoint.' });
