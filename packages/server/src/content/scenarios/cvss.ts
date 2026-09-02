@@ -320,7 +320,7 @@ export const NINE_POINT_EIGHT_TRUTH: ScenarioTruth = {
         'tree of eleven separate products here and most of them never call it directly, which is ' +
         'how a general purpose library ends up on a third of an estate that has never made a ' +
         'decision about it. Slow the number down before it becomes a commitment: a floor that ' +
-        'accepts 340 will spend a two weeks patching machines that were never exposed, and the ' +
+        'accepts 340 will spend two weeks patching machines that were never exposed, and the ' +
         'time comes out of the thing that actually is.',
       standIn:
         'Three hundred and forty is true about the estate and false about the risk, and it is ' +

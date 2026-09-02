@@ -113,8 +113,8 @@ export const THREE_SIGNATURES: Scenario = {
       detail:
         'Running the same comparison across every possible trio finds two others well above ' +
         'expectation: one group of three appears together on 64 files and another on 51. The first ' +
-        'three are the Tuesday and Wednesday night shift at the Ipswich site, who are the only ' +
-        'staff working those hours. The second three are the only Welsh-language assessors in the ' +
+        'three are the Tuesday and Wednesday night shift at the Kingsport site, who are the only ' +
+        'staff working those hours. The second three are the only Spanish-language assessors in the ' +
         'society and receive that queue exclusively.',
       source: 'loan origination system',
       claimedSeverity: 'high',
@@ -125,8 +125,8 @@ export const THREE_SIGNATURES: Scenario = {
       surface: 'cloud-audit',
       summary: 'These three should never land on the same file',
       detail:
-        'h.mabry is in the Norwich origination team on earlies. s.okwuosa is a credit assessor at ' +
-        'the Ipswich site on lates. g.pryde is in the central disbursement team and works ' +
+        'h.mabry is in the Fremont origination team on earlies. s.okwuosa is a credit assessor at ' +
+        'the Kingsport site on lates. g.pryde is in the central disbursement team and works ' +
         'remotely. They are in three different reporting lines, on three different sites, on three ' +
         'different shift patterns, and share no queue. The routing engine assigns by queue, ' +
         'availability and authority limit, and would place all three on one file by chance ' +
@@ -169,7 +169,7 @@ export const THREE_SIGNATURES: Scenario = {
       detail:
         'Six months of mail, chat and calendar records contain no message of any kind between any ' +
         'two of the three, no shared meeting, and no shared distribution list beyond society-wide ' +
-        'announcements. For comparison, the Ipswich night shift trio exchanged 1,900 chat messages ' +
+        'announcements. For comparison, the Kingsport night shift trio exchanged 1,900 chat messages ' +
         'in the same period, and the median for any two staff who appear on more than ten files ' +
         'together is 240.',
       source: 'communications platform',
@@ -209,7 +209,7 @@ export const THREE_SIGNATURES: Scenario = {
       surface: 'alert-queue',
       summary: 'The night shift trio also reassign files by hand',
       detail:
-        'The Ipswich night shift trio carry manual reassignments on 12 of their 64 shared files. ' +
+        'The Kingsport night shift trio carry manual reassignments on 12 of their 64 shared files. ' +
         'All 12 reference a sickness cover ticket in the reassignment note, all 12 were reassigned ' +
         'by a duty supervisor rather than by the person completing the stage, and the amounts ' +
         'across their 64 files range from 900 to 31,000 with a mean of 10,900. Their 1,900 chat ' +
@@ -229,7 +229,7 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
     'All 89 files were pulled out of the automatic queue by hand: three manual reassignments each, one before each stage, each performed by the account that then completed that stage, a median of 41 seconds after the previous stage closed. That is 267 deliberate choices.',
     'Every one of the 89 advances falls between 22,000 and $24,900, immediately below the 25,000 threshold that requires a fourth signature from a lending manager. Across all lending in the period that band holds 6 per cent of files. Here it holds 100 per cent.',
     'The three have exchanged no message on any corporate channel in six months, where the median for two staff sharing more than ten files is 240.',
-    'Two other trios co-occur heavily and are innocent: the Ipswich night shift, who are the only people working those hours, and the only three Welsh-language assessors in the credit union.',
+    'Two other trios co-occur heavily and are innocent: the Kingsport night shift, who are the only people working those hours, and the only three Spanish-language assessors in the credit union.',
     'Every individual action taken by all three was within their authority and passed every control test the credit union operates.',
   ],
   events: [
@@ -318,8 +318,8 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
       escalateTo: ['fusion-analyst'],
       why:
         'The check that saves the case, arriving in the form of two groups who look just as guilty ' +
-        'and are not. Sixty-four files for three people who are the only staff on the Ipswich ' +
-        'night shift, and fifty-one for the only three Welsh-language assessors in the credit union. ' +
+        'and are not. Sixty-four files for three people who are the only staff on the Kingsport ' +
+        'night shift, and fifty-one for the only three Spanish-language assessors in the credit union. ' +
         'Both numbers are far above chance and both have a one-sentence explanation, which is the ' +
         'point: co-occurrence is a property of how work is allocated, not of intent. Two things ' +
         'follow. The 89 is no longer sufficient on its own, and anybody presenting it as proof can ' +
@@ -328,15 +328,15 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
         'the two innocent trios each have an obvious one and it is not obvious what this one would ' +
         'be.',
       standIn:
-        'Two other trios come out just as high. Sixty-four for the Ipswich night shift, who are the ' +
-        'only people awake at that hour, and fifty-one for the only three Welsh-language assessors ' +
+        'Two other trios come out just as high. Sixty-four for the Kingsport night shift, who are the ' +
+        'only people awake at that hour, and fifty-one for the only three Spanish-language assessors ' +
         'we have. Both far above chance, both explained in a sentence. So co-occurrence is about ' +
         'how work is allocated, not intent, and the 89 on its own would be taken apart by any ' +
         'lawyer holding this. New question: what allocation would put our three together? The ' +
         'other two have an obvious answer.',
       commandOptions: [
         { command: "awk -F, '{print $4\"|\"$5\"|\"$6}' /var/log/loans/files-6mo.csv | sort | uniq -c | sort -rn | head -5", correct: true, teaches: CORRECT_STEP },
-        { command: 'grep -iE "night|welsh" /var/log/workforce/teams.csv', correct: true, teaches: ALSO_WORKS },
+        { command: 'grep -iE "night|spanish" /var/log/workforce/teams.csv', correct: true, teaches: ALSO_WORKS },
         { command: 'systemctl status loan-origination', ...STATUS_CHECK },
         { command: 'cat /var/log/workforce/teams.csv', ...DUMP_ALL },
         { command: 'grep -c . /var/log/loans/files-6mo.csv', ...COUNT_ONLY },
@@ -359,9 +359,9 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
       escalateTo: ['ir-lead', 'forensics'],
       why:
         'The answer to the question ev.3 raised, and it is the opposite of the two innocent trios. ' +
-        'Norwich earlies, Ipswich lates, and central disbursement working remotely: three ' +
+        'Fremont earlies, Kingsport lates, and central disbursement working remotely: three ' +
         'reporting lines, three sites, three shift patterns, no shared queue. The night shift are ' +
-        'together because they are the only people there and the Welsh assessors are together ' +
+        'together because they are the only people there and the Spanish-language assessors are together ' +
         'because they are the only people who can do it, and both of those are the routing engine ' +
         'behaving normally. Here the routing engine behaving normally puts these three on one file ' +
         'about twice a year, and something put them on 89. That flips the whole shape of the ' +
@@ -370,7 +370,7 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
         'in the routing records. Somebody or something overrode the assignment 89 times and there ' +
         'will be a log of it.',
       standIn:
-        'Opposite of the other two trios. Norwich earlies, Ipswich lates, and central disbursement ' +
+        'Opposite of the other two trios. Fremont earlies, Kingsport lates, and central disbursement ' +
         'working from home. Three reporting lines, three sites, three shift patterns, no shared ' +
         'queue. The night shift are together because they are the only ones there; these three the ' +
         'router would put together about twice a year. Something overrode the assignment 89 times, ' +
@@ -563,7 +563,7 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
         'Two candidate signals and the naive version of each is unusable. Manual reassignment ' +
         'happens 1,100 times a month for sickness, escalation, authority limits and language ' +
         'routing, so alerting on it is 1,100 alerts a month and the floor will suppress it inside ' +
-        'a two weeks. Trio co-occurrence has the ev.3 problem: the night shift and the Welsh ' +
+        'two weeks. Trio co-occurrence has the ev.3 problem: the night shift and the Spanish-language ' +
         'assessors top the list every month forever. The version that works is the intersection ' +
         'and it is cheap, because it is exactly what discriminated tonight: a file where every ' +
         'stage was manually reassigned by the account that then completed it. Nine files in six ' +
@@ -574,8 +574,8 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
         'is worth more in real terms than it was when somebody chose the number.',
       standIn:
         'Naive versions of both signals are unusable. Manual reassignment is 1,100 a month for ' +
-        'sickness and escalation, so that is 1,100 alerts and we suppress it in a two weeks. Trio ' +
-        'co-occurrence puts the night shift and the Welsh assessors top of the list every month ' +
+        'sickness and escalation, so that is 1,100 alerts and we suppress it in two weeks. Trio ' +
+        'co-occurrence puts the night shift and the Spanish-language assessors top of the list every month ' +
         'forever. The intersection is cheap and is what actually discriminated: a file where every ' +
         'stage was manually reassigned by the person who then did it. Nine of those in six months ' +
         'outside our 89. And the bigger finding is not a rule. The twenty-five thousand threshold ' +

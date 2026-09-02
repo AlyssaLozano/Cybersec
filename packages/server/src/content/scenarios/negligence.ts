@@ -73,7 +73,7 @@ export const THE_COFFEE_SHOP: Scenario = {
       surface: 'alert-queue',
       summary: 'A member reports seeing her own account details on a laptop in a coffee shop',
       detail:
-        'A member rang the Norwich branch at 14:40 to say she was sitting behind somebody in a ' +
+        'A member rang the Fremont branch at 14:40 to say she was sitting behind somebody in a ' +
         'coffee shop on Bridge Street at around 11:00 and recognised her own name, account number ' +
         'and balance on their screen. She could read it from the next table. She reported it ' +
         'because she was concerned, not because she was complaining. Rule history: this arrived by ' +
@@ -196,7 +196,7 @@ export const THE_COFFEE_SHOP_TRUTH: ScenarioTruth = {
         'off on is the conclusion: at this point nobody knows whether this is somebody working, ' +
         'somebody careless or somebody stealing, and all three produce this call.',
       standIn:
-        'Member rang the Norwich branch at 14:40. She was in a coffee shop on Bridge Street around ' +
+        'Member rang the Fremont branch at 14:40. She was in a coffee shop on Bridge Street around ' +
         '11:00 and read her own name, account number and balance off the laptop in front of her. ' +
         'Nothing alerted and nothing would have. She is our detection. Raising it, and I do not yet ' +
         'know which of three things this is.',

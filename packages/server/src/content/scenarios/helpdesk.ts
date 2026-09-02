@@ -107,7 +107,7 @@ export const HELPDESK_SAYS_YES: Scenario = {
       detail:
         'The replacement authenticator was enrolled at 09:53 from 203.0.113.64, which is not an ' +
         'office range, not the corporate VPN, and has no prior history in the estate. The account ' +
-        'holder was in the Norwich office and badged in at 08:31. Enrolment does not require the ' +
+        'holder was in the Fremont office and badged in at 08:31. Enrolment does not require the ' +
         'device to be on a corporate network.',
       source: '203.0.113.64',
       claimedSeverity: 'high',
@@ -159,8 +159,8 @@ export const HELPDESK_SAYS_YES: Scenario = {
       summary: 'A second reset and re-registration the same morning',
       detail:
         'A second account, r.mbeki in mortgages, was reset and re-enrolled at 10:40 against ticket ' +
-        'SD-88231. That enrolment came from the Ipswich branch range, the account holder badged in ' +
-        'at Ipswich at 08:55, and she raised the ticket in person at the branch IT desk after ' +
+        'SD-88231. That enrolment came from the Kingsport branch range, the account holder badged in ' +
+        'at Kingsport at 08:55, and she raised the ticket in person at the branch IT desk after ' +
         'breaking her phone at the weekend. Rule history: fired 120 times in thirty days, 120 ' +
         'closed as routine.',
       source: 'r.mbeki',
@@ -176,7 +176,7 @@ export const HELPDESK_SAYS_YES_TRUTH: ScenarioTruth = {
     'The analyst followed the runbook exactly and asked the three approved verification questions: employee number, line manager and office location.',
     'The caller answered all three correctly, because all three are discoverable. Two are on our own website and the third is on a public professional profile.',
     'The analyst reset the password and re-registered the authenticator, removing the real one in the same action. That is what the runbook says to do.',
-    'The new authenticator was enrolled a minute later from an external address, while the real account holder was sitting in the Norwich office having badged in at 08:31.',
+    'The new authenticator was enrolled a minute later from an external address, while the real account holder was sitting in the Fremont office having badged in at 08:31.',
     'The session opened the payment approval queue and read 34 pending payments, four of them above fifty thousand dollars. Nothing was approved, because approval above fifty thousand needs a second officer.',
     'They were finding out what the queue holds and how approval works, which is preparation rather than theft.',
     'Nothing technical was exploited. The verification scheme is built from facts an outsider can look up, and it has been since 2019.',
@@ -268,7 +268,7 @@ export const HELPDESK_SAYS_YES_TRUTH: ScenarioTruth = {
       why:
         'The contradiction that proves it, and it takes two lookups. The replacement authenticator ' +
         'was enrolled from an address that is not an office range, not the VPN and has no history, ' +
-        'at 09:53, while the account holder had been badged into Norwich since 08:31. Two places at ' +
+        'at 09:53, while the account holder had been badged into Fremont since 08:31. Two places at ' +
         'once, and one of them has a door record. The finding underneath is that enrolment does not ' +
         'require the device to be on a corporate network, which is a reasonable decision for people ' +
         'setting up phones at home and is also the thing that let this complete. Badge records ' +
@@ -276,7 +276,7 @@ export const HELPDESK_SAYS_YES_TRUTH: ScenarioTruth = {
         'owner, and almost nobody pulls them.',
       standIn:
         'The new authenticator was enrolled at 09:53 from an address that is not an office range, ' +
-        'not our VPN, and has no history anywhere. She badged into Norwich at 08:31 and was there ' +
+        'not our VPN, and has no history anywhere. She badged into Fremont at 08:31 and was there ' +
         'all morning. Enrolment does not require a corporate network, which is why it completed.',
       commandOptions: [
         { command: 'grep 203.0.113.64 /var/log/idp/enrolment.log', correct: true, teaches: CORRECT_STEP },
@@ -414,7 +414,7 @@ export const HELPDESK_SAYS_YES_TRUTH: ScenarioTruth = {
       escalateTo: [],
       why:
         'The same event type on the same morning, and it is genuinely fine. Reset and re-enrolment ' +
-        'at 10:40, enrolled from the Ipswich branch range, holder badged into Ipswich at 08:55, ' +
+        'at 10:40, enrolled from the Kingsport branch range, holder badged into Kingsport at 08:55, ' +
         'raised in person at the branch IT desk after breaking her phone at the weekend. Three ' +
         'checks and all three agree. It is here to stop the dismissal reflex inverting: a floor ' +
         'that has just found a malicious reset will want to escalate every reset, and doing that on ' +
@@ -422,8 +422,8 @@ export const HELPDESK_SAYS_YES_TRUTH: ScenarioTruth = {
         'changed. The differentiator is precise and repeatable, which is where the enrolment came ' +
         'from against where the person was.',
       standIn:
-        'Second reset at 10:40 is mortgages, enrolled from the Ipswich branch range, holder badged ' +
-        'into Ipswich at 08:55, and she raised it in person at the branch desk after breaking her ' +
+        'Second reset at 10:40 is mortgages, enrolled from the Kingsport branch range, holder badged ' +
+        'into Kingsport at 08:55, and she raised it in person at the branch desk after breaking her ' +
         'phone. Enrolment location matches where she was. That is the difference. Closing it.',
       commandOptions: [
         { command: "awk '$4==\"ENROL\" {print $1, $3, $5}' /var/log/idp/enrolment.log | tail", correct: true, teaches: CORRECT_STEP },

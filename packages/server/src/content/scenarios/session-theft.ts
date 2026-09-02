@@ -76,7 +76,7 @@ export const ALREADY_LOGGED_IN: Scenario = {
       surface: 'alert-queue',
       summary: 'One session identifier active from two countries eleven minutes apart',
       detail:
-        'Session SID-4471E9 shows activity from the Norwich office range at 09:02 and from ' +
+        'Session SID-4471E9 shows activity from the Fremont office range at 09:02 and from ' +
         '198.51.100.140 at 09:13. Both are the same session identifier, not two sessions. The ' +
         'account is m.arundel, member services. Rule history: fired 30 times in thirty days, 28 ' +
         'closed as split tunnel VPN behaviour.',
@@ -89,7 +89,7 @@ export const ALREADY_LOGGED_IN: Scenario = {
       surface: 'raw-log',
       summary: 'No authentication event exists for the second location',
       detail:
-        'The authentication log holds one sign-in for this account today, at 08:41, from the Norwich ' +
+        'The authentication log holds one sign-in for this account today, at 08:41, from the Fremont ' +
         'office, with the second factor satisfied. There is no sign-in, no failure, and no factor ' +
         'prompt corresponding to the 09:13 activity. The account password has not changed and no ' +
         'account lockout has occurred in ninety days.',
@@ -103,7 +103,7 @@ export const ALREADY_LOGGED_IN: Scenario = {
       summary: 'The second location presents a different device fingerprint on the same session',
       detail:
         'Requests carrying SID-4471E9 from 198.51.100.140 present a different browser version, ' +
-        'operating system and screen resolution from the Norwich requests on the same session. The ' +
+        'operating system and screen resolution from the Fremont requests on the same session. The ' +
         'session was not re-established between them. The address belongs to a consumer hosting ' +
         'provider and has no history in the estate.',
       source: '198.51.100.140',
@@ -172,7 +172,7 @@ export const ALREADY_LOGGED_IN_TRUTH: ScenarioTruth = {
     'It exported the browser cookie stores, including the corporate session cookie for the identity platform, saved when she checked work webmail from home.',
     'This morning somebody imported that cookie into their own browser. They were then already authenticated, as her, with no password and no second factor, because none of that happens when a session already exists.',
     'That is why the authentication log is clean: no sign-in occurred, so no sign-in was recorded, and there was nothing for the second factor to challenge.',
-    'The same session identifier is now in use from Norwich and from a consumer hosting provider, presenting a different browser, operating system and screen resolution, without the session being re-established.',
+    'The same session identifier is now in use from Fremont and from a consumer hosting provider, presenting a different browser, operating system and screen resolution, without the session being re-established.',
     'At 09:14 they added a payee to a member account holding $61,000. Member services add payees as routine work and nothing below 50,000 requires a second approval.',
     'Resetting her password does nothing, because the platform does not revoke sessions on password change. The session runs until 16:41 unless somebody revokes it.',
     'The payment run is at 14:00.',
@@ -197,7 +197,7 @@ export const ALREADY_LOGGED_IN_TRUTH: ScenarioTruth = {
         'the alert title is the whole event. Resetting the password is graded out of lane here and ' +
         'it is the near-universal instinct, for reasons ev.6 makes explicit.',
       standIn:
-        'Session SID-4471E9 active from the Norwich range at 09:02 and from a hosting address at ' +
+        'Session SID-4471E9 active from the Fremont range at 09:02 and from a hosting address at ' +
         '09:13. Same session identifier, not two sessions. Twenty-eight of thirty this month were ' +
         'split tunnel, and split tunnel does not put one session in two countries. Raising it.',
       commandOptions: [
@@ -234,7 +234,7 @@ export const ALREADY_LOGGED_IN_TRUTH: ScenarioTruth = {
         'about what happens afterwards. Once that lands, the whole shape of the investigation ' +
         'changes: stop looking at logins and start looking at the session.',
       standIn:
-        'One sign-in today, 08:41, Norwich, second factor satisfied. Nothing at all for the 09:13 ' +
+        'One sign-in today, 08:41, Fremont, second factor satisfied. Nothing at all for the 09:13 ' +
         'activity: no sign-in, no failure, no prompt. That is not a gap in the logging. There was ' +
         'no authentication, because the session already existed. MFA protects logging in and has no ' +
         'opinion about a session that is already open.',

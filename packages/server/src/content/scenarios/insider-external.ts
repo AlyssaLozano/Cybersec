@@ -88,7 +88,7 @@ export const THE_OPEN_DOOR: Scenario = {
       summary: 'The credential vault was opened at 09:47 by an infrastructure administrator',
       detail:
         'The privileged credential vault records the svc-pay-admin entry being retrieved at 09:47 ' +
-        'by k.deverell, an infrastructure administrator, from a workstation in the Norwich office. ' +
+        'by k.deverell, an infrastructure administrator, from a workstation in the Fremont office. ' +
         'Retrieval is permitted for that role and requires no approval or ticket reference. The ' +
         'account retrieves credentials from the vault around forty times a month as part of routine ' +
         'work.',
@@ -238,7 +238,7 @@ export const THE_OPEN_DOOR_TRUTH: ScenarioTruth = {
         'use twelve minutes apart is a sequence, and a sequence is not an intention.',
       standIn:
         'The credential used at 09:59 was pulled from the vault at 09:47 by k.deverell, an ' +
-        'infrastructure administrator, from a Norwich workstation. Twelve minutes. The retrieval ' +
+        'infrastructure administrator, from a Fremont workstation. Twelve minutes. The retrieval ' +
         'itself is completely ordinary: permitted, no approval, no ticket needed, and that account ' +
         'does it forty times a month. The pairing is the finding, not the retrieval, and I am not ' +
         'calling them anything yet.',

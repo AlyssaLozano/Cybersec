@@ -414,7 +414,7 @@ export const CERTIFICATE_OF_TRUST_TRUTH: ScenarioTruth = {
       outOfLaneActions: ['act.triage-high', 'act.isolate', 'act.declare', 'act.scope-estate'],
       escalateTo: [],
       why:
-        'Ninety certificates expiring in a two weeks, on the morning the floor is working a ' +
+        'Ninety certificates expiring in two weeks, on the morning the floor is working a ' +
         'certificate incident. It is the annual handheld scanner renewal, with a scheduled task and ' +
         'a change record, and twelve of twelve this month were the same. The check is what kind of ' +
         'certificates and is there a renewal scheduled, which takes a minute. Worth noticing why ' +

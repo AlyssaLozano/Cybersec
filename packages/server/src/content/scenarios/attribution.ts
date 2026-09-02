@@ -59,7 +59,7 @@ export const ATTRIBUTED: Scenario = {
   durationMinutes: 75,
   situation:
     'It is 11:00 at Fenmarch Credit Union. A sector advisory published overnight names a ' +
-    'state-sponsored group targeting UK financial services, three of its indicators match our ' +
+    'state-sponsored group targeting US financial services, three of its indicators match our ' +
     'telemetry, and the board has asked for a written assessment by 16:00.',
   roles: [
     'soc-operator',
@@ -82,7 +82,7 @@ export const ATTRIBUTED: Scenario = {
       summary: 'Three advisory indicators match, and the board wants a name by four o\'clock',
       detail:
         'The sector information sharing centre published an advisory at 02:00 describing a group ' +
-        'it tracks as SILENT LADDER, assessed as state-sponsored, targeting UK financial services. ' +
+        'it tracks as SILENT LADDER, assessed as state-sponsored, targeting US financial services. ' +
         'It lists 41 indicators. Retrospective search across ninety days matches three: an IP ' +
         'address, a file hash and a domain. The chief executive has asked the board to be told by ' +
         '16:00 whether Fenmarch is being attacked by a nation state.',

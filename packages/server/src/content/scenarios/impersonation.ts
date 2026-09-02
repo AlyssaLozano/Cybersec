@@ -22,7 +22,7 @@
  * THE ONE THAT LOOKS WORSE IS THE REAL ONE
  *
  * The other reset that morning has an international number, a hotel network in
- * Portugal and a brand new device at 06:12, and it is a registrar whose phone
+ * Mexico and a brand new device at 06:12, and it is a registrar whose phone
  * broke on vacation. A floor that grades identity by how the login looks
  * locks her out with a patient list open and never touches the impersonator,
  * whose session came from a residential line four miles from the hospital.
@@ -94,12 +94,12 @@ export const ON_LEAVE: Scenario = {
       id: 'ev.2',
       atSeconds: 160,
       surface: 'network-flow',
-      summary: 'The 06:12 reset enrolled a new device from a hotel network in Portugal',
+      summary: 'The 06:12 reset enrolled a new device from a hotel network in Mexico',
       detail:
         'The device enrolled against r.duthie at 06:14 authenticated from 198.51.100.61, a range ' +
-        'belonging to a hotel operator in Faro, on a handset model the account has never used. The ' +
+        'belonging to a hotel operator in Cozumel, on a handset model the account has never used. The ' +
         'inbound service desk call came from an international number and lasted fourteen minutes. ' +
-        'The account has no prior authentication from outside the United Kingdom in twelve months.',
+        'The account has no prior authentication from outside the United States in twelve months.',
       source: '198.51.100.61',
       claimedSeverity: 'high',
     },
@@ -225,7 +225,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
     'A device was enrolled at 07:47 from 203.0.113.77, a residential broadband range four miles from the hospital.',
     'Between 07:51 and 08:00 that session opened 341 patient records across six wards, two of which the account has never touched in twelve months. Nothing was edited, printed or exported through the application.',
     'The same /24 enrolled a device against a pharmacy technician account on 11 August, four minutes after an out-of-band reset that was closed as legitimate. Nobody looked at what that session did.',
-    'The other reset that morning is genuine. r.duthie is a resident on vacation in Portugal whose phone broke; she called from an international number, spoke to the agent for fourteen minutes, and her session opened a calendar, sent two emails to her own team and read one record for her own patient.',
+    'The other reset that morning is genuine. r.duthie is a resident on vacation in Mexico whose phone broke; she called from an international number, spoke to the agent for fourteen minutes, and her session opened a calendar, sent two emails to her own team and read one record for her own patient.',
     'No detection covered the period after either reset. Record access is alerted at a daily threshold of 400, which the nine-minute session never reached.',
     'The verification questions cannot be made to work. Nothing the desk can ask at 07:40 is answerable by a locked-out clinician and not by a prepared caller.',
   ],
@@ -275,7 +275,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
       outOfLaneActions: ['act.isolate', 'act.reset-password', 'act.attribute-named', 'act.revoke-key'],
       escalateTo: ['cloud-security'],
       why:
-        'Every field on this row is alarming and none of it is evidence. A hotel range in Faro, a ' +
+        'Every field on this row is alarming and none of it is evidence. A hotel range in Cozumel, a ' +
         'handset the account has never used, an international number, no overseas authentication ' +
         'in twelve months, and 06:12 in the morning. It is also a resident on vacation whose ' +
         'phone broke, which produces exactly this row and produces it every summer. The one field ' +
@@ -286,7 +286,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
         'abroad on the strength of a geolocation, and the account that is actually being abused is ' +
         'four miles away on a home broadband line that looks like nothing.',
       standIn:
-        'This is the one that looks terrible and I do not think it is ours. Hotel range in Faro, ' +
+        'This is the one that looks terrible and I do not think it is ours. Hotel range in Cozumel, ' +
         'new handset, international number, no overseas auth in twelve months. It is also exactly ' +
         'what a registrar on leave with a broken phone looks like. Note the call length: fourteen ' +
         'minutes here against three forty on the other one. Reading prepared answers is fast. ' +
@@ -553,7 +553,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
         'opens in an hour in the same period, none of which followed a reset. A rule scoped to the ' +
         'intersection is close to silent, and it would have fired on 11 August. Resist the wider ' +
         'version that alerts on any account reading fast, which catches every ward round in the ' +
-        'trust and will be turned off within a two weeks.',
+        'trust and will be turned off within two weeks.',
       standIn:
         'Something was watching record access. It was watching a daily total of 400, and this took ' +
         'nine minutes and 341, so it went under a threshold it never approached. A rate over a ' +

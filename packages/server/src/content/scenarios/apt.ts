@@ -25,7 +25,7 @@
  * WHY THE ADVERSARY IS SLOW ON PURPOSE
  *
  * Everything here is spaced to sit under a threshold. Beaconing every 47 hours
- * with jitter, one credential at a time, one host a two weeks. Nothing this
+ * with jitter, one credential at a time, one host two weeks. Nothing this
  * attacker does would trip a rule designed around a burst, which is what most
  * rules are designed around.
  */
@@ -118,7 +118,7 @@ export const LONG_WEATHER: Scenario = {
       summary: 'Service account rmg-svc-print authenticated to nine hosts it has no reason to touch',
       detail:
         'The print service account authenticated to nine servers between 22 June and 19 August, ' +
-        'roughly one a two weeks, always between 02:00 and 04:00, always a single session under ' +
+        'roughly one two weeks, always between 02:00 and 04:00, always a single session under ' +
         'four minutes. The nine include two domain controllers and the finance file server. The ' +
         'account is a member of a group granted broad rights during a 2019 migration.',
       source: 'rmg-svc-print',
@@ -298,7 +298,7 @@ export const LONG_WEATHER_TRUTH: ScenarioTruth = {
       outOfLaneActions: ['act.isolate', 'act.reset-password', 'act.reimage-now'],
       escalateTo: ['ir-lead', 'forensics'],
       why:
-        'One host a two weeks for two months. Any rule watching for a service account touching many ' +
+        'One host two weeks for two months. Any rule watching for a service account touching many ' +
         'hosts quickly would see nothing here, because the pace is deliberately below the window ' +
         'every such rule uses. The finding that changes the incident is the destination list: two ' +
         'domain controllers and the finance file server, reached by an account that exists to talk ' +
@@ -307,7 +307,7 @@ export const LONG_WEATHER_TRUTH: ScenarioTruth = {
         'is older than the intrusion.',
       standIn:
         'The print service account authenticated to nine servers between 22 June and 19 August, ' +
-        'about one a two weeks, always between 02:00 and 04:00, always short. Two of them are ' +
+        'about one two weeks, always between 02:00 and 04:00, always short. Two of them are ' +
         'domain controllers and one is the finance file server. It has those rights because of a ' +
         '2019 migration.',
       commandOptions: [

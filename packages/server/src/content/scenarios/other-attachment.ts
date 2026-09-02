@@ -139,7 +139,7 @@ export const THE_OTHER_ATTACHMENT: Scenario = {
       detail:
         'The mail gateway delivered 34 copies of the message between 09:38 and 09:47, all to ' +
         'finance and procurement mailboxes. The sender domain is calderbrook-medical.net. The real ' +
-        'supplier uses calderbrook-medical.co.uk, which has been in the address book for six ' +
+        'supplier uses calderbrook-medical.com, which has been in the address book for six ' +
         'years. The .net domain was registered eleven days ago. All 34 copies carry both ' +
         'attachments and none were quarantined.',
       source: 'mail gateway',
@@ -193,7 +193,7 @@ export const THE_OTHER_ATTACHMENT: Scenario = {
 export const THE_OTHER_ATTACHMENT_TRUTH: ScenarioTruth = {
   scenarioId: ID,
   narrative: [
-    'At 09:38 somebody sent 34 copies of a message to Ridgeline finance and procurement mailboxes from calderbrook-medical.net, a domain registered eleven days ago that imitates a real supplier whose actual domain ends .co.uk and has been in the address book for six years.',
+    'At 09:38 somebody sent 34 copies of a message to Ridgeline finance and procurement mailboxes from calderbrook-medical.net, a domain registered eleven days ago that imitates a real supplier whose actual domain ends .com and has been in the address book for six years.',
     'Each copy carried two attachments. The first, Remittance_Advice.pdf, is a genuine and harmless remittance listing four real open invoice numbers, and exists to make the message credible.',
     'Three of sixty scanning engines flagged that PDF with generic heuristic names, all of which fire on the producer string of an old open source PDF library used widely by accounting software. It contains no JavaScript, no embedded files, no launch actions and no forms.',
     'The second attachment, Statement_Aug.htm, was flagged by nothing, because there is nothing in it for a scanner to recognise. It is a base64 block that decodes to a login page carrying the Ridgeline logo and the finance portal wording, with a form that posts to https://203.0.113.156/collect.',
@@ -409,7 +409,7 @@ export const THE_OTHER_ATTACHMENT_TRUTH: ScenarioTruth = {
       escalateTo: ['ir-lead', 'mitigation-specialist'],
       why:
         'One report becomes thirty-four deliveries, and the sender domain explains why none of them ' +
-        'were stopped. calderbrook-medical.net against the real calderbrook-medical.co.uk, which ' +
+        'were stopped. calderbrook-medical.net against the real calderbrook-medical.com, which ' +
         'has been in the address book for six years, and the .net was registered eleven days ago. ' +
         'That is a domain bought for this, aimed at a supplier relationship somebody knew about, ' +
         'and it passed the gateway because it is a real domain sending real mail rather than ' +
@@ -419,7 +419,7 @@ export const THE_OTHER_ATTACHMENT_TRUTH: ScenarioTruth = {
         'nothing has told them not to open it.',
       standIn:
         'Thirty-four copies, not one. Finance and procurement, 09:38 to 09:47, sender domain ' +
-        'calderbrook-medical.net where the real supplier is .co.uk and has been in our address ' +
+        'calderbrook-medical.net where the real supplier is .com and has been in our address ' +
         'book six years. The .net was registered eleven days ago. Nothing was spoofed, which is ' +
         'why the gateway passed it. Thirty-three people still have this sitting in their inbox ' +
         'right now.',

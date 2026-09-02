@@ -159,7 +159,7 @@ export const GOLDEN_HOUR: Scenario = {
       summary: 'Directory replication latency alerts across four sites',
       detail:
         'Replication between the four branch sites has been reporting latency above threshold since ' +
-        '01:30. Network operations replaced a failing link at the Ipswich branch at 01:20 and the ' +
+        '01:30. Network operations replaced a failing link at the Kingsport branch at 01:20 and the ' +
         'change record notes replication will lag until the queue drains, expected by 04:00. Rule ' +
         'history: fired 210 times in thirty days, 208 closed as expected replication lag.',
       source: 'fcu-dc-02',
@@ -395,11 +395,11 @@ export const GOLDEN_HOUR_TRUTH: ScenarioTruth = {
         'matches the real finding, and the floor has under four hours before payments open.',
       standIn:
         'Replication latency across the four branches since 01:30, from the link network operations ' +
-        'replaced at Ipswich at 01:20, change record says it drains by 04:00. Latency, not a ' +
+        'replaced at Kingsport at 01:20, change record says it drains by 04:00. Latency, not a ' +
         'replication request. Two hundred and eight of two hundred and ten this month were the ' +
         'same. Closing it.',
       commandOptions: [
-        { command: 'grep -i ipswich /var/log/change-management.log', correct: true, teaches: CORRECT_STEP },
+        { command: 'grep -i kingsport /var/log/change-management.log', correct: true, teaches: CORRECT_STEP },
         { command: 'systemctl status ntpd', ...STATUS_CHECK },
         { command: 'cat /var/log/directory/replication.log', ...DUMP_ALL },
         { command: 'grep -c LATENCY /var/log/directory/replication.log', ...COUNT_ONLY },
