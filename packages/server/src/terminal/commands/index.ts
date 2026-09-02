@@ -9,6 +9,7 @@
 import { fromLines, ok, type CommandResult, type ExecContext } from '../context.js';
 import * as capture from './capture.js';
 import * as fs from './filesystem.js';
+import * as osq from './osquery.js';
 import * as ids from './suricata.js';
 import * as net from './network.js';
 import * as sys from './system.js';
@@ -96,6 +97,12 @@ export const COMMANDS: Record<string, CommandSpec> = {
     summary: 'Run signature rules against a saved capture',
     usage: 'suricata -r CAPTURE -S RULES',
     group: 'network',
+  },
+  osqueryi: {
+    handler: osq.osqueryi,
+    summary: 'Query the host as SQL tables',
+    usage: 'osqueryi [--json|--csv|--line] "SELECT ... FROM TABLE [WHERE ...]"',
+    group: 'system',
   },
 };
 
