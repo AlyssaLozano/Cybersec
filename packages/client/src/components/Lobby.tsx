@@ -183,19 +183,37 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
     );
   }
 
-  if (openRoom) {
-    return (
-      <LobbyChat
-        room={openRoom}
-        identity={identity}
-        canReview={view?.canReview ?? false}
-        onBack={() => setOpenRoomId(null)}
-      />
-    );
-  }
+  /*
+   * Anything that is not the corridor itself opens as a panel over it. The
+   * corridor keeps running behind: dimmed, still moving, still showing who is
+   * standing in it. Nobody has gone anywhere.
+   */
+  const overlay = openRoom ? (
+    <LobbyChat
+      room={openRoom}
+      identity={identity}
+      canReview={view?.canReview ?? false}
+      onBack={() => setOpenRoomId(null)}
+    />
+  ) : pane === 'chat' ? (
+    <ChatRooms rooms={view?.rooms ?? []} notice={notice} onOpen={(id) => setOpenRoomId(id)} />
+  ) : pane === 'events' ? (
+    <EventCenter identity={identity} rooms={view?.rooms ?? []} />
+  ) : pane === 'review' && view?.canReview ? (
+    <RoomReview />
+  ) : null;
+
+  const closeOverlay = () => {
+    setOpenRoomId(null);
+    setPane('floor');
+  };
 
   return (
-    <div className="lobby">
+    /*
+     * The lobby IS the corridor: full bleed, no card, no page chrome around it,
+     * with the controls floating over the scene. It is never swapped out.
+     */
+    <div className="lobby lobby--hall">
       <header className="lobby__top">
         <button type="button" className="linkish" onClick={onExit}>
           &larr; Leave the lobby
@@ -263,30 +281,45 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
         ))}
       </div>
 
-      {pane === 'floor' ? (
-        <Hall
-          view={view}
-          me={identity}
-          headingFor={headingFor}
-          onHeadFor={setHeadingFor}
-          onSocFloor={onSocFloor}
-          onRedBlue={onRedBlue}
-          onOpenChat={() => setPane('chat')}
-          onOpenEvents={() => setPane('events')}
-        />
+      <Hall
+        view={view}
+        me={identity}
+        headingFor={headingFor}
+        onHeadFor={setHeadingFor}
+        onSocFloor={onSocFloor}
+        onRedBlue={onRedBlue}
+        onOpenChat={() => setPane('chat')}
+        onOpenEvents={() => setPane('events')}
+      />
+
+      {overlay ? (
+        <div className="overlay">
+          {/*
+            Clicking the corridor behind the panel steps back out into it. The
+            scrim is a button rather than a div with a handler so that it is
+            reachable and announced, and Escape does the same thing.
+          */}
+          <button
+            type="button"
+            className="overlay__scrim"
+            aria-label="Back to the corridor"
+            onClick={closeOverlay}
+          />
+          <div
+            className="overlay__panel"
+            role="dialog"
+            aria-modal="false"
+            onKeyDown={(keyEvent) => {
+              if (keyEvent.key === 'Escape') closeOverlay();
+            }}
+          >
+            <button type="button" className="overlay__close" onClick={closeOverlay}>
+              Back to the corridor
+            </button>
+            {overlay}
+          </div>
+        </div>
       ) : null}
-
-      {pane === 'chat' ? (
-        <ChatRooms
-          rooms={view?.rooms ?? []}
-          notice={notice}
-          onOpen={(id) => setOpenRoomId(id)}
-        />
-      ) : null}
-
-      {pane === 'events' ? <EventCenter identity={identity} rooms={view?.rooms ?? []} /> : null}
-
-      {pane === 'review' && view?.canReview ? <RoomReview /> : null}
     </div>
   );
 }

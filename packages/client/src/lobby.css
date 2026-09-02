@@ -236,14 +236,113 @@
   border: 1px solid var(--border-strong);
   border-radius: 14px;
   background: #04060b;
+  height: 100%;
 }
 
 .hall__scene {
   position: relative;
   width: 100%;
+  height: 100%;
   aspect-ratio: 16 / 10;
   min-height: 30rem;
   max-height: 44rem;
+}
+
+/* --- the corridor takes the whole page ----------------------------------- */
+
+/*
+ * WHY THE FLOOR PANE IS FULL BLEED
+ *
+ * A portal drawn inside a rounded card on a padded page is a picture of a
+ * place. The point of the corridor is that somebody is standing IN it, and
+ * that only works if it runs to every edge of the screen with nothing around
+ * it. The controls float on top rather than sitting in a strip above, for the
+ * same reason: a toolbar with a scene underneath it is a viewer, and a viewer
+ * is the thing this is not.
+ *
+ * The condition is a floor on BOTH dimensions. The corridor needs 72rem across
+ * (see the stack rule at the end of this file) and 44rem down, because the
+ * alcoves are stacked in rem from the floor and the far one needs somewhere to
+ * be. Below either, the same six doors stack and scroll.
+ */
+@media (min-width: 72rem) and (min-height: 44rem) {
+  .lobby--hall {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .lobby--hall .hall {
+    border: none;
+    border-radius: 0;
+  }
+
+  .lobby--hall .hall__scene {
+    aspect-ratio: auto;
+    max-height: none;
+  }
+
+  /* The controls, floating over the scene rather than above it. */
+  .lobby--hall .lobby__top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    margin: 0;
+    padding: 0.85rem 1.25rem;
+    border-bottom: none;
+    background: linear-gradient(180deg, rgba(4, 7, 12, 0.9), rgba(4, 7, 12, 0));
+  }
+
+  .lobby--hall .lobby__tabs button {
+    background: rgba(4, 7, 12, 0.55);
+    backdrop-filter: blur(4px);
+  }
+
+  .lobby--hall .lobby__tabs button.is-on {
+    background: rgba(30, 90, 140, 0.6);
+    border-color: #7ce8ff;
+    color: #dff6ff;
+  }
+
+  /* Walking in, over the corridor rather than pushing it down the page. */
+  .lobby--hall .arrival {
+    position: absolute;
+    top: 4.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    margin: 0;
+    background: rgba(4, 7, 12, 0.8);
+    border-color: rgba(126, 232, 255, 0.4);
+  }
+
+  .lobby--hall .hall__alone {
+    position: absolute;
+    left: 50%;
+    bottom: 5.5rem;
+    transform: translateX(-50%);
+    z-index: 5;
+    margin: 0;
+  }
+
+  /* An error has to be readable over neon, so it gets its own ground. */
+  .lobby--hall > .seat-note--bad {
+    position: absolute;
+    top: 4.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 21;
+    margin: 0;
+    background: rgba(4, 7, 12, 0.9);
+    border: 1px solid var(--fail);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.85rem;
+  }
 }
 
 /* The ceiling, with a lit slot running back to the vanishing point. */
@@ -313,11 +412,16 @@
   height: 44%;
   clip-path: polygon(32% 0, 68% 0, 100% 100%, 0 100%);
   background:
+    repeating-conic-gradient(
+      from 84deg at 50% 0%,
+      rgba(126, 232, 255, 0.16) 0deg 0.35deg,
+      transparent 0.35deg 5deg
+    ),
     repeating-linear-gradient(
       0deg,
       transparent 0 12%,
-      rgba(126, 232, 255, 0.14) 12% 12.6%,
-      transparent 12.6% 24%
+      rgba(126, 232, 255, 0.12) 12% 12.5%,
+      transparent 12.5% 24%
     ),
     linear-gradient(180deg, #0a1220 0%, #060a12 100%);
   background-color: #070c16;
@@ -344,6 +448,22 @@
     );
   filter: blur(2px);
   mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
+}
+
+/*
+ * The corners of the room fall away.
+ *
+ * Layered above the walls and the gate and below the alcoves, so it darkens the
+ * scenery and never the text. This is the difference between a flat diagram of
+ * a corridor and standing in one.
+ */
+.hall__scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(115% 85% at 50% 42%, transparent 42%, rgba(0, 0, 0, 0.62) 100%);
 }
 
 /* --- the gate at the end ------------------------------------------------- */
@@ -474,16 +594,23 @@
  * behind it show the title and the count at rest and reveal the rest on hover,
  * which is what buys the room for the band above.
  */
-.bay--l1, .bay--r1 { --ring: 6.5rem; --bay-h: 14.5rem; width: 12rem; bottom: 1%; }
-.bay--l2, .bay--r2 { --ring: 4.8rem; --bay-h: 9rem; width: 10.5rem; bottom: 38%; }
-.bay--l3, .bay--r3 { --ring: 3.4rem; --bay-h: 7.25rem; width: 10rem; bottom: 60%; opacity: 0.9; }
+/*
+ * Band offsets are in the SAME UNIT as the band heights, and stacked from the
+ * floor: each band starts half a rem above the top of the one in front of it.
+ * That is what makes the corridor safe at any viewport height, where a
+ * percentage offset would let the far alcove drift up through the ceiling on a
+ * tall screen and collide with its neighbour on a short one.
+ */
+.bay--l1, .bay--r1 { --ring: 6.5rem; --bay-h: 14.5rem; width: 12rem; bottom: 2.5rem; }
+.bay--l2, .bay--r2 { --ring: 4.8rem; --bay-h: 9rem; width: 10.5rem; bottom: 17.5rem; }
+.bay--l3, .bay--r3 { --ring: 3.4rem; --bay-h: 7.25rem; width: 10rem; bottom: 27rem; opacity: 0.9; }
 
 .bay--l1 { left: 0.5%; }
 .bay--l2 { left: 12%; }
-.bay--l3 { left: 21%; }
+.bay--l3 { left: 20%; }
 .bay--r1 { right: 0.5%; }
 .bay--r2 { right: 12%; }
-.bay--r3 { right: 21%; }
+.bay--r3 { right: 20%; }
 
 /* Two lines and no more, so the near plate has a height that can be budgeted. */
 .bay--l1 .bay__blurb,
@@ -555,10 +682,9 @@
   transform: translateX(-50%);
   width: 13rem;
   margin-top: 0.3rem;
-  background: rgba(4, 7, 12, 0.94);
-  border: 1px solid rgba(126, 232, 255, 0.18);
-  border-radius: var(--radius);
-  padding: 0.4rem 0.5rem;
+  padding: 0.35rem 0.5rem;
+  /* A wash rather than a panel: no edge, so it belongs to the corridor. */
+  background: radial-gradient(60% 100% at 50% 50%, rgba(4, 7, 12, 0.96), rgba(4, 7, 12, 0));
   z-index: 6;
 }
 
@@ -588,39 +714,76 @@
   filter: drop-shadow(0 0 40px color-mix(in srgb, var(--p1) 60%, transparent));
 }
 
-.bay__mouth {
+.bay__arch::after {
+  content: '';
   position: absolute;
-  inset: 6% 6%;
-  border-radius: 50% 50% 46% 46% / 58% 58% 42% 42%;
-  background:
-    radial-gradient(60% 55% at 50% 42%, color-mix(in srgb, var(--p1) 60%, transparent), transparent 74%),
-    conic-gradient(
-      from 0deg,
-      color-mix(in srgb, var(--p2) 88%, transparent),
-      color-mix(in srgb, var(--p1) 72%, transparent),
-      color-mix(in srgb, var(--p2) 88%, transparent),
-      color-mix(in srgb, var(--p1) 72%, transparent),
-      color-mix(in srgb, var(--p2) 88%, transparent)
-    );
-  animation: portal-churn 14s linear infinite;
-  opacity: 0.9;
+  left: 50%;
+  bottom: -10%;
+  transform: translateX(-50%);
+  width: 165%;
+  height: 24%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    color-mix(in srgb, var(--p1) 60%, transparent),
+    transparent 68%
+  );
+  filter: blur(7px);
+  pointer-events: none;
 }
 
-/* The lit rim. A ring drawn as a border with the middle masked out. */
+/* A sealed doorway casts nothing, which is most of how it reads as sealed. */
+.bay--sealed .bay__arch::after {
+  opacity: 0.12;
+}
+
+/* The field inside the ring: dark, lit from within, with something turning. */
+.bay__mouth {
+  position: absolute;
+  inset: 7% 9%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(
+    circle at 50% 42%,
+    color-mix(in srgb, var(--p1) 38%, #071019) 0%,
+    #071019 58%,
+    #04090f 100%
+  );
+  box-shadow: inset 0 0 20px color-mix(in srgb, var(--p1) 45%, transparent);
+}
+
+.bay__mouth::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    color-mix(in srgb, var(--p1) 45%, transparent) 60deg,
+    transparent 130deg,
+    color-mix(in srgb, var(--p1) 30%, transparent) 230deg,
+    transparent 320deg
+  );
+  animation: portal-churn 14s linear infinite;
+  opacity: 0.75;
+}
+
+/*
+ * The lit rim.
+ *
+ * Concentric box-shadows rather than a masked border: the mask trick renders
+ * differently across engines and silently draws nothing when the compositing
+ * is not supported, and a portal with no ring is not a portal.
+ */
 .bay__rim {
   position: absolute;
-  inset: 2% 2%;
-  border-radius: 50% 50% 46% 46% / 58% 58% 42% 42%;
-  border: 2px solid transparent;
-  background: linear-gradient(180deg, #fff, var(--p1) 32%, var(--p2)) border-box;
-  mask:
-    linear-gradient(#000 0 0) padding-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  -webkit-mask:
-    linear-gradient(#000 0 0) padding-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
+  inset: 7% 9%;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.92),
+    0 0 0 5px var(--p1),
+    0 0 26px 5px color-mix(in srgb, var(--p1) 55%, transparent),
+    inset 0 0 18px color-mix(in srgb, var(--p1) 30%, transparent);
 }
 
 .bay__label {
@@ -645,9 +808,19 @@
 
 /* A sealed doorway is visibly the same doorway, unlit. */
 .bay--sealed .bay__mouth {
+  background: radial-gradient(circle at 50% 42%, #0b131c 0%, #070c13 70%);
+  box-shadow: none;
+}
+
+.bay--sealed .bay__mouth::after {
   animation: none;
-  opacity: 0.2;
-  filter: saturate(0.3);
+  opacity: 0.06;
+}
+
+.bay--sealed .bay__rim {
+  box-shadow:
+    0 0 0 2px rgba(140, 160, 180, 0.35),
+    0 0 0 4px rgba(90, 110, 130, 0.28);
 }
 
 .bay--sealed .bay__arch {
@@ -667,24 +840,34 @@
   }
 }
 
+/*
+ * A label lit on the wall, not a card sitting in front of it.
+ *
+ * The plate used to have a panel behind it, and six panels floating in a
+ * corridor read as six separate cards somebody had arranged in a room rather
+ * than as six doorways in one. The text now carries its own legibility with a
+ * dark halo, which keeps it readable over neon without ever drawing an edge.
+ */
 .bay__plate {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.1rem;
+  gap: 0.05rem;
   text-align: center;
-  /* Reads over whatever scenery is behind it, at any depth. */
-  background: rgba(4, 7, 12, 0.72);
-  border: 1px solid rgba(126, 232, 255, 0.12);
-  border-radius: var(--radius);
-  padding: 0.4rem 0.5rem;
-  backdrop-filter: blur(3px);
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.95),
+    0 0 10px rgba(0, 0, 0, 0.85);
 }
 
 .bay__title {
   font-weight: 600;
   color: var(--p1);
   font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  /* The name of a door in a neon corridor glows. */
+  text-shadow:
+    0 0 12px color-mix(in srgb, var(--p1) 60%, transparent),
+    0 1px 3px rgba(0, 0, 0, 0.95);
 }
 
 .bay__blurb {
@@ -744,17 +927,19 @@
 
 .drifter__name {
   font-size: 11px;
-  color: var(--text);
-  background: rgba(4, 7, 12, 0.82);
-  border: 1px solid rgba(126, 232, 255, 0.25);
-  border-radius: 999px;
-  padding: 0 0.45rem;
+  color: #cfe9f7;
   white-space: nowrap;
+  letter-spacing: 0.04em;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.95),
+    0 0 10px rgba(0, 0, 0, 0.9);
 }
 
 .drifter--me .drifter__name {
-  border-color: #7ce8ff;
   color: #9beeff;
+  text-shadow:
+    0 0 12px rgba(126, 232, 255, 0.7),
+    0 1px 3px rgba(0, 0, 0, 0.95);
 }
 
 /* Badges are one gesture away, so the corridor stays a place and not a table. */
@@ -818,17 +1003,16 @@
  * Anything narrower than the lobby's own max width gets the same six doors,
  * stacked.
  *
- * The breakpoint is 72rem because that is `.lobby`'s max-width: at or above it
- * the scene is always the same 69rem across, so the corridor's geometry is
- * fixed and can be tuned once. Below it the scene shrinks while the alcoves,
- * which are text, do not, and they walk into each other. Rather than chase that
- * with a dozen breakpoints, the corridor simply does not run at sizes it cannot
- * be correct at.
+ * The corridor needs 72rem across and 44rem down. Below either it does not run
+ * at all, rather than running badly: the alcoves are blocks of text stacked in
+ * rem from the floor, and on a screen too small to hold three of them they walk
+ * into each other. Chasing that with a dozen breakpoints would be a worse trade
+ * than simply having a second, plainer layout that always works.
  *
  * The corridor is the nice version, never the only version: a portal somebody
  * cannot reach on a laptop is a war room they cannot join.
  */
-@media (max-width: 71.99rem) {
+@media (max-width: 71.99rem), (max-height: 43.99rem) {
   .hall__scene {
     aspect-ratio: auto;
     min-height: 0;
@@ -895,6 +1079,97 @@
     text-align: center;
     padding-top: 0.75rem;
   }
+}
+
+/* --- panels over the corridor -------------------------------------------- */
+
+/*
+ * Chat, events and the review queue open ON the corridor rather than instead
+ * of it.
+ *
+ * Swapping the corridor out for a document made each of them a separate room
+ * somebody had travelled to, and the lobby stopped being one place. Behind this
+ * panel the corridor is still lit, still moving, and still showing who is
+ * standing in it, so nobody has gone anywhere: they have opened something while
+ * remaining in the room.
+ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 4rem 1.5rem 1.5rem;
+}
+
+/*
+ * The corridor behind, dimmed and pushed out of focus.
+ *
+ * A button rather than a div with a click handler, so stepping back out is
+ * reachable from a keyboard and announced rather than being a secret.
+ */
+.overlay__scrim {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  background: rgba(3, 6, 10, 0.7);
+  backdrop-filter: blur(7px) saturate(0.75);
+  cursor: zoom-out;
+}
+
+.overlay__panel {
+  position: relative;
+  z-index: 1;
+  width: min(66rem, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 0.75rem 1.35rem 1.5rem;
+  border: 1px solid rgba(126, 232, 255, 0.22);
+  border-radius: 14px;
+  /* Lit from the corridor rather than painted on top of it. */
+  background:
+    radial-gradient(90% 60% at 50% 0%, rgba(126, 232, 255, 0.07), transparent 65%),
+    linear-gradient(180deg, rgba(10, 16, 26, 0.97), rgba(5, 9, 16, 0.97));
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 34px 90px -34px #000,
+    0 0 70px -26px rgba(126, 232, 255, 0.5);
+}
+
+.overlay__close {
+  display: block;
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: rgba(155, 238, 255, 0.8);
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  padding: 0.25rem 0;
+}
+
+.overlay__close:hover {
+  color: #dff6ff;
+}
+
+/* Inside a panel these surfaces are already framed, so they drop their own. */
+.overlay__panel .chatroom,
+.overlay__panel .lobby__rooms,
+.overlay__panel .events,
+.overlay__panel .review {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.overlay__panel .chatroom {
+  height: auto;
+}
+
+.overlay__panel .chatroom__log {
+  max-height: 26rem;
 }
 
 /* --- chat rooms ---------------------------------------------------------- */
