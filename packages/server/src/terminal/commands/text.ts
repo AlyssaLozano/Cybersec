@@ -398,6 +398,23 @@ export function sort(argv: string[], ctx: ExecContext): CommandResult {
     return fields[keyIndex] ?? '';
   };
 
+  /**
+   * The numeric key `sort -n` actually uses: leading blanks are skipped, and the
+   * number is read as a PREFIX of the field rather than the whole of it.
+   *
+   * `Number(line)` was used here, which returns NaN for every realistic input to
+   * `sort -n`. The idiom this command exists to serve is
+   * `... | uniq -c | sort -rn`, and `uniq -c` emits right-aligned counts followed
+   * by the text, so every line scored 0, the sort was a no-op, and `-r` handed
+   * back a reversed alphabetical list that looks plausible and ranks nothing.
+   * A student following the standard "who hit us hardest" recipe would have read
+   * the wrong address off the top.
+   */
+  const numericValue = (value: string): number => {
+    const match = /^\s*([+-]?\d+(?:\.\d+)?)/.exec(value);
+    return match ? Number(match[1]) : 0;
+  };
+
   /** Parse "4.1G" style sizes so `sort -h` orders them by magnitude. */
   const humanValue = (value: string): number => {
     const match = /^([\d.]+)\s*([KMGTP]?)/i.exec(value.trim());
@@ -411,7 +428,7 @@ export function sort(argv: string[], ctx: ExecContext): CommandResult {
     const left = fieldOf(a);
     const right = fieldOf(b);
     if (human) return humanValue(left) - humanValue(right);
-    if (numeric) return (Number(left) || 0) - (Number(right) || 0);
+    if (numeric) return numericValue(left) - numericValue(right);
     return left.localeCompare(right, 'en');
   });
 

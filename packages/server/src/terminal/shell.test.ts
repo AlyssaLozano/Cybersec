@@ -332,6 +332,26 @@ describe('pipelines and redirection', () => {
     expect(new Set(addresses).size).toBe(addresses.length);
   });
 
+  it('ranks counted output numerically, which is the whole point of uniq -c | sort -rn', () => {
+    /*
+     * Regression. `sort -n` parsed the key with Number(line), which is NaN for
+     * every line uniq -c produces ("    288 rhost=..."), so every line scored
+     * zero, the sort did nothing, and -r returned a reversed alphabetical list.
+     * It looked like a ranking and ranked nothing: a student following the
+     * standard "who hit us hardest" recipe read the wrong address off the top.
+     */
+    const output = s.run(
+      "grep -oE 'rhost=[0-9.]+' /var/log/auth.log | sort | uniq -c | sort -rn",
+    ).output;
+    const counts = output
+      .trim()
+      .split('\n')
+      .map((line) => Number(line.trim().split(/\s+/)[0]));
+
+    expect(counts.length).toBeGreaterThan(3);
+    expect(counts).toEqual([...counts].sort((a, b) => b - a));
+  });
+
   it('writes stdout to a file with >', () => {
     s.run('grep -c "Accepted" /var/log/auth.log > count.txt');
     expect(s.run('cat count.txt').output.trim()).toBe('9');
