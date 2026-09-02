@@ -368,3 +368,80 @@ who adapt to the detector, which is a stronger statement than "attacker adapts".
 **Done:** `aisp.2.4` teaches the mechanism as a property of decision boundaries
 in a high-dimensional space without adopting a contested explanation, and makes
 "detecting adversarial inputs is a settled defence" one of the wrong options.
+
+## 23. The risk specification's risk matrix is non-monotonic
+
+Its worked matrix rates a critical-impact / rare-likelihood risk RED and a
+critical-impact / unlikely-likelihood risk ORANGE, where unlikely is defined as
+more frequent than rare. Holding impact constant, becoming more likely lowers
+the rating. Taught as written, a student produces a heat map that a reviewer can
+disprove in thirty seconds, and every other cell in it stops being believed.
+
+**Done:** `rmg.5.3` teaches monotonicity as a property a matrix must have, uses
+the specification's own inverted pair as the thing to spot, and adds the point
+the specification misses: ordinal ratings cannot be multiplied, because high,
+medium and low are an order with no spacing.
+
+## 24. The recommendation-engine loss estimate produces $500 billion
+
+The specification multiplies one billion recommendations by a 1% harmful rate by
+a $50,000 per-incident legal cost, gets $500B, observes that this is "obviously
+unacceptable", and then adjusts the inputs until the answer looks reasonable.
+The arithmetic is not the problem; the model is. A cost drawn from a rare
+escalated case (a lawsuit) has been applied to every occurrence of a much
+broader event (an inappropriate recommendation), and the events are treated as
+independent when a thousand bad outputs in a week produce one news story rather
+than a thousand suits.
+
+**Done:** `rmg.5.2` uses the specification's own figure as the worked example
+and grades the diagnosis: tail cost applied to the whole distribution, assumed
+independence, and a result exceeding any plausible bound. The repair taught is a
+staged escalation model (noticed, reported, escalated) with a cost per stage.
+"Therefore quantification does not work" is one of the wrong options, because
+qualitative ratings hide the same guess with none of the arithmetic exposed.
+
+## 25. The governance risk score contradicts itself
+
+The specification scores five governance factors where a higher number means
+worse, averages them to 0.86, computes `1.0 - 0.86 = 0.14`, calls the result a
+governance risk of 14%, then says "low score is bad" and concludes the risk is
+HIGH. The subtraction inverts the scale and the conclusion ignores the
+inversion. A student who follows it will report a percentage that means the
+opposite of what they say it means.
+
+**Done:** no exercise reproduces the formula. `rmg.6.3` grades governance
+controls by naming the specific failure each one prevents (registry against
+"nobody can say what is serving", monitoring against silent degradation), which
+is the defensible version of the same idea, and `rmg.12.2` grades governance
+gaps as high-ranking because they multiply other failures rather than because a
+composite index says so.
+
+## 26. CVSS is used to score process gaps
+
+The specification assigns CVSS scores to "missing documentation: 2.1" and "weak
+password policy: 5.3", and sorts a remediation plan by that column. CVSS scores
+a specific software vulnerability and has no metrics that apply to a stale
+runbook; the numbers are invented. Worse, the base score deliberately excludes
+the environment, so sorting by it patches a 9.8 on a lab host before a 6.5 on
+the payment path.
+
+**Done:** `rmg.4.2` teaches severity and risk as different quantities, uses the
+specification's own spreadsheet as the scenario, and makes "two findings with
+the same CVSS score carry the same risk" the wrong option. The remedy taught is
+to carry asset criticality and known exploitation alongside severity rather than
+to abandon CVSS.
+
+## 27. The risk specification's capstone and tabletop cannot be graded
+
+It asks for a 60 to 75 page enterprise risk assessment and for the student to
+facilitate a tabletop exercise. This is the same limit already recorded against
+the AI Security specification: a rubric cannot honestly mark sixty pages, and a
+facilitator cannot be simulated by a text box.
+
+**Done:** module 12 grades the reasoning the report would have to contain
+(`rmg.12.1` on what belongs in the register, the report and the summary,
+`rmg.12.2` on ranking a mixed portfolio, `rmg.12.3` on the executive paragraph)
+and module 11 grades tabletop design, observation, and folding findings back
+into the register rather than the facilitation itself. `rmg.12.4` grades a
+decision made at speed on partial information, which is the readiness the
+specification's Risk Gaming venue actually needs.
