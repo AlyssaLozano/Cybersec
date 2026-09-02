@@ -112,11 +112,14 @@ describe('registration', () => {
     expect(resolveBoardFor(id)).toBe(resolveBoard);
   });
 
-  it('is in the catalogue, tagged positional, without disturbing the linear five', () => {
+  it('is in the catalogue, tagged positional, and the linear scenarios still exist alongside it', () => {
     const list = matchScenarioList();
     const mine = list.find((s) => s.id === id);
     expect(mine?.mode).toBe('positional');
-    expect(list.filter((s) => s.mode === 'linear')).toHaveLength(5);
+    // Both modes coexist. Assert presence, not a hardcoded count: the catalogue
+    // grows on both sides, and a fixed number here just rots.
+    expect(list.some((s) => s.mode === 'linear')).toBe(true);
+    expect(list.filter((s) => s.mode === 'linear').map((s) => s.id)).toContain('rt-recon-northwind');
     expect(getPositionalScenario(id)).toBe(REACH_THE_CORE);
   });
 

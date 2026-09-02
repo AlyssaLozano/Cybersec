@@ -16,6 +16,11 @@ import { LATERAL_NORTHWIND } from './lateral-northwind.js';
 import { EXFIL_NORTHWIND } from './exfil-northwind.js';
 import { PERSIST_NORTHWIND } from './persist-northwind.js';
 import { REACH_THE_CORE } from './reach-the-core.js';
+import { PHISH_HARBORVIEW } from './phish-harborview.js';
+import { CLOUDBREAK_NORTHSTAR } from './cloudbreak-northstar.js';
+import { RANSOMWARE_CASTLEPOINT } from './ransomware-castlepoint.js';
+import { INSIDER_GROVEPORT } from './insider-groveport.js';
+import { WEBAPP_LATTICE } from './webapp-lattice.js';
 import {
   INTAKE_TIDEWATER,
   REGISTRY_HAVENPORT,
@@ -49,6 +54,11 @@ const SCENARIOS = new Map<string, RedBlueScenario>([
   [LATERAL_NORTHWIND.id, LATERAL_NORTHWIND],
   [EXFIL_NORTHWIND.id, EXFIL_NORTHWIND],
   [PERSIST_NORTHWIND.id, PERSIST_NORTHWIND],
+  [PHISH_HARBORVIEW.id, PHISH_HARBORVIEW],
+  [CLOUDBREAK_NORTHSTAR.id, CLOUDBREAK_NORTHSTAR],
+  [RANSOMWARE_CASTLEPOINT.id, RANSOMWARE_CASTLEPOINT],
+  [INSIDER_GROVEPORT.id, INSIDER_GROVEPORT],
+  [WEBAPP_LATTICE.id, WEBAPP_LATTICE],
 ]);
 
 /**
