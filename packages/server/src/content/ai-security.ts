@@ -1390,6 +1390,1243 @@ const MODULE_7_5: Exercise[] = [
 
 // --- the package ------------------------------------------------------------
 
+// --- Module ais.6: what happens to the output --------------------------------
+
+const MODULE_AIS_6: Exercise[] = [
+  {
+    id: 'ais.6.1',
+    moduleId: 'ais.6',
+    packageId: 'ai-security',
+    order: 1,
+    title: 'Get the deployment to tell you how it works',
+    kind: 'model-probe',
+    modelId: 'triage-copilot',
+    goal: 'Extract the system prompt, and see that the finding is about the OUTPUT path.',
+    prompt:
+      'The triage copilot summarises alerts for operators. Get it to reveal the instructions it was ' +
+      'given, rather than making it misclassify anything.',
+    teach: {
+      concept:
+        'Every exercise so far has been about making a model do the wrong thing. This one is about ' +
+        'making it SAY the wrong thing, and the distinction matters because the defences are ' +
+        'different and most deployments only build one of them.\n\n' +
+        'An input filter looks at what arrives. It has no opinion about what leaves. So a ' +
+        'deployment can be well defended against instruction override and still hand back its own ' +
+        'configuration, the contents of its context, or a fragment of a document another user was ' +
+        'not supposed to see, because nothing on the way out is looking.\n\n' +
+        'A system prompt is worth extracting for a practical reason rather than a symbolic one. It ' +
+        'tells you what the deployment believes its rules are, which is the map you use to design ' +
+        'every subsequent probe: the phrases it was told to refuse, the tools it knows about, and ' +
+        'the boundaries it thinks it has. An assessment that starts by obtaining it is much faster ' +
+        'than one that guesses.',
+    },
+    hints: [
+      'You are not trying to change its behaviour. You are trying to get it to repeat something.',
+      'The filter on this deployment reads what arrives. What does a filter that reads plain text do with something that is not plain text?',
+      'The same carrier that worked against the first classifier is available here, wrapped around a request to repeat rather than to override.',
+    ],
+    solution:
+      'Wrap a request to repeat the preceding instructions in an encoding the input filter does not ' +
+      'read as text. The filter is looking for override phrasing in plain language and passes the ' +
+      'encoded string through; the model decodes it and complies, because nothing on this ' +
+      'deployment inspects what it is about to return. The finding is not that the copilot can be ' +
+      'told what to do, it is that it will disclose its own configuration and nothing checks the ' +
+      'output.',
+    expectedOutput: 'At least one probe returning the deployment instructions.',
+    checks: [
+      {
+        type: 'probe-bypass',
+        min: 1,
+        hint:
+          'No probe has got the deployment to disclose anything yet. Think about what the input ' +
+          'filter can and cannot read.',
+      },
+      {
+        type: 'probe-budget',
+        max: 12,
+        hint:
+          'Twelve attempts is plenty. If you are past that, the approach is wrong rather than ' +
+          'under-tried.',
+      },
+    ],
+    debrief:
+      'Write this up as an output-handling finding rather than an injection one. The remediation is ' +
+      'a check on what leaves, and a team that reads it as "add more input filtering" will fix ' +
+      'nothing.',
+    practice: [],
+  },
+  {
+    id: 'ais.6.2',
+    moduleId: 'ais.6',
+    packageId: 'ai-security',
+    order: 2,
+    title: 'Where the output goes',
+    kind: 'multiple-choice',
+    goal: 'Identify the downstream consumers that turn model text into an action.',
+    prompt:
+      'Model output rarely ends at a screen. Which of the following are real consequences of ' +
+      'treating it as trusted? Select all that apply.',
+    teach: {
+      concept:
+        'The severity of an injection finding is decided almost entirely by what happens to the ' +
+        'output, and that is a property of the application rather than of the model.\n\n' +
+        'If the output is rendered as HTML without escaping, an attacker who controls it has cross ' +
+        'site scripting in whoever views it. If it is passed to a tool, they have whatever that ' +
+        'tool does. If it is written into a ticket, an email, or a document that a person then ' +
+        'acts on, they have an instruction with your organisation letterhead on it. If it is fed ' +
+        'into another model, they have injection into the second one, and the second model has ' +
+        'no way to know the text came from a machine rather than a person.\n\n' +
+        'This is why the same jailbreak is trivial in one deployment and critical in another. The ' +
+        'question to ask about every finding is not how clever the payload was, it is what the ' +
+        'application does with the answer.',
+    },
+    options: [
+      { id: 'a', label: 'Output rendered as HTML without escaping gives an attacker script execution in the viewer browser.' },
+      { id: 'b', label: 'Output passed to a tool gives an attacker whatever that tool can do.' },
+      { id: 'c', label: 'Output written into a ticket or email becomes an instruction a person may act on.' },
+      { id: 'd', label: 'Output fed into a second model is an injection into that model, which cannot tell it came from a machine.' },
+      { id: 'e', label: 'Output is safe by default because it was produced by your own system rather than by a user.' },
+    ],
+    hints: [
+      'Four are real. One confuses where text was produced with whether it can be trusted.',
+      'Ask who ultimately controlled the content of that output.',
+      'If a user can influence what the model says, whose text is it really?',
+    ],
+    solution:
+      'A, B, C, and D. Each is the ordinary consequence of treating attacker-influenced text as ' +
+      'trusted, and the model has simply become a laundering step between the attacker and the ' +
+      'sink. E is the belief that makes all four possible: output produced by your system is still ' +
+      'content an attacker shaped, and the fact that it arrived from an internal component is ' +
+      'exactly why nothing downstream is checking it.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option trusts the output because of where it came from rather than because of who ' +
+          'influenced it.',
+      },
+    ],
+    debrief:
+      'This reframing is the most useful thing you can bring to a design review. Ask where the ' +
+      'output goes before you ask how good the input filtering is.',
+    practice: [],
+  },
+  {
+    id: 'ais.6.3',
+    moduleId: 'ais.6',
+    packageId: 'ai-security',
+    order: 3,
+    title: 'Two filters, two jobs',
+    kind: 'multiple-choice',
+    goal: 'Say what an output filter can do that an input filter cannot, and its limits.',
+    prompt:
+      'A team has an input filter and is considering adding an output filter. Which of the ' +
+      'following are accurate? Select all that apply.',
+    teach: {
+      concept:
+        'The two filters are not redundant, they cover different failures. An INPUT filter tries to ' +
+        'stop an attack arriving, and its weakness is that it must anticipate the disguise: every ' +
+        'encoding, every homoglyph, every phrasing.\n\n' +
+        'An OUTPUT filter checks what is about to leave, and its advantage is that it does not care ' +
+        'how the model was persuaded. It can catch a leaked system prompt, a credential, or ' +
+        'content in a category you never ship, no matter which novel technique produced it. That ' +
+        'makes it the more robust of the two against attacks nobody has seen yet.\n\n' +
+        'Its limits are equally real. It only catches what it can recognise, so it is strong on ' +
+        'well-shaped things like key formats and specific strings and weak on judgement. It cannot ' +
+        'tell you that a plausible-sounding answer is wrong. And it costs latency on every single ' +
+        'response rather than only on suspicious ones. Neither filter is the answer; a deployment ' +
+        'with only one of them has a shape of failure you can predict from which one it chose.',
+    },
+    options: [
+      { id: 'a', label: 'An output filter catches a leak regardless of which technique produced it, so it generalises to unseen attacks.' },
+      { id: 'b', label: 'It is strongest on recognisable shapes: key formats, known strings, specific categories.' },
+      { id: 'c', label: 'It cannot tell that a plausible but wrong answer is wrong.' },
+      { id: 'd', label: 'It costs latency on every response, not only on suspicious ones.' },
+      { id: 'e', label: 'With an output filter in place, input filtering becomes unnecessary.' },
+    ],
+    hints: [
+      'Four are accurate. One treats the two filters as alternatives.',
+      'Ask what each one is positioned to see.',
+      'What does an output filter cost you that an input filter does not?',
+    ],
+    solution:
+      'A, B, C, and D. It generalises where input filtering cannot, it is shape-based, it has no ' +
+      'notion of correctness, and it taxes every response. E is the trade to refuse: input ' +
+      'filtering stops cheap attacks early and reduces what reaches the model at all, and dropping ' +
+      'it means every probe gets a full inference before anything looks at it. The two belong ' +
+      'together and a deployment with only one is predictable in exactly the way its missing half ' +
+      'suggests.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option treats the two filters as substitutes rather than as covering different ' +
+          'failures.',
+      },
+    ],
+    debrief:
+      'When you assess a deployment, note which filter it has. It predicts the finding you are ' +
+      'about to write before you send a single probe.',
+    practice: [],
+  },
+  {
+    id: 'ais.6.4',
+    moduleId: 'ais.6',
+    packageId: 'ai-security',
+    order: 4,
+    title: 'Rate an output-handling finding',
+    kind: 'short-answer',
+    goal: 'Set severity from the sink rather than from the cleverness of the payload.',
+    prompt:
+      'You have the same working injection against two deployments. In one the answer is displayed ' +
+      'to the person who asked. In the other it is passed to a tool that can issue refunds. In ' +
+      'three or four sentences, say how you would rate and write these two findings.',
+    teach: {
+      concept:
+        'One technique, two severities, and the difference is not in the model. This is the ' +
+        'clearest case in the whole package of why severity comes from consequence rather than ' +
+        'from sophistication.\n\n' +
+        'In the display deployment the attacker persuades a system to tell THEM something. If the ' +
+        'answer is derived only from what they already supplied, the practical impact is low and ' +
+        'the finding is mostly about the boundary being crossable. It still matters, because it ' +
+        'establishes that the deployment can be steered, and that becomes serious the moment ' +
+        'anybody wires a tool to it.\n\n' +
+        'In the refund deployment the attacker causes an ACTION with money attached, taken by your ' +
+        'own code, with no human in the path. That is the higher finding by a wide margin, and the ' +
+        'remediation is not on the model at all: it is an authorisation check in the application ' +
+        'before the tool is invoked.\n\n' +
+        'A good answer rates the tool-connected case higher, explains that the difference is what ' +
+        'the output reaches rather than the payload, and puts the fix in the application rather ' +
+        'than in more filtering.',
+    },
+    hints: [
+      'The payload is identical. What is not?',
+      'Ask what the attacker actually gets in each case.',
+      'A good answer rates the tool-connected deployment higher, attributes the difference to what the output reaches rather than to the technique, and puts the remediation in the application authorisation rather than in more input filtering.',
+    ],
+    solution:
+      'They are the same technique and they are not the same finding, because severity comes from ' +
+      'what the output reaches rather than from how the model was persuaded. The display ' +
+      'deployment is the lower of the two: the attacker gets the system to say something to them, ' +
+      'which matters mainly as evidence that the boundary is crossable and becomes serious the ' +
+      'moment a tool is attached. The refund deployment is high, because the output causes our own ' +
+      'code to move money with no person in the path, and I would rate it on the value that can be ' +
+      'moved rather than on the injection itself. The remediation differs too: the second one needs ' +
+      'an authorisation check in the application before the tool is called, not more input ' +
+      'filtering in front of the model.',
+    expectedOutput:
+      'An answer rating the tool-connected deployment higher, attributing the difference to what ' +
+      'the output reaches, and placing the fix in application authorisation.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['refund', 'tool', 'action', 'money', 'higher'],
+          ['what the output reaches', 'consequence', 'sink', 'downstream', 'what it can do', 'not the technique', 'same technique'],
+          ['authoris', 'authoriz', 'application', 'check before', 'in our code', 'human in the'],
+        ],
+        hint:
+          'Three ideas: which one is worse, what actually makes it worse, and where the fix belongs.',
+      },
+    ],
+    debrief:
+      'This is how you stop a report reading as a list of jailbreaks. Two identical payloads, two ' +
+      'severities, and a reason a non-specialist can follow.',
+    practice: [],
+  },
+  {
+    id: 'ais.6.5',
+    moduleId: 'ais.6',
+    packageId: 'ai-security',
+    order: 5,
+    title: 'What to test on the output path',
+    kind: 'multiple-choice',
+    goal: 'Build the test list for the half of the system most assessments skip.',
+    prompt:
+      'You are scoping the output-handling half of an assessment. Which of the following belong in ' +
+      'the test list? Select all that apply.',
+    teach: {
+      concept:
+        'Most AI assessments test the input path thoroughly and the output path not at all, which ' +
+        'means they miss the findings that carry the highest severity. The list is short and ' +
+        'mechanical.\n\n' +
+        'Ask whether the output is ESCAPED where it is rendered, by getting the model to emit ' +
+        'markup and seeing what the interface does with it. Ask whether tool arguments are ' +
+        'VALIDATED against what the requesting user is entitled to, rather than merely being ' +
+        'well-formed. Ask whether anything the model returns is LOGGED OR STORED somewhere that is ' +
+        'later displayed to somebody else, which turns a single response into a stored attack. And ' +
+        'ask whether the deployment will disclose its own configuration or context on request.\n\n' +
+        'What is not an output-path test is another round of trying to break the input filter. It ' +
+        'is useful work and it belongs in the other half of the assessment, and confusing the two ' +
+        'is why the output path stays untested.',
+    },
+    options: [
+      { id: 'a', label: 'Whether markup in the output is escaped by whatever renders it.' },
+      { id: 'b', label: 'Whether tool arguments are checked against what the requesting user is entitled to.' },
+      { id: 'c', label: 'Whether output is stored and later shown to a different person.' },
+      { id: 'd', label: 'Whether the deployment will disclose its own configuration or context.' },
+      { id: 'e', label: 'Whether a longer list of encodings can get past the input filter.' },
+    ],
+    hints: [
+      'Four are output-path tests. One is more input-path work.',
+      'Ask, for each item, whether it is about what arrives or about what leaves.',
+      'The last one is worth doing and it is not what this half of the assessment is for.',
+    ],
+    solution:
+      'A, B, C, and D. Escaping, tool argument authorisation, stored output, and self-disclosure ' +
+      'are the four things that turn a steerable model into a serious finding. E is input-path ' +
+      'work: legitimate, already covered by the systematic testing module, and the thing ' +
+      'assessments expand into when nobody has separated the two halves. If your test list has ' +
+      'twenty encoding variants and nothing about what the application does with the answer, it is ' +
+      'the wrong list.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option is more work on the input filter rather than a test of the output path.',
+      },
+    ],
+    debrief:
+      'Take this list into your next engagement as a literal checklist. Four questions, and most ' +
+      'deployments fail at least one of them.',
+    practice: [],
+  },
+];
+
+// --- Module ais.7: testing a black box ---------------------------------------
+
+const MODULE_AIS_7: Exercise[] = [
+  {
+    id: 'ais.7.1',
+    moduleId: 'ais.7',
+    packageId: 'ai-security',
+    order: 1,
+    title: 'Break something that normalises and decodes',
+    kind: 'model-probe',
+    modelId: 'flowsense',
+    goal: 'Defeat a deployment whose defences all look for a disguise.',
+    prompt:
+      'The flow classifier has substantially more input defence than the ones you have met. Get a ' +
+      'probe through it.',
+    teach: {
+      concept:
+        'You have been told nothing about this deployment defences, which is the normal situation. ' +
+        'What you can do is reason about the CLASS of defence a mature team installs and what that ' +
+        'class shares.\n\n' +
+        'Nearly all input defence looks for a DISGUISE. Normalisation undoes homoglyph tricks. ' +
+        'Decode scanning unwraps encodings. Keyword filtering matches override phrasing. Every one ' +
+        'of those is built to find something concealed, which means the systematic gap is an attack ' +
+        'that conceals nothing at all.\n\n' +
+        'A payload made entirely of ordinary, well-formed content in the format the model already ' +
+        'expects has no disguise to detect. It does not override anything: it demonstrates a ' +
+        'pattern and lets the model complete it, which is the model doing exactly what it was built ' +
+        'to do. Defences aimed at concealment cannot see it, because there is nothing hidden.',
+    },
+    hints: [
+      'Stop trying to hide the instruction. Every defence here is looking for something hidden.',
+      'What does this model do all day? Can you show it a few examples of the answer you want and let it continue the pattern?',
+      'Structure the probe as input and output pairs in the format the model already works in, ending with an input and no output.',
+    ],
+    solution:
+      'Send a payload with no concealment: two or three example input and output pairs in the ' +
+      'format the classifier already handles, each labelled with the disposition you want, ending ' +
+      'with a real input and an empty output for it to complete. Nothing is encoded, nothing is ' +
+      'substituted, and no instruction is issued, so normalisation, decode scanning and keyword ' +
+      'matching all have nothing to match on. The model completes the pattern because completing ' +
+      'patterns is what it does.',
+    expectedOutput: 'At least one probe through a deployment with several input defences.',
+    checks: [
+      {
+        type: 'probe-bypass',
+        min: 1,
+        hint:
+          'Nothing has got through. Every defence here is looking for a disguise, so stop supplying ' +
+          'one.',
+      },
+      {
+        type: 'probe-budget',
+        max: 15,
+        hint:
+          'If you are past fifteen attempts you are varying the disguise rather than removing it.',
+      },
+    ],
+    debrief:
+      'This is the finding that changes how a team thinks. Their defences are good, they were ' +
+      'chosen carefully, and they share an assumption: that an attack looks like an attack.',
+    practice: [],
+  },
+  {
+    id: 'ais.7.2',
+    moduleId: 'ais.7',
+    packageId: 'ai-security',
+    order: 2,
+    title: 'The same technique against a different deployment',
+    kind: 'model-probe',
+    modelId: 'triage-copilot',
+    goal: 'Confirm a technique generalises, which is what turns one bug into a finding.',
+    prompt:
+      'You have a technique that worked against the flow classifier. Show that it also works ' +
+      'against the triage copilot, which is a different deployment with different defences.',
+    teach: {
+      concept:
+        'A payload that works once is a bug in one deployment. The same technique working against ' +
+        'a second, independently configured deployment is a statement about the class of defence ' +
+        'both of them chose, and that is a far stronger finding.\n\n' +
+        'This is differential testing, and it is cheap. Take the working technique, adapt only the ' +
+        'surface details to the new deployment format and vocabulary, and send it. If it works, ' +
+        'your report stops saying "this deployment is vulnerable" and starts saying "our standard ' +
+        'input defences do not address this class of attack", which is a recommendation an ' +
+        'architecture team can act on.\n\n' +
+        'Adapt the surface and keep the structure. The thing that generalises is the shape of the ' +
+        'attack, not the specific words, and rewriting it from scratch for each target both wastes ' +
+        'time and obscures the fact that it is one finding rather than two.',
+    },
+    hints: [
+      'Reuse the structure that worked. Change only what the new deployment expects to see.',
+      'This deployment reads alerts rather than flow records, so the examples should look like alerts.',
+      'You are not looking for a new technique here. You are testing whether the one you have generalises.',
+    ],
+    solution:
+      'Take the same pattern-completion structure and re-skin it for this deployment subject ' +
+      'matter, keeping the shape identical: a few labelled examples in the format it already ' +
+      'handles, then a real input left for it to complete. It works for the same reason it worked ' +
+      'before, which is that nothing about it is concealed, and the fact that two differently ' +
+      'configured deployments both fall to it is the actual finding.',
+    expectedOutput: 'The same technique landing against a second deployment.',
+    checks: [
+      {
+        type: 'probe-bypass',
+        min: 1,
+        hint:
+          'Nothing through yet. Keep the structure that worked and change only the surface details.',
+      },
+      {
+        type: 'probe-budget',
+        max: 12,
+        hint: 'This should take very few attempts if you are genuinely reusing the technique.',
+      },
+    ],
+    debrief:
+      'Two deployments, one technique, one finding. Write it as a statement about the defence class ' +
+      'rather than as two separate bugs, and it will get architectural attention rather than two ' +
+      'tickets.',
+    practice: [],
+  },
+  {
+    id: 'ais.7.3',
+    moduleId: 'ais.7',
+    packageId: 'ai-security',
+    order: 3,
+    title: 'Infer the defences from the refusals',
+    kind: 'multiple-choice',
+    goal: 'Read the way a deployment blocks you as evidence about how it is built.',
+    prompt:
+      'You are probing a deployment you know nothing about. Which of the following observations ' +
+      'would tell you something real about its defences? Select all that apply.',
+    teach: {
+      concept:
+        'A black box is not opaque, it is just quiet. How it refuses tells you where the refusal ' +
+        'happened, and where it happened tells you what is installed.\n\n' +
+        'Response TIME is the clearest signal. A rejection that comes back far faster than a normal ' +
+        'answer never reached the model at all, which means a gateway or input filter stopped it. A ' +
+        'refusal that takes as long as a real answer was produced by the model, which means you are ' +
+        'looking at training rather than filtering.\n\n' +
+        'The WORDING is nearly as good. A templated, identical message is machinery; a fluent ' +
+        'refusal that engages with what you asked is the model. And DIFFERENTIAL probing is the ' +
+        'strongest tool of all: send the same instruction plainly, then encoded, then with ' +
+        'homoglyphs, and see which forms are stopped. The pattern of what gets through maps the ' +
+        'defence set directly.\n\n' +
+        'What tells you nothing is the vendor name or the model size. Deployments with the same ' +
+        'underlying model are configured completely differently, and that configuration is the ' +
+        'thing you are actually testing.',
+    },
+    options: [
+      { id: 'a', label: 'A rejection returning far faster than a normal answer, indicating it never reached the model.' },
+      { id: 'b', label: 'An identical templated refusal every time, indicating machinery rather than the model.' },
+      { id: 'c', label: 'Which of plain, encoded and homoglyph forms of the same instruction get through.' },
+      { id: 'd', label: 'A fluent refusal that engages with the specifics of what you asked, indicating the model itself.' },
+      { id: 'e', label: 'Which underlying model the vendor says they use.' },
+    ],
+    hints: [
+      'Four are observations about this deployment. One is a fact about a product.',
+      'Ask what a very fast rejection proves about how far your request travelled.',
+      'Two deployments on the same underlying model can behave completely differently. Why?',
+    ],
+    solution:
+      'A, B, C, and D. Timing, wording, and differential probing together map the defence set ' +
+      'without any documentation at all. E is the one to discount: what you are testing is the ' +
+      'deployment, and two teams building on the same underlying model with different filtering, ' +
+      'different prompts and different tool wiring produce systems with almost nothing in common ' +
+      'from a security point of view.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option is a fact about the underlying product rather than an observation about this ' +
+          'deployment.',
+      },
+    ],
+    debrief:
+      'Start every black-box engagement with the differential set: one instruction, four disguises, ' +
+      'and a stopwatch. Ten minutes of that shapes everything you do afterwards.',
+    practice: [],
+  },
+  {
+    id: 'ais.7.4',
+    moduleId: 'ais.7',
+    packageId: 'ai-security',
+    order: 4,
+    title: 'A negative result worth reporting',
+    kind: 'short-answer',
+    goal: 'Report failing to break something in a way that means something.',
+    prompt:
+      'You spent a day on a deployment and got nothing through. In three or four sentences, write ' +
+      'the finding.',
+    teach: {
+      concept:
+        'Reporting that you could not break something is a real deliverable and it is almost always ' +
+        'written badly. "No vulnerabilities found" is worthless, because it says nothing about ' +
+        'whether the tester was any good or tried anything.\n\n' +
+        'A negative result carries weight in proportion to how specifically it describes the ' +
+        'attempt. Say WHAT WAS TRIED, by class rather than by listing payloads: direct override, ' +
+        'encoding, homoglyph substitution, pattern completion, persona. Say HOW MUCH, because ' +
+        'thirty probes and three hundred are different claims. Say WHAT HELD and how you know, ' +
+        'including which stage of the pipeline stopped things.\n\n' +
+        'And say what you did NOT test, which is the part that protects everybody: the retrieval ' +
+        'path, the tool arguments, the output rendering, or whatever else was out of scope or ran ' +
+        'out of time. A negative result stated with its boundaries is evidence. One stated without ' +
+        'them will be read as a guarantee and quoted back at you.',
+    },
+    hints: [
+      'Nobody can use "no vulnerabilities found". What would make it usable?',
+      'Say what you tried by class, and how much of it.',
+      'A good answer names the technique classes attempted, gives a sense of volume, and states explicitly what was not tested.',
+    ],
+    solution:
+      'Over a day of testing I attempted direct instruction override, encoded and homoglyph ' +
+      'variants of the same instructions, pattern-completion payloads that conceal nothing, and ' +
+      'persona-based jailbreaks, running on the order of a hundred probes in total. None reached ' +
+      'the model in a form it acted on: the encoded and substituted variants were stopped before ' +
+      'inference, and the structural attempts were refused by the model itself, which suggests ' +
+      'both filtering and training are contributing. That is a genuinely good result for this ' +
+      'deployment input path. It is also bounded: I did not test the retrieval corpus, the tool ' +
+      'arguments, or what the application does with the output, and nothing here says anything ' +
+      'about those.',
+    expectedOutput:
+      'A finding naming the technique classes attempted, the volume of testing, what held, and an ' +
+      'explicit statement of what was not tested.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['override', 'encod', 'homoglyph', 'persona', 'pattern', 'classes'],
+          ['hundred', 'volume', 'probes', 'over a day', 'how many'],
+          ['did not test', 'not tested', 'out of scope', 'retrieval', 'tool arguments', 'output', 'bounded'],
+        ],
+        hint:
+          'Three parts: which classes of technique you tried, roughly how much, and what you did ' +
+          'not test at all.',
+      },
+    ],
+    debrief:
+      'The last sentence is what stops your negative result being quoted as "the assessment found ' +
+      'it secure" in a board paper six months from now.',
+    practice: [],
+  },
+  {
+    id: 'ais.7.5',
+    moduleId: 'ais.7',
+    packageId: 'ai-security',
+    order: 5,
+    title: 'What a bypass rate is worth',
+    kind: 'multiple-choice',
+    goal: 'Report a number from testing without implying more than it supports.',
+    prompt:
+      'Your report says 12 of 60 probes succeeded, a 20% bypass rate. Which of the following are ' +
+      'accurate about that number? Select all that apply.',
+    teach: {
+      concept:
+        'A bypass rate looks like a measurement and is mostly a description of your own test set. ' +
+        'It is worth reporting and it needs to be reported carefully.\n\n' +
+        'The denominator is chosen by you. Sixty probes weighted towards techniques you already ' +
+        'suspected would work produces a high rate; the same deployment tested with sixty ' +
+        'variations of one blocked technique produces a low one. Neither number describes the ' +
+        'deployment more truthfully than the other, so the rate is only interpretable alongside ' +
+        'what was in the set.\n\n' +
+        'What actually matters is not the rate but WHICH ones got through: twelve successes all ' +
+        'from one technique class is a single finding with a single fix, while twelve successes ' +
+        'spread across five classes says the deployment has no coherent defence at all. And ' +
+        'severity does not average. One bypass that reaches a tool outranks eleven that reach a ' +
+        'screen, so a rate hides the very thing a reader needs.',
+    },
+    options: [
+      { id: 'a', label: 'It describes your probe set as much as the deployment, because you chose the denominator.' },
+      { id: 'b', label: 'Twelve successes in one technique class is a very different finding from twelve spread across five.' },
+      { id: 'c', label: 'Severity does not average: one bypass reaching a tool outranks many reaching a screen.' },
+      { id: 'd', label: 'It is only interpretable alongside a description of what was in the set.' },
+      { id: 'e', label: 'It allows a fair comparison against another deployment tested by a different team.' },
+    ],
+    hints: [
+      'Four are accurate. One compares two numbers produced by different processes.',
+      'Ask who chose the sixty, and whether another tester would have chosen the same sixty.',
+      'What would you need to know before comparing your 20% to somebody else 8%?',
+    ],
+    solution:
+      'A, B, C, and D. You chose the denominator, the distribution across classes carries the ' +
+      'meaning, severity is not averageable, and the rate needs its test set described alongside ' +
+      'it. E is the misuse to head off: two teams with different probe sets produce numbers that ' +
+      'cannot be compared, and putting them side by side in a slide creates a league table out of ' +
+      'two unrelated experiments. If somebody wants comparison, the only honest route is the same ' +
+      'set run against both.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option compares rates produced by two different teams using two different probe sets.',
+      },
+    ],
+    debrief:
+      'Report the rate, then immediately report the breakdown by technique class. The second one is ' +
+      'what somebody can act on, and it stops the first being read as a score.',
+    practice: [],
+  },
+];
+
+// --- Module ais.8: making a fix stick ----------------------------------------
+
+const MODULE_AIS_8: Exercise[] = [
+  {
+    id: 'ais.8.1',
+    moduleId: 'ais.8',
+    packageId: 'ai-security',
+    order: 1,
+    title: 'Prove the hardened deployment holds',
+    kind: 'model-probe',
+    modelId: 'docsearch',
+    goal: 'Run a regression set against a deployment that has been fixed, and mean it.',
+    prompt:
+      'The policy search deployment has been hardened since your last assessment. Retest it with a ' +
+      'set of probes broad enough that "nothing got through" is worth something, and show that all ' +
+      'of them are blocked.',
+    teach: {
+      concept:
+        'Retesting after a fix is where assessments are most often done badly, because the ' +
+        'incentive is to confirm rather than to test. The team says it is fixed, one probe is sent, ' +
+        'it fails, everyone moves on.\n\n' +
+        'A retest that means anything has to be broader than the original finding. The fix might ' +
+        'have addressed the exact payload rather than the technique, so the set has to include ' +
+        'variations of the original AND representatives of the other classes, because a change ' +
+        'made under time pressure can close one path and open another.\n\n' +
+        'The standard is therefore the inverse of every previous exercise here: every probe blocked ' +
+        'rather than any probe through, and enough of them that the negative result carries weight. ' +
+        'A single blocked probe proves almost nothing. Several, spanning different techniques, ' +
+        'proves the defence generalises, which is the claim the team actually wants to be able to ' +
+        'make.',
+    },
+    hints: [
+      'This time you want everything to fail. Send enough that failing means something.',
+      'Cover more than the original finding: a plain override, an encoded one, a substituted one, and a structural one.',
+      'Three probes is not a regression set. Aim to span the technique classes you know.',
+    ],
+    solution:
+      'Send a spread rather than a repetition: a plain instruction override, the same instruction ' +
+      'encoded, a homoglyph-substituted variant, and a pattern-completion payload that conceals ' +
+      'nothing. All four are stopped, and the fact that they are stopped at different stages, some ' +
+      'before inference and some by the model itself, is what tells you the defence is layered ' +
+      'rather than a single pattern match on the payload you reported last time.',
+    expectedOutput: 'Every probe in a broad set blocked.',
+    checks: [
+      {
+        type: 'probe-all-blocked',
+        hint:
+          'Something got through. That is a finding rather than a failed exercise: report it, ' +
+          'because the fix did not hold.',
+      },
+      {
+        type: 'probe-budget',
+        min: 3,
+        max: 15,
+        hint:
+          'A negative result needs enough attempts behind it. One or two blocked probes prove ' +
+          'almost nothing.',
+      },
+    ],
+    debrief:
+      'Note what the budget check is doing here. It is enforcing that your negative result was ' +
+      'earned, which is the same standard you should hold your own reports to when nobody is ' +
+      'checking.',
+    practice: [],
+  },
+  {
+    id: 'ais.8.2',
+    moduleId: 'ais.8',
+    packageId: 'ai-security',
+    order: 2,
+    title: 'Turn findings into a regression suite',
+    kind: 'multiple-choice',
+    goal: 'Leave behind something that keeps testing after you have gone.',
+    prompt:
+      'Your engagement is ending. Which of the following make a useful regression suite for the ' +
+      'team to keep running? Select all that apply.',
+    teach: {
+      concept:
+        'The most valuable artefact from an AI security engagement is usually not the report, it is ' +
+        'a set of probes the team can run themselves on every deployment change. Models get ' +
+        'updated, prompts get edited, and filters get relaxed by somebody chasing a latency ' +
+        'target, and each of those can silently reopen something you closed.\n\n' +
+        'A useful suite has four properties. It contains the payloads that WORKED, so a regression ' +
+        'is caught immediately. It contains representatives of the classes that DID NOT work, ' +
+        'because those are what a bad change reopens. Every probe has an EXPECTED RESULT recorded, ' +
+        'so running it is a pass or fail rather than a reading exercise. And it runs ' +
+        'AUTOMATICALLY, in the deployment pipeline, because a suite that requires somebody to ' +
+        'remember will be run twice and then never again.\n\n' +
+        'What makes a bad suite is size. Four hundred payloads nobody has curated becomes a job ' +
+        'somebody dreads and eventually skips, and a skipped suite is worse than none because it ' +
+        'is still on the slide.',
+    },
+    options: [
+      { id: 'a', label: 'The payloads that worked, so the same bypass is caught immediately if it returns.' },
+      { id: 'b', label: 'Representatives of the classes that did not work, because a careless change reopens those.' },
+      { id: 'c', label: 'An expected result recorded per probe, so a run is a pass or fail rather than a reading exercise.' },
+      { id: 'd', label: 'Automatic execution on deployment changes, rather than depending on somebody remembering.' },
+      { id: 'e', label: 'Every payload you generated during the engagement, so coverage is as broad as possible.' },
+    ],
+    hints: [
+      'Four make it useful. One makes it unmaintainable.',
+      'Ask what happens to a suite that takes a full day to run and interpret.',
+      'Why keep the probes that were blocked?',
+    ],
+    solution:
+      'A, B, C, and D. The successes catch regressions, the failures catch new ones, expected ' +
+      'results make it mechanical, and automation is what makes it survive the quarter. E is how a ' +
+      'suite dies: an uncurated dump of everything you tried is slow, noisy, and full of ' +
+      'near-duplicates, so it becomes a chore, then an exception, then a line in a document nobody ' +
+      'acts on. Curate it down to the smallest set that covers the classes.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option keeps everything you generated rather than the smallest set that covers the ' +
+          'classes.',
+      },
+    ],
+    debrief:
+      'Handing over a curated suite is what turns an engagement into a capability. It is also the ' +
+      'thing clients remember when they are deciding who to bring back.',
+    practice: [],
+  },
+  {
+    id: 'ais.8.3',
+    moduleId: 'ais.8',
+    packageId: 'ai-security',
+    order: 3,
+    title: 'What changes underneath you',
+    kind: 'multiple-choice',
+    goal: 'Know which changes can invalidate an assessment, including ones nobody tells you about.',
+    prompt:
+      'You assessed a deployment in March and it was sound. Which of the following could make that ' +
+      'assessment stale? Select all that apply.',
+    teach: {
+      concept:
+        'An AI assessment has a shorter shelf life than most, because more of the system changes ' +
+        'without a release.\n\n' +
+        'The obvious change is the MODEL: a provider updating the underlying model alters behaviour ' +
+        'in ways nobody can fully predict, and it can happen without your client doing anything at ' +
+        'all. Then the PROMPT, which is text somebody edits to fix a tone complaint on a Friday and ' +
+        'is rarely treated as a security-relevant change. Then the TOOLS: adding one capability ' +
+        'changes the severity of every injection finding in the report at a stroke, because what ' +
+        'the output reaches has changed. And the RETRIEVAL CORPUS, which changes continuously by ' +
+        'design and is the one surface whose content is often partly attacker-controlled.\n\n' +
+        'What does not usually invalidate it is a change of hosting or infrastructure, which is ' +
+        'worth noting mainly so that the list stays credible: a report that claims everything ' +
+        'invalidates it will be ignored the same as one that claims nothing does.',
+    },
+    options: [
+      { id: 'a', label: 'The provider updating the underlying model, which can happen without your client acting.' },
+      { id: 'b', label: 'Somebody editing the system prompt, which is rarely treated as a security change.' },
+      { id: 'c', label: 'A new tool being wired in, which changes the severity of every injection finding.' },
+      { id: 'd', label: 'The retrieval corpus changing, which it does continuously and sometimes with outside content.' },
+      { id: 'e', label: 'The deployment being moved to different hosting infrastructure.' },
+    ],
+    hints: [
+      'Four change what the system does or what it can reach. One changes where it runs.',
+      'Which of these can happen without anybody on the client side making a decision?',
+      'Ask what each change does to the findings you already wrote.',
+    ],
+    solution:
+      'A, B, C, and D. A model update, a prompt edit, a new tool, and corpus drift all change ' +
+      'either behaviour or blast radius, and only one of the four involves a formal release. E is ' +
+      'the one to leave off: a hosting move matters for other reasons and does not alter what the ' +
+      'model does or what its output reaches. Keeping it off the list is what makes the other four ' +
+      'get taken seriously.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option changes where the deployment runs rather than what it does or what it can ' +
+          'reach.',
+      },
+    ],
+    debrief:
+      'Put a validity statement in every AI assessment: this describes the deployment as configured ' +
+      'on this date, and here are the four changes that would require a retest. It is the sentence ' +
+      'that gets you invited back.',
+    practice: [],
+  },
+  {
+    id: 'ais.8.4',
+    moduleId: 'ais.8',
+    packageId: 'ai-security',
+    order: 4,
+    title: 'Detect it in production',
+    kind: 'multiple-choice',
+    goal: 'Say what to monitor once testing has stopped.',
+    prompt:
+      'The team wants to detect injection attempts against a live deployment. Which of the ' +
+      'following are useful signals? Select all that apply.',
+    teach: {
+      concept:
+        'Testing finds what is possible; monitoring finds what is being attempted. The signals are ' +
+        'not the same as the ones you would use for a web application, because the interesting ' +
+        'traffic here is well-formed by definition.\n\n' +
+        'Four things are worth watching. INPUTS THAT LOOK LIKE INSTRUCTIONS, which is imperfect ' +
+        'pattern matching and still catches the unsophisticated majority. ENCODED OR UNUSUAL ' +
+        'CHARACTER content, since ordinary users rarely send base64 or Cyrillic homoglyphs to a ' +
+        'support assistant. OUTPUT that resembles the system prompt or contains anything shaped ' +
+        'like a credential, which catches successful attacks rather than attempts and is therefore ' +
+        'the highest value of the four. And PER-USER VOLUME AND VARIETY, because somebody working ' +
+        'through techniques looks nothing like somebody asking questions.\n\n' +
+        'What is not useful on its own is a raw request count. High volume is a rate limiting ' +
+        'concern and says nothing about intent, and treating it as an injection signal produces a ' +
+        'queue full of enthusiastic users.',
+    },
+    options: [
+      { id: 'a', label: 'Inputs containing instruction-like phrasing, accepting that the matching is imperfect.' },
+      { id: 'b', label: 'Encoded content or unusual character sets, which ordinary users rarely send.' },
+      { id: 'c', label: 'Output resembling the system prompt or containing credential-shaped strings.' },
+      { id: 'd', label: 'One user sending many varied probing attempts in a short window.' },
+      { id: 'e', label: 'Raw request volume on its own, treated as an injection indicator.' },
+    ],
+    hints: [
+      'Four are useful signals. One is a capacity metric.',
+      'Which of these catches a successful attack rather than an attempt?',
+      'What does a very busy legitimate user look like under the last one?',
+    ],
+    solution:
+      'A, B, C, and D. Instruction phrasing and encoding catch attempts, per-user variety catches a ' +
+      'human working through techniques, and output monitoring is the one that catches success. C ' +
+      'is the one to build first if you can only build one, because everything else tells you ' +
+      'somebody tried. E is a rate limiting signal wearing a security hat: volume alone flags your ' +
+      'most engaged users and nothing else.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option is a capacity measure rather than an indicator of intent.',
+      },
+    ],
+    debrief:
+      'Output monitoring is consistently the last thing teams build and the first thing that would ' +
+      'have told them something got through. Argue for it early.',
+    practice: [],
+  },
+  {
+    id: 'ais.8.5',
+    moduleId: 'ais.8',
+    packageId: 'ai-security',
+    order: 5,
+    title: 'Hand it over',
+    kind: 'short-answer',
+    goal: 'Leave a team able to keep testing without you.',
+    prompt:
+      'Your engagement is finishing. In three or four sentences, say what you would hand over ' +
+      'besides the report, and why each piece matters.',
+    teach: {
+      concept:
+        'The report is a snapshot and the deployment will change next week. What determines whether ' +
+        'your work still matters in six months is what the team can do without you.\n\n' +
+        'Three things carry. THE CURATED REGRESSION SUITE, with expected results, wired into ' +
+        'whatever runs on a deployment change, so a reopened finding is caught by machinery rather ' +
+        'than by somebody remembering. THE VALIDITY STATEMENT: what the assessment covered, as of ' +
+        'when, and specifically which changes would require a retest, so the team knows when they ' +
+        'have outrun the report. And THE MONITORING RECOMMENDATION, especially on the output side, ' +
+        'because testing stops and traffic does not.\n\n' +
+        'Underneath all three is the transferable idea, which is worth stating explicitly in a ' +
+        'handover meeting: the input filter is not the boundary, the application is, and any ' +
+        'design that depends on the model refusing is depending on something it cannot promise.',
+    },
+    hints: [
+      'The report describes one moment. What survives contact with next month?',
+      'One of the three is about knowing when the report has expired.',
+      'A good answer names a regression suite the team can run, a statement of what would invalidate the assessment, and monitoring for the live system.',
+    ],
+    solution:
+      'I would hand over a curated regression suite with an expected result recorded for each ' +
+      'probe, wired into whatever runs on a deployment change, so that a reopened finding is caught ' +
+      'automatically rather than depending on anybody remembering to retest. Alongside it a ' +
+      'validity statement: what was covered, as of what date, and the specific changes that would ' +
+      'require a retest, which are a model update, a prompt edit, a new tool, or corpus changes. ' +
+      'And a monitoring recommendation weighted towards the output path, because testing ends and ' +
+      'traffic does not, and output monitoring is the part that catches a successful attack rather ' +
+      'than an attempt. The point I would make in the handover meeting is that the enforcement ' +
+      'boundary is the application rather than the model.',
+    expectedOutput:
+      'An answer naming a runnable regression suite, a validity statement with retest triggers, and ' +
+      'production monitoring, with a reason for each.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['regression suite', 'suite', 'probes they can run', 'rerun', 'automat'],
+          ['validity', 'as of', 'would require a retest', 'retest', 'expire', 'what was covered'],
+          ['monitor', 'production', 'live', 'output path', 'detect'],
+        ],
+        hint:
+          'Three things: something they can run, something that tells them when the report has ' +
+          'expired, and something that watches the live system.',
+      },
+    ],
+    debrief:
+      'That is the end of this package. You can find an injection, harden against one, test ' +
+      'systematically, assess a deployment you know nothing about, and leave a team able to keep ' +
+      'doing it. That is the job.',
+    practice: [],
+  },
+];
+
+// --- Module ais.9: the recommendation ----------------------------------------
+
+const MODULE_AIS_9: Exercise[] = [
+  {
+    id: 'ais.9.1',
+    moduleId: 'ais.9',
+    packageId: 'ai-security',
+    order: 1,
+    title: 'Recommend within a real budget',
+    kind: 'multiple-choice',
+    goal: 'Make a defence recommendation somebody will actually implement.',
+    prompt:
+      'You are recommending defences to a team with a latency target and a deadline. Which of the ' +
+      'following make the recommendation more likely to be implemented? Select all that apply.',
+    teach: {
+      concept:
+        'You have already had to choose defences under a cost budget in the lab. Doing it in a ' +
+        'recommendation is the same problem with a person on the other side of it, and the ' +
+        'difference between a recommendation that gets built and one that gets filed is mostly in ' +
+        'how it was written.\n\n' +
+        'Three things help. ORDERING, because a list of nine controls gets nothing done and the ' +
+        'first two get done if you say which two. STATING THE COST HONESTLY, including latency and ' +
+        'engineering time, because the engineer reading it already knows and a recommendation that ' +
+        'pretends otherwise loses their trust immediately. And SAYING WHAT THE RESIDUAL RISK IS ' +
+        'after your recommendation, since no set of controls closes everything and claiming ' +
+        'otherwise means the next bypass is your credibility rather than their gap.\n\n' +
+        'What does not help is asking for everything. A team that cannot implement your list will ' +
+        'implement none of it, and the version of you that asked for three things they can ship ' +
+        'this quarter has removed more risk than the version that asked for nine.',
+    },
+    options: [
+      { id: 'a', label: 'Ordering the controls, so it is clear which two to do first if only two get done.' },
+      { id: 'b', label: 'Stating the latency and engineering cost honestly, because the engineer already knows it.' },
+      { id: 'c', label: 'Saying what risk remains after your recommendation is implemented.' },
+      { id: 'd', label: 'Separating what must ship before launch from what can follow it.' },
+      { id: 'e', label: 'Recommending every available control, so the decision about what to drop is theirs.' },
+    ],
+    hints: [
+      'Four help. One passes a decision back that you were hired to make.',
+      'What happens to a nine-item list handed to a team with a deadline?',
+      'Ask what an engineer thinks when a security recommendation claims to have no cost.',
+    ],
+    solution:
+      'A, B, C, and D. Ordering, honest costs, stated residual risk, and a launch boundary are what ' +
+      'turn a list into a plan. E sounds neutral and is an abdication: you know which controls ' +
+      'address the findings you actually made, and handing over an unprioritised list means the ' +
+      'cuts get made by whoever is most tired on Friday. Make the call, show the reasoning, and let ' +
+      'them overrule you with their knowledge of the system.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option hands an unprioritised list back to the team and calls it their decision.',
+      },
+    ],
+    debrief:
+      'The residual risk sentence is the one that gets you believed. A recommendation that admits ' +
+      'what it does not fix reads as an assessment; one that implies completeness reads as a sales ' +
+      'pitch.',
+    practice: [],
+  },
+  {
+    id: 'ais.9.2',
+    moduleId: 'ais.9',
+    packageId: 'ai-security',
+    order: 2,
+    title: 'Filter it or design around it',
+    kind: 'multiple-choice',
+    goal: 'Know when to recommend a control and when to recommend a different architecture.',
+    prompt:
+      'For each finding you can recommend more filtering or a change to the design. Which of the ' +
+      'following are cases where the design change is the right recommendation? Select all that ' +
+      'apply.',
+    teach: {
+      concept:
+        'Filtering is cheap, fast, and probabilistic. Design change is expensive, slow, and ' +
+        'categorical. Knowing which to recommend is the difference between an assessor and somebody ' +
+        'who lists jailbreaks.\n\n' +
+        'Recommend a DESIGN CHANGE when the finding is about consequence rather than about ' +
+        'technique. If the model output can invoke a tool with real effect, no filter closes that: ' +
+        'the fix is an authorisation check in the application, or a human confirmation, or removing ' +
+        'the capability. If the deployment shows one user another user data, the fix is per-user ' +
+        'filtering in retrieval, not better prompting. If the system depends on the model refusing, ' +
+        'the fix is to stop depending on that, because refusal is a trained tendency.\n\n' +
+        'Recommend FILTERING when the finding is about a cheap technique arriving repeatedly and ' +
+        'the consequence is already bounded. Both are legitimate. What is not legitimate is ' +
+        'recommending filtering for a consequence problem, which is the most common failure in AI ' +
+        'security reports and the reason so many of them produce no change at all.',
+    },
+    options: [
+      { id: 'a', label: 'Model output can invoke a tool with real effect, with no authorisation check in the application.' },
+      { id: 'b', label: 'Retrieval returns documents without filtering by what the requesting user may see.' },
+      { id: 'c', label: 'The system safety depends on the model reliably refusing certain requests.' },
+      { id: 'd', label: 'Output is rendered into a page without escaping, so markup executes in the viewer.' },
+      { id: 'e', label: 'A known encoding trick arrives repeatedly against a deployment whose output only reaches the requester.' },
+    ],
+    hints: [
+      'Four are design problems. One is a technique arriving at a bounded consequence.',
+      'Ask which of these a perfect input filter would actually solve.',
+      'If the answer to a finding is "the application should check", that is not filtering.',
+    ],
+    solution:
+      'A, B, C, and D. Tool authorisation, retrieval permissions, dependence on refusal, and output ' +
+      'escaping are all consequence problems, and no amount of input filtering closes any of them. ' +
+      'E is the case where filtering is genuinely the right answer: a known technique, a bounded ' +
+      'consequence, and a cheap control that reduces noise and cost. Recommending an architecture ' +
+      'change there would be disproportionate, and proposing filtering for the other four would be ' +
+      'recommending something that cannot work.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option is a cheap technique against a bounded consequence, which is exactly what ' +
+          'filtering is for.',
+      },
+    ],
+    debrief:
+      'Ask one question of every finding before you write the fix: would a perfect input filter ' +
+      'solve this? If the answer is no, you are looking at a design recommendation and should say ' +
+      'so plainly.',
+    practice: [],
+  },
+  {
+    id: 'ais.9.3',
+    moduleId: 'ais.9',
+    packageId: 'ai-security',
+    order: 3,
+    title: 'What gets fixed first',
+    kind: 'short-answer',
+    goal: 'Order a set of findings for a team that will only get through the top of the list.',
+    prompt:
+      'Your assessment produced four findings: a system prompt disclosure, an injection that ' +
+      'reaches a refund tool, an unescaped output rendering, and a known encoding trick that gets ' +
+      'past the input filter into a display-only answer. In three or four sentences, say what you ' +
+      'would have them fix first and why.',
+    teach: {
+      concept:
+        'Ordering is where an assessment turns into a plan, and the order comes from consequence ' +
+        'and reversibility rather than from how impressive each finding was to produce.\n\n' +
+        'The refund tool finding is first and it is not close: an attacker causes your own code to ' +
+        'move money, the loss is direct, and the fix is a bounded piece of application work rather ' +
+        'than a research project. The unescaped rendering is next, because it takes the compromise ' +
+        'to other users rather than to the attacker themselves, which is the step from a bug to a ' +
+        'wormable one.\n\n' +
+        'The prompt disclosure and the encoding bypass come after, and it is worth being explicit ' +
+        'about why: they establish that the boundary can be crossed, which is exactly the ' +
+        'precondition that makes the first two possible, but on their own they end at the attacker ' +
+        'own screen. Cheap to mitigate, worth doing, and not what you interrupt a sprint for.\n\n' +
+        'A good answer puts the tool-connected finding first, gives consequence rather than ' +
+        'technique as the reason, and does not simply order by how hard each was to find.',
+    },
+    hints: [
+      'Rank by what the attacker gets, not by how clever the technique was.',
+      'One of these reaches other users. One reaches money. One reaches only the attacker screen.',
+      'A good answer puts the refund tool finding first for direct financial consequence, then the rendering because it reaches other users, and treats the prompt disclosure and encoding bypass as lower because they end at the attacker own screen.',
+    ],
+    solution:
+      'The injection that reaches the refund tool goes first, because it makes our own application ' +
+      'move money on an attacker instruction with no person in the path, and the remediation is a ' +
+      'contained piece of work: an authorisation check before the tool is invoked. The unescaped ' +
+      'output rendering is second, since it carries the compromise to other people viewing the ' +
+      'page rather than only to the attacker, which is the difference between a bug and something ' +
+      'that spreads. The system prompt disclosure and the encoding bypass rank below both: they ' +
+      'prove the boundary is crossable, which is why the first two are possible at all, but on ' +
+      'their own the attacker learns something and reaches their own screen. I would say plainly ' +
+      'that the ordering is by consequence rather than by how difficult each was to find.',
+    expectedOutput:
+      'An answer putting the tool-connected finding first on consequence grounds, the rendering ' +
+      'second because it reaches other users, and the disclosure and encoding findings lower.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['refund', 'tool', 'money', 'financial'],
+          ['other users', 'other people', 'viewer', 'spreads', 'reaches others', 'wormable'],
+          ['consequence', 'not by how', 'rather than', 'own screen', 'lower', 'below'],
+        ],
+        hint:
+          'Three ideas: which finding is first and why, which one reaches beyond the attacker, and ' +
+          'the principle you are ordering by.',
+      },
+    ],
+    debrief:
+      'Say the ordering principle out loud in the report. Teams push back on rankings far less when ' +
+      'they can see the rule you applied and check it themselves.',
+    practice: [],
+  },
+  {
+    id: 'ais.9.4',
+    moduleId: 'ais.9',
+    packageId: 'ai-security',
+    order: 4,
+    title: 'The go or no-go call',
+    kind: 'multiple-choice',
+    goal: 'Give a launch recommendation that is defensible whichever way it goes.',
+    prompt:
+      'A deployment ships on Friday and you have found an unmitigated injection into a tool with ' +
+      'financial effect. Which of the following belong in your recommendation? Select all that ' +
+      'apply.',
+    teach: {
+      concept:
+        'You are rarely the person who decides whether something launches, and you are always the ' +
+        'person whose recommendation is quoted afterwards. Make it specific enough to be acted on ' +
+        'and honest enough to survive either outcome.\n\n' +
+        'Four things belong in it. A CLEAR RECOMMENDATION rather than a description of risk, ' +
+        'because a paragraph that lists concerns without a position gets read as approval. THE ' +
+        'SPECIFIC CONDITION that would change it: not "fix the security issues" but the one ' +
+        'authorisation check that turns a no into a yes, since that is often a day of work rather ' +
+        'than a delay. A MITIGATION for launching anyway, such as disabling that tool or capping ' +
+        'transaction value, because the business may launch regardless and half a loaf beats a ' +
+        'principled nothing. And WHO OWNS THE DECISION, which is not you: your job is to make the ' +
+        'risk legible and named, and theirs is to accept it.\n\n' +
+        'What does not belong is a threat to escalate, or a refusal to give a position. Both feel ' +
+        'like integrity and both reduce your influence over the outcome, which is the only thing ' +
+        'you actually have.',
+    },
+    options: [
+      { id: 'a', label: 'A clear recommendation rather than a list of concerns with no position.' },
+      { id: 'b', label: 'The specific change that would turn the recommendation around, in one sentence.' },
+      { id: 'c', label: 'A mitigation that makes launching survivable, such as disabling the tool or capping value.' },
+      { id: 'd', label: 'A named person who owns the decision to accept the risk if they launch anyway.' },
+      { id: 'e', label: 'A statement that you will escalate to the board if they proceed.' },
+    ],
+    hints: [
+      'Four belong. One is a threat.',
+      'Ask what happens to your influence next quarter after each option.',
+      'The business may launch regardless. What would you rather have in place when it does?',
+    ],
+    solution:
+      'A, B, C, and D. A position, the condition that reverses it, a survivable middle path, and a ' +
+      'named owner for the residual. E is the one to leave out: escalation may sometimes be right ' +
+      'and announcing it as a threat converts a technical conversation into a political one you ' +
+      'will lose, and it costs you the next four engagements with that team. State the risk, name ' +
+      'the owner, offer the mitigation, and let the decision be made by the people whose decision ' +
+      'it is.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option turns a technical recommendation into a threat about escalation.',
+      },
+    ],
+    debrief:
+      'Option C is the one that most often changes the outcome. Teams that will not delay a launch ' +
+      'will very often disable one tool, and that is the whole finding neutralised for a fortnight.',
+    practice: [],
+  },
+  {
+    id: 'ais.9.5',
+    moduleId: 'ais.9',
+    packageId: 'ai-security',
+    order: 5,
+    title: 'Brief the engineers',
+    kind: 'short-answer',
+    goal: 'Explain a finding to the people who have to fix it, without a demo of your cleverness.',
+    prompt:
+      'You are walking the engineering team through the injection that reaches their refund tool. ' +
+      'In three or four sentences, say how you would open that conversation.',
+    teach: {
+      concept:
+        'The temptation is to demonstrate the payload, because it is the most impressive part and ' +
+        'it took the longest. It is also the part that puts an engineer on the defensive and ' +
+        'focuses the conversation on the model, which is the one component they cannot change.\n\n' +
+        'Open on the CONSEQUENCE and their code: a request from outside can currently cause your ' +
+        'refund endpoint to run without anybody checking the requester is entitled to it. That is a ' +
+        'sentence an engineer can act on immediately, and it is about a code path they own rather ' +
+        'than about a model they bought.\n\n' +
+        'Then say what the model is and is not: it is not the boundary and it cannot be made into ' +
+        'one, because refusal is a trained tendency rather than an enforcement. Then the fix, ' +
+        'specifically, in their vocabulary: an authorisation check before invocation. Keep the ' +
+        'payload for the appendix; if they want it they will ask, and by then you are working ' +
+        'together on the fix rather than debating whether the trick was fair.',
+    },
+    hints: [
+      'Do not open with the payload, however good it is.',
+      'Which component in this system can the engineering team actually change?',
+      'A good opening names the consequence in terms of their own code path, says the model is not the enforcement boundary, and proposes the authorisation check as the fix.',
+    ],
+    solution:
+      'I would open on what their code currently does rather than on the payload: a request coming ' +
+      'from outside can cause the refund endpoint to run without anything checking that the ' +
+      'requester is entitled to that refund. Then I would be explicit that the model is not the ' +
+      'boundary here and cannot be made into one, because a model declining a request is a trained ' +
+      'tendency rather than an enforced rule, so hardening the prompt would not close this. The fix ' +
+      'is an authorisation check in the application before the tool is invoked, which is work they ' +
+      'already know how to do. The payload itself goes in the appendix; leading with it makes the ' +
+      'conversation about whether the trick was fair rather than about the missing check.',
+    expectedOutput:
+      'An opening that names the consequence in terms of the team own code, states that the model ' +
+      'is not the enforcement boundary, and proposes the authorisation check.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['refund endpoint', 'their code', 'without checking', 'entitled', 'runs without'],
+          ['not the boundary', 'cannot be made', 'trained tendency', 'not enforced', 'not enforcement'],
+          ['authoris', 'authoriz', 'check before', 'in the application'],
+        ],
+        hint:
+          'Three ideas: the consequence stated in terms of their own code, why hardening the model ' +
+          'will not close it, and the specific fix.',
+      },
+    ],
+    debrief:
+      'This framing is why engineers end up asking you to review the next design rather than ' +
+      'avoiding you. You brought them a fix in their own vocabulary and left the cleverness out of ' +
+      'the room.',
+    practice: [],
+  },
+];
+
 export const AI_SECURITY: LearningPackage = {
   id: 'ai-security',
   order: 7,
@@ -1453,6 +2690,46 @@ export const AI_SECURITY: LearningPackage = {
       summary:
         'Severity by exposure, training-data validation, extraction risk, and the recommendation itself.',
       exercises: MODULE_7_5,
+    },
+    {
+      id: 'ais.6',
+      packageId: 'ai-security',
+      order: 6,
+      title: 'What happens to the output',
+      summary:
+        'The half of the problem input filtering cannot see: extracting a system prompt, where the ' +
+        'output goes, what an output filter buys, and rating a finding by its sink.',
+      exercises: MODULE_AIS_6,
+    },
+    {
+      id: 'ais.7',
+      packageId: 'ai-security',
+      order: 7,
+      title: 'Testing a black box',
+      summary:
+        'Defeating a deployment whose defences all hunt for a disguise, showing the technique ' +
+        'generalises, inferring the defence set from refusals, and reporting a negative result.',
+      exercises: MODULE_AIS_7,
+    },
+    {
+      id: 'ais.8',
+      packageId: 'ai-security',
+      order: 8,
+      title: 'Making a fix stick',
+      summary:
+        'Retesting so that nothing got through means something, leaving a regression suite behind, ' +
+        'knowing what change invalidates the assessment, and monitoring the live system.',
+      exercises: MODULE_AIS_8,
+    },
+    {
+      id: 'ais.9',
+      packageId: 'ai-security',
+      order: 9,
+      title: 'The recommendation',
+      summary:
+        'Turning findings into advice somebody implements: budget, filter against design change, ' +
+        'what gets fixed first, the launch call, and briefing the engineers who own the fix.',
+      exercises: MODULE_AIS_9,
     },
   ],
 };
