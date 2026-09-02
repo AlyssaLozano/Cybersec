@@ -75,7 +75,7 @@ const EXPECTED_EXERCISE_COUNTS: Record<string, number> = {
   'linux-fundamentals': 22,
   'log-analysis': 40,
   'incident-triage': 26,
-  networking: 15,
+  networking: 25,
 };
 
 function exerciseCount(packageId: string): number {

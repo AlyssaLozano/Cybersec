@@ -1,5 +1,5 @@
 /**
- * Practice drills for Networking Basics: five per exercise, 75 in total.
+ * Practice drills for Networking Basics: five per exercise, 125 in total.
  *
  * Same rules as Linux Fundamentals and Log Analysis: same skill, different target; graded on
  * outcome; optional, so they never gate progression or move the completion
@@ -40,6 +40,12 @@ const hasFlag = (command: string, flag: string): Check => ({
 });
 
 const usesPipe: Check = { type: 'command-uses-pipe', hint: 'Join the commands with the | character.' };
+
+const num = (equals: number): Check => ({
+  type: 'output-numeric',
+  equals,
+  hint: 'The answer is a single number.',
+});
 
 export const NETWORKING_PRACTICE: Record<string, PracticeItem[]> = {
   // --- 4.1.1 addresses -------------------------------------------------------
@@ -175,5 +181,95 @@ export const NETWORKING_PRACTICE: Record<string, PracticeItem[]> = {
     { id: 'net.3.4-p3', prompt: 'Using a pipe, count how many entries mention the 10.20 network.', solution: 'grep -c "10.20." /etc/hosts', checks: [{ type: 'output-numeric', equals: 6, hint: 'The answer is a single number.' }] },
     { id: 'net.3.4-p4', prompt: 'Find the entry for the lab interface host, rmg-lab-if-01.', solution: 'grep rmg-lab-if-01 /etc/hosts', checks: [outHas('10.20.7.22')] },
     { id: 'net.3.4-p5', prompt: 'Show the first 3 lines of /etc/hosts.', solution: 'head -n 3 /etc/hosts', checks: [lines(3), outHas('localhost')] },
+  ],
+
+  // --- 4.4.1 the listener inventory ------------------------------------------
+  'net.4.1': [
+    { id: 'net.4.1-p1', prompt: 'Take the same listener inventory using ss instead of netstat.', solution: 'ss -tlnp', checks: [outHas('LISTEN'), outHas('sshd')] },
+    { id: 'net.4.1-p2', prompt: 'Show the listeners without the owning program, so you can see what the table looks like without -p.', solution: 'netstat -tln', checks: [outHas('0.0.0.0:22'), outLacks('sshd')] },
+    { id: 'net.4.1-p3', prompt: 'Using a pipe, show only the listener lines that mention nginx.', solution: 'netstat -tlnp | grep nginx', checks: [usesPipe, outHas('443')] },
+    { id: 'net.4.1-p4', prompt: 'Using a pipe, count the lines the listener inventory produces, headers included.', solution: 'netstat -tlnp | wc -l', checks: [usesPipe, num(9)] },
+    { id: 'net.4.1-p5', prompt: 'Using a pipe, show only the listener line for the database port, 5432.', solution: 'netstat -tlnp | grep 5432', checks: [usesPipe, outHas('postgres')] },
+  ],
+
+  // --- 4.4.2 wildcard against loopback ---------------------------------------
+  'net.4.2': [
+    { id: 'net.4.2-p1', prompt: 'Show, rather than count, the listeners bound to every interface.', solution: "netstat -tlnp | grep '0.0.0.0:[0-9]'", checks: [usesPipe, lines(3)] },
+    { id: 'net.4.2-p2', prompt: 'Count the listeners bound only to loopback.', solution: "netstat -tlnp | grep -c '127.0.0.1:'", checks: [usesPipe, num(3)] },
+    { id: 'net.4.2-p3', prompt: 'Show which program is listening on the HTTPS port.', solution: 'netstat -tlnp | grep 443', checks: [usesPipe, outHas('nginx')] },
+    { id: 'net.4.2-p4', prompt: 'Count how many listener lines mention port 22, remembering that IPv6 has its own.', solution: "netstat -tlnp | grep -c ':22'", checks: [usesPipe, num(2)] },
+    { id: 'net.4.2-p5', prompt: 'Show the listeners bound to every interface, using ss instead.', solution: "ss -tlnp | grep '0.0.0.0'", checks: [usesPipe, outHas('nginx')] },
+  ],
+
+  // --- 4.4.3 the private services --------------------------------------------
+  'net.4.3': [
+    { id: 'net.4.3-p1', prompt: 'Show the listener for the application server on port 8080.', solution: 'netstat -tlnp | grep 8080', checks: [usesPipe, outHas('gunicorn')] },
+    { id: 'net.4.3-p2', prompt: 'Find the listener owned by gunicorn by name rather than by port.', solution: 'netstat -tlnp | grep gunicorn', checks: [usesPipe, outHas('8080')] },
+    { id: 'net.4.3-p3', prompt: 'Show the local mail submission listener, owned by the postfix master process.', solution: 'netstat -tlnp | grep master', checks: [usesPipe, outHas('127.0.0.1:25')] },
+    { id: 'net.4.3-p4', prompt: 'Confirm the database listener is on loopback, using ss.', solution: 'ss -tlnp | grep 5432', checks: [usesPipe, outHas('127.0.0.1')] },
+    { id: 'net.4.3-p5', prompt: 'Show every loopback listener at once.', solution: "netstat -tlnp | grep '127.0.0.1'", checks: [usesPipe, outHas('postgres'), outHas('gunicorn')] },
+  ],
+
+  // --- 4.4.4 reading port numbers --------------------------------------------
+  'net.4.4': [
+    { id: 'net.4.4-p1', prompt: 'Show the full socket table using ss rather than netstat.', solution: 'ss -tn', checks: [outHas('ESTAB')] },
+    { id: 'net.4.4-p2', prompt: 'Using a pipe, show only the sockets involving the HTTPS port.', solution: "netstat -tn | grep ':443'", checks: [usesPipe, outHas('198.51.100.60')] },
+    { id: 'net.4.4-p3', prompt: 'Using a pipe, show only the sockets involving SSH, with their owning process.', solution: "netstat -tnp | grep ':22'", checks: [usesPipe, outHas('sshd')] },
+    { id: 'net.4.4-p4', prompt: 'Count the lines in the full socket table, headers included.', solution: 'netstat -tn | wc -l', checks: [usesPipe, num(8)] },
+    { id: 'net.4.4-p5', prompt: 'Show the socket table including the owning process for every row.', solution: 'netstat -tnp', checks: [outHas('curl')] },
+  ],
+
+  // --- 4.4.5 checking for absence --------------------------------------------
+  'net.4.5': [
+    { id: 'net.4.5-p1', prompt: 'Check whether anything listens on the RDP port, 3389.', solution: 'netstat -tlnp | grep 3389', checks: [usesPipe, outLacks('LISTEN')] },
+    { id: 'net.4.5-p2', prompt: 'Check whether anything listens on the Redis port, 6379.', solution: 'netstat -tlnp | grep 6379', checks: [usesPipe, outLacks('LISTEN')] },
+    { id: 'net.4.5-p3', prompt: 'Check whether anything listens on the Elasticsearch port, 9200, using ss.', solution: 'ss -tlnp | grep 9200', checks: [usesPipe, outLacks('LISTEN')] },
+    { id: 'net.4.5-p4', prompt: 'Confirm that something DOES listen on the web port, 80.', solution: 'netstat -tlnp | grep 80', checks: [usesPipe, outHas('nginx')] },
+    { id: 'net.4.5-p5', prompt: 'Check whether any telnet daemon is running on this host.', solution: 'ps aux | grep telnetd', checks: [usesPipe, outLacks('/usr/sbin/telnetd')] },
+  ],
+
+  // --- 4.5.1 removing loopback -----------------------------------------------
+  'net.5.1': [
+    { id: 'net.5.1-p1', prompt: 'Count every established session, loopback included.', solution: 'netstat -tn | grep -c ESTABLISHED', checks: [usesPipe, num(5)] },
+    { id: 'net.5.1-p2', prompt: 'Count the established sessions using ss, which abbreviates the state.', solution: 'ss -tn | grep -c ESTAB', checks: [usesPipe, num(5)] },
+    { id: 'net.5.1-p3', prompt: 'Show only the sessions with the 10.20.4 subnet.', solution: "netstat -tn | grep '10.20.4'", checks: [usesPipe, outHas('ESTABLISHED')] },
+    { id: 'net.5.1-p4', prompt: 'Show the sessions that are loopback only, which is the internal plumbing.', solution: "netstat -tn | grep '127.0.0.1' | grep ESTABLISHED", checks: [usesPipe, outHas('127.0.0.1')] },
+    { id: 'net.5.1-p5', prompt: 'Show the socket that has already closed and is in TIME_WAIT.', solution: 'netstat -tn | grep TIME_WAIT', checks: [usesPipe, outHas('10.20.7.22')] },
+  ],
+
+  // --- 4.5.2 direction --------------------------------------------------------
+  'net.5.2': [
+    { id: 'net.5.2-p1', prompt: 'Find the socket by its high local port, 44218.', solution: 'netstat -tnp | grep 44218', checks: [usesPipe, outHas('198.51.100.60')] },
+    { id: 'net.5.2-p2', prompt: 'Show the inbound SSH session from 10.20.4.31 for comparison.', solution: 'netstat -tnp | grep 10.20.4.31', checks: [usesPipe, outHas('sshd')] },
+    { id: 'net.5.2-p3', prompt: 'Find the same outbound session using ss.', solution: 'ss -tnp | grep 198.51.100.60', checks: [usesPipe, outHas('44218')] },
+    { id: 'net.5.2-p4', prompt: 'Count how many sockets involve the external address.', solution: "netstat -tnp | grep -c '198.51.100.60'", checks: [usesPipe, num(1)] },
+    { id: 'net.5.2-p5', prompt: 'Show the inbound web session from 10.20.4.58.', solution: 'netstat -tnp | grep 10.20.4.58', checks: [usesPipe, outHas('nginx')] },
+  ],
+
+  // --- 4.5.3 socket to process ------------------------------------------------
+  'net.5.3': [
+    { id: 'net.5.3-p1', prompt: 'Find the process by name rather than by pid.', solution: 'ps aux | grep curl', checks: [usesPipe, outHas('/tmp/.cache/pt.tar.gz')] },
+    { id: 'net.5.3-p2', prompt: 'Show every process owned by the sysmon account.', solution: 'ps aux | grep sysmon', checks: [usesPipe, outHas('curl')] },
+    { id: 'net.5.3-p3', prompt: 'Show the nginx worker processes and the account they run as.', solution: 'ps aux | grep nginx', checks: [usesPipe, outHas('www-data')] },
+    { id: 'net.5.3-p4', prompt: 'Show the sshd daemon process.', solution: 'ps aux | grep sshd', checks: [usesPipe, outHas('/usr/sbin/sshd')] },
+    { id: 'net.5.3-p5', prompt: 'Show the busiest processes using top in batch mode.', solution: 'top -bn1', checks: [outHas('nginx')] },
+  ],
+
+  // --- 4.5.4 socket states ----------------------------------------------------
+  'net.5.4': [
+    { id: 'net.5.4-p1', prompt: 'Show only the closed-but-remembered socket using ss.', solution: 'ss -tn | grep TIME_WAIT', checks: [usesPipe, outHas('9443')] },
+    { id: 'net.5.4-p2', prompt: 'Show the listeners using ss without the owning process.', solution: 'ss -tln', checks: [outHas('LISTEN')] },
+    { id: 'net.5.4-p3', prompt: 'Show only the established rows using the ss abbreviation.', solution: 'ss -tn | grep ESTAB', checks: [usesPipe, outHas('10.20.6.40')] },
+    { id: 'net.5.4-p4', prompt: 'Show every TCP socket, listeners and connections together, using ss.', solution: 'ss -tan', checks: [outHas('LISTEN'), outHas('ESTAB')] },
+    { id: 'net.5.4-p5', prompt: 'Search ss output for the netstat spelling, and see that it finds nothing.', solution: 'ss -tn | grep ESTABLISHED', checks: [usesPipe, outLacks('10.20.6.40')] },
+  ],
+
+  // --- 4.5.5 accounting for every session -------------------------------------
+  'net.5.5': [
+    { id: 'net.5.5-p1', prompt: 'Show the established sessions that involve the 10.20.4 subnet.', solution: "netstat -tnp | grep ESTABLISHED | grep '10.20.4'", checks: [usesPipe, outHas('sshd')] },
+    { id: 'net.5.5-p2', prompt: 'Count the established sessions that are loopback.', solution: "netstat -tn | grep ESTABLISHED | grep -c '127.0.0.1'", checks: [usesPipe, num(2)] },
+    { id: 'net.5.5-p3', prompt: 'Show the established session owned by the web server.', solution: 'netstat -tnp | grep ESTABLISHED | grep nginx', checks: [usesPipe, outHas('10.20.4.58')] },
+    { id: 'net.5.5-p4', prompt: 'Show the established off-host sessions using ss instead.', solution: "ss -tnp | grep ESTAB | grep -v '127.0.0.1'", checks: [usesPipe, outHas('198.51.100.60')] },
+    { id: 'net.5.5-p5', prompt: 'Show the one session whose peer is neither loopback nor in the 10.20.4 client subnet. Careful: the local address on every row starts 10.20 as well, so do not exclude that.', solution: "netstat -tnp | grep ESTABLISHED | grep -vE '10.20.4|127.0.0.1'", checks: [usesPipe, outHas('curl')] },
   ],
 };

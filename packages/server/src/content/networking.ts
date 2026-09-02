@@ -1,5 +1,5 @@
 /**
- * Networking Basics -- 15 exercises across 3 modules.
+ * Networking Basics -- 25 exercises across 5 modules.
  *
  * WHY THIS PACKAGE EXISTS, AND WHY NOW
  *
@@ -29,11 +29,48 @@
 
 import type { Exercise, LearningPackage } from '@soc/shared';
 
+import { MACHINE } from '../vfs/machine.js';
 import { NETWORKING_PRACTICE } from './networking-practice.js';
 
 const HOST_IP = '10.20.6.40';
 const GATEWAY = '10.20.6.1';
 const EXFIL = '198.51.100.60';
+
+// --- expected answers, derived from the simulated machine --------------------
+//
+// Modules 4.4 to 4.8 grade counts of sockets. Reading them off MACHINE rather
+// than typing them in means adding a service to the host cannot leave an
+// exercise asserting a number that stopped being true.
+
+const tcpSockets = MACHINE.sockets.filter((socket) => socket.proto === 'tcp');
+
+/** TCP services accepting connections, IPv4 only. */
+const LISTENING_TCP = tcpSockets.filter((socket) => socket.state === 'LISTEN');
+
+/** Listening on every interface, and therefore reachable from off the host. */
+const EXPOSED_TCP = LISTENING_TCP.filter((socket) => socket.localAddress === '0.0.0.0');
+
+/** Listening only on loopback, and therefore reachable only from the host itself. */
+const LOOPBACK_TCP = LISTENING_TCP.filter((socket) => socket.localAddress.startsWith('127.'));
+
+const ESTABLISHED_TCP = tcpSockets.filter((socket) => socket.state === 'ESTABLISHED');
+
+/** Established sessions that are not the host talking to itself. */
+const ESTABLISHED_OFF_HOST = ESTABLISHED_TCP.filter(
+  (socket) => !socket.remoteAddress.startsWith('127.'),
+);
+
+/**
+ * The one established session whose peer is outside RFC 1918 space.
+ *
+ * Derived rather than named, so that the exercise which asks a student to find
+ * the odd connection cannot silently stop having an answer.
+ */
+const EXFIL_SOCKET = ESTABLISHED_TCP.find(
+  (socket) => !socket.remoteAddress.startsWith('10.') && !socket.remoteAddress.startsWith('127.'),
+)!;
+
+const EXFIL_PROCESS = MACHINE.processes.find((process) => process.pid === EXFIL_SOCKET.pid)!;
 
 // --- Module 4.1: what this machine is ----------------------------------------
 
@@ -575,6 +612,452 @@ const MODULE_4_3: Exercise[] = [
   },
 ];
 
+// --- Module 4.4: what is exposed, and to whom --------------------------------
+
+const MODULE_4_4: Exercise[] = [
+  {
+    id: 'net.4.1',
+    moduleId: '4.4',
+    packageId: 'networking',
+    order: 1,
+    title: 'Count what is listening',
+    kind: 'terminal',
+    goal: 'Take an inventory of the services accepting connections on this host.',
+    prompt:
+      'List the TCP services listening on rmg-web-02, with the program that owns each one, and count how many there are.',
+    teach: {
+      concept:
+        'Every listening socket is a door. Some of them are doors you meant to install, and the difference between the two lists is most of what an attacker is looking for when they arrive on a host.\n\nThe inventory is a single command. `netstat -tlnp` restricts to TCP (-t), shows only listeners (-l), keeps addresses and ports numeric rather than resolving them (-n), and names the owning process (-p). Learn those four letters as a unit: it is the first thing to run on any host you have never seen before.',
+      syntax: 'netstat -tlnp',
+      examples: [
+        {
+          command: 'netstat -ulnp',
+          explains: 'The same inventory for UDP, which is where DNS and a lot of quieter services live.',
+        },
+      ],
+      flags: [
+        { flag: '-t', means: 'TCP sockets only.' },
+        { flag: '-l', means: 'Only sockets in the LISTEN state.' },
+        { flag: '-n', means: 'Numeric: do not resolve addresses or port names.' },
+        { flag: '-p', means: 'Show the pid and program that owns the socket.' },
+      ],
+    },
+    hints: [
+      'Four flags, all on netstat, and they can be written together as one argument.',
+      'You want listeners rather than established connections, which is the -l.',
+    ],
+    solution: 'netstat -tlnp',
+    expectedOutput: `${LISTENING_TCP.length} listening TCP sockets, including sshd, nginx, gunicorn and postgres.`,
+    checks: [
+      {
+        type: 'output-contains',
+        text: 'LISTEN',
+        hint: 'You want sockets in the LISTEN state, which is what -l selects.',
+      },
+      {
+        type: 'output-contains',
+        text: 'nginx',
+        hint: 'Add -p so the owning program appears next to each socket.',
+      },
+      {
+        type: 'output-contains',
+        text: '5432',
+        hint: 'Use -n so ports stay numeric rather than being shown by service name.',
+      },
+    ],
+    debrief:
+      'Four programs, several sockets. Now the real question, which the next exercise asks: which of those are reachable from another machine, and which are only reachable from this one?',
+    practice: NETWORKING_PRACTICE['net.4.1'] ?? [],
+  },
+  {
+    id: 'net.4.2',
+    moduleId: '4.4',
+    packageId: 'networking',
+    order: 2,
+    title: 'The difference between 0.0.0.0 and 127.0.0.1',
+    kind: 'terminal',
+    goal: 'Read the local address of a listener as a statement about exposure.',
+    prompt:
+      'Count how many TCP listeners are bound to 0.0.0.0, which means they accept connections from any interface.',
+    teach: {
+      concept:
+        'The local address on a listening socket is not decoration, it is the blast radius. A socket bound to 127.0.0.1 accepts connections only from processes on this host: nothing on the network can reach it, whatever the firewall says. A socket bound to 0.0.0.0 accepts connections on every interface the machine has, which means anything that can route to the box can knock.\n\nThis single distinction explains a large share of real findings. A database bound to 0.0.0.0 is an incident waiting to happen; the same database on 127.0.0.1 is fine. When you read a listener table, read the left-hand address first and the port second.\n\nOne trap to know about before you write the filter. Every listener row ALSO shows 0.0.0.0:* in its foreign-address column, so a pattern of just "0.0.0.0:" matches every row including the loopback ones, and hands you a number twice as reassuring as it should be. Requiring a digit after the colon pins the match to a real local port and excludes the wildcard column.',
+      syntax: "netstat -tlnp | grep -c '0.0.0.0:[0-9]'",
+      examples: [
+        {
+          command: "netstat -tlnp | grep '127.0.0.1:'",
+          explains: 'The opposite selection: the services that are deliberately kept private to this host.',
+        },
+      ],
+    },
+    hints: [
+      'Take the listener inventory and filter it to the lines whose LOCAL address is the wildcard.',
+      'Every row also has 0.0.0.0:* in its foreign column, so a bare "0.0.0.0:" matches everything. Require a digit after the colon.',
+      'grep -c will count for you once the pattern is right.',
+    ],
+    solution: "netstat -tlnp | grep -c '0.0.0.0:[0-9]'",
+    expectedOutput: `${EXPOSED_TCP.length}`,
+    checks: [
+      {
+        type: 'output-numeric',
+        equals: EXPOSED_TCP.length,
+        hint: 'Every row shows 0.0.0.0:* in the foreign column, so match a digit after the colon to pin the pattern to a real local port.',
+      },
+    ],
+    debrief: `${EXPOSED_TCP.length} sockets are reachable from off this host and ${LOOPBACK_TCP.length} are not. That first number is your actual external attack surface, and it is the one to put in a report rather than the total.`,
+    practice: NETWORKING_PRACTICE['net.4.2'] ?? [],
+  },
+  {
+    id: 'net.4.3',
+    moduleId: '4.4',
+    packageId: 'networking',
+    order: 3,
+    title: 'Which services stay private',
+    kind: 'terminal',
+    goal: 'Identify the services deliberately bound to loopback, and know why that is the right default.',
+    prompt:
+      'Show the TCP listeners that are bound only to loopback, so you can see which services this host keeps to itself.',
+    teach: {
+      concept:
+        'A well-built host binds anything that does not need to face the network to 127.0.0.1: the database, the application server behind the reverse proxy, the local mail submission socket. Traffic reaches them only by going through something that IS exposed, which gives you one front door to defend instead of five.\n\nWhen you find the opposite, a database or an admin interface bound wide, you have found a finding worth writing up even though nothing has gone wrong yet. That is the difference between vulnerability work and incident work, and both start from this table.',
+      syntax: "netstat -tlnp | grep '127.0.0.1'",
+      examples: [
+        {
+          command: "netstat -tlnp | grep ':22'",
+          explains: 'Selecting by port instead, to answer whether SSH is listening at all and on which addresses.',
+        },
+      ],
+    },
+    hints: [
+      'Same inventory command, filtered to the loopback address this time.',
+      'Loopback is 127.0.0.1, and the services on it are the ones nothing off-host can reach.',
+    ],
+    solution: "netstat -tlnp | grep '127.0.0.1'",
+    expectedOutput: `${LOOPBACK_TCP.length} loopback-only listeners, including the database and the application server.`,
+    checks: [
+      {
+        type: 'output-contains',
+        text: 'postgres',
+        hint: 'The database should appear: it is bound to loopback only.',
+      },
+      {
+        type: 'output-excludes',
+        text: '0.0.0.0:80',
+        hint: 'The web server is exposed on all interfaces, so it should not be in this filtered list.',
+      },
+    ],
+    debrief:
+      'The database and the application server are private, and the web server in front of them is not. That is the shape you want, and noticing when a host does NOT have that shape is a large part of hardening work.',
+    practice: NETWORKING_PRACTICE['net.4.3'] ?? [],
+  },
+  {
+    id: 'net.4.4',
+    moduleId: '4.4',
+    packageId: 'networking',
+    order: 4,
+    title: 'What a port number tells you',
+    kind: 'terminal',
+    goal: 'Read the well-known ports on sight, and notice the one that is not well known.',
+    prompt:
+      'Show every TCP socket on the host, listeners and established connections together, numerically.',
+    teach: {
+      concept:
+        'A handful of port numbers carry meaning you should read without looking up: 22 is SSH, 25 is SMTP, 53 is DNS, 80 and 443 are HTTP and HTTPS, 5432 is PostgreSQL, 3306 is MySQL, 3389 is RDP. Recognising them turns a socket table from a wall of digits into a sentence about what the machine does.\n\nEqually important is the shape of the numbers that are NOT well known. Ports above roughly 32768 are ephemeral: the operating system hands them out to the client end of an outgoing connection. A high port on the LOCAL side of an established socket therefore means this host reached out, and that is a fact you get for free just by looking at which side the big number is on.',
+      syntax: 'netstat -tn',
+      examples: [
+        {
+          command: 'netstat -tnp | grep 443',
+          explains: 'Everything involving the HTTPS port, which on this host includes both a service and something else.',
+        },
+      ],
+    },
+    hints: [
+      'Drop the -l so you see established connections as well as listeners.',
+      'Keep -n so you are reading numbers rather than service names.',
+    ],
+    solution: 'netstat -tn',
+    expectedOutput: 'Listeners and established sessions together, all numeric.',
+    checks: [
+      {
+        type: 'output-contains',
+        text: 'ESTABLISHED',
+        hint: 'Without -l you should see established sessions as well as listeners.',
+      },
+      {
+        type: 'output-contains',
+        text: String(EXFIL_SOCKET.localPort),
+        hint: 'One of the established sockets has a high, ephemeral port on the local side. It should be in the table.',
+      },
+    ],
+    debrief: `Look at the socket with local port ${EXFIL_SOCKET.localPort}. A high local port and 443 on the far side means this host opened an HTTPS connection OUTWARD to somewhere. Web servers serve; they do not usually browse.`,
+    practice: NETWORKING_PRACTICE['net.4.4'] ?? [],
+  },
+  {
+    id: 'net.4.5',
+    moduleId: '4.4',
+    packageId: 'networking',
+    order: 5,
+    title: 'Compare what is running to what should be',
+    kind: 'terminal',
+    goal: 'Check the listener inventory against the services the host is supposed to run.',
+    prompt:
+      'rmg-web-02 is a web server with a local database. Confirm whether anything is listening on port 3306, the MySQL port, which it has no reason to run.',
+    teach: {
+      concept:
+        'An inventory is only useful against an expectation. The productive question is never "what is listening" on its own, it is "what is listening that nobody can explain", and answering it means having a view of what the host is for before you look.\n\nA search that returns nothing is a good outcome here, and it is worth running anyway. Confirming the absence of something takes seconds and it is the only way to turn "I think we do not run MySQL" into a statement you can defend. Remember that grep exits non-zero when it finds nothing, which is not an error.',
+      syntax: 'netstat -tlnp | grep PORT',
+      examples: [
+        {
+          command: 'netstat -tlnp | grep 3389',
+          explains: 'The same check for the Windows remote desktop port, which should also find nothing on a Linux host.',
+        },
+      ],
+    },
+    hints: [
+      'Filter the listener inventory for the port number.',
+      'Finding nothing is the correct result. Do not assume your command failed.',
+    ],
+    solution: 'netstat -tlnp | grep 3306',
+    expectedOutput: 'No output: nothing is listening on that port.',
+    checks: [
+      {
+        type: 'output-excludes',
+        text: '3306',
+        hint: 'Nothing should be listening on the MySQL port. If you see it, check what you filtered.',
+      },
+      {
+        type: 'command-matches',
+        anyOf: ['netstat.*3306', 'ss.*3306'],
+        regex: true,
+        hint: 'Query the socket table for that specific port.',
+      },
+    ],
+    debrief:
+      'Nothing there, and now you can say so. Half of an assessment is a list of things you checked and did not find, because that is what makes the things you did find credible.',
+    practice: NETWORKING_PRACTICE['net.4.5'] ?? [],
+  },
+];
+
+// --- Module 4.5: reading a connection as a direction -------------------------
+
+const MODULE_4_5: Exercise[] = [
+  {
+    id: 'net.5.1',
+    moduleId: '4.5',
+    packageId: 'networking',
+    order: 1,
+    title: 'Strip out the host talking to itself',
+    kind: 'terminal',
+    goal: 'Reduce the connection table to sessions that actually crossed the network.',
+    prompt:
+      'Show the established TCP connections that are NOT loopback, so you are left only with sessions involving another machine.',
+    teach: {
+      concept:
+        'A busy host holds a lot of connections to itself: the web server talking to the application server, the application server talking to the database. They are noise for an investigation, because nothing about them crossed a wire, and they crowd out the handful of sessions that did.\n\nRemoving them is one inverted match on the loopback address. What is left is the set of conversations this machine is having with the outside world, and it is usually short enough to read line by line, which is exactly what you want.',
+      syntax: "netstat -tn | grep -v '127.0.0.1' | grep ESTABLISHED",
+      examples: [
+        {
+          command: "netstat -tn | grep '127.0.0.1' | grep ESTABLISHED",
+          explains: 'The inverse: only the internal plumbing, which is what you want when you are debugging the application rather than hunting.',
+        },
+      ],
+    },
+    hints: [
+      'Two filters: remove loopback, keep established.',
+      'grep -v is the one that removes.',
+    ],
+    solution: "netstat -tn | grep -v '127.0.0.1' | grep ESTABLISHED",
+    expectedOutput: `${ESTABLISHED_OFF_HOST.length} sessions with other machines.`,
+    checks: [
+      {
+        type: 'output-line-count',
+        count: ESTABLISHED_OFF_HOST.length,
+        hint: `There are ${ESTABLISHED_OFF_HOST.length} established sessions that are not loopback.`,
+      },
+      {
+        type: 'output-excludes',
+        text: '127.0.0.1',
+        hint: 'Loopback sessions should be filtered out entirely.',
+      },
+    ],
+    debrief: `Three conversations with the rest of the world. That is a short enough list to account for every single one, which is the standard you should hold a host to.`,
+    practice: NETWORKING_PRACTICE['net.5.1'] ?? [],
+  },
+  {
+    id: 'net.5.2',
+    moduleId: '4.5',
+    packageId: 'networking',
+    order: 2,
+    title: 'Which end started it',
+    kind: 'terminal',
+    goal: 'Use port numbers to work out the direction of a connection.',
+    prompt: `Show the established connection whose remote peer is ${EXFIL}, including the owning process.`,
+    teach: {
+      concept:
+        'Direction is not recorded anywhere in a socket table, and you can read it anyway. The end holding the WELL-KNOWN port is the server; the end holding the high ephemeral port is the client that dialled out. So a socket whose local port is 44218 and whose remote port is 443 was opened BY this machine, TO that address.\n\nOn a web server that is a question worth asking about every outbound session. Servers are dialled; they do not usually dial. A legitimate exception is a package update or a licence check, and those go to places you can name.',
+      syntax: 'netstat -tnp | grep ADDRESS',
+      examples: [
+        {
+          command: 'netstat -tnp | grep 10.20.4.31',
+          explains: 'An inbound session for comparison: the well-known port is on the local side, so that peer dialled us.',
+        },
+      ],
+    },
+    hints: [
+      'Filter the socket table by the address, and include -p so you learn which program holds it.',
+      'Compare which side has the small, well-known port number.',
+    ],
+    solution: `netstat -tnp | grep '${EXFIL}'`,
+    expectedOutput: `One established session, owned by ${EXFIL_PROCESS.command.split(' ')[0]}.`,
+    checks: [
+      {
+        type: 'output-contains',
+        text: 'ESTABLISHED',
+        hint: 'The session is live, not merely closing.',
+      },
+      {
+        type: 'output-contains',
+        text: String(EXFIL_SOCKET.pid),
+        hint: 'Add -p so the pid of the owning process appears.',
+      },
+    ],
+    debrief: `A web server holding an outbound HTTPS session to an external address, owned by ${EXFIL_PROCESS.command.split(' ')[0]} rather than by a service. Note the pid: the next module turns it into a person.`,
+    practice: NETWORKING_PRACTICE['net.5.2'] ?? [],
+  },
+  {
+    id: 'net.5.3',
+    moduleId: '4.5',
+    packageId: 'networking',
+    order: 3,
+    title: 'Turn a socket into a process',
+    kind: 'terminal',
+    goal: 'Pivot from a connection to the command line behind it.',
+    prompt: `The suspicious session is held by process ${EXFIL_SOCKET.pid}. Show that process, with its full command line and the user running it.`,
+    teach: {
+      concept:
+        'A connection tells you where; a process tells you what and who. The pid on a socket is the bridge between them, and crossing that bridge is the single most productive move available when something looks wrong on a host.\n\n`ps aux` prints every process with its owner and its full command line. Filtered to one pid, it turns "something is talking to an address I do not recognise" into a command line, a user, and a start time, which is usually enough to decide whether you are looking at an incident or at a colleague.',
+      syntax: 'ps aux | grep PID',
+      examples: [
+        {
+          command: 'ps aux | grep nginx',
+          explains: 'The same pivot from a service name instead of a pid, which is how you check what a listener really is.',
+        },
+      ],
+    },
+    hints: [
+      'ps aux lists everything; filter it down to the pid you were given.',
+      'Read the whole line when you find it, especially the end of the command.',
+    ],
+    solution: `ps aux | grep ${EXFIL_SOCKET.pid}`,
+    expectedOutput: `The ${EXFIL_PROCESS.command.split(' ')[0]} process, running as ${EXFIL_PROCESS.user}.`,
+    checks: [
+      {
+        type: 'output-contains',
+        text: EXFIL_PROCESS.user,
+        hint: 'The user column tells you which account is running it.',
+      },
+      {
+        type: 'output-contains',
+        text: '/tmp/.cache/pt.tar.gz',
+        hint: 'The full command line names the file being uploaded. Make sure you are seeing the whole line.',
+      },
+    ],
+    debrief: `An upload of /tmp/.cache/pt.tar.gz to an external host, running as ${EXFIL_PROCESS.user}. If you worked through Log Analysis, you have seen both of those before: that account was created through sudo at 10:22, and that archive was built from the portal exports directory at 11:06. This is the same intrusion, seen from the other side.`,
+    practice: NETWORKING_PRACTICE['net.5.3'] ?? [],
+  },
+  {
+    id: 'net.5.4',
+    moduleId: '4.5',
+    packageId: 'networking',
+    order: 4,
+    title: 'Read the socket states',
+    kind: 'terminal',
+    goal: 'Tell a live session apart from one that has already finished.',
+    prompt:
+      'Use ss to show the TCP socket table, and read the state column.',
+    teach: {
+      concept:
+        'A socket table mixes several states and they mean different things to an investigation. ESTABLISHED is a live session, right now, and it is the only state you can act on by killing something. TIME_WAIT is the residue of a connection that has already closed, kept for a couple of minutes so late packets do not confuse a new session. LISTEN is a service waiting.\n\nThe practical consequence: a TIME_WAIT entry is evidence that a conversation HAPPENED, not that one is happening. Reporting it as a live connection is a mistake that gets noticed, and missing it entirely means missing the only trace of a session that ended a minute before you logged in.\n\n`ss` is the modern replacement for netstat and abbreviates the live state as ESTAB rather than ESTABLISHED, which trips people up when they reuse a grep pattern between the two.',
+      syntax: 'ss -tn',
+      examples: [
+        {
+          command: 'ss -tlnp',
+          explains: 'The listener inventory again, in ss form, which is what you will find on hosts where netstat is not installed.',
+        },
+      ],
+    },
+    hints: [
+      'Two flags: TCP, and numeric.',
+      'Read the leftmost column. Not every row is a live connection.',
+    ],
+    solution: 'ss -tn',
+    expectedOutput: 'The socket table, with ESTAB and TIME_WAIT rows.',
+    checks: [
+      {
+        type: 'output-contains',
+        text: 'TIME_WAIT',
+        hint: 'At least one socket on this host is in TIME_WAIT: a session that has already closed.',
+      },
+      {
+        type: 'output-contains',
+        text: 'ESTAB',
+        hint: 'ss abbreviates the established state. Make sure you are running ss rather than netstat here.',
+      },
+    ],
+    debrief:
+      'Note that ss says ESTAB where netstat says ESTABLISHED. A grep pattern that worked on one silently returns nothing on the other, which is a good reason to check your filter against the raw output before you trust an empty result.',
+    practice: NETWORKING_PRACTICE['net.5.4'] ?? [],
+  },
+  {
+    id: 'net.5.5',
+    moduleId: '4.5',
+    packageId: 'networking',
+    order: 5,
+    title: 'Account for every external session',
+    kind: 'terminal',
+    goal: 'Produce the short list a handover note needs.',
+    prompt:
+      'Show every established non-loopback session together with the process holding it, so each one can be accounted for by name.',
+    teach: {
+      concept:
+        'This is the command you run before you hand a host over to somebody else, and the output is short enough to annotate line by line: this one is the admin who is logged in, this one is a customer on the web server, this one is unexplained.\n\nThe discipline that matters is accounting for ALL of them, including the boring ones. An analyst who explains the alarming session and ignores the other two has not established that there is only one problem.',
+      syntax: "netstat -tnp | grep ESTABLISHED | grep -v '127.0.0.1'",
+      examples: [
+        {
+          command: "netstat -tnp | grep ESTABLISHED | grep ':22'",
+          explains: 'Narrowing to interactive SSH sessions, which answers the separate question of who is logged in right now.',
+        },
+      ],
+    },
+    hints: [
+      'Combine what you already know: established only, no loopback, and -p for the owning process.',
+      'The order of the two filters does not matter.',
+    ],
+    solution: "netstat -tnp | grep ESTABLISHED | grep -v '127.0.0.1'",
+    expectedOutput: `${ESTABLISHED_OFF_HOST.length} sessions, each with an owning program.`,
+    checks: [
+      {
+        type: 'output-line-count',
+        count: ESTABLISHED_OFF_HOST.length,
+        hint: `Every established off-host session should be listed: there are ${ESTABLISHED_OFF_HOST.length}.`,
+      },
+      {
+        type: 'output-contains',
+        text: 'sshd',
+        hint: 'One of them is an inbound SSH session. Include -p so the program shows.',
+      },
+      {
+        type: 'output-contains',
+        text: EXFIL,
+        hint: 'The outbound session to the external address belongs in the list too.',
+      },
+    ],
+    debrief:
+      'Three sessions: an administrator on SSH, a user on the web server, and an upload to an address nobody can name. Two of those are explainable in a sentence. The third is your incident.',
+    practice: NETWORKING_PRACTICE['net.5.5'] ?? [],
+  },
+];
+
 // --- the package -------------------------------------------------------------
 
 export const NETWORKING: LearningPackage = {
@@ -615,6 +1098,24 @@ export const NETWORKING: LearningPackage = {
       title: 'Names and resolution',
       summary: 'Forward and reverse lookups, resolvers, and the file that quietly overrides them.',
       exercises: MODULE_4_3,
+    },
+    {
+      id: '4.4',
+      packageId: 'networking',
+      order: 4,
+      title: 'What is exposed, and to whom',
+      summary:
+        'The listener inventory, what a bind address says about blast radius, and checking what is running against what should be.',
+      exercises: MODULE_4_4,
+    },
+    {
+      id: '4.5',
+      packageId: 'networking',
+      order: 5,
+      title: 'Reading a connection as a direction',
+      summary:
+        'Which end dialled, socket states, and the pivot from a session to the process and the account behind it.',
+      exercises: MODULE_4_5,
     },
   ],
 };

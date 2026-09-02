@@ -52,9 +52,9 @@ function attempt(solution: string, setup: string[] | undefined, exercise: Exerci
 }
 
 describe('Networking structure', () => {
-  it('has 15 exercises across 3 modules', () => {
-    expect(NETWORKING.modules.length).toBe(3);
-    expect(EXERCISES.length).toBe(15);
+  it('has 25 exercises across 5 modules', () => {
+    expect(NETWORKING.modules.length).toBe(5);
+    expect(EXERCISES.length).toBe(25);
   });
 
   it('uses the net.x id space, so no other package can collide with it', () => {
@@ -72,7 +72,7 @@ describe('Networking structure', () => {
   it('gives every drill a unique id', () => {
     const ids = EXERCISES.flatMap((exercise) => exercise.practice.map((drill) => drill.id));
     expect(new Set(ids).size).toBe(ids.length);
-    expect(ids.length).toBe(75);
+    expect(ids.length).toBe(125);
   });
 
   it('satisfies the content rules the catalogue validator enforces', () => {
