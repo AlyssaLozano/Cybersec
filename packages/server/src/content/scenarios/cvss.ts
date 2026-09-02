@@ -320,7 +320,7 @@ export const NINE_POINT_EIGHT_TRUTH: ScenarioTruth = {
         'tree of eleven separate products here and most of them never call it directly, which is ' +
         'how a general purpose library ends up on a third of an estate that has never made a ' +
         'decision about it. Slow the number down before it becomes a commitment: a floor that ' +
-        'accepts 340 will spend a fortnight patching machines that were never exposed, and the ' +
+        'accepts 340 will spend a two weeks patching machines that were never exposed, and the ' +
         'time comes out of the thing that actually is.',
       standIn:
         'Three hundred and forty is true about the estate and false about the risk, and it is ' +
@@ -328,7 +328,7 @@ export const NINE_POINT_EIGHT_TRUTH: ScenarioTruth = {
         'which is its job, and that is the start of the work and not the end. This library is in ' +
         'the dependency tree of eleven products and most of them never call it. Give me twenty ' +
         'minutes before anybody commits to that number, because patching 340 machines takes a ' +
-        'fortnight out of whatever is actually broken.',
+        'two weeks out of whatever is actually broken.',
       commandOptions: [
         { command: "awk -F, '$3==\"serial-io\" {print $1, $4}' /var/log/vulnmgmt/inventory.csv | wc -l", correct: true, teaches: CORRECT_STEP },
         { command: "awk -F, '$3==\"serial-io\" {print $5}' /var/log/vulnmgmt/inventory.csv | sort | uniq -c", correct: true, teaches: ALSO_WORKS },

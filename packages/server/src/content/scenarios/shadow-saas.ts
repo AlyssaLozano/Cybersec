@@ -117,7 +117,7 @@ export const SHADOW_COPY: Scenario = {
       summary: 'The uploaded content is a patient waiting list with identifiers',
       detail:
         'A copy of the most recent upload recovered from a workstation contains 2,300 rows with ' +
-        'patient name, date of birth, NHS number, referral date, clinic and a free text ' +
+        'patient name, date of birth, medical record number, referral date, clinic and a free text ' +
         'clinical priority note. The file is named respiratory-waiting-list. It is maintained by ' +
         'hand and updated weekly.',
       source: 'RMG-WS-1804',
@@ -175,7 +175,7 @@ export const SHADOW_COPY_TRUTH: ScenarioTruth = {
     'Eleven colleagues did the same. Nobody hid anything and nobody thought they were doing something wrong.',
     'The grant carries read access to files the accounts can reach and offline access, so the application can act without anybody present.',
     'Fourteen workstations have uploaded 6.8 GB over five months, rising every Monday, and the traffic was allowlisted because the provider shares infrastructure with a content delivery network we already use.',
-    'The uploaded file holds 2,300 patients with name, date of birth, NHS number, referral date, clinic and a free text clinical priority note.',
+    'The uploaded file holds 2,300 patients with name, date of birth, medical record number, referral date, clinic and a free text clinical priority note.',
     'The account is a free tier registered to a personal email. The terms license the provider to use uploaded content, permit storage in any jurisdiction, and offer no deletion guarantee.',
     'Revoking the grant stops future access and does not remove what is already there. There is no attacker in this incident at all.',
   ],
@@ -300,14 +300,14 @@ export const SHADOW_COPY_TRUTH: ScenarioTruth = {
       escalateTo: ['ir-lead', 'forensics'],
       why:
         'What is actually in it, which is the sentence the organisation needs and the only one that ' +
-        'sizes the exposure. 2,300 patients with name, date of birth, NHS number, referral date, ' +
+        'sizes the exposure. 2,300 patients with name, date of birth, medical record number, referral date, ' +
         'clinic and a free text clinical priority note. Two of those fields do more work than the ' +
         'rest: the clinic discloses a specialty, and a free text priority note written by a ' +
         'clinician will contain clinical detail nobody intended to be structured data. That makes ' +
         'this special category health data rather than a contact list, and it is the difference ' +
         'between an internal process failure and a notifiable one.',
       standIn:
-        'The file is a respiratory waiting list, 2,300 rows: name, date of birth, NHS number, ' +
+        'The file is a respiratory waiting list, 2,300 rows: name, date of birth, medical record number, ' +
         'referral date, clinic and a free text clinical priority note. The clinic name discloses ' +
         'the specialty and the free text will have clinical detail in it. That is special category ' +
         'health data for 2,300 people.',

@@ -117,8 +117,8 @@ export const PAY_US_OR_WE_PUBLISH: Scenario = {
       surface: 'host-artefact',
       summary: 'The reporting warehouse holds 61,000 patient records',
       detail:
-        'The reporting warehouse contains a patient extract of 61,400 rows with name, NHS number, ' +
-        'date of birth, GP practice, and coded diagnosis and procedure history. It is refreshed ' +
+        'The reporting warehouse contains a patient extract of 61,400 rows with name, medical record number, ' +
+        'date of birth, primary care practice, and coded diagnosis and procedure history. It is refreshed ' +
         'nightly and retained indefinitely. It exists so the analytics team can produce activity ' +
         'reporting without querying the live clinical system.',
       source: 'rmg-rpt-02',
@@ -174,7 +174,7 @@ export const PAY_US_OR_WE_PUBLISH_TRUTH: ScenarioTruth = {
   narrative: [
     'On 2 August somebody signed in to the reporting server with a service account whose password had not changed since 2021 and which appeared in a credential list published in June.',
     'They took 9.1 GB out over three and a half hours. It is the only transfer of any size from that host in ninety days.',
-    'The reporting warehouse holds 61,400 patient records with name, NHS number, date of birth, GP practice and coded diagnosis history.',
+    'The reporting warehouse holds 61,400 patient records with name, medical record number, date of birth, primary care practice and coded diagnosis history.',
     'Six weeks later they emailed the chief executive demanding payment within 72 hours or they publish.',
     'The sample they linked is genuine: 40 records matching the warehouse field for field, including two corrected in July, which proves they took it after those corrections.',
     'It proves possession of 40 records. Nothing anywhere evidences the 61,000 they claim, and the volume is consistent with the whole extract without confirming it.',
@@ -304,19 +304,19 @@ export const PAY_US_OR_WE_PUBLISH_TRUTH: ScenarioTruth = {
       outOfLaneActions: ['act.reimage-now', 'act.contact-attacker', 'act.dismiss'],
       escalateTo: ['ir-lead'],
       why:
-        'What was reachable, which bounds the worst case. 61,400 rows with name, NHS number, date ' +
-        'of birth, GP practice and coded diagnosis and procedure history, refreshed nightly and ' +
+        'What was reachable, which bounds the worst case. 61,400 rows with name, medical record number, date ' +
+        'of birth, primary care practice and coded diagnosis and procedure history, refreshed nightly and ' +
         'retained indefinitely. Diagnosis codes make this special category health data at the most ' +
-        'serious end, and the combination of NHS number and date of birth makes every record ' +
+        'serious end, and the combination of medical record number and date of birth makes every record ' +
         'individually identifying with no re-identification work required. Two things worth saying ' +
         'that nobody else will. Retained indefinitely means the extract has been accumulating for ' +
         'years with no expiry anybody chose, and the warehouse exists so analytics can avoid ' +
         'querying the live system, which is a sensible design that produced a second complete copy ' +
         'of the patient population on a server nobody thinks of as clinical.',
       standIn:
-        'The reporting warehouse holds 61,400 rows: name, NHS number, date of birth, GP practice, ' +
+        'The reporting warehouse holds 61,400 rows: name, medical record number, date of birth, primary care practice, ' +
         'coded diagnosis and procedure history. Refreshed nightly, retained indefinitely. Diagnosis ' +
-        'codes make it special category and NHS number with date of birth makes every row ' +
+        'codes make it special category and medical record number with date of birth makes every row ' +
         'identifying on its own. It exists so analytics do not query the live system, which gave us ' +
         'a second complete copy of the patient population.',
       commandNudge:

@@ -55,7 +55,7 @@ export const LAST_FRIDAY: Scenario = {
   durationMinutes: 60,
   situation:
     'It is 17:10 on the Friday of a bank holiday weekend. Most of the organisation has gone home ' +
-    'and the on-call rota is two people until Tuesday. Something has been moving through the ' +
+    'and the on-call schedule is two people until Tuesday. Something has been moving through the ' +
     'estate since about half past three. Nothing is encrypted yet.',
   roles: [
     'soc-operator',

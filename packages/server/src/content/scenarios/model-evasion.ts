@@ -197,7 +197,7 @@ export const THE_MODEL_SAYS_BENIGN_TRUTH: ScenarioTruth = {
         'And an outbound transfer from an operational server to an external address is a category ' +
         'where being wrong is expensive. The habit worth building is that a sampling review exists ' +
         'precisely so a human can disagree with the model, and treating the score as settling it ' +
-        'makes the review theatre.',
+        'makes the review operating room.',
       standIn:
         'Sampling review flagged an auto-closed alert from 6 September: outbound transfer from the ' +
         'warehouse server to an external address, scored 0.11, closed with no human. Model is 96.4 ' +

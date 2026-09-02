@@ -154,10 +154,10 @@ export const THREE_SIGNATURES: Scenario = {
       surface: 'alert-queue',
       summary: 'Every one of the 89 sits just under the four-signature threshold',
       detail:
-        'All 89 advances fall between 22,000 and 24,900 pounds. Loans of 25,000 and above require ' +
+        'All 89 advances fall between 22,000 and $24,900. Loans of 25,000 and above require ' +
         'a fourth signature from a lending manager. Across the full six months the average advance ' +
         'is 11,400 and 6 per cent of all loans fall in the 22,000 to 25,000 band. In these 89 it ' +
-        'is 100 per cent. The total advanced across the 89 files is just over 2.07 million pounds.',
+        'is 100 per cent. The total advanced across the 89 files is just over $2.07 million.',
       source: 'loan origination system',
       claimedSeverity: 'critical',
     },
@@ -182,7 +182,7 @@ export const THREE_SIGNATURES: Scenario = {
       summary: 'The 89 loans are live and the borrowers may not all be accomplices',
       detail:
         'All 89 advances have been disbursed and 81 are performing normally with payments up to ' +
-        'date. Freezing the accounts stops collection and puts the society in default of its own ' +
+        'date. Freezing the accounts stops collection and puts the credit union in default of its own ' +
         'terms with the account holders. Some of the named borrowers may be real people whose ' +
         'identities were used. Suspending three staff across three sites on the same morning is ' +
         'visible to the entire lending function within the hour.',
@@ -227,10 +227,10 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
     'Over six months h.mabry, s.okwuosa and g.pryde appear together on 89 of 4,118 files, where routing predicts between one and three.',
     'They are in three different reporting lines, on three different sites, on three different shift patterns, and share no queue. The routing engine would put them on one file together about twice a year.',
     'All 89 files were pulled out of the automatic queue by hand: three manual reassignments each, one before each stage, each performed by the account that then completed that stage, a median of 41 seconds after the previous stage closed. That is 267 deliberate choices.',
-    'Every one of the 89 advances falls between 22,000 and 24,900 pounds, immediately below the 25,000 threshold that requires a fourth signature from a lending manager. Across all lending in the period that band holds 6 per cent of files. Here it holds 100 per cent.',
+    'Every one of the 89 advances falls between 22,000 and $24,900, immediately below the 25,000 threshold that requires a fourth signature from a lending manager. Across all lending in the period that band holds 6 per cent of files. Here it holds 100 per cent.',
     'The three have exchanged no message on any corporate channel in six months, where the median for two staff sharing more than ten files is 240.',
-    'Two other trios co-occur heavily and are innocent: the Ipswich night shift, who are the only people working those hours, and the only three Welsh-language assessors in the society.',
-    'Every individual action taken by all three was within their authority and passed every control test the society operates.',
+    'Two other trios co-occur heavily and are innocent: the Ipswich night shift, who are the only people working those hours, and the only three Welsh-language assessors in the credit union.',
+    'Every individual action taken by all three was within their authority and passed every control test the credit union operates.',
   ],
   events: [
     {
@@ -287,14 +287,14 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
         'with caution and everything to do with what the number is. Co-occurrence measures ' +
         'togetherness, and people who work together are together: a shift, a site, a specialist ' +
         'queue and a small team all produce this. The right next move is the one that tries to ' +
-        'break the finding, which is to run the same comparison across every trio in the society ' +
+        'break the finding, which is to run the same comparison across every trio in the credit union ' +
         'and see who else comes out high. If nobody does, the number is even stronger. If somebody ' +
         'does, you have learned what the number cannot tell you before you say it out loud.',
       standIn:
         'Eighty-nine files out of 4,118 carry all three of them, and expectation is one to three. ' +
         'All 89 completed and disbursed. That is a huge number and I do not want to stop on it, ' +
         'because co-occurrence just measures togetherness and people who work together are ' +
-        'together. Running the same comparison across every possible trio in the society before ' +
+        'together. Running the same comparison across every possible trio in the credit union before ' +
         'anybody says this means anything.',
       commandOptions: [
         { command: "awk -F, '{print $4\"|\"$5\"|\"$6}' /var/log/loans/files-6mo.csv | sort | uniq -c | sort -rn | head", correct: true, teaches: CORRECT_STEP },
@@ -319,7 +319,7 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
       why:
         'The check that saves the case, arriving in the form of two groups who look just as guilty ' +
         'and are not. Sixty-four files for three people who are the only staff on the Ipswich ' +
-        'night shift, and fifty-one for the only three Welsh-language assessors in the society. ' +
+        'night shift, and fifty-one for the only three Welsh-language assessors in the credit union. ' +
         'Both numbers are far above chance and both have a one-sentence explanation, which is the ' +
         'point: co-occurrence is a property of how work is allocated, not of intent. Two things ' +
         'follow. The 89 is no longer sufficient on its own, and anybody presenting it as proof can ' +
@@ -448,13 +448,13 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
         'band ends exactly where a fourth signature begins. Twenty-two to twenty-four thousand nine ' +
         'hundred, against a portfolio average of 11,400, with the lending manager required at ' +
         'twenty-five. Each of those files is individually unremarkable, because a 24,000 pound ' +
-        'loan is a completely ordinary thing for this society to write, and that is what makes the ' +
+        'loan is a completely ordinary thing for this credit union to write, and that is what makes the ' +
         'distribution the finding rather than any file. The value is doing two things at once: ' +
         'maximising the take per file, and keeping a fourth person out of a control that was ' +
         'designed for exactly this. Somebody knew where the threshold was, which is not secret ' +
         'information and does not narrow anything, and worked immediately underneath it 89 times, ' +
         'which is not something anybody does by accident. Put the total in the readout, because ' +
-        'two point zero seven million is the number that decides how seriously the society treats ' +
+        'two point zero seven million is the number that decides how seriously the credit union treats ' +
         'tomorrow.',
       standIn:
         'All 89 sit between twenty-two thousand and twenty-four nine, and twenty-five is where a ' +
@@ -520,7 +520,7 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
       escalateTo: ['ir-lead'],
       why:
         'Three obvious actions and all three cost more than they buy. Freezing the 89 accounts ' +
-        'stops collection on 81 that are performing, puts the society in default of its own terms, ' +
+        'stops collection on 81 that are performing, puts the credit union in default of its own terms, ' +
         'and lands hardest on any borrower who is a victim rather than a participant, which nobody ' +
         'can currently tell apart. Suspending three staff across three sites on one morning is ' +
         'known to the whole lending function within the hour, and if there is a fourth person the ' +
@@ -563,7 +563,7 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
         'Two candidate signals and the naive version of each is unusable. Manual reassignment ' +
         'happens 1,100 times a month for sickness, escalation, authority limits and language ' +
         'routing, so alerting on it is 1,100 alerts a month and the floor will suppress it inside ' +
-        'a fortnight. Trio co-occurrence has the ev.3 problem: the night shift and the Welsh ' +
+        'a two weeks. Trio co-occurrence has the ev.3 problem: the night shift and the Welsh ' +
         'assessors top the list every month forever. The version that works is the intersection ' +
         'and it is cheap, because it is exactly what discriminated tonight: a file where every ' +
         'stage was manually reassigned by the account that then completed it. Nine files in six ' +
@@ -574,7 +574,7 @@ export const THREE_SIGNATURES_TRUTH: ScenarioTruth = {
         'is worth more in real terms than it was when somebody chose the number.',
       standIn:
         'Naive versions of both signals are unusable. Manual reassignment is 1,100 a month for ' +
-        'sickness and escalation, so that is 1,100 alerts and we suppress it in a fortnight. Trio ' +
+        'sickness and escalation, so that is 1,100 alerts and we suppress it in a two weeks. Trio ' +
         'co-occurrence puts the night shift and the Welsh assessors top of the list every month ' +
         'forever. The intersection is cheap and is what actually discriminated: a file where every ' +
         'stage was manually reassigned by the person who then did it. Nine of those in six months ' +

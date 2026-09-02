@@ -146,7 +146,7 @@ export const GOLDEN_HOUR: Scenario = {
       summary: 'Payment processing opens at 06:00 and the approver group is compromised',
       detail:
         'Payment initiation runs from 06:00 and the approval group gates every transfer above ' +
-        'fifty thousand pounds. Rotating the domain signing key invalidates every authentication ' +
+        'fifty thousand dollars. Rotating the domain signing key invalidates every authentication ' +
         'ticket in the estate simultaneously, which logs out every user and every service account ' +
         'at once, including the core banking platform. It has to be done twice to be effective.',
       source: 'fcu core banking',

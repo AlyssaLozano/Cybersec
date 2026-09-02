@@ -1,7 +1,7 @@
 /**
  * Scenario 58: Three Things At Once.
  *
- * A ransomware note, a departing consultant emptying a research share, and a
+ * A ransomware note, a departing attending emptying a research share, and a
  * blood chemistry analyser talking to an address it has never talked to. All in
  * one evening, in one hospital.
  *
@@ -18,7 +18,7 @@
  *
  * WHAT IS ACTUALLY TRUE
  *
- * The ransomware is real, commodity, and unrelated. The consultant download is
+ * The ransomware is real, commodity, and unrelated. The attending download is
  * mostly her own work and one dataset of it is genuinely unresolvable tonight.
  * The analyser is the incident: a vendor remote-support tunnel whose credential
  * is shared across every hospital that vendor serves, used this evening from an
@@ -67,7 +67,7 @@ export const THREE_THINGS_AT_ONCE: Scenario = {
   durationMinutes: 90,
   situation:
     'It is 23:55 at Ridgeline Medical Group. A ransom note appeared on a radiology file share, an ' +
-    'oncology consultant working her notice period pulled four gigabytes off a research share ' +
+    'oncology attending working her notice period pulled four gigabytes off a research share ' +
     'earlier this evening, and a pathology analyser has been talking to an address nobody ' +
     'recognises since seven.',
   roles: [
@@ -137,7 +137,7 @@ export const THREE_THINGS_AT_ONCE: Scenario = {
       id: 'ev.4',
       atSeconds: 480,
       surface: 'cloud-audit',
-      summary: 'A consultant working her notice pulled 4.1 GB off the research share at 22:10',
+      summary: 'A attending working her notice pulled 4.1 GB off the research share at 22:10',
       detail:
         'The e.hargate account downloaded 4.1 gigabytes from the oncology research share between ' +
         '22:04 and 22:19, comprising four dataset directories. The account holder resigned on 18 ' +
@@ -227,7 +227,7 @@ export const THREE_THINGS_AT_ONCE: Scenario = {
       summary: 'RMG-PATH-A2 is the only chemistry analyser running tonight',
       detail:
         'The second chemistry analyser is down for a calibration fault booked for Thursday. ' +
-        'RMG-PATH-A2 is processing urgent bloods for the emergency department, two theatres and ' +
+        'RMG-PATH-A2 is processing urgent bloods for the emergency department, two operating rooms and ' +
         'the neonatal unit. Taking it off the network stops results reaching the clinical systems ' +
         'and reverts the laboratory to manual telephone reporting, which the laboratory manager ' +
         'estimates at forty minutes per urgent sample against four. The nearest alternative ' +
@@ -271,11 +271,11 @@ export const THREE_THINGS_AT_ONCE_TRUTH: ScenarioTruth = {
   narrative: [
     'Three unrelated things happened at Ridgeline on one evening, and the story that ties them together is wrong in every particular.',
     'A commodity ransomware affiliate reached RMG-VS-01, a vendor-managed file transfer appliance running March 2024 firmware with four published remote code execution issues, and ran an off-the-shelf locker from it. Encryption of the radiology share began at 21:05 and ran until 23:38, when the note files were written and the process exited. Around 900 files are affected. The note claims exfiltration in the same template wording every sample of this family has used for eighteen months, and nothing left either host.',
-    'Separately, at 22:04, an oncology consultant working her notice period downloaded 4.1 gigabytes from the research share. She is named on the ethics approval and is corresponding author on two of the four datasets. A third dataset, 340 megabytes, belongs to a sub-study she is not named on, and whether her co-investigator status on the parent study covers it is governed by a paper agreement in an office that opens at 09:00.',
+    'Separately, at 22:04, an oncology attending working her notice period downloaded 4.1 gigabytes from the research share. She is named on the ethics approval and is corresponding author on two of the four datasets. A third dataset, 340 megabytes, belongs to a sub-study she is not named on, and whether her co-investigator status on the parent study covers it is governed by a paper agreement in an office that opens at 09:00.',
     'Separately again, at 19:01, somebody authenticated to a clinical chemistry analyser using BELCARRA-SVC, the vendor standard support account documented in the installation manual and identical across every Belcarra installation in the country, from 198.51.100.204, which is not a vendor address. The session has been open since and has carried 340 megabytes outbound.',
     'That analyser session is the actual compromise and it is the quietest row on the board.',
     'The real link between two of the threads is not an actor. RMG-VS-01 and RMG-PATH-A2 are both excluded from patching and from the endpoint agent estate under procurement exception RMG-EX-0031, granted in 2023 because vendor contracts prohibit customer-installed software. Forty-one devices sit under it and nothing watches any of them.',
-    'The order of events makes the tidy story impossible: encryption started at 21:05, an hour before the consultant downloaded anything.',
+    'The order of events makes the tidy story impossible: encryption started at 21:05, an hour before the attending downloaded anything.',
   ],
   events: [
     {
@@ -335,7 +335,7 @@ export const THREE_THINGS_AT_ONCE_TRUTH: ScenarioTruth = {
         'all, so 23:40 is when the notes were created and not when anything began. The weaker ' +
         'source is the one reporting later. Averaging them, or taking the queue timestamp because ' +
         'it is the one on the alert, gets the whole night wrong, because 21:05 is an hour before ' +
-        'the consultant downloaded anything and the tidy story requires the theft to come first. ' +
+        'the attending downloaded anything and the tidy story requires the theft to come first. ' +
         'It is also worth stating plainly that the agent saw all of this and did not stop it: a ' +
         'signed archiving utility invoked with arguments is not what the behavioural policy calls ' +
         'ransomware.',
@@ -417,7 +417,7 @@ export const THREE_THINGS_AT_ONCE_TRUTH: ScenarioTruth = {
         'of what moved she is the person whose work it is. And the timing that seems damning ' +
         'points the other way once ev.2 is settled: the encryption started at 21:05 and she ' +
         'downloaded at 22:04, so she cannot have taken data and then covered it. Hold it open, ' +
-        'audit the entitlements, and do not revoke anything: cutting a consultant off her own ' +
+        'audit the entitlements, and do not revoke anything: cutting a attending off her own ' +
         'research at midnight on a suspicion the evidence does not support is a decision that ' +
         'cannot be taken back in the morning.',
       standIn:
@@ -602,7 +602,7 @@ export const THREE_THINGS_AT_ONCE_TRUTH: ScenarioTruth = {
       stage: 'execution',
       techniques: ['T1486', 'T1657'],
       appearsToBe:
-        'Confirmation that the consultant download was the exfiltration leg of the ransomware ' +
+        'Confirmation that the attending download was the exfiltration leg of the ransomware ' +
         'incident. The note claims data was copied, 4.1 GB left a research share an hour later, ' +
         'and the two read as one operation. The wording is boilerplate that has shipped with every ' +
         'sample of this family for eighteen months, and no transfer of any size left either host.',
@@ -657,11 +657,11 @@ export const THREE_THINGS_AT_ONCE_TRUTH: ScenarioTruth = {
       why:
         'The only live channel in the building runs through the only working chemistry analyser, ' +
         'and pulling its cable is a clinical decision wearing a technical costume. It is ' +
-        'processing urgent bloods for the emergency department, two theatres and the neonatal ' +
+        'processing urgent bloods for the emergency department, two operating rooms and the neonatal ' +
         'unit, the second analyser is down until Thursday, manual telephone reporting takes forty ' +
         'minutes a sample against four, and the nearest alternative laboratory is fifty minutes ' +
         'away. Isolation is available and it is not this floor call to take alone, and the person ' +
-        'who has to agree it is the on-call consultant in pathology. What can be done without ' +
+        'who has to agree it is the on-call attending in pathology. What can be done without ' +
         'anybody agreeing anything is narrower and stops the bleeding tonight: block outbound to ' +
         '198.51.100.204 at the perimeter, which kills the session and leaves the analyser on the ' +
         'network doing bloods, because the device needs the laboratory network and does not need ' +
@@ -673,7 +673,7 @@ export const THREE_THINGS_AT_ONCE_TRUTH: ScenarioTruth = {
         'variation, not for tonight.',
       standIn:
         'Nobody pulls that cable on my say-so. It is the only working chemistry analyser, it is ' +
-        'doing urgent bloods for ED, two theatres and neonates, the spare is down until Thursday, ' +
+        'doing urgent bloods for ED, two operating rooms and neonates, the spare is down until Thursday, ' +
         'and manual reporting is forty minutes a sample against four. Narrower move that works ' +
         'now: block outbound to that address at the perimeter. Session dies, analyser stays on the ' +
         'lab network doing bloods. It needs the lab, it does not need the internet. I want the ' +

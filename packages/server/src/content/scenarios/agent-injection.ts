@@ -8,7 +8,7 @@
  * WHAT THIS TEACHES
  *
  * That a system reporting on itself is the weakest witness on the board, and
- * that the trust boundary around an agent is drawn one hop further out than
+ * that the group boundary around an agent is drawn one hop further out than
  * anybody has drawn it.
  *
  * The agent has permission to add group members, deliberately and for a good
@@ -678,7 +678,7 @@ export const NO_CHANGES_MADE_TRUTH: ScenarioTruth = {
         'suspicious content, and that filter works: 340 bodies flagged since March. Attachments go ' +
         'to the agent whole, deliberately, because the agent exists to read diagnostic logs and ' +
         'filtering them would break the product. The review does not mention attachments at all. ' +
-        'So the trust boundary was drawn around the channel everybody pictures when they imagine ' +
+        'So the group boundary was drawn around the channel everybody pictures when they imagine ' +
         'somebody typing at an agent, and the agent reads from three places: the ticket, the ' +
         'attachment, and whatever a tool returns to it. Say the general form rather than the ' +
         'specific fix, because the specific fix invites a filter on attachments and the next ' +

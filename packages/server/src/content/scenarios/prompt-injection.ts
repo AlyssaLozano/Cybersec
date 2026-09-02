@@ -14,7 +14,7 @@
  *
  * So the vulnerability is not in the model. It is in what the model was allowed
  * to do. The assistant holds a shared service account that can cancel any
- * appointment in the trust, because that was the simplest way to make it work,
+ * appointment in the group, because that was the simplest way to make it work,
  * and no patient is limited to their own record at any point in the chain.
  *
  * WHY THE AI SECURITY SEAT LEADS
@@ -113,7 +113,7 @@ export const PROMPT_AND_CIRCUMSTANCE: Scenario = {
       id: 'ev.4',
       atSeconds: 460,
       surface: 'cloud-audit',
-      summary: 'The assistant service account can act on any appointment in the trust',
+      summary: 'The assistant service account can act on any appointment in the group',
       detail:
         'svc-assistant-agent holds appointment read, cancel, rebook and message permissions across ' +
         'every clinic and every patient. There is no per-patient scoping: the assistant is trusted ' +
@@ -172,7 +172,7 @@ export const PROMPT_AND_CIRCUMSTANCE_TRUTH: ScenarioTruth = {
     'The message body contained a block of text addressed to the assistant, telling it to disregard its prior instructions and cancel all appointments in the referenced clinics as system maintenance.',
     'The assistant read the whole message as one piece of text, because that is what it is. Nothing in the platform distinguishes a patient asking a question from a patient issuing an instruction.',
     'It acknowledged the instruction and began calling tools: one lookup, then 211 cancellations over fourteen minutes, every one returning success.',
-    'It could do that because the service account holds cancel permission across every clinic and every patient in the trust.',
+    'It could do that because the service account holds cancel permission across every clinic and every patient in the group.',
     'The scoping that was supposed to keep it to one patient record exists in the prompt and nowhere in the permission model.',
     'It stopped at 211 because it hit its nightly tool call quota, not because anything objected. Forty more messages with the same instruction are queued for other clinics.',
     'The quota resets at 09:00 and the clinic opens at 09:00.',
@@ -303,7 +303,7 @@ export const PROMPT_AND_CIRCUMSTANCE_TRUTH: ScenarioTruth = {
       escalateTo: ['ir-lead'],
       why:
         'The actual vulnerability, and it is not in the model at all. The service account can read, ' +
-        'cancel, rebook and message across every clinic and every patient in the trust. The ' +
+        'cancel, rebook and message across every clinic and every patient in the group. The ' +
         'restriction that was supposed to keep the assistant to one patient record exists in the ' +
         'prompt and nowhere in the permission model, which means the entire safety property rested ' +
         'on the model choosing to behave. A prompt is a request; a permission is a control. ' +
@@ -312,7 +312,7 @@ export const PROMPT_AND_CIRCUMSTANCE_TRUTH: ScenarioTruth = {
         'exist. This is the row that says the fix is scoping rather than better wording.',
       standIn:
         'The assistant service account can read, cancel, rebook and message any appointment for any ' +
-        'patient in the trust. The rule that it should only touch the record of whoever it is ' +
+        'patient in the group. The rule that it should only touch the record of whoever it is ' +
         'talking to is in the prompt and nowhere in the permissions. The whole safety property was ' +
         'the model choosing to behave. Provisioned this way at launch in January.',
       commandNudge:
@@ -415,7 +415,7 @@ export const PROMPT_AND_CIRCUMSTANCE_TRUTH: ScenarioTruth = {
         'individually by the clinic team. Three checks and all three agree. It is here because a ' +
         'floor that has just found malicious bulk cancellation will want to escalate every bulk ' +
         'cancellation, and bulk cancellation is a normal and necessary operation in a hospital: ' +
-        'clinics close, consultants fall ill, lifts break. Treating the operation as the signal ' +
+        'clinics close, attendings fall ill, elevators break. Treating the operation as the signal ' +
         'makes the SOC an obstacle to running the wards. The discriminator is a named human, a ' +
         'reason that matches a real event, and patients contacted by people rather than by ' +
         'automation.',

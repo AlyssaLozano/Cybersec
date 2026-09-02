@@ -71,7 +71,7 @@ export const TUNED_TO_NOTHING: Scenario = {
       surface: 'alert-queue',
       summary: 'A user reports a renamed file on a clinical shared drive',
       detail:
-        'A ward manager reports that a rota spreadsheet on the clinical shared drive has a different ' +
+        'A ward manager reports that a schedule spreadsheet on the clinical shared drive has a different ' +
         'filename than it did on Friday and will not open. The service desk found four further ' +
         'files in the same folder with the same changed extension. No security alert has been ' +
         'raised for this drive at any point. Rule history: this arrived as a service desk ticket, ' +
@@ -206,16 +206,16 @@ export const TUNED_TO_NOTHING_TRUTH: ScenarioTruth = {
         'for this drive. That is not the same as nothing having happened, and it is the thread the ' +
         'rest of the hour pulls.',
       standIn:
-        'Ward manager rang about a rota spreadsheet that will not open and has a different name. ' +
+        'Ward manager rang about a schedule spreadsheet that will not open and has a different name. ' +
         'Four more in the same folder with the same changed extension, clinical share. Renamed and ' +
         'unopenable is encryption until proven otherwise. Declaring. Note that no security alert ' +
         'has ever fired on this drive.',
       commandOptions: [
-        { command: 'find /mnt/clinical/rota -newermt "today" -type f | head -20', correct: true, teaches: CORRECT_STEP },
-        { command: 'ls -la /mnt/clinical/rota/', correct: true, teaches: ALSO_WORKS },
+        { command: 'find /mnt/clinical/schedule -newermt "today" -type f | head -20', correct: true, teaches: CORRECT_STEP },
+        { command: 'ls -la /mnt/clinical/schedule/', correct: true, teaches: ALSO_WORKS },
         { command: 'systemctl status smbd', ...STATUS_CHECK },
         { command: 'cat /var/log/samba/audit.log', ...DUMP_ALL },
-        { command: 'mv /mnt/clinical/rota/*.locked /tmp/', ...MUTATE },
+        { command: 'mv /mnt/clinical/schedule/*.locked /tmp/', ...MUTATE },
       ],
       commandNudge:
         'Find out how many files on that share changed today, not just the ones she noticed.',

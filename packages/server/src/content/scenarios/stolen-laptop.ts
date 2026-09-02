@@ -52,7 +52,7 @@ export const LEFT_THE_BUILDING: Scenario = {
   difficulty: 'beginner',
   durationMinutes: 60,
   situation:
-    'It is 09:15 at Ridgeline Medical Group. A consultant had a work laptop taken from her car ' +
+    'It is 09:15 at Ridgeline Medical Group. A attending had a work laptop taken from her car ' +
     'overnight. Everybody in the room already believes this is fine because the estate is ' +
     'encrypted.',
   roles: [
@@ -71,9 +71,9 @@ export const LEFT_THE_BUILDING: Scenario = {
       id: 'ev.1',
       atSeconds: 0,
       surface: 'alert-queue',
-      summary: 'Consultant reports work laptop stolen from a vehicle overnight',
+      summary: 'Attending physician reports work laptop stolen from a vehicle overnight',
       detail:
-        'A respiratory consultant reported at 08:40 that her assigned laptop was taken from her car ' +
+        'A pulmonology attending reported at 08:40 that her assigned laptop was taken from her car ' +
         'between 19:00 and 07:30. A police reference has been raised. The device is RMG-LT-2288 and ' +
         'was issued in 2023. The service desk closed the ticket as "device encrypted, no further ' +
         'action" at 08:52. Rule history: theft reports go to the service desk and no security rule ' +
@@ -113,7 +113,7 @@ export const LEFT_THE_BUILDING: Scenario = {
       surface: 'cloud-audit',
       summary: 'The account holds an active session token valid until Friday',
       detail:
-        'The consultant account has an active session issued at 08:30 yesterday with a seven day ' +
+        'The attending account has an active session issued at 08:30 yesterday with a seven day ' +
         'refresh window, valid until Friday. It was last used at 17:58 yesterday from the device. ' +
         'The token is stored on the device and does not require the password to reuse. No sign-in ' +
         'from any unfamiliar location has occurred since the theft.',
@@ -128,7 +128,7 @@ export const LEFT_THE_BUILDING: Scenario = {
       detail:
         'Backup records from the last successful sync at 17:40 yesterday show a local documents ' +
         'folder containing four spreadsheets exported from the clinical system between June and ' +
-        'September, holding a combined 4,100 patient records with name, NHS number, diagnosis code ' +
+        'September, holding a combined 4,100 patient records with name, medical record number, diagnosis code ' +
         'and appointment history. Local export is permitted and is how clinicians prepare audit ' +
         'submissions.',
       source: 'backup service',
@@ -166,12 +166,12 @@ export const LEFT_THE_BUILDING: Scenario = {
 export const LEFT_THE_BUILDING_TRUTH: ScenarioTruth = {
   scenarioId: ID,
   narrative: [
-    'A consultant laptop was taken from a car overnight, and the service desk closed the ticket in twelve minutes as device encrypted, no further action.',
+    'A attending laptop was taken from a car overnight, and the service desk closed the ticket in twelve minutes as device encrypted, no further action.',
     'The management console does say encrypted, and the console is describing the last state it observed rather than the current one.',
     'On 3 September the firmware update process suspended disk encryption so the machine could reboot unattended, which is normal and is meant to resume at the next successful boot.',
     'It never resumed. There is no resume event in the twelve days since, and eleven other devices are in the same state.',
     'So the disk is readable by anybody who opens the machine, and everything anybody has said about this being fine rests on a console field that has been wrong for twelve days.',
-    'The device holds four clinical exports covering 4,100 patients with name, NHS number, diagnosis code and appointment history, which local export policy permits.',
+    'The device holds four clinical exports covering 4,100 patients with name, medical record number, diagnosis code and appointment history, which local export policy permits.',
     'It also holds a session token valid until Friday that does not need the password to reuse.',
     'The remote wipe is queued and will execute only if the device is ever powered on and connected, and there is no way to tell not yet wiped from never will be.',
   ],
@@ -195,7 +195,7 @@ export const LEFT_THE_BUILDING_TRUTH: ScenarioTruth = {
         'what can be proved, and it starts with somebody refusing to accept a twelve minute ' +
         'closure.',
       standIn:
-        'Consultant laptop taken from a car overnight, RMG-LT-2288, police reference raised. Service ' +
+        'Attending physician laptop taken from a car overnight, RMG-LT-2288, police reference raised. Service ' +
         'desk closed it at 08:52 as device encrypted, no further action, twelve minutes after it was ' +
         'reported. Nobody checked. Reopening it.',
       commandOptions: [
@@ -327,16 +327,16 @@ export const LEFT_THE_BUILDING_TRUTH: ScenarioTruth = {
       escalateTo: ['ir-lead'],
       why:
         'What is on it, which sizes the notification, and the last sentence is the one that keeps ' +
-        'the report fair. Four exports, 4,100 patients, name, NHS number, diagnosis code and ' +
+        'the report fair. Four exports, 4,100 patients, name, medical record number, diagnosis code and ' +
         'appointment history, which is special category health data by any reading. Local export is ' +
-        'permitted and is how clinicians prepare audit submissions, so the consultant did nothing ' +
+        'permitted and is how clinicians prepare audit submissions, so the attending did nothing ' +
         'wrong and the report has to say so plainly or the organisation will conclude the answer is ' +
         'to discipline her. The useful observation is that the backup record is the only reason ' +
         'anybody knows what was on the machine at all: without a sync at 17:40 the honest answer to ' +
         'what was lost would have been that nobody knows.',
       standIn:
         'Last sync at 17:40 shows four clinical exports in her documents folder, 4,100 patients, ' +
-        'name, NHS number, diagnosis code, appointment history. Local export is permitted and it is ' +
+        'name, medical record number, diagnosis code, appointment history. Local export is permitted and it is ' +
         'how audit submissions get prepared, so she did nothing wrong. And that backup is the only ' +
         'reason we know what was on it.',
       commandOptions: [

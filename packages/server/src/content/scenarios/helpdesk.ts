@@ -119,7 +119,7 @@ export const HELPDESK_SAYS_YES: Scenario = {
       summary: 'The session opened the payment approval queue and read pending items',
       detail:
         'Between 09:56 and 10:21 the session opened the payment approval queue and viewed 34 ' +
-        'pending payments, including four above fifty thousand pounds. Nothing was approved, ' +
+        'pending payments, including four above fifty thousand dollars. Nothing was approved, ' +
         'modified or released. The account is entitled to view the queue; approval above fifty ' +
         'thousand requires a second officer.',
       source: 's.bhattacharya',
@@ -177,7 +177,7 @@ export const HELPDESK_SAYS_YES_TRUTH: ScenarioTruth = {
     'The caller answered all three correctly, because all three are discoverable. Two are on our own website and the third is on a public professional profile.',
     'The analyst reset the password and re-registered the authenticator, removing the real one in the same action. That is what the runbook says to do.',
     'The new authenticator was enrolled a minute later from an external address, while the real account holder was sitting in the Norwich office having badged in at 08:31.',
-    'The session opened the payment approval queue and read 34 pending payments, four of them above fifty thousand pounds. Nothing was approved, because approval above fifty thousand needs a second officer.',
+    'The session opened the payment approval queue and read 34 pending payments, four of them above fifty thousand dollars. Nothing was approved, because approval above fifty thousand needs a second officer.',
     'They were finding out what the queue holds and how approval works, which is preparation rather than theft.',
     'Nothing technical was exploited. The verification scheme is built from facts an outsider can look up, and it has been since 2019.',
   ],

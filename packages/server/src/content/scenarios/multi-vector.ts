@@ -368,7 +368,7 @@ export const ALL_AT_ONCE_TRUTH: ScenarioTruth = {
       why:
         'How they got to the clinical servers, and the answer is that nobody broke in. A legitimate ' +
         'vendor support session, opened at 11:40 for a scheduled upgrade, authorised by a change ' +
-        'ticket, and still open. The trust boundary here is the supplier, not the perimeter, and ' +
+        'ticket, and still open. The group boundary here is the supplier, not the perimeter, and ' +
         'that is a boundary most estates have no visibility into at all. Be precise about what this ' +
         'does and does not establish. It establishes the route. It does not establish whether the ' +
         'vendor engineer did this, whether their credential is compromised, or whether somebody ' +

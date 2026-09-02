@@ -12,9 +12,9 @@
  * The caller who was lying answered five verification questions correctly in
  * under four minutes. The answers were a date of birth, a manager's name, a
  * ward, a covering colleague and a recent ticket reference, and every one of
- * them is published by the organisation itself: the trust website names
- * consultants and their leads, the ward rota is a public PDF, and the
- * consultant's own out-of-office autoreply gives the ward, the covering
+ * them is published by the organisation itself: the group website names
+ * attendings and their leads, the ward schedule is a public PDF, and the
+ * attending's own out-of-office autoreply gives the ward, the covering
  * colleague and the return date to anybody who emails her. Harder questions do
  * not fix that. There is no question the help desk can ask at 07:40 that a
  * prepared caller cannot answer and a genuinely locked-out clinician can.
@@ -23,7 +23,7 @@
  *
  * The other reset that morning has an international number, a hotel network in
  * Portugal and a brand new device at 06:12, and it is a registrar whose phone
- * broke on annual leave. A floor that grades identity by how the login looks
+ * broke on vacation. A floor that grades identity by how the login looks
  * locks her out with a patient list open and never touches the impersonator,
  * whose session came from a residential line four miles from the hospital.
  *
@@ -34,7 +34,7 @@
  * opened 341 patient records in nine minutes across six wards, two of which the
  * account has never touched in twelve months. That difference is unambiguous,
  * it arrives within fifteen minutes, and it is the same fifteen minutes for
- * every out-of-band reset the trust will ever do.
+ * every out-of-band reset the group will ever do.
  */
 
 import type { Scenario, ScenarioTruth } from '@soc/shared';
@@ -83,7 +83,7 @@ export const ON_LEAVE: Scenario = {
       summary: 'Two out-of-band authentication resets before 08:00, both by the same agent',
       detail:
         'The service desk performed telephone authentication resets for r.duthie at 06:12 and for ' +
-        'c.abiade at 07:44, both handled by the same agent on the early shift. The trust averages ' +
+        'c.abiade at 07:44, both handled by the same agent on the early shift. The group averages ' +
         'three out-of-band resets a week across 4,100 staff. Both callers passed identity ' +
         'verification as recorded in the ticket. Rule history: fired 14 times in thirty days, 14 ' +
         'closed as legitimate.',
@@ -110,9 +110,9 @@ export const ON_LEAVE: Scenario = {
       summary: 'What the r.duthie session did in its first twenty-two minutes',
       detail:
         'Between 06:14 and 06:36 the session opened the account calendar, sent two emails to the ' +
-        'general medicine registrar group, opened one patient record for a patient on the ' +
+        'internal medicine resident group, opened one patient record for a patient on the ' +
         'account own admission list, and set an out-of-office. Twenty-two minutes, four actions, ' +
-        'one record. The account is rostered as on annual leave until 8 September.',
+        'one record. The account is scheduled as on vacation until 8 September.',
       source: 'r.duthie',
       claimedSeverity: 'medium',
     },
@@ -148,10 +148,10 @@ export const ON_LEAVE: Scenario = {
       id: 'ev.6',
       atSeconds: 820,
       surface: 'host-artefact',
-      summary: 'Four of the five answers are published by the trust',
+      summary: 'Four of the five answers are published by the group',
       detail:
-        'The trust website lists c.abiade by name, specialty and clinical lead. The September ward ' +
-        'rota is a public PDF on the same site and names her ward. Her mailbox out-of-office, set ' +
+        'The group website lists c.abiade by name, specialty and clinical lead. The September ward ' +
+        'schedule is a public PDF on the same site and names her ward. Her mailbox out-of-office, set ' +
         'on 26 August and running now, gives the covering colleague and the return date to anybody ' +
         'who emails the address. The ticket reference appears in a reply she sent to an external ' +
         'supplier on 21 August. Only the date of birth is not published, and it is on a public ' +
@@ -179,7 +179,7 @@ export const ON_LEAVE: Scenario = {
       surface: 'alert-queue',
       summary: 'Out-of-band resets cannot simply be stopped',
       detail:
-        'The trust runs continuously and clinicians lose or break phones on shift. Suspending ' +
+        'The group runs continuously and clinicians lose or break phones on shift. Suspending ' +
         'telephone resets means a doctor locked out at 03:00 with a deteriorating patient and no ' +
         'route back in until the day shift arrives. The clinical safety team has previously ' +
         'rejected a proposal to require in-person verification for this reason. The service desk ' +
@@ -208,7 +208,7 @@ export const ON_LEAVE: Scenario = {
       detail:
         'Retrospective review of the last week flags j.okonjo, a night-shift nurse, opening 90 ' +
         'patient records between 02:10 and 02:30 on Thursday. All 90 are patients on Fenwick ward, ' +
-        'the account is rostered to Fenwick that night, the pattern matches the same account on ' +
+        'the account is scheduled to Fenwick that night, the pattern matches the same account on ' +
         'eleven previous night shifts, and the session came from a ward workstation. Rule history: ' +
         'no rule fired on this; it was surfaced by a manual review.',
       source: 'j.okonjo',
@@ -220,12 +220,12 @@ export const ON_LEAVE: Scenario = {
 export const ON_LEAVE_TRUTH: ScenarioTruth = {
   scenarioId: ID,
   narrative: [
-    'Somebody telephoned the Ridgeline service desk at 07:44 claiming to be c.abiade, a respiratory consultant who is on annual leave, and asked for her authentication to be reset.',
-    'They answered five verification questions correctly in three minutes forty. Four of the five answers are published by the trust: the website gives her specialty and clinical lead, the September ward rota is a public PDF, and her own out-of-office autoreply names her covering colleague and return date to anybody who emails her.',
+    'Somebody telephoned the Ridgeline service desk at 07:44 claiming to be c.abiade, a pulmonology attending who is on vacation, and asked for her authentication to be reset.',
+    'They answered five verification questions correctly in three minutes forty. Four of the five answers are published by the group: the website gives her specialty and clinical lead, the September ward schedule is a public PDF, and her own out-of-office autoreply names her covering colleague and return date to anybody who emails her.',
     'A device was enrolled at 07:47 from 203.0.113.77, a residential broadband range four miles from the hospital.',
     'Between 07:51 and 08:00 that session opened 341 patient records across six wards, two of which the account has never touched in twelve months. Nothing was edited, printed or exported through the application.',
     'The same /24 enrolled a device against a pharmacy technician account on 11 August, four minutes after an out-of-band reset that was closed as legitimate. Nobody looked at what that session did.',
-    'The other reset that morning is genuine. r.duthie is a registrar on annual leave in Portugal whose phone broke; she called from an international number, spoke to the agent for fourteen minutes, and her session opened a calendar, sent two emails to her own team and read one record for her own patient.',
+    'The other reset that morning is genuine. r.duthie is a resident on vacation in Portugal whose phone broke; she called from an international number, spoke to the agent for fourteen minutes, and her session opened a calendar, sent two emails to her own team and read one record for her own patient.',
     'No detection covered the period after either reset. Record access is alerted at a daily threshold of 400, which the nine-minute session never reached.',
     'The verification questions cannot be made to work. Nothing the desk can ask at 07:40 is answerable by a locked-out clinician and not by a prepared caller.',
   ],
@@ -277,7 +277,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
       why:
         'Every field on this row is alarming and none of it is evidence. A hotel range in Faro, a ' +
         'handset the account has never used, an international number, no overseas authentication ' +
-        'in twelve months, and 06:12 in the morning. It is also a registrar on annual leave whose ' +
+        'in twelve months, and 06:12 in the morning. It is also a resident on vacation whose ' +
         'phone broke, which produces exactly this row and produces it every summer. The one field ' +
         'that is quietly reassuring is the call duration: fourteen minutes, against three forty ' +
         'for the other one. Somebody reading prepared answers off a page is quick, and a real ' +
@@ -315,16 +315,16 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
       why:
         'The resolution of ev.2, and it takes one query. Twenty-two minutes, four actions, one ' +
         'patient record, and the record is for a patient on the account own admission list. ' +
-        'Somebody who has bought or stolen a consultant login does not spend it sending two emails ' +
-        'to a registrar group and setting an out-of-office. The behaviour is not merely innocuous, ' +
+        'Somebody who has bought or stolen a attending login does not spend it sending two emails ' +
+        'to a resident group and setting an out-of-office. The behaviour is not merely innocuous, ' +
         'it is specifically the behaviour of the person whose account this is, doing the small ' +
         'catching-up that people do on leave. Close it, and notice what closed it: not the ' +
         'geolocation, not the device, not the hour, but what the session went and did. That is the ' +
         'same test that convicts the other one.',
       standIn:
         'Duthie is fine. Twenty-two minutes, four actions: calendar, two emails to her own ' +
-        'registrar group, one record for a patient on her own admission list, out-of-office set. ' +
-        'Nobody buys a consultant login to email a registrar group. What cleared her is what she ' +
+        'resident group, one record for a patient on her own admission list, out-of-office set. ' +
+        'Nobody buys a attending login to email a resident group. What cleared her is what she ' +
         'did, not where she did it from. Closing it.',
       commandOptions: [
         { command: "awk -F, '$2==\"r.duthie\" && $1 ~ /06:[1-4]/ {print $1, $4, $5}' /var/log/ehr/audit.csv", correct: true, teaches: CORRECT_STEP },
@@ -354,7 +354,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
         'across a whole clinic day, and across six wards when the account has ever worked in two. ' +
         'That is thirty-eight records a minute, which is not a person reading anything. It is a ' +
         'person moving through a list. The two wards with no history in twelve months are the ' +
-        'part that removes any remaining doubt, because a consultant with a legitimate reason to ' +
+        'part that removes any remaining doubt, because a attending with a legitimate reason to ' +
         'look wide still looks where her patients are. Note carefully what is absent: no edit, no ' +
         'print, no export through the application, which means the loss is whatever was on screen ' +
         'and there is no export log to bound it with. That absence will tempt somebody to call the ' +
@@ -435,10 +435,10 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
       escalateTo: ['ir-lead', 'detection-engineer'],
       why:
         'The organisation published its own verification answers. The website gives the specialty ' +
-        'and the clinical lead, the September rota is a public PDF naming the ward, and the ' +
+        'and the clinical lead, the September schedule is a public PDF naming the ward, and the ' +
         'out-of-office autoreply hands the covering colleague and the return date to anybody who ' +
         'sends an email to the address. The ticket reference was in a reply to an external ' +
-        'supplier. Only the date of birth is not on the trust site, and it is on a public ' +
+        'supplier. Only the date of birth is not on the group site, and it is on a public ' +
         'professional register. So the caller needed no insider, no breach and no prior access; ' +
         'they needed a browser and one email. The autoreply is the part worth sitting with, ' +
         'because it is a courtesy feature working exactly as designed, and turning it off is a ' +
@@ -447,14 +447,14 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
         'built on facts about a person cannot work, and the control has to live somewhere else.',
       standIn:
         'We published four of the five answers ourselves. Website gives specialty and clinical ' +
-        'lead, the September rota is a public PDF with her ward on it, and her out-of-office hands ' +
+        'lead, the September schedule is a public PDF with her ward on it, and her out-of-office hands ' +
         'the covering colleague and return date to anybody who emails her. The ticket reference was ' +
         'in a reply to a supplier. Date of birth is on the professional register. They needed a ' +
         'browser and one email. And I would not turn the autoreply off, because a covering ' +
         'clinician has to be findable. Verification on facts about a person cannot work.',
       commandOptions: [
         { command: 'grep -ri "out of office\\|automatic reply" /evidence/mailbox/abiade/ | head', correct: true, teaches: CORRECT_STEP },
-        { command: 'sha256sum /evidence/opensource/rota-september.pdf | tee /evidence/opensource/rota-september.pdf.sha256', correct: true, teaches: ALSO_WORKS },
+        { command: 'sha256sum /evidence/opensource/schedule-september.pdf | tee /evidence/opensource/schedule-september.pdf.sha256', correct: true, teaches: ALSO_WORKS },
         { command: 'curl -s https://203.0.113.77/', ...TOUCH_ATTACKER },
         { command: 'cat /evidence/mailbox/abiade/inbox.mbox', ...DUMP_ALL },
         { command: 'net user c.abiade /domain', ...WRONG_TARGET },
@@ -517,7 +517,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
         'one under a record access ceiling for an hour, sized somewhere above a busy ward round ' +
         'and well below three hundred. Thirteen resets a month is thirteen ceilings a month, which ' +
         'is affordable. Say what is deliberately left undone as well. The autoreply stays on, ' +
-        'because a covering clinician has to be findable, and the rota stays published. Those leak ' +
+        'because a covering clinician has to be findable, and the schedule stays published. Those leak ' +
         'the verification answers and they will keep leaking them, and the compensating control is ' +
         'the ceiling rather than pretending the answers can be made secret.',
       standIn:
@@ -526,7 +526,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
         'worse outcome than this. Put the control on the hour after instead. Keep telephone resets ' +
         'and give any account that just had one a record access ceiling for sixty minutes, above a ' +
         'busy ward round and far below three hundred. Thirteen a month, so it costs nothing. ' +
-        'Deliberately left undone: autoreply stays on and the rota stays published, because we ' +
+        'Deliberately left undone: autoreply stays on and the schedule stays published, because we ' +
         'cannot make those answers secret and should stop trying.',
       commandNudge:
         'Find out how many out-of-band resets a month you would actually be wrapping a control ' +
@@ -553,7 +553,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
         'opens in an hour in the same period, none of which followed a reset. A rule scoped to the ' +
         'intersection is close to silent, and it would have fired on 11 August. Resist the wider ' +
         'version that alerts on any account reading fast, which catches every ward round in the ' +
-        'trust and will be turned off within a fortnight.',
+        'trust and will be turned off within a two weeks.',
       standIn:
         'Something was watching record access. It was watching a daily total of 400, and this took ' +
         'nine minutes and 341, so it went under a threshold it never approached. A rate over a ' +
@@ -587,7 +587,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
       why:
         'Ninety records in twenty minutes at two in the morning, surfaced by a manual review ' +
         'started because of everything above, and it is a night nurse doing the observations round ' +
-        'she does every shift. All ninety patients are on Fenwick, the account is rostered to ' +
+        'she does every shift. All ninety patients are on Fenwick, the account is scheduled to ' +
         'Fenwick that night, the session came from a ward workstation, and the same pattern is on ' +
         'eleven previous night shifts. Every one of those checks is the ev.4 test run properly, ' +
         'and it comes back clean. The row is here because a floor that has just found a real ' +
@@ -597,8 +597,8 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
         'wide version of the ev.9 rule would have generated.',
       standIn:
         'Ninety records in twenty minutes at two in the morning, and it is the obs round. All ' +
-        'ninety are Fenwick patients, she is rostered to Fenwick, it came from a ward workstation, ' +
-        'and the same shape is on eleven previous nights. Same checks as the consultant account, ' +
+        'ninety are Fenwick patients, she is scheduled to Fenwick, it came from a ward workstation, ' +
+        'and the same shape is on eleven previous nights. Same checks as the attending account, ' +
         'opposite answer. Closing it, and this is exactly what the wide version of that new rule ' +
         'would have sent us all night.',
       commandOptions: [
@@ -609,7 +609,7 @@ export const ON_LEAVE_TRUTH: ScenarioTruth = {
         { command: 'grep -c j.okonjo /var/log/ehr/audit.csv', ...COUNT_ONLY },
       ],
       commandNudge:
-        'Check which ward those records are on and which ward that account is rostered to.',
+        'Check which ward those records are on and which ward that account is scheduled to.',
       guidance:
         'Volume is not the test. Ask whether the records are the ones this person is supposed to ' +
         'be looking at.',

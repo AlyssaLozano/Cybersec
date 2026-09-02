@@ -116,9 +116,9 @@ export const ALREADY_LOGGED_IN: Scenario = {
       summary: 'A new payee was added to a member account at 09:14',
       detail:
         'A payee was added to member account 88-4419 at 09:14, one minute after the session ' +
-        'appeared from the second address. The member holds a balance of 61,000 pounds. The payee ' +
+        'appeared from the second address. The member holds a balance of $61,000. The payee ' +
         'is a newly registered business account. Member services staff add payees on request as ' +
-        'routine work, and the action requires no second approval below 50,000 pounds.',
+        'routine work, and the action requires no second approval below $50,000.',
       source: 'm.arundel',
       claimedSeverity: 'high',
     },
@@ -173,7 +173,7 @@ export const ALREADY_LOGGED_IN_TRUTH: ScenarioTruth = {
     'This morning somebody imported that cookie into their own browser. They were then already authenticated, as her, with no password and no second factor, because none of that happens when a session already exists.',
     'That is why the authentication log is clean: no sign-in occurred, so no sign-in was recorded, and there was nothing for the second factor to challenge.',
     'The same session identifier is now in use from Norwich and from a consumer hosting provider, presenting a different browser, operating system and screen resolution, without the session being re-established.',
-    'At 09:14 they added a payee to a member account holding 61,000 pounds. Member services add payees as routine work and nothing below 50,000 requires a second approval.',
+    'At 09:14 they added a payee to a member account holding $61,000. Member services add payees as routine work and nothing below 50,000 requires a second approval.',
     'Resetting her password does nothing, because the platform does not revoke sessions on password change. The session runs until 16:41 unless somebody revokes it.',
     'The payment run is at 14:00.',
   ],
@@ -303,7 +303,7 @@ export const ALREADY_LOGGED_IN_TRUTH: ScenarioTruth = {
       why:
         'What they came for, and the timing is the proof: one minute after the session appears from ' +
         'the second address. Adding a payee is routine member services work, so nothing about the ' +
-        'action is anomalous in isolation, and nothing below fifty thousand pounds requires a second ' +
+        'action is anomalous in isolation, and nothing below fifty thousand dollars requires a second ' +
         'approval. The account holds sixty-one thousand. Read together those two numbers say the ' +
         'attacker either knows the threshold or will find it, and that a payment run at 14:00 is the ' +
         'deadline rather than the end of the shift. This is the row that converts an interesting ' +

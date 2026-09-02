@@ -180,7 +180,7 @@ export const THE_OTHER_ATTACHMENT: Scenario = {
       summary: 'Three hundred more HTML attachments arrived this morning',
       detail:
         'A retrospective sweep for .htm attachments returns 312 messages received today. All 312 ' +
-        'originate from path-reports@ridgeline.nhs.uk, an internal system, are addressed to named ' +
+        'originate from path-reports@ridgeline.example, an internal system, are addressed to named ' +
         'clinicians, and contain a results table with no form elements, no base64 blocks and no ' +
         'external references. The pathology reporting system has sent results this way since 2021. ' +
         'Rule history: no rule exists on HTML attachments.',

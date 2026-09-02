@@ -13,7 +13,7 @@
  * caller said a case reference out loud and the assistant looked it up, which
  * is exactly what it was built to do. The failure is one layer down: the
  * assistant was given a lookup tool that runs under its own service identity,
- * that identity can read every case in the society, and the member's identity
+ * that identity can read every case in the credit union, and the member's identity
  * was never passed to it. The conversation was authenticated. The tool call was
  * not.
  *
@@ -108,7 +108,7 @@ export const ASK_IT_NICELY: Scenario = {
       id: 'ev.4',
       atSeconds: 400,
       surface: 'cloud-audit',
-      summary: 'The assistant service principal can read every case in the society',
+      summary: 'The assistant service principal can read every case in the credit union',
       detail:
         'svc-fen-assistant holds the CaseReader role on the complaints platform, which grants read ' +
         'access to all 61,400 case records. The role was granted at build time in April so that ' +
@@ -281,7 +281,7 @@ export const ASK_IT_NICELY_TRUTH: ScenarioTruth = {
         'in the call, not in the query the tool issues, not in any filtering of the response. So ' +
         'the conversation is authenticated and the tool call is anonymous, and everything the ' +
         'assistant can reach, any member talking to it can reach. This is the sentence worth ' +
-        'carrying to every assistant this society ever builds: a model with a tool has the tool\'s ' +
+        'carrying to every assistant this credit union ever builds: a model with a tool has the tool\'s ' +
         'permissions and not the user\'s, unless somebody deliberately made it otherwise. Nobody ' +
         'did here, and it would not have looked like an omission in April, because at build time ' +
         'the tool works perfectly for every honest question.',

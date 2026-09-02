@@ -127,7 +127,7 @@ export const SECOND_POST: Scenario = {
       summary: 'Mailbox searched for supplier and banking terms, 41 messages opened',
       detail:
         'Between 07:35 and 08:04 the session ran nine mailbox searches for terms including bank ' +
-        'details, remittance, sort code and account change, and opened 41 messages. No message was ' +
+        'details, remittance, routing number and account change, and opened 41 messages. No message was ' +
         'sent, forwarded or deleted. The account holds no elevated permissions and is a standard ' +
         'finance mailbox.',
       source: 'h.marchetti',

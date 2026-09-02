@@ -75,7 +75,7 @@ export const LAST_DAY: Scenario = {
       detail:
         'The account t.ashworth, a senior systems administrator, authenticated through the VPN at ' +
         '02:03 from a residential address that matches his registered home connection. He is not ' +
-        'on the on-call rota this week and there is no change record open. Ninety days of history ' +
+        'on the on-call schedule this week and there is no change record open. Ninety days of history ' +
         'show him signing in between 07:40 and 18:30 on weekdays only. Rule history: fired 22 times ' +
         'in thirty days, 20 closed as out-of-hours engineering work.',
       source: 't.ashworth',
@@ -167,7 +167,7 @@ export const LAST_DAY_TRUTH: ScenarioTruth = {
   scenarioId: ID,
   narrative: [
     'A senior systems administrator was served a redundancy notice on Monday, with a leaving date at the end of next month and access scheduled for removal on that date.',
-    'At 02:03 on Thursday he signed in through the VPN from home, outside the on-call rota, with no change record open.',
+    'At 02:03 on Thursday he signed in through the VPN from home, outside the on-call schedule, with no change record open.',
     'At 02:14 he removed the retention lock from the backup vault and deleted 41 restore points covering warehouse management, customs filing and route planning.',
     'At 02:34 he removed 210 accounts from the groups that grant access to the warehouse system and the depot terminals, so nobody can sign in and three depots are working from paper.',
     'At 02:38 he renamed nine production servers to abuse directed at the operations director by name.',
@@ -188,7 +188,7 @@ export const LAST_DAY_TRUTH: ScenarioTruth = {
       escalateTo: ['ir-lead', 'cloud-security'],
       why:
         'Twenty of twenty-two this month were engineers working late, and this is an engineer ' +
-        'working late. Three things on the row put it above that: he is not on the on-call rota, ' +
+        'working late. Three things on the row put it above that: he is not on the on-call schedule, ' +
         'there is no change record, and ninety days of history put him on weekdays between 07:40 ' +
         'and 18:30. None of those individually is much and together they mean nobody expected him ' +
         'to be there. Declare on the combination rather than waiting for something worse, because ' +
@@ -196,7 +196,7 @@ export const LAST_DAY_TRUTH: ScenarioTruth = {
         'in how fast it is taken.',
       standIn:
         'Senior administrator signed in through the VPN at 02:03 from his home connection. Not on ' +
-        'the rota, no change record open, and ninety days of history put him on weekdays in office ' +
+        'the schedule, no change record open, and ninety days of history put him on weekdays in office ' +
         'hours. Twenty of twenty-two this month were late engineering. Declaring on this one.',
       commandOptions: [
         { command: "awk '$5==\"t.ashworth\" {print $1, $9}' /var/log/auth.log | tail -20", correct: true, teaches: CORRECT_STEP },

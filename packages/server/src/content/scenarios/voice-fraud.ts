@@ -52,7 +52,7 @@ export const THE_VOICE_ON_THE_PHONE: Scenario = {
   difficulty: 'intermediate',
   durationMinutes: 60,
   situation:
-    'It is 16:20 at Fenmarch Credit Union. A payment of 180,000 pounds was released this afternoon ' +
+    'It is 16:20 at Fenmarch Credit Union. A payment of $180,000 was released this afternoon ' +
     'on a verbal authorisation, and the person who gave it says she did not.',
   roles: [
     'soc-operator',
@@ -73,7 +73,7 @@ export const THE_VOICE_ON_THE_PHONE: Scenario = {
       surface: 'alert-queue',
       summary: 'A 180,000 pound payment released on verbal authorisation at 14:19',
       detail:
-        'A supplier payment of 180,000 pounds was released at 14:19 against a verbal authorisation ' +
+        'A supplier payment of $180,000 was released at 14:19 against a verbal authorisation ' +
         'recorded by a payments officer at 14:12. The payment exceeded her release limit and the ' +
         'verbal path is the documented exception for amounts above it when an authorised director ' +
         'is unavailable to approve in the system. The finance director says she made no such call. ' +
@@ -153,9 +153,9 @@ export const THE_VOICE_ON_THE_PHONE: Scenario = {
       id: 'ev.7',
       atSeconds: 880,
       surface: 'alert-queue',
-      summary: 'A second verbal authorisation on Tuesday for 94,000 pounds',
+      summary: 'A second verbal authorisation on Tuesday for $94,000',
       detail:
-        'A verbal authorisation was recorded on Tuesday at 11:05 for 94,000 pounds, given by the ' +
+        'A verbal authorisation was recorded on Tuesday at 11:05 for $94,000, given by the ' +
         'operations director. The call originated from extension 2151 internally, the switch ' +
         'records it as an internal leg with no external trunk involved, he was in the building and ' +
         'badged in at 08:20, and he confirmed it in writing by email at 11:40 unprompted. Rule ' +
@@ -173,7 +173,7 @@ export const THE_VOICE_ON_THE_PHONE_TRUTH: ScenarioTruth = {
     'That is far more speech than current synthesis needs.',
     'Somebody used it to place a call at 14:12 in her voice, through the external trunk, presenting caller identification for her desk extension. The switch displays whatever the calling network supplies and validates none of it.',
     'They referenced a supplier dispute from a meeting whose minutes go to fourteen people on a shared drive, which is what made the call sound informed rather than generic.',
-    'The payments officer recognised the voice and recorded the call, which is exactly what the procedure asks for, and released 180,000 pounds at 14:19.',
+    'The payments officer recognised the voice and recorded the call, which is exactly what the procedure asks for, and released $180,000 at 14:19.',
     'The director was in the air between 13:40 and 15:25 and could not have made the call.',
     'The verbal path exists because directors travel and payments need releasing, it has been used 19 times in a year and every previous use was genuine.',
     'It has no callback, no code word and no written confirmation. The only control is that the officer recognises the voice, and recognising a voice is no longer evidence of anything.',
@@ -192,14 +192,14 @@ export const THE_VOICE_ON_THE_PHONE_TRUTH: ScenarioTruth = {
       why:
         'A payment above the officer limit, released through a documented exception, and the person ' +
         'who authorised it says she did not. Declare on that alone: whichever way it resolves, ' +
-        '180,000 pounds moved on an authorisation somebody is disputing, and at a credit union the ' +
+        '$180,000 moved on an authorisation somebody is disputing, and at a credit union the ' +
         'recall window is measured in hours. Two things are worth holding lightly at this point ' +
         'rather than assuming. Nobody has established yet whether the call was faked or the ' +
         'director is mistaken about her own afternoon, and both have happened before. And the ' +
         'officer followed the documented process, so this is not a compliance failure to be ' +
         'investigated as one.',
       standIn:
-        '180,000 pounds released at 14:19 on a verbal authorisation recorded at 14:12. Above the ' +
+        '$180,000 released at 14:19 on a verbal authorisation recorded at 14:12. Above the ' +
         'officer limit, through the documented exception, and the finance director says she made no ' +
         'such call. Declaring. Recall window is hours and I am not yet assuming which of them is ' +
         'wrong.',

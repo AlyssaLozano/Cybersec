@@ -169,7 +169,7 @@ export const ATTRIBUTED: Scenario = {
         'The compromised account is a payments operations login with authority to prepare, but not ' +
         'to release, outbound batches. The Friday faster payments batch is prepared on Thursday ' +
         'evening and released at 09:30 Friday by a second approver, and this week it totals 4.1 ' +
-        'million pounds across 2,880 payments. The account has viewed the batch preparation screen ' +
+        'million dollars across 2,880 payments. The account has viewed the batch preparation screen ' +
         'eleven times since 26 August and has changed nothing.',
       source: 'payments platform',
       claimedSeverity: 'critical',
@@ -230,7 +230,7 @@ export const ATTRIBUTED_TRUTH: ScenarioTruth = {
     'There is a genuine intrusion. Across nineteen days the operator worked 06:00 to 14:00 UTC on weekdays only, took four weekend days off, reached the payment initiation system within four hours of first access, ignored the member records database and the mortgage book entirely, and staged an encryptor on 28 August without running it.',
     'That is a financially motivated criminal operation keeping office hours in a time zone around three hours ahead, and it does not resemble the advisory group in any behaviour, only in objects.',
     'The Cyrillic strings and the foreign build path in the dropped binary belong to the author of an off-the-shelf loader sold on two criminal marketplaces, and are identical in every copy anybody buys.',
-    'The compromised account can prepare but not release payment batches. Friday\'s batch is 4.1 million pounds across 2,880 payments, including 1,940 salary credits.',
+    'The compromised account can prepare but not release payment batches. Friday\'s batch is $4.1 million across 2,880 payments, including 1,940 salary credits.',
   ],
   events: [
     {
@@ -282,7 +282,7 @@ export const ATTRIBUTED_TRUTH: ScenarioTruth = {
       why:
         'An address with 412 hostnames on it in a year is a hosting provider, not an adversary, and ' +
         'the advisory is not wrong to list it: the group did use it, on a server they rented for a ' +
-        'few pounds a month alongside four hundred other tenants. What matters is what Fenmarch ' +
+        'few dollars a month alongside four hundred other tenants. What matters is what Fenmarch ' +
         'actually did with it, and the answer is a 90 second HTTPS session from a marketing ' +
         'workstation on 14 August to a documentation site for an email design tool. Same address, ' +
         'different hostname, different service, different month, different purpose. This is the ' +
@@ -478,7 +478,7 @@ export const ATTRIBUTED_TRUTH: ScenarioTruth = {
       why:
         'What they are holding, and what they are waiting for. The account can prepare a payment ' +
         'batch and cannot release one, which means the segregation of duties control is the only ' +
-        'thing standing between this intrusion and 4.1 million pounds. Eleven visits to the batch ' +
+        'thing standing between this intrusion and $4.1 million. Eleven visits to the batch ' +
         'preparation screen since 26 August with nothing changed is not indecision: it is somebody ' +
         'learning the process and waiting for the moment when a modification is least likely to be ' +
         'noticed, which is Thursday evening, after preparation and before the 09:30 Friday ' +
@@ -489,7 +489,7 @@ export const ATTRIBUTED_TRUTH: ScenarioTruth = {
         'who run the payment operation.',
       standIn:
         'They can prepare a batch and they cannot release one, so segregation of duties is the only ' +
-        'thing between them and 4.1 million pounds. Eleven visits to the preparation screen since ' +
+        'thing between them and $4.1 million. Eleven visits to the preparation screen since ' +
         '26 August, nothing changed. That is not indecision, it is learning the process and waiting ' +
         'for Thursday evening, after preparation and before the 09:30 release. So we have a date. ' +
         'That is the sentence for the board at four, because a board can act on a date and cannot ' +
@@ -611,7 +611,7 @@ export const ATTRIBUTED_TRUTH: ScenarioTruth = {
         'all running the licensed remote admin agent our own service desk installed between March ' +
         'and July, signed installer, catalogue version, change records for all of it. Two of them ' +
         'are domain controllers. Standard response to a critical on a domain controller is to ' +
-        'isolate it, and isolating two DCs on a Wednesday morning takes the society down over a ' +
+        'isolate it, and isolating two DCs on a Wednesday morning takes the credit union down over a ' +
         'bad alert. Closing all nine and stopping the rule, not just the alerts, because otherwise ' +
         'there are nine more tomorrow.',
       commandOptions: [

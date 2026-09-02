@@ -25,7 +25,7 @@
  * WHY THE ADVERSARY IS SLOW ON PURPOSE
  *
  * Everything here is spaced to sit under a threshold. Beaconing every 47 hours
- * with jitter, one credential at a time, one host a fortnight. Nothing this
+ * with jitter, one credential at a time, one host a two weeks. Nothing this
  * attacker does would trip a rule designed around a burst, which is what most
  * rules are designed around.
  */
@@ -118,7 +118,7 @@ export const LONG_WEATHER: Scenario = {
       summary: 'Service account rmg-svc-print authenticated to nine hosts it has no reason to touch',
       detail:
         'The print service account authenticated to nine servers between 22 June and 19 August, ' +
-        'roughly one a fortnight, always between 02:00 and 04:00, always a single session under ' +
+        'roughly one a two weeks, always between 02:00 and 04:00, always a single session under ' +
         'four minutes. The nine include two domain controllers and the finance file server. The ' +
         'account is a member of a group granted broad rights during a 2019 migration.',
       source: 'rmg-svc-print',
@@ -174,7 +174,7 @@ export const LONG_WEATHER_TRUTH: ScenarioTruth = {
     'Somebody has been in the estate since at least 14 June. How they first got in is not on the board and the logs that would answer it rolled weeks ago.',
     'They kept access through a scheduled task running a legitimate signed remote management tool from a directory named to look like print software.',
     'It called home every 47 hours with jitter, moving kilobytes, which is under every threshold the estate had.',
-    'They took the print service account, which a 2019 migration had left with rights across the estate, and used it to reach nine servers at a fortnightly pace.',
+    'They took the print service account, which a 2019 migration had left with rights across the estate, and used it to reach nine servers every two weeks.',
     'On 6 July they dumped credentials on a domain controller and deleted the output. Forty percent of it survived in unallocated space.',
     'On 2 August, 890 MB left the finance file server for the same destination. What was in it cannot be established, because file access logging was not turned on until 20 August.',
     'None of this was found by a detection. It was found because a firewall replacement removed a permit rule nobody could explain.',
@@ -298,7 +298,7 @@ export const LONG_WEATHER_TRUTH: ScenarioTruth = {
       outOfLaneActions: ['act.isolate', 'act.reset-password', 'act.reimage-now'],
       escalateTo: ['ir-lead', 'forensics'],
       why:
-        'One host a fortnight for two months. Any rule watching for a service account touching many ' +
+        'One host a two weeks for two months. Any rule watching for a service account touching many ' +
         'hosts quickly would see nothing here, because the pace is deliberately below the window ' +
         'every such rule uses. The finding that changes the incident is the destination list: two ' +
         'domain controllers and the finance file server, reached by an account that exists to talk ' +
@@ -307,7 +307,7 @@ export const LONG_WEATHER_TRUTH: ScenarioTruth = {
         'is older than the intrusion.',
       standIn:
         'The print service account authenticated to nine servers between 22 June and 19 August, ' +
-        'about one a fortnight, always between 02:00 and 04:00, always short. Two of them are ' +
+        'about one a two weeks, always between 02:00 and 04:00, always short. Two of them are ' +
         'domain controllers and one is the finance file server. It has those rights because of a ' +
         '2019 migration.',
       commandOptions: [

@@ -15,7 +15,7 @@
  * That means the technical seats have very little to find, and the finding that
  * matters is procedural. A SOC that only knows how to answer "what did the
  * attacker run" will produce an accurate report saying nothing happened, while
- * 340,000 pounds is in somebody else's account.
+ * $340,000 is in somebody else's account.
  *
  * WHAT IT ACTUALLY TEACHES
  *
@@ -75,7 +75,7 @@ export const CHANGE_OF_BANK: Scenario = {
       id: 'ev.1',
       atSeconds: 0,
       surface: 'alert-queue',
-      summary: 'Supplier reports non-payment of an invoice settled on Tuesday for 340,000 pounds',
+      summary: 'Supplier reports non-payment of an invoice settled on Tuesday for $340,000',
       detail:
         'A long-standing clinical supplies vendor says invoice 88214 is unpaid. Finance records ' +
         'show it settled on Tuesday at 11:40 to account details supplied by email on the previous ' +
@@ -140,11 +140,11 @@ export const CHANGE_OF_BANK: Scenario = {
       id: 'ev.6',
       atSeconds: 760,
       surface: 'raw-log',
-      summary: 'Two other suppliers received similar change requests in the last fortnight',
+      summary: 'Two other suppliers received similar change requests in the last two weeks',
       detail:
         'A search of the mail archive for bank detail change language finds two further requests in ' +
         'the last fourteen days, from two different supplier addresses, both genuine replies in ' +
-        'existing threads. One was actioned on the 24th for 46,000 pounds. The other is sitting in ' +
+        'existing threads. One was actioned on the 24th for $46,000. The other is sitting in ' +
         'the finance queue awaiting the callback.',
       source: 'mail archive',
       claimedSeverity: 'high',
@@ -174,8 +174,8 @@ export const CHANGE_OF_BANK_TRUTH: ScenarioTruth = {
     'They replied inside that thread, from the real address, quoting the correct invoice number, purchase order and amount, in the sender own style.',
     'They put a phone number in the signature that differs from the supplier record by two digits, so the mandatory verification callback reached them.',
     'Finance followed the procedure exactly. The callback was made, logged, and answered by the attacker.',
-    '340,000 pounds went to an account opened eleven days earlier in a name resembling the supplier trading name.',
-    'Two other suppliers received the same treatment in the last fortnight. One payment of 46,000 pounds already went. The third is still in the queue and can be stopped.',
+    '$340,000 went to an account opened eleven days earlier in a name resembling the supplier trading name.',
+    'Two other suppliers received the same treatment in the last two weeks. One payment of $46,000 already went. The third is still in the queue and can be stopped.',
     'No control failed here and nothing in this estate was compromised. The procedure had a gap: it verified using a number the requester supplied.',
   ],
   events: [
@@ -199,7 +199,7 @@ export const CHANGE_OF_BANK_TRUTH: ScenarioTruth = {
         'investigating. Understanding this incident will take an hour. The recall window is already ' +
         'mostly gone.',
       standIn:
-        'Supplier says invoice 88214 is unpaid, finance says it settled Tuesday for 340,000 pounds ' +
+        'Supplier says invoice 88214 is unpaid, finance says it settled Tuesday for $340,000 ' +
         'to details emailed the previous Thursday, and the payment cleared. Money went somewhere ' +
         'that is not the supplier. Raising it and asking finance to call the bank now, before we ' +
         'understand anything.',
@@ -295,7 +295,7 @@ export const CHANGE_OF_BANK_TRUTH: ScenarioTruth = {
         'Ninety days of clean authentication, no unusual sign-in, no forwarding rule, no unexpected ' +
         'grant, no impossible travel, clean endpoint telemetry. Establishing this properly is real ' +
         'work and the result is correct: nothing in this organisation was compromised. Two ways to ' +
-        'misuse it. Reporting it as "no incident" would be wrong, because 340,000 pounds is gone. ' +
+        'misuse it. Reporting it as "no incident" would be wrong, because $340,000 is gone. ' +
         'And continuing to hunt for an internal compromise because one feels like it must exist ' +
         'wastes the afternoon. The useful framing is that this is a bounded negative finding that ' +
         'tells the floor where to stop looking, which is worth saying explicitly so nobody quietly ' +
@@ -355,14 +355,14 @@ export const CHANGE_OF_BANK_TRUTH: ScenarioTruth = {
         'The event that turns one loss into a campaign and, more importantly, the only one where ' +
         'the floor can still prevent something. Two more requests in fourteen days from two ' +
         'different supplier addresses, both genuine replies in existing threads. One already went ' +
-        'for 46,000 pounds, which nobody had connected. The third is sitting in the finance queue ' +
+        'for $46,000, which nobody had connected. The third is sitting in the finance queue ' +
         'awaiting its callback, and stopping it is worth more than everything else on this board ' +
         'combined. It also changes the scope of the problem: three separate supplier mailboxes ' +
         'compromised means this is somebody working a supplier ecosystem rather than a single ' +
         'unlucky vendor, and every supplier with a pending payment needs checking.',
       standIn:
-        'Two more bank change requests in the last fortnight, different suppliers, both genuine ' +
-        'replies in existing threads. One was actioned on the 24th for 46,000 pounds and nobody ' +
+        'Two more bank change requests in the last two weeks, different suppliers, both genuine ' +
+        'replies in existing threads. One was actioned on the 24th for $46,000 and nobody ' +
         'connected it. The third is in the finance queue waiting for its callback. Stop that one ' +
         'now. Three supplier mailboxes means this is a campaign, not one vendor.',
       commandOptions: [

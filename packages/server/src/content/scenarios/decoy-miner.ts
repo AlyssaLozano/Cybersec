@@ -16,7 +16,7 @@
  * around.
  *
  * The tell is economic before it is technical. Twelve servers of this size earn
- * a few pounds a day. Whoever put the miner there added a layer to a container
+ * a few dollars a day. Whoever put the miner there added a layer to a container
  * image in an internal registry, which is patient, careful work worth far more
  * than the mining revenue it produced. When the effort is wildly out of
  * proportion to the payoff, the payoff on display is not the objective.
@@ -102,7 +102,7 @@ export const LOUD_ON_PURPOSE: Scenario = {
         'its own name, with a configuration file in the same directory naming a public mining pool ' +
         'and a wallet address. It is not packed, not obfuscated, and takes no steps to avoid ' +
         'monitoring. It starts from a systemd unit written in plain text. The wallet has received ' +
-        'the equivalent of 41 pounds since 14 July.',
+        'the equivalent of $41 since 14 July.',
       source: 'RMG-APP-14',
       claimedSeverity: 'high',
     },
@@ -202,9 +202,9 @@ export const LOUD_ON_PURPOSE: Scenario = {
       id: 'ev.9',
       atSeconds: 1280,
       surface: 'alert-queue',
-      summary: 'The mining earned forty-one pounds in seven weeks',
+      summary: 'The mining earned forty-one dollars in seven weeks',
       detail:
-        'The wallet has received the equivalent of 41 pounds since 14 July across twelve servers. ' +
+        'The wallet has received the equivalent of $41 since 14 July across twelve servers. ' +
         'Compromising an internal container registry, producing a modified base image that passes ' +
         'as a legitimate tag, and maintaining it undetected across a remediation is many days of ' +
         'skilled work. Commodity mining operations typically deploy to thousands of hosts and do ' +
@@ -281,7 +281,7 @@ export const LOUD_ON_PURPOSE_TRUTH: ScenarioTruth = {
     'Since 22 July six service accounts belonging to the pathology interface, the pharmacy stock system and the appointment reminder service have authenticated from those hosts on 34 occasions. None of their passwords has changed since 2024, and they are embedded in configuration on 60 other systems.',
     'On 15 July a miner was found on three of these hosts. Two were rebuilt from image, which redeployed the same compromised tag. The third was cleaned by hand: the binary and unit file were deleted, the service reloaded, and the disk never taken.',
     'The case closed on 17 July with the outcome recorded as all three rebuilt, no evidence of onward access, root cause not established.',
-    'The wallet has received 41 pounds in seven weeks, against many days of skilled work to compromise a registry and hold that access across a remediation.',
+    'The wallet has received $41 in seven weeks, against many days of skilled work to compromise a registry and hold that access across a remediation.',
     'The mining is not the objective. It is the thing that gets found.',
   ],
   events: [
@@ -642,10 +642,10 @@ export const LOUD_ON_PURPOSE_TRUTH: ScenarioTruth = {
       outOfLaneActions: ['act.attribute-named', 'act.contact-attacker', 'act.dismiss', 'act.isolate'],
       escalateTo: ['ir-lead'],
       why:
-        'Forty-one pounds in seven weeks, and the arithmetic is the assessment. Compromising an ' +
+        'Forty-one dollars in seven weeks, and the arithmetic is the assessment. Compromising an ' +
         'internal container registry, producing a modified base image that passes as a legitimate ' +
         'tag, and holding that access through a remediation is many days of skilled work by ' +
-        'somebody who knew the estate. Nobody does that for forty-one pounds. The comparison ' +
+        'somebody who knew the estate. Nobody does that for forty-one dollars. The comparison ' +
         'strengthens it: commodity mining operations deploy to thousands of hosts opportunistically ' +
         'and do not build supply chain access to reach twelve, because the economics only work at ' +
         'volume. So the mining is not the objective, and once that is stated the rest of the ' +
@@ -657,10 +657,10 @@ export const LOUD_ON_PURPOSE_TRUTH: ScenarioTruth = {
         'output: an operation this patient will return through the registry, and the thing to watch ' +
         'is the next tag rather than the next miner.',
       standIn:
-        'Forty-one pounds in seven weeks, and that is the assessment. Compromising an internal ' +
+        'Forty-one dollars in seven weeks, and that is the assessment. Compromising an internal ' +
         'registry, building an image that passes as a real tag, and holding it through a ' +
         'remediation is days of skilled work by somebody who knows this estate. Nobody does that ' +
-        'for forty-one pounds. Commodity miners hit thousands of hosts opportunistically because ' +
+        'for forty-one dollars. Commodity miners hit thousands of hosts opportunistically because ' +
         'the economics only work at volume; they do not build supply chain access to reach twelve. ' +
         'So mining is not the objective, somebody chose us, and they were happy to be found in a ' +
         'way that would close cleanly. I am not naming anyone, the route is public. What I will ' +
@@ -813,7 +813,7 @@ export const LOUD_ON_PURPOSE_TRUTH: ScenarioTruth = {
         '11 July with no pipeline run behind it. That layer delivers a miner and one shared object. ' +
         'Six service accounts with passwords unchanged since 2024 have been used from those hosts ' +
         'since 22 July, and forty kilobytes leaves each host every six hours to an address with no ' +
-        'prior history. The mining earned forty-one pounds. State the July finding in the same ' +
+        'prior history. The mining earned forty-one dollars. State the July finding in the same ' +
         'breath rather than as a footnote: a remediation removed miners from three hosts and the ' +
         'cause from none, and two of those hosts were rebuilt from the compromised image by people ' +
         'doing exactly the right thing. That sentence is the one worth carrying, because it is not ' +
@@ -825,7 +825,7 @@ export const LOUD_ON_PURPOSE_TRUTH: ScenarioTruth = {
         'nobody added on purpose, pushed 11 July with no pipeline run behind it, delivering a miner ' +
         'and one shared object. Six service accounts, passwords unchanged since 2024, used from ' +
         'those hosts since 22 July, and forty kilobytes leaving each host every six hours to an ' +
-        'address with no history. The mining made forty-one pounds. And July goes in the same ' +
+        'address with no history. The mining made forty-one dollars. And July goes in the same ' +
         'sentence, not a footnote: we removed miners from three hosts and the cause from none, and ' +
         'two of those were rebuilt from the compromised image by people doing exactly the right ' +
         'thing. Nobody was careless. We answered the question the evidence invited and never asked ' +

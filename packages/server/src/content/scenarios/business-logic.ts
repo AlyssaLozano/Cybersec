@@ -55,7 +55,7 @@ export const READ_ONLY: Scenario = {
   difficulty: 'intermediate',
   durationMinutes: 60,
   situation:
-    'It is 10:00 at Fenmarch Credit Union. The monthly reconciliation is out by 214,000 pounds and ' +
+    'It is 10:00 at Fenmarch Credit Union. The monthly reconciliation is out by $214,000 and ' +
     'every individual transaction in it was properly authorised. Nothing has been hacked.',
   roles: [
     'soc-operator',
@@ -74,9 +74,9 @@ export const READ_ONLY: Scenario = {
       id: 'ev.1',
       atSeconds: 0,
       surface: 'alert-queue',
-      summary: 'Monthly reconciliation out by 214,000 pounds with no unauthorised transactions',
+      summary: 'Monthly reconciliation out by $214,000 with no unauthorised transactions',
       detail:
-        'Finance reports the month end reconciliation short by 214,000 pounds across 61 payments. ' +
+        'Finance reports the month end reconciliation short by $214,000 across 61 payments. ' +
         'Every one of the 61 carries a valid approval record, a named approving officer and a ' +
         'timestamp. No transaction is unauthorised, no account is overdrawn and no control reports ' +
         'a failure. Rule history: reconciliation breaks are raised to finance, not to security, and ' +
@@ -92,8 +92,8 @@ export const READ_ONLY: Scenario = {
       detail:
         'The 61 payments reference approval APR-99140 in their authorisation field. That approval ' +
         'was granted once, on 3 August, by a second officer, against a single payment of 3,400 ' +
-        'pounds. The approval record has no expiry and is not marked consumed. The 61 payments were ' +
-        'raised between 3 August and yesterday, each between 3,100 and 4,900 pounds.',
+        'dollars. The approval record has no expiry and is not marked consumed. The 61 payments were ' +
+        'raised between 3 August and yesterday, each between 3,100 and $4,900.',
       source: 'fcu core banking',
       claimedSeverity: 'high',
     },
@@ -118,8 +118,8 @@ export const READ_ONLY: Scenario = {
       surface: 'raw-log',
       summary: 'Every payment sits just under the second approval threshold',
       detail:
-        'All 61 amounts fall between 3,100 and 4,900 pounds. The second approval threshold is 5,000 ' +
-        'pounds. The officer daily aggregate limit is 25,000 pounds and no day exceeds 19,600. No ' +
+        'All 61 amounts fall between 3,100 and $4,900. The second approval threshold is 5,000 ' +
+        'dollars. The officer daily aggregate limit is $25,000 and no day exceeds 19,600. No ' +
         'individual payment, and no single day, breaches any configured limit. The limits check ' +
         'each payment and each day independently and there is no rolling total.',
       source: 'fcu core banking',
@@ -134,7 +134,7 @@ export const READ_ONLY: Scenario = {
         'The 61 payments went to eleven beneficiary accounts at four institutions, all opened ' +
         'between 6 July and 30 July. Names are close variants of genuine Fenmarch suppliers, ' +
         'differing by a word or a legal suffix. Nine of the eleven have since been emptied and ' +
-        'closed. Two remain open holding a combined 18,400 pounds.',
+        'closed. Two remain open holding a combined $18,400.',
       source: 'payments records',
       claimedSeverity: 'high',
     },
@@ -159,7 +159,7 @@ export const READ_ONLY: Scenario = {
       summary: 'Four hundred payments cancelled and reinstated across the credit union this month',
       detail:
         'Cancel and reinstate is used 400 times a month across all branches, almost always within ' +
-        'minutes, to correct a mistyped payee reference or sort code before settlement. In 396 ' +
+        'minutes, to correct a mistyped payee reference or routing number before settlement. In 396 ' +
         'cases the reinstated payment has the same amount and the same payee as the cancelled one. ' +
         'Rule history: no rule covers this and none has ever fired.',
       source: 'fcu core banking',
@@ -171,10 +171,10 @@ export const READ_ONLY: Scenario = {
 export const READ_ONLY_TRUTH: ScenarioTruth = {
   scenarioId: ID,
   narrative: [
-    'On 3 August a payments officer raised a payment of 3,400 pounds and a second officer approved it, which is exactly what should happen.',
+    'On 3 August a payments officer raised a payment of $3,400 and a second officer approved it, which is exactly what should happen.',
     'They cancelled it before settlement. Cancelling releases the hold on the balance and leaves the approval attached to the payment record.',
     'They then reinstated the cancelled payment with a different payee and a different amount. Reinstatement is available to the officer who raised it and does not ask for a fresh approval, because the payment already carries one.',
-    'They repeated that loop 61 times between 3 August and yesterday, every payment between 3,100 and 4,900 pounds against a second approval threshold of 5,000.',
+    'They repeated that loop 61 times between 3 August and yesterday, every payment between 3,100 and $4,900 against a second approval threshold of 5,000.',
     'No daily aggregate exceeded 19,600 against a limit of 25,000, because the limits check each payment and each day independently and nothing keeps a rolling total.',
     'The money went to eleven accounts opened in the four weeks before the first payment, named as close variants of genuine suppliers. Nine have been emptied and closed.',
     'Nothing was exploited. The officer held the correct role, the approval was genuine, every payment was under the threshold, and every action went through the standard interface.',
@@ -193,14 +193,14 @@ export const READ_ONLY_TRUTH: ScenarioTruth = {
       escalateTo: ['ir-lead', 'log-analyst'],
       why:
         'It arrives as a finance problem and no security rule has fired or ever would, because ' +
-        'nothing failed. The contradiction is the whole reason to take it: 214,000 pounds is ' +
+        'nothing failed. The contradiction is the whole reason to take it: $214,000 is ' +
         'missing and every transaction that moved it was properly authorised. Those two sentences ' +
         'cannot both be comfortable. A reconciliation break with no unauthorised transaction in it ' +
         'means either the reconciliation is wrong or something authorised was not intended, and the ' +
         'second of those is a security question even though nothing in the estate will ever call it ' +
         'one.',
       standIn:
-        'Month end is short 214,000 pounds across 61 payments and every one carries a valid ' +
+        'Month end is short $214,000 across 61 payments and every one carries a valid ' +
         'approval, a named approving officer and a timestamp. Nothing is unauthorised and no ' +
         'control reported a failure. Those two things cannot both be fine. Taking it.',
       commandOptions: [
@@ -229,7 +229,7 @@ export const READ_ONLY_TRUTH: ScenarioTruth = {
       why:
         'The finding, and it takes one grouping to reach. Sixty-one payments all referencing the ' +
         'same approval identifier, granted once, on 3 August, by a second officer, against a single ' +
-        'payment of 3,400 pounds. One approval and sixty-one payments. That is the entire fraud in ' +
+        'payment of $3,400. One approval and sixty-one payments. That is the entire fraud in ' +
         'a single comparison, and the reason nobody saw it is that every report in the bank is ' +
         'written per payment: each row shows an approval reference and a name, and looks correct in ' +
         'isolation. Grouping by the approval rather than reading down the payments is the whole ' +
@@ -237,7 +237,7 @@ export const READ_ONLY_TRUTH: ScenarioTruth = {
         'consumed.',
       standIn:
         'All 61 payments reference the same approval, APR-99140. That was granted once, on 3 ' +
-        'August, by a second officer, against one payment of 3,400 pounds. One approval, sixty-one ' +
+        'August, by a second officer, against one payment of $3,400. One approval, sixty-one ' +
         'payments. Every report we have is per payment, so each row looks correct on its own.',
       commandOptions: [
         { command: "awk -F, '{print $7}' /var/log/core/payments.csv | sort | uniq -c | sort -rn | head", correct: true, teaches: CORRECT_STEP },
@@ -380,7 +380,7 @@ export const READ_ONLY_TRUTH: ScenarioTruth = {
         'exceeded, standard interface throughout, and the vendor documents reinstatement as ' +
         'intended behaviour with no option to require re-approval. That is the hardest thing on ' +
         'this board to communicate, and it is this seat job. An audience expects a breach story ' +
-        'with malware and a stolen password, and what they are getting is that 214,000 pounds left ' +
+        'with malware and a stolen password, and what they are getting is that $214,000 left ' +
         'through a feature working exactly as designed. Two things follow that have to be said in ' +
         'the same breath, because either alone is misleading. Nothing was hacked, so no technical ' +
         'control needs replacing. And nothing being hacked is not reassuring, because the same ' +
@@ -404,7 +404,7 @@ export const READ_ONLY_TRUTH: ScenarioTruth = {
       escalateTo: ['detection-engineer'],
       why:
         'Four hundred cancel-and-reinstate operations a month, which is the exact sequence the ' +
-        'fraud used, and 396 of them are somebody fixing a mistyped sort code within minutes. This ' +
+        'fraud used, and 396 of them are somebody fixing a mistyped routing number within minutes. This ' +
         'is here because after ev.3 the instinct is to treat the sequence as the finding, and if ' +
         'the floor recommends alerting on cancel-and-reinstate the bank gets 400 alerts a month and ' +
         'switches it off by Christmas. The discriminator is in the row and it is precise: in 396 ' +
@@ -413,7 +413,7 @@ export const READ_ONLY_TRUTH: ScenarioTruth = {
         'difference between a control that survives and one that gets tuned to nothing.',
       standIn:
         'Cancel and reinstate happens 400 times a month across the branches and 396 of those have ' +
-        'the same amount and the same payee, somebody fixing a sort code within minutes. Ours ' +
+        'the same amount and the same payee, somebody fixing a routing number within minutes. Ours ' +
         'changed both. If we alert on the sequence we get 400 a month and it gets switched off. ' +
         'Alert on reinstatement where the payee or amount changed.',
       commandOptions: [

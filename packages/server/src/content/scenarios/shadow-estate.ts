@@ -87,7 +87,7 @@ export const NOT_ON_THE_LIST: Scenario = {
       surface: 'host-artefact',
       summary: 'The host is real, has been on the network for fourteen months, and is not inventoried',
       detail:
-        'The address resolves in internal DNS to rmg-res-07.ridgeline.nhs.uk, a record created on ' +
+        'The address resolves in internal DNS to rmg-res-07.ridgeline.example, a record created on ' +
         '4 July 2025. Switch port records show the same MAC address on the same port in the ' +
         'research wing since then, with no gap. It answers on ports 22, 443 and 3389. It does not ' +
         'appear in the asset inventory, has never been scanned, and no configuration management ' +
@@ -297,7 +297,7 @@ export const NOT_ON_THE_LIST_TRUTH: ScenarioTruth = {
         'a stealthy asset, it is an unenrolled one, and the difference decides whether the remedy ' +
         'is better detection or a different process. No scanner has ever touched it, no ' +
         'configuration management agent has ever reported from it, and no endpoint agent exists on ' +
-        'it, so every control this trust operates has a hole exactly the shape of this machine. ' +
+        'it, so every control this group operates has a hole exactly the shape of this machine. ' +
         'Do not pull it off the network yet; nobody knows what it does.',
       standIn:
         'It is real and it is not hidden. DNS record from July 2025, same MAC on the same research ' +
@@ -336,7 +336,7 @@ export const NOT_ON_THE_LIST_TRUTH: ScenarioTruth = {
         'the process was never reached rather than avoided. He left in March 2025 and the grant ' +
         'closed in January, which means the machine has had no owner for six months and no funded ' +
         'owner for eight. There is no ticket, no change record and no build documentation, so ' +
-        'nobody currently alive at this trust knows what is on it. Treat the procurement route as ' +
+        'nobody currently alive at this group knows what is on it. Treat the procurement route as ' +
         'the finding rather than the individual: anything bought on a grant enters the estate ' +
         'invisibly, and there are a lot of grants.',
       standIn:
@@ -423,7 +423,7 @@ export const NOT_ON_THE_LIST_TRUTH: ScenarioTruth = {
         'percentage up and missing hosts keep the estate looking small, and the two together ' +
         'produce a number that looks plausible and healthy, which is precisely why nobody has ever ' +
         'questioned it. Say the sentence that matters: the figure is not a measurement of the ' +
-        'estate, it is a measurement of the inventory, and nothing at this trust measures the ' +
+        'estate, it is a measurement of the inventory, and nothing at this group measures the ' +
         'estate.',
       standIn:
         'Ninety-eight point two per cent of the wrong number, and it is wrong in both directions. ' +
@@ -460,7 +460,7 @@ export const NOT_ON_THE_LIST_TRUTH: ScenarioTruth = {
       why:
         'One unowned host becomes ninety, and the method matters as much as the number because it ' +
         'is repeatable next month. DHCP leases, switch MAC address tables and DNS records against ' +
-        'the asset inventory, which is three sources the trust already has and has never joined. ' +
+        'the asset inventory, which is three sources the group already has and has never joined. ' +
         'Thirty-one of the ninety answer on a service port, so they are running something rather ' +
         'than simply being plugged in. The distribution is the part to carry into the readout: ' +
         'fourteen in the research wing and nine in estates and facilities are unsurprising, and ' +
@@ -683,7 +683,7 @@ export const NOT_ON_THE_LIST_TRUTH: ScenarioTruth = {
         'reaches something, and it is the correct state when the host is on a network that ' +
         'reaches nothing. A floor that flattens that will spend next week investigating every ' +
         'visitor with a phone, and the reconciliation being proposed will be switched off inside a ' +
-        'fortnight.',
+        'two weeks.',
       standIn:
         'No asset record, outbound connections, and it is a contractor\'s laptop on guest wireless. ' +
         'That segment has no route to anything clinical or corporate, the lease was issued at 09:12 ' +

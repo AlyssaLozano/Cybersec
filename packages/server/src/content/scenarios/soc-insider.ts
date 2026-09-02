@@ -95,9 +95,9 @@ export const ONE_OF_OURS: Scenario = {
       detail:
         'Detection ADF-D-0311 has been edited three times: on 8 July an exclusion for the partner ' +
         'API service account, on 29 July an exclusion for bookings created inside business hours ' +
-        'from office ranges, and on 21 August a minimum consignment value threshold of 500 pounds. ' +
+        'from office ranges, and on 21 August a minimum consignment value threshold of $500. ' +
         'Each edit reduced firing volume. Together they exclude every booking made from the ' +
-        'customer portal under 500 pounds, which is 71 per cent of all bookings.',
+        'customer portal under $500, which is 71 per cent of all bookings.',
       source: 'detection platform',
       claimedSeverity: 'critical',
     },
@@ -135,7 +135,7 @@ export const ONE_OF_OURS: Scenario = {
       summary: 'Searches at two in the morning, from home, on nights off',
       detail:
         'The SIEM search log records 26 sessions by t.marchetti between 01:40 and 02:30 on nights ' +
-        'not rostered, from a residential address. The searches are for the string "marchetti", for ' +
+        'not scheduled, from a residential address. The searches are for the string "marchetti", for ' +
         'the analyst\'s own case identifiers, for the term "investigation", and for the customer ' +
         'portal booking hosts. Remote SIEM access outside shift is permitted and eleven other ' +
         'analysts have used it this quarter.',
@@ -149,8 +149,8 @@ export const ONE_OF_OURS: Scenario = {
       summary: 'Bookings are being created right now from one address block',
       detail:
         'Since 20:10 this evening, 31 consignment bookings have been created through the customer ' +
-        'portal from 198.51.100.212, all under 500 pounds, all with delivery addresses in three ' +
-        'postcodes, all paid from six member accounts whose registered addresses are elsewhere. ' +
+        'portal from 198.51.100.212, all under $500, all with delivery addresses in three ' +
+        'ZIP codes, all paid from six member accounts whose registered addresses are elsewhere. ' +
         'The same address block created 140 bookings over the previous nine days. None generated ' +
         'an alert.',
       source: '198.51.100.212',
@@ -237,8 +237,8 @@ export const ONE_OF_OURS_TRUTH: ScenarioTruth = {
     'It was edited three times in eight weeks by t.marchetti, a senior analyst of four years: a partner API exclusion on 8 July, a business hours and office range exclusion on 29 July, and a 500 pound minimum consignment value on 21 August. Each edit is defensible alone. Together they exclude 71 per cent of all bookings.',
     'Tuning at Ardal requires no second approver, carries no expiry and is reviewed on no schedule. Nobody looked at any of the three.',
     'Before the edits, the same analyst closed 41 of 44 alerts on those hosts as false positive. That analyst closes the same rule class at 58 per cent everywhere else, and the floor average is 61 per cent. The three not closed were closed by other people on nights they were not on shift.',
-    'Since 20:10 tonight, 31 bookings have been created from one external address, all under 500 pounds, all delivering to three postcodes, all paid from six member accounts registered elsewhere. The same block created 140 bookings over the previous nine days. None alerted.',
-    'The SIEM search log records 26 sessions by that analyst between 01:40 and 02:30 on nights they were not rostered, from a residential address, searching for their own name, their own case identifiers and the word "investigation".',
+    'Since 20:10 tonight, 31 bookings have been created from one external address, all under $500, all delivering to three ZIP codes, all paid from six member accounts registered elsewhere. The same block created 140 bookings over the previous nine days. None alerted.',
+    'The SIEM search log records 26 sessions by that analyst between 01:40 and 02:30 on nights they were not scheduled, from a residential address, searching for their own name, their own case identifiers and the word "investigation".',
     'What was done is established. Why is not, and nothing available distinguishes an analyst being paid from an analyst being threatened.',
     'The analyst is on shift now, holds administrative access to the detection platform, case management, the SIEM and the endpoint console, and the case system emails anybody named in a new case.',
   ],
@@ -298,7 +298,7 @@ export const ONE_OF_OURS_TRUTH: ScenarioTruth = {
         'pound minimum value is a judgement anybody could defend. Read them one at a time and ' +
         'there is nothing to see, which is presumably the point of doing it in three steps eight ' +
         'weeks apart rather than one. Read them together and they exclude every portal booking ' +
-        'under 500 pounds, which is 71 per cent of all bookings and, not coincidentally, the ' +
+        'under $500, which is 71 per cent of all bookings and, not coincidentally, the ' +
         'entire population the fraud is operating in. Build the combined effect rather than ' +
         'listing the changes, because the combined effect is the only form in which this is ' +
         'visible and no record anywhere states it.',
@@ -306,7 +306,7 @@ export const ONE_OF_OURS_TRUTH: ScenarioTruth = {
         'Three edits over eight weeks and the shape is the finding, not any one of them. Partner API ' +
         'exclusion, business hours and office range exclusion, 500 pound minimum value. Each one is ' +
         'the most ordinary tuning change there is. Together they exclude every portal booking under ' +
-        '500 pounds, which is 71 per cent of bookings and the exact population the fraud is running ' +
+        '$500, which is 71 per cent of bookings and the exact population the fraud is running ' +
         'in. That combined effect is written down nowhere. You only get it by working it out.',
       commandOptions: [
         { command: "awk -F, '$2==\"ADF-D-0311\" {print $1, $4, $5}' /var/log/detection/edits.csv", correct: true, teaches: CORRECT_STEP },
@@ -416,7 +416,7 @@ export const ONE_OF_OURS_TRUTH: ScenarioTruth = {
       outOfLaneActions: ['act.revoke-key', 'act.attribute-named', 'act.reset-password', 'act.dismiss'],
       escalateTo: ['ir-lead', 'fusion-analyst'],
       why:
-        'Twenty-six sessions between 01:40 and 02:30, from home, on nights not rostered, and the ' +
+        'Twenty-six sessions between 01:40 and 02:30, from home, on nights not scheduled, and the ' +
         'searches are the part that matters rather than the hour. Remote access outside shift is ' +
         'permitted and eleven other analysts used it this quarter, so the access itself is not a ' +
         'finding. What they searched for is: their own surname, their own case identifiers, the ' +
@@ -461,7 +461,7 @@ export const ONE_OF_OURS_TRUTH: ScenarioTruth = {
       why:
         'While the floor investigates its own tooling, the fraud is still running, and this row ' +
         'exists to keep that in front of everybody. Thirty-one bookings since 20:10 from one ' +
-        'address block, every one under 500 pounds, every one delivering into three postcodes, ' +
+        'address block, every one under $500, every one delivering into three ZIP codes, ' +
         'every one paid from a member account registered somewhere else. The under-500 detail is ' +
         'the one to say out loud, because it is not a coincidence and it is not a preference: it ' +
         'is the threshold from the 21 August edit, which means whoever is booking knows exactly ' +
@@ -472,7 +472,7 @@ export const ONE_OF_OURS_TRUTH: ScenarioTruth = {
         'clock from the personnel question.',
       standIn:
         'This is still running while we investigate ourselves. Thirty-one bookings since 20:10 from ' +
-        'one block, all under 500 pounds, all into three postcodes, all paid from member accounts ' +
+        'one block, all under $500, all into three ZIP codes, all paid from member accounts ' +
         'registered elsewhere. The under-500 part is the bit to say out loud: that is the exact ' +
         'threshold from the 21 August edit. Whoever is booking knows where the line is. A hundred ' +
         'and forty over the previous nine days, none of it alerted, and tonight\'s consignments ' +
@@ -588,7 +588,7 @@ export const ONE_OF_OURS_TRUTH: ScenarioTruth = {
         'edits appears in the platform change feed, which all three analysts on shift can read. So ' +
         'the move is to stop the bleeding somewhere the suspect does not administer: block the ' +
         'booking address at the perimeter and put a hold on tonight\'s consignments from those ' +
-        'three postcodes at the depot, which are operations actions rather than SOC actions and do ' +
+        'three ZIP codes at the depot, which are operations actions rather than SOC actions and do ' +
         'not appear in any console on this floor. Leave the rule alone tonight. Reverting it ' +
         'announces the investigation, and it buys nothing that blocking the address does not ' +
         'already buy. Then the account: not suspended by the SOC, but escalated so that whoever ' +
@@ -601,7 +601,7 @@ export const ONE_OF_OURS_TRUTH: ScenarioTruth = {
         'Everything worth doing is visible to them, and one of it takes a third of the night shift ' +
         'off the floor while a fraud is live. So we act where they do not administer: block the ' +
         'booking address at the perimeter, and hold tonight\'s consignments to those three ' +
-        'postcodes at the depot. Both are operations actions, neither shows up in a console on ' +
+        'ZIP codes at the depot. Both are operations actions, neither shows up in a console on ' +
         'this floor. Leave the rule alone: reverting it announces us and buys nothing the block ' +
         'does not. The account goes to whoever owns personnel decisions, with the shift covered ' +
         'first, because pulling one of three at 21:15 is its own incident. Rollback checked against ' +

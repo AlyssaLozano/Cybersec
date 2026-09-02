@@ -118,7 +118,7 @@ export const APPROVE_APPROVE_APPROVE: Scenario = {
       summary: 'The session that followed read a shared mailbox for nineteen minutes',
       detail:
         'From 03:15 to 03:34 the session opened the ward administration shared mailbox and read 62 ' +
-        'messages, searching for terms including rota, bank staff, agency and payroll. Nothing was ' +
+        'messages, searching for terms including schedule, bank staff, agency and payroll. Nothing was ' +
         'sent, forwarded or deleted. The mailbox contains staffing schedules and agency contact ' +
         'details, and the account is entitled to reach it.',
       source: 'd.whitcombe',
@@ -175,7 +175,7 @@ export const APPROVE_APPROVE_APPROVE_TRUTH: ScenarioTruth = {
     'Each attempt sent a push prompt to a phone on a bedside table. Thirty-seven were denied or expired.',
     'At 03:14 the thirty-eighth was approved, by somebody who had been woken thirty-eight times and had no way to tell what they were approving.',
     'The prompt shows an application name and approve or deny. It does not show a number to match, an address, or a location. Number matching is available in the product and is not switched on.',
-    'The session read the ward administration shared mailbox for nineteen minutes, searching for rota, bank staff, agency and payroll, and took nothing.',
+    'The session read the ward administration shared mailbox for nineteen minutes, searching for schedule, bank staff, agency and payroll, and took nothing.',
     'Nothing was bypassed. The second factor was requested and satisfied exactly as designed, and thirty-seven denials generated no alert because a denial is a control working.',
   ],
   events: [
@@ -297,7 +297,7 @@ export const APPROVE_APPROVE_APPROVE_TRUTH: ScenarioTruth = {
       outOfLaneActions: ['act.reset-password', 'act.dismiss', 'act.isolate', 'act.reimage-now'],
       escalateTo: ['ir-lead'],
       why:
-        'What it was for, and the search terms say it plainly: rota, bank staff, agency, payroll. ' +
+        'What it was for, and the search terms say it plainly: schedule, bank staff, agency, payroll. ' +
         'Nothing was sent, forwarded or deleted, so a floor measuring harm by what left will call ' +
         'this a near miss. It is preparation and it succeeded. Somebody now knows the ward staffing ' +
         'pattern, which agencies are used and who is contacted about shifts, which is exactly what ' +
@@ -306,7 +306,7 @@ export const APPROVE_APPROVE_APPROVE_TRUTH: ScenarioTruth = {
         'the specific approach this enables.',
       standIn:
         'The session read the ward administration mailbox for nineteen minutes, sixty-two messages, ' +
-        'searching rota, bank staff, agency and payroll. Nothing sent, forwarded or deleted. They ' +
+        'searching schedule, bank staff, agency and payroll. Nothing sent, forwarded or deleted. They ' +
         'were not stealing, they were learning how ward staffing works and who gets called about ' +
         'shifts.',
       commandOptions: [
