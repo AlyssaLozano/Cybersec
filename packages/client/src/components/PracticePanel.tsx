@@ -13,6 +13,7 @@
 interface PracticeItemView {
   id: string;
   prompt: string;
+  teach?: { note: string; syntax?: string };
 }
 
 interface PracticePanelProps {
@@ -27,6 +28,7 @@ export function PracticePanel({ practice, state, activeId, onSelect }: PracticeP
 
   const passedIds = new Set(state.filter((entry) => entry.passed).map((entry) => entry.practiceId));
   const passedCount = practice.filter((item) => passedIds.has(item.id)).length;
+  const activeTeach = practice.find((item) => item.id === activeId)?.teach;
 
   return (
     <section className="practice">
@@ -64,6 +66,13 @@ export function PracticePanel({ practice, state, activeId, onSelect }: PracticeP
           );
         })}
       </ol>
+
+      {activeTeach && (
+        <div className="practice-teach">
+          <p>{activeTeach.note}</p>
+          {activeTeach.syntax && <code className="practice-syntax">{activeTeach.syntax}</code>}
+        </div>
+      )}
 
       {activeId && (
         <div className="practice-active-note">

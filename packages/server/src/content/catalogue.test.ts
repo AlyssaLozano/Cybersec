@@ -76,7 +76,7 @@ const EXPECTED_EXERCISE_COUNTS: Record<string, number> = {
   'log-analysis': 40,
   'incident-triage': 26,
   'incident-response': 30,
-  networking: 25,
+  networking: 45,
 };
 
 function exerciseCount(packageId: string): number {

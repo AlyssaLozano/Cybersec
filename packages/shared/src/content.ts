@@ -349,10 +349,31 @@ export interface AnswerFormat {
  * skill is identical, only the target changes, so a student who got the parent
  * exercise by luck cannot pass five of these by luck.
  */
+/**
+ * The teaching that travels with a drill.
+ *
+ * Drills used to carry a prompt and nothing else, which made them a test rather
+ * than practice: a student who could not do the parent exercise got five more
+ * chances to fail at it silently. A drill that says what is different about this
+ * target, and what the answer will tell them, is repetition somebody can learn
+ * from unaided.
+ *
+ * Safe to ship to the browser, and it must be: it is teaching material, and it
+ * names no answer. The solution and the checks stay server-side as always.
+ */
+export interface PracticeTeach {
+  /** What is different about this target, and what to notice in the result. */
+  note: string;
+  /** The command's shape, when this drill needs a different one to its parent. */
+  syntax?: string;
+}
+
 export interface PracticeItem {
   /** Stable id, by convention the parent id plus "-p1", "-p2", and so on. */
   id: string;
   prompt: string;
+  /** Shown with the drill, before the student attempts it. */
+  teach?: PracticeTeach;
   solution: string;
   /** Commands run before the drill, to set up the state it assumes. */
   setup?: string[];

@@ -74,6 +74,8 @@ interface WorldSpec {
   exfilIp: string;
   monitoringIp: string;
   backupIp: string;
+  localIp: string;
+  resolverIp: string;
   /** Path the generated module is written to, relative to scripts/. */
   outFile: string;
 }
@@ -141,6 +143,10 @@ let BACKDOOR_USER = 'sysmon';
 /** Where the attacker sends data. */
 let EXFIL_IP = '198.51.100.60';
 
+/** This host's own address, and the resolver /etc/resolv.conf points at. */
+let LOCAL_IP = '10.20.6.40';
+let RESOLVER_IP = '10.20.1.10';
+
 /** The monitoring host with a stale password. Noisy, internal, and harmless. */
 let MONITORING_IP = '10.20.9.40';
 /** Backup server, authenticates by key and always succeeds. */
@@ -160,6 +166,13 @@ function hms(secondsSinceMidnight: number): string {
   const s = secondsSinceMidnight % 60;
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+
+/** Same clock as hms(), with the microseconds a packet timestamp carries. */
+function hmsu(secondsSinceMidnight: number): string {
+  const whole = Math.floor(secondsSinceMidnight);
+  const micro = Math.round((secondsSinceMidnight - whole) * 1_000_000);
+  return `${hms(whole)}.${String(micro).padStart(6, '0')}`;
 }
 
 function at(hour: number, minute: number, second = 0): number {
@@ -459,6 +472,289 @@ function buildSyslog(): string {
   return render(events, (line) => line);
 }
 
+// --- packet capture ----------------------------------------------------------
+
+/**
+ * One packet, stored as fields rather than as rendered tcpdump output.
+ *
+ * The file on disk is NOT tcpdump output, and that is the point: `cat` on a
+ * capture shows records, `tcpdump -r` shows packets. A student who can read the
+ * answer straight out of the file learns to grep, not to filter, and the filter
+ * is the entire reason this part of the career exists.
+ */
+interface Packet {
+  /** Seconds since midnight, fractional. Ordering and the displayed timestamp. */
+  at: number;
+  proto: 'tcp' | 'udp' | 'icmp';
+  src: string;
+  sport: number;
+  dst: string;
+  dport: number;
+  /** TCP flag letters (S, S., P., ., F., R.), or a UDP/ICMP descriptor. */
+  flags: string;
+  seq: number;
+  win: number;
+  /** Payload bytes, excluding headers, the way tcpdump counts `length`. */
+  len: number;
+  /** Protocol detail tcpdump would print, e.g. a DNS question. Often empty. */
+  info: string;
+}
+
+let packets: Packet[] = [];
+
+function pkt(
+  when: number,
+  proto: Packet['proto'],
+  src: string,
+  sport: number,
+  dst: string,
+  dport: number,
+  flags: string,
+  len: number,
+  seq: number,
+  win: number,
+  info = '',
+): void {
+  packets.push({
+    at: when,
+    proto,
+    src,
+    sport,
+    dst,
+    dport,
+    flags,
+    seq,
+    win,
+    len: Math.round(len),
+    info,
+  });
+}
+
+/** The initial sequence number a stack picks when it opens a connection. */
+function isn(): number {
+  return between(1_000_000, 4_000_000_000);
+}
+
+/** Advertised window. One value per session, because a real one barely moves. */
+function windowSize(): number {
+  return pick([64240, 65535, 62720, 29200]);
+}
+
+/** An ephemeral source port, from the range Linux actually uses. */
+function ephemeral(): number {
+  return between(32_768, 60_999);
+}
+
+/**
+ * A complete TCP conversation: handshake, payload both ways, orderly close.
+ *
+ * Written as one helper because "which end opened this connection" is only a
+ * teachable question if every session in the file really does begin with a lone
+ * SYN. Hand-placed packets drift, and a drifted handshake teaches the opposite
+ * of the intended lesson.
+ */
+function session(
+  start: number,
+  client: string,
+  server: string,
+  port: number,
+  exchanges: number,
+  bytesEach: number,
+  /**
+   * Seconds between exchanges.
+   *
+   * Exists because "how long were they in" is a question worth grading, and it
+   * is only gradeable if a session lasts as long as the thing it depicts. A
+   * machine fetching a metrics page is done in milliseconds; a person typing at
+   * a shell is not, and 220 keystrokes compressed into eight seconds would teach
+   * a student to read a duration that no real capture would show them.
+   */
+  pace = 0,
+): void {
+  const sport = ephemeral();
+  const clientWindow = windowSize();
+  const serverWindow = windowSize();
+  let clientSeq = isn();
+  let serverSeq = isn();
+  let t = start;
+
+  // Each end's sequence number advances by the bytes it has sent, and a SYN or
+  // FIN consumes one. An exercise asks students to prove which end opened a
+  // connection; that is only provable if the numbers behave.
+  const fromClient = (flags: string, len: number) => {
+    pkt(t, 'tcp', client, sport, server, port, flags, len, clientSeq, clientWindow);
+    clientSeq += len + (flags.includes('S') || flags.includes('F') ? 1 : 0);
+  };
+  const fromServer = (flags: string, len: number) => {
+    pkt(t, 'tcp', server, port, client, sport, flags, len, serverSeq, serverWindow);
+    serverSeq += len + (flags.includes('S') || flags.includes('F') ? 1 : 0);
+  };
+
+  fromClient('S', 0);
+  t += 0.0004 + rand() / 1000;
+  fromServer('S.', 0);
+  t += 0.0002 + rand() / 1000;
+  fromClient('.', 0);
+
+  for (let i = 0; i < exchanges; i += 1) {
+    t += 0.01 + rand() / 20 + pace * (0.5 + rand());
+    fromClient('P.', between(Math.floor(bytesEach / 2), bytesEach));
+    t += 0.001 + rand() / 200;
+    fromServer('P.', between(Math.floor(bytesEach / 2), bytesEach * 2));
+    t += 0.0003;
+    fromClient('.', 0);
+  }
+
+  t += 0.02;
+  fromClient('F.', 0);
+  t += 0.0005;
+  fromServer('F.', 0);
+  t += 0.0002;
+  fromClient('.', 0);
+}
+
+/** A DNS question and its answer, against the first resolver in resolv.conf. */
+function lookup(when: number, name: string, answer: string): void {
+  const sport = ephemeral();
+  const id = between(1000, 65_000);
+  pkt(when, 'udp', LOCAL_IP, sport, RESOLVER_IP, 53, 'q', 29 + name.length, id, 0, `${id}+ A? ${name}.`);
+  pkt(
+    when + 0.002 + rand() / 500,
+    'udp',
+    RESOLVER_IP,
+    53,
+    LOCAL_IP,
+    sport,
+    'r',
+    45 + name.length,
+    id,
+    0,
+    `${id} 1/0/0 A ${answer}`,
+  );
+}
+
+/** Names this host looks up in the course of doing its job. */
+const LOOKUP_NAMES = [
+  ['portal.ridgelinemed.example', '10.20.6.40'],
+  ['rmg-backup-01.ridgelinemed.example', '10.20.9.15'],
+  ['rmg-monitor-01.ridgelinemed.example', '10.20.9.40'],
+  ['example.com', '192.0.2.10'],
+  ['www.example.com', '192.0.2.10'],
+  ['ubuntu.com', '192.0.2.30'],
+] as const;
+
+/** Ports an opportunistic scanner tries on anything with a public address. */
+const SCANNED_PORTS = [21, 23, 25, 110, 135, 445, 1433, 3306, 3389, 5432, 5900, 8080, 8443] as const;
+
+function buildCapture(): string {
+  packets = [];
+
+  // --- the boring majority --------------------------------------------------
+  //
+  // Most of this file is traffic nobody should care about, and that ratio IS the
+  // exercise. A capture where the intrusion is the only thing present teaches a
+  // student to find the only thing present.
+
+  // Name resolution, all morning, against the resolver /etc/resolv.conf names.
+  for (let t = at(10, 0, 12); t < at(11, 45); t += between(35, 70)) {
+    const [name, answer] = pick(LOOKUP_NAMES);
+    lookup(t + rand(), name, answer);
+  }
+
+  // Staff using the portal this host serves.
+  for (const staff of STAFF) {
+    for (let n = 0; n < between(4, 7); n += 1) {
+      session(at(10, 0) + between(0, 6000) + rand(), staff.ip, LOCAL_IP, 443, between(3, 9), 1400);
+    }
+  }
+
+  // Outbound HTTPS: package metadata and the sites everyone has open anyway.
+  for (const target of ['192.0.2.10', '192.0.2.20', '192.0.2.30']) {
+    for (let n = 0; n < between(2, 4); n += 1) {
+      session(at(10, 0) + between(0, 6200) + rand(), LOCAL_IP, target, 443, between(2, 6), 1200);
+    }
+  }
+
+  // --- the decoys -----------------------------------------------------------
+
+  // The monitoring host scrapes metrics on a perfectly regular 60-second beat.
+  // A student taught that "regular interval means beacon" has to meet this
+  // before they meet the real one, or what they learn is a false positive.
+  for (let t = at(10, 0, 7); t < at(11, 45); t += 60) {
+    session(t, MONITORING_IP, LOCAL_IP, 9100, 1, 900);
+  }
+
+  // Monitoring pings too, which is why ICMP on its own proves nothing.
+  const pingId = between(1000, 30_000);
+  let pingSeq = 1;
+  for (let t = at(10, 0, 31); t < at(11, 45); t += 120) {
+    const detail = `id ${pingId}, seq ${pingSeq}`;
+    pkt(t, 'icmp', MONITORING_IP, 0, LOCAL_IP, 0, 'echo-request', 64, pingId, 0, detail);
+    pkt(t + 0.0003 + rand() / 2000, 'icmp', LOCAL_IP, 0, MONITORING_IP, 0, 'echo-reply', 64, pingId, 0, detail);
+    pingSeq += 1;
+  }
+
+  // The backup pulls a large volume over SSH: the second biggest transfer in the
+  // capture, internal, authorised, and completely uninteresting.
+  session(at(10, 15, 4), BACKUP_IP, LOCAL_IP, 22, 140, 4000);
+
+  // Internet background radiation: SYN, RST, nothing. Never a session.
+  for (const source of NOISE_IPS) {
+    const burst = at(10, 0) + between(0, 6000);
+    for (const port of SCANNED_PORTS) {
+      if (rand() > 0.55) continue;
+      const t = burst + rand() * 30;
+      const sport = ephemeral();
+      const scanSeq = isn();
+      pkt(t, 'tcp', source, sport, LOCAL_IP, port, 'S', 0, scanSeq, windowSize());
+      pkt(t + 0.0002 + rand() / 3000, 'tcp', LOCAL_IP, port, source, sport, 'R.', 0, 0, 0);
+    }
+  }
+
+  // --- the intrusion --------------------------------------------------------
+
+  // Password guessing against SSH: many short sessions, all failing. The same
+  // event auth.log records, seen from the wire instead of from the daemon.
+  for (let n = 0; n < between(60, 90); n += 1) {
+    session(at(10, 47) + n * between(8, 14) + rand(), ATTACKER_IP, LOCAL_IP, 22, 2, 300);
+  }
+
+  // The session that succeeded: long, interactive, small packets each way. The
+  // shape of somebody typing.
+  session(at(11, 3, 18), ATTACKER_IP, LOCAL_IP, 22, 220, 180, 2.1);
+
+  // Command and control. Every 300 seconds exactly, a few hundred bytes, over
+  // port 443 so it passes for HTTPS. The interval is the tell, not the port.
+  for (let t = at(11, 5, 41); t < at(11, 45); t += 300) {
+    session(t, LOCAL_IP, ATTACKER_IP, 443, 1, 340);
+  }
+
+  // Exfiltration: one destination, one direction, more bytes than anything else
+  // in the file. Whoever totals bytes per external address finds it.
+  session(at(11, 28, 9), LOCAL_IP, EXFIL_IP, 443, 400, 1400, 0.9);
+
+  // --- render ---------------------------------------------------------------
+  return packets
+    .map((packet, index) => ({ packet, index }))
+    .sort((a, b) => a.packet.at - b.packet.at || a.index - b.index)
+    .map(({ packet }) =>
+      [
+        hmsu(packet.at),
+        packet.proto,
+        packet.src,
+        packet.sport,
+        packet.dst,
+        packet.dport,
+        packet.flags,
+        packet.seq,
+        packet.win,
+        packet.len,
+        packet.info,
+      ].join('|'),
+    )
+    .join('\n');
+}
+
 // --- emit --------------------------------------------------------------------
 
 /** Escapes a log body for embedding in a TypeScript template literal. */
@@ -487,6 +783,8 @@ const WORLDS: WorldSpec[] = [
     exfilIp: '198.51.100.60',
     monitoringIp: '10.20.9.40',
     backupIp: '10.20.9.15',
+    localIp: '10.20.6.40',
+    resolverIp: '10.20.1.10',
     outFile: join(HERE, '..', 'src', 'vfs', 'data', 'generated.ts'),
   },
   {
@@ -503,11 +801,13 @@ const WORLDS: WorldSpec[] = [
     exfilIp: '198.51.100.112',
     monitoringIp: '10.20.9.40',
     backupIp: '10.20.9.15',
+    localIp: '10.20.8.20',
+    resolverIp: '10.20.1.10',
     outFile: join(HERE, '..', 'src', 'vfs', 'data', 'worlds', 'meridian.generated.ts'),
   },
 ];
 
-function buildWorld(spec: WorldSpec): { authLog: string; syslog: string } {
+function buildWorld(spec: WorldSpec): { authLog: string; syslog: string; capture: string } {
   // Rebind the per-world values, then reset the stream so each world is a pure
   // function of its own seed and nothing leaks between them.
   HOSTNAME = spec.hostname;
@@ -518,10 +818,16 @@ function buildWorld(spec: WorldSpec): { authLog: string; syslog: string } {
   EXFIL_IP = spec.exfilIp;
   MONITORING_IP = spec.monitoringIp;
   BACKUP_IP = spec.backupIp;
+  LOCAL_IP = spec.localIp;
+  RESOLVER_IP = spec.resolverIp;
   rand = makeRandom(spec.seed);
   sshdPid = 21_400;
 
-  return { authLog: buildAuthLog(), syslog: buildSyslog() };
+  // Order matters: auth.log and syslog must consume the random stream in the
+  // same order they always did, or every count in Packages 1 to 4 shifts.
+  const authLog = buildAuthLog();
+  const syslog = buildSyslog();
+  return { authLog, syslog, capture: buildCapture() };
 }
 
 const banner = `/**
@@ -539,7 +845,7 @@ const countIn = (text: string, needle: string) =>
   text.split('\n').filter((l) => l.includes(needle)).length;
 
 for (const spec of WORLDS) {
-  const { authLog, syslog } = buildWorld(spec);
+  const { authLog, syslog, capture } = buildWorld(spec);
 
   const body = `${banner}
 /** ${authLog.split('\n').length} lines of authentication events for ${spec.logDay}. */
@@ -547,6 +853,9 @@ export const AUTH_LOG = ${asTemplateLiteral(authLog)};
 
 /** ${syslog.split('\n').length} lines of system events for ${spec.logDay}. */
 export const SYSLOG = ${asTemplateLiteral(syslog)};
+
+/** ${capture.split('\n').length} packet records for ${spec.logDay}, rendered by \`tcpdump\`. */
+export const CAPTURE = ${asTemplateLiteral(capture)};
 `;
 
   mkdirSync(dirname(spec.outFile), { recursive: true });
@@ -564,6 +873,9 @@ export const SYSLOG = ${asTemplateLiteral(syslog)};
       `    from ${spec.attackerIp}  : ${countIn(authLog, spec.attackerIp)}`,
       `    from ${spec.monitoringIp} (decoy): ${countIn(authLog, spec.monitoringIp)}`,
       `  syslog   : ${syslog.split('\n').length} lines`,
+      `  capture  : ${capture.split('\n').length} packets`,
+      `    to/from ${spec.attackerIp}: ${countIn(capture, spec.attackerIp)}`,
+      `    to ${spec.exfilIp} (exfil): ${countIn(capture, spec.exfilIp)}`,
       '',
     ].join('\n'),
   );

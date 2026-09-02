@@ -11,7 +11,7 @@
  */
 
 import { daysAgo, onAugust15, WORLD_NOW } from './clock.js';
-import { AUTH_LOG, SYSLOG } from './data/generated.js';
+import { AUTH_LOG, CAPTURE, SYSLOG } from './data/generated.js';
 import type { BaseImage, VNode } from './types.js';
 
 const HOME = '/home/student';
@@ -315,6 +315,18 @@ export function buildBaseImage(): BaseImage {
   b.file('/var/log/dpkg.log', DPKG_LOG, { mtime: onAugust15(8, 22, 47) });
   b.file('/var/log/wtmp', '(binary login records)\n', { size: 41_472, mtime: onAugust15(11, 31) });
   b.file('/var/log/lastlog', '(binary)\n', { size: 292_876, mtime: onAugust15(11, 5) });
+  // --- /var/captures ---------------------------------------------------------
+  //
+  // Kept out of /var/log on purpose: a capture is evidence somebody chose to
+  // take, not something the system writes on its own, and the split is the first
+  // thing an analyst has to understand about where a pcap comes from.
+  b.dir('/var/captures', { mtime: onAugust15(11, 45) });
+  b.file('/var/captures/eth0-morning.pcap', CAPTURE + '\n', {
+    mode: 0o640,
+    group: 'adm',
+    mtime: onAugust15(11, 45, 2),
+  });
+
   b.dir('/var/log/nginx');
   b.file('/var/log/nginx/access.log', NGINX_ACCESS, { owner: 'www-data', group: 'adm', mtime: onAugust15(11, 12, 27) });
   b.file('/var/log/nginx/error.log', NGINX_ERROR, { owner: 'www-data', group: 'adm', mtime: onAugust15(11, 12, 30) });

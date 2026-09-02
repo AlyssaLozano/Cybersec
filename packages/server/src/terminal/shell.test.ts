@@ -431,6 +431,121 @@ describe('find', () => {
   });
 });
 
+describe('tcpdump', () => {
+  const PCAP = '/var/captures/eth0-morning.pcap';
+  let s: ReturnType<typeof session>;
+
+  beforeEach(() => {
+    s = session();
+  });
+
+  const lines = (input: string) =>
+    s.run(input).output.split('\n').filter((line) => line !== '');
+
+  it('refuses to sniff an interface and says why', () => {
+    const result = s.run(`tcpdump ${PCAP}`);
+    expect(result.output).toContain('cannot sniff an interface');
+    expect(result.exitCode).not.toBe(0);
+  });
+
+  it('rejects a file that is not a capture', () => {
+    const result = s.run('tcpdump -r /var/log/auth.log');
+    expect(result.output).toContain('unknown file format');
+    expect(result.exitCode).not.toBe(0);
+  });
+
+  it('prints one line per packet, so wc -l counts packets', () => {
+    const count = Number(s.run(`tcpdump -n -r ${PCAP} | wc -l`).output.trim());
+    const stored = Number(s.run(`cat ${PCAP} | wc -l`).output.trim());
+    expect(count).toBe(stored);
+  });
+
+  it('stores records rather than rendered output, so grep is not a shortcut', () => {
+    // The exercises depend on this: if `cat` showed tcpdump lines, every
+    // filtering question could be answered without a filter.
+    const raw = s.run(`head -n 1 ${PCAP}`).output;
+    expect(raw).toContain('|');
+    expect(raw).not.toContain(' IP ');
+  });
+
+  it('resolves names and services unless -n is given', () => {
+    const named = s.run(`tcpdump -c 1 -r ${PCAP}`).output;
+    const numeric = s.run(`tcpdump -n -c 1 -r ${PCAP}`).output;
+    expect(named).toContain('rmg-web-02.ridgelinemed.example');
+    expect(named).toContain('.jetdirect');
+    expect(numeric).toContain('10.20.6.40');
+    expect(numeric).not.toContain('rmg-web-02.ridgelinemed.example');
+  });
+
+  it('limits output with -c', () => {
+    expect(lines(`tcpdump -n -c 5 -r ${PCAP}`)).toHaveLength(5);
+  });
+
+  it('drops the timestamp with -t', () => {
+    const [first] = lines(`tcpdump -n -t -c 1 -r ${PCAP}`);
+    expect(first!.startsWith('IP ')).toBe(true);
+  });
+
+  it('matches a host in either direction', () => {
+    const both = lines(`tcpdump -n -r ${PCAP} 'host 203.0.113.55'`).length;
+    const inbound = lines(`tcpdump -n -r ${PCAP} 'src host 203.0.113.55'`).length;
+    const outbound = lines(`tcpdump -n -r ${PCAP} 'dst host 203.0.113.55'`).length;
+    expect(inbound + outbound).toBe(both);
+    expect(inbound).toBeGreaterThan(0);
+    expect(outbound).toBeGreaterThan(0);
+  });
+
+  it('honours pcap precedence: not binds tighter than and, and than or', () => {
+    // `tcp and port 22 or port 443` must mean `(tcp and port 22) or port 443`.
+    const grouped = lines(`tcpdump -n -r ${PCAP} '(tcp and port 22) or port 443'`).length;
+    const bare = lines(`tcpdump -n -r ${PCAP} 'tcp and port 22 or port 443'`).length;
+    expect(bare).toBe(grouped);
+  });
+
+  it('filters by protocol', () => {
+    const total = lines(`tcpdump -n -r ${PCAP}`).length;
+    const tcp = lines(`tcpdump -n -r ${PCAP} 'tcp'`).length;
+    const udp = lines(`tcpdump -n -r ${PCAP} 'udp'`).length;
+    const icmp = lines(`tcpdump -n -r ${PCAP} 'icmp'`).length;
+    expect(tcp + udp + icmp).toBe(total);
+  });
+
+  it('supports net with and without a mask', () => {
+    const short = lines(`tcpdump -n -r ${PCAP} 'src net 10.20'`).length;
+    const masked = lines(`tcpdump -n -r ${PCAP} 'src net 10.20.0.0/16'`).length;
+    expect(short).toBe(masked);
+  });
+
+  it('reports a syntax error instead of silently matching nothing', () => {
+    const result = s.run(`tcpdump -n -r ${PCAP} 'porp 22'`);
+    expect(result.output).toContain('syntax error');
+    expect(result.exitCode).not.toBe(0);
+  });
+
+  it('shows the DNS question rather than a byte count', () => {
+    const [first] = lines(`tcpdump -n -c 1 -r ${PCAP} 'udp and port 53'`);
+    expect(first).toContain('A? ');
+  });
+
+  it('pairs an ICMP reply with its request', () => {
+    const [request, reply] = lines(`tcpdump -n -c 2 -r ${PCAP} 'icmp'`);
+    const id = /id (\d+), seq (\d+)/.exec(request!);
+    expect(id).not.toBeNull();
+    expect(reply).toContain(`id ${id![1]}, seq ${id![2]}`);
+    expect(request).toContain('echo request');
+    expect(reply).toContain('echo reply');
+  });
+
+  it('advances the sequence number by the bytes sent', () => {
+    // Without this an exercise cannot ask which end opened a connection, and a
+    // student would learn that sequence numbers are decoration.
+    const [syn, , ack] = lines(`tcpdump -n -c 3 -r ${PCAP}`);
+    const seqOf = (line: string) => Number(/seq (\d+)/.exec(line)![1]);
+    expect(syn).toContain('Flags [S]');
+    expect(seqOf(ack!)).toBe(seqOf(syn!) + 1);
+  });
+});
+
 describe('unknown input', () => {
   it('reports command not found with status 127', () => {
     const result = session().run('sl -la');

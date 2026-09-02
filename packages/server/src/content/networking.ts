@@ -31,6 +31,7 @@ import type { Exercise, LearningPackage } from '@soc/shared';
 
 import { MACHINE } from '../vfs/machine.js';
 import { NETWORKING_PRACTICE } from './networking-practice.js';
+import { PACKET_MODULES, PACKET_OUTCOMES } from './networking-packets.js';
 
 const HOST_IP = '10.20.6.40';
 const GATEWAY = '10.20.6.1';
@@ -1072,6 +1073,7 @@ export const NETWORKING: LearningPackage = {
     'Read a netstat table and separate open doors from live conversations',
     'Connect a port to the process that owns it',
     'Resolve names forwards and backwards, and know which file overrides DNS',
+    ...PACKET_OUTCOMES,
   ],
   prerequisites: ['linux-fundamentals'],
   modules: [
@@ -1117,5 +1119,9 @@ export const NETWORKING: LearningPackage = {
         'Which end dialled, socket states, and the pivot from a session to the process and the account behind it.',
       exercises: MODULE_4_5,
     },
+    // Modules 4.6 to 4.9 read the wire rather than the host. They live in their
+    // own file because they are a different skill with a different tool -- see
+    // the header of networking-packets.ts.
+    ...PACKET_MODULES,
   ],
 };

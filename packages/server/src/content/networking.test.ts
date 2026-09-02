@@ -28,6 +28,16 @@ const HOME = '/home/student';
 
 const EXERCISES: Exercise[] = NETWORKING.modules.flatMap((module) => module.exercises);
 
+/**
+ * The exercises whose solution is a command.
+ *
+ * Modules 4.1 to 4.5 are entirely terminal work, which is why this file
+ * originally ran every solution through the shell. The packet modules added
+ * multiple-choice and short-answer exercises, and running "A, C and E" through
+ * bash asserts nothing except that bash does not recognise it.
+ */
+const TERMINAL: Exercise[] = EXERCISES.filter((exercise) => exercise.kind === 'terminal');
+
 function attempt(solution: string, setup: string[] | undefined, exercise: Exercise, checks: Check[]) {
   const vfs = new Vfs(BASE_IMAGE, emptyOverlay(), HOME);
   let cwd = HOME;
@@ -52,9 +62,19 @@ function attempt(solution: string, setup: string[] | undefined, exercise: Exerci
 }
 
 describe('Networking structure', () => {
-  it('has 25 exercises across 5 modules', () => {
-    expect(NETWORKING.modules.length).toBe(5);
-    expect(EXERCISES.length).toBe(25);
+  it('has 45 exercises across 9 modules', () => {
+    expect(NETWORKING.modules.length).toBe(9);
+    expect(EXERCISES.length).toBe(45);
+  });
+
+  it('covers packet analysis as well as host sockets', () => {
+    // Modules 4.1 to 4.5 ask the host what it is doing. 4.6 to 4.9 read the
+    // wire, which is the half that still works when the host is lying.
+    const packetModules = NETWORKING.modules.filter((module) =>
+      ['4.6', '4.7', '4.8', '4.9'].includes(module.id),
+    );
+    expect(packetModules).toHaveLength(4);
+    expect(packetModules.flatMap((module) => module.exercises)).toHaveLength(20);
   });
 
   it('uses the net.x id space, so no other package can collide with it', () => {
@@ -72,7 +92,7 @@ describe('Networking structure', () => {
   it('gives every drill a unique id', () => {
     const ids = EXERCISES.flatMap((exercise) => exercise.practice.map((drill) => drill.id));
     expect(new Set(ids).size).toBe(ids.length);
-    expect(ids.length).toBe(125);
+    expect(ids.length).toBe(195);
   });
 
   it('satisfies the content rules the catalogue validator enforces', () => {
@@ -81,7 +101,29 @@ describe('Networking structure', () => {
       expect(exercise.hints.length, exercise.id).toBeGreaterThan(0);
       expect(exercise.checks.length, exercise.id).toBeGreaterThan(0);
       expect(exercise.debrief, exercise.id).toBeTruthy();
-      expect(exercise.practice.length, `${exercise.id} has no drills`).toBe(5);
+    }
+  });
+
+  it('gives every terminal exercise a full set of drills', () => {
+    // Repetition is the point of a drill and it only makes sense where there is
+    // a command to repeat. A multiple-choice question has one answer, and five
+    // ways of asking it is a quiz, not practice.
+    for (const exercise of TERMINAL) {
+      expect(exercise.practice.length, `${exercise.id} has ${exercise.practice.length} drills`).toBe(5);
+    }
+  });
+
+  it('gives every drill in the packet modules a teaching note', () => {
+    // The rest of the package predates PracticeTeach. New drills carry it, and
+    // this stops the next batch quietly going back to bare prompts.
+    const packetDrills = NETWORKING.modules
+      .filter((module) => ['4.6', '4.7', '4.8', '4.9'].includes(module.id))
+      .flatMap((module) => module.exercises)
+      .flatMap((exercise) => exercise.practice);
+
+    expect(packetDrills.length).toBeGreaterThan(0);
+    for (const drill of packetDrills) {
+      expect(drill.teach?.note, `${drill.id} has no teaching note`).toBeTruthy();
     }
   });
 
@@ -105,7 +147,7 @@ describe('Networking structure', () => {
 });
 
 describe('every Networking solution passes its own checks', () => {
-  for (const exercise of EXERCISES) {
+  for (const exercise of TERMINAL) {
     it(`${exercise.id}: ${exercise.title}`, () => {
       const evaluation = attempt(exercise.solution, exercise.setup, exercise, exercise.checks);
       expect(evaluation.failed.map((f) => `${f.type}: ${f.hint}`)).toEqual([]);
@@ -115,7 +157,7 @@ describe('every Networking solution passes its own checks', () => {
 });
 
 describe('every Networking drill passes its own checks', () => {
-  const drills: Array<{ exercise: Exercise; drill: PracticeItem }> = EXERCISES.flatMap((exercise) =>
+  const drills: Array<{ exercise: Exercise; drill: PracticeItem }> = TERMINAL.flatMap((exercise) =>
     exercise.practice.map((drill) => ({ exercise, drill })),
   );
 
@@ -129,7 +171,10 @@ describe('every Networking drill passes its own checks', () => {
 });
 
 describe('worked examples are runnable and are never the answer', () => {
-  for (const exercise of EXERCISES) {
+  // Only for terminal exercises. On a multiple-choice exercise `command` holds
+  // the thing being illustrated -- a packet line, a pair of counters -- which is
+  // the same convention Incident Triage uses, and none of it is shell input.
+  for (const exercise of TERMINAL) {
     for (const example of exercise.teach.examples ?? []) {
       it(`${exercise.id}: ${example.command}`, () => {
         const vfs = new Vfs(BASE_IMAGE, emptyOverlay(), HOME);
@@ -139,6 +184,9 @@ describe('worked examples are runnable and are never the answer', () => {
       });
     }
 
+  }
+
+  for (const exercise of EXERCISES) {
     it(`${exercise.id} does not give away its own answer`, () => {
       const normalise = (text: string) => text.trim().replace(/\s+/g, ' ');
       const examples = (exercise.teach.examples ?? []).map((e) => normalise(e.command));

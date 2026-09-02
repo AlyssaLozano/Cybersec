@@ -198,7 +198,13 @@ learningRouter.get(
       // look as though nothing was ever asked about.
       consultedAlertIds,
       // Drill prompts ship freely; their checks and answers do not.
-      practice: exercise.practice.map((drill) => ({ id: drill.id, prompt: drill.prompt })),
+      // `teach` is teaching material and names no answer, so it ships with the
+      // prompt. `solution` and `checks` stay here, as always.
+      practice: exercise.practice.map((drill) => ({
+        id: drill.id,
+        prompt: drill.prompt,
+        teach: drill.teach,
+      })),
       practiceState,
       nextExerciseId: nextExerciseId(exerciseId),
       // The answer is released after a pass, or if the student asked for it.

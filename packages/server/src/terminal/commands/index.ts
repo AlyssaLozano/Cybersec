@@ -7,6 +7,7 @@
  */
 
 import { fromLines, ok, type CommandResult, type ExecContext } from '../context.js';
+import * as capture from './capture.js';
 import * as fs from './filesystem.js';
 import * as net from './network.js';
 import * as sys from './system.js';
@@ -83,6 +84,12 @@ export const COMMANDS: Record<string, CommandSpec> = {
   dig: { handler: net.dig, summary: 'Query DNS', usage: 'dig NAME | dig -x ADDRESS', group: 'network' },
   nslookup: { handler: net.nslookup, summary: 'Look up a name or address', usage: 'nslookup NAME|ADDRESS', group: 'network' },
   host: { handler: net.host, summary: 'Look up a name or address', usage: 'host NAME|ADDRESS', group: 'network' },
+  tcpdump: {
+    handler: capture.tcpdump,
+    summary: 'Read a saved packet capture, with an optional filter',
+    usage: "tcpdump -r FILE [-n] [-q] [-t] [-c COUNT] ['FILTER']",
+    group: 'network',
+  },
 };
 
 const GROUP_TITLES: Record<CommandSpec['group'], string> = {
