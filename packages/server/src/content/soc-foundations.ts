@@ -19,9 +19,17 @@
  *
  * Role titles and one-line descriptions are taken from `roles.ts`, so this
  * package and the career router describe the same jobs in the same words.
+ *
+ * Modules soc.6 to soc.8 cover the part of orientation that is not about the
+ * SOC as an idea but about working in one: the tools on the floor and what none
+ * of them do, what the rota costs and what alert fatigue actually is, and how
+ * somebody gets hired into the first seat and out of it again. That last module
+ * exists because this package is most students first contact with the platform
+ * and the questions they arrive with are career questions, not technical ones.
  */
 
 import type { LearningPackage } from '@soc/shared';
+import { SOC_FOUNDATIONS_PRACTICE } from './soc-foundations-practice.js';
 
 const SOC_TEACH = {
   concept:
@@ -342,21 +350,28 @@ export const SOC_FOUNDATIONS: LearningPackage = {
           checks: [
             {
               type: 'answer-mentions',
+              /*
+                * These grade what the ANSWER adds, not the nouns the prompt hands over.
+                * The question already says "Log Analyst", "embed" and "separate team", so
+                * groups built on those words passed when the prompt was pasted back, which
+                * soc-foundations.test.ts caught. What has to be supplied is the output of
+                * the role and the two REASONS.
+                */
               conceptGroups: [
-                ['log', 'timeline', 'correlat', 'parse', 'events'],
-                ['embed', 'inside', 'within', 'on the floor', 'part of the soc', 'speed', 'fast'],
-                ['outside', 'separate', 'data', 'platform', 'engineering', 'shared', 'whole business'],
+                ['timeline', 'parse', 'correlat', 'reconcil', 'raw log', 'builds'],
+                ['fast', 'speed', 'quick', 'live', 'immediately', 'during an incident'],
+                ['whole business', 'shared', 'platform', 'pipeline', 'one place', 'serves'],
               ],
               hint:
-                'Three ideas: what the log analyst produces, a reason to keep it inside the SOC, and ' +
-                'a reason to run it as a separate team.',
+                'Three ideas: what the log analyst actually produces, the reason embedding helps ' +
+                'during an incident, and the reason a shared team helps everybody else.',
             },
           ],
           debrief:
             'There is no single right home for the role. Knowing that a title can mean either ' +
             'placement is the difference between an interview where you ask the right question about ' +
             'the team, and one where you find out on your first day.',
-          practice: [],
+          practice: SOC_FOUNDATIONS_PRACTICE['soc.1.6'] ?? [],
         },
       ],
     },
@@ -547,7 +562,7 @@ export const SOC_FOUNDATIONS: LearningPackage = {
           debrief:
             'Naming this tradeoff is what separates an operator who is learning from one who is just ' +
             'clicking. The good ones know which risk they are taking on each call, and why.',
-          practice: [],
+          practice: SOC_FOUNDATIONS_PRACTICE['soc.2.4'] ?? [],
         },
         {
           id: 'soc.2.5',
@@ -830,18 +845,24 @@ export const SOC_FOUNDATIONS: LearningPackage = {
           checks: [
             {
               type: 'answer-mentions',
+              /*
+                * Graded on what each seat PRODUCES, never on its job title: the prompt names
+                * all three roles, so title-matching passed on the question itself.
+                */
               conceptGroups: [
-                ['rule', 'automate', 'write', 'engineer', 'detection logic', 'tune'],
-                ['intel', 'adversary', 'campaign', 'indicator', 'research', 'attribution'],
-                ['hunt', 'proactive', 'hypothesis', 'search', 'no alert', 'assume breach'],
+                ['rule', 'automate', 'detection logic', 'tune'],
+                ['adversary', 'campaign', 'indicator', 'research', 'attribution', 'who is behind'],
+                ['hypothesis', 'no alert', 'by hand', 'proactive', 'assume breach', 'never fired'],
               ],
-              hint: 'Three distinct ideas: automating detection, researching the adversary, and hunting by hypothesis.',
+              hint:
+                'Three distinct outputs: the rule that automates it, the intelligence about the ' +
+                'adversary, and the hypothesis-driven search for what no alert caught.'
             },
           ],
           debrief:
             'Blurring these is a common interview stumble. Being able to say cleanly what each one ' +
             'produces shows you understand the floor as a set of jobs, not one undifferentiated role.',
-          practice: [],
+          practice: SOC_FOUNDATIONS_PRACTICE['soc.3.5'] ?? [],
         },
       ],
     },
@@ -1044,7 +1065,7 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'There is no universal right answer, which is the point. A small company may be far safer ' +
             'with an MSSP than with a single overworked analyst; a large one may need the context only ' +
             'an in-house team can hold.',
-          practice: [],
+          practice: SOC_FOUNDATIONS_PRACTICE['soc.4.4'] ?? [],
         },
       ],
     },
@@ -1319,6 +1340,896 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'This is the mindset the rest of the platform builds on. You will specialise into one of ' +
             'these seats, but you are always one link in a chain, and the hand-off is where incidents ' +
             'are won or lost.',
+          practice: SOC_FOUNDATIONS_PRACTICE['soc.5.6'] ?? [],
+        },
+      ],
+    },
+    {
+      id: 'soc.6',
+      packageId: 'soc-foundations',
+      order: 6,
+      title: 'The tools on the floor',
+      summary:
+        'What a SIEM, an EDR, a SOAR and a case system each do, what none of them do, and why the ' +
+        'product name on a job advert is not the skill it is asking for.',
+      exercises: [
+        {
+          id: 'soc.6.1',
+          moduleId: 'soc.6',
+          packageId: 'soc-foundations',
+          order: 1,
+          title: 'What a SIEM actually does',
+          kind: 'multiple-choice',
+          goal: 'Understand the tool the SOC spends most of its day inside.',
+          prompt:
+            'A SIEM sits at the centre of most SOCs. Which of the following describe what one ' +
+            'actually does? Select all that apply.',
+          teach: {
+            concept:
+              'A SIEM is a place where logs from everywhere arrive, get normalised into a common ' +
+              'shape, and can be searched together. That last word is the whole point. A firewall log ' +
+              'and a Windows event log describe the same login in completely different vocabularies, ' +
+              'and a SIEM makes them comparable so one query can cross both.\n\n' +
+              'On top of that it runs saved queries continuously and raises an alert when one ' +
+              'matches. That is where the queue an operator works comes from: somebody wrote a rule, ' +
+              'the rule matched, and a row appeared.\n\n' +
+              'What a SIEM does not do is understand anything. It has no opinion about whether a ' +
+              'match matters, it only knows a pattern fired. It also cannot see what was never sent ' +
+              'to it, which is the most important limitation of all: a SIEM covers exactly the ' +
+              'sources somebody onboarded, and the gap between what is logged and what is collected ' +
+              'is invisible from inside the tool.',
+          },
+          options: [
+            { id: 'a', label: 'Collects logs from many different systems into one searchable place.' },
+            { id: 'b', label: 'Normalises different log formats so one query can cross several sources.' },
+            { id: 'c', label: 'Runs saved detection rules continuously and raises alerts when they match.' },
+            { id: 'd', label: 'Understands which alerts genuinely matter, so triage is unnecessary.' },
+            { id: 'e', label: 'Shows activity from systems whose logs were never sent to it.' },
+          ],
+          hints: [
+            'Three describe collecting, normalising, and matching. Two describe abilities no product has.',
+            'If a SIEM knew which alerts mattered, what would the operator be for?',
+            'Ask what a tool can possibly know about a server that never sends it anything.',
+          ],
+          solution:
+            'A, B, and C. Collect, normalise, and match saved rules: that is a SIEM, and the alerts ' +
+            'it raises are the queue somebody works. D is what vendors imply and no product ' +
+            'delivers, which is precisely why Tier 1 exists. E is the limitation worth carrying ' +
+            'around: a SIEM sees only what was onboarded, so an attack on a system nobody connected ' +
+            'is invisible, and the tool will look perfectly healthy while it happens.',
+          expectedOutput: 'Options A, B, and C selected.',
+          checks: [
+            {
+              type: 'choice-equals',
+              optionIds: ['a', 'b', 'c'],
+              hint:
+                'One option claims the tool can judge relevance. Another claims it can see systems ' +
+                'that never send it data.',
+            },
+          ],
+          debrief:
+            'Coverage is the question nobody asks of a SIEM until after an incident. Knowing which ' +
+            'systems are onboarded, and which are not, is a more useful thing to be able to say than ' +
+            'knowing any query language.',
+          practice: [],
+        },
+        {
+          id: 'soc.6.2',
+          moduleId: 'soc.6',
+          packageId: 'soc-foundations',
+          order: 2,
+          title: 'Which tool answers which question',
+          kind: 'multiple-choice',
+          goal: 'Reach for the right source instead of the familiar one.',
+          prompt:
+            'Four questions come up during a shift. Which of these pair a question with a tool that ' +
+            'can actually answer it? Select all that apply.',
+          teach: {
+            concept:
+              'The tools on a SOC floor overlap enough to be confusing and are not interchangeable.\n\n' +
+              'A SIEM answers questions ACROSS systems and over time: has this address touched ' +
+              'anything else, did this pattern happen before, what else occurred in that ten ' +
+              'minutes. Its strength is breadth and history.\n\n' +
+              'An EDR answers questions about ONE ENDPOINT in depth: which process started which, ' +
+              'what a binary did after it ran, what it touched on disk. Its strength is the detail ' +
+              'a log summary throws away, and modern EDR can also act, isolating a machine from the ' +
+              'console.\n\n' +
+              'A case or ticketing system answers questions about the WORK: what was decided, by ' +
+              'whom, when, and what happened next. It is the only one of the three that remembers ' +
+              'why a human did something, which is why it is the artefact an audit asks for.\n\n' +
+              'Reaching for the tool you know rather than the tool that holds the answer is the ' +
+              'most common way an hour disappears.',
+          },
+          options: [
+            { id: 'a', label: 'Has this external address been seen anywhere else in the estate this month: the SIEM.' },
+            { id: 'b', label: 'Which process spawned the suspicious binary on this laptop: the EDR.' },
+            { id: 'c', label: 'Who decided not to escalate this alert last Tuesday, and why: the case system.' },
+            { id: 'd', label: 'Isolate this endpoint from the network right now: the EDR.' },
+            { id: 'e', label: 'What the encrypted payload of that outbound connection contained: the SIEM.' },
+          ],
+          hints: [
+            'Four pair correctly. One asks a tool for something it never had.',
+            'Ask what each tool physically records, and at what level of detail.',
+            'A log line records that a connection happened. Does it record what went through it?',
+          ],
+          solution:
+            'A, B, C, and D. Breadth and history from the SIEM, endpoint depth and response from the ' +
+            'EDR, and the record of human decisions from the case system. E is the misplacement: a ' +
+            'SIEM holds a summary that a connection occurred, not its contents, and if the traffic ' +
+            'was encrypted then even full packet capture would not hand you the payload. The honest ' +
+            'answer to that question is usually that it cannot be established from what exists.',
+          expectedOutput: 'Options A, B, C, and D selected.',
+          checks: [
+            {
+              type: 'choice-equals',
+              optionIds: ['a', 'b', 'c', 'd'],
+              hint:
+                'One option asks a log aggregator for the contents of an encrypted connection.',
+            },
+          ],
+          debrief:
+            'Before you start searching, say out loud which tool should hold the answer. It takes ' +
+            'five seconds and it is the difference between a five-minute question and a lost morning.',
+          practice: [],
+        },
+        {
+          id: 'soc.6.3',
+          moduleId: 'soc.6',
+          packageId: 'soc-foundations',
+          order: 3,
+          title: 'What should be automated',
+          kind: 'multiple-choice',
+          goal: 'Tell the work a machine should take from the work it must not.',
+          prompt:
+            'Your SOC is introducing automation. Which of the following are good candidates? Select ' +
+            'all that apply.',
+          teach: {
+            concept:
+              'Automation in a SOC, often sold as SOAR, is worth exactly as much as the judgement it ' +
+              'frees up. The rule for what to automate is simple: work that is repetitive, that has ' +
+              'one correct answer, and whose failure is cheap and visible.\n\n' +
+              'That covers a lot. Enriching an alert with the things an operator would look up ' +
+              'anyway, gathering context from three systems into one view, opening and routing a ' +
+              'ticket, closing a class of alert that is known benign and provably so. All of that is ' +
+              'clerical work that a person is slower and no better at.\n\n' +
+              'What must not be automated is the judgement, and specifically anything irreversible ' +
+              'made on an inference. Automatically disabling a user account on a single medium ' +
+              'confidence alert will eventually lock out a surgeon mid-shift, and the cost of that ' +
+              'is not paid by the SOC. The test is whether a wrong decision can be undone cheaply. ' +
+              'Enrichment that is wrong wastes a minute; containment that is wrong stops a hospital.',
+          },
+          options: [
+            { id: 'a', label: 'Enriching every alert with the context an operator would have looked up anyway.' },
+            { id: 'b', label: 'Opening a ticket and routing it to the right queue.' },
+            { id: 'c', label: 'Closing a specific alert class that has been proven benign, with a record of each closure.' },
+            { id: 'd', label: 'Disabling any user account that triggers a medium confidence alert.' },
+            { id: 'e', label: 'Deciding whether an ambiguous alert is a real incident, so nobody has to read it.' },
+          ],
+          hints: [
+            'Three are clerical work with one right answer. Two are judgement, and one of those is also irreversible.',
+            'Ask what it costs when the automation is wrong, and who pays it.',
+            'If a machine could reliably do the last one, the whole triage tier would not exist.',
+          ],
+          solution:
+            'A, B, and C. Enrichment, routing, and provable auto-closure are repetitive, have one ' +
+            'right answer, and fail cheaply. D is the one that gets a SOC into trouble: it acts ' +
+            'irreversibly on an inference, and the day it disables the wrong account during a ' +
+            'clinical shift is the day automation gets switched off entirely. E is the judgement the ' +
+            'tier exists to apply; automating it does not remove the decision, it just makes it ' +
+            'silently and with nobody accountable.',
+          expectedOutput: 'Options A, B, and C selected.',
+          checks: [
+            {
+              type: 'choice-equals',
+              optionIds: ['a', 'b', 'c'],
+              hint:
+                'One option takes an irreversible action on a medium confidence signal. Another ' +
+                'automates the judgement the triage tier exists for.',
+            },
+          ],
+          debrief:
+            'Note what C carries with it: a record of each closure. Automation you cannot audit is ' +
+            'indistinguishable from alerts being dropped, and one of those is a decision while the ' +
+            'other is a gap.',
+          practice: [],
+        },
+        {
+          id: 'soc.6.4',
+          moduleId: 'soc.6',
+          packageId: 'soc-foundations',
+          order: 4,
+          title: 'The ticket is the product',
+          kind: 'short-answer',
+          goal: 'Say why the written record is the deliverable, not a chore attached to one.',
+          prompt:
+            'A new operator says the ticketing system slows them down and they would clear more ' +
+            'alerts without it. In three or four sentences, explain why the ticket matters.',
+          teach: {
+            concept:
+              'It is easy to think the work is the investigation and the ticket is admin. It is the ' +
+              'other way round: the investigation happens in somebody head and disappears, and the ' +
+              'ticket is the only part that survives to be used by anybody else.\n\n' +
+              'Three things depend on it. CONTINUITY: shifts hand over, and the next operator either ' +
+              'reads what you found or starts again. PATTERN: one alert closed as benign is noise, ' +
+              'but forty tickets closed for the same reason is a tuning case somebody can act on, ' +
+              'and that pattern only exists if the reasons were written down. And ACCOUNTABILITY: ' +
+              'when an incident is reviewed months later, the question is what was known and decided ' +
+              'at the time, and an undocumented decision is indistinguishable from no decision.\n\n' +
+              'A good answer names at least the handover or continuity value, the pattern that only ' +
+              'emerges across many records, and the fact that the ticket is what an audit or review ' +
+              'actually reads.',
+          },
+          hints: [
+            'Ask what remains of the work an hour after the operator goes home.',
+            'One alert closed tells you nothing. What do forty closed for the same reason tell you?',
+            'A good answer names the handover, the pattern that only shows up across many tickets, and the review or audit that reads them later.',
+          ],
+          solution:
+            'Clearing alerts faster with no record means the work exists only in the head of whoever ' +
+            'did it, so the next shift cannot pick up an open thread and has to start again. The ' +
+            'record is also the only place patterns live: one alert closed as benign says nothing, ' +
+            'while forty closed for the same reason is a tuning case that removes the noise ' +
+            'permanently, and that case cannot be made if nobody wrote the reasons down. And when an ' +
+            'incident is reviewed later, what gets read is the ticket: a decision nobody documented ' +
+            'cannot be defended, however sound it was at the time. The throughput gained by skipping ' +
+            'it is real and it is borrowed from everybody who comes after.',
+          expectedOutput:
+            'An answer naming continuity across shifts, the pattern that only emerges across many ' +
+            'records, and the later review or audit that depends on the written decision.',
+          checks: [
+            {
+              type: 'answer-mentions',
+              conceptGroups: [
+                ['next shift', 'handover', 'hand over', 'continuity', 'somebody else', 'pick up', 'start again'],
+                ['pattern', 'tuning', 'forty', 'many', 'across', 'trend', 'repeated'],
+                ['review', 'audit', 'later', 'defend', 'accountab', 'months'],
+              ],
+              hint:
+                'Three ideas: what the next shift needs, what only shows up across many tickets, and ' +
+                'who reads them long afterwards.',
+            },
+          ],
+          debrief:
+            'Operators who write good tickets get noticed faster than operators who close more of ' +
+            'them, because the ticket is the only part of the work a manager can actually see.',
+          practice: [],
+        },
+        {
+          id: 'soc.6.5',
+          moduleId: 'soc.6',
+          packageId: 'soc-foundations',
+          order: 5,
+          title: 'The product name is not the skill',
+          kind: 'multiple-choice',
+          goal: 'Read a tool requirement on a job advert for what it really asks.',
+          prompt:
+            'An advert asks for three years of Splunk. You have never opened Splunk. Which of the ' +
+            'following are accurate? Select all that apply.',
+          teach: {
+            concept:
+              'Job adverts name products because whoever wrote the advert named the product the team ' +
+              'happens to own. What the team actually needs is somebody who can take a question and ' +
+              'turn it into a search, read what comes back, and know when the answer is wrong.\n\n' +
+              'That skill transfers almost completely. The query languages differ in syntax and are ' +
+              'the same in shape: filter to the events you care about, extract a field, group and ' +
+              'count, sort. Somebody fluent in one is productive in another within about a week, and ' +
+              'every hiring manager who has done the job knows it.\n\n' +
+              'Two honest caveats. Product familiarity is worth real money at interview, so getting ' +
+              'hands on a free tier and being able to say you have used it is worth an evening. And ' +
+              'a hard requirement is sometimes genuinely hard, usually because of a contract or a ' +
+              'certification the employer has to evidence. Read the advert, apply anyway, and name ' +
+              'the transferable skill rather than pretending to the product.',
+          },
+          options: [
+            { id: 'a', label: 'The underlying skill, turning a question into a search and reading the result, transfers between platforms.' },
+            { id: 'b', label: 'Query languages differ in syntax but share a shape: filter, extract, group, count, sort.' },
+            { id: 'c', label: 'Hands-on time in a free tier is worth having, because naming the product credibly matters at interview.' },
+            { id: 'd', label: 'It is worth applying and describing the transferable skill rather than ruling yourself out.' },
+            { id: 'e', label: 'Since the skill transfers, it is fine to claim three years of Splunk on the application.' },
+          ],
+          hints: [
+            'Four are accurate. One turns a true observation about skills into a false claim about your history.',
+            'Ask what happens in the interview when somebody who does use Splunk asks a follow-up question.',
+            'There is a real difference between "I have not used that product and here is what I have done" and a claim that is not true.',
+          ],
+          solution:
+            'A, B, C, and D. The skill transfers, the languages rhyme, an evening in a free tier ' +
+            'buys credibility, and applying while naming what you can actually do is the right move. ' +
+            'E is not a shortcut, it is a lie that fails at the first specific question and costs you ' +
+            'the reference as well as the role. The strong version of this answer at interview is ' +
+            'plain: you have not used that product, here is the equivalent work you have done, and ' +
+            'here is how long you think it would take you to be useful in theirs.',
+          expectedOutput: 'Options A, B, C, and D selected.',
+          checks: [
+            {
+              type: 'choice-equals',
+              optionIds: ['a', 'b', 'c', 'd'],
+              hint:
+                'One option converts "the skill transfers" into a claim about experience you do not ' +
+                'have.',
+            },
+          ],
+          debrief:
+            'This is the single most common reason career changers do not apply for roles they would ' +
+            'get. The product list is a description of the toolbox, not a description of the person.',
+          practice: [],
+        },
+      ],
+    },
+    {
+      id: 'soc.7',
+      packageId: 'soc-foundations',
+      order: 7,
+      title: 'Working the shift',
+      summary:
+        'What shift work costs, what alert fatigue really is, the metrics that improve a SOC and the ' +
+        'ones that quietly wreck it, and what a good quiet day looks like.',
+      exercises: [
+        {
+          id: 'soc.7.1',
+          moduleId: 'soc.7',
+          packageId: 'soc-foundations',
+          order: 1,
+          title: 'What the rota costs',
+          kind: 'multiple-choice',
+          goal: 'Understand shift work as a life decision before you accept one.',
+          prompt:
+            'You are considering a Tier 1 role on a 24 by 7 rota. Which of the following are ' +
+            'accurate? Select all that apply.',
+          teach: {
+            concept:
+              'Most Tier 1 SOC roles cover nights and weekends, because attacks do not keep office ' +
+              'hours. That is a fact about the job worth knowing before you take it rather than ' +
+              'after, and it is the single most common reason people leave a first security role ' +
+              'that they were otherwise good at.\n\n' +
+              'The trade is real in both directions. Shift work pays more, often substantially, and ' +
+              'night shifts are quieter, which means more time to read and learn than a day operator ' +
+              'ever gets. Many people do a year of it deliberately, learn faster than their peers, ' +
+              'and move to a business hours role afterwards.\n\n' +
+              'The costs are equally real and are not evenly distributed. Rotating shifts are harder ' +
+              'on health and on anybody with caring responsibilities or a partner on a fixed ' +
+              'schedule. A fixed night rota is often easier to live with than one that rotates every ' +
+              'week. Ask which pattern the team actually runs, because the advert will not say.',
+          },
+          options: [
+            { id: 'a', label: 'Most Tier 1 roles involve nights and weekends, because monitoring is continuous.' },
+            { id: 'b', label: 'Shift roles usually pay more than the equivalent business hours role.' },
+            { id: 'c', label: 'Night shifts are typically quieter, which can mean more time to learn.' },
+            { id: 'd', label: 'A fixed pattern is usually easier to live with than one that rotates every week.' },
+            { id: 'e', label: 'Shift work suits everybody equally, so it is not worth asking about before accepting.' },
+          ],
+          hints: [
+            'Four are accurate. One treats a significant life decision as a detail.',
+            'Ask who in a household is affected by a rota, not just the person working it.',
+            'The advert will tell you the salary. What will it not tell you?',
+          ],
+          solution:
+            'A, B, C, and D. Continuous monitoring means somebody is awake, the premium is real, the ' +
+            'quiet hours are a genuine learning opportunity, and a fixed pattern is easier on the ' +
+            'body and the household than a rotating one. E is the answer that costs people a year: ' +
+            'shift work affects health, relationships, and childcare very unevenly, and the pattern ' +
+            'is a fair and normal thing to ask about in a first interview. Nobody will think less of ' +
+            'you for it.',
+          expectedOutput: 'Options A, B, C, and D selected.',
+          checks: [
+            {
+              type: 'choice-equals',
+              optionIds: ['a', 'b', 'c', 'd'],
+              hint:
+                'One option says the rota is not worth asking about, which is the assumption that ' +
+                'ends a lot of first security jobs.',
+            },
+          ],
+          debrief:
+            'Ask three questions at interview: is the pattern fixed or rotating, how many people ' +
+            'cover the night, and what happens when somebody is off sick. The answers tell you more ' +
+            'about the team than anything on the advert.',
+          practice: [],
+        },
+        {
+          id: 'soc.7.2',
+          moduleId: 'soc.7',
+          packageId: 'soc-foundations',
+          order: 2,
+          title: 'Hand the shift over',
+          kind: 'short-answer',
+          goal: 'Write a handover that leaves the next operator ready rather than curious.',
+          prompt:
+            'Your shift ends. One alert is still open and waiting on a reply from a user, a second ' +
+            'was escalated an hour ago, and a noisy detection has fired eleven times and been closed ' +
+            'each time. In three or four sentences, write the handover.',
+          teach: {
+            concept:
+              'A shift handover is not a summary of your shift. It is a briefing for somebody who is ' +
+              'about to become responsible, and it is written for their next hour rather than about ' +
+              'your last eight.\n\n' +
+              'Three things go in it. WHAT IS LIVE AND WAITING ON SOMETHING, with what it is waiting ' +
+              'for, so the incoming operator knows what to chase rather than discovering it at ' +
+              'midnight. WHAT HAS BEEN ESCALATED AND TO WHOM, so nobody escalates it twice or ' +
+              'assumes somebody has it. And ANYTHING RECURRING, because a detection that has fired ' +
+              'eleven times is not eleven alerts, it is one tuning problem, and saying so stops the ' +
+              'next person working it again from scratch.\n\n' +
+              'Leave out everything that is finished and unremarkable. A handover that lists all ' +
+              'forty alerts you closed is a handover nobody reads, which is functionally the same as ' +
+              'not writing one.',
+          },
+          hints: [
+            'Write for their next hour, not about your last eight.',
+            'The eleven firings are not eleven pieces of news. What are they, in one sentence?',
+            'A good handover says what is open and what it waits on, who has the escalated item, and flags the recurring detection as one tuning issue.',
+          ],
+          solution:
+            'One alert is open and waiting on a reply from the user about whether they recognise the ' +
+            'login, so it needs chasing if nothing arrives by mid-shift rather than being reworked. ' +
+            'A second was escalated to Tier 2 an hour ago and is with them, so it does not need ' +
+            'picking up here unless they come back with questions. The third thing is not really an ' +
+            'alert: one detection has fired eleven times tonight and been closed as benign every ' +
+            'time, which is a tuning case rather than eleven separate pieces of work, and I have ' +
+            'raised it with detection engineering. Nothing else from the shift needs carrying ' +
+            'forward.',
+          expectedOutput:
+            'A handover naming the open alert and what it waits on, the escalation and who holds it, ' +
+            'and the recurring detection framed as a single tuning problem.',
+          checks: [
+            {
+              type: 'answer-mentions',
+              conceptGroups: [
+                ['waiting', 'waits on', 'chase', 'reply', 'open'],
+                ['escalated', 'tier 2', 'with them', 'handed to', 'holds it'],
+                ['tuning', 'one issue', 'same detection', 'recurring', 'not eleven', 'single'],
+              ],
+              hint:
+                'Three things: what is open and what it needs, who holds the escalation, and the ' +
+                'recurring detection stated as one problem rather than eleven.',
+            },
+          ],
+          debrief:
+            'The eleven firings are the part most people get wrong. Reporting them as eleven alerts ' +
+            'is accurate and useless; reporting them as one tuning case is what gets the noise ' +
+            'removed for everybody.',
+          practice: [],
+        },
+        {
+          id: 'soc.7.3',
+          moduleId: 'soc.7',
+          packageId: 'soc-foundations',
+          order: 3,
+          title: 'Alert fatigue is not laziness',
+          kind: 'multiple-choice',
+          goal: 'Recognise the failure mode that hits every high-volume queue, and what actually fixes it.',
+          prompt:
+            'A team is closing alerts faster and faster, and has started missing real ones. Which of ' +
+            'the following are accurate? Select all that apply.',
+          teach: {
+            concept:
+              'Alert fatigue is what happens to any human working a queue that is overwhelmingly ' +
+              'false. After several hundred alerts that turned out to be nothing, the brain stops ' +
+              'genuinely assessing each one and starts pattern-matching to the outcome it expects, ' +
+              'which is closure. It happens to conscientious people, it happens quickly, and it is ' +
+              'not a character flaw.\n\n' +
+              'It also does not respond to the interventions managers reach for first. Telling people ' +
+              'to be more careful does nothing, because they are already trying. Adding a second ' +
+              'reviewer doubles the cost and produces two fatigued people. Measuring throughput makes ' +
+              'it worse by rewarding exactly the behaviour causing the misses.\n\n' +
+              'What works is reducing the volume: tuning the detections that produce the noise, ' +
+              'automating provable benign closures, and giving the queue a realistic size. That is ' +
+              'why tuning is a first-class activity in a healthy SOC rather than something done when ' +
+              'there is time, and why an operator who documents why an alert was benign is doing the ' +
+              'work that eventually fixes it.',
+          },
+          options: [
+            { id: 'a', label: 'It is a predictable response to a queue that is mostly false positives, not a lack of diligence.' },
+            { id: 'b', label: 'Tuning the noisiest detections addresses the cause rather than the symptom.' },
+            { id: 'c', label: 'Measuring operators on alerts closed per hour makes it worse.' },
+            { id: 'd', label: 'Well documented benign closures are what make the tuning case possible.' },
+            { id: 'e', label: 'The fix is to tell the team to be more careful and review their work more closely.' },
+          ],
+          hints: [
+            'Four are accurate. One is the intervention that gets tried first and never works.',
+            'Ask whether the people missing alerts are failing to try.',
+            'What behaviour does a throughput metric reward, and is it the behaviour you want?',
+          ],
+          solution:
+            'A, B, C, and D. It is a predictable consequence of volume, the cause is the noise, ' +
+            'throughput metrics accelerate it, and the documented closures are the raw material for ' +
+            'fixing it. E is the response that feels like management and changes nothing: the team ' +
+            'is already being careful, and asking for more care without reducing the volume just ' +
+            'adds guilt to a workload problem. If you find yourself on a queue like this, the useful ' +
+            'thing you can do is write down why each one was benign, because that is what turns your ' +
+            'experience into somebody tuning the rule.',
+          expectedOutput: 'Options A, B, C, and D selected.',
+          checks: [
+            {
+              type: 'choice-equals',
+              optionIds: ['a', 'b', 'c', 'd'],
+              hint:
+                'One option treats a volume problem as an attitude problem.',
+            },
+          ],
+          debrief:
+            'If you ever run a queue, watch the false positive rate rather than the closure rate. ' +
+            'One of those numbers tells you whether the work is possible; the other tells you how ' +
+            'fast people are giving up on it.',
+          practice: [],
+        },
+        {
+          id: 'soc.7.4',
+          moduleId: 'soc.7',
+          packageId: 'soc-foundations',
+          order: 4,
+          title: 'Metrics that help and metrics that harm',
+          kind: 'multiple-choice',
+          goal: 'Judge a proposed SOC metric by the behaviour it will produce.',
+          prompt:
+            'Leadership wants to measure the SOC. Which of these metrics would improve it? Select ' +
+            'all that apply.',
+          teach: {
+            concept:
+              'Every metric is an instruction, whatever it was intended as. People optimise what is ' +
+              'measured, so the only useful question about a proposed metric is what behaviour it ' +
+              'will produce when somebody is under pressure to move it.\n\n' +
+              'Good SOC metrics point at the outcome rather than the activity. How long until a real ' +
+              'incident was detected, and until it was contained, both measure the thing the SOC ' +
+              'exists for. The proportion of alerts that turn out to be false measures whether the ' +
+              'queue is workable at all. Detection coverage against a framework measures whether you ' +
+              'can see the attacks that matter.\n\n' +
+              'Bad ones measure activity and are trivially gamed. Alerts closed per operator per ' +
+              'hour rewards fast closure regardless of correctness, which is the exact behaviour ' +
+              'behind missed incidents. Number of alerts generated rewards noisy detections. Both ' +
+              'produce charts that improve while the SOC gets worse, which is the worst possible ' +
+              'outcome because it removes the pressure to fix anything.',
+          },
+          options: [
+            { id: 'a', label: 'Time from an incident starting to it being detected.' },
+            { id: 'b', label: 'Time from detection to containment.' },
+            { id: 'c', label: 'The proportion of alerts that turn out to be false positives.' },
+            { id: 'd', label: 'Detection coverage measured against a framework such as ATT&CK.' },
+            { id: 'e', label: 'Alerts closed per operator per hour.' },
+          ],
+          hints: [
+            'Four measure outcomes. One measures speed of closure.',
+            'For each one, ask what somebody would do to improve the number if they were being judged on it.',
+            'Which of these could improve every quarter while the SOC gets steadily worse?',
+          ],
+          solution:
+            'A, B, C, and D. Detection time and containment time measure what the SOC is for, the ' +
+            'false positive rate measures whether the work is possible, and coverage measures whether ' +
+            'you can see what matters. E is the one to argue against, and the argument is not that ' +
+            'throughput is unimportant but that it is trivially improved by closing things without ' +
+            'reading them. A team measured on it will look better on the chart every quarter until ' +
+            'the incident nobody read goes public.',
+          expectedOutput: 'Options A, B, C, and D selected.',
+          checks: [
+            {
+              type: 'choice-equals',
+              optionIds: ['a', 'b', 'c', 'd'],
+              hint:
+                'One option measures how fast alerts are closed rather than whether they were ' +
+                'handled correctly.',
+            },
+          ],
+          debrief:
+            'You will be measured on something. Being able to say what a metric will do to behaviour ' +
+            'is a senior skill and it is worth practising long before anybody asks your opinion.',
+          practice: [],
+        },
+        {
+          id: 'soc.7.5',
+          moduleId: 'soc.7',
+          packageId: 'soc-foundations',
+          order: 5,
+          title: 'A good quiet shift',
+          kind: 'short-answer',
+          goal: 'Say what productive looks like on a night when nothing happens.',
+          prompt:
+            'You are on a night shift and nothing is happening. In three or four sentences, say what ' +
+            'you would do with the time, and why that is the job rather than a way of filling it.',
+          teach: {
+            concept:
+              'Most shifts contain no incident, and what an operator does with the quiet hours is ' +
+              'most of what separates somebody who is promoted in a year from somebody still on the ' +
+              'same queue in three.\n\n' +
+              'The productive uses are all forms of turning experience into something durable. ' +
+              'Reading back through recent closed alerts to see what you would decide differently ' +
+              'now. Documenting a noisy detection well enough that somebody can tune it. Learning ' +
+              'the environment: which servers exist, what normal traffic looks like, where the ' +
+              'crown jewels are, so that when something is abnormal you recognise it instead of ' +
+              'having to derive it. Following up threads from earlier shifts that were left open.\n\n' +
+              'The thing that makes all of that the job rather than self-improvement is that a quiet ' +
+              'queue is not evidence of safety, it is the only time available to get better at ' +
+              'noticing. An operator who knows the estate spots the odd thing in seconds; one who ' +
+              'does not never spots it at all.',
+          },
+          hints: [
+            'A quiet queue is not evidence that nothing is happening. What does that suggest is worth doing?',
+            'Think about what would make the next busy shift faster.',
+            'A good answer names learning the environment or what normal looks like, reviewing past alerts or tuning noisy detections, and connects it to catching things faster later.',
+          ],
+          solution:
+            'A quiet queue is not evidence that nothing is wrong, so the first use of the time is ' +
+            'learning the environment: which systems exist, what normal traffic and normal login ' +
+            'patterns look like, and where the data worth stealing actually lives. The second is ' +
+            'going back over recently closed alerts to see whether I would still close them the same ' +
+            'way, and writing up any detection that keeps firing benign so somebody can tune it. ' +
+            'Both of those make the next busy shift faster, because recognising an abnormality is ' +
+            'only possible if you already know what normal looks like. Filling the time with ' +
+            'anything else is the version of this job where you are still on the same queue in three ' +
+            'years.',
+          expectedOutput:
+            'An answer naming learning the environment or baseline normal, reviewing past alerts or ' +
+            'documenting noisy detections, and connecting both to faster recognition later.',
+          checks: [
+            {
+              type: 'answer-mentions',
+              conceptGroups: [
+                ['normal', 'baseline', 'environment', 'estate', 'what systems', 'learn the'],
+                ['review', 'go back', 'closed alerts', 'tuning', 'document', 'write up'],
+                ['faster', 'recognise', 'spot', 'next time', 'later', 'catch'],
+              ],
+              hint:
+                'Three ideas: learning what normal looks like, reviewing or documenting past work, ' +
+                'and why both pay off when something real arrives.',
+            },
+          ],
+          debrief:
+            'Every experienced analyst can name the quiet month where they learned the network. It ' +
+            'is the least visible and most valuable thing you will do in a first year.',
+          practice: [],
+        },
+      ],
+    },
+    {
+      id: 'soc.8',
+      packageId: 'soc-foundations',
+      order: 8,
+      title: 'Getting in, and getting on',
+      summary:
+        'What a first interview is really testing, where certifications help and where they do not, ' +
+        'how to talk about work you have done, and the routes out of Tier 1.',
+      exercises: [
+        {
+          id: 'soc.8.1',
+          moduleId: 'soc.8',
+          packageId: 'soc-foundations',
+          order: 1,
+          title: 'What the interview is testing',
+          kind: 'multiple-choice',
+          goal: 'Understand what a hiring manager is actually looking for in a Tier 1 candidate.',
+          prompt:
+            'You have an interview for a first SOC role. Which of the following are the panel ' +
+            'actually assessing? Select all that apply.',
+          teach: {
+            concept:
+              'Nobody hiring for Tier 1 expects you to know their environment, their tooling, or ' +
+              'much of their threat landscape. They expect to teach you all of that. What they ' +
+              'cannot teach quickly is how you think, so that is what the questions are for.\n\n' +
+              'Four things are being assessed. STRUCTURED REASONING: given an ambiguous alert, do you ' +
+              'ask sensible questions in a sensible order, or guess. HONESTY UNDER UNCERTAINTY: can ' +
+              'you say you do not know and describe how you would find out, which is the single ' +
+              'strongest answer available to a junior. CURIOSITY: have you looked at anything on your ' +
+              'own, and can you talk about it. And RELIABILITY: a rota depends on people turning up ' +
+              'and doing what they said, and a SOC will take a dependable learner over a brilliant ' +
+              'one every time.\n\n' +
+              'What they are not assessing is whether you can recite port numbers. Some interviewers ' +
+              'still ask; the answer matters far less than what you do when you hit one you do not ' +
+              'know.',
+          },
+          options: [
+            { id: 'a', label: 'Whether you reason through an ambiguous situation in a sensible order.' },
+            { id: 'b', label: 'Whether you can say you do not know and describe how you would find out.' },
+            { id: 'c', label: 'Whether you have looked into anything on your own initiative.' },
+            { id: 'd', label: 'Whether you are dependable, because a rota falls apart without that.' },
+            { id: 'e', label: 'Whether you can recall port numbers and acronyms from memory under pressure.' },
+          ],
+          hints: [
+            'Four are about how you think and work. One is about recall.',
+            'Ask which of these a good employer can teach you in a month.',
+            'What is the strongest possible answer to a question you genuinely cannot answer?',
+          ],
+          solution:
+            'A, B, C, and D. Reasoning, honesty, curiosity, and dependability are the things that ' +
+            'cannot be taught in the first month, so they are what gets assessed. E is the one ' +
+            'candidates over-prepare and interviewers weight least: a port number is a lookup, and a ' +
+            'candidate who says they would check and then explains how they would confirm it looks ' +
+            'better than one who recites it and cannot reason. If you take one thing into an ' +
+            'interview, take a worked example of something you investigated and can talk through ' +
+            'step by step.',
+          expectedOutput: 'Options A, B, C, and D selected.',
+          checks: [
+            {
+              type: 'choice-equals',
+              optionIds: ['a', 'b', 'c', 'd'],
+              hint:
+                'One option is pure recall, which is the thing a search engine does and an interview ' +
+                'weights least.',
+            },
+          ],
+          debrief:
+            'Practise saying "I do not know, here is how I would find out" out loud until it is ' +
+            'comfortable. It is the answer that separates candidates, and almost nobody rehearses it.',
+          practice: [],
+        },
+        {
+          id: 'soc.8.2',
+          moduleId: 'soc.8',
+          packageId: 'soc-foundations',
+          order: 2,
+          title: 'Where a certification helps',
+          kind: 'multiple-choice',
+          goal: 'Spend certification money and time where it actually changes an outcome.',
+          prompt:
+            'You are deciding whether to take an entry-level certification. Which of the following ' +
+            'are accurate? Select all that apply.',
+          teach: {
+            concept:
+              'Certifications do one job well: they get a CV past a filter. Many organisations, and ' +
+              'nearly all government and defence work, screen on them before a human reads anything, ' +
+              'so in those places a missing certificate is a wall rather than a preference.\n\n' +
+              'They also give a structured syllabus to somebody who does not yet know what they do ' +
+              'not know, which is genuinely valuable when you are starting and have no map.\n\n' +
+              'What they do not do is demonstrate that you can do the work. Everybody on the panel ' +
+              'knows the exam is multiple choice, so a certificate opens the conversation and ' +
+              'evidence wins it: something you built, an investigation you can walk through, a ' +
+              'home lab, a write-up. The strongest position for a career changer is a screening ' +
+              'certificate plus one piece of work you can talk about in detail, and the second half ' +
+              'is what people skip.',
+          },
+          options: [
+            { id: 'a', label: 'They get a CV past automated and HR screening, which is a real barrier in many places.' },
+            { id: 'b', label: 'Some sectors, particularly government and defence, make specific certificates mandatory.' },
+            { id: 'c', label: 'They provide a structured syllabus when you do not yet know what you do not know.' },
+            { id: 'd', label: 'They do not demonstrate you can do the work, so evidence of actual work still matters.' },
+            { id: 'e', label: 'Holding several certificates is a substitute for having anything to show.' },
+          ],
+          hints: [
+            'Four are accurate. One treats certificates as a replacement for evidence.',
+            'Ask what a panel does after the certificate has got you into the room.',
+            'What can somebody who has passed an exam still not prove?',
+          ],
+          solution:
+            'A, B, C, and D. They pass filters, they are genuinely mandatory in parts of the public ' +
+            'sector, they give a beginner a map, and they do not show you can do the job. E is the ' +
+            'trap that costs career changers a year and a lot of money: a stack of certificates with ' +
+            'nothing to show reads as somebody who studies rather than somebody who does. One ' +
+            'screening certificate plus one piece of work you can walk through beats four ' +
+            'certificates and nothing every time.',
+          expectedOutput: 'Options A, B, C, and D selected.',
+          checks: [
+            {
+              type: 'choice-equals',
+              optionIds: ['a', 'b', 'c', 'd'],
+              hint:
+                'One option offers certificates as a substitute for demonstrable work.',
+            },
+          ],
+          debrief:
+            'If you are choosing between a second certificate and finishing something you can ' +
+            'demonstrate, finish the thing. The certificate gets you read; the work gets you hired.',
+          practice: [],
+        },
+        {
+          id: 'soc.8.3',
+          moduleId: 'soc.8',
+          packageId: 'soc-foundations',
+          order: 3,
+          title: 'Talk about work you have done',
+          kind: 'short-answer',
+          goal: 'Describe an investigation so a panel can hear the reasoning rather than the result.',
+          prompt:
+            'An interviewer asks you to walk through something you have investigated. In three or ' +
+            'four sentences, describe how you would structure that answer, whatever the subject was.',
+          teach: {
+            concept:
+              'Candidates answer this question by describing what they found, which is the least ' +
+              'interesting part. The panel already assumes the exercise worked out; they are ' +
+              'listening for how you got there.\n\n' +
+              'A strong answer has four moves. THE QUESTION you were trying to answer, stated ' +
+              'plainly, because a specific starting question shows you were not just clicking about. ' +
+              'WHAT YOU LOOKED AT AND WHY THAT SOURCE, which is where reasoning becomes visible. ' +
+              'WHAT SURPRISED YOU or turned out wrong, which is the most credible thing a junior can ' +
+              'say and almost nobody says it. And WHAT YOU CONCLUDED, with its limits: what you could ' +
+              'establish and what remained unknown.\n\n' +
+              'It does not need to be a real breach. A home lab, an exercise, or a public dataset is ' +
+              'completely acceptable, and being straightforward about that is far stronger than ' +
+              'dressing it up as something it was not.',
+          },
+          hints: [
+            'The panel assumes you found the answer. What are they actually listening for?',
+            'One of the four moves is the one nobody makes, and it is the most convincing.',
+            'A good answer starts from the question being asked, explains why each source was chosen, includes what turned out wrong, and ends with a conclusion and its limits.',
+          ],
+          solution:
+            'I would start with the question I was actually trying to answer, stated in one sentence, ' +
+            'because that shows the work had a direction rather than being a tour of the tooling. ' +
+            'Then what I looked at and why I chose that source over another, since that is where the ' +
+            'reasoning is visible to somebody who cannot see my screen. I would deliberately include ' +
+            'something that surprised me or that I initially got wrong and had to correct, because ' +
+            'that is more credible than a clean narrative and it shows I check myself. And I would ' +
+            'finish with what I concluded and what I could not establish, being clear that it was a ' +
+            'lab exercise rather than implying it was a real incident.',
+          expectedOutput:
+            'An answer structured around the starting question, the sources chosen and why, something ' +
+            'that went wrong or surprised them, and a conclusion stated with its limits.',
+          checks: [
+            {
+              type: 'answer-mentions',
+              conceptGroups: [
+                ['question', 'what I was trying', 'starting', 'direction', 'goal'],
+                ['why', 'chose', 'source', 'looked at', 'reasoning'],
+                ['wrong', 'surprised', 'corrected', 'did not expect', 'mistake', 'check myself'],
+                ['could not establish', 'limits', 'concluded', 'unknown', 'lab'],
+              ],
+              hint:
+                'Four moves: the question, the sources and why, what went wrong, and the conclusion ' +
+                'with its limits.',
+            },
+          ],
+          debrief:
+            'The third move is the one that gets people hired. A candidate who describes correcting ' +
+            'their own mistake is describing the single most useful habit in this job.',
+          practice: [],
+        },
+        {
+          id: 'soc.8.4',
+          moduleId: 'soc.8',
+          packageId: 'soc-foundations',
+          order: 4,
+          title: 'Where Tier 1 leads',
+          kind: 'multiple-choice',
+          goal: 'See the routes out of the queue before you are standing in it.',
+          prompt:
+            'Which of the following are realistic progressions from a Tier 1 SOC role? Select all ' +
+            'that apply.',
+          teach: {
+            concept:
+              'Tier 1 is a starting position and it is meant to be left. It is unusually good as a ' +
+              'first role because it exposes you to the whole estate and to every kind of alert, ' +
+              'which means you find out what you actually like doing rather than guessing.\n\n' +
+              'The common routes out are visible from the floor. Tier 2 and incident response, for ' +
+              'people who want the investigation rather than the triage. Detection engineering, for ' +
+              'people who keep noticing that a rule is wrong and want to fix it, which is a natural ' +
+              'move for anybody who has been documenting benign closures. Threat intelligence, for ' +
+              'people drawn to the actor rather than the event. Threat hunting, which usually wants ' +
+              'a couple of years of pattern recognition first. And out of the SOC entirely into ' +
+              'security engineering, cloud security, or GRC.\n\n' +
+              'What does not happen is jumping straight into the specialist seats with no operational ' +
+              'grounding. It is not gatekeeping: the specialisms all depend on knowing what normal ' +
+              'looks like, and the queue is where that is learned.',
+          },
+          options: [
+            { id: 'a', label: 'Tier 2 and incident response, for people who prefer the investigation to the triage.' },
+            { id: 'b', label: 'Detection engineering, which is a natural move for somebody who keeps finding rules that are wrong.' },
+            { id: 'c', label: 'Threat intelligence or threat hunting, usually after a couple of years of pattern recognition.' },
+            { id: 'd', label: 'Out of the SOC entirely, into security engineering, cloud security, or risk and governance.' },
+            { id: 'e', label: 'Straight into a senior specialist role, since the queue teaches nothing worth keeping.' },
+          ],
+          hints: [
+            'Four are real routes people take. One dismisses the thing that makes the specialisms possible.',
+            'Ask what every specialism depends on knowing.',
+            'Where do you learn what normal looks like, if not on the queue?',
+          ],
+          solution:
+            'A, B, C, and D. All four are routes people actually take, and B is worth noticing ' +
+            'because it starts from something you can do on day one: documenting why alerts were ' +
+            'benign is the beginning of detection engineering. E is wrong on both counts. The ' +
+            'specialisms depend on knowing what normal traffic, normal logins, and normal noise look ' +
+            'like across a real estate, and Tier 1 is where that is learned faster than anywhere ' +
+            'else. Treating it as time to be endured is how people spend two years there and learn ' +
+            'one year of things.',
+          expectedOutput: 'Options A, B, C, and D selected.',
+          checks: [
+            {
+              type: 'choice-equals',
+              optionIds: ['a', 'b', 'c', 'd'],
+              hint:
+                'One option treats the queue as time wasted rather than as where the specialisms get ' +
+                'their foundation.',
+            },
+          ],
+          debrief:
+            'Pick a direction in your first six months and start bending your spare time towards it. ' +
+            'The people who move fastest are the ones who chose, not the ones who waited to be ' +
+            'chosen.',
           practice: [],
         },
       ],

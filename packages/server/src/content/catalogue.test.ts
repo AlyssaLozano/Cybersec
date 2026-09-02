@@ -76,6 +76,7 @@ const EXPECTED_EXERCISE_COUNTS: Record<string, number> = {
   'log-analysis': 40,
   'incident-triage': 26,
   'incident-response': 40,
+  'soc-foundations': 40,
   networking: 45,
 };
 
