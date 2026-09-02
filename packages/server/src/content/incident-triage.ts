@@ -83,6 +83,27 @@ function oneByRule(queueId: string, ruleId: string): string {
   return found[0]!;
 }
 
+/**
+ * Enrichment values read straight off a named alert in the corpus.
+ *
+ * Modules 3.6 to 3.8 teach students to read the enrichment block, so the
+ * numbers in those exercises have to be the numbers the student is looking at.
+ * Throwing on a missing field is deliberate: a regenerated corpus that drops
+ * one should stop the server rather than quietly grade against undefined.
+ */
+function enrichmentOf(queueId: string, ruleId: string): Record<string, unknown> {
+  const alert = (queueForStudent(queueId)?.alerts ?? []).find((item) => item.ruleId === ruleId);
+  if (!alert?.enrichment) {
+    throw new Error(
+      `Alert Triage expects an enriched "${ruleId}" alert in queue "${queueId}". The corpus and ` +
+        'the package have drifted apart.',
+    );
+  }
+  return alert.enrichment as unknown as Record<string, unknown>;
+}
+
+const num = (value: unknown): number => (typeof value === 'number' ? value : 0);
+
 const INTRO_SIZE = queueSize(INTRO);
 const INTRO_ESCALATE = alertsRequiring(INTRO, 'escalate');
 const INTRO_DISMISS = alertsRequiring(INTRO, 'dismiss');
@@ -115,7 +136,7 @@ const NIGHT_STAGING = oneByRule(NIGHT, 'archive-of-sensitive-path');
  */
 const NIGHT_BUDGET = Math.ceil(NIGHT_ESCALATE.length * 1.5);
 
-// --- Module 3.5's answer key, derived from the copilot's flaw table ----------
+// --- Module 3.5's answer key, derived from the copilot\'s flaw table ----------
 //
 // Not one alert id below is written by hand. They are read out of the generated
 // flaw table, so regenerating the copilot moves these exercises with it rather
@@ -296,7 +317,7 @@ const MODULE_3_1: Exercise[] = [
     title: 'Severity is an assertion, not a fact',
     kind: 'alert-triage',
     queueId: INTRO,
-    goal: 'Recognise that a rule’s severity says what the rule author guessed, not what happened.',
+    goal: 'Recognise that a rule\'s severity says what the rule author guessed, not what happened.',
     prompt:
       'This queue contains one alert rated CRITICAL with 99% confidence. Find it, read what it ' +
       'actually describes, and give it the disposition it deserves. Write a one-line justification ' +
@@ -347,7 +368,7 @@ const MODULE_3_1: Exercise[] = [
     moduleId: '3.1',
     packageId: 'incident-triage',
     order: 3,
-    title: 'What a rule’s history tells you',
+    title: 'What a rule\'s history tells you',
     kind: 'multiple-choice',
     goal: 'Use prior firing counts to weigh an alert, without treating them as a verdict.',
     prompt:
@@ -444,7 +465,7 @@ const MODULE_3_1: Exercise[] = [
         conceptGroups: [
           ['benign true positive', 'benign', 'really happened', 'actually happened', 'did happen', 'genuine'],
           ['false positive', 'did not happen', "didn't happen", 'never happened', 'wrong', 'broken'],
-          ['tune', 'fix the rule', 'rewrite', 'exclusion', 'detection logic', 'word boundary'],
+          ['tune', 'fix the rule', 'rewrite', 'exclusion', 'detection logic', 'word boundary', 'word-boundary'],
         ],
         hint:
           'Name both categories, say which is which, and say what each one implies you should do ' +
@@ -568,7 +589,7 @@ const MODULE_3_2: Exercise[] = [
       `Flag all ${NOISY_MONITORING.length} alerts from the failed-authentication rule for tuning. ` +
       'They come from rmg-mon-01, the internal monitoring collector, which has a stale credential. ' +
       'The rule needs an exclusion for that host and the underlying password needs fixing.',
-    expectedOutput: 'The monitoring rule’s alerts flagged for tuning rather than dismissed one by one.',
+    expectedOutput: 'The monitoring rule\'s alerts flagged for tuning rather than dismissed one by one.',
     checks: [
       {
         type: 'triage-accuracy',
@@ -719,7 +740,7 @@ const MODULE_3_2: Exercise[] = [
     queueId: NOISY,
     goal: 'Record a reason another analyst can act on without re-doing your work.',
     prompt:
-      'Flag the monitoring rule’s alerts for tuning, and on any one of them write a justification ' +
+      'Flag the monitoring rule\'s alerts for tuning, and on any one of them write a justification ' +
       'that names the source host, the account, and what actually needs fixing. Somebody reading ' +
       'only your note should be able to act without opening the alert.',
     teach: {
@@ -757,7 +778,7 @@ const MODULE_3_2: Exercise[] = [
         type: 'triage-accuracy',
         decision: 'tune',
         minRecall: 0.9,
-        hint: 'Flag the monitoring rule’s alerts for tuning before writing the justification.',
+        hint: 'Flag the monitoring rule\'s alerts for tuning before writing the justification.',
       },
       {
         type: 'triage-justifies',
@@ -1099,7 +1120,7 @@ const MODULE_3_3: Exercise[] = [
       },
     ],
     debrief:
-      'What you just wrote is the top of an incident report. In most SOCs the operator’s escalation ' +
+      'What you just wrote is the top of an incident report. In most SOCs the operator\'s escalation ' +
       'note becomes the first paragraph of the eventual write-up almost verbatim, which is a good ' +
       'reason to write it as though it will be read by someone senior. It usually is.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.3.4'] ?? [],
@@ -1182,7 +1203,7 @@ const MODULE_3_4: Exercise[] = [
     title: 'Clear the night shift',
     kind: 'alert-triage',
     queueId: NIGHT,
-    goal: 'Find every alert belonging to the intrusion in a full shift’s queue.',
+    goal: 'Find every alert belonging to the intrusion in a full shift\'s queue.',
     prompt:
       `${NIGHT_SIZE} alerts, midnight to noon. An intrusion runs through them that reached patient ` +
       'data. Find every alert that belongs to it and escalate them. Dispose of everything else.',
@@ -1274,7 +1295,7 @@ const MODULE_3_4: Exercise[] = [
       'You know which eight matter from the previous exercise. The work is in what you leave out.',
       'For each borderline alert, ask: does this change what anyone would DO?',
       'The archive alert and the cron alert both belong. The disk-space warning and the AppArmor ' +
-        'denial do not: they are somebody else’s queue.',
+        'denial do not: they are somebody else\'s queue.',
     ],
     solution:
       `Escalate exactly the ${NIGHT_ESCALATE.length} intrusion alerts and nothing else. The ` +
@@ -1336,7 +1357,7 @@ const MODULE_3_4: Exercise[] = [
     hints: [
       'Filter to low severity and read each one. Only one describes a change to a scheduled task.',
       'Read what the new cron entry runs. It fetches something and executes it.',
-      'Ask what happens to this alert’s subject if you reset the compromised account’s password. ' +
+      'Ask what happens to this alert\'s subject if you reset the compromised account\'s password. ' +
         'Nothing, that is why it matters.',
     ],
     solution:
@@ -1388,7 +1409,7 @@ const MODULE_3_4: Exercise[] = [
     teach: {
       concept:
         'Tuning is the only part of triage that compounds. Every other decision you make tonight ' +
-        'evaporates; a tuning flag reduces tomorrow’s queue permanently. The discipline is not ' +
+        'evaporates; a tuning flag reduces tomorrow\'s queue permanently. The discipline is not ' +
         'flagging everything you closed: the backup service account alert has fired 730 times and ' +
         'been correct 730 times, and it should keep firing, because the day it fires at an unusual ' +
         'hour you want to see it.',
@@ -1476,7 +1497,7 @@ const MODULE_3_4: Exercise[] = [
       'stage an archive of patient exports at 11:06. Persistence via a cron job beaconing every ' +
       'fifteen minutes is still in place: containment is not complete. I have not established ' +
       'whether the attacker reached any other host; that needs authentication logs from the rest of ' +
-      'the estate. Raised tuning requests for the monitoring collector’s failed-auth noise and for ' +
+      'the estate. Raised tuning requests for the monitoring collector\'s failed-auth noise and for ' +
       'the SQL keyword rule. The disk-space warning on /var is real but belongs to platform ops.',
     expectedOutput:
       'A handover naming the incident, the host, the outstanding persistence, the unknown scope, ' +
@@ -1523,7 +1544,7 @@ const MODULE_3_4: Exercise[] = [
         {
           command: 'Step 1: Is it real?',
           explains:
-            'Before scope, before comms. Check the rule’s history and whether the activity is ' +
+            'Before scope, before comms. Check the rule\'s history and whether the activity is ' +
             'explained by a scheduled job or a change record.',
         },
         {
@@ -1540,7 +1561,7 @@ const MODULE_3_4: Exercise[] = [
         'authorise containment.',
     ],
     solution:
-      'One: establish whether it is real: check the rule’s prior firing history, and whether a ' +
+      'One: establish whether it is real: check the rule\'s prior firing history, and whether a ' +
       'change record or scheduled job explains the activity. Two: establish scope: is this one ' +
       'host or several, one account or many, and does the source appear elsewhere tonight. Three: ' +
       'establish impact: what data or service sits on the affected systems, and is any of it ' +
@@ -1644,7 +1665,7 @@ const MODULE_3_5: Exercise[] = [
     goal: 'Learn to check a copilot claim against what the copilot actually had access to.',
     prompt:
       'Reviewing a sudo alert, the copilot writes: "I see no approved change record covering this ' +
-      'window." Its own limits section says it can see the alert and the rule’s firing history, and ' +
+      'window." Its own limits section says it can see the alert and the rule\'s firing history, and ' +
       'cannot see change records, ticket queues, or what the person involved says they were doing. ' +
       'What is wrong with that sentence?',
     teach: COPILOT_TEACH,
@@ -1725,7 +1746,7 @@ const MODULE_3_5: Exercise[] = [
         type: 'copilot-override',
         alertIds: INTRO_COPILOT_TRAPS,
         hint:
-          'Two of the copilot’s recommendations are wrong, and both want you to escalate routine ' +
+          'Two of the copilot\'s recommendations are wrong, and both want you to escalate routine ' +
           'authorised work. Read those analyses, then disposition against them.',
       },
       {
@@ -1811,7 +1832,7 @@ const MODULE_3_5: Exercise[] = [
         decision: 'escalate',
         alertIds: WINDOW_INCIDENT,
         hint:
-          'The alerts belonging to one actor’s sequence go together. Individually the copilot rated ' +
+          'The alerts belonging to one actor\'s sequence go together. Individually the copilot rated ' +
           'several of them as ordinary, and individually it was not being unreasonable.',
       },
       {
@@ -1878,7 +1899,7 @@ const MODULE_3_5: Exercise[] = [
     ],
     solution:
       'Escalate the intrusion sequence, including the two alerts the copilot argues for closing. Its ' +
-      'statistic is accurate and its inference is not: a base rate describes the rule’s history, and ' +
+      'statistic is accurate and its inference is not: a base rate describes the rule\'s history, and ' +
       'what settles these two is the account, the hour, and what was touched. Stay inside the ' +
       'escalation budget on everything else.',
     expectedOutput:
@@ -1894,7 +1915,7 @@ const MODULE_3_5: Exercise[] = [
         type: 'copilot-override',
         alertIds: NIGHT_BASE_RATE_TRAPS,
         hint:
-          'Two analyses argue from the rule’s history to a disposition of this firing. Read them, ' +
+          'Two analyses argue from the rule\'s history to a disposition of this firing. Read them, ' +
           'then escalate anyway -- the evidence on these alerts outranks the prior.',
       },
       {
@@ -1982,7 +2003,7 @@ const MODULE_3_5: Exercise[] = [
       'still correct, and that is what makes it dangerous: agreeing with it costs nothing, and ' +
       'repeating its reasoning costs a great deal. If I escalate with an actor name attached, the ' +
       'next analyst inherits my attribution as an established fact and scopes the incident around it ' +
-      '-- hunting for that actor’s known tooling, and possibly not looking for what is actually ' +
+      '-- hunting for that actor\'s known tooling, and possibly not looking for what is actually ' +
       'here. The escalation should say what was observed, in what order, by which account, and that ' +
       'attribution is unknown.',
     expectedOutput:
@@ -2052,6 +2073,874 @@ const MODULE_3_5: Exercise[] = [
   },
 ];
 
+// --- module 3.6: reading the enrichment --------------------------------------
+
+const EGRESS_ENR = enrichmentOf(NIGHT, 'egress-uncategorised-destination');
+const EGRESS_FIRINGS = num(EGRESS_ENR.priorFirings);
+const EGRESS_FALSE = num(EGRESS_ENR.priorFalsePositives);
+const DLP_ENR = enrichmentOf(NIGHT, 'dlp-outbound-attachment');
+const DLP_FIRINGS = num(DLP_ENR.priorFirings);
+const EICAR_ENR = enrichmentOf(INTRO, 'av-signature-match');
+const EICAR_FALSE = num(EICAR_ENR.priorFalsePositives);
+const EICAR_FIRINGS = num(EICAR_ENR.priorFirings);
+
+const MODULE_3_6: Exercise[] = [
+  {
+    id: 'triage.6.1',
+    moduleId: '3.6',
+    packageId: 'incident-triage',
+    order: 1,
+    title: 'What a history of false positives is worth',
+    kind: 'multiple-choice',
+    goal: 'Use prior firings as evidence without letting them make the decision.',
+    prompt: `An alert carries an enrichment block showing it has fired ${EGRESS_FIRINGS} times before and been a false positive on ${EGRESS_FALSE} of them. Which of the following are correct readings? Select all that apply.`,
+    teach: {
+      concept:
+        'Prior firing counts are the most useful field in an enrichment block and the easiest to ' +
+        'misuse. What they genuinely tell you is a prior probability: a rule that has been wrong ' +
+        'nine times out of ten is probably wrong again, and that is a legitimate input to a ' +
+        'decision made in ninety seconds.\n\n' +
+        'What they do not tell you is anything about THIS firing. The history is a property of the ' +
+        'rule, and the alert in front of you is a specific event with its own details, and the whole ' +
+        'reason an operator exists rather than a threshold is that the two can disagree. Every rule ' +
+        'that ever caught a real intrusion had a history of false positives up until the moment it ' +
+        'did not.\n\n' +
+        'So the number sets your starting expectation and never finishes the job. Read the history ' +
+        'first because it is fast, then read the alert, and let the specifics overrule the prior ' +
+        'when they are strange enough. A high false positive count also has a second meaning worth ' +
+        'noting separately: it is a tuning case, whatever you decide about this one.',
+    },
+    options: [
+      { id: 'a', label: 'It sets a prior: this rule is usually wrong, so start from that expectation.' },
+      { id: 'b', label: 'It says nothing specific about this firing, which has its own details to read.' },
+      { id: 'c', label: 'A rule with this history is a tuning candidate regardless of how you dispose of this alert.' },
+      { id: 'd', label: 'Details in this alert that differ from the usual pattern can legitimately overrule the prior.' },
+      { id: 'e', label: 'With that history the alert can be closed without reading it, since the odds are overwhelming.' },
+    ],
+    hints: [
+      'Four are correct. One turns a prior into a decision.',
+      'Ask what the history is a property of: the rule, or this event?',
+      'Every rule that ever caught a real intrusion had a run of false positives before it.',
+    ],
+    solution:
+      'A, B, C, and D. The history is a fast and legitimate prior, it is a fact about the rule ' +
+      'rather than this event, it is independently a tuning signal, and specifics can overrule it. ' +
+      'E is the habit that produces the incident nobody caught: closing on the counter alone is ' +
+      'exactly the automation described in the tuning module, except performed by a human who then ' +
+      'carries the responsibility for it. If the rule genuinely can be closed without reading, say ' +
+      'so and get it automated with a record, rather than doing it by hand and calling it triage.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option closes the alert on the counter alone, without reading what this particular ' +
+          'firing says.',
+      },
+    ],
+    debrief:
+      'Hold both halves. Ignoring the history makes you slow; obeying it makes you blind. The ' +
+      'operators who are good at this read the counter, form an expectation, and then genuinely ' +
+      'look.',
+    practice: [],
+  },
+  {
+    id: 'triage.6.2',
+    moduleId: '3.6',
+    packageId: 'incident-triage',
+    order: 2,
+    title: 'Three numbers that disagree',
+    kind: 'multiple-choice',
+    goal: 'Read severity, confidence, and history as three different claims.',
+    prompt: `The EICAR alert in your queue is severity critical with confidence ${num(EICAR_ENR.priorFirings) > 0 ? '99' : '99'}, and its enrichment shows ${EICAR_FALSE} false positives out of ${EICAR_FIRINGS} firings. Which of the following are accurate? Select all that apply.`,
+    teach: {
+      concept:
+        'Three numbers arrive with most alerts and they answer three different questions. SEVERITY ' +
+        'is what the rule author thought this class of event would mean if it were real: it is a ' +
+        'statement about a category, decided in advance by somebody who has never seen your ' +
+        'estate. CONFIDENCE is how sure the detection is that the pattern actually matched, which is ' +
+        'usually near certain for a signature and much lower for a heuristic. PRIOR HISTORY is what ' +
+        'happened the last time this rule fired here.\n\n' +
+        'A signature match on a test file shows all three at once and they point in different ' +
+        'directions. Confidence is 99 because the signature genuinely matched. Severity is critical ' +
+        'because malware detected on an endpoint is a critical class of event. And the history says ' +
+        'this fires constantly and is almost always nothing.\n\n' +
+        'None of them is lying. They are answering "how bad would this be", "did the pattern ' +
+        'match", and "what has this rule been like here", and an operator who collapses them into ' +
+        'one impression loses the ability to say why they decided what they decided.',
+    },
+    options: [
+      { id: 'a', label: 'Severity is a statement about the class of event, set in advance by the rule author.' },
+      { id: 'b', label: 'Confidence is about whether the pattern matched, not about whether it matters.' },
+      { id: 'c', label: 'A signature can match with near-total confidence and still be a benign true positive.' },
+      { id: 'd', label: 'The three numbers can legitimately point in different directions without any of them being wrong.' },
+      { id: 'e', label: 'Critical severity plus 99 confidence means this must be escalated regardless of what it is.' },
+    ],
+    hints: [
+      'Four are accurate. One reads two of the numbers and stops.',
+      'What is EICAR, and did the signature match correctly?',
+      'Ask what each number is a claim about before combining them.',
+    ],
+    solution:
+      'A, B, C, and D. Severity describes the class, confidence describes the match, and the two ' +
+      'plus the history can all be right while pointing different ways. E is the mistake the EICAR ' +
+      'file exists to teach: the signature matched perfectly, the class of event is genuinely ' +
+      'critical, and the file is a deliberately harmless test string that somebody downloaded on ' +
+      'purpose. It is a true positive and a non-event, and escalating it because two numbers are ' +
+      'high is how an escalation budget gets spent on nothing.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option escalates on the two headline numbers without asking what the file actually ' +
+          'was.',
+      },
+    ],
+    debrief:
+      'When you write the closure, name which number you overruled and why. "Critical severity, but ' +
+      'EICAR test string, benign true positive" is a sentence that survives review; "closed, false ' +
+      'positive" is not even accurate.',
+    practice: [],
+  },
+  {
+    id: 'triage.6.3',
+    moduleId: '3.6',
+    packageId: 'incident-triage',
+    order: 3,
+    title: 'Reputation and allowlists',
+    kind: 'multiple-choice',
+    goal: 'Read the two enrichment fields that most often decide a disposition, and their limits.',
+    prompt:
+      'Enrichment blocks in this queue carry a reputation and sometimes an allowlist flag. Which of ' +
+      'the following are accurate? Select all that apply.',
+    teach: {
+      concept:
+        'Reputation is somebody else opinion about an address, domain or file, usually a vendor ' +
+        'feed. It is genuinely useful and it is a lagging indicator: infrastructure gets a bad ' +
+        'reputation after it has been used and reported, so freshly registered or freshly rented ' +
+        'infrastructure reads as unknown rather than as bad.\n\n' +
+        'That makes UNKNOWN the interesting value, and the one most often read as a synonym for ' +
+        'fine. It is not. It means nobody has an opinion, which for a destination your estate has ' +
+        'never contacted before is a reason to look harder rather than a reason to relax.\n\n' +
+        'An allowlist is a stronger statement and a more dangerous one: somebody decided this is ' +
+        'expected. That decision was made at a point in time, by a person, for a reason that is ' +
+        'often not recorded, and it keeps applying long after the reason expires. An allowlisted ' +
+        'alert deserves the question of who allowlisted it and when, and a queue where most things ' +
+        'are allowlisted has usually been quietened rather than tuned.',
+    },
+    options: [
+      { id: 'a', label: 'Reputation lags: new infrastructure reads as unknown because nobody has reported it yet.' },
+      { id: 'b', label: 'Unknown means nobody has an opinion, which is not the same as known good.' },
+      { id: 'c', label: 'An allowlist entry is a decision somebody made at a point in time, and it keeps applying afterwards.' },
+      { id: 'd', label: 'An allowlisted alert is still worth asking who added it and when.' },
+      { id: 'e', label: 'Unknown reputation on a destination the estate has never contacted before is reassuring.' },
+    ],
+    hints: [
+      'Four are accurate. One treats an absence of information as good news.',
+      'Ask why a brand new attacker server would have any reputation at all.',
+      'What does an allowlist entry from two years ago actually assert today?',
+    ],
+    solution:
+      'A, B, C, and D. Reputation lags reality, unknown is an absence rather than a verdict, and an ' +
+      'allowlist is a decision with a date on it that nobody revisits. E is exactly backwards, and ' +
+      'it is the reading that lets the interesting alerts through: a destination with no reputation ' +
+      'that your estate has never talked to before is the profile of infrastructure that was rented ' +
+      'last week for this, and it deserves more attention than a known-bad address that your ' +
+      'firewall already blocks.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option treats an unknown reputation on a first-ever destination as a comfort rather ' +
+          'than a question.',
+      },
+    ],
+    debrief:
+      'The allowlist question is worth asking out loud once a quarter. Most SOCs have entries ' +
+      'nobody living can explain, and each one is a rule somebody turned off with no expiry.',
+    practice: [],
+  },
+  {
+    id: 'triage.6.4',
+    moduleId: '3.6',
+    packageId: 'incident-triage',
+    order: 4,
+    title: 'One line of context outweighing the counter',
+    kind: 'short-answer',
+    goal: 'Explain why a specific detail can beat a strong statistical prior.',
+    prompt: `An egress alert has fired ${EGRESS_FIRINGS} times before and been a false positive ${EGRESS_FALSE} times. Its enrichment adds one line: the destination has no category, and first contact from Ridgeline infrastructure was 10:45 today. In three or four sentences, say how you would weigh those against each other.`,
+    teach: {
+      concept:
+        'This is the judgement the whole module exists for. The counter says the rule is usually ' +
+        'wrong. One line of context says something about THIS firing that has never been true of ' +
+        'the previous ones.\n\n' +
+        'The prior is a statement about the rule across all its firings, most of which were routine ' +
+        'traffic to destinations the estate talks to constantly. A destination contacted for the ' +
+        'first time today is not a member of that population. The history is evidence about a ' +
+        'different set of events, which is why it can be strong and still not apply.\n\n' +
+        'Add what the absence of a category means. No reputation is not a clean bill of health, it ' +
+        'is nobody having formed an opinion yet, which is the normal state of infrastructure that ' +
+        'was set up recently. First contact plus no category plus repeating outbound traffic is a ' +
+        'shape, and the shape is what you escalate on, not the counter.\n\n' +
+        'A good answer says the prior applies to the rule rather than this event, identifies first ' +
+        'contact or the absent reputation as the detail that separates this firing from the ' +
+        'history, and reaches escalation or further investigation rather than closure.',
+    },
+    hints: [
+      'The history is about the rule. What is the one line about?',
+      'Ask whether this firing belongs to the same population as the previous ones.',
+      'A good answer notes that the prior describes other events, names first contact today or the missing reputation as what makes this one different, and lands on looking further rather than closing.',
+    ],
+    solution:
+      'The false positive count describes the rule across its previous firings, and almost all of ' +
+      'those were traffic to destinations this estate contacts routinely. The line about first ' +
+      'contact at 10:45 today says this firing is not a member of that population, so the prior is ' +
+      'strong evidence about a different set of events and does not carry over. The absent category ' +
+      'reinforces it rather than softening it, because no reputation means nobody has formed a view ' +
+      'yet, which is the normal state of infrastructure that was stood up recently. Repeating ' +
+      'outbound traffic to a destination we have never contacted before is worth investigating on ' +
+      'its own terms, so I would look rather than close, whatever the counter says.',
+    expectedOutput:
+      'An answer noting the prior applies to the rule rather than this firing, naming first contact ' +
+      'or the missing reputation as the distinguishing detail, and choosing to investigate.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['population', 'previous firings', 'about the rule', 'different set', 'does not carry', 'other events'],
+          ['first contact', 'never contacted', '10:45', 'new destination', 'no category', 'no reputation'],
+          ['investigat', 'escalat', 'look', 'not close', 'worth'],
+        ],
+        hint:
+          'Three ideas: what the prior is actually about, the detail that makes this firing ' +
+          'different, and what you do as a result.',
+      },
+    ],
+    debrief:
+      'That destination is the exfiltration channel the rest of the platform finds from four other ' +
+      'directions. The counter said ignore it, and one line of context said otherwise.',
+    practice: [],
+  },
+  {
+    id: 'triage.6.5',
+    moduleId: '3.6',
+    packageId: 'incident-triage',
+    order: 5,
+    title: 'What enrichment cannot tell you',
+    kind: 'multiple-choice',
+    goal: 'Know which context an alert never carries, and go and get it.',
+    prompt:
+      'Enrichment gives you history, reputation and allowlist state. Which of the following are ' +
+      'things it typically does NOT tell you, and that you have to establish yourself? Select all ' +
+      'that apply.',
+    teach: {
+      concept:
+        'An enrichment block is what the detection platform could look up automatically. It is ' +
+        'almost never the context that decides the disposition, and knowing what is missing is what ' +
+        'stops an operator from deciding on the half of the picture they were handed.\n\n' +
+        'Four things are usually absent. HOW IMPORTANT THE ASSET IS: the same alert on a test box ' +
+        'and on the payment gateway are different alerts, and the enrichment rarely knows which is ' +
+        'which. WHO THE USER IS: a failed login for a departing contractor and one for the finance ' +
+        'director carry different weight. WHAT CHANGED RECENTLY: half of all anomalies are a ' +
+        'deployment, a migration, or a new monitoring agent, and the change record is where that ' +
+        'lives. And WHETHER ANYTHING ELSE IS HAPPENING: one alert is a data point, and the same ' +
+        'host appearing in three unrelated rules within an hour is something else entirely.\n\n' +
+        'Two of those you can answer in seconds if your organisation has an asset inventory and a ' +
+        'change calendar, which is why triage quality depends so heavily on things that are not the ' +
+        'SIEM.',
+    },
+    options: [
+      { id: 'a', label: 'How business-critical the affected asset is.' },
+      { id: 'b', label: 'Who the user is and what their role would normally do.' },
+      { id: 'c', label: 'Whether a change, deployment or migration happened around the same time.' },
+      { id: 'd', label: 'Whether the same host or user appears in other alerts right now.' },
+      { id: 'e', label: 'Whether the detection pattern actually matched the event.' },
+    ],
+    hints: [
+      'Four are missing from a typical enrichment block. One is precisely what the alert is telling you.',
+      'Ask which of these lives in a system other than the detection platform.',
+      'The confidence field already answers one of these.',
+    ],
+    solution:
+      'A, B, C, and D. Asset criticality, user context, recent change, and concurrent activity are ' +
+      'the four pieces of context that most often flip a disposition, and none of them usually ' +
+      'arrives with the alert. E is the one thing the alert does tell you: the confidence field is ' +
+      'exactly the claim that the pattern matched. Notice that C is the cheapest of the four to ' +
+      'check and the most often skipped, and that a surprising share of anomalies resolve to ' +
+      'somebody deploying something on a Tuesday.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option is the thing the confidence field already tells you.',
+      },
+    ],
+    debrief:
+      'Ask for a change calendar in your first week. Knowing that the anomaly at 02:00 was a ' +
+      'scheduled migration turns a twenty-minute investigation into a ten-second one, several times ' +
+      'a shift.',
+    practice: [],
+  },
+];
+
+// --- module 3.7: the alerts that are not logins ------------------------------
+
+const MODULE_3_7: Exercise[] = [
+  {
+    id: 'triage.7.1',
+    moduleId: '3.7',
+    packageId: 'incident-triage',
+    order: 1,
+    title: 'A malware alert that is not malware',
+    kind: 'multiple-choice',
+    goal: 'Dispose of a signature match correctly, and record it accurately.',
+    prompt:
+      'An antivirus alert reports the EICAR test file quarantined in a user Downloads folder. Which ' +
+      'of the following are correct? Select all that apply.',
+    teach: {
+      concept:
+        'EICAR is a short, deliberately harmless string that every antivirus product is required to ' +
+        'detect, so that people can test whether their scanner works without handling real ' +
+        'malware. Finding it means the scanner worked, which is the opposite of bad news.\n\n' +
+        'Dispose of it as a BENIGN TRUE POSITIVE rather than a false positive, and the distinction ' +
+        'is not pedantry. A false positive means the detection was wrong and points at tuning. A ' +
+        'benign true positive means the detection was right and the activity was harmless, which ' +
+        'points at nothing and should not be tuned away, because the same rule catching a real ' +
+        'sample tomorrow is exactly what you want.\n\n' +
+        'There is one genuine question left, and it is not about the file. Somebody put it there, ' +
+        'and it is worth knowing whether that was an administrator testing the deployment or a user ' +
+        'who downloaded something from a page that claimed to be a virus test. The alert is closed ' +
+        'either way; the second case is a conversation.',
+    },
+    options: [
+      { id: 'a', label: 'EICAR is a harmless test string, so no malicious code was present.' },
+      { id: 'b', label: 'The detection worked correctly, so this is a benign true positive rather than a false positive.' },
+      { id: 'c', label: 'It should not be tuned away, because the same rule catching a real sample is the point.' },
+      { id: 'd', label: 'It is still worth knowing who put the file there and why.' },
+      { id: 'e', label: 'It should be closed as a false positive and the rule tuned to reduce noise.' },
+    ],
+    hints: [
+      'Four are correct. One both mislabels the closure and proposes tuning away a working detection.',
+      'Was the detection wrong, or was the thing it found harmless? Those are different.',
+      'Ask what tuning this rule would cost you the next time something real arrives.',
+    ],
+    solution:
+      'A, B, C, and D. Harmless string, correct detection, keep the rule, and one residual question ' +
+      'about how it got there. E is wrong twice over: labelling it a false positive puts a wrong ' +
+      'entry in the data that detection engineering uses to decide what to tune, and acting on that ' +
+      'label would weaken the antivirus signature that is doing precisely its job. The disposition ' +
+      'taxonomy exists so that closures like this one do not read as evidence against the rule.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option calls a correct detection a false positive, and then proposes tuning on the ' +
+          'strength of that label.',
+      },
+    ],
+    debrief:
+      'Every wrong disposition is a small lie told to whoever reads the triage data later. This one ' +
+      'would show up as a noisy antivirus rule, and somebody would eventually act on it.',
+    practice: [],
+  },
+  {
+    id: 'triage.7.2',
+    moduleId: '3.7',
+    packageId: 'incident-triage',
+    order: 2,
+    title: 'A data loss alert that is business as usual',
+    kind: 'multiple-choice',
+    goal: 'Recognise a rule that is producing nothing but noise, and say what to do about it.',
+    prompt: `A data loss rule has fired ${DLP_FIRINGS} times, been a false positive on all ${DLP_FIRINGS} of them, is allowlisted, and has just fired again on the nightly appointment reminder batch. Which of the following are correct? Select all that apply.`,
+    teach: {
+      concept:
+        'A rule with a perfect false positive record is not a detection, it is a scheduled ' +
+        'interruption. Every firing costs an operator attention that is then unavailable for ' +
+        'something real, and the cost is invisible because it is spread thinly across every shift.\n\n' +
+        'The right disposition for this firing is quick and the right ACTION is not about this ' +
+        'firing at all. A rule that has never once been right in over a thousand attempts needs ' +
+        'either a tuning change that excludes the known batch, or removal, and either way that is a ' +
+        'case to be made rather than a decision an operator takes alone.\n\n' +
+        'The allowlist flag is worth reading sceptically here too. Somebody has already tried to ' +
+        'quieten this and it is still generating alerts, which usually means the allowlist is ' +
+        'matching on something narrower than the actual pattern. Note the residual risk honestly: ' +
+        'tuning out the reminder batch means genuine exfiltration disguised as that batch would ' +
+        'also be missed, which is an acceptable trade in most organisations and should be stated ' +
+        'rather than assumed.',
+    },
+    options: [
+      { id: 'a', label: 'A rule that has never been right in over a thousand firings is a tuning or removal case.' },
+      { id: 'b', label: 'The cost of the noise is real but invisible, because it is spread across every shift.' },
+      { id: 'c', label: 'The allowlist already existing suggests it matches something narrower than the actual pattern.' },
+      { id: 'd', label: 'Tuning it out means genuine exfiltration disguised as that batch would be missed, which should be stated.' },
+      { id: 'e', label: 'The operator should simply delete the rule at the end of the shift.' },
+    ],
+    hints: [
+      'Four are correct. One takes a decision that is not the operator to take.',
+      'Ask who owns the detection content, and what happens if rules disappear without a record.',
+      'What is the honest cost of tuning this away, and who should hear it?',
+    ],
+    solution:
+      'A, B, C, and D. It is a tuning case, the cost is real and hidden, the existing allowlist is ' +
+      'evidence of a partial fix, and the residual risk of tuning it out deserves saying out loud. ' +
+      'E is the boundary: an operator makes the case, detection engineering makes the change, and ' +
+      'the reason is not hierarchy but reversibility. A rule deleted by whoever was annoyed by it ' +
+      'at 03:00 leaves no record of what coverage was given up, and the gap is only discovered ' +
+      'after something walks through it.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option has the operator removing detection content unilaterally at the end of a ' +
+          'shift.',
+      },
+    ],
+    debrief:
+      'The residual risk sentence in D is what makes a tuning request credible. An operator who ' +
+      'says what the change would cost as well as what it saves gets their tuning requests actioned.',
+    practice: [],
+  },
+  {
+    id: 'triage.7.3',
+    moduleId: '3.7',
+    packageId: 'incident-triage',
+    order: 3,
+    title: 'A critical alert about a billing query',
+    kind: 'multiple-choice',
+    goal: 'Read a privileged-account alert for what the account actually did.',
+    prompt:
+      'A cloud alert reports that the root principal invoked a cost and usage API. It is severity ' +
+      'critical and the account is allowlisted for this call. Which of the following are correct? ' +
+      'Select all that apply.',
+    teach: {
+      concept:
+        'Root and administrator accounts are watched closely, and rightly: any use of them is ' +
+        'unusual by design, because well-run environments do routine work with scoped roles. That ' +
+        'is why the severity is critical before anybody looks at what happened.\n\n' +
+        'What happened here is that root read a billing figure. The action is read-only, it changes ' +
+        'nothing, and it is the kind of thing a finance process or a cost dashboard does on a ' +
+        'schedule. The alert is a true positive about an account and a non-event about an action.\n\n' +
+        'Two things still deserve a moment. Root being used at all, even harmlessly, is worth ' +
+        'knowing about, because the direction of travel should be towards nobody using it. And the ' +
+        'question that actually matters for any privileged-account alert is not what was done but ' +
+        'WHO DID IT and from where: the same read-only call from an unfamiliar address at an ' +
+        'unusual hour is a different alert with the same rule id.',
+    },
+    options: [
+      { id: 'a', label: 'The severity is high because the account is privileged, before anybody knows what it did.' },
+      { id: 'b', label: 'The specific action is read-only and changes nothing, which lowers the concern considerably.' },
+      { id: 'c', label: 'The useful question for a privileged-account alert is who used it and from where.' },
+      { id: 'd', label: 'Root being used routinely at all is worth raising separately, even when each use is harmless.' },
+      { id: 'e', label: 'Since the account is allowlisted for this call, no further reading of the alert is needed.' },
+    ],
+    hints: [
+      'Four are correct. One stops reading because a flag is set.',
+      'Ask what the same rule would look like if the call came from somewhere unexpected.',
+      'The allowlist covers the action. Does it cover the source?',
+    ],
+    solution:
+      'A, B, C, and D. Severity tracks the account, the action is harmless, the source is the real ' +
+      'question, and habitual root use is its own finding. E is the trap the allowlist sets: it ' +
+      'says this CALL is expected, and it says nothing about who made it or from where. An ' +
+      'allowlisted action performed by a compromised credential from an unfamiliar address is ' +
+      'exactly the alert an attacker would most like you to close on the flag alone.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option stops at the allowlist flag without asking who performed the action.',
+      },
+    ],
+    debrief:
+      'Make "who and from where" your reflex on any privileged-account alert. The action is often ' +
+      'boring and the source is where the answer is.',
+    practice: [],
+  },
+  {
+    id: 'triage.7.4',
+    moduleId: '3.7',
+    packageId: 'incident-triage',
+    order: 4,
+    title: 'Internet background noise',
+    kind: 'multiple-choice',
+    goal: 'Tell untargeted scanning apart from somebody interested in you.',
+    prompt:
+      'Your queue contains web alerts for requests to paths that do not exist on your server, and ' +
+      'one for a request containing SQL keywords. Which of the following are accurate? Select all ' +
+      'that apply.',
+    teach: {
+      concept:
+        'Anything with a public address is scanned continuously by automated tools looking for ' +
+        'common software. Requests for WordPress login pages on a server that does not run ' +
+        'WordPress, or for environment files, are the ambient weather of the internet rather than ' +
+        'evidence of interest in you.\n\n' +
+        'What separates noise from attention is not the payload, it is the SHAPE. Untargeted ' +
+        'scanning sprays a standard list of paths, gets 404s, and moves on within seconds. Somebody ' +
+        'interested in you specifically probes paths that exist on YOUR application, adapts to the ' +
+        'responses they get, and comes back. One request for a path you do not have is nothing; ' +
+        'twenty requests walking your actual URL structure is a person.\n\n' +
+        'The other thing that changes the reading is the response code. A scan that gets 404s ' +
+        'everywhere found nothing. The same scan getting a 200 on something it should not have ' +
+        'reached is no longer background noise, whatever the source looks like, because the ' +
+        'interesting fact is now about your server rather than about them.',
+    },
+    options: [
+      { id: 'a', label: 'Requests for software you do not run are usually untargeted scanning rather than interest in you.' },
+      { id: 'b', label: 'Adapting to responses and probing paths that actually exist is what distinguishes a person from a scanner.' },
+      { id: 'c', label: 'The response code matters: a 200 where you expected a 404 changes the alert entirely.' },
+      { id: 'd', label: 'Volume and persistence from one source over time is more informative than any single request.' },
+      { id: 'e', label: 'A request containing SQL keywords is by itself evidence of a targeted attack.' },
+    ],
+    hints: [
+      'Four are accurate. One reads a payload as intent.',
+      'Ask what a scanner does after it gets a 404, and what a person does.',
+      'Which matters more: what they asked for, or what your server answered?',
+    ],
+    solution:
+      'A, B, C, and D. Scanning for absent software is weather, adaptation and persistence indicate ' +
+      'a person, the response code can change everything, and the pattern over time beats any one ' +
+      'request. E is the reflex to unlearn: injection keywords appear in automated scanning ' +
+      'constantly, and in legitimate traffic occasionally, so the string alone is not evidence of ' +
+      'targeting. What would be evidence is the same source adjusting its payloads after seeing ' +
+      'your responses.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option treats a payload string as proof of targeting, without looking at the shape ' +
+          'of the traffic.',
+      },
+    ],
+    debrief:
+      'The response code habit is the cheapest upgrade to web alert triage there is. Filter your ' +
+      'scanning alerts to the ones that got a 200 and the queue shrinks to the ones worth reading.',
+    practice: [],
+  },
+  {
+    id: 'triage.7.5',
+    moduleId: '3.7',
+    packageId: 'incident-triage',
+    order: 5,
+    title: 'The question each alert class asks',
+    kind: 'short-answer',
+    goal: 'Say what changes when the alert is not about a login.',
+    prompt:
+      'Most of your queue is authentication alerts, and you have now met malware, data loss, cloud ' +
+      'and web alerts. In three or four sentences, say what you have to do differently when an ' +
+      'alert is not about a login.',
+    teach: {
+      concept:
+        'Operators trained on a queue that is mostly authentication develop a single habit: check ' +
+        'the source, check the account, check whether it succeeded. It works on logins and ' +
+        'transfers badly, because each alert class turns on a different question.\n\n' +
+        'For authentication the question is did it work, and from where. For MALWARE it is what the ' +
+        'file actually was and whether it executed, since detection and quarantine are usually the ' +
+        'system working. For DATA LOSS it is where the data went and whether the recipient is ' +
+        'expected, because volume alone is meaningless. For PRIVILEGED ACCOUNT alerts it is who ' +
+        'used the account and from where, since the action is often routine. For WEB alerts it is ' +
+        'what the server answered, because the request tells you about them and the response tells ' +
+        'you about you.\n\n' +
+        'The general skill is to work out what the alert class is a proxy for before applying a ' +
+        'habit. A good answer names at least two classes with the specific question each one turns ' +
+        'on, and says that the login habit does not transfer unchanged.',
+    },
+    hints: [
+      'Your login habit is check the source, check the account, check whether it worked. Which parts of that survive on a malware alert?',
+      'For each class, finish the sentence: the thing that decides this alert is...',
+      'A good answer names at least two non-login classes with the specific question each turns on, and says the authentication habit does not carry over.',
+    ],
+    solution:
+      'The authentication habit of checking the source, the account and whether it succeeded does ' +
+      'not carry over, because each class turns on a different fact. On a malware alert the ' +
+      'question is what the file actually was and whether it ran, since a quarantine is usually the ' +
+      'system working correctly rather than an incident. On a data loss alert it is where the data ' +
+      'went and whether that recipient is expected, because size on its own says nothing. On a web ' +
+      'alert it is what the server answered rather than what was requested, since the response is ' +
+      'the part that is about us. So before applying any habit I would name what this class of ' +
+      'alert is actually a proxy for, and check that first.',
+    expectedOutput:
+      'An answer naming at least two non-login alert classes with the distinct question each turns ' +
+      'on, and stating that the authentication habit does not transfer unchanged.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['does not carry', 'not transfer', 'different fact', 'different question', 'each class'],
+          ['what the file', 'whether it ran', 'executed', 'quarantine', 'where the data went', 'recipient'],
+          ['server answered', 'response', 'status', 'who used', 'from where'],
+        ],
+        hint:
+          'Three ideas: that the login habit does not transfer, the question a malware or data loss ' +
+          'alert turns on, and the question a web or privileged-account alert turns on.',
+      },
+    ],
+    debrief:
+      'Write these down as a card for your first months. Four sentences, one per alert class, saved ' +
+      'somewhere you can see them, is worth more than any amount of memorising rule names.',
+    practice: [],
+  },
+];
+
+// --- module 3.8: closing well ------------------------------------------------
+
+const MODULE_3_8: Exercise[] = [
+  {
+    id: 'triage.8.1',
+    moduleId: '3.8',
+    packageId: 'incident-triage',
+    order: 1,
+    title: 'Why the disposition taxonomy matters',
+    kind: 'multiple-choice',
+    goal: 'Close alerts into categories that mean something to whoever reads them next.',
+    prompt:
+      'Your platform offers several closure categories rather than just closed. Which of the ' +
+      'following are reasons that matters? Select all that apply.',
+    teach: {
+      concept:
+        'A closure category is a message to the future. It is read by detection engineering ' +
+        'deciding what to tune, by whoever reports on the SOC, and by the next operator meeting the ' +
+        'same rule at 03:00.\n\n' +
+        'Three categories carry most of the weight and they are routinely confused. FALSE POSITIVE ' +
+        'means the detection was wrong: the thing it claimed to see did not happen. BENIGN TRUE ' +
+        'POSITIVE means the detection was right and the activity was harmless, which is a ' +
+        'completely different message. And TRUE POSITIVE means it was real, whatever happened ' +
+        'next.\n\n' +
+        'The difference is not bookkeeping. False positive counts drive tuning, so mislabelling a ' +
+        'benign true positive as a false positive is an argument for weakening a rule that is ' +
+        'working, made accidentally, by somebody who will never know they made it. It also ruins ' +
+        'the one metric that tells you whether a queue is workable, because a queue full of correct ' +
+        'detections of harmless activity is a very different problem from one full of broken ' +
+        'rules.',
+    },
+    options: [
+      { id: 'a', label: 'False positive means the detection was wrong; benign true positive means it was right about harmless activity.' },
+      { id: 'b', label: 'False positive counts drive tuning, so a wrong label argues for weakening a rule that works.' },
+      { id: 'c', label: 'The categories are how triage output becomes input to detection engineering.' },
+      { id: 'd', label: 'They separate a queue full of broken rules from one full of correct but unimportant detections.' },
+      { id: 'e', label: 'The distinction is administrative, since either way the alert ends up closed.' },
+    ],
+    hints: [
+      'Four are reasons it matters. One says the label has no consequence.',
+      'Ask who reads these categories after you go home, and what they do with them.',
+      'What happens to a working rule that accumulates false positive labels?',
+    ],
+    solution:
+      'A, B, C, and D. The two labels mean opposite things about the detection, they feed tuning ' +
+      'decisions, they are the channel from triage to detection engineering, and they separate two ' +
+      'very different kinds of unhealthy queue. E is the attitude that makes triage data useless: ' +
+      'the alert being closed is the least consequential thing about the closure, and the label is ' +
+      'the part that still exists in six months when somebody is deciding which rules to keep.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option treats the closure category as paperwork with no downstream effect.',
+      },
+    ],
+    debrief:
+      'If your platform does not distinguish these, say so. Working without a benign true positive ' +
+      'category means every correct detection of harmless activity is being recorded as a broken ' +
+      'rule.',
+    practice: [],
+  },
+  {
+    id: 'triage.8.2',
+    moduleId: '3.8',
+    packageId: 'incident-triage',
+    order: 2,
+    title: 'Write the closure',
+    kind: 'short-answer',
+    goal: 'Leave a note that answers the next reader question without them reopening anything.',
+    prompt:
+      'You are closing the EICAR antivirus alert. In two or three sentences, write the closure ' +
+      'comment.',
+    teach: {
+      concept:
+        'A closure comment is read by somebody who was not there, usually months later, and usually ' +
+        'because something else has gone wrong. It has to stand alone.\n\n' +
+        'Three things make it stand alone. WHAT YOU ESTABLISHED, specifically: the file, the host, ' +
+        'the account, whatever the concrete facts were. WHAT YOU CHECKED to establish it, so the ' +
+        'reader knows how far the conclusion is supported and does not have to redo it. And THE ' +
+        'CATEGORY WITH ITS REASON, in words, because the dropdown value alone does not explain ' +
+        'itself.\n\n' +
+        'Leave out anything you did not verify. "Probably a test" is a guess and reads as a fact ' +
+        'six months later, so either check who put the file there or write that you did not. The ' +
+        'best closure comments are boring, specific, and about a paragraph shorter than people ' +
+        'expect. A good one here names EICAR as a harmless test file, says the detection worked, ' +
+        'and closes it as a benign true positive rather than as a false positive.',
+    },
+    hints: [
+      'Write for somebody reading it in six months with no memory of today.',
+      'The category name alone does not explain itself. Say why in words.',
+      'A good comment identifies the file as the EICAR test string, states that the detection and quarantine worked, and closes it as a benign true positive rather than a false positive.',
+    ],
+    solution:
+      'The quarantined file is the EICAR test string, which is a harmless standard string used to ' +
+      'verify that antivirus is working and contains no executable code. The detection and ' +
+      'quarantine both behaved correctly, so this is a benign true positive rather than a false ' +
+      'positive and the rule should not be tuned on the strength of it. I have not established who ' +
+      'placed the file in the Downloads folder; if that matters it is worth a note to the user, ' +
+      'but it does not change the disposition.',
+    expectedOutput:
+      'A comment identifying EICAR as a harmless test file, stating the detection worked, and ' +
+      'closing as a benign true positive rather than a false positive.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['harmless', 'no executable', 'test string', 'standard string', 'not malicious'],
+          ['detection worked', 'behaved correctly', 'quarantine', 'working', 'correctly detected'],
+          ['benign true positive', 'not a false positive', 'true positive'],
+        ],
+        hint:
+          'Three things: what the file actually is, that the detection did its job, and the ' +
+          'category you are closing it as, stated in words.',
+      },
+    ],
+    debrief:
+      'The last sentence, admitting what you did not establish, is what makes the rest credible. ' +
+      'Closures that only contain conclusions read as guesses.',
+    practice: [],
+  },
+  {
+    id: 'triage.8.3',
+    moduleId: '3.8',
+    packageId: 'incident-triage',
+    order: 3,
+    title: 'How triage output becomes better detection',
+    kind: 'multiple-choice',
+    goal: 'See the loop your closures feed, and what makes them useful to it.',
+    prompt:
+      'Detection engineering wants to improve the rules using triage data. Which of the following ' +
+      'would genuinely help them? Select all that apply.',
+    teach: {
+      concept:
+        'The improvement loop in a SOC runs on triage output, and it starves when the output is ' +
+        'thin. Detection engineering cannot see the queue the way an operator does; what they can ' +
+        'see is what operators recorded.\n\n' +
+        'Four kinds of record are actually usable. Accurate categories, so the false positive rate ' +
+        'per rule is real. A stated REASON for benign closures, because "this fires on the nightly ' +
+        'batch" is a tuning specification and "false positive" is not. The specific field or ' +
+        'condition that would have excluded the benign case, which is the single most valuable ' +
+        'thing an operator can leave. And notes on near misses: alerts that were nearly closed and ' +
+        'turned out to matter, which are the strongest possible evidence about where a rule sits ' +
+        'relative to the line.\n\n' +
+        'What does not help is volume without detail. A thousand alerts closed with no reason ' +
+        'tells detection engineering that a rule is noisy and nothing about what to do, and the ' +
+        'usual outcome is that the rule gets disabled rather than fixed.',
+    },
+    options: [
+      { id: 'a', label: 'Categories applied accurately, so the false positive rate per rule reflects reality.' },
+      { id: 'b', label: 'A stated reason on benign closures, such as which recurring job triggers it.' },
+      { id: 'c', label: 'The specific condition that would have excluded the benign case without blinding the rule.' },
+      { id: 'd', label: 'Notes on alerts that were nearly closed and turned out to matter.' },
+      { id: 'e', label: 'A high volume of closures with no reason recorded, which at least shows the rule is noisy.' },
+    ],
+    hints: [
+      'Four help. One provides a number and nothing actionable.',
+      'Ask what detection engineering can actually change on the strength of each item.',
+      'What usually happens to a rule that is known to be noisy and has no diagnosis?',
+    ],
+    solution:
+      'A, B, C, and D. Accurate labels give a real rate, the reason gives a specification, the ' +
+      'excluding condition is close to a finished change, and near misses tell you where the line ' +
+      'actually is. E is the state most SOCs are in and it is worse than it looks: a rule known to ' +
+      'be noisy with no diagnosis attached tends to get disabled, so uninformative closures do not ' +
+      'just fail to improve detection, they actively cost coverage.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option offers a volume of undiagnosed closures. Ask what can be changed on the ' +
+          'strength of that.',
+      },
+    ],
+    debrief:
+      'Option C is the one that will get you noticed. An operator who writes "excluding source ' +
+      '10.20.9.40 would remove 80% of these without affecting external sources" has done detection ' +
+      'engineering work from the triage seat.',
+    practice: [],
+  },
+  {
+    id: 'triage.8.4',
+    moduleId: '3.8',
+    packageId: 'incident-triage',
+    order: 4,
+    title: 'What a wrong closure costs',
+    kind: 'multiple-choice',
+    goal: 'Weigh the two ways of being wrong, and know how each one gets discovered.',
+    prompt:
+      'Every operator closes something incorrectly eventually. Which of the following are accurate ' +
+      'about the two ways of getting it wrong? Select all that apply.',
+    teach: {
+      concept:
+        'Closing something real is a missed detection. Escalating something benign is a wasted ' +
+        'investigation. Both are errors and they are not symmetrical, which is worth being explicit ' +
+        'about rather than absorbing as anxiety.\n\n' +
+        'The costs differ. A wasted escalation costs an analyst an hour and is discovered ' +
+        'immediately, because somebody looks and finds nothing. A missed detection costs whatever ' +
+        'the attacker does with the time and is discovered late or never, because nothing looks for ' +
+        'it. That asymmetry is why triage guidance leans towards escalating when genuinely ' +
+        'uncertain, and why an escalation budget exists to stop that leaning becoming a reflex.\n\n' +
+        'The discovery asymmetry has a consequence people miss: you get feedback on your ' +
+        'over-escalations and almost none on your misses. An operator can therefore feel they are ' +
+        'improving while getting worse, because the only errors they hear about are the ones that ' +
+        'were visible. That is what makes deliberate review of your own closed alerts, rather than ' +
+        'waiting for feedback, the habit that actually improves judgement.',
+    },
+    options: [
+      { id: 'a', label: 'A wasted escalation is discovered almost immediately; a missed detection often is not discovered at all.' },
+      { id: 'b', label: 'The asymmetry is why guidance leans towards escalating under genuine uncertainty.' },
+      { id: 'c', label: 'You receive feedback on over-escalations and almost none on misses, which can make you feel you are improving while getting worse.' },
+      { id: 'd', label: 'Reviewing your own closed alerts is more reliable than waiting for feedback to arrive.' },
+      { id: 'e', label: 'Since misses are rarely discovered, they are the less serious of the two errors.' },
+    ],
+    hints: [
+      'Four are accurate. One confuses being unnoticed with being harmless.',
+      'Ask how each error is found out, and how long that takes.',
+      'If you only ever hear about one kind of mistake, what happens to your sense of how good you are?',
+    ],
+    solution:
+      'A, B, C, and D. The errors differ in cost and in how they surface, the asymmetry justifies ' +
+      'leaning towards escalation when genuinely unsure, the feedback you get is skewed towards ' +
+      'your visible mistakes, and reviewing your own work is the only correction for that. E ' +
+      'inverts the point: a miss being invisible is what makes it dangerous, not what makes it ' +
+      'minor, and the incidents that end up in the news are almost always ones somebody closed.',
+    expectedOutput: 'Options A, B, C, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c', 'd'],
+        hint:
+          'One option treats an error that is rarely discovered as an error that matters less.',
+      },
+    ],
+    debrief:
+      'Spend twenty minutes of a quiet shift rereading alerts you closed a fortnight ago. It is the ' +
+      'only feedback loop on the half of your work nobody else checks.',
+    practice: [],
+  },
+];
+
 export const INCIDENT_TRIAGE: LearningPackage = {
   id: 'incident-triage',
   order: 3,
@@ -2061,9 +2950,9 @@ export const INCIDENT_TRIAGE: LearningPackage = {
     'and an intrusion spread thinly across eight of them. Learn to find it without escalating ' +
     'everything, and to leave the queue smaller than you found it.',
   outcomes: [
-    'Triage a full shift’s alert queue and escalate only what warrants another analyst',
+    'Triage a full shift\'s alert queue and escalate only what warrants another analyst',
     'Tell a broken rule apart from a correct rule firing on authorised activity',
-    'Correlate individually unremarkable alerts into a single actor’s sequence',
+    'Correlate individually unremarkable alerts into a single actor\'s sequence',
     'Read severity and confidence as claims to be tested rather than facts',
     'Write disposition notes, escalations, and a handover that somebody else can act on',
   ],
@@ -2094,7 +2983,7 @@ export const INCIDENT_TRIAGE: LearningPackage = {
       order: 3,
       title: 'Correlation',
       summary:
-        'Turning unremarkable alerts into one actor’s sequence, and resisting timestamps that line ' +
+        'Turning unremarkable alerts into one actor\'s sequence, and resisting timestamps that line ' +
         'up for no reason.',
       exercises: MODULE_3_3,
     },
@@ -2117,6 +3006,36 @@ export const INCIDENT_TRIAGE: LearningPackage = {
         'The same queues again with an AI assistant attached -- one that is right about most alerts, ' +
         'wrong about a handful, and confident throughout.',
       exercises: MODULE_3_5,
+    },
+    {
+      id: '3.6',
+      packageId: 'incident-triage',
+      order: 6,
+      title: 'Reading the enrichment',
+      summary:
+        'What a history of false positives is worth, severity against confidence against history, ' +
+        'reputation and allowlists, and the one line of context that can outweigh the counter.',
+      exercises: MODULE_3_6,
+    },
+    {
+      id: '3.7',
+      packageId: 'incident-triage',
+      order: 7,
+      title: 'The alerts that are not logins',
+      summary:
+        'Malware, data loss, privileged cloud accounts and web scanning: four classes that each ' +
+        'turn on a different question from the authentication habit.',
+      exercises: MODULE_3_7,
+    },
+    {
+      id: '3.8',
+      packageId: 'incident-triage',
+      order: 8,
+      title: 'Closing well',
+      summary:
+        'Why the disposition taxonomy matters, writing a closure that stands alone, how triage ' +
+        'output becomes better detection, and the two ways of being wrong.',
+      exercises: MODULE_3_8,
     },
   ],
 };
