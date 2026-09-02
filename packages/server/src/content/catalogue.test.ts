@@ -72,7 +72,7 @@ const terminalExercises = ALL_EXERCISES.filter((exercise) => exercise.kind === '
  * package's size.
  */
 const EXPECTED_EXERCISE_COUNTS: Record<string, number> = {
-  'linux-fundamentals': 22,
+  'linux-fundamentals': 40,
   'log-analysis': 40,
   'incident-triage': 26,
   networking: 25,

@@ -1,5 +1,5 @@
 /**
- * Practice drills for Linux Fundamentals: five per exercise, 110 in total.
+ * Practice drills for Linux Fundamentals: five per exercise, 200 in total.
  *
  * Kept in their own file so the main curriculum stays readable.
  *
@@ -284,5 +284,167 @@ export const LINUX_FUNDAMENTALS_PRACTICE: Record<string, PracticeItem[]> = {
     { id: 'linux.4.6-p3', prompt: 'Search every .log file in /var/log for "Failed".', solution: 'grep "Failed" /var/log/*.log', checks: [{ type: 'command-matches', anyOf: ['\\*\\.log'], regex: true, hint: 'Use the *.log wildcard.' }, outHas('Failed')] },
     { id: 'linux.4.6-p4', prompt: 'Search every .log file in /var/log for "cron", ignoring case.', solution: 'grep -i "cron" /var/log/*.log', checks: [hasFlag('grep', 'i'), { type: 'command-matches', anyOf: ['\\*\\.log'], regex: true, hint: 'Use the *.log wildcard.' }] },
     { id: 'linux.4.6-p5', prompt: 'List every file in /etc starting with "host", using a wildcard.', solution: 'ls /etc/host*', checks: [outHas('hostname'), outHas('hosts')] },
+  ],
+
+  // --- 1.5.1 reading permissions ---------------------------------------------
+  'linux.5.1': [
+    { id: 'linux.5.1-p1', prompt: 'Show the detailed listing for /etc/passwd and compare its permissions to the shadow file.', solution: 'ls -l /etc/passwd', checks: [outHas('rw-r--r--')] },
+    { id: 'linux.5.1-p2', prompt: 'Show the detailed listing for the SSH daemon configuration, /etc/ssh/sshd_config.', solution: 'ls -l /etc/ssh/sshd_config', checks: [outHas('sshd_config')] },
+    { id: 'linux.5.1-p3', prompt: 'Show the permissions on your own home directory.', solution: 'ls -ld /home/student', checks: [outHas('student')] },
+    { id: 'linux.5.1-p4', prompt: 'Show the detailed listing for the crontab file /etc/crontab.', solution: 'ls -l /etc/crontab', checks: [outHas('crontab')] },
+    { id: 'linux.5.1-p5', prompt: 'Show the permissions on the backup script in /usr/local/bin.', solution: 'ls -l /usr/local/bin/rmg-backup.sh', checks: [outHas('rmg-backup.sh')] },
+  ],
+
+  // --- 1.5.2 setuid ----------------------------------------------------------
+  'linux.5.2': [
+    { id: 'linux.5.2-p1', prompt: 'Count how many setuid binaries there are under /usr/bin.', solution: 'find /usr/bin -perm -4000 | wc -l', checks: [numberIs(9)] },
+    { id: 'linux.5.2-p2', prompt: 'Search /usr/sbin for setuid binaries, and see that there are none.', solution: 'find /usr/sbin -perm -4000', checks: [{ type: 'output-excludes', text: '/usr/sbin/', hint: 'Nothing in /usr/sbin is setuid on this host.' }] },
+    { id: 'linux.5.2-p3', prompt: 'Using a pipe, show only the setuid binaries whose name contains "pass".', solution: 'find /usr/bin -perm -4000 | grep pass', checks: [outHas('/usr/bin/passwd')] },
+    { id: 'linux.5.2-p4', prompt: 'Show the detailed listing of /usr/bin/sudo so you can see the s in the permission string.', solution: 'ls -l /usr/bin/sudo', checks: [outHas('sudo')] },
+    { id: 'linux.5.2-p5', prompt: 'Search the whole of /usr for setuid binaries.', solution: 'find /usr -perm -4000', checks: [outHas('/usr/bin/su')] },
+  ],
+
+  // --- 1.5.3 world-writable --------------------------------------------------
+  'linux.5.3': [
+    { id: 'linux.5.3-p1', prompt: 'Count the world-writable regular files under /tmp.', solution: 'find /tmp -type f -perm -002 | wc -l', checks: [numberIs(3)] },
+    { id: 'linux.5.3-p2', prompt: 'Search /etc for world-writable files, which should find nothing.', solution: 'find /etc -type f -perm -002', checks: [{ type: 'output-excludes', text: '/etc/', hint: 'Nothing in /etc should be world-writable.' }] },
+    { id: 'linux.5.3-p3', prompt: 'Search /home for world-writable regular files.', solution: 'find /home -type f -perm -002', checks: [{ type: 'output-excludes', text: '/home/student/.bashrc', hint: 'Your own dotfiles are not world-writable.' }] },
+    { id: 'linux.5.3-p4', prompt: 'Using a pipe, show only the world-writable file in /tmp whose name ends in .gz.', solution: 'find /tmp -type f -perm -002 | grep gz', checks: [outHas('pt.tar.gz')] },
+    { id: 'linux.5.3-p5', prompt: 'List /tmp in long form, including hidden entries, and look at the permission column.', solution: 'ls -la /tmp', checks: [outHas('.cache')] },
+  ],
+
+  // --- 1.5.4 chmod -----------------------------------------------------------
+  'linux.5.4': [
+    { id: 'linux.5.4-p1', prompt: 'Create a file called drill-a.txt and give it the usual document permissions, 644.', solution: 'touch drill-a.txt\nchmod 644 drill-a.txt\nls -l drill-a.txt', checks: [exists('/home/student/drill-a.txt'), outHas('rw-r--r--')] },
+    { id: 'linux.5.4-p2', prompt: 'Create a file called drill-b.sh and make it executable by everyone, 755.', solution: 'touch drill-b.sh\nchmod 755 drill-b.sh\nls -l drill-b.sh', checks: [exists('/home/student/drill-b.sh'), outHas('rwxr-xr-x')] },
+    { id: 'linux.5.4-p3', prompt: 'Create a file called drill-c.txt and make it readable by nobody at all except its owner, read only: 400.', solution: 'touch drill-c.txt\nchmod 400 drill-c.txt\nls -l drill-c.txt', checks: [exists('/home/student/drill-c.txt'), outHas('r--------')] },
+    { id: 'linux.5.4-p4', prompt: 'Create a directory called drill-dir and set it to 700 so only you may enter it.', solution: 'mkdir drill-dir\nchmod 700 drill-dir\nls -ld drill-dir', checks: [exists('/home/student/drill-dir', 'dir'), outHas('rwx------')] },
+    { id: 'linux.5.4-p5', prompt: 'Create a file called drill-e.txt, set it to 600, then confirm the mode with stat rather than ls.', solution: 'touch drill-e.txt\nchmod 600 drill-e.txt\nstat drill-e.txt', checks: [exists('/home/student/drill-e.txt'), outHas('0600')] },
+  ],
+
+  // --- 1.5.5 ownership -------------------------------------------------------
+  'linux.5.5': [
+    { id: 'linux.5.5-p1', prompt: 'List the home directories one per line, so each account is on its own row.', solution: 'ls -1 /home', checks: [outHas('sysmon'), outHas('student')] },
+    { id: 'linux.5.5-p2', prompt: 'Using a pipe, show only the /home entry belonging to sysmon.', solution: 'ls -l /home | grep sysmon', checks: [outHas('sysmon')] },
+    { id: 'linux.5.5-p3', prompt: 'List the contents of the testuser home directory, hidden files included.', solution: 'ls -la /home/testuser', checks: [outHas('.bash_history')] },
+    { id: 'linux.5.5-p4', prompt: 'Show the account list and find the sysmon entry in it.', solution: 'grep sysmon /etc/passwd', checks: [outHas('sysmon')] },
+    { id: 'linux.5.5-p5', prompt: 'Using a pipe, count how many accounts are defined in /etc/passwd.', solution: 'wc -l /etc/passwd', checks: [outHas('/etc/passwd')] },
+  ],
+
+  // --- 1.5.6 permission denied -----------------------------------------------
+  'linux.5.6': [
+    { id: 'linux.5.6-p1', prompt: 'Try to read /etc/shadow and read the refusal.', solution: 'cat /etc/shadow', checks: [outHas('Permission denied')] },
+    { id: 'linux.5.6-p2', prompt: 'Try to read a file that genuinely does not exist, /etc/nonexistent.conf, and compare the error.', solution: 'cat /etc/nonexistent.conf', checks: [outHas('No such file')] },
+    { id: 'linux.5.6-p3', prompt: 'Try to list the root user\'s home directory.', solution: 'ls /root', checks: [outHas('Permission denied')] },
+    { id: 'linux.5.6-p4', prompt: 'Confirm you CAN read /etc/passwd, which is the deliberate contrast to the shadow file.', solution: 'head -n 1 /etc/passwd', checks: [outHas('root')] },
+    { id: 'linux.5.6-p5', prompt: 'Try to read the crontab directory listing at /var/spool/cron/crontabs.', solution: 'ls /var/spool/cron/crontabs', checks: [outHas('Permission denied')] },
+  ],
+
+  // --- 1.6.1 find by name ----------------------------------------------------
+  'linux.6.1': [
+    { id: 'linux.6.1-p1', prompt: 'Find every file under /var/log whose name ends in .log.', solution: "find /var/log -name '*.log'", checks: [outHas('/var/log/auth.log')] },
+    { id: 'linux.6.1-p2', prompt: 'Using a pipe, count how many .log files there are under /var/log.', solution: "find /var/log -name '*.log' | wc -l", checks: [numberIs(5)] },
+    { id: 'linux.6.1-p3', prompt: 'Find every shell script under /home and /usr/local, searching /home first.', solution: "find /home -name '*.sh'", checks: [outHas('deploy.sh')] },
+    { id: 'linux.6.1-p4', prompt: 'Find every compressed archive under /tmp.', solution: "find /tmp -name '*.tar.gz'", checks: [outHas('pt.tar.gz')] },
+    { id: 'linux.6.1-p5', prompt: 'Find every CSV export under /var/www.', solution: "find /var/www -name '*.csv'", checks: [outHas('billing-2026-08-14.csv')] },
+  ],
+
+  // --- 1.6.2 hidden files ----------------------------------------------------
+  'linux.6.2': [
+    { id: 'linux.6.2-p1', prompt: 'List your own home directory including hidden files.', solution: 'ls -la /home/student', checks: [outHas('.bashrc')] },
+    { id: 'linux.6.2-p2', prompt: 'List the sysmon home directory including hidden entries.', solution: 'ls -la /home/sysmon', checks: [outHas('.ssh')] },
+    { id: 'linux.6.2-p3', prompt: 'Try reading the authorised keys file inside the sysmon account\'s .ssh directory.', solution: 'cat /home/sysmon/.ssh/authorized_keys', checks: [outHas('Permission denied')] },
+    { id: 'linux.6.2-p4', prompt: 'List /tmp including hidden entries, in long form.', solution: 'ls -la /tmp', checks: [outHas('.cache')] },
+    { id: 'linux.6.2-p5', prompt: 'Show the shell history left behind in the testuser home directory.', solution: 'cat /home/testuser/.bash_history', checks: [outHas('useradd')] },
+  ],
+
+  // --- 1.6.3 find by time ----------------------------------------------------
+  'linux.6.3': [
+    { id: 'linux.6.3-p1', prompt: 'Using a pipe, count how many files under /var/log changed in the last day.', solution: 'find /var/log -mtime -1 -type f | wc -l', checks: [numberIs(8)] },
+    { id: 'linux.6.3-p2', prompt: 'Find the files under /tmp that changed in the last day.', solution: 'find /tmp -mtime -1 -type f', checks: [outHas('pt.tar.gz')] },
+    { id: 'linux.6.3-p3', prompt: 'Find files under /home that changed in the last day.', solution: 'find /home -mtime -1 -type f', checks: [{ type: 'output-excludes', text: 'No such file', hint: 'The search itself should succeed.' }] },
+    { id: 'linux.6.3-p4', prompt: 'Using a pipe, show only the recently changed log in the nginx subdirectory.', solution: 'find /var/log -mtime -1 -type f | grep nginx', checks: [outHas('/var/log/nginx/')] },
+    { id: 'linux.6.3-p5', prompt: 'Find directories rather than files under /var/log.', solution: 'find /var/log -type d', checks: [outHas('/var/log/nginx')] },
+  ],
+
+  // --- 1.6.4 disk usage ------------------------------------------------------
+  'linux.6.4': [
+    { id: 'linux.6.4-p1', prompt: 'Show a single summarised, human-readable total for /var/log.', solution: 'du -sh /var/log', checks: [outHas('/var/log')] },
+    { id: 'linux.6.4-p2', prompt: 'Show how much free space each filesystem has, in human-readable units.', solution: 'df -h', checks: [outHas('Filesystem')] },
+    { id: 'linux.6.4-p3', prompt: 'Show a summarised human-readable total for /var/www.', solution: 'du -sh /var/www', checks: [outHas('/var/www')] },
+    { id: 'linux.6.4-p4', prompt: 'Show the human-readable size of your own home directory.', solution: 'du -sh /home/student', checks: [outHas('/home/student')] },
+    { id: 'linux.6.4-p5', prompt: 'Show the size of /tmp/.cache without the -s flag, so you see it broken down.', solution: 'du -h /tmp/.cache', checks: [outHas('M')] },
+  ],
+
+  // --- 1.6.5 stat ------------------------------------------------------------
+  'linux.6.5': [
+    { id: 'linux.6.5-p1', prompt: 'Show the full metadata for /etc/passwd.', solution: 'stat /etc/passwd', checks: [outHas('regular file')] },
+    { id: 'linux.6.5-p2', prompt: 'Show the full metadata for your home directory.', solution: 'stat /home/student', checks: [outHas('directory')] },
+    { id: 'linux.6.5-p3', prompt: 'Show the metadata for the small executable in the hidden cache directory.', solution: 'stat /tmp/.cache/u', checks: [outHas('regular file')] },
+    { id: 'linux.6.5-p4', prompt: 'Show the metadata for the current authentication log.', solution: 'stat /var/log/auth.log', checks: [outHas('auth.log')] },
+    { id: 'linux.6.5-p5', prompt: 'Show the metadata for the database dump in the jmartel home directory.', solution: 'stat /home/jmartel/portal-db-dump.sql', checks: [outHas('portal-db-dump.sql')] },
+  ],
+
+  // --- 1.6.6 broad find ------------------------------------------------------
+  'linux.6.6': [
+    { id: 'linux.6.6-p1', prompt: 'Using a pipe, count every regular file under /home.', solution: 'find /home -type f | wc -l', checks: [numberIs(12)] },
+    { id: 'linux.6.6-p2', prompt: 'Find every directory under /home.', solution: 'find /home -type d', checks: [outHas('/home/student')] },
+    { id: 'linux.6.6-p3', prompt: 'Using a pipe, show only the files under /home belonging to the jmartel account.', solution: 'find /home -type f | grep jmartel', checks: [outHas('/home/jmartel/')] },
+    { id: 'linux.6.6-p4', prompt: 'Find every regular file under /var/www.', solution: 'find /var/www -type f', checks: [outHas('README.md')] },
+    { id: 'linux.6.6-p5', prompt: 'Using a pipe, count the regular files under /var/log.', solution: 'find /var/log -type f | wc -l', checks: [numberIs(10)] },
+  ],
+
+  // --- 1.7.1 the process table -----------------------------------------------
+  'linux.7.1': [
+    { id: 'linux.7.1-p1', prompt: 'Using a pipe, count the lines the process table produces, header included.', solution: 'ps aux | wc -l', checks: [numberIs(24)] },
+    { id: 'linux.7.1-p2', prompt: 'Using a pipe, show only the process table lines mentioning postgres.', solution: 'ps aux | grep postgres', checks: [outHas('postgres')] },
+    { id: 'linux.7.1-p3', prompt: 'Using a pipe, show only the processes owned by www-data.', solution: 'ps aux | grep www-data', checks: [outHas('nginx')] },
+    { id: 'linux.7.1-p4', prompt: 'Using a pipe, count how many process lines mention nginx.', solution: 'ps aux | grep -c nginx', checks: [numberIs(3)] },
+    { id: 'linux.7.1-p5', prompt: 'Using a pipe, show only the processes owned by root.', solution: 'ps aux | grep root', checks: [outHas('/sbin/init')] },
+  ],
+
+  // --- 1.7.2 services --------------------------------------------------------
+  'linux.7.2': [
+    { id: 'linux.7.2-p1', prompt: 'Using a pipe, show only the running service whose name mentions ssh.', solution: 'systemctl list-units --type=service --state=running | grep ssh', checks: [outHas('ssh.service')] },
+    { id: 'linux.7.2-p2', prompt: 'Using a pipe, count the lines the running-service list produces.', solution: 'systemctl list-units --type=service --state=running | wc -l', checks: [numberIs(13)] },
+    { id: 'linux.7.2-p3', prompt: 'Using a pipe, show only the running service for the patient portal application.', solution: 'systemctl list-units --type=service --state=running | grep portal', checks: [outHas('portal-app.service')] },
+    { id: 'linux.7.2-p4', prompt: 'Using a pipe, show only the running database service.', solution: 'systemctl list-units --type=service --state=running | grep postgres', checks: [outHas('postgresql.service')] },
+    { id: 'linux.7.2-p5', prompt: 'Using a pipe, show only the running scheduling service.', solution: 'systemctl list-units --type=service --state=running | grep cron', checks: [outHas('cron.service')] },
+  ],
+
+  // --- 1.7.3 journals --------------------------------------------------------
+  'linux.7.3': [
+    { id: 'linux.7.3-p1', prompt: 'Show the last three journal entries for the nginx service.', solution: 'journalctl -u nginx -n 3', checks: [lines(3)] },
+    { id: 'linux.7.3-p2', prompt: 'Show the last two journal entries for the nginx service.', solution: 'journalctl -u nginx -n 2', checks: [lines(2)] },
+    { id: 'linux.7.3-p3', prompt: 'Show the last ten journal entries for nginx, then confirm nginx is named in them.', solution: 'journalctl -u nginx -n 10', checks: [outHas('nginx')] },
+    { id: 'linux.7.3-p4', prompt: 'Using a pipe, show only the nginx journal entries mentioning a 404 response.', solution: 'journalctl -u nginx -n 20 | grep 404', checks: [outHas('404')] },
+    { id: 'linux.7.3-p5', prompt: 'Using a pipe, count the last twenty nginx journal entries.', solution: 'journalctl -u nginx -n 20 | wc -l', checks: [{ type: 'output-numeric', min: 1, hint: 'The answer should be a single number.' }] },
+  ],
+
+  // --- 1.7.4 snapshots -------------------------------------------------------
+  'linux.7.4': [
+    { id: 'linux.7.4-p1', prompt: 'Show how long the host has been up, and its load average.', solution: 'uptime', checks: [outHas('load average')] },
+    { id: 'linux.7.4-p2', prompt: 'Using a pipe, show only the header lines of a top snapshot.', solution: 'top -bn1 | head -n 5', checks: [outHas('load average')] },
+    { id: 'linux.7.4-p3', prompt: 'Using a pipe, show only the top snapshot lines mentioning nginx.', solution: 'top -bn1 | grep nginx', checks: [outHas('nginx')] },
+    { id: 'linux.7.4-p4', prompt: 'Show the kernel and system information for this host.', solution: 'uname -a', checks: [outHas('Linux')] },
+    { id: 'linux.7.4-p5', prompt: 'Show the current date and time as the host sees it.', solution: 'date', checks: [outHas('2026')] },
+  ],
+
+  // --- 1.7.5 host health -----------------------------------------------------
+  'linux.7.5': [
+    { id: 'linux.7.5-p1', prompt: 'Show memory usage without the human-readable flag, so you see the raw numbers.', solution: 'free', checks: [outHas('Mem:')] },
+    { id: 'linux.7.5-p2', prompt: 'Using a pipe, show only the memory row of the human-readable output.', solution: 'free -h | grep Mem', checks: [outHas('Mem:')] },
+    { id: 'linux.7.5-p3', prompt: 'Show the raw memory information the kernel exposes in /proc.', solution: 'cat /proc/meminfo', checks: [outHas('MemTotal')] },
+    { id: 'linux.7.5-p4', prompt: 'Show the load average straight from /proc.', solution: 'cat /proc/loadavg', checks: [outHas('0.')] },
+    { id: 'linux.7.5-p5', prompt: 'Show free disk space in human-readable units.', solution: 'df -h', checks: [outHas('Filesystem')] },
+  ],
+
+  // --- 1.7.6 the odd process -------------------------------------------------
+  'linux.7.6': [
+    { id: 'linux.7.6-p1', prompt: 'Using a pipe, show every process line mentioning curl.', solution: 'ps aux | grep curl', checks: [outHas('/tmp/.cache/pt.tar.gz')] },
+    { id: 'linux.7.6-p2', prompt: 'Using a pipe, show the processes owned by the gunicorn application server account.', solution: 'ps aux | grep gunicorn', checks: [outHas('gunicorn')] },
+    { id: 'linux.7.6-p3', prompt: 'Using a pipe, count how many process lines mention sysmon.', solution: 'ps aux | grep -c sysmon', checks: [numberIs(3)] },
+    { id: 'linux.7.6-p4', prompt: 'Using a pipe, show the process lines that mention the external address the upload is going to.', solution: 'ps aux | grep 198.51.100.60', checks: [outHas('curl')] },
+    { id: 'linux.7.6-p5', prompt: 'Using a pipe, show the sshd processes so you can compare a legitimate daemon against the odd one.', solution: 'ps aux | grep sshd', checks: [outHas('/usr/sbin/sshd')] },
   ],
 };
