@@ -258,7 +258,24 @@
    * what keeps them from ever colliding at any size.
    */
   container-type: size;
-  --u: max(1rem, 2.35cqh);
+  --u: max(0.62rem, 2.35cqh);
+
+  /*
+   * Band heights, and the offsets stacked off them.
+   *
+   * Each band is the LARGER of what the scale asks for and what its own text
+   * actually needs, and each band starts above the top of the one in front of
+   * it rather than at a number chosen by hand. That is what lets the scale unit
+   * shrink a long way without the doorways walking into each other, which in
+   * turn is what lets the corridor run on a small or zoomed window instead of
+   * falling back to a stack of circles. The old version had a 1rem floor under
+   * the unit and hand-written offsets, so it could only be correct on a big
+   * screen and gave up everywhere else.
+   */
+  --h1: max(9.6rem, calc(var(--u) * 14.5));
+  --h2: max(6rem, calc(var(--u) * 9));
+  --hev: max(5rem, calc(var(--u) * 6));
+  --band-gap: calc(var(--u) * 0.6);
 }
 
 /* --- the corridor takes the whole page ----------------------------------- */
@@ -273,12 +290,15 @@
  * same reason: a toolbar with a scene underneath it is a viewer, and a viewer
  * is the thing this is not.
  *
- * The condition is a floor on BOTH dimensions. The corridor needs 72rem across
- * (see the stack rule at the end of this file) and 40rem down, which is what
- * the three bands come to at the smallest scale unit they are allowed. Below
- * either, the same six doors stack and scroll.
+ * The condition is a floor on BOTH dimensions, and it is set LOW on purpose:
+ * 56rem across and 34rem down, which is roughly a half-screen window. It used
+ * to be 72rem, and that was wrong in a way that is easy to miss on a big
+ * monitor: browser zoom and display scaling both shrink the CSS viewport, so a
+ * perfectly ordinary maximised window at 125% or 150% landed under the
+ * threshold and got the stack. The corridor is what people asked for, so it
+ * should be what they get unless the window genuinely cannot hold it.
  */
-@media (min-width: 72rem) and (min-height: 40rem) {
+@media (min-width: 56rem) and (min-height: 34rem) {
   .lobby--hall {
     max-width: none;
     margin: 0;
@@ -631,7 +651,7 @@
  */
 .bay {
   --ring: calc(var(--u) * 6.5);
-  --bay-h: calc(var(--u) * 14.5);
+  --bay-h: var(--h1);
   --p1: #7cc4ff;
   --p2: #1f5fc4;
   position: absolute;
@@ -669,16 +689,18 @@
  */
 .bay--l1, .bay--r1 {
   --ring: calc(var(--u) * 6.5);
-  --bay-h: calc(var(--u) * 14.5);
+  --bay-h: var(--h1);
   width: calc(var(--u) * 12);
   bottom: calc(var(--u) * 2.5);
 }
 
 .bay--l2, .bay--r2 {
   --ring: calc(var(--u) * 4.8);
-  --bay-h: calc(var(--u) * 9);
+  --bay-h: var(--h2);
   width: calc(var(--u) * 10.5);
-  bottom: calc(var(--u) * 17.5);
+  /* Stacked off the near band's real height, so the two cannot meet however
+     small the scale unit gets or however far the near plate's text wraps. */
+  bottom: calc(var(--u) * 2.5 + var(--h1) + var(--band-gap));
   opacity: 0.92;
 }
 
@@ -697,7 +719,7 @@
  */
 .bay--ev {
   --ring: calc(var(--u) * 3.4);
-  --bay-h: calc(var(--u) * 6);
+  --bay-h: var(--hev);
   width: calc(var(--u) * 8);
   left: calc(50% + var(--u) * 8.5);
   bottom: calc(var(--u) * 7);
@@ -981,10 +1003,23 @@
    */
   left: calc(50% - var(--u) * 8.5);
   right: calc(50% - var(--u) * 8);
-  /* The ring's own radius, plus the label hanging under it, so nobody ever
-     stands on the words "Chat rooms". */
-  top: calc(40% + min(15cqw, var(--u) * 9) + var(--u) * 4);
-  bottom: calc(var(--u) * 4);
+  /*
+   * The ring's own radius, the gap its label hangs at, and the label's own
+   * height, so nobody ever stands on the words "Chat rooms".
+   *
+   * The label height is a `max` for the same reason the band heights are: the
+   * text has a floor it will not shrink past, so at a small scale unit a
+   * clearance expressed purely in scale units is not enough.
+   *
+   * The last term is half a person. People are centred on their point, so their
+   * box reaches half their own height ABOVE the top of this band; clearing the
+   * label with the band alone left the avatars still clipping it.
+   */
+  top: calc(
+    40% + min(15cqw, var(--u) * 9) + var(--u) * 1.7 + max(2.6rem, var(--u) * 2.6) +
+      max(1.5rem, var(--u) * 1.4)
+  );
+  bottom: calc(var(--u) * 2);
   z-index: 4;
   pointer-events: none;
 }
@@ -1054,11 +1089,19 @@
   }
 }
 
+/*
+ * How many people are in here, read as a HUD line rather than a caption.
+ *
+ * It used to sit centred along the bottom, which put it exactly where the back
+ * of the crowd stands: at the smallest window the two touched, and no amount of
+ * nudging the crowd band fixed it without squeezing the crowd into a sliver.
+ * Moving the readout out of the room instead of shrinking the room is the
+ * better trade, and a count belongs with the other controls anyway.
+ */
 .hall__count {
   position: absolute;
-  left: 50%;
-  bottom: 2%;
-  transform: translateX(-50%);
+  left: 1.3rem;
+  top: 3.4rem;
   z-index: 5;
   font-family: var(--mono);
   font-size: 11px;
@@ -1088,7 +1131,7 @@
  * Anything narrower than the lobby's own max width gets the same six doors,
  * stacked.
  *
- * The corridor needs 72rem across and 40rem down. Below either it does not run
+ * The corridor needs 56rem across and 34rem down. Below either it does not run
  * at all, rather than running badly: the alcoves are blocks of text stacked in
  * rem from the floor, and on a screen too small to hold three of them they walk
  * into each other. Chasing that with a dozen breakpoints would be a worse trade
@@ -1097,7 +1140,7 @@
  * The corridor is the nice version, never the only version: a portal somebody
  * cannot reach on a laptop is a war room they cannot join.
  */
-@media (max-width: 71.99rem), (max-height: 39.99rem) {
+@media (max-width: 55.99rem), (max-height: 33.99rem) {
   .hall__scene {
     container-type: normal;
     aspect-ratio: auto;
