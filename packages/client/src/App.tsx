@@ -41,6 +41,7 @@ import { ModelLab } from './components/ModelLab';
 import { WrittenAnswer } from './components/WrittenAnswer';
 import { IncidentConsole } from './components/IncidentConsole';
 import { MatchConsole } from './components/MatchConsole';
+import { RoomBoard } from './components/RoomBoard';
 import { Home } from './components/Home';
 import {
   ApiCallError,
@@ -169,6 +170,12 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
    */
   const [careerView, setCareerView] = useState<'none' | 'quiz' | 'report' | 'lane'>('none');
   const [warRoom, setWarRoom] = useState(false);
+  /*
+   * The multi-seat SOC floor, which is a different product from the red versus
+   * blue match: one incident, one seat each, and the seats come from the
+   * scenario rather than from the role catalogue.
+   */
+  const [floor, setFloor] = useState(false);
   const [landing, setLanding] = useState(true);
   const [report, setReport] = useState<ReportData | null>(null);
   const [lanes, setLanes] = useState<LaneProfile[] | null>(null);
@@ -604,6 +611,17 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
    * the terminal would make it feel like a formality rather than the thing that
    * decides what somebody studies for the next year.
    */
+  if (floor) {
+    return (
+      <div className="floorshell">
+        <button type="button" className="linkish" onClick={() => { setFloor(false); setLanding(true); }}>
+          ← Back
+        </button>
+        <RoomBoard />
+      </div>
+    );
+  }
+
   if (warRoom) {
     return <MatchConsole user={user} onExit={() => setWarRoom(false)} />;
   }
@@ -624,7 +642,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
         onBrowseTracks={() => setLanding(false)}
         onSocWarRoom={() => {
           setLanding(false);
-          setWarRoom(true);
+          setFloor(true);
         }}
         onRedBlueWarRoom={() => {
           setLanding(false);
