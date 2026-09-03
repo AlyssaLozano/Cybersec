@@ -83,8 +83,8 @@ describe('catalogue integrity', () => {
   });
 
   it('offers certification study at the advertised price, and does not offer to sell it yet', () => {
-    expect(CERT_STUDY_PLAN.amountUsd).toBe(15);
-    expect(CERT_STUDY_PLAN.windowDays).toBe(30);
+    expect(CERT_STUDY_PLAN.amountUsd).toBe(20);
+    expect(CERT_STUDY_PLAN.windowDays).toBe(60);
     // Load-bearing: the UI reads this to decide whether to show a purchase.
     expect(CERT_STUDY_PLAN.status).toBe('coming-soon');
   });
@@ -203,8 +203,17 @@ describe('foundations are per-track, not universal', () => {
 // =========================================================================
 
 describe('lane profiles are complete and honest', () => {
-  it('covers every lane exactly once', () => {
-    expect(LANE_PROFILES.map((lane) => lane.id).sort()).toEqual([...LANES].sort());
+  it('covers every scored lane, with no id repeated', () => {
+    // LANE_PROFILES is a superset of LANES: a few lanes exist purely to give a
+    // track its own "day in the life" page without joining the 16-lane
+    // career-fit scoring taxonomy (see LaneProfile.id in @soc/shared). Every
+    // scored lane still needs a profile, and no id may collide.
+    const ids = LANE_PROFILES.map((lane) => lane.id);
+    const missing = LANES.filter((laneId) => !ids.includes(laneId));
+    expect(missing).toEqual([]);
+
+    const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
+    expect(duplicates).toEqual([]);
   });
 
   it('ranks all three environments for every lane', () => {

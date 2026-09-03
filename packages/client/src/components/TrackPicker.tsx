@@ -22,9 +22,11 @@ interface TrackPickerProps {
   /** Undefined until the track list has loaded; the section simply waits. */
   certStudy?: CertStudyOffer;
   onChoose: (trackId: string) => void;
+  /** Opens the day-in-the-life page for a track's lane, before it is chosen. */
+  onViewLane: (laneId: string) => void;
 }
 
-export function TrackPicker({ tracks, activeTrackId, certStudy, onChoose }: TrackPickerProps) {
+export function TrackPicker({ tracks, activeTrackId, certStudy, onChoose, onViewLane }: TrackPickerProps) {
   return (
     <div className="track-picker">
       <header className="track-picker-head">
@@ -76,6 +78,16 @@ export function TrackPicker({ tracks, activeTrackId, certStudy, onChoose }: Trac
                 ))}
               </ul>
 
+              {track.laneId ? (
+                <button
+                  type="button"
+                  className="ghost small track-lane-link"
+                  onClick={() => onViewLane(track.laneId!)}
+                >
+                  What this job is really like →
+                </button>
+              ) : null}
+
               <ol className="track-stages">
                 {track.curriculum.map((stage) => (
                   <li key={stage.title} className={stage.packageId ? 'ready' : 'planned'}>
@@ -95,17 +107,14 @@ export function TrackPicker({ tracks, activeTrackId, certStudy, onChoose }: Trac
                   <h3>Industry certifications for this role</h3>
                   <p className="muted small">
                     These are the certifications employers hiring for this role ask for by name. The
-                    fee below is the exam only, paid to the issuer, and it is not part of your
-                    subscription.
+                    exam fee is paid to the issuer directly and is not part of your subscription.
                   </p>
                   <ul className="track-cert-list">
                     {track.certificationDetail.map((cert) => (
                       <li key={cert.id}>
                         <span className="track-cert-name">{cert.name}</span>
                         <span className="track-cert-issuer">{cert.issuer}</span>
-                        <span className="track-cert-cost">
-                          ${cert.approxCostUsd} exam · ~{cert.typicalStudyWeeks} weeks study
-                        </span>
+                        <span className="track-cert-cost">~{cert.typicalStudyWeeks} weeks study</span>
                         {cert.mandatedSomewhere && (
                           <span className="track-cert-mandate">Mandatory in some sectors</span>
                         )}

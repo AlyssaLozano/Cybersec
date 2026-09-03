@@ -120,7 +120,7 @@ const MODULE_4_1: Exercise[] = [
     moduleId: '4.1',
     packageId: 'networking',
     order: 2,
-    title: 'List the interfaces without the noise',
+    title: 'List the interfaces on their own',
     kind: 'terminal',
     goal: 'Get a compact view of what network hardware exists.',
     prompt: 'Show just the network interfaces on this host, without their IP addresses.',

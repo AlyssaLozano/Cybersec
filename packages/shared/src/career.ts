@@ -310,6 +310,8 @@ export interface TrackSummary extends Track {
    * the content's source of truth, and this is a convenience for the UI.
    */
   certificationDetail: Certification[];
+  /** The lane whose "day in the life" page describes this track, when one exists. */
+  laneId?: string;
   exerciseCount: number;
   passedCount: number;
   percentComplete: number;

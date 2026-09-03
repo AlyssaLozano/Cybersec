@@ -52,6 +52,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'high',
     burnoutDrivers: ['Alert volume with poor tuning', 'Night shift rotation', 'Being measured on throughput rather than accuracy'],
     advancement: 'Tier 2 and 3, then usually a fork: detection engineering, incident response, or team lead. Staying at Tier 1 beyond two years is a warning sign about the employer, not about you.',
+    compensationUsd: {
+      entry: '$50,000 to $65,000',
+      mid: '$70,000 to $95,000',
+      senior: '$100,000 to $130,000',
+      note: 'MSSP shops tend to sit at the bottom of these bands; large corporate SOCs and government roles with a clearance sit nearer the top. "Senior" here means Tier 3 or shift lead, not management.',
+    },
+    worksWith: [
+      'The shift you hand off to and the one you receive from',
+      'Tier 2 and Tier 3 analysts you escalate to when something does not resolve',
+      'The detection engineering team, when the actual problem is a bad rule rather than a bad alert',
+      'IT and the help desk, for the account and device context an alert alone does not give you',
+    ],
     trackId: 'soc',
     entryReality:
       'The most accessible entry point in security, and the one most likely to hire somebody with no security experience. Expect to start on shift.',
@@ -95,6 +107,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     ],
     advancement:
       'Senior detection engineer, then detection lead, threat hunting, or security engineering. The work is unusually portable: rules and methodology transfer between employers in a way that knowledge of one company’s alert queue does not.',
+    compensationUsd: {
+      entry: '$75,000 to $90,000',
+      mid: '$95,000 to $125,000',
+      senior: '$130,000 to $165,000',
+      note: 'There is no true entry band, because almost nobody starts here. These figures assume the SOC time already served; quote them to yourself only once that is true.',
+    },
+    worksWith: [
+      'SOC analysts, whose complaints about a rule are effectively your backlog',
+      'The platform or logging team that owns the sources a rule depends on',
+      'Incident responders, when a real intrusion becomes the model for a new detection',
+      'Whoever owns change control on the SIEM, for every rule you ship',
+    ],
     trackId: 'detection-engineering',
     entryReality:
       'Rarely a first security job, and anybody telling you otherwise is selling a course. The normal route is eighteen months to two years in a SOC first, because tuning a rule well requires knowing what the queue feels like at 3am. Data engineers and software developers moving across are the genuine exception.',
@@ -130,6 +154,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'high',
     burnoutDrivers: ['On-call rotation', 'High-stakes pressure with incomplete information', 'Carrying blame for underfunded environments'],
     advancement: 'IR lead, then either a management path running the function or a specialist path into forensics, threat hunting, or consulting at a much higher rate.',
+    compensationUsd: {
+      entry: '$70,000 to $90,000',
+      mid: '$100,000 to $130,000',
+      senior: '$140,000 to $180,000',
+      note: 'Retainer consulting firms pay more per hour but bill you out constantly; in-house roles pay less on paper and cost you fewer weekends. Both numbers are real, they are just different jobs.',
+    },
+    worksWith: [
+      'The SOC, who escalates the incident to you in the first place',
+      'Legal and communications, on anything that could become public or regulatory',
+      'IT operations, who actually rebuilds what you contained',
+      'Executives, on an hourly bridge call none of them asked to be on',
+    ],
     trackId: 'incident-response',
     entryReality:
       'Rarely a first security job. Most people arrive after a year or two in a SOC. Coming straight in from another career is possible but uncommon.',
@@ -165,6 +201,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'medium',
     burnoutDrivers: ['Case backlog', 'Distressing case material', 'Procedural pressure where mistakes are unforgiving'],
     advancement: 'Senior examiner, then expert witness work or a lab management role. Highly specialised and hard to hire for, which protects your position.',
+    compensationUsd: {
+      entry: '$65,000 to $85,000',
+      mid: '$90,000 to $120,000',
+      senior: '$130,000 to $160,000',
+      note: 'Law enforcement pay tends to sit below the private-sector consulting figures for the same skill; the tradeoff is case variety and a pension most consultancies do not offer.',
+    },
+    worksWith: [
+      'The incident response lead who handed you the case',
+      'Legal counsel, on what a finding actually proves and what it does not',
+      'Law enforcement, on cases that cross that line',
+      'Opposing counsel, occasionally, under oath',
+    ],
     trackId: 'incident-response',
     entryReality:
       'Specialised. Often entered from law enforcement, IR, or a digital forensics degree. The evidentiary discipline matters more than the technical depth.',
@@ -175,6 +223,7 @@ export const LANE_PROFILES: LaneProfile[] = [
     summary: 'Work out who is attacking, how they operate, and what your organisation should do differently.',
     dayToDay: [
       'Read. A lot. Vendor reporting, government advisories, forums, other people\'s incident write-ups.',
+      'Query LeakIX, Argus, and similar open-source platforms for exposed infrastructure, leaked credentials, and public data tied to an actor or a target.',
       'Track groups over time: cluster activity, map behaviour to ATT&CK, notice when something changes.',
       'Answer questions from the SOC and leadership: is this campaign relevant to us, and how would we know?',
       'Write assessments with explicit confidence levels, and defend them when challenged.',
@@ -200,6 +249,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'low',
     burnoutDrivers: ['Producing work nobody acts on', 'Pressure to overstate confidence'],
     advancement: 'Senior analyst, then intel lead or a specialist niche in a particular region or actor set. Transfers well into consulting and vendor research.',
+    compensationUsd: {
+      entry: '$60,000 to $80,000',
+      mid: '$90,000 to $115,000',
+      senior: '$120,000 to $150,000',
+      note: 'A cleared federal role and a vendor research seat can pay very differently for the same seniority. Ask which one a number is describing before you compare it to your own offer.',
+    },
+    worksWith: [
+      'The SOC, who wants to know whether a campaign is relevant to them specifically',
+      'Detection engineering, translating a report into something a rule can catch',
+      'Executives, before a public breach makes the question urgent anyway',
+      'Other intelligence teams, trading what each of you has seen',
+    ],
     trackId: 'threat-intel',
     entryReality:
       'Strong fit for people arriving from journalism, academia, military intelligence, or library and research work. Writing ability matters more than technical depth.',
@@ -236,6 +297,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'medium',
     burnoutDrivers: ['Billable utilisation targets', 'Reporting workload', 'Finding the same issues repeatedly with nothing fixed'],
     advancement: 'Senior tester, then red team, specialist research, or practice lead. A strong route into independent consulting at high rates.',
+    compensationUsd: {
+      entry: '$65,000 to $85,000',
+      mid: '$95,000 to $125,000',
+      senior: '$140,000 to $180,000',
+      note: 'Independent consulting at senior level can exceed this considerably, but you are pricing your own time and covering your own gaps between engagements, which the figure alone does not show.',
+    },
+    worksWith: [
+      'The client\'s IT or security lead, who scoped what you are allowed to touch',
+      'The developers whose application you are about to make their problem',
+      'Your own report writers and technical reviewer',
+      'The client\'s executives, at the out-brief where the real conversation happens',
+    ],
     trackId: 'pentest',
     entryReality:
       'Hard to enter directly. Expect a long technical runway and a portfolio before anyone hires you. Rarely a first security job, and worth knowing that early.',
@@ -271,6 +344,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'medium',
     burnoutDrivers: ['Sustained secrecy and isolation', 'Political fallout from findings', 'Constant tooling maintenance'],
     advancement: 'Red team lead or adversary emulation specialist. Very small field, so reputation matters more than credentials.',
+    compensationUsd: {
+      entry: '$100,000 to $130,000',
+      mid: '$135,000 to $165,000',
+      senior: '$170,000 to $220,000',
+      note: 'These numbers describe somebody arriving with years of penetration testing already behind them, which is the only real way in. There is no junior version of this figure.',
+    },
+    worksWith: [
+      'The blue team, whose detection you are testing without telling them when',
+      'Purple team coordinators, after the exercise ends and the lessons get shared',
+      'The CISO, who authorised the engagement and wants findings held quietly until fixed',
+      'Your own operators, coordinating a campaign that can run for weeks',
+    ],
     entryReality:
       'Not an entry point. Almost everyone arrives after several years of penetration testing. Treat it as a destination rather than a start.',
   },
@@ -305,6 +390,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'low',
     burnoutDrivers: ['Being blocked by other teams', 'Accountability without authority', 'Out-of-hours changes'],
     advancement: 'Senior engineer, then security architect or engineering management. One of the strongest salary trajectories in the field.',
+    compensationUsd: {
+      entry: '$70,000 to $90,000',
+      mid: '$100,000 to $130,000',
+      senior: '$140,000 to $175,000',
+      note: 'Prior systems or DevOps experience tends to land you nearer the top of the entry band than somebody arriving with security knowledge alone and no infrastructure background.',
+    },
+    worksWith: [
+      'The engineering teams whose systems you are hardening, who often see you as friction',
+      'Change management, for every window you need to make a change',
+      'The SOC, who inherits whatever you build',
+      'Vendors, for the tools underneath most of what you deploy',
+    ],
     trackId: 'security-engineering',
     entryReality: 'A natural transfer for system administrators and DevOps engineers. Prior infrastructure experience shortens this enormously.',
   },
@@ -339,6 +436,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'low',
     burnoutDrivers: ['Legacy rule bases', 'Being the default suspect for every outage'],
     advancement: 'Senior network security engineer, then architecture. Increasingly merges with cloud networking, which is worth planning for.',
+    compensationUsd: {
+      entry: '$60,000 to $80,000',
+      mid: '$85,000 to $110,000',
+      senior: '$120,000 to $150,000',
+      note: 'The field is narrowing as workloads move to the cloud, and pay reflects that: the top of this band increasingly belongs to people who can also speak cloud networking.',
+    },
+    worksWith: [
+      'Network engineering, who owns the hardware you are securing',
+      'The SOC, chasing down what a packet capture actually shows',
+      'Every team that files an exception request against a segmentation rule',
+      'Cloud engineering, increasingly, as the network itself moves off-premises',
+    ],
     entryReality: 'A very direct transfer for anyone from network administration. Network+ or CCNA-level knowledge is close to a prerequisite.',
   },
   {
@@ -372,6 +481,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'medium',
     burnoutDrivers: ['Relentless pace of provider change', 'Reviewing faster than you can think', 'Being the bottleneck for delivery teams'],
     advancement: 'Senior cloud security engineer, then cloud security architect. Among the best-paid and most portable skill sets in security right now.',
+    compensationUsd: {
+      entry: '$75,000 to $95,000',
+      mid: '$105,000 to $135,000',
+      senior: '$145,000 to $185,000',
+      note: 'Demand currently outpaces supply enough that these bands move up faster than most of security. Multi-cloud experience, not just one provider, is what pushes an offer toward the top.',
+    },
+    worksWith: [
+      'The DevOps or platform team whose account you are auditing',
+      'Developers, who can create risk faster than you can review it',
+      'Finance, when a security control collides with a cost decision',
+      'Compliance, for whatever framework the cloud posture has to satisfy',
+    ],
     trackId: 'cloud-security',
     entryReality: 'Strong transfer from IT operations, DevOps, or sysadmin work. Cloud fundamentals matter more than security background at entry.',
   },
@@ -406,6 +527,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'medium',
     burnoutDrivers: ['False positive triage', 'Adversarial relationship with engineering', 'Responsibility without authority'],
     advancement: 'Senior appsec engineer, then product security lead or security architecture. Excellent pay, particularly at software companies.',
+    compensationUsd: {
+      entry: '$75,000 to $95,000',
+      mid: '$105,000 to $135,000',
+      senior: '$145,000 to $180,000',
+      note: 'Pay tracks software engineering pay more than it tracks general security pay, because the job is closer to development than to most of the rest of this list.',
+    },
+    worksWith: [
+      'The developers whose code you are reviewing, who did not ask for the review',
+      'Engineering leadership, when a finding threatens a release date',
+      'The pentest team, on anything that needs a human attacker to confirm',
+      'Product management, on risk tradeoffs they did not know they were making',
+    ],
     trackId: 'appsec',
     entryReality:
       'Close to requiring a software background. If you can already code, this is one of the fastest transfers into security available.',
@@ -441,6 +574,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'medium',
     burnoutDrivers: ['Accountability without authority', 'A backlog that never ends', 'Being dismissed as a scan operator'],
     advancement: 'Programme lead, then risk management or security engineering. An underrated way in, because the demand is constant and the competition is light.',
+    compensationUsd: {
+      entry: '$55,000 to $70,000',
+      mid: '$75,000 to $95,000',
+      senior: '$105,000 to $130,000',
+      note: 'This is one of the lower-paid lanes in security relative to the demand for it, which is exactly why the entry competition is lighter than the job market numbers would suggest.',
+    },
+    worksWith: [
+      'The system owners you chase for remediation, repeatedly',
+      'IT operations, who actually applies the patch',
+      'Risk management, on what gets an exception and why',
+      'Executives, via the metrics that say whether the number is moving',
+    ],
     trackId: 'vuln-management',
     entryReality:
       'One of the most accessible entry points in security, and consistently hiring. Organisation and persistence matter more than technical depth.',
@@ -476,6 +621,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'low',
     burnoutDrivers: ['Access review fatigue', 'Executive pressure for exceptions', 'Invisible work'],
     advancement: 'IAM engineer, then identity architect or governance lead. Specialised enough that experienced people are genuinely hard to replace.',
+    compensationUsd: {
+      entry: '$55,000 to $70,000',
+      mid: '$75,000 to $100,000',
+      senior: '$110,000 to $140,000',
+      note: 'Federal roles involving PIV/CAC and ICAM policy sit above these bands as a specialised niche; general enterprise IAM sits within them.',
+    },
+    worksWith: [
+      'The service desk, on every access request and password reset that lands on your queue',
+      'Managers, who you chase every cycle to certify their team\'s access',
+      'Application owners, on what a role in their system actually grants',
+      'Audit, at every review cycle',
+    ],
     trackId: 'identity',
     entryReality:
       'One of the most reliable ways into security from an IT service desk background, because you already understand joiner-leaver processes.',
@@ -511,6 +668,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'low',
     burnoutDrivers: ['Being ignored until something goes wrong', 'Producing compliance theatre', 'Lack of technical credibility'],
     advancement: 'Risk manager, then head of GRC or CISO. One of the more direct routes to security leadership, since it is closest to the business.',
+    compensationUsd: {
+      entry: '$55,000 to $70,000',
+      mid: '$80,000 to $105,000',
+      senior: '$115,000 to $150,000',
+      note: 'A background in audit or finance tends to command more at entry than a background in security alone, because the writing and stakeholder skills are what the role is actually short of.',
+    },
+    worksWith: [
+      'Internal audit, who tests what you assert is true',
+      'Every department head, who owns a risk you are tracking on their behalf',
+      'The board or an audit committee, for the report they actually read',
+      'Legal, on anything that touches a regulation',
+    ],
     trackId: 'risk-governance',
     entryReality:
       'The most direct transfer for anyone from audit, legal, finance, or project management, and it needs no terminal work at all.',
@@ -546,6 +715,18 @@ export const LANE_PROFILES: LaneProfile[] = [
     baselineBurnout: 'low',
     burnoutDrivers: ['Influence without authority', 'Designs that are never implemented', 'Drifting away from hands-on skill'],
     advancement: 'Principal architect, then CISO or independent consulting. A senior destination rather than a step.',
+    compensationUsd: {
+      entry: '$120,000 to $145,000',
+      mid: '$145,000 to $175,000',
+      senior: '$180,000 to $230,000',
+      note: 'There is no junior figure worth publishing, because there is no junior version of this job. These bands describe somebody arriving already senior from engineering, engineering management, or another lane on this list.',
+    },
+    worksWith: [
+      'Engineering leads, on every design you review before it is built',
+      'The CISO, for whom you are translating risk into architecture',
+      'Specialists in network, cloud, and identity, whose depth you rely on rather than duplicate',
+      'Procurement, on anything that has to be bought to build what you designed',
+    ],
     entryReality:
       'Not an entry point under any circumstances. Expect eight to ten years across several other lanes first. Included here so you can see where a path leads.',
   },
@@ -589,14 +770,242 @@ export const LANE_PROFILES: LaneProfile[] = [
     ],
     advancement:
       'Senior AI security engineer, then either research or leading an AI assurance function. It is genuinely too new to say where it settles, and anybody telling you the ten-year path with confidence is guessing. What is portable is the underlying skill: somebody who can reason about a system nobody has documented is employable regardless of what this specialism is called in five years.',
+    compensationUsd: {
+      entry: '$110,000 to $140,000',
+      mid: '$140,000 to $175,000',
+      senior: '$180,000 to $230,000',
+      note: 'Read the entry figure the way the rest of this profile reads everything else about entering the field: it describes somebody who was already senior in security or machine learning before crossing over, not a first job.',
+    },
+    worksWith: [
+      'The ML or product team whose model you are testing, who has a launch date',
+      'Legal and policy, on what a finding means for compliance',
+      'Data scientists, reading training data alongside you',
+      'Executives, who are being sold the technology faster than it can be secured',
+    ],
     trackId: 'ai-security',
     entryReality:
       'Not a first security job, and the salary figures being quoted around it are for people who were already senior somewhere else. The realistic route is two to three years in another lane (detection engineering, appsec, or security engineering are the usual ones) while learning the AI mechanics properly, then moving across. If you are arriving from machine learning rather than from security, the crossing is shorter and you need the security half instead. Either way, the credential that gets you hired is a portfolio of findings you can walk somebody through, because there is no established certification for this and several of the ones being sold are worthless.',
+  },
+  {
+    id: 'ot-ics',
+    title: 'OT and Industrial Control Systems Security',
+    summary:
+      'Protect the systems that run physical processes, where a failure has consequences you can see rather than a number on a spreadsheet.',
+    dayToDay: [
+      'Walk the plant floor with an engineer before touching anything, because you are a guest in a world you do not run.',
+      'Read traffic from a protocol built decades ago to trust everything on the wire, and decide what normal looks like before you can say what is not.',
+      'Argue for a patch or a segmentation change that cannot happen until the next planned outage, sometimes months away.',
+      'Sit between plant engineers, who measure success in decades of uptime, and IT security, who measure it in hours since the last incident.',
+      'Document a control that will be reviewed by an auditor who has never set foot in a control room.',
+    ],
+    personalityMatch: [
+      'You can accept that "patch it now" is sometimes the wrong answer, not just the slow one',
+      'You are comfortable being the least senior person in a room full of people with decades on the plant floor',
+      'You think in terms of physical consequence, not just data loss',
+      'You are patient with a change that lands on the next planned outage rather than the next ticket',
+    ],
+    painPoints: [
+      'The gap between how IT security assumes things work and how the plant actually runs causes real friction, and you absorb most of it.',
+      'Change happens on the plant\'s schedule, not yours, which can mean living with a known gap for months.',
+      'Prior industrial experience carries more weight here than a security background does, which can make entry slower than other lanes.',
+      'The job is quiet until it very much is not, and "it will never happen here" is a common, hard instinct to argue against.',
+    ],
+    environmentFit: [
+      { environmentId: 'government', rank: 1, note: 'Municipal utilities, power, water, and transit run critical infrastructure with famously small security teams and real public impact. Federal critical-infrastructure programmes fund this work seriously.' },
+      { environmentId: 'corporate', rank: 2, note: 'Manufacturing and energy companies with real plant floors. Deep, narrow expertise inside one industry.' },
+      { environmentId: 'consulting', rank: 3, note: 'Assessment work across several plants and industries. Broad exposure, but you rarely stay long enough to see a fix through a full outage cycle.' },
+    ],
+    certPathway: ['sec-plus', 'gicsp'],
+    baselineBurnout: 'low',
+    burnoutDrivers: ['Living with a known gap until the next planned outage', 'Being the newest voice in a room of plant veterans', 'Translating between two departments that do not share a vocabulary'],
+    advancement:
+      'Senior OT security engineer, then OT security lead or a Purdue-model architecture role spanning several sites. A small, specialised field where experienced people are genuinely hard to find and harder to replace.',
+    compensationUsd: {
+      entry: '$65,000 to $85,000',
+      mid: '$90,000 to $115,000',
+      senior: '$120,000 to $155,000',
+      note: 'Prior industrial, engineering, or military experience is worth more here at entry than a security certification is, and offers reflect that.',
+    },
+    worksWith: [
+      'Plant or operations engineers, who own the equipment and outrank you on it',
+      'The safety team, whose systems are never touched for a security reason alone',
+      'IT security, translating between two departments that measure risk differently',
+      'Vendors, who control firmware you are usually not allowed to modify yourself',
+    ],
+    trackId: 'ot-ics',
+    entryReality:
+      'People arriving from engineering, manufacturing, utilities, or the military transfer in more easily than people arriving from a pure IT security background, because the physical-systems instinct is the harder half to teach.',
+  },
+  {
+    id: 'compliance-audit',
+    title: 'Compliance and Audit',
+    summary:
+      'Test whether controls actually operate, gather evidence that survives a sceptical reviewer, and write findings that get acted on.',
+    dayToDay: [
+      'Interview a control owner about how a process works, and compare the answer to what the system logs actually show.',
+      'Pull a sample, not everything, and be ready to defend why the sample is big enough to mean something.',
+      'Chase evidence that should have been easy to produce and was not, which tells you something on its own.',
+      'Write a finding with a rating you can justify to somebody who wants it lowered.',
+    ],
+    personalityMatch: [
+      'You are comfortable being the person nobody is glad to see on their calendar',
+      'You can hold a position under pushback from somebody more senior than you',
+      'You write precisely, because a vague finding gets argued rather than fixed',
+      'You would rather find the gap now than have someone else find it during a real audit',
+    ],
+    painPoints: [
+      'You are treated as an obstacle by the people you audit, no matter how reasonable the finding.',
+      'The work runs in hard cycles: quiet stretches followed by weeks where every deadline lands at once.',
+      'Evidence collection is often the least respected, most time-consuming part of the job.',
+      'A technically correct finding that lands badly politically can be softened by somebody more senior than the truth.',
+    ],
+    environmentFit: [
+      { environmentId: 'government', rank: 1, note: 'FISMA, inspector general reviews, and continuous monitoring make this a defined, stable career field with real structure.' },
+      { environmentId: 'consulting', rank: 2, note: 'Firms doing SOC 2 and ISO 27001 work for companies chasing certification for the first time. Steady demand, varied clients, fast learning.' },
+      { environmentId: 'corporate', rank: 3, note: 'Regulated industries run internal audit functions with genuine authority, though you may wait longer between cycles to see the impact of a finding.' },
+    ],
+    certPathway: ['cisa', 'sec-plus', 'crisc', 'cgrc'],
+    baselineBurnout: 'low',
+    burnoutDrivers: ['Being resented for doing the job correctly', 'Deadline-heavy cycles around audit periods', 'Findings softened or reversed above your level'],
+    advancement:
+      'Senior auditor, then audit manager or a move into risk and governance leadership. One of the more direct routes into a CISO-adjacent career for somebody without a technical background.',
+    compensationUsd: {
+      entry: '$55,000 to $70,000',
+      mid: '$75,000 to $95,000',
+      senior: '$105,000 to $135,000',
+      note: 'A CPA or an internal-audit background tends to move the top of this band higher than a security-only background does.',
+    },
+    worksWith: [
+      'The control owners you interview and then test',
+      'Internal audit, if that is not the seat you already hold',
+      'External auditors, during the certification window',
+      'Leadership, on the finding they would rather not have',
+    ],
+    trackId: 'compliance-audit',
+    entryReality:
+      'The most direct transfer that exists for anyone from internal audit, accounting, or quality assurance. Those skills are the job; security knowledge is what you add on top.',
+  },
+  {
+    id: 'privacy',
+    title: 'Privacy and Data Protection',
+    summary:
+      'Work out what personal data an organisation actually holds, whether it should, and keep its use lawful and defensible.',
+    dayToDay: [
+      'Map a data flow: what is collected, why, where it goes, and who else can see it.',
+      'Read a new product design before it ships and ask what happens to the data it will start collecting.',
+      'Review a vendor contract for what it actually permits them to do with data you are responsible for.',
+      'When a breach notification clock starts, work out who has to be told, what, and by when, against a legal deadline that does not move.',
+    ],
+    personalityMatch: [
+      'You read contracts and regulation without your eyes glazing over',
+      'You can say no to a product decision on legal grounds and hold that line',
+      'You think about second- and third-order uses of data, not just the obvious one',
+      'You are comfortable working from a law or a standard rather than a technical spec',
+    ],
+    painPoints: [
+      'You often find out what a system actually does with data well after it was already built that way.',
+      'The regulatory landscape changes state by state and country by country, and keeping current is a permanent task.',
+      'A breach notification clock is unforgiving, and it does not wait for a convenient time to start.',
+      'Being the person who says no to a launch is not always a popular seat.',
+    ],
+    environmentFit: [
+      { environmentId: 'government', rank: 1, note: 'Privacy Act obligations and mandatory privacy impact assessments make this a defined career field with its own progression.' },
+      { environmentId: 'corporate', rank: 2, note: 'Multinationals juggling GDPR, state privacy laws, and sector rules simultaneously need this depth permanently. Legal backgrounds are prized.' },
+      { environmentId: 'consulting', rank: 3, note: 'Privacy assessment and DPIA work across many clients. Good breadth, less ownership of any one programme.' },
+    ],
+    certPathway: ['cipp-us', 'sec-plus'],
+    baselineBurnout: 'low',
+    burnoutDrivers: ['A regulatory landscape that never stops changing underneath you', 'Being brought in after a design decision is already made', 'The unforgiving clock on a real breach notification'],
+    advancement:
+      'Senior privacy analyst, then Data Protection Officer or privacy programme lead. A distinct profession from the rest of this list, with its own credentialing and its own leadership track.',
+    compensationUsd: {
+      entry: '$60,000 to $80,000',
+      mid: '$85,000 to $110,000',
+      senior: '$120,000 to $155,000',
+      note: 'A legal background pushes these figures up meaningfully; a Data Protection Officer at a large multinational can exceed the top of this band considerably.',
+    },
+    worksWith: [
+      'Legal counsel, on what the law actually requires versus what is merely prudent',
+      'Engineering, on how a system actually handles data versus how the design document says it does',
+      'The Data Protection Officer or privacy lead you report findings to, if that is not your own seat',
+      'Customers and regulators, indirectly, through every policy you write',
+    ],
+    trackId: 'privacy',
+    entryReality:
+      'A strong, direct transfer for anyone arriving from legal, compliance, healthcare, or records management. It is a distinct profession that overlaps security without being it, and that overlap is exactly the value you add.',
+  },
+  {
+    id: 'awareness',
+    title: 'Security Awareness and Human Risk',
+    summary:
+      'Change what people actually do, not what they can recite: training that is not ignored, phishing simulation that teaches rather than punishes.',
+    dayToDay: [
+      'Look at last month\'s numbers and ask whether they measure behaviour or just completion, because most awareness metrics measure the wrong thing.',
+      'Design a phishing simulation that teaches the person who clicked something useful, rather than humiliating them in front of their team.',
+      'Turn a real incident into a training moment without naming who caused it.',
+      'Fight for budget for a programme whose success looks like nothing happening, which is a hard thing to sell upward.',
+    ],
+    personalityMatch: [
+      'You understand how people actually decide under pressure, not how a policy assumes they do',
+      'You can make a dry topic land without talking down to the room',
+      'You think about incentives: what a policy actually rewards, and whether that is what you want',
+      'You are comfortable that your best work is invisible: an incident that never happened',
+    ],
+    painPoints: [
+      'Most organisations still measure completion and click rates, which are close to meaningless, and changing that is a constant argument.',
+      'You are easy to deprioritise when budgets tighten, because the cost of skipping awareness work is not obvious until it is.',
+      'A programme that punishes people for clicking teaches them to hide mistakes rather than report them, and convincing leadership of that takes real effort.',
+      'You rarely get credit for the incident that did not happen.',
+    ],
+    environmentFit: [
+      { environmentId: 'corporate', rank: 1, note: 'Large organisations fund dedicated awareness roles with a real budget and a real mandate. Where almost all of these jobs actually are.' },
+      { environmentId: 'consulting', rank: 2, note: 'Designing and running programmes for clients who do not have the role in-house. Varied audiences, less ownership of long-term results.' },
+      { environmentId: 'government', rank: 3, note: 'Mandated annual training cycles give you a captive audience and a compliance deadline, though the content is often more constrained.' },
+    ],
+    certPathway: ['sec-plus'],
+    baselineBurnout: 'low',
+    burnoutDrivers: ['Proving the value of work whose success is invisible', 'Being the first budget line cut when things tighten', 'Fighting metrics that reward the wrong behaviour'],
+    advancement:
+      'Senior awareness manager, then head of security culture or a move into broader risk communications. One of the more direct routes in for people who do not come from a technical background at all.',
+    compensationUsd: {
+      entry: '$55,000 to $70,000',
+      mid: '$75,000 to $95,000',
+      senior: '$100,000 to $130,000',
+      note: 'Pay here trails the more technical lanes on this list, which is a genuine argument worth having with anyone hiring for it rather than a reflection of the skill the job actually takes.',
+    },
+    worksWith: [
+      'HR and internal communications, who own the channels your message actually travels through',
+      'Every employee, who is both your audience and, through what they report, your data source',
+      'The SOC, who tells you what people are actually falling for right now',
+      'Leadership, who has to fund a programme that is hard to prove worked',
+    ],
+    trackId: 'awareness',
+    entryReality:
+      'The most underrated entry point on this list. People arriving from teaching, communications, HR, or marketing bring exactly the skills the role needs, and prior non-technical experience is a genuine advantage rather than something to overcome.',
   },
 ];
 
 const BY_ID = new Map(LANE_PROFILES.map((lane) => [lane.id, lane]));
 
 export function getLaneProfile(id: string) {
-  return BY_ID.get(id as never) ?? null;
+  return BY_ID.get(id) ?? null;
+}
+
+/*
+ * A few tracks (incident-response, risk-governance) back more than one lane,
+ * e.g. incident-response backs both the "incident-response" and "forensics"
+ * lanes. Two passes so the lane whose own id matches the track id wins: the
+ * plain, unqualified read of the job over a specialisation within it.
+ */
+const LANE_ID_BY_TRACK = new Map<string, string>();
+for (const lane of LANE_PROFILES) {
+  if (lane.trackId) LANE_ID_BY_TRACK.set(lane.trackId, lane.id);
+}
+for (const lane of LANE_PROFILES) {
+  if (lane.trackId === lane.id) LANE_ID_BY_TRACK.set(lane.trackId, lane.id);
+}
+
+/** The lane a track's "what this job is really like" page should open, if one exists. */
+export function laneIdForTrack(trackId: string): string | undefined {
+  return LANE_ID_BY_TRACK.get(trackId);
 }

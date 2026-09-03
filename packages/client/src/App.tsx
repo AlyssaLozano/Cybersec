@@ -742,6 +742,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
         }}
         onRisk={() => setLanding(false)}
         onLinux={() => setLanding(false)}
+        onNetworking={() => setLanding(false)}
         onSoc={() => setLanding(false)}
         onBrowseTracks={() => setLanding(false)}
         onLobby={(door) => {
@@ -848,6 +849,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
               activeTrackId={trackId}
               certStudy={certStudy ?? undefined}
               onChoose={setTrackId}
+              onViewLane={openLane}
             />
           </div>
         </div>

@@ -421,7 +421,7 @@ export const CAPSTONES: Record<string, CapstoneOption[]> = {
       title: 'OSINT collection tool',
       pitch: 'Automate part of the boring collection work and show what it turned up.',
       deliverables: [
-        'A small tool that pulls from a public source (certificate transparency, a public feed, etc.)',
+        'A small tool that queries a public OSINT source (LeakIX, Argus, crt.sh, Shodan, or a similar platform)',
         'Source committed, with setup instructions that actually work',
         'A findings writeup from running it for real, not just a demo run',
         'A note on the legal and ethical boundary of what it collects',

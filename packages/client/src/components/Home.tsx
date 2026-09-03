@@ -146,6 +146,7 @@ interface HomeProps {
   onTakeAssessment: () => void;
   onRisk: () => void;
   onLinux: () => void;
+  onNetworking: () => void;
   onSoc: () => void;
   onBrowseTracks: () => void;
   /**
@@ -193,6 +194,7 @@ export function Home({
   onTakeAssessment,
   onRisk,
   onLinux,
+  onNetworking,
   onSoc,
   onBrowseTracks,
   onLobby,
@@ -273,21 +275,11 @@ export function Home({
             </div>
           </section>
 
-          {/* Fork: Risk (branch) and Linux (trunk) */}
+          {/* The trunk: Linux and Networking together, the two foundations every hands-on path shares */}
           <section className="stage">
             <div className="stage-node">02</div>
             <div className="stage-label">Learn the basics and practice</div>
             <div className="stage-tiles">
-              <button className="techbtn amber" onClick={onRisk}>
-                <span className="tb-tag">A branch of its own</span>
-                <span className="tb-name">Go into Risk</span>
-                <span className="tb-desc">
-                  Governance, risk, and compliance: decisions and evidence, no command line. A path
-                  you can take without the terminal at all.
-                </span>
-                <span className="tb-enter">Explore Risk &amp; GRC &rsaquo;&rsaquo;</span>
-              </button>
-
               <button className="techbtn green" onClick={onLinux}>
                 <span className="tb-tag">The main trunk</span>
                 <span className="tb-name">Linux Foundations</span>
@@ -297,12 +289,39 @@ export function Home({
                 </span>
                 <span className="tb-enter">Open module &rsaquo;&rsaquo;</span>
               </button>
+
+              <button className="techbtn violet" onClick={onNetworking}>
+                <span className="tb-tag">The main trunk</span>
+                <span className="tb-name">Networking Basics</span>
+                <span className="tb-desc">
+                  What a host is talking to, and whether it should be. The other half of the ground
+                  floor, and where the exfiltration connection from Linux Fundamentals finally gets
+                  found.
+                </span>
+                <span className="tb-enter">Open module &rsaquo;&rsaquo;</span>
+              </button>
             </div>
           </section>
 
-          {/* From Linux: SOC Foundations, fanning into roles */}
+          {/* Risk stands alone: the one path that skips the terminal entirely */}
           <section className="stage">
             <div className="stage-node">03</div>
+            <div className="stage-tiles">
+              <button className="techbtn amber" onClick={onRisk}>
+                <span className="tb-tag">No prerequisites needed</span>
+                <span className="tb-name">Go into Risk</span>
+                <span className="tb-desc">
+                  Governance, risk, and compliance: decisions and evidence, no command line. Start
+                  here directly, skipping Linux and Networking entirely.
+                </span>
+                <span className="tb-enter">Explore Risk &amp; GRC &rsaquo;&rsaquo;</span>
+              </button>
+            </div>
+          </section>
+
+          {/* From Linux and Networking: SOC Foundations, fanning into roles */}
+          <section className="stage">
+            <div className="stage-node">04</div>
             <div className="stage-label">Learn the skills, and practice them on the roles</div>
             <div className="role-grid">
               {SOC_ROLES.map((role) => (
@@ -317,7 +336,7 @@ export function Home({
 
           {/* Live war rooms */}
           <section className="stage live">
-            <div className="stage-node">04</div>
+            <div className="stage-node">05</div>
             <div className="stage-label live">
               <span className="live-badge">
                 <span className="live-dot" />
@@ -417,7 +436,7 @@ export function Home({
 
           {/* Land the job: the portfolio the work builds, and interview practice */}
           <section className="stage">
-            <div className="stage-node">05</div>
+            <div className="stage-node">06</div>
             <div className="stage-label">Land the job</div>
             <div className="stage-tiles">
               {/* Free, and deliberately so: the badges are the record of work

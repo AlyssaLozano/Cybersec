@@ -19,6 +19,7 @@ import {
 import { TRACKS, getTrack } from '../content/tracks.js';
 import { trackFoundations, trackPackages, trackReadiness } from '../content/curriculum.js';
 import { CERT_PHILOSOPHY, resolveCertifications } from '../content/certifications.js';
+import { laneIdForTrack } from '../content/lanes.js';
 import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
 import { canAccess, getOverview, getPracticeState } from '../services/progress.js';
 import { openSession, resetSession, runCommand } from '../services/terminalSession.js';
@@ -81,6 +82,10 @@ learningRouter.get(
         // Resolved here rather than in the client so the end of a track can
         // show exam cost and study time without a request per track.
         certificationDetail: resolveCertifications(track.certifications),
+        // The lane whose "day in the life" page describes this track, when one
+        // exists, so the picker can link straight into it before a student
+        // commits to the curriculum.
+        laneId: laneIdForTrack(track.id),
         exerciseCount,
         passedCount,
         percentComplete: exerciseCount === 0 ? 0 : Math.round((passedCount / exerciseCount) * 100),

@@ -195,10 +195,10 @@ export const PRICING_PHILOSOPHY = {
 export const CERT_STUDY_PLAN: CertStudyOffer = {
   status: 'coming-soon',
   headline: 'Certification study help is coming.',
-  amountUsd: 15,
-  windowDays: 30,
+  amountUsd: 20,
+  windowDays: 60,
   includes: [
-    'One certification at a time, for thirty days from the day you start it',
+    'One certification at a time, for sixty days from the day you start it',
     'The published exam objectives broken into study sessions, with practice questions per objective',
     'Practice exams that report which objectives you are weak on rather than only a score',
     'Guidance on when you are actually ready to book, which is the question most people get wrong',
@@ -209,7 +209,7 @@ export const CERT_STUDY_PLAN: CertStudyOffer = {
     'Anything that would breach an exam NDA. Dumps are not study material and holding them can void your certification',
   ],
   rationale:
-    'Fifteen dollars for thirty days on one certification. It is priced per certification because keeping a question bank honest against a vendor syllabus is work that has to be redone every time the syllabus moves, and priced low because the exam fee is already the expensive part.',
+    'Twenty dollars for sixty days on one certification. It is priced per certification because keeping a question bank honest against a vendor syllabus is work that has to be redone every time the syllabus moves, and the window is long enough to study around a full-time job rather than cramming.',
 } as const;
 
 /** Prerequisite guidance shown before somebody buys into the AI path. */

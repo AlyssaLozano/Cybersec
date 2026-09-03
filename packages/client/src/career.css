@@ -319,6 +319,11 @@
   border-bottom: 1px solid var(--border);
 }
 
+.track-lane-link {
+  align-self: flex-start;
+  margin: 2px 0 4px;
+}
+
 .lane-list {
   display: flex;
   flex-direction: column;
@@ -602,6 +607,86 @@
 .lane-section h3 {
   font-size: 14px;
   margin: 18px 0 6px;
+}
+
+/*
+ * Two adjacent sections that used to run together with no boundary but a
+ * heading: "what you'd learn" and "certifications" are different kinds of
+ * information (a roadmap versus a shopping list of exams) and read better as
+ * two distinct, enclosed blocks rather than one continuous scroll.
+ */
+.lane-section.boxed {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  padding: 20px 22px 24px;
+}
+
+.lane-section.boxed h2 {
+  margin-top: 0;
+}
+
+.lane-section-gap {
+  height: 28px;
+}
+
+.lane-roles {
+  margin: 4px 0 22px;
+}
+
+.lane-roles .tag {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  margin-bottom: 6px;
+}
+
+.lane-roles-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lane-roles-list .chip {
+  font-size: 11.5px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 3px 9px;
+  color: var(--text-dim);
+}
+
+.comp-bands {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 4px 0 10px;
+}
+
+.comp-band {
+  flex: 1;
+  min-width: 140px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.comp-stage {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+}
+
+.comp-figure {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
 }
 
 .env-rank {

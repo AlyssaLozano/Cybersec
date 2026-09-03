@@ -264,7 +264,13 @@ export interface AssessmentReport {
 // --- lane profiles -----------------------------------------------------------
 
 export interface LaneProfile {
-  id: LaneId;
+  /**
+   * Not constrained to `LaneId`: a handful of lanes exist to give a track a
+   * "day in the life" page without being part of the 16-lane career-fit
+   * scoring taxonomy, which would otherwise require them to carry real
+   * assessment-item weight and capability baselines to stay honest.
+   */
+  id: string;
   title: string;
   /** One line, honest. */
   summary: string;
@@ -284,6 +290,19 @@ export interface LaneProfile {
   burnoutDrivers: string[];
   /** Where this leads. */
   advancement: string;
+  /**
+   * Typical U.S. base salary by career stage. Broad market bands, not a
+   * promise: `note` carries the caveats a number on its own would hide.
+   */
+  compensationUsd: {
+    entry: string;
+    mid: string;
+    senior: string;
+    /** Geography, company size, and title-inflation caveats, stated plainly. */
+    note: string;
+  };
+  /** Who this role actually coordinates with day to day, not an org chart. */
+  worksWith: string[];
   /** Track id this lane maps to, when a learning track exists. */
   trackId?: string;
   /** Honest note on entering this lane directly from another career. */

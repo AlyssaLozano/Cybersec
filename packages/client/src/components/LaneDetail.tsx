@@ -70,6 +70,19 @@ export function LaneDetail({
         {track ? <span className="badge rhythm">{track.workRhythm}</span> : null}
       </div>
 
+      {track && track.roles.length > 0 ? (
+        <div className="lane-roles">
+          <span className="tag">Job titles this prepares you for</span>
+          <div className="lane-roles-list">
+            {track.roles.map((role) => (
+              <span key={role} className="chip">
+                {role}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <section className="lane-section">
         <h2>What the day actually looks like</h2>
         <ul className="plain-list">
@@ -83,6 +96,15 @@ export function LaneDetail({
         <h2>Who does well here</h2>
         <ul className="plain-list">
           {lane.personalityMatch.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="lane-section">
+        <h2>Who you work with</h2>
+        <ul className="plain-list">
+          {lane.worksWith.map((line) => (
             <li key={line}>{line}</li>
           ))}
         </ul>
@@ -107,6 +129,25 @@ export function LaneDetail({
       </section>
 
       <section className="lane-section">
+        <h2>What it pays</h2>
+        <div className="comp-bands">
+          <div className="comp-band">
+            <span className="comp-stage">Entry</span>
+            <span className="comp-figure">{lane.compensationUsd.entry}</span>
+          </div>
+          <div className="comp-band">
+            <span className="comp-stage">Mid</span>
+            <span className="comp-figure">{lane.compensationUsd.mid}</span>
+          </div>
+          <div className="comp-band">
+            <span className="comp-stage">Senior</span>
+            <span className="comp-figure">{lane.compensationUsd.senior}</span>
+          </div>
+        </div>
+        <p className="muted small">{lane.compensationUsd.note}</p>
+      </section>
+
+      <section className="lane-section">
         <h2>Where this job is best done</h2>
         <div className="env-rank">
           {[...lane.environmentFit]
@@ -124,7 +165,7 @@ export function LaneDetail({
       </section>
 
       {foundations && foundations.length > 0 ? (
-        <section className="lane-section">
+        <section className="lane-section boxed">
           <h2>What you would need to learn</h2>
           <p className="muted">
             {readiness
@@ -147,7 +188,9 @@ export function LaneDetail({
         </section>
       ) : null}
 
-      <section className="lane-section">
+      <div className="lane-section-gap" aria-hidden="true" />
+
+      <section className="lane-section boxed certs">
         <h2>Certifications that matter here</h2>
         <p className="muted">{certPhilosophy.headline}</p>
         <div className="cert-list">
@@ -159,10 +202,6 @@ export function LaneDetail({
               </header>
               <p>{cert.summary}</p>
               <dl className="cert-facts">
-                <div>
-                  <dt>Exam cost</dt>
-                  <dd>${cert.approxCostUsd}</dd>
-                </div>
                 <div>
                   <dt>Typical study</dt>
                   <dd>{cert.typicalStudyWeeks} weeks</dd>
