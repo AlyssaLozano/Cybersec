@@ -41,6 +41,12 @@ interface PackageBadgeArt {
 }
 
 const PACKAGE_ART: Record<string, PackageBadgeArt> = {
+  'ot-security-foundations': {
+    title: 'Plant Floor',
+    citation: 'Learned to secure a process that cannot be paused, patched, or scanned.',
+    emblem: 'chip',
+    accent: 'amber',
+  },
   'linux-fundamentals': {
     title: 'Ground Floor',
     citation: 'Found their way around a live Linux host from the command line alone.',
