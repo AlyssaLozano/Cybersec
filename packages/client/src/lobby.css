@@ -705,7 +705,16 @@
   --ring: calc(var(--u) * 6.5);
   --bay-h: var(--h1);
   width: calc(var(--u) * 12);
-  bottom: calc(var(--u) * 2.5);
+  /*
+   * Lifted clear of the floor, so the doorway is ON the wall.
+   *
+   * The 7% is a percentage of the scene rather than a scale unit on purpose:
+   * the thing it has to clear is the floor's leading edge, and the floor is
+   * drawn as a percentage of the scene too, so the two move together. Sitting
+   * lower, the near doorways overlapped that edge and read as standing on the
+   * floor rather than mounted on the wall beside it.
+   */
+  bottom: calc(7% + var(--u) * 2.5);
 }
 
 .bay--l2, .bay--r2 {
@@ -714,7 +723,7 @@
   width: calc(var(--u) * 10.5);
   /* Stacked off the near band's real height, so the two cannot meet however
      small the scale unit gets or however far the near plate's text wraps. */
-  bottom: calc(var(--u) * 2.5 + var(--h1) + var(--band-gap));
+  bottom: calc(7% + var(--u) * 2.5 + var(--h1) + var(--band-gap));
   opacity: 0.92;
 }
 

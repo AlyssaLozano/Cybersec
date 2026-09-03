@@ -234,7 +234,7 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
             className={pane === 'floor' ? 'is-on' : ''}
             onClick={() => setPane('floor')}
           >
-            The floor
+            The lobby
           </button>
           <button
             type="button"
@@ -315,10 +315,19 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
             scrim is a button rather than a div with a handler so that it is
             reachable and announced, and Escape does the same thing.
           */}
+          {/*
+            ONE NAME FOR THIS PLACE.
+
+            It was "the lobby" on the way out, "the floor" on the tab and "the
+            hall" in the occupant count, which is three names for one room. The
+            floor is already this product's word for a war room's seating chart
+            (see RoomBoard), so letting the lobby borrow it made the two
+            genuinely ambiguous. Everything the viewer reads says lobby.
+          */}
           <button
             type="button"
             className="overlay__scrim"
-            aria-label="Back to the corridor"
+            aria-label="Back to the lobby"
             onClick={closeOverlay}
           />
           <div
@@ -330,7 +339,7 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
             }}
           >
             <button type="button" className="overlay__close" onClick={closeOverlay}>
-              Back to the corridor
+              Back to the lobby
             </button>
             {overlay}
           </div>
@@ -502,7 +511,7 @@ function Hall({
         <span className="hall__count">
           {view.occupants.length === 1
             ? 'you are the only one here'
-            : `${view.occupants.length} in the hall`}
+            : `${view.occupants.length} in the lobby`}
         </span>
       </div>
     </section>
