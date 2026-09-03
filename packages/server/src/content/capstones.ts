@@ -160,6 +160,45 @@ export const CAPSTONES: Record<string, CapstoneOption[]> = {
       estimatedHours: '8 to 12 hours',
       difficulty: 'hard',
     },
+    {
+      id: 'soc-helpdesk-ticketing',
+      title: 'Help desk ticketing system',
+      pitch: 'Stand up a real ticketing tool and show the workflow, since running one IS the entry-level job.',
+      deliverables: [
+        'A real ticketing tool (osTicket, or a TopDesk-style open-source alternative) deployed and configured by you',
+        'The full lifecycle demonstrated on real or realistic tickets: intake, triage and priority, assignment, resolution',
+        'A README explaining the priority matrix and SLA rules you configured, and why',
+        'At least one resolved ticket with a resolution note good enough for someone else to reuse',
+      ],
+      estimatedHours: '6 to 10 hours',
+      difficulty: 'accessible',
+    },
+    {
+      id: 'soc-virtual-network-lab',
+      title: 'Virtual networking lab',
+      pitch: 'Build a real multi-subnet network and prove you know exactly why a ping succeeds or fails on it.',
+      deliverables: [
+        'A multi-subnet topology built in Packet Tracer, GNS3, or EVE-NG, with a diagram committed',
+        'Subnetting and VLAN design documented, with the reasoning for how the address space was split',
+        'Static or dynamic routing configured between every subnet, with a DHCP scope serving at least one of them',
+        'End-to-end connectivity proven with ping and traceroute output between devices on different subnets',
+      ],
+      estimatedHours: '6 to 10 hours',
+      difficulty: 'accessible',
+    },
+    {
+      id: 'soc-siem-automation-pipeline',
+      title: 'SIEM to automation pipeline',
+      pitch: 'Wire a real SIEM into a real automation platform and show alerts arriving enriched, not raw.',
+      deliverables: [
+        'A SIEM (e.g. Wazuh) with at least one real endpoint onboarded and reporting',
+        'Alerts forwarded from the SIEM into an automation platform (e.g. n8n) via a webhook you configured',
+        'At least one enrichment step in the pipeline (threat intel lookup, asset lookup, or similar), with a before/after example',
+        'A README with an architecture diagram of the pipeline and a note on what you deliberately did not automate, and why',
+      ],
+      estimatedHours: '8 to 14 hours',
+      difficulty: 'moderate',
+    },
   ],
   'ai-security': [
     {
@@ -226,6 +265,21 @@ export const CAPSTONES: Record<string, CapstoneOption[]> = {
       ],
       estimatedHours: '8 to 14 hours',
       difficulty: 'moderate',
+    },
+  ],
+  identity: [
+    {
+      id: 'iam-ad-homelab',
+      title: 'Active Directory home lab',
+      pitch: 'Stand up a real domain top down and document it the way every entry-level sysadmin or IAM job actually expects.',
+      deliverables: [
+        'A domain controller you promoted yourself, with the reasoning for the prerequisites you checked first',
+        'Users, groups, and an OU structure you designed, with the reasoning behind the layout',
+        'At least one Group Policy you linked and verified with gpresult, not just the wizard saying success',
+        'A client domain-joined and proven working end to end: a domain login, the GPO taking effect, and access to a resource gated by group membership',
+      ],
+      estimatedHours: '6 to 10 hours',
+      difficulty: 'accessible',
     },
   ],
 };
