@@ -64,10 +64,25 @@ const VALIDATE_HARMFUL = optionsWithQuality('dp.validate', 'harmful');
 
 const VOLATILITY_TEACH: Teach = {
   concept:
-    'Evidence has a shelf life, and the order you collect it in decides how much of it survives. ' +
-    'Memory disappears the instant power or state changes and is the only place some things ever ' +
-    'exist: a decrypted key, an in-memory payload, the attacker’s live session. Disk will still ' +
-    'be there in an hour. Collect in order of how fast a thing disappears, most volatile first.',
+    'Evidence, here, just means anything on a computer that can show what an attacker did: a file, a ' +
+    'log entry, a running program, a live connection. Not all of it lasts the same length of time. ' +
+    'Some of it survives on a hard disk for years. Some of it exists only while the machine is ' +
+    'switched on and vanishes the instant that changes, which is what "volatile" means: not ' +
+    'dangerous, just short-lived. Evidence has a shelf life, and the order you collect it in decides ' +
+    'how much of it survives to be looked at.\n\n' +
+    'Picture the difference between a name carved into a stone wall and a word written in wet sand at ' +
+    'low tide. The wall will read the same next year. The sand is gone with the next wave. A ' +
+    'computer\'s memory, its RAM, is the sand: it holds the attacker\'s live session, any password or ' +
+    'encryption key they had decrypted, anything a running program was working on but had not yet ' +
+    'saved anywhere permanent. The instant the machine loses power, reboots, or its running state ' +
+    'changes in some other way, everything that was only in memory is gone for good, and no tool ' +
+    'anywhere can bring it back. The disk is the wall: a file written there stays until something ' +
+    'deliberately removes it, so there is no rush to grab it first.\n\n' +
+    'That is the entire reason an "order of volatility" exists as a rule: it is a checklist that puts ' +
+    'the sand before the wall. Capture memory first, then whatever disappears next (live network ' +
+    'connections, for instance, which die the moment you disconnect the machine), and only once the ' +
+    'fragile things are safely copied do you move on to disk and log files, which were never going ' +
+    'anywhere.',
   examples: [
     {
       command: 'Memory → live connections → isolate → disk → logs',
@@ -85,10 +100,19 @@ const VOLATILITY_TEACH: Teach = {
 
 const UNCERTAINTY_TEACH: Teach = {
   concept:
-    'You will make irreversible decisions on roughly sixty percent of the picture. The skill is not ' +
-    'eliminating the uncertainty (there is no time) it is knowing precisely which part of your ' +
-    'picture is missing and deciding anyway, out loud, so that somebody else can see what you were ' +
-    'working from.',
+    'In an incident you rarely get to wait for complete information before you act. Something is ' +
+    'happening right now, and every hour spent trying to understand it fully is an hour the attacker ' +
+    'gets to keep going. So you will make irreversible decisions on roughly sixty percent of the ' +
+    'picture: some things you can prove, and some things you can only guess at, and both categories ' +
+    'have to go into the same decision.\n\n' +
+    'Think of it like a doctor in an emergency room. They do not wait for every test result before ' +
+    'starting treatment, because the patient cannot wait that long, but they also do not pretend the ' +
+    'missing results do not exist: they treat based on what is known, and they say out loud what is ' +
+    'still unknown, so the next clinician who looks at the chart knows exactly where the gaps are.\n\n' +
+    'The skill in incident response is the same. It is not eliminating the uncertainty, because there ' +
+    'is no time to. It is knowing precisely which part of the picture is missing and deciding anyway, ' +
+    'out loud, in writing, so that somebody else, a colleague, a manager, a lawyer reading the report ' +
+    'months later, can see exactly what you were working from and was not simply asserted as fact.',
   examples: [
     {
       command: 'Known: an archive of patient exports was staged at 11:06.',
@@ -121,10 +145,19 @@ const MODULE_1: Exercise[] = [
       'first, including what is listed as unknown.',
     teach: {
       concept:
-        'Containment is the first irreversible decision in most incidents, and it is usually made ' +
-        'under time pressure by whoever noticed. Every option trades something: speed against ' +
-        'evidence, evidence against exposure, exposure against service. There is no move that costs ' +
-        'nothing, and looking for one is how people freeze.',
+        'Containment is the act of stopping an attacker from doing anything further, right now, ' +
+        'without necessarily removing them from the system yet. Think of a break-in at a building: ' +
+        'containment is locking the doors and cutting the alarm the intruder disabled so they cannot ' +
+        'get further in or take anything more out. It is not the same as catching them, searching the ' +
+        'building, or fixing the lock they used, all of which come later. Its whole job is to stop the ' +
+        'bleeding immediately.\n\n' +
+        'Containment is usually the first irreversible decision in an incident, and it is usually made ' +
+        'under time pressure by whoever noticed the intrusion, which is why it deserves its own module ' +
+        'before anything else. Every way of containing an attacker trades something for something ' +
+        'else: acting fast against preserving evidence of what happened, cutting the attacker off ' +
+        'against tipping them off that they have been seen, keeping a service running against shutting ' +
+        'it down cleanly. There is no move here that costs nothing, and looking for one is how people ' +
+        'freeze at the exact moment a decision is needed.',
       examples: [
         {
           command: 'Preserve, then contain',
@@ -185,9 +218,12 @@ const MODULE_1: Exercise[] = [
       },
     ],
     debrief:
-      'Pulling the power is the single most common response to a live intrusion, and it is why so ' +
-      'many incident reports contain the sentence "we were unable to determine whether the database ' +
-      'was accessed". The answer was in memory, and somebody safe-ed it away.',
+      'Pulling the power is the single most common response to a live intrusion, because it feels ' +
+      'decisive and final: the attacker is gone, right now, no ambiguity. That instinct is exactly ' +
+      'backwards. It is why so many incident reports contain the sentence "we were unable to ' +
+      'determine whether the database was accessed": the answer to that question was sitting in the ' +
+      'computer\'s memory, and somebody switched it off, believing they were making things safe, and ' +
+      'erased it before anyone had a chance to look.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.1.1'] ?? [],
   },
   {
@@ -227,10 +263,12 @@ const MODULE_1: Exercise[] = [
       },
     ],
     debrief:
-      'This ordering is not a convention somebody agreed on: it falls out of physics. Every argument ' +
-      'about it in a real incident is really an argument about time pressure, and the answer is ' +
-      'always that capturing memory takes minutes and not capturing it takes the rest of the ' +
-      'investigation.',
+      'This ordering is not a convention somebody in a committee agreed on: it falls directly out of ' +
+      'physics, out of the simple fact that some things stop existing the instant power or state ' +
+      'changes and some things do not. Every argument about it in a real incident is really an ' +
+      'argument about time pressure, somebody wanting to skip ahead to the part that feels more ' +
+      'urgent, and the answer is always that capturing memory takes minutes, while failing to capture ' +
+      'it costs the rest of the investigation, because that evidence cannot be recreated afterwards.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.1.2'] ?? [],
   },
   {
@@ -275,9 +313,11 @@ const MODULE_1: Exercise[] = [
       },
     ],
     debrief:
-      'Being able to defend a slower decision is a large part of senior incident work. The pressure ' +
-      'in the room is always toward the fastest visible action, and "I took four more minutes and ' +
-      'kept the evidence" is a sentence you will need ready.',
+      'Being able to defend a slower decision, out loud, to somebody who was not there and only sees ' +
+      'the outcome, is a large part of senior incident work. The pressure in the room during an ' +
+      'incident is always toward the fastest visible action, the one that looks the most decisive on ' +
+      'the day, and "I took four more minutes and kept the evidence" is a sentence you will need ready ' +
+      'and be able to explain in plain terms.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.1.3'] ?? [],
   },
   {
@@ -293,10 +333,18 @@ const MODULE_1: Exercise[] = [
       'true? Select all that apply.',
     teach: {
       concept:
-        'Containment stops the incident progressing. It does not undo anything. Every mechanism the ' +
-        'attacker installed is still sitting on the disk waiting for the host to be reconnected, and ' +
-        'the way in that they used is usually still open. Treating containment as resolution is the ' +
-        'single most common reason incidents reopen.',
+        'Containment and eradication sound similar and mean very different things. Containment stops ' +
+        'the incident from progressing, the locked door from the last exercise. Eradication is what ' +
+        'happens afterwards: actually going through the building, removing whatever the intruder left ' +
+        'behind, and fixing the broken lock they got in through. Containment does not do any of that. ' +
+        'It does not undo anything the attacker already did.\n\n' +
+        'Every account the attacker created, every scheduled task they set up, every key they added so ' +
+        'they could log back in later, is still sitting on the disk exactly as they left it, waiting ' +
+        'for the host to be reconnected to the network. The original way in, whatever weakness let ' +
+        'them get access in the first place, is usually still open too, because containment happened ' +
+        'at the network layer and touched nothing on the machine itself. Treating containment as ' +
+        'resolution, as though the problem were now solved, is the single most common reason ' +
+        'incidents reopen.',
       examples: [
         {
           command: 'Contained',
@@ -338,9 +386,10 @@ const MODULE_1: Exercise[] = [
       },
     ],
     debrief:
-      'Ridgeline would have reset the testuser password here, congratulated themselves, and been ' +
-      're-compromised the moment the host came back: by a cron job nobody looked for, because the ' +
-      'alert about it was rated low.',
+      'Ridgeline (the fictional company this incident happens to) would have reset the testuser ' +
+      'password here, congratulated themselves on a job well done, and been re-compromised the moment ' +
+      'the host came back online: by a cron job, a task the machine runs automatically on a schedule, ' +
+      'that nobody looked for, because the alert about it was rated low priority and never checked.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.1.4'] ?? [],
   },
 ];
@@ -362,11 +411,23 @@ const MODULE_2: Exercise[] = [
       'among them.',
     teach: {
       concept:
-        'The first thing a responder establishes on a compromised host is who can log in. ' +
-        '/etc/passwd is one colon-separated line per account: name, placeholder, UID, GID, comment, ' +
-        'home directory, shell. The shell is the last field, and it is the one that matters: an ' +
-        'account whose shell is /usr/sbin/nologin cannot be used to log in no matter what its ' +
-        'password is.',
+        'On a Linux computer, every user account that exists, real people and background system ' +
+        'processes alike, is listed in a single plain text file: /etc/passwd. Despite the name it has ' +
+        'not stored actual passwords for decades; what it holds is the roster of accounts, one per ' +
+        'line, and some basic facts about each one.\n\n' +
+        'Each line has seven fields separated by colons: the account name, a placeholder where a ' +
+        'password hash used to live, a numeric user ID, a numeric group ID, a comment, the account\'s ' +
+        'home directory, and finally its SHELL, the program that starts when that account logs in. ' +
+        'The shell is the field that matters most here, because it is the one that decides whether an ' +
+        'account can actually be used to log in at all. Most accounts on a healthy Linux server exist ' +
+        'purely so that some background service can own its own files, and they are deliberately given ' +
+        'the shell /usr/sbin/nologin: even if somebody had that account\'s password, typing it in would ' +
+        'get them nowhere, because there is no interactive shell for them to land in. An account with ' +
+        'a real shell, like /bin/bash, is one an actual person, or an attacker, can log into and start ' +
+        'typing commands.\n\n' +
+        'So the first thing a responder establishes on a compromised host is who can log in at all, ' +
+        'which means finding the accounts with a real shell and treating the rest, the ones that ' +
+        'cannot log in no matter what, as noise.',
       syntax: 'grep PATTERN FILE',
       examples: [
         {
@@ -407,10 +468,14 @@ const MODULE_2: Exercise[] = [
       },
     ],
     debrief:
-      'sysmon is named to look like monitoring infrastructure and has an ordinary user UID of 1501. ' +
-      'Real service accounts are either provisioned below 1000 or created by something that keeps a ' +
-      'record. Nothing on this host has a record of creating this one. Note testuser is here too, ' +
-      'described in its own comment field as a temporary migration account.',
+      'sysmon is named to look like monitoring infrastructure, the kind of account a security tool ' +
+      'might legitimately use, and it has an ordinary human user ID of 1501 rather than the low ' +
+      'numbers (below 1000) that real service accounts are conventionally given. Genuine service ' +
+      'accounts are also created by something that keeps a record, a deployment script, a package ' +
+      'installer, a documented process. Nothing on this host has any record of creating this one, ' +
+      'which is itself a finding. Note testuser is here too, described in its own comment field as a ' +
+      'temporary migration account: a label that will matter a great deal in the exercises that ' +
+      'follow.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.2.1'] ?? [],
   },
   {
@@ -426,10 +491,22 @@ const MODULE_2: Exercise[] = [
       'as root on this host.',
     teach: {
       concept:
-        'Knowing who can become root matters more than knowing who exists. /etc/group lists group ' +
-        'name, placeholder, GID, and a comma-separated member list. Membership of sudo is ' +
-        'root-equivalent access, and it is exactly where an attacker puts an account they intend to ' +
-        'keep: alongside, quite often, an account of yours that should have lost it years ago.',
+        'root is the name of the one account on a Linux machine that is allowed to do absolutely ' +
+        'anything: read any file, kill any process, install anything, change anything. Ordinary ' +
+        'accounts are deliberately restricted so that a mistake or a compromise on one of them cannot ' +
+        'touch the rest of the system. sudo is the mechanism that lets a trusted ordinary account ' +
+        'temporarily act as root, one command at a time, without ever needing the root password ' +
+        'itself. Whether an account can do that is controlled by group membership.\n\n' +
+        'Groups are Linux\'s way of bundling permissions and handing them to more than one account at ' +
+        'once, rather than configuring each account individually. /etc/group lists them: group name, ' +
+        'a placeholder field, a numeric group ID, and a comma-separated list of which accounts belong ' +
+        'to it. The sudo group is the one that matters most of all, because being in it is ' +
+        'root-equivalent access: anything root could do, a member of sudo can also do.\n\n' +
+        'Knowing who can become root matters more than knowing who exists, because an attacker with an ' +
+        'ordinary account can do very little damage, while an attacker with sudo can do anything a ' +
+        'system administrator could. It is exactly where an attacker puts an account they intend to ' +
+        'keep, and it is very often sitting alongside an account of yours that should have lost that ' +
+        'privilege years ago and simply never did.',
       syntax: 'grep PATTERN FILE',
       examples: [
         {
@@ -466,9 +543,12 @@ const MODULE_2: Exercise[] = [
       },
     ],
     debrief:
-      'Two findings, not one. sysmon is the attacker’s. testuser holding sudo is Ridgeline’s own ' +
-      'mistake, made 619 days ago, and it is the reason a guessed password became root access rather ' +
-      'than a nuisance. The second finding is the one that goes in the post-mortem.',
+      'Two findings here, not one. sysmon is the attacker\'s own creation. testuser holding sudo is a ' +
+      'mistake Ridgeline (the company this incident happens to) made itself, 619 days earlier, and it ' +
+      'is the reason a single guessed password turned into full administrative control of the machine ' +
+      'rather than a minor nuisance somebody could shrug off. The second finding, not the attacker\'s ' +
+      'cleverness but the organisation\'s own standing mistake, is the one that goes in the ' +
+      'post-mortem, the write-up produced after an incident that asks what allowed it to happen.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.2.2'] ?? [],
   },
   {
@@ -484,10 +564,18 @@ const MODULE_2: Exercise[] = [
       '/home/testuser/.bash_history and see what was actually run.',
     teach: {
       concept:
-        'bash writes the commands a user typed to ~/.bash_history when the shell exits. It is the ' +
-        'closest thing to a transcript of what somebody did, and attackers know it, which is why ' +
-        'the last command in a compromised history is so often an attempt to erase it. That attempt ' +
-        'is itself written to the file, so it survives and tells you something about intent.',
+        'bash is the program most Linux accounts use to type commands into: the shell. As you type ' +
+        'commands into it, bash quietly keeps a running list of them in memory, and when that shell ' +
+        'session ends, it writes that whole list out to a file in the account\'s home directory called ' +
+        '.bash_history. Nobody has to turn this on. It happens by default, every time, for every ' +
+        'account, which is what makes it so valuable to a responder: it is the closest thing there is ' +
+        'to a transcript of exactly what somebody typed, in the order they typed it.\n\n' +
+        'Attackers know this file exists too, which is why the last command in a compromised history ' +
+        'is so often an attempt to erase it, something like clearing the history or deleting the file. ' +
+        'The trap for them is that history is only written out when the shell exits, so a command ' +
+        'meant to erase the file has to be typed into the shell first, which means it gets recorded ' +
+        'right alongside everything it was trying to hide. That attempt survives, and the fact that ' +
+        'somebody tried to cover their tracks tells you something about intent all on its own.',
       syntax: 'cat FILE',
       examples: [
         {
@@ -524,10 +612,13 @@ const MODULE_2: Exercise[] = [
       },
     ],
     debrief:
-      'Read the sequence: id, sudo -l, cat /etc/passwd (an attacker working out what they have) ' +
-      'then useradd, passwd, usermod -aG sudo, then history -c. The `sudo -l` is the moment they ' +
-      'discovered that a temporary test account could become root. The `history -c` at the end ran ' +
-      'too late to remove anything, because the file had already been written.',
+      'Read the sequence: id (who am I), sudo -l (what am I allowed to run as root), cat /etc/passwd ' +
+      '(who else exists on this machine), an attacker methodically working out what they have just ' +
+      'gained access to, followed by useradd (create an account), passwd (set its password), usermod ' +
+      '-aG sudo (add it to the privileged group), and finally history -c, an attempt to clear the ' +
+      'history. The `sudo -l` line is the exact moment they discovered that a supposedly temporary ' +
+      'test account could become root. The `history -c` at the end ran too late to remove anything, ' +
+      'because bash had already written everything typed before it out to the file on disk.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.2.3'] ?? [],
   },
   {
@@ -544,10 +635,21 @@ const MODULE_2: Exercise[] = [
       'written.',
     teach: {
       concept:
-        'Data staging is the step between access and theft: the attacker collects what they want ' +
-        'into one file, then moves it. The staged copy tells you what they selected, how much of it ' +
-        'there was, and exactly when: three facts that decide the scope of a breach notification. ' +
-        'Dot-directories under /tmp are a favourite hiding place because plain ls does not show them.',
+        'Stealing data from a server is not usually one instant action. It is a two-step process: ' +
+        'first the attacker gathers up whatever they want from wherever it is scattered on the ' +
+        'filesystem and bundles it into a single file, usually a compressed archive, and only then do ' +
+        'they move that file off the machine. That first step is called STAGING, and the bundled file ' +
+        'it produces sits on disk, however briefly, as physical evidence of exactly what was taken.\n\n' +
+        'A directory listing of that staged file tells you three things at once: what was selected ' +
+        '(from the filename and location), how much of it there was (from the file size), and exactly ' +
+        'when it was gathered (from the timestamp). Those three facts are precisely what later decide ' +
+        'the scope of a breach notification, the legal process of telling regulators and customers ' +
+        'that their data may have been exposed.\n\n' +
+        'Attackers commonly stage this kind of file somewhere like /tmp, a directory every account can ' +
+        'write to, inside a DOT-DIRECTORY: a folder whose name begins with a period. On Linux, a name ' +
+        'starting with a dot is treated as hidden by convention, meaning the plain `ls` command will ' +
+        'not show it in a normal listing. It is not real security, just an easy way to avoid being ' +
+        'noticed by a quick glance, which is exactly why a responder never trusts a plain listing.',
       syntax: 'ls [OPTIONS] PATH',
       examples: [
         {
@@ -589,10 +691,12 @@ const MODULE_2: Exercise[] = [
       },
     ],
     debrief:
-      'The size and timestamp are the finding, not the filename. 6,298,441 bytes written at 11:09 ' +
-      'from a directory holding patient exports is what turns an intrusion into a potential regulated ' +
-      'breach, and it is the number legal will ask for first. Note the second file, owned by sysmon: ' +
-      'that is what the scheduled job fetches and runs.',
+      'The size and timestamp are the finding here, not the filename. 6,298,441 bytes written at ' +
+      '11:09, staged from a directory that holds exported patient records, is what turns a technical ' +
+      'intrusion into a potential regulated data breach, and the byte count is the very first number ' +
+      'the legal team will ask for once they hear about this. Note the second file in the listing too, ' +
+      'owned by sysmon: that is the payload a scheduled job on this host periodically fetches and ' +
+      'runs, which the next few exercises pick up.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.2.4'] ?? [],
   },
   {
@@ -608,11 +712,20 @@ const MODULE_2: Exercise[] = [
       'inside it (you are logged in as student, not root) but the listing alone is evidence.',
     teach: {
       concept:
-        'You are not root on this host, and a real responder frequently is not either at first. That ' +
-        'is not a dead end: metadata is evidence. A directory you cannot open still tells you it ' +
-        'exists, who owns it, what its permissions are, and when it was last written, and for SSH ' +
-        'key material, when it was written is very nearly the whole finding. Recording what you could ' +
-        'not access, and why, is part of the job rather than a failure of it.',
+        'On Linux, every file and directory has an owner and a set of permissions that decide who is ' +
+        'allowed to read it, write to it, or (for a directory) look inside it. A directory with the ' +
+        'permission mode drwx------ can only be entered by its owner: everybody else, including you as ' +
+        'the student account, can see that it exists but cannot open it. You are not root on this ' +
+        'host, and a real responder is frequently not either, at least not immediately.\n\n' +
+        'That is not a dead end. METADATA, information about a file rather than its contents, such as ' +
+        'who owns it, what its permissions are, and when it was last changed, is evidence in its own ' +
+        'right and you do not need permission to read it. A directory you cannot open still tells you ' +
+        'that it exists, who created it, and exactly when it was last touched, and for something like ' +
+        'SSH key material (the cryptographic keys that let an account log in without typing a ' +
+        'password), the timestamp of when it was written is very nearly the whole finding on its own.' +
+        '\n\nRecording what you could not access, and precisely why, is part of doing the job properly ' +
+        'rather than a failure of it: it tells the next person, or the next tool, exactly what still ' +
+        'needs escalated access to examine.',
       syntax: 'ls [OPTIONS] PATH',
       examples: [
         {
@@ -655,11 +768,14 @@ const MODULE_2: Exercise[] = [
       },
     ],
     debrief:
-      'You cannot read authorized_keys as student, and that is realistic. What you can establish is ' +
-      'that SSH key material was written at 11:04 on an account created at 10:22, four minutes before ' +
-      'a key-based login from the attacker’s address. That is enough to know a key exists and to ' +
-      'record that reading it requires escalated access and an evidence request, which is exactly ' +
-      'what you would write in the case notes.',
+      'You cannot read the contents of authorized_keys (the file that lists which cryptographic keys ' +
+      'are allowed to log into an account) as the student account, and that restriction is realistic, ' +
+      'not a limitation of the exercise. What you CAN establish from the listing alone is that SSH key ' +
+      'material was written at 11:04 on an account that was created at 10:22, four minutes before a ' +
+      'key-based login arrived from the attacker\'s address. That is enough to know a key exists and ' +
+      'roughly when it was planted, and to record that actually reading it requires escalated access ' +
+      'and a formal evidence request, which is exactly what you would write in the case notes rather ' +
+      'than leaving the question unanswered.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.2.5'] ?? [],
   },
 ];
@@ -683,10 +799,18 @@ const MODULE_3: Exercise[] = [
       'like thoroughness.',
     teach: {
       concept:
-        'Eradication is a checklist, not a judgement call, because missing one item is ' +
-        'indistinguishable from doing nothing. Two things trip people here: forgetting the original ' +
-        'way in (which was not the attacker’s doing and is still open) and deleting evidence in the ' +
-        'name of cleaning up.',
+        'Eradication is the step after containment where you actually remove everything the attacker ' +
+        'left behind and close the way they got in. Where containment was locking the doors, ' +
+        'eradication is walking through the whole building, taking out anything the intruder planted, ' +
+        'and fixing the specific lock they picked so the same trick does not work twice.\n\n' +
+        'Eradication has to be a checklist, not a judgement call, because missing even one item is ' +
+        'indistinguishable, from the outside, from doing nothing at all: a single forgotten backdoor ' +
+        'account is enough for the whole incident to happen again. Two things trip people up here in ' +
+        'particular. One is forgetting the original way in, the underlying weakness that let the ' +
+        'attacker get access in the first place, which was not something the attacker built and so is ' +
+        'easy to overlook when you are focused on cleaning up what they did add. The other is deleting ' +
+        'evidence in the name of tidying up, before anybody has finished using it to answer questions ' +
+        'like how much data was taken.',
       examples: [
         {
           command: 'Rebuild from a known-good image',
@@ -731,9 +855,11 @@ const MODULE_3: Exercise[] = [
       },
     ],
     debrief:
-      'Note what deleting the archive would have cost: not the evidence itself, which is on the disk ' +
-      'image, but the two hours of work needed to get it back off that image at the moment legal is ' +
-      'asking how much data was involved.',
+      'Note what deleting the archive would actually have cost. Not the evidence itself, since a ' +
+      'forensic copy, a DISK IMAGE, a bit-for-bit backup of the entire drive taken before rebuilding, ' +
+      'still has it. What it would have cost is the two hours of extra work needed to pull that one ' +
+      'file back out of the disk image at the exact moment legal is asking how much data was involved ' +
+      'and wants an answer today, not in two hours.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.3.1'] ?? [],
   },
   {
@@ -749,10 +875,18 @@ const MODULE_3: Exercise[] = [
       'of the estate for, and say what each one would prove if it hit. Four is enough.',
     teach: {
       concept:
-        'An indicator of compromise is any observable that would only be present if the same actor ' +
-        'had been there. Good ones are specific enough that a hit means something and durable enough ' +
-        'to survive the attacker changing tools. Addresses are the weakest: they are cheap to ' +
-        'change; account names, key material and behavioural patterns last longer.',
+        'An indicator of compromise, usually shortened to IOC, is any observable fact, a file, an ' +
+        'address, a pattern of behaviour, that would only be present on a machine if the same attacker ' +
+        'had been there. Once you have found one host an attacker touched, you turn what you learned ' +
+        'about them into a short list of these indicators, and then check every other machine you have ' +
+        'against that list, which is far faster than investigating each one from scratch.\n\n' +
+        'A good indicator is specific enough that a match means something (not so generic it could be ' +
+        'anybody) and durable enough to survive the attacker changing their tools between one host and ' +
+        'the next. Not every indicator is equally durable. A network address is the weakest kind: it ' +
+        'usually belongs to a rented server the attacker can swap out for the cost of a coffee, so its ' +
+        'absence elsewhere proves very little. An account name, a cryptographic key, or a repeated ' +
+        'pattern of behaviour costs the attacker real effort to change, which is exactly what makes ' +
+        'those indicators worth building a sweep around.',
       examples: [
         {
           command: 'A source address',
@@ -796,9 +930,10 @@ const MODULE_3: Exercise[] = [
       },
     ],
     debrief:
-      'This list is the deliverable that makes the difference between remediating a host and ending ' +
-      'an incident. Everything on it can be handed to somebody else and run across ten thousand ' +
-      'machines without them understanding the case at all.',
+      'This list is the deliverable that makes the difference between remediating one host and ending ' +
+      'an incident across an entire organisation. Everything on it can be handed to somebody else, or ' +
+      'fed into an automated tool, and run across ten thousand machines by people who understand ' +
+      'nothing about this specific case at all, which is exactly what makes it so valuable.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.3.2'] ?? [],
   },
   {
@@ -815,10 +950,16 @@ const MODULE_3: Exercise[] = [
       'closed. Choose what you would do before saying yes.',
     teach: {
       concept:
-        '"We think it is clean" is not a finding. Validation means picking tests that would FAIL if ' +
-        'you were wrong, and running them: sweep the estate for your indicators, watch egress for the ' +
-        'beacon destination, and close the route you never fully explained. Failed remediation does ' +
-        'not announce itself: the incident simply restarts later, usually worse.',
+        'Validation is the step where you try to prove yourself wrong, on purpose, before you tell ' +
+        'anyone the incident is over. "We think it is clean" is a feeling, not a finding, because ' +
+        'feelings are not something anyone else can check. Validation means picking specific tests ' +
+        'that would actually FAIL if you had missed something, and running them anyway even though you ' +
+        'expect them to pass: sweeping the wider network for the indicators you extracted, watching ' +
+        'outbound traffic (EGRESS, meaning data leaving the network) for the address the malware was ' +
+        'calling home to, and closing the route into the system that was never fully explained.\n\n' +
+        'Failed remediation does not announce itself with an alarm. It looks identical, from the ' +
+        'outside, to successful remediation, right up until the incident simply restarts later, ' +
+        'usually worse, because the attacker now knows you looked and what you found.',
       examples: [
         {
           command: 'Watch egress for the beacon destination',
@@ -861,9 +1002,11 @@ const MODULE_3: Exercise[] = [
       },
     ],
     debrief:
-      'The credential reset is the one people argue about, because it is disruptive and the link is ' +
-      'speculative. That is exactly why it belongs: you never established how the password was ' +
-      'obtained, so you cannot rule out that it works somewhere else.',
+      'The credential reset is the one people argue about, because it is disruptive to everybody\'s ' +
+      'day and the link to this specific incident feels speculative rather than proven. That is ' +
+      'exactly why it belongs on the list: you never actually established how the password was ' +
+      'obtained in the first place, so you cannot rule out that the same password, or the same habit ' +
+      'of choosing weak ones, works somewhere else too.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.3.3'] ?? [],
   },
   {
@@ -908,9 +1051,12 @@ const MODULE_3: Exercise[] = [
       },
     ],
     debrief:
-      'Overstating this makes a breach notification out of an inference; understating it misses a ' +
-      'statutory deadline. The people who decide are not technical, so the precision has to come from ' +
-      'you: "staged for exfiltration, transfer unconfirmed" is a sentence they can act on.',
+      'Overstating this turns a legal breach notification, a formal, public, hard-to-reverse ' +
+      'statement, into something built on a guess rather than proof; understating it risks missing a ' +
+      'statutory deadline, a legal cutoff for reporting that starts a clock the moment a breach is ' +
+      'suspected. The people who make that call are not technical, so the precision has to come from ' +
+      'you: "staged for exfiltration, transfer unconfirmed" is a sentence they can actually act on, ' +
+      'while "we think it might be bad" is not.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.3.4'] ?? [],
   },
   {
@@ -926,10 +1072,17 @@ const MODULE_3: Exercise[] = [
       'it possible. Name it and say what control would have prevented it.',
     teach: {
       concept:
-        'Root cause analysis fails when it stops at the attacker. "Somebody brute-forced us" is not a ' +
-        'root cause, because brute force is a constant of the internet and always will be. The root ' +
-        'cause is the condition on your side that turned an ordinary attack into a compromise, and ' +
-        'it is nearly always something your own organisation did, months earlier, for a good reason.',
+        'A root cause is the underlying condition that had to be true for something bad to happen, as ' +
+        'opposed to the immediate trigger that set it off. If a building floods every time it rains, ' +
+        '"it rained" is not the root cause, because it is always going to rain eventually; the root ' +
+        'cause is whatever is broken about the drainage. Root cause analysis in incident response fails ' +
+        'the same way when it stops at the attacker.\n\n' +
+        '"Somebody brute-forced us", meaning tried password after password until one worked, is not a ' +
+        'root cause, because attempted brute force is a constant background noise of being connected ' +
+        'to the internet at all, and always will be: you cannot fix the fact that attackers exist. The ' +
+        'actual root cause is the condition on your own side that turned an ordinary, unremarkable ' +
+        'attack into an actual compromise, and it is nearly always something your own organisation did, ' +
+        'months or years earlier, for a perfectly reasonable-sounding reason at the time.',
       examples: [
         {
           command: 'Cause: the attacker guessed a password',
@@ -972,8 +1125,9 @@ const MODULE_3: Exercise[] = [
     ],
     debrief:
       'This is the single most valuable paragraph in the whole incident, and it is the one most often ' +
-      'skipped because the team is exhausted and the attacker is gone. Without it, the next intrusion ' +
-      'uses the next stale account.',
+      'skipped because by this point the team is exhausted and the attacker is gone, so it feels like ' +
+      'the work is finished. Without it, nothing about the organisation actually changes, and the next ' +
+      'intrusion simply uses the next stale account that nobody was watching for.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.3.5'] ?? [],
   },
 ];
@@ -995,10 +1149,18 @@ const MODULE_4: Exercise[] = [
       'asking whether the notification clock has started. Decide what you do.',
     teach: {
       concept:
-        'Notification is not your decision, and the timing of telling the people whose decision it is ' +
-        '*is* your decision. Obligations for regulated data generally run from awareness of a ' +
-        'potential compromise, not from proof of transfer, so "I will tell them once I am sure" can ' +
-        'consume a statutory deadline on somebody else’s behalf.',
+        'Notification is the formal, often legally required, act of telling regulators and the people ' +
+        'affected (patients, customers) that their data may have been exposed. In organisations that ' +
+        'handle regulated data such as health or financial records, this is not a courtesy: it is ' +
+        'frequently a legal obligation with a strict deadline, and whether that obligation has been ' +
+        'triggered is a legal question, not a technical one.\n\n' +
+        'That is the key thing to hold onto here: whether to notify is not your decision as the ' +
+        'incident responder, but the TIMING of telling the people whose decision it actually is (legal ' +
+        'and the privacy officer) very much is. Obligations for regulated data generally start ' +
+        'counting down from the moment somebody becomes AWARE of a potential compromise, not from the ' +
+        'moment somebody has hard proof that data actually left the building. So "I will tell them once ' +
+        'I am sure" is not caution, it is quietly spending a legal deadline on somebody else\'s behalf, ' +
+        'without them ever getting the chance to weigh in.',
       examples: [
         {
           command: 'Tell legal what you know and what you do not, now',
@@ -1040,8 +1202,11 @@ const MODULE_4: Exercise[] = [
       },
     ],
     debrief:
-      'Regulators penalise delay far more consistently than they penalise the breach. The instinct to ' +
-      'wait until you understand it properly is a good engineering instinct and the wrong one here.',
+      'Regulators penalise delay far more consistently, and far more harshly, than they penalise the ' +
+      'breach itself: an organisation that reports promptly with honest uncertainty is treated very ' +
+      'differently from one that sat on the knowledge. The instinct to wait until you understand ' +
+      'something properly before speaking up is a good engineering instinct almost everywhere else, ' +
+      'and it is the wrong one here.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.4.1'] ?? [],
   },
   {
@@ -1058,10 +1223,17 @@ const MODULE_4: Exercise[] = [
       'does not belong. Six sentences at most.',
     teach: {
       concept:
-        'Executives need four things and no others: what happened in plain terms, how bad it is, what ' +
-        'is being done, and what decision you need from them. Technical detail does not reassure ' +
-        'them, it obscures the decision, and the most common failure is not being unclear, it is ' +
-        'burying the ask so far down that nobody realises they were meant to do something.',
+        'The people leading an organisation are usually not technical, and during an incident they do ' +
+        'not need to become technical: they need to make a small number of decisions quickly, with ' +
+        'the right information in front of them. Executives need four things and no others: what ' +
+        'happened, in plain terms; how bad it is; what is being done about it; and what decision you ' +
+        'actually need from them.\n\n' +
+        'Technical detail does not reassure this audience, however precise and correct it is. It ' +
+        'obscures the decision they are there to make, forcing them to either interrupt and ask what a ' +
+        'term means or nod along without really following. The most common failure in a brief like this ' +
+        'is not being unclear about the facts, it is burying the ASK, the specific thing you need them ' +
+        'to decide or approve, so far down in the explanation that nobody in the room realises they were ' +
+        'actually meant to do something before the meeting ends.',
       examples: [
         {
           command: 'An attacker brute-forced SSH and escalated via a sudo-enabled stale account',
@@ -1106,9 +1278,11 @@ const MODULE_4: Exercise[] = [
       },
     ],
     debrief:
-      'Notice how much shorter the plain version is. Jargon is usually a way of avoiding commitment: ' +
-      '"potential unauthorised data access event" says less than "someone took a copy of patient ' +
-      'records" while sounding more careful.',
+      'Notice how much shorter the plain version is than the technical one would have been. Jargon is ' +
+      'usually a way of avoiding commitment rather than a way of being precise: "potential ' +
+      'unauthorised data access event" actually says less than "someone took a copy of patient ' +
+      'records" while managing to sound more careful, because the vague phrase commits to nothing an ' +
+      'executive could act on.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.4.2'] ?? [],
   },
   {
@@ -1124,10 +1298,18 @@ const MODULE_4: Exercise[] = [
       'time, what happened, and what it is evidenced by. Cover at least six points.',
     teach: {
       concept:
-        'The timeline is the spine of every incident report and the thing everyone else argues from. ' +
-        'Two rules make it useful: every entry is tied to a piece of evidence, and detection time is ' +
-        'recorded separately from occurrence time. The gap between those two is the single most ' +
-        'important number in the report: it is what the whole detection programme gets judged on.',
+        'A timeline, in incident response, is a plain ordered list of what happened and when, each ' +
+        'entry backed by a specific piece of evidence rather than memory or guesswork. It is the spine ' +
+        'of every incident report: the thing every other section, the impact assessment, the ' +
+        'notification decision, the executive brief, ultimately argues from.\n\n' +
+        'Two rules make a timeline actually useful rather than just a list of events. First, every ' +
+        'entry is tied to a specific piece of evidence, a log line, a file, an alert, so that anyone ' +
+        'reading it later can check the claim themselves instead of taking your word for it. Second, ' +
+        'OCCURRENCE time (when something actually happened) is recorded separately from DETECTION time ' +
+        '(when somebody first noticed it). Those are very often not the same moment at all, and the gap ' +
+        'between them is the single most important number in the whole report: it is what the entire ' +
+        'detection programme, the alerts, the monitoring, the people watching them, ultimately gets ' +
+        'judged on.',
       examples: [
         {
           command: '10:14: password accepted for testuser from 203.0.113.55 (auth.log)',
@@ -1176,9 +1358,11 @@ const MODULE_4: Exercise[] = [
       },
     ],
     debrief:
-      'The ninety-minute gap is the finding that changes anything. Every stage of this intrusion ' +
-      'raised an alert while it was happening; the failure was not detection, it was a queue nobody ' +
-      'could work. That is a resourcing and tuning problem, and the timeline is what proves it.',
+      'The ninety-minute gap is the finding that changes anything about how this gets fixed. Every ' +
+      'stage of this intrusion raised an alert while it was actually happening; the failure was not ' +
+      'that nothing detected it, it was that the alerts landed in a queue nobody had the capacity to ' +
+      'work through in time. That is a resourcing and tuning problem rather than a missing-tool ' +
+      'problem, and the timeline, laid out with both times side by side, is what proves it.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.4.3'] ?? [],
   },
   {
@@ -1194,10 +1378,16 @@ const MODULE_4: Exercise[] = [
       'enough to follow while exhausted. Include who to involve and at what point. Six to eight steps.',
     teach: {
       concept:
-        'A playbook exists because judgement degrades at 02:00 and the answer is to decide in advance ' +
-        'rather than to try harder. The ones that work are specific about order and about who gets ' +
-        'called; the ones that do not are lists of principles. "Preserve evidence" is a principle. ' +
-        '"Capture memory before you touch the network" is a playbook step.',
+        'A playbook is a written, step-by-step procedure for handling a specific kind of situation, ' +
+        'prepared calmly in advance so that nobody has to invent the right response from scratch while ' +
+        'it is actually happening. It exists because judgement measurably degrades at 02:00, under ' +
+        'pressure, with an attacker still active, and the answer to that is to decide the hard parts in ' +
+        'advance rather than to simply try harder in the moment.\n\n' +
+        'The playbooks that actually work are specific about order and about exactly who gets called at ' +
+        'each point; the ones that do not work are just lists of good principles. "Preserve evidence" ' +
+        'is a principle: true, and useless to somebody exhausted at 02:00 who now has to work out what ' +
+        'it means for them to do right now. "Capture memory before you touch the network" is a playbook ' +
+        'step: a single, concrete, unambiguous action.',
       examples: [
         {
           command: 'Step 2: Capture memory before making any network change',
@@ -1246,9 +1436,10 @@ const MODULE_4: Exercise[] = [
       },
     ],
     debrief:
-      'This is the strongest portfolio piece in the package. A playbook in your own words, derived ' +
-      'from an incident you actually worked, is something you can hand a hiring manager and talk ' +
-      'through for twenty minutes, which is considerably more than a certificate does.',
+      'This is the strongest portfolio piece in the whole package. A playbook written in your own ' +
+      'words, derived from an incident you actually worked through step by step rather than copied ' +
+      'from a template, is something you can hand a hiring manager and talk through in detail for ' +
+      'twenty minutes, which is considerably more convincing than a certificate on its own.',
     practice: INCIDENT_RESPONSE_PRACTICE['ir.4.4'] ?? [],
   },
 ];
@@ -1268,7 +1459,7 @@ const MODULE_IR_5: Exercise[] = [
       'Pull every command that was run through sudo on rmg-web-02, in the order the log recorded them.',
     teach: {
       concept:
-        'A timeline is not a list of everything that happened. It is the shortest ordered sequence that explains how the incident got from nothing to now, and the fastest way to build its spine is to start with the actions that needed privilege, because those are the ones that changed the machine.\n\nsudo records the account, the working directory, and the exact command line, and it is written in time order already. Read the whole set before interpreting any of it: the entries that turn out to be routine administration are what let you recognise the ones that are not.',
+        'A timeline is not a list of everything that happened on a machine, which for a busy server could run to millions of lines. It is the shortest ordered sequence of events that explains how the incident got from nothing to where it is now, and the fastest way to build its spine, its first solid set of fixed points, is to start with the actions that needed elevated PRIVILEGE (permission to act as an administrator), because those are the ones that actually changed something about the machine rather than merely reading from it.\n\nsudo is the command that lets a permitted account temporarily act as the all-powerful root account, one command at a time, and every time it is used it writes a record: which account used it, what directory they were standing in, and the exact command line they ran, all stamped with a time. That record lands in the system log in the order it happened, already sorted for you.\n\nRead the whole set before you try to interpret any single line of it. The entries that turn out to be routine, everyday administration are exactly what let you recognise, by contrast, the ones that are not.',
       syntax: 'grep PATTERN FILE',
       examples: [
         {
@@ -1296,7 +1487,7 @@ const MODULE_IR_5: Exercise[] = [
       },
     ],
     debrief:
-      'Two of those five are ordinary administration and three are the incident: an account created, that account given sudo, and then that account archiving the exports directory. Your timeline now has three fixed points and you have not opened a forensic tool.',
+      'Two of those five sudo entries are ordinary administration and three are the incident itself: an account created, that account given sudo rights, and then that account archiving the exports directory. Your timeline already has three fixed, evidenced points, and notice that you have not opened a single specialised forensic tool to get them: a plain text log and a simple search did all of it.',
     practice: [],
   },
   {
@@ -1311,7 +1502,7 @@ const MODULE_IR_5: Exercise[] = [
       'Show the FIRST successful login from 203.0.113.55. One line.',
     teach: {
       concept:
-        'Every incident has a moment where the attacker stopped being outside and started being inside, and finding it is what turns a pile of alerts into a story. Everything before it is attempts; everything after it is activity you have to account for.\n\nThe log is in time order, so the earliest matching entry is simply the first one that comes back. Narrowing to successes and then taking the head of the result is the whole technique. Getting this timestamp right matters more than almost anything else you will do, because every other question in the investigation is asked relative to it.',
+        'Every intrusion has a single moment where the attacker stopped being outside the system, merely knocking, and started being inside it, actually logged in and able to act. Finding that exact moment is what turns a pile of disconnected alerts into a coherent story with a beginning. Everything before it is just attempts, failed or otherwise irrelevant; everything after it is activity by that account you now have to account for and treat as suspect.\n\nThe authentication log records every login attempt in the order it happened, so the earliest matching entry in it is simply the first one your search returns, no extra sorting needed. Narrowing the search down to only successful logins, then only from the address you care about, and finally taking just the very first line of what is left, is the entire technique: three small filters stacked together. Getting this one timestamp right matters more than almost anything else you will do in the whole investigation, because every other question you ask from here on is asked relative to it: what happened before this moment, and what happened after.',
       syntax: 'grep SUCCESS FILE | grep SOURCE | head -n 1',
       examples: [
         {
@@ -1344,7 +1535,11 @@ const MODULE_IR_5: Exercise[] = [
       },
     ],
     debrief:
-      '10:14:22, as testuser, with a password. That is the boundary of your incident. Everything testuser did after that time is suspect, and everything it did before is probably a real person doing their job.',
+      '10:14:22, as testuser, using a password. That single timestamp is the boundary of your ' +
+      'incident: the line between "before" and "after" that everything else in the investigation gets ' +
+      'measured against. Everything testuser did after that moment is suspect and needs accounting ' +
+      'for, and everything it did before that moment is probably just a real person doing their ' +
+      'ordinary job.',
     practice: [],
   },
   {
@@ -1359,7 +1554,7 @@ const MODULE_IR_5: Exercise[] = [
       'Show the earliest line in auth.log mentioning 203.0.113.55, whatever kind of line it is.',
     teach: {
       concept:
-        'Dwell time is how long the attacker was present before anybody noticed, and it is one of the few numbers an executive will remember from your report. It needs two timestamps: first contact, and detection.\n\nFirst contact is not the same as first success. The earliest line involving the source is usually a failure or a probe, and it is the honest start of the story because it is the first moment the host and the attacker interacted. Reporting dwell from the successful login instead quietly shortens the incident and makes detection look better than it was.',
+        'Dwell time is how long an attacker was present inside a system before anybody noticed them, and it is one of the very few numbers an executive will actually remember from your report, because it translates directly into "how bad was our detection". It needs exactly two timestamps to calculate: first contact, and detection.\n\nFirst contact is not the same thing as first SUCCESS. The earliest line in the log involving the source address is usually a failure or a probe, a knock that did not get answered, and that is the honest start of the story, because it is the first moment the host and the attacker actually interacted at all, however unsuccessfully. Reporting dwell time starting from the successful login instead quietly shortens the reported incident and makes detection look better than it really was, by hiding the whole stretch of time the attacker spent trying before they got in.',
       syntax: 'grep SOURCE FILE | head -n 1',
       examples: [
         {
@@ -1387,7 +1582,7 @@ const MODULE_IR_5: Exercise[] = [
       },
     ],
     debrief:
-      'First contact at 09:12, first success at 10:14, first privileged action at 10:22. An hour of brute force against a host that did not lock anybody out and did not alert anybody. That hour is the finding, not the intrusion.',
+      'First contact at 09:12, first success at 10:14, first privileged action at 10:22: an hour of brute force, meaning repeated password guessing, against a host that did not lock anybody out and did not alert anybody, before the attacker even got in. That hour of silence is the finding worth writing up, not the intrusion that followed it.',
     practice: [],
   },
   {
@@ -1402,7 +1597,7 @@ const MODULE_IR_5: Exercise[] = [
       'The incident is being written up. In three or four sentences, state the root cause of this intrusion, and say why the exfiltration is not the answer.',
     teach: {
       concept:
-        'Root cause is the condition whose absence would have prevented the incident, and it is almost never the thing people noticed first. The exfiltration is the last event in the chain and the one that caused the alarm; fixing it means nothing, because it was made possible by everything upstream.\n\nWalk the chain backwards. Data left the host because an archive was staged. The archive was staged because an account had sudo. That account existed because a compromised account created it. That account was compromised because a password was guessed over an hour of unimpeded attempts. So the causes worth writing down are the ones that allowed that hour: password authentication exposed with no rate limiting and no lockout, and no alert on repeated failure. Everything after that follows.\n\nA good answer names the guessable password or the unlimited attempts as the entry, notes the absence of detection or alerting on the failures, and says explicitly that the exfiltration was the consequence rather than the cause.',
+        'A root cause is the underlying condition whose absence would have prevented the whole incident from happening, as distinct from the last visible event that actually triggered the alarm. It is almost never the thing people noticed first, because the thing people noticed first is usually the END of a chain of smaller events, not the start of it.\n\nEXFILTRATION, data actually leaving the network for somewhere the attacker controls, is the last event in that chain here and the one that set off the alarm. Fixing only that, blocking that one upload, would mean almost nothing, because it was made possible by everything that happened upstream of it, all the steps that led up to it being possible at all.\n\nWalk the chain backwards, one link at a time. Data left the host because an archive of it had been staged. The archive was staged because an account had sudo, administrator-level rights. That account existed because a different, already-compromised account was used to create it. That account was compromised because a password was successfully guessed, over an hour of completely unimpeded login attempts. So the causes actually worth writing down are the conditions that allowed that hour to happen unopposed: password authentication exposed to the internet with no rate limiting (a mechanism that slows down or blocks repeated attempts) and no account lockout, and no alert firing on repeated authentication failure. Everything downstream of that follows automatically once those conditions exist.\n\nA good answer names the guessable password, or the unlimited login attempts, as the actual entry point, notes the complete absence of detection or alerting on those failures, and says explicitly that the exfiltration was the consequence of all that rather than the cause of anything.',
     },
     hints: [
       'Walk the chain backwards from the upload and keep asking what made the previous step possible.',
@@ -1426,7 +1621,7 @@ const MODULE_IR_5: Exercise[] = [
       },
     ],
     debrief:
-      'Notice which recommendations fall out of that answer: rate limiting and alerting. Neither of them mentions the archive, the account, or the upload, which is how you know you have reached a cause rather than a symptom.',
+      'Notice which recommendations actually fall out of that answer: rate limiting login attempts, and alerting on repeated failures. Neither of them mentions the archive, the account, or the upload at all, and that is exactly how you know you have reached a genuine cause rather than just described a symptom in more detail.',
     practice: [],
   },
   {
@@ -1441,7 +1636,7 @@ const MODULE_IR_5: Exercise[] = [
       'Your timeline is built entirely from auth.log, syslog and the nginx logs on the host itself. In three or four sentences, say what those sources cannot tell you.',
     teach: {
       concept:
-        'Every incident report contains claims the evidence does not support, unless somebody deliberately writes down the limits. Doing it yourself is not modesty, it is self-defence: the person who finds the gap after you published is going to doubt everything else you wrote.\n\nThree limits apply here and they are worth naming precisely. Host logs are on the host, so anybody with root could have edited or deleted them, which means absence of evidence is weak. Rotation has already discarded whatever came before the retained window, so you cannot say when this really started. And the logs record that an upload happened, not what was in it: proving whether patient data actually left needs network capture or the destination, neither of which you have.\n\nA good answer names at least the log integrity problem, the retention or rotation boundary, and the inability to confirm what was actually transferred.',
+        'Every incident report ends up containing claims the evidence does not fully support, unless somebody deliberately sits down and writes out the limits of what was actually looked at. Doing that yourself is not modesty or excessive caution, it is self-defence: the person who finds the gap after you have already published the report is going to doubt everything else you wrote, even the parts that were solid.\n\nThree limits apply here and they are worth naming precisely rather than gesturing at vaguely. First, these are HOST logs, meaning they are stored on the very machine that was compromised, and the attacker had root on that machine, so they could have edited or deleted entries in them; that means the absence of something suspicious in the logs is weak evidence, because a careful attacker could simply have removed it. Second, log ROTATION, the routine process of deleting the oldest log entries to save space, has already discarded whatever came before the retained window, so you genuinely cannot say when this really started, only when it started within what survived. Third, the logs record that an upload command RAN, not what was actually inside the file it uploaded: proving whether patient data genuinely left the building needs a capture of the network traffic itself, or evidence from the destination end, neither of which you have here.\n\nA good answer names at least the log integrity problem (root could have altered them), the retention or rotation boundary, and the inability to confirm what was actually transferred.',
     },
     hints: [
       'Ask who could have changed these files, and with what privilege.',
@@ -1465,7 +1660,7 @@ const MODULE_IR_5: Exercise[] = [
       },
     ],
     debrief:
-      'The last one changes what you can say to a regulator. "Data was exfiltrated" and "a transfer of an archive of exports was initiated to an external address" are different claims, and only one of them is supported by what you have.',
+      'The last limit is the one that changes what you can honestly say to a regulator. "Data was exfiltrated" and "a transfer of an archive of exports was initiated to an external address" sound similar but are different claims of very different strength, and only the second one is actually supported by what the host logs give you.',
     practice: [],
   },
   {
@@ -1480,7 +1675,7 @@ const MODULE_IR_5: Exercise[] = [
       'You have four questions still open. Which of the following pair a question with a source that can actually answer it? Select all that apply.',
     teach: {
       concept:
-        'Half of investigative speed is knowing where an answer lives before you go looking. Sources are not interchangeable, and pointing the wrong one at a question wastes an hour and often produces a confident wrong answer.\n\nThe authentication log answers who logged in, from where, and when. The sudo record answers what was run with privilege. The web server logs answer what was requested over HTTP and what the server returned. The process table and socket table answer what is happening RIGHT NOW, and they are volatile: reboot the host and they are gone.\n\nWhat none of them answers is the contents of a network transfer, which needs capture at the network layer, and none of them tells you whether the same actor is on other hosts, which needs the same questions asked elsewhere. Knowing what a source cannot answer is as useful as knowing what it can.',
+        'Half of investigative speed is simply knowing where an answer lives before you go looking for it. A log file, a table, a record kept by some piece of software, each one is called an EVIDENCE SOURCE, and sources are not interchangeable: each was built to record one particular kind of thing, and it genuinely does not know about anything else. Pointing the wrong one at a question wastes an hour and, worse, often produces a confident-sounding wrong answer rather than an honest "I do not know".\n\nThe authentication log answers who logged in, from where, and when, because that is specifically what it was built to record. The sudo record answers what was run with elevated privilege. The web server logs answer what was requested over HTTP (the protocol web browsers use) and what the server sent back. The process table and socket table, which list what programs and network connections currently exist on a machine, answer what is happening RIGHT NOW, and they are volatile in exactly the sense the earlier modules covered: reboot the host and they are simply gone.\n\nWhat none of these sources answers is the actual contents of a network transfer, which needs a capture at the network layer itself, a recording of the raw traffic as it crossed the wire, and none of them tells you whether the same attacker is active on other hosts, which needs the same set of questions asked separately, on those other hosts. Knowing what a source cannot answer is just as useful, in practice, as knowing what it can.',
       },
     options: [
       { id: 'a', label: 'When the attacker first authenticated successfully: the authentication log.' },
@@ -1506,7 +1701,7 @@ const MODULE_IR_5: Exercise[] = [
       },
     ],
     debrief:
-      'Option C is worth one more thought: the process and socket tables answer that question only until the host is rebooted. Volatile sources have to be captured before you contain, which is the whole reason the containment module puts memory acquisition first.',
+      'Option C is worth one more thought on its own: the process and socket tables only answer that question up until the host is rebooted, and no longer. Volatile sources like these have to be captured before you contain the host, which is the whole reason the containment module, back at the start of this package, puts capturing memory before anything else.',
     practice: [],
   },
 ];
@@ -1526,7 +1721,7 @@ const MODULE_IR_6: Exercise[] = [
       'Save the sudo command entries from auth.log into a file called sudo-evidence.txt in your home directory.',
     teach: {
       concept:
-        'Anything that exists only in your scrollback is not evidence. Terminals close, sessions time out, and the host you are reading may be about to be rebuilt. Redirecting output to a file makes the result something you can attach to a ticket and something a second analyst can check.\n\nThe `>` operator sends output to a file instead of the screen, creating it or overwriting it. `>>` appends instead, which is what you want for a running log you add to through a shift. Write to your own home directory rather than into the evidence you are reading: writing to the host you are investigating changes it, and on a real engagement the capture belongs somewhere else entirely.',
+        'SCROLLBACK is the text still visible in a terminal window that you can scroll up to see again, and anything that exists only there is not evidence, no matter how carefully you read it, because it disappears the moment the window closes. Terminals close by accident, sessions time out, and the host you are reading may be about to be rebuilt out from under you. Redirecting a command\'s output to a file instead turns a fleeting result into something you can attach to a ticket and something a second analyst, or a reviewer months later, can independently check.\n\nOn the command line, the `>` symbol is called a REDIRECT: it sends a command\'s output to a named file instead of printing it to the screen, creating the file if it does not exist yet and completely overwriting it if it does. `>>` does almost the same thing but appends to the end of the file instead of overwriting it, which is what you want for a running log that you keep adding entries to over the course of a whole shift.\n\nWrite the file into your own home directory, not into the evidence you are examining: writing to the host you are investigating changes that host, which is itself a kind of evidence contamination, and on a real engagement the actual capture belongs somewhere else entirely, off the compromised machine.',
       syntax: 'COMMAND > FILE',
       examples: [
         {
@@ -1555,7 +1750,7 @@ const MODULE_IR_6: Exercise[] = [
       },
     ],
     debrief:
-      'Note that nothing appeared on screen, which is correct and disconcerting the first time. Check the file rather than assuming: a redirect that silently captured an error message instead of your results is a mistake you only find later.',
+      'Note that nothing appeared on screen, which is correct behaviour and slightly disconcerting the first time you see it: the redirect quietly took everything that would normally have printed. Check the file directly rather than assuming it worked, because a redirect that silently captured an error message instead of the results you wanted is a mistake you often only discover much later, when the evidence turns out to be missing.',
     practice: [],
   },
   {
@@ -1570,7 +1765,7 @@ const MODULE_IR_6: Exercise[] = [
       'At 11:47 you isolated rmg-web-02 from the network, after capturing memory, and failed the portal over to rmg-web-01. In two or three sentences, write the entry for the incident running log.',
     teach: {
       concept:
-        'A running log is written as you go, not reconstructed afterwards, and it is the artefact that turns a chaotic afternoon into a defensible account. Four things go in every entry: the TIME, the ACTION taken, the REASON at the time, and the EFFECT observed.\n\nThe reason matters more than people expect. Decisions during an incident are made on incomplete information, and they will be reviewed by people who know how it turned out. An entry that records why the call looked right at 11:47, with what was known at 11:47, is the difference between a defensible decision and one that looks reckless in hindsight.\n\nWrite in plain past tense, name yourself, and do not editorialise. A good entry here names the time, the isolation, the memory capture that preceded it, and what happened to the service.',
+        'A running log is a written record kept DURING an incident, one short entry added each time something significant happens, rather than a report reconstructed afterwards from memory. It is the single artefact that turns a chaotic, fast-moving afternoon into a defensible account that somebody else can trust later. Four things go in every entry: the TIME it happened, the ACTION taken, the REASON it seemed right at the time, and the EFFECT you actually observed happening as a result.\n\nThe reason matters more than people expect it to when they first start keeping one of these. Decisions made during an incident are made on incomplete information, under time pressure, and they will very often be reviewed later by people who already know how everything turned out, which makes hindsight unfairly generous to alternatives that were never actually available in the moment. An entry that records exactly why a call looked right at 11:47, given only what was known at 11:47, is the difference between a decision that can be defended and one that simply looks reckless once you already know the ending.\n\nWrite each entry in plain past tense, name yourself as the person who acted, and avoid editorialising, meaning stick to what happened rather than how you feel about it. A good entry here names the time, the isolation, the memory capture that came before it, and what happened to the service as a result.',
     },
     hints: [
       'The facts are in the question. What the log entry has to add is the part nobody else can reconstruct later.',
@@ -1602,7 +1797,7 @@ const MODULE_IR_6: Exercise[] = [
       },
     ],
     debrief:
-      'The sentence that will matter in three months is the middle one, the reason. Nobody disputes what you did; they dispute whether it was reasonable, and only the contemporaneous note answers that.',
+      'The sentence that will matter in three months is the middle one, the reason. Nobody reviewing this later disputes what you did, since that is a plain fact recorded elsewhere; what gets disputed is whether it was reasonable given what was known at the time, and only a note written contemporaneously, meaning at the time rather than reconstructed afterwards, can actually answer that.',
     practice: [],
   },
   {
@@ -1617,7 +1812,7 @@ const MODULE_IR_6: Exercise[] = [
       'You are keeping an incident ticket during a live response. Which of the following belong in it? Select all that apply.',
     teach: {
       concept:
-        'The ticket is the working record: contemporaneous, complete, and messy. The report is the finished account: edited, structured, and written afterwards for somebody who was not there. Confusing them costs you either way. A ticket that is written like a report loses the raw detail that makes it credible; a report that reads like a ticket does not get read at all.\n\nInto the ticket goes every action with a timestamp, every command run, every artefact captured and where it was put, and the decisions with their reasoning. Also into the ticket: things you tried that found nothing, because that is what stops the next person repeating them.\n\nWhat does NOT belong is speculation stated as fact, and the names of individuals framed as blame. Write "the account testuser authenticated from 203.0.113.55", not "Dana clicked a phishing link", unless you have established it. Tickets are disclosable, they get read by people outside the team, and an unsupported accusation in one is a serious problem separately from the incident.',
+        'An incident TICKET is the working record kept during a live response: contemporaneous, meaning written at the time, complete, and often messy, because it is capturing events as they happen rather than being tidied up afterwards. The finished REPORT is a different document entirely: edited, structured, and written afterwards for somebody who was not in the room. Confusing the two costs you either way: a ticket written like a polished report loses the raw detail that makes it credible as a record, and a report that still reads like a raw ticket does not get read at all by the people it is for.\n\nInto the ticket goes every action with its timestamp, every command actually run, every piece of evidence captured and exactly where it was stored, and every decision along with its reasoning. Also into the ticket, and this is the part people forget: things you tried that found nothing, because writing down a dead end is what stops the next person wasting an hour repeating it.\n\nWhat does NOT belong in a ticket is speculation stated as though it were an established fact, and the names of individuals framed as blame. Write "the account testuser authenticated from 203.0.113.55", not "Dana clicked a phishing link", unless you have actually established that as fact. Tickets are DISCLOSABLE, meaning they can end up being read by people well outside the immediate team, regulators, lawyers, auditors, and an unsupported accusation sitting inside one is a serious problem entirely separate from the incident itself.',
     },
     options: [
       { id: 'a', label: 'Every action taken, with the time it was taken.' },
@@ -1643,7 +1838,7 @@ const MODULE_IR_6: Exercise[] = [
       },
     ],
     debrief:
-      'Write about accounts and hosts, not about people, until you can prove otherwise. It costs nothing, it is more accurate, and it keeps the investigation about the evidence.',
+      'Write about accounts and hosts, not about people, until you can actually prove a specific person did something. It costs you nothing to phrase it that way, it is more accurate to what you actually know, and it keeps the entire investigation anchored to the evidence rather than to a guess about who is at fault.',
     practice: [],
   },
   {
@@ -1658,7 +1853,7 @@ const MODULE_IR_6: Exercise[] = [
       'Your shift ends with the host isolated, memory captured, and the question of whether the database was reached still open. In three or four sentences, write the handover for the analyst taking over.',
     teach: {
       concept:
-        'Most incidents outlive a shift, and the handover is where they most often go wrong: the next analyst re-derives what you already knew, or worse, assumes something is done because nobody said it was not.\n\nA handover has three parts and they are all short. WHERE IT STANDS: what is established, and what has been done to the environment. WHAT IS OPEN: the specific questions still unanswered, phrased as questions rather than as topics. WHAT IS NEXT: the single most useful thing to do first, and anything time-critical, including who has been told and who has not.\n\nBe explicit about what is NOT done. "Memory captured, not yet analysed" prevents an hour of somebody assuming otherwise, and it is the sentence most often left out.',
+        'Most real incidents last far longer than a single work shift, and the HANDOVER, the point where one analyst hands the case to another, is where they most often go wrong: the next analyst either re-derives from scratch something you already knew, wasting time, or worse, quietly assumes something is finished simply because nobody explicitly said it was not.\n\nA handover has three parts, and each of them should be short. WHERE IT STANDS: what has been established as fact so far, and what has actually been done to the environment itself (isolated, captured, and so on). WHAT IS OPEN: the specific questions still unanswered, phrased as actual questions rather than vague topics. WHAT IS NEXT: the single most useful thing to do first, plus anything time-critical, including exactly who has already been told and who has not.\n\nBe explicit about what is specifically NOT done yet. "Memory captured, not yet analysed" prevents an hour of somebody downstream wrongly assuming the analysis already happened, and it is exactly the kind of sentence that gets left out when people are tired.',
     },
     hints: [
       'Three parts: where it stands, what is still open, and what to do next.',
@@ -1682,7 +1877,7 @@ const MODULE_IR_6: Exercise[] = [
       },
     ],
     debrief:
-      'The most valuable line in that handover is "captured and not yet analysed". Everything else could be reconstructed from the ticket; that one prevents the incoming analyst from believing a job is finished when it has not started.',
+      'The most valuable line in that handover is "captured and not yet analysed". Almost everything else in it could, in principle, be reconstructed later from the ticket; that one specific line is what prevents the incoming analyst from believing a piece of work is finished when it has not even started yet.',
     practice: [],
   },
   {
@@ -1697,7 +1892,7 @@ const MODULE_IR_6: Exercise[] = [
       'The memory image may end up in front of a regulator or a court. In three or four sentences, say what has to be recorded about it for it to be worth anything.',
     teach: {
       concept:
-        'An artefact is only as good as the account of where it came from. Chain of custody is that account, and it is boring, contemporaneous paperwork rather than anything technical.\n\nFour things have to be recorded. WHAT was collected, precisely, including which host and which volume. WHEN and by WHOM, with the time taken from a clock somebody can vouch for. HOW, meaning the tool and its version, because a known-buggy acquisition tool is a real challenge to your evidence. And INTEGRITY: a cryptographic hash computed at collection, so anybody can later demonstrate the copy they are looking at is the copy you took.\n\nThen every subsequent transfer is logged: who held it, who they gave it to, when. A gap in that record does not prove anything was altered. It means nobody can prove it was not, which is enough to lose the argument.\n\nA good answer names the hash, the collector and time, and the unbroken record of who has held it since.',
+        'A piece of digital evidence, an ARTEFACT such as a memory image or a disk copy, is only ever as good as the documented account of exactly where it came from and who has had it since. CHAIN OF CUSTODY is that account, and despite the technical-sounding name it is boring, contemporaneous paperwork rather than anything requiring specialised tools: it exists purely to answer the question "how do we know this file is really what you say it is, and that nobody tampered with it".\n\nFour things have to be recorded for it to hold up. WHAT was collected, precisely, including which host and which storage volume it came from. WHEN and by WHOM, with the time taken from a clock somebody else can independently vouch for. HOW, meaning the specific tool and version used to collect it, because a known-buggy acquisition tool is itself a real avenue to challenge your evidence later. And INTEGRITY: a cryptographic HASH, a short fixed-length fingerprint of the file\'s exact contents, computed at the moment of collection, so that anybody, at any later point, can recompute that fingerprint and demonstrate the copy in front of them is bit-for-bit identical to the one originally taken.\n\nFrom that point on, every subsequent transfer of the evidence has to be logged too: who held it, who they handed it to, and exactly when. A gap in that record does not, by itself, prove anything was altered during it. It simply means nobody can prove it was NOT altered, which in a legal or regulatory setting is usually enough on its own to lose the argument and have the evidence set aside.\n\nA good answer names the hash, the collector and the time of collection, and the unbroken record of everyone who has held the evidence since.',
     },
     hints: [
       'Think about what somebody hostile would ask about this file in a year.',
@@ -1721,7 +1916,7 @@ const MODULE_IR_6: Exercise[] = [
       },
     ],
     debrief:
-      'None of this is technical work and all of it is the difference between an image that proves something and an expensive file nobody can rely on. Do it at collection time: it cannot be added convincingly afterwards.',
+      'None of this chain-of-custody paperwork is technical work in itself, and all of it is the difference between a memory image that actually proves something in front of a regulator and an expensive file nobody can reliably vouch for. Do it at the moment of collection: none of it can be convincingly added afterwards, because the whole point is that it was recorded at the time, not reconstructed from memory later.',
     practice: [],
   },
   {
@@ -1736,7 +1931,7 @@ const MODULE_IR_6: Exercise[] = [
       'The incident is being closed. In three or four sentences, write the summary paragraph, covering what happened, what the impact was, and what remains uncertain.',
     teach: {
       concept:
-        'The closing summary is the paragraph that gets quoted for years, in board papers, in regulatory correspondence, and by whoever writes the next report. It has to be short, specific, and honest about its own limits.\n\nThree things go in it. WHAT HAPPENED, as a sequence with times, in language a non-specialist can follow. WHAT THE IMPACT WAS, stated as what is established rather than what is feared. And WHAT IS STILL UNCERTAIN, which is the part most often dropped and the part that protects everybody, because a summary that reads as complete will be treated as complete.\n\nResist two temptations. Do not inflate: describing a probable transfer as a confirmed breach commits the organisation to a position the evidence may not support. Do not minimise either: an hour of undetected brute force against an internet-facing service is a real failure and saying so is what gets it fixed.',
+        'The closing summary is the single paragraph that ends up getting quoted for years afterwards, in board papers, in regulatory correspondence, and by whoever writes the next incident report and wants an example. It has to be short, specific, and honest about its own limits, because it will travel far beyond the room it was written in.\n\nThree things go in it. WHAT HAPPENED, laid out as a sequence with times, in plain language a non-specialist can follow without help. WHAT THE IMPACT WAS, stated as what has actually been established rather than what is merely feared. And WHAT IS STILL UNCERTAIN, which is the part most often quietly dropped and, for that exact reason, the part that protects everybody involved, because a summary that reads as complete will be treated by its readers as complete, whether or not that is actually true.\n\nResist two opposite temptations while writing it. Do not inflate the claim: describing a merely probable transfer as a confirmed breach commits the whole organisation to a position the evidence may not actually support. Do not minimise it either: an hour of undetected brute force, repeated password guessing, against a service exposed to the internet is a real failure, and saying so plainly is what actually gets it fixed afterwards.',
     },
     hints: [
       'Three parts: the sequence with times, the established impact, and what remains unknown.',
@@ -1760,7 +1955,7 @@ const MODULE_IR_6: Exercise[] = [
       },
     ],
     debrief:
-      'Read your last sentence again and check it does not claim more than the evidence supports. The summary is the one part of the report that will be quoted without its context, so it has to survive being read alone.',
+      'Read your last sentence again and check that it does not claim more than the evidence actually supports. The closing summary is the one part of the whole report that will get quoted on its own, stripped of all the surrounding context, so it has to be able to survive being read entirely alone.',
     practice: [],
   },
 ];
@@ -1783,14 +1978,21 @@ const MODULE_IR_7: Exercise[] = [
       'list before you choose: one of those questions is holding up every other decision.',
     teach: {
       concept:
-        'Scoping is a resourcing decision wearing technical clothes. You almost never have enough ' +
-        'people to look at everything properly, so the question is not "what could have been ' +
-        'reached" but "which answer unblocks the most other decisions, and can I get it today".\n\n' +
-        'Two things separate a good scope from a thorough one. Depth beats coverage: four shallow ' +
-        'looks produce four inconclusive answers, and inconclusive means the work has to be done ' +
-        'again. And cheap estate-wide checks are different in kind from investigations: asking one ' +
-        'narrow question everywhere, such as whether an account or a key exists, costs almost ' +
-        'nothing and scales, so it runs alongside the deep work rather than competing with it.',
+        'SCOPING is the process of working out how far an intrusion actually reached: which systems ' +
+        'were touched, and just as importantly, which ones were checked and found untouched. It sounds ' +
+        'like a purely technical exercise, but underneath it is really a resourcing decision wearing ' +
+        'technical clothes. You almost never have enough people to look at everything properly at the ' +
+        'same time, so the real question is not "what could the attacker theoretically have reached", ' +
+        'it is "which single answer unblocks the most other decisions, and can I actually get it ' +
+        'today".\n\n' +
+        'Two things separate a good scope from a merely thorough-looking one. First, depth beats ' +
+        'coverage: four shallow, rushed looks across four systems produce four inconclusive answers, ' +
+        'and an inconclusive answer means the work has to be redone properly later anyway, so nothing ' +
+        'was actually saved by spreading thin. Second, cheap estate-wide checks are a different kind of ' +
+        'activity from a deep investigation, not a smaller version of one: asking one narrow, ' +
+        'mechanical question across every system at once, such as whether a specific account or key ' +
+        'exists anywhere, costs almost nothing and scales easily, so it can run alongside the deep work ' +
+        'on the one host that matters most, rather than competing with it for the same people.',
       examples: [
         {
           command: 'Depth on the host that matters',
@@ -1843,9 +2045,10 @@ const MODULE_IR_7: Exercise[] = [
       },
     ],
     debrief:
-      'Notice that the defensible option, the backup host, is not wrong. It is genuinely important ' +
-      'and it is not first, and knowing the difference between "wrong" and "not yet" is most of ' +
-      'what scoping is.',
+      'Notice that the DEFENSIBLE option, checking the backup host first, is not actually wrong: it is ' +
+      'a real system that genuinely deserves attention. It is simply not the first priority right now, ' +
+      'and knowing the difference between "wrong" and "genuinely important, just not yet" is most of ' +
+      'what scoping under pressure actually is.',
     practice: [],
   },
   {
@@ -1861,14 +2064,18 @@ const MODULE_IR_7: Exercise[] = [
       'and show the line if it does.',
     teach: {
       concept:
-        'The sweep decided on in the previous exercise is made of questions like this one: narrow, ' +
-        'mechanical, with an answer shape you know in advance. On a real estate it runs against ' +
-        'every host through configuration management; the question asked of each one is identical ' +
-        'to what you run here by hand.\n\n' +
-        '/etc/passwd holds the local accounts, one per line, colon-separated. It is world-readable ' +
-        'by design, which is what makes this check cheap. What you are looking for is the account ' +
-        'name, and what you are reading on the line is the UID and the shell: an account with a real ' +
-        'login shell was made for somebody to use.',
+        'The estate-wide sweep decided on in the previous exercise is made up of many small questions ' +
+        'exactly like this one: narrow, mechanical, with an answer shape you already know in advance ' +
+        'before you even run it. On a real fleet of machines this same question runs automatically ' +
+        'against every host through CONFIGURATION MANAGEMENT, tooling that can execute one command ' +
+        'across thousands of machines at once; the actual question asked of each host is identical to ' +
+        'what you are about to run here by hand, on just this one.\n\n' +
+        '/etc/passwd, met earlier in this package, holds the local accounts on a machine, one per ' +
+        'line, colon-separated. It is world-readable by design, meaning any account can read it, which ' +
+        'is exactly what makes this check so cheap to run everywhere. What you are searching for is ' +
+        'the account name, and what you are reading on the matching line once you find it is the UID ' +
+        '(the account\'s numeric identity) and the shell: an account with a real, interactive login ' +
+        'shell was set up for somebody, or something, to actually log in and use.',
       syntax: 'grep NAME /etc/passwd',
       examples: [
         {
@@ -1896,9 +2103,11 @@ const MODULE_IR_7: Exercise[] = [
       },
     ],
     debrief:
-      'A login shell and a UID in the human range, on an account named to look like monitoring ' +
-      'software. Real monitoring accounts are usually system accounts with no shell, which is the ' +
-      'comparison that makes this one stand out.',
+      'A real login shell, and a UID in the ordinary human range, on an account deliberately named to ' +
+      'look like monitoring software. Genuine monitoring accounts are usually plain SYSTEM accounts ' +
+      'with no interactive shell at all, since nothing ever needs to log into them by typing a ' +
+      'password, and it is exactly that comparison, real monitoring accounts versus this one, that ' +
+      'makes sysmon stand out the moment you know what to look for.',
     practice: [],
   },
   {
@@ -1914,17 +2123,21 @@ const MODULE_IR_7: Exercise[] = [
       'what that claim needs to mean before it can go in the report.',
     teach: {
       concept:
-        '"Clean" is the most dangerous word in a scoping conversation, because it sounds like a ' +
-        'conclusion and is usually a summary of whatever somebody happened to look at.\n\n' +
-        'A usable clearing statement has three parts. WHAT WAS CHECKED: which artefacts, on which ' +
-        'host. OVER WHAT PERIOD: a clearing that covers the last hour says nothing about the ' +
-        'intrusion window, and the window here runs from 09:12 to isolation. AND WITH WHAT ' +
-        'LIMITS: which sources were unavailable, and what would still be invisible if the attacker ' +
-        'was careful.\n\n' +
-        'The strong form is not "the database is clean". It is "no authentication from web-02 ' +
-        'appears in the database logs between 09:12 and 11:42, and those logs are retained for ' +
-        'thirty days and were not writable by the compromised host". That is a claim somebody can ' +
-        'check, and it is honest about being narrower than the sentence it replaces.',
+        '"Clean" is probably the single most dangerous word in a scoping conversation, because it ' +
+        'sounds like a firm conclusion someone can rely on, while usually being nothing more than a ' +
+        'quick summary of whatever that person happened to glance at, with no record of what was ' +
+        'actually excluded.\n\n' +
+        'A usable clearing statement, one strong enough to put in a report, has three parts. WHAT WAS ' +
+        'CHECKED: which specific artefacts, on which specific host, by name. OVER WHAT PERIOD: a ' +
+        'clearing that only covers the last hour of logs says nothing whatsoever about the actual ' +
+        'intrusion window, which here runs all the way from 09:12 to the moment of isolation. AND WITH ' +
+        'WHAT LIMITS: which sources were unavailable at the time, and what would still have been ' +
+        'completely invisible even to a careful check, if the attacker had been careful themselves.\n\n' +
+        'The strong form of a clearing statement is not "the database is clean". It is "no ' +
+        'authentication from web-02 appears in the database logs between 09:12 and 11:42, and those ' +
+        'logs are retained for thirty days and were not writable by the compromised host". That is a ' +
+        'specific claim somebody else can independently check, and it is honest about being narrower, ' +
+        'and therefore more trustworthy, than the single vague word it replaces.',
     },
     hints: [
       'Ask three questions of the claim: what was looked at, over what period, and what would not have shown up.',
@@ -1957,9 +2170,10 @@ const MODULE_IR_7: Exercise[] = [
       },
     ],
     debrief:
-      'Push back on "clean" every time you hear it, including when you say it. The person quoting ' +
-      'your report in six months will not have the conversation you had; they will only have the ' +
-      'sentence.',
+      'Push back on the word "clean" every time you hear it, including the times when you are about ' +
+      'to say it yourself. The person quoting your report in six months will not have had the ' +
+      'conversation you had, will not remember the caveats you meant to imply; they will only have the ' +
+      'sentence you actually wrote down.',
     practice: [],
   },
   {
@@ -1975,17 +2189,24 @@ const MODULE_IR_7: Exercise[] = [
       'all that apply.',
     teach: {
       concept:
-        'Not every fact about an attacker is worth searching for. The useful ones are specific ' +
-        'enough that a hit means something, and stable enough that the attacker cannot trivially ' +
-        'change them between now and when your sweep runs.\n\n' +
-        'Strong indicators here: the account name, because it had to be created and would have to be ' +
-        'created again; the public key, because it is a fixed string the attacker needs to keep ' +
-        'using; the crontab entry, because persistence has to persist. Each of those costs the ' +
-        'attacker real effort to change.\n\n' +
-        'Weak ones: a source address, which is a rented server and changes for the price of a coffee, ' +
-        'and a file hash of something that is trivially recompiled. Neither is useless, and both ' +
-        'produce a lot of confident false negatives if you treat absence as evidence. Search on ' +
-        'behaviour and on what the attacker must keep, rather than on what they can discard.',
+        'Not every fact you know about an attacker is worth spending a sweep on. This exercise ' +
+        'revisits the same idea as the indicator-of-compromise exercise earlier in the package, this ' +
+        'time asking you to actually rank them: the useful ones are specific enough that a match means ' +
+        'something real, and stable enough that the attacker cannot trivially change them between now ' +
+        'and whenever your sweep actually runs.\n\n' +
+        'Strong indicators here: the account name, because it had to be deliberately created and would ' +
+        'have to be created again from scratch on a new host; the public key, because it is a fixed ' +
+        'string the attacker genuinely needs to keep reusing in order to keep logging back in; the ' +
+        'crontab entry (a scheduled task), because persistence, by its very definition, has to keep ' +
+        'persisting to be any use to them. Each of those costs the attacker real, meaningful effort to ' +
+        'change.\n\n' +
+        'Weak ones: a source address, which typically belongs to a rented server the attacker can swap ' +
+        'out for the price of a coffee, and a file hash (a fingerprint of a file\'s exact contents) of ' +
+        'something that can be trivially recompiled into a file with a completely different fingerprint ' +
+        'and identical behaviour. Neither of those is useless to check, and both of them produce a lot ' +
+        'of confident FALSE NEGATIVES, meaning a clean-looking result that is actually wrong, if you ' +
+        'treat their absence as proof of anything. Search on behaviour and on what the attacker is ' +
+        'forced to keep, rather than on what they can freely discard.',
     },
     options: [
       { id: 'a', label: 'The sysmon account name, which had to be created and would have to be created again.' },
@@ -2018,8 +2239,10 @@ const MODULE_IR_7: Exercise[] = [
       },
     ],
     debrief:
-      'This is the pyramid of pain in one exercise: the higher up you search, the more it costs the ' +
-      'attacker to evade you, and behaviour costs them the most.',
+      'This is a well-known idea in the field, sometimes called the pyramid of pain, compressed into ' +
+      'one exercise: the higher up the pyramid you search, from a disposable address at the bottom up ' +
+      'to a genuine behavioural pattern at the top, the more it costs the attacker to evade you, and ' +
+      'behaviour costs them the most of all to change.',
     practice: [],
   },
   {
@@ -2036,15 +2259,20 @@ const MODULE_IR_7: Exercise[] = [
       'sentences, write the scoping statement for the report.',
     teach: {
       concept:
-        'The scoping statement is the paragraph a regulator reads to decide how large this was, and ' +
-        'it is the one most likely to be wrong in the reassuring direction.\n\n' +
-        'It needs three things. WHAT WAS AFFECTED, stated positively and specifically. WHAT WAS ' +
-        'CHECKED AND NOT AFFECTED, with the check named rather than implied, because "no evidence of ' +
-        'access" without saying what you looked at is not a finding. And THE BOUNDARY OF THE SEARCH: ' +
-        'which systems were in scope at all, and what would have been missed by the methods used.\n\n' +
-        'Write it so that somebody could disagree with it. A statement nobody could challenge is ' +
-        'usually one that does not say anything, and the ones that get organisations into trouble ' +
-        'are the ones that read as broader guarantees than the work supports.',
+        'The scoping statement is the paragraph a regulator actually reads to decide how large this ' +
+        'incident really was, and it is, of every paragraph in the report, the one most likely to end ' +
+        'up wrong in the reassuring direction, simply because reassuring is what everyone in the room ' +
+        'wants to hear.\n\n' +
+        'It needs three things. WHAT WAS AFFECTED, stated positively and specifically rather than ' +
+        'vaguely. WHAT WAS CHECKED AND FOUND NOT AFFECTED, with the actual check named rather than ' +
+        'merely implied, because "no evidence of access" without saying what you actually looked at is ' +
+        'not a finding at all, it is an unsupported assertion. And THE BOUNDARY OF THE SEARCH: which ' +
+        'systems were even in scope for checking in the first place, and what would have been missed ' +
+        'entirely by the methods that were used.\n\n' +
+        'Write it so that somebody could, in principle, disagree with it. A statement nobody could ' +
+        'possibly challenge is usually one that does not actually say anything concrete, and the ' +
+        'statements that get organisations into serious trouble later are the ones that read as ' +
+        'broader guarantees than the underlying work actually supports.',
     },
     hints: [
       'Three parts: what was affected, what you checked and found clear, and where you did not look.',
@@ -2078,8 +2306,9 @@ const MODULE_IR_7: Exercise[] = [
       },
     ],
     debrief:
-      'The last sentence is the one that protects everybody. "On the evidence available" is not ' +
-      'hedging, it is the accurate scope of every claim in the paragraph above it.',
+      'The last sentence is the one that actually protects everybody who relies on this report later. ' +
+      '"On the evidence available" is not hedging or covering yourself vaguely, it is the accurate, ' +
+      'literal scope of every single claim in the paragraph above it.',
     practice: [],
   },
 ];
@@ -2102,18 +2331,25 @@ const MODULE_IR_8: Exercise[] = [
       'choose.',
     teach: {
       concept:
-        'Recovery decisions are made under the strongest pressure in the whole incident, because ' +
-        'the outage is now visible to everybody and the attacker is not. The question underneath ' +
-        'every option is the same: does this plan work even if my list of what the attacker did is ' +
+        'RECOVERY is the step where a system actually goes back into service after an incident, and ' +
+        'recovery decisions get made under the strongest pressure of the entire response, because by ' +
+        'this point the outage is visible to everybody in the organisation while the attacker, and ' +
+        'whatever they left behind, is not visible to anyone. The question underneath every recovery ' +
+        'option is the same one: does this plan still work even if my list of what the attacker did is ' +
         'incomplete?\n\n' +
-        'That reframing settles it. You found four persistence mechanisms on a host where somebody ' +
-        'else had root for ninety minutes, and they could have altered any binary, service unit or ' +
-        'library in that time. Removing four known things does not address the unknown ones, and no ' +
-        'amount of careful enumeration turns "I found four" into "there were four".\n\n' +
-        'A rebuild makes the question irrelevant instead of answering it, which is why it is the ' +
-        'sound answer even though it is slower. Credential rotation is necessary alongside whatever ' +
-        'you choose, because anything readable by root while the attacker was present has to be ' +
-        'treated as theirs.',
+        'That reframing is what settles the decision. You found four persistence mechanisms, meaning ' +
+        'ways the attacker arranged to keep their access, on a host where somebody else held root, ' +
+        'full administrative control, for roughly ninety minutes, and in that time they could have ' +
+        'altered any program, background service, or shared code library on the machine. Removing the ' +
+        'four things you actually found does nothing at all about the ones you did not find, and no ' +
+        'amount of careful, patient checking turns "I found four" into a guarantee that "there were ' +
+        'only four".\n\n' +
+        'A REBUILD, replacing the machine entirely from a known-good starting image rather than ' +
+        'cleaning the existing one, makes that whole question irrelevant instead of trying to answer ' +
+        'it, which is exactly why it is the sound choice even though it takes longer. Rotating ' +
+        'credentials (changing every password and key) is necessary no matter which recovery route you ' +
+        'take, because anything readable by root while the attacker was present has to be treated as ' +
+        'though the attacker now has a copy of it too.',
       examples: [
         {
           command: 'Rebuild from known-good',
@@ -2166,10 +2402,12 @@ const MODULE_IR_8: Exercise[] = [
       },
     ],
     debrief:
-      'The restore-from-backup option is deliberately defensible rather than sound. It is a real ' +
-      'answer if you can show the backup predates first access, and the same timeline that lets you ' +
-      'argue that also says you cannot be certain 10:14 was the first login. Defensible with ' +
-      'evidence; dangerous as a reflex.',
+      'The restore-from-backup option is deliberately built to be defensible rather than genuinely ' +
+      'sound: a competent responder could reasonably reach for it, but it comes with a real cost. It ' +
+      'is a legitimate answer if you can actually show the backup predates the attacker\'s first ' +
+      'access, and the same timeline that lets you argue that point also warns that you cannot be ' +
+      'entirely certain 10:14 really was the first successful login. Defensible when backed by ' +
+      'evidence you can point to; dangerous when reached for as a reflex.',
     practice: [],
   },
   {
@@ -2185,18 +2423,24 @@ const MODULE_IR_8: Exercise[] = [
       'again? Select all that apply.',
     teach: {
       concept:
-        'A host restored to exactly the state it was in on the morning of the incident is a host ' +
-        'that can be compromised the same way this afternoon. Recovery is not "back to normal", it ' +
-        'is "back to better than it was", and the difference is a short list of specific changes ' +
-        'traceable to the root cause.\n\n' +
-        'Here the root cause was unlimited password attempts against an internet-facing service with ' +
-        'no alerting, reaching a stale account that should not have existed. So the list writes ' +
-        'itself: key-based authentication or rate limiting on SSH, an alert on repeated failure, ' +
-        'and the removal of accounts nobody can account for. Add monitoring you know works, because ' +
-        'the monitoring you had did not fire once all morning.\n\n' +
-        'What does not belong on the list is anything that is not traceable to how this happened. ' +
-        'Recovery is the moment when every unrelated project tries to attach itself to an incident, ' +
-        'and a hardening list nobody can finish delays the restoration for no security benefit.',
+        'A host restored to exactly the same state it was in on the morning of the incident is a host ' +
+        'that can be compromised the exact same way again this afternoon, by the same attacker or the ' +
+        'next one who finds the same weakness. Recovery is not "back to how it was before", it is ' +
+        '"back to better than it was", and the difference between the two is a short, specific list of ' +
+        'changes each one directly traceable to the root cause identified earlier.\n\n' +
+        'Here the root cause was unlimited password attempts against a service exposed to the ' +
+        'internet, with no alerting on any of them, eventually reaching a stale account that should ' +
+        'never have existed at all. So the hardening list practically writes itself: key-based ' +
+        'authentication or rate limiting on SSH (limiting how many login attempts are allowed in a ' +
+        'given time), an alert that actually fires on repeated failure, and the removal of accounts ' +
+        'nobody can account for the existence of. Add monitoring you know genuinely works, because the ' +
+        'monitoring already in place did not fire even once, all morning, while it was being tested by ' +
+        'real events.\n\n' +
+        'What does not belong on this list is anything not traceable to how this specific incident ' +
+        'actually happened. Recovery is the exact moment when every unrelated pet project in the ' +
+        'organisation tries to attach itself to the incident for funding and urgency, and a hardening ' +
+        'list nobody can realistically finish just delays the restoration of service for no additional ' +
+        'security benefit.',
     },
     options: [
       { id: 'a', label: 'SSH accepts keys only, or rate-limits and locks out repeated password failures.' },
@@ -2228,8 +2472,9 @@ const MODULE_IR_8: Exercise[] = [
       },
     ],
     debrief:
-      'Keep the recovery list short and causally connected. The fastest way to have none of it ' +
-      'implemented is to make it long enough that finishing it is somebody else problem.',
+      'Keep the recovery list short and causally connected to what actually happened. The fastest way ' +
+      'to end up with none of it ever implemented is to make the list so long that finishing it quietly ' +
+      'becomes somebody else\'s problem, indefinitely.',
     practice: [],
   },
   {
@@ -2245,19 +2490,21 @@ const MODULE_IR_8: Exercise[] = [
       'over the following days that the attacker no longer has access.',
     teach: {
       concept:
-        'Eradication is a claim, and like every other claim in this package it needs evidence rather ' +
-        'than confidence. The evidence is mostly the absence of specific things you decided to watch ' +
-        'for in advance, which only counts if you can show the watching was working.\n\n' +
-        'Three kinds of evidence matter. WATCHING FOR RETURN: alerting specifically on the indicators ' +
-        'from this incident, the account name, the key, the source, and on the behaviour, so a return ' +
-        'produces a signal rather than a silence. WATCHING THE ROUTE BACK IN: authentication ' +
-        'attempts against the rebuilt host, so a resumed brute force is visible on the first day ' +
-        'rather than the fortieth. And PROVING THE DETECTION WORKS: firing a test through it, because ' +
-        'the alerting that existed this morning was also silent and nobody had ever confirmed it ' +
-        'would not be.\n\n' +
-        'Give it a defined period and a defined end. "We watched for a while and nothing happened" is ' +
-        'not a finding; "no indicator from this incident appeared over thirty days, on detection ' +
-        'we verified was firing" is.',
+        '"Eradicated" is a claim, and exactly like every other claim in this package, it needs actual ' +
+        'evidence behind it rather than simple confidence. The evidence for it is mostly the absence of ' +
+        'specific things you deliberately decided to watch for in advance, and that absence only counts ' +
+        'as real evidence if you can independently show the watching itself was actually working.\n\n' +
+        'Three kinds of evidence matter here. WATCHING FOR RETURN: alerting specifically on the ' +
+        'indicators pulled from this incident, the account name, the key, the source address, and the ' +
+        'behavioural pattern, so that a return produces a clear signal rather than passing by in ' +
+        'silence. WATCHING THE ROUTE BACK IN: monitoring authentication attempts against the rebuilt ' +
+        'host closely, so that a resumed brute force is visible on the very first day rather than the ' +
+        'fortieth. And PROVING THE DETECTION ACTUALLY WORKS: deliberately firing a test event through ' +
+        'it, because the alerting in place this morning was also completely silent through an hour of ' +
+        'real failures, and nobody had ever actually confirmed beforehand that it would not be.\n\n' +
+        'Give the whole exercise a defined period and a defined end. "We watched for a while and ' +
+        'nothing happened" is not a finding worth writing down; "no indicator from this incident ' +
+        'appeared over thirty days, on detection we had specifically verified was firing" is.',
     },
     hints: [
       'Absence only counts as evidence if you can show you were actually looking.',
@@ -2291,8 +2538,10 @@ const MODULE_IR_8: Exercise[] = [
       },
     ],
     debrief:
-      'The middle one is the one teams skip. An untested alert and no alert produce identical output ' +
-      'on a quiet network, and you cannot tell them apart until the day it matters.',
+      'The middle piece, actually testing that the detection fires, is the one teams skip most often. ' +
+      'An untested alert and no alert at all produce exactly identical output on a quiet network, ' +
+      'silence either way, and you cannot tell the two apart until the one day it actually matters and ' +
+      'the silence turns out to mean the wrong thing.',
     practice: [],
   },
   {
@@ -2308,16 +2557,21 @@ const MODULE_IR_8: Exercise[] = [
       '619 days. In three or four sentences, write that up as a post-incident finding.',
     teach: {
       concept:
-        'Somebody created that account, and somebody else did not remove it. Naming them achieves ' +
-        'nothing and costs you the next incident, because the analyst who watches a colleague blamed ' +
-        'for a mistake learns to raise things later and more quietly.\n\n' +
-        'The alternative is not pretending nothing went wrong. It is asking why the system made the ' +
-        'outcome likely: the account survived 619 days because nothing reviewed dormant accounts, ' +
-        'nothing flagged sudo rights on an account that had not logged in, and nothing expired ' +
-        'credentials that were never rotated. Those are three missing controls, and each one is ' +
-        'fixable in a way that "somebody should have noticed" is not.\n\n' +
-        'A good finding therefore states the condition, states the absent control that allowed it to ' +
-        'persist, and proposes something specific and mechanical, without naming an individual.',
+        'A BLAMELESS post-incident review is one that deliberately asks what allowed a mistake to ' +
+        'happen, rather than who made it. Somebody created that stale account, and somebody else did ' +
+        'not get around to removing it. Naming either of them in the finding achieves nothing useful ' +
+        'and quietly costs you the next incident, because the next analyst who watches a colleague get ' +
+        'blamed in writing for an honest mistake learns from that, and the lesson they learn is to ' +
+        'raise problems later, and more quietly, next time.\n\n' +
+        'The alternative to blame is not pretending nothing went wrong, it is asking why the SYSTEM ' +
+        'made that particular outcome likely in the first place. The account survived 619 days because ' +
+        'nothing ever reviewed dormant accounts, nothing ever flagged sudo rights sitting on an account ' +
+        'that had not logged in for months, and nothing ever forced credentials that were never ' +
+        'rotated to expire. Those are three specific missing controls, and each one is fixable in a way ' +
+        'that "somebody should have noticed" simply is not, because nobody was ever assigned to notice.' +
+        '\n\nA good finding therefore states the condition plainly, states the absent control that let ' +
+        'it persist unnoticed, and proposes something specific and mechanical to fix it, without ever ' +
+        'naming an individual.',
     },
     hints: [
       'Do not ask who. Ask what would have had to exist for this to be caught without anybody being vigilant.',
@@ -2351,9 +2605,10 @@ const MODULE_IR_8: Exercise[] = [
       },
     ],
     debrief:
-      'Read your answer back and check no person appears in it. If one does, the finding is about ' +
-      'them and it will be read as an accusation, which is both less useful and less true than the ' +
-      'version about the missing control.',
+      'Read your answer back and check that no specific person appears in it anywhere. If one does, ' +
+      'the finding becomes about them and will be read as an accusation, which is both less useful for ' +
+      'actually preventing a repeat and less true than the version that names the missing control ' +
+      'instead.',
     practice: [],
   },
   {
@@ -2369,17 +2624,24 @@ const MODULE_IR_8: Exercise[] = [
       'hand them over so that they are still real in three months.',
     teach: {
       concept:
-        'Almost every incident produces a good list of recommendations and almost none of them get ' +
-        'implemented, because the list is written by people with no budget, handed to people with no ' +
-        'context, at the exact moment everybody wants to stop thinking about it.\n\n' +
-        'Three things change that. AN OWNER PER ITEM, by name and role, and never the security team ' +
-        'for work the security team cannot do. A DATE, because an item with no date is a wish, and a ' +
-        'realistic one, because a list of dates nobody believes is worse than no dates. And ' +
-        'RUTHLESS PRIORITISATION: eleven recommendations will not happen, so name the two or three ' +
-        'that address the actual chain of this incident and mark the rest explicitly as accepted or ' +
-        'deferred, so their absence is a decision rather than a drift.\n\n' +
-        'Then track them somewhere that is reviewed, in the risk register or the normal engineering ' +
-        'backlog, not in the incident document. Incident documents get archived; backlogs get read.',
+        'Almost every incident produces a genuinely good list of recommendations at the end, and ' +
+        'almost none of the items on it actually get implemented, because the list is typically written ' +
+        'by people with no budget of their own, handed to people with no context on why it matters, at ' +
+        'the exact moment everybody in the room most wants to stop thinking about the incident and move ' +
+        'on.\n\n' +
+        'Three things reliably change that. AN OWNER PER ITEM, named by person and role specifically, ' +
+        'and never simply "the security team" for a piece of work the security team has no actual power ' +
+        'to do, such as changing infrastructure they do not control. A DATE, because a recommendation ' +
+        'with no date attached is really just a wish, and it needs to be a realistic date, because a ' +
+        'list of dates nobody actually believes is worse for credibility than having no dates at all. ' +
+        'And RUTHLESS PRIORITISATION: eleven recommendations are simply not all going to happen, so name ' +
+        'the two or three that address the actual chain of events in this incident, and mark the rest ' +
+        'explicitly as accepted or deliberately deferred, so their absence later is a recorded decision ' +
+        'rather than something that just quietly drifted away.\n\n' +
+        'Then track the surviving items somewhere that is genuinely reviewed on a schedule, the risk ' +
+        'register or the normal engineering backlog, rather than leaving them inside the incident ' +
+        'document itself. Incident documents get filed away and archived; backlogs get read, because ' +
+        'people are already looking at them every week for other reasons.',
     },
     hints: [
       'Eleven items will not get done. Which of them address the chain that actually happened?',
@@ -2413,8 +2675,9 @@ const MODULE_IR_8: Exercise[] = [
       },
     ],
     debrief:
-      'That is the end of the incident and the beginning of the next one not happening. The measure ' +
-      'of a response is not how well it was run, it is whether the same route works again in March.',
+      'That is the actual end of this incident, and the beginning of the next one simply not ' +
+      'happening. The true measure of an incident response is not how smoothly it was run on the day, ' +
+      'it is whether the exact same route into the system still works again the following March.',
     practice: [],
   },
 ];
