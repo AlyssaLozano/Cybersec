@@ -40,7 +40,9 @@ import type {
 } from '../lib/api';
 import { WatchFloor } from './WatchFloor';
 import { ReportPanel } from './ReportPanel';
+import { DoorOutside, RoomDoor } from './RoomDoor';
 import type { ReportablePerson } from './ReportPanel';
+import type { DoorView } from '../lib/api';
 
 interface Props {
   roomId: string;
@@ -70,6 +72,11 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
     { eventId: string; role: SocRoleId; dueAtSeconds: number; text: string }[]
   >([]);
   const [reporting, setReporting] = useState(false);
+  /*
+   * The door, carried on the same fetch as the seat chart so a knock appears
+   * on the floor without a second poll. Null until the first load.
+   */
+  const [door, setDoor] = useState<DoorView | null>(null);
 
   const mine: SocRoleId | null = useMemo(
     () =>
@@ -99,7 +106,9 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
 
   const loadChart = useCallback(async () => {
     try {
-      setDetail(await rooms.get(roomId, joinCode));
+      const next = await rooms.get(roomId, joinCode);
+      setDetail(next);
+      setDoor(next.door);
       setError(null);
     } catch (caught) {
       setError(caught instanceof ApiCallError ? caught.error.message : 'Could not load the room.');
@@ -107,6 +116,35 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
       setLoading(false);
     }
   }, [roomId, joinCode]);
+
+  /** Leave, keeping the chair. The floor sees the seat as away, not open. */
+  const stepOut = useCallback(async () => {
+    setBusy(true);
+    try {
+      const next = await rooms.stepOut(roomId);
+      setDoor(next.door);
+      await loadChart();
+    } catch (caught) {
+      setError(caught instanceof ApiCallError ? caught.error.message : 'Could not step out.');
+    } finally {
+      setBusy(false);
+    }
+  }, [roomId, loadChart]);
+
+  /** Come back. Refused while the shift runs until the room has admitted you. */
+  const stepIn = useCallback(async () => {
+    setBusy(true);
+    try {
+      const next = await rooms.stepIn(roomId);
+      setDoor(next.door);
+      await loadChart();
+      setError(null);
+    } catch (caught) {
+      setError(caught instanceof ApiCallError ? caught.error.message : 'Could not come back in.');
+    } finally {
+      setBusy(false);
+    }
+  }, [roomId, loadChart]);
 
   const loadBoard = useCallback(async () => {
     try {
@@ -292,7 +330,39 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
             <button type="button" className="quiet" onClick={() => setReporting(true)}>
               Report somebody
             </button>
+            {/*
+              Stepping out keeps the chair. Somebody who has to take a call in
+              the middle of an incident should not have to choose between the
+              call and their seat.
+            */}
+            {door?.mine.seated && !door.mine.steppedOut ? (
+              <button
+                type="button"
+                className="quiet"
+                disabled={busy}
+                onClick={() => void stepOut()}
+              >
+                Step out
+              </button>
+            ) : null}
+            {door?.mine.steppedOut ? (
+              <button
+                type="button"
+                className="primary"
+                disabled={busy}
+                onClick={() => void stepIn()}
+              >
+                Come back in
+              </button>
+            ) : null}
           </div>
+
+          {door ? (
+            <>
+              <RoomDoor roomId={roomId} door={door} onChanged={setDoor} />
+              <DoorOutside roomId={roomId} door={door} onChanged={setDoor} />
+            </>
+          ) : null}
 
           {reporting ? (
             <ReportPanel

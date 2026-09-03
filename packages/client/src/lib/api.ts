@@ -7,6 +7,7 @@
  */
 
 import type {
+  Knock,
   ProfileVisibility,
   PublicProfile,
   ReportReasonDefinition,
@@ -592,6 +593,26 @@ export interface RoomDetail {
     notes: string[];
   };
   identity: FloorIdentity | null;
+  door: DoorView;
+}
+
+/**
+ * The door of a running room, as one person sees it.
+ *
+ * `waiting` is the same list for everybody in the room, not just the lead. A
+ * knock only the lead can see is invisible while the lead is writing a
+ * readout, and the person outside cannot tell refusal from being forgotten.
+ */
+export interface DoorView {
+  shut: boolean;
+  canAdmit: boolean;
+  waiting: Knock[];
+  mine: {
+    seated: boolean;
+    steppedOut: boolean;
+    waiting: boolean;
+    admitted: boolean;
+  };
 }
 
 export interface RoomScenarioSummary {
@@ -622,6 +643,35 @@ export const rooms = {
     startsAt: string;
     visibility: RoomVisibility;
   }) => request<{ room: ClientRoom }>('/rooms', { method: 'POST', body: JSON.stringify(body) }),
+
+  /** Leave the room, keeping your chair. */
+  stepOut: (id: string) =>
+    request<{ room: ClientRoom; seating: SeatView[]; door: DoorView }>(`/rooms/${id}/step-out`, {
+      method: 'POST',
+    }),
+
+  /** Come back to a chair you stepped out of. Needs an admission if the shift runs. */
+  stepIn: (id: string) =>
+    request<{ room: ClientRoom; seating: SeatView[]; door: DoorView }>(`/rooms/${id}/step-in`, {
+      method: 'POST',
+    }),
+
+  /** Ask to be let into a running room. */
+  knock: (id: string) => request<{ door: DoorView }>(`/rooms/${id}/knock`, { method: 'POST' }),
+
+  /** Answer the door. Lead only, or anybody seated when the lead has stepped out. */
+  answerDoor: (id: string, subjectUserId: string, decision: 'admitted' | 'declined') =>
+    request<{ seating: SeatView[]; door: DoorView }>(`/rooms/${id}/door`, {
+      method: 'POST',
+      body: JSON.stringify({ userId: subjectUserId, decision }),
+    }),
+
+  /** Free a chair whose occupant is not coming back. */
+  releaseSeat: (id: string, role: SocRoleId) =>
+    request<Omit<RoomDetail, 'identity'>>(`/rooms/${id}/release-seat`, {
+      method: 'POST',
+      body: JSON.stringify({ role }),
+    }),
 
   takeSeat: (id: string, role: SocRoleId, code?: string | null) =>
     request<Omit<RoomDetail, 'identity'>>(`/rooms/${id}/seat`, {

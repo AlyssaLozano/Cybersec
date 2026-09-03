@@ -152,6 +152,57 @@ export interface SeatAssignment {
   role: SocRoleId;
   /** Null means the chair is open. The lead covers it with the stand-in script. */
   occupant: FloorIdentity | null;
+  /**
+   * Somebody stepped out and is expected back.
+   *
+   * The chair stays theirs. A person who leaves the room for four minutes in
+   * the middle of an incident should not come back to find a stranger holding
+   * their seat and their evidence, and a floor that works that way teaches
+   * people never to leave, which is worse than the gap it prevents.
+   *
+   * The lead can free a chair whose occupant is not coming back. That is a
+   * decision somebody makes, not a timer.
+   */
+  steppedOut?: boolean;
+}
+
+/**
+ * Somebody at the door of a running room.
+ *
+ * WHY A ROOM HAS A DOOR AT ALL
+ *
+ * Before the shift starts anybody may take a free chair, which is how a floor
+ * fills. Once it is running the room is holding a live incident: half-formed
+ * theories, a contested event, somebody's first attempt at a claim they are
+ * about to withdraw. Letting a stranger walk into that unannounced is a
+ * different thing from letting them join a queue, and the people already in
+ * the room are the ones who should decide.
+ *
+ * WHY EVERY SEAT SEES THE KNOCK
+ *
+ * Not just the lead. A knock that only the lead can see is invisible when the
+ * lead is deep in a readout, and the person outside has no way to tell whether
+ * they were refused or forgotten. Showing it to the whole floor also means the
+ * decision is made in front of everybody, which is the right shape for a
+ * decision about who is allowed in.
+ */
+export const KNOCK_STATUSES = ['waiting', 'admitted', 'declined'] as const;
+export type KnockStatus = (typeof KNOCK_STATUSES)[number];
+
+export interface Knock {
+  who: FloorIdentity;
+  /** ISO 8601. */
+  at: string;
+  status: KnockStatus;
+  /**
+   * True when this person held a seat in this room and stepped out.
+   *
+   * Shown on the door so the lead is answering a different question for a
+   * colleague coming back from a phone call than for somebody nobody knows.
+   */
+  returning: boolean;
+  /** Who answered, once somebody has. */
+  decidedByUserId?: string | null;
 }
 
 export interface RoomSession {
@@ -187,6 +238,35 @@ export interface RoomSession {
   readout?: LeadReadout | null;
   /** Seconds after startsAt that the lead closed it. */
   closedAtSeconds?: number | null;
+  /**
+   * People at the door, newest last. Cleared of nothing: a declined knock stays
+   * so the same person cannot quietly ask ten times and so the room can see
+   * what it decided.
+   */
+  knocks?: Knock[];
+}
+
+/**
+ * Who may answer the door.
+ *
+ * The lead, because admitting somebody to a running incident is the same kind
+ * of decision as adjudicating a contested event and belongs in the same chair.
+ *
+ * And anybody seated when the lead chair is empty or its occupant has stepped
+ * out, because the alternative is a room that cannot let a colleague back in
+ * because the one person who could is the person who went to find them. A
+ * fallback that requires the lead to be present is not a fallback.
+ */
+export function canAdmit(room: RoomSession, userId: string): boolean {
+  const lead = room.seats.find((s) => s.role === REQUIRED_SEAT);
+  const leadPresent = Boolean(lead?.occupant) && !lead?.steppedOut;
+  if (leadPresent) return lead!.occupant!.userId === userId;
+  return room.seats.some((s) => s.occupant?.userId === userId && !s.steppedOut);
+}
+
+/** Whether the door is shut. Open rooms have no door until they start. */
+export function doorIsShut(room: RoomSession): boolean {
+  return room.status === 'running';
 }
 
 /**

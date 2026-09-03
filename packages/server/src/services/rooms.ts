@@ -17,6 +17,7 @@
 import type {
   AvatarId,
   FloorIdentity,
+  Knock,
   RoomSession,
   RoomVisibility,
   ScenarioDifficulty,
@@ -26,7 +27,9 @@ import type {
 import {
   REQUIRED_SEAT,
   SEATING_OPENS_MINUTES_BEFORE,
+  canAdmit,
   checkCallSign,
+  doorIsShut,
   isAvatarId,
 } from '@soc/shared';
 
@@ -158,17 +161,41 @@ export function seatingFor(room: RoomSession, userId: string, now: Date): SeatVi
   const tooEarly = now < opensAt;
   const alreadySeated = room.seats.find((s) => s.occupant?.userId === userId)?.role ?? null;
 
+  /*
+   * Once the shift is running the room has a door. Somebody outside sees the
+   * whole chart, including which chairs are free, and cannot sit in one until
+   * the room lets them in. Showing the chart rather than a locked page is
+   * deliberate: a person at the door should be able to see what they are
+   * asking for, and the room should be able to see who is asking.
+   */
+  const shut = doorIsShut(room) && !hasBeenAdmitted(room, userId);
+
   return room.seats.map((seat) => {
     const mine = seat.occupant?.userId === userId;
     if (mine) {
-      return { role: seat.role, occupant: seat.occupant, selectable: false, blockedBecause: 'This is your seat.' };
+      return {
+        role: seat.role,
+        occupant: seat.occupant,
+        selectable: false,
+        blockedBecause: seat.steppedOut ? 'Your seat, held while you are out.' : 'This is your seat.',
+      };
     }
     if (seat.occupant) {
       return {
         role: seat.role,
         occupant: seat.occupant,
         selectable: false,
-        blockedBecause: `Taken by ${seat.occupant.callSign}.`,
+        blockedBecause: seat.steppedOut
+          ? `${seat.occupant.callSign} stepped out. The chair is theirs until the lead frees it.`
+          : `Taken by ${seat.occupant.callSign}.`,
+      };
+    }
+    if (shut) {
+      return {
+        role: seat.role,
+        occupant: null,
+        selectable: false,
+        blockedBecause: 'The shift is running. Knock, and somebody in the room will answer.',
       };
     }
     if (tooEarly) {
@@ -245,6 +272,135 @@ export function takeSeat(
  * adjudicate, cover empty chairs, or close. It has to be handed to somebody,
  * not vacated.
  */
+/**
+ * Step out, keeping the chair.
+ *
+ * The lead may step out like anybody else. A lead who has to hand the chair
+ * over to answer the phone will simply not answer the phone, and a room whose
+ * lead cannot leave for four minutes is not modelling anything real. While
+ * they are out the door falls to the rest of the floor, which is what
+ * `canAdmit` does.
+ */
+export function stepOut(room: RoomSession, userId: string): RoomSession {
+  const seat = room.seats.find((s) => s.occupant?.userId === userId);
+  if (!seat) throw new RoomError('You are not in a seat.');
+  if (seat.steppedOut) return room;
+  return {
+    ...room,
+    seats: room.seats.map((s) => (s.role === seat.role ? { ...s, steppedOut: true } : s)),
+  };
+}
+
+/**
+ * Come back to a chair you stepped out of.
+ *
+ * Refused while the shift is running unless the room has admitted them, which
+ * is the whole point of the door. Before it starts, walking back in is free.
+ */
+export function stepBackIn(room: RoomSession, userId: string): RoomSession {
+  const seat = room.seats.find((s) => s.occupant?.userId === userId);
+  if (!seat) throw new RoomError('You are not holding a seat in this room.');
+  if (!seat.steppedOut) return room;
+
+  if (doorIsShut(room) && !hasBeenAdmitted(room, userId)) {
+    throw new RoomError('The shift is running. Knock, and somebody in the room will let you in.');
+  }
+
+  return {
+    ...room,
+    seats: room.seats.map((s) => (s.role === seat.role ? { ...s, steppedOut: false } : s)),
+    knocks: (room.knocks ?? []).filter((k) => k.who.userId !== userId),
+  };
+}
+
+/** Whether a standing admission exists for this person. */
+export function hasBeenAdmitted(room: RoomSession, userId: string): boolean {
+  const mine = (room.knocks ?? []).filter((k) => k.who.userId === userId);
+  return mine.length > 0 && mine[mine.length - 1]!.status === 'admitted';
+}
+
+/** Whether this person is already waiting at the door. */
+export function isWaiting(room: RoomSession, userId: string): boolean {
+  const mine = (room.knocks ?? []).filter((k) => k.who.userId === userId);
+  return mine.length > 0 && mine[mine.length - 1]!.status === 'waiting';
+}
+
+/**
+ * Ask to be let in.
+ *
+ * A second knock from somebody already waiting changes nothing rather than
+ * erroring, because the person outside cannot see whether the first one landed
+ * and will press it again. A knock after a refusal is allowed and replaces the
+ * refusal, because circumstances change and the room can decline twice.
+ */
+export function knock(room: RoomSession, identity: FloorIdentity, now: Date): RoomSession {
+  if (!doorIsShut(room)) throw new RoomError('This room has not started. Take a seat.');
+  if (isWaiting(room, identity.userId)) return room;
+  if (hasBeenAdmitted(room, identity.userId)) return room;
+
+  const seat = room.seats.find((s) => s.occupant?.userId === identity.userId);
+  const entry: Knock = {
+    who: identity,
+    at: now.toISOString(),
+    status: 'waiting',
+    returning: Boolean(seat?.steppedOut),
+    decidedByUserId: null,
+  };
+  return { ...room, knocks: [...(room.knocks ?? []), entry] };
+}
+
+/**
+ * Answer the door.
+ *
+ * The permission check is `canAdmit` and lives in @soc/shared beside the rule
+ * it enforces, so a route cannot decide for itself who counts as the lead.
+ */
+export function answerDoor(
+  room: RoomSession,
+  deciderUserId: string,
+  subjectUserId: string,
+  decision: 'admitted' | 'declined',
+): RoomSession {
+  if (!canAdmit(room, deciderUserId)) {
+    throw new RoomError(
+      'Only the lead can let somebody in while the shift is running. If the lead has stepped out, anybody seated can.',
+    );
+  }
+  const waiting = (room.knocks ?? []).some(
+    (k) => k.who.userId === subjectUserId && k.status === 'waiting',
+  );
+  if (!waiting) throw new RoomError('Nobody by that name is at the door.');
+
+  return {
+    ...room,
+    knocks: (room.knocks ?? []).map((k) =>
+      k.who.userId === subjectUserId && k.status === 'waiting'
+        ? { ...k, status: decision, decidedByUserId: deciderUserId }
+        : k,
+    ),
+  };
+}
+
+/**
+ * Free a chair whose occupant is not coming back.
+ *
+ * Deliberately a decision somebody makes rather than a timer. A chair released
+ * automatically after ten minutes is released during the ten minutes somebody
+ * spent on the phone with a supplier about this incident.
+ */
+export function releaseSeat(room: RoomSession, deciderUserId: string, role: SocRoleId): RoomSession {
+  if (!canAdmit(room, deciderUserId)) {
+    throw new RoomError('Only the lead can free a chair, or anybody seated if the lead has stepped out.');
+  }
+  const seat = room.seats.find((s) => s.role === role);
+  if (!seat?.occupant) throw new RoomError('That chair is already open.');
+  if (!seat.steppedOut) throw new RoomError('They are still in the room. Ask them.');
+  return {
+    ...room,
+    seats: room.seats.map((s) => (s.role === role ? { ...s, occupant: null, steppedOut: false } : s)),
+  };
+}
+
 export function leaveSeat(room: RoomSession, userId: string): RoomSession {
   const seat = room.seats.find((s) => s.occupant?.userId === userId);
   if (!seat) throw new RoomError('You are not in a seat.');
@@ -255,7 +411,9 @@ export function leaveSeat(room: RoomSession, userId: string): RoomSession {
   }
   return {
     ...room,
-    seats: room.seats.map((s) => (s.role === seat.role ? { ...s, occupant: null } : s)),
+    seats: room.seats.map((s) =>
+      s.role === seat.role ? { ...s, occupant: null, steppedOut: false } : s,
+    ),
   };
 }
 

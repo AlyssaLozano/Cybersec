@@ -28,6 +28,8 @@ import {
   ROOM_VISIBILITIES,
   SCENARIO_DIFFICULTIES,
   SOC_ROLE_IDS,
+  canAdmit,
+  doorIsShut,
 } from '@soc/shared';
 import type { SocRoleId } from '@soc/shared';
 
@@ -38,11 +40,18 @@ import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
 import { requireCanEnter } from './guards.js';
 import {
   RoomError,
+  answerDoor,
   canJoin,
   handOverLead,
+  hasBeenAdmitted,
+  isWaiting,
+  knock,
   leaveSeat,
   readiness,
+  releaseSeat,
   seatingFor,
+  stepBackIn,
+  stepOut,
 } from '../services/rooms.js';
 import { takeSeat } from '../services/rooms.js';
 import {
@@ -248,7 +257,146 @@ roomsRouter.get(
       seating: seatingFor(room, userId, now),
       readiness: readiness(room, requiredSeatsOf(room.scenarioId)),
       identity: await getIdentity(userId),
+      door: doorFor(room, userId),
     });
+  }),
+);
+
+/**
+ * The door, as this person sees it.
+ *
+ * Everybody in the room gets the same list of who is waiting, on purpose. A
+ * knock only the lead can see is invisible while the lead is writing a readout,
+ * and the person outside cannot tell refusal from being forgotten.
+ */
+function doorFor(room: Awaited<ReturnType<typeof getRoom>> & object, userId: string) {
+  const seat = room.seats.find((s) => s.occupant?.userId === userId);
+  return {
+    shut: doorIsShut(room),
+    /** Whether this viewer may answer it. See canAdmit for who that is. */
+    canAdmit: canAdmit(room, userId),
+    /** Everybody still outside. Decided knocks are kept but not displayed here. */
+    waiting: (room.knocks ?? []).filter((k) => k.status === 'waiting'),
+    /** This viewer's own standing at the door, so the outside can render itself. */
+    mine: {
+      seated: Boolean(seat),
+      steppedOut: Boolean(seat?.steppedOut),
+      waiting: isWaiting(room, userId),
+      admitted: hasBeenAdmitted(room, userId),
+    },
+  };
+}
+
+/* -- the door -----------------------------------------------------------
+ *
+ * Leaving and coming back. Before the shift starts none of this is needed:
+ * anybody may take a free chair and walk away from it. Once it is running the
+ * room holds a live incident and the people in it decide who joins.
+ */
+
+roomsRouter.post(
+  '/:id/step-out',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const room = await getRoom(request.params.id!);
+    if (!room) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such room.');
+    const now = new Date();
+    try {
+      const next = await persistRoom(stepOut(room, userId));
+      sendOk(response, {
+        room: toClientRoom(next, userId, titleOf(next.scenarioId)),
+        seating: seatingFor(next, userId, now),
+        door: doorFor(next, userId),
+      });
+    } catch (error) {
+      asHttp(error);
+    }
+  }),
+);
+
+roomsRouter.post(
+  '/:id/step-in',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const room = await getRoom(request.params.id!);
+    if (!room) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such room.');
+    const now = new Date();
+    try {
+      const next = await persistRoom(stepBackIn(room, userId));
+      sendOk(response, {
+        room: toClientRoom(next, userId, titleOf(next.scenarioId)),
+        seating: seatingFor(next, userId, now),
+        door: doorFor(next, userId),
+      });
+    } catch (error) {
+      asHttp(error);
+    }
+  }),
+);
+
+roomsRouter.post(
+  '/:id/knock',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const room = await getRoom(request.params.id!);
+    if (!room) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such room.');
+    const identity = await requireIdentity(userId);
+    try {
+      const next = await persistRoom(knock(room, identity, new Date()));
+      sendOk(response, { door: doorFor(next, userId) }, 201);
+    } catch (error) {
+      asHttp(error);
+    }
+  }),
+);
+
+const doorBody = z.object({
+  userId: z.string().min(1),
+  decision: z.enum(['admitted', 'declined']),
+});
+
+roomsRouter.post(
+  '/:id/door',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const body = doorBody.parse(request.body);
+    const room = await getRoom(request.params.id!);
+    if (!room) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such room.');
+    const now = new Date();
+    try {
+      const next = await persistRoom(answerDoor(room, userId, body.userId, body.decision));
+      sendOk(response, {
+        seating: seatingFor(next, userId, now),
+        door: doorFor(next, userId),
+      });
+    } catch (error) {
+      asHttp(error);
+    }
+  }),
+);
+
+const releaseBody = z.object({ role: z.enum(SOC_ROLE_IDS) });
+
+/** Free a chair whose occupant is not coming back. A decision, never a timer. */
+roomsRouter.post(
+  '/:id/release-seat',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const body = releaseBody.parse(request.body);
+    const room = await getRoom(request.params.id!);
+    if (!room) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such room.');
+    const now = new Date();
+    try {
+      const next = await persistRoom(releaseSeat(room, userId, body.role as SocRoleId));
+      sendOk(response, {
+        room: toClientRoom(next, userId, titleOf(next.scenarioId)),
+        seating: seatingFor(next, userId, now),
+        readiness: readiness(next, requiredSeatsOf(next.scenarioId)),
+        door: doorFor(next, userId),
+      });
+    } catch (error) {
+      asHttp(error);
+    }
   }),
 );
 

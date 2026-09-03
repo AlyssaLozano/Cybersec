@@ -24,6 +24,7 @@
 
 import { AVATARS, checkCallSign, isAvatarId } from '@soc/shared';
 import type {
+  Knock,
   LeadReadout,
   AvatarId,
   FloorIdentity,
@@ -58,6 +59,7 @@ interface RoomRow {
   status: string;
   hostUserId: string;
   seatsJson: string;
+  knocksJson: string;
   readoutJson: string | null;
   closedAtSeconds: number | null;
 }
@@ -73,6 +75,7 @@ function rowToRoom(row: RoomRow): RoomSession {
     status: row.status as RoomSession['status'],
     hostUserId: row.hostUserId,
     seats: JSON.parse(row.seatsJson) as SeatAssignment[],
+    knocks: JSON.parse(row.knocksJson ?? '[]') as Knock[],
     readout: row.readoutJson ? (JSON.parse(row.readoutJson) as LeadReadout) : null,
     closedAtSeconds: row.closedAtSeconds,
   };
@@ -174,6 +177,7 @@ export async function persistRoom(room: RoomSession): Promise<RoomSession> {
       status: room.status,
       joinCode: room.joinCode,
       seatsJson: JSON.stringify(room.seats),
+      knocksJson: JSON.stringify(room.knocks ?? []),
       /*
        * Written once and never rewritten. The readout is what the lead said
        * before seeing the answer key, so an update path that could overwrite it

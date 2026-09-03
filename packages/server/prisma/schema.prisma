@@ -29,10 +29,6 @@ model User {
   createdAt    DateTime  @default(now())
   lastLoginAt  DateTime?
 
-  /// How the floor addresses this person over the microphone. Nullable because
-  /// it is chosen when somebody first takes a seat rather than at signup: the
-  /// learning platform never needs it, and asking for one during registration
-  /// is a question about a product the person has not seen yet.
   /// The profile somebody builds as they work. Every field optional and
   /// every field empty by default: a profile is something people fill in
   /// when they have a reason to, not a form standing between them and the
@@ -63,6 +59,10 @@ model User {
   /// permanent and still not the learning platform.
   roomsBanned         Boolean   @default(false)
 
+  /// How the floor addresses this person over the microphone. Nullable because
+  /// it is chosen when somebody first takes a seat rather than at signup: the
+  /// learning platform never needs it, and asking for one during registration
+  /// is a question about a product the person has not seen yet.
   callSign String? @unique
   /// See AVATARS in @soc/shared. Plain string, not an enum, for Postgres
   /// portability.
@@ -402,6 +402,11 @@ model RoomSession {
   /// never queried across rooms, so a table would buy nothing and cost a join
   /// on every seat change.
   seatsJson       String
+  /// Knock[] as JSON. Same reasoning as seatsJson: read and written as one
+  /// unit with the room, never queried across rooms. A declined knock is kept
+  /// rather than deleted, so the room can see what it decided and the same
+  /// person cannot quietly ask ten times.
+  knocksJson      String   @default("[]")
   /// LeadReadout as JSON, written once when the lead closes the shift. Null
   /// until then. Stored rather than rebuilt because it is what the lead said
   /// BEFORE seeing the answer key, and the whole value of the review is
