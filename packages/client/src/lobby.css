@@ -834,9 +834,19 @@
   pointer-events: none;
 }
 
-/* A sealed doorway casts nothing, which is most of how it reads as sealed. */
-.bay--sealed .bay__arch::after {
-  opacity: 0.12;
+/*
+ * A room that is not built yet is LIT.
+ *
+ * It used to be drawn dark and unlit, and that was a mistake: down a corridor
+ * an unlit doorway does not read as "coming later", it reads as a hole in the
+ * wall, or as something broken. Risk and AI Security are real parts of this
+ * product that people are waiting for, and a lit doorway with "opening soon"
+ * under it says so. The only thing that marks it out is a slower turn, as if
+ * whatever is behind it is idling rather than running.
+ */
+.bay--sealed .bay__mouth::after {
+  animation-duration: 34s;
+  opacity: 0.5;
 }
 
 /* The field inside the ring: dark, lit from within, with something turning. */
@@ -908,32 +918,36 @@
   opacity: 1;
 }
 
-/* A sealed doorway is visibly the same doorway, unlit. */
-.bay--sealed .bay__mouth {
-  background: radial-gradient(circle at 50% 42%, #0b131c 0%, #070c13 70%);
+/*
+ * The chip on a room that is not open reads "soon", or "waiting" once somebody
+ * has joined its queue.
+ *
+ * It appears on hover like every other chip rather than sitting there
+ * permanently. Pinned open it covered most of the ring it was labelling, which
+ * defeated the point of lighting these doorways in the first place. What the
+ * room is and how many people are waiting for it is already written underneath,
+ * where there is room for it.
+ */
+.bay--sealed .bay__label {
+  background: rgba(8, 13, 20, 0.88);
+  color: var(--p1);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--p1) 45%, transparent);
+}
+
+/* Somebody is in the queue for this one. Their own doorway burns brighter. */
+.bay--marked .bay__label {
+  background: color-mix(in srgb, var(--p1) 88%, #fff);
+  color: #05090e;
   box-shadow: none;
 }
 
-.bay--sealed .bay__mouth::after {
-  animation: none;
-  opacity: 0.06;
+.bay--marked .bay__mouth::after {
+  animation-duration: 12s;
+  opacity: 0.85;
 }
 
-.bay--sealed .bay__rim {
-  box-shadow:
-    0 0 0 2px rgba(140, 160, 180, 0.35),
-    0 0 0 4px rgba(90, 110, 130, 0.28);
-}
-
-.bay--sealed .bay__arch {
-  filter: none;
-  cursor: default;
-}
-
-.bay--sealed .bay__label {
-  opacity: 0.7;
-  background: rgba(8, 13, 20, 0.85);
-  color: var(--text-faint);
+.bay--marked .bay__arch {
+  filter: drop-shadow(0 0 34px color-mix(in srgb, var(--p1) 55%, transparent));
 }
 
 @keyframes portal-churn {

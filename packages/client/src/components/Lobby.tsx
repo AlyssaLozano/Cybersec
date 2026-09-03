@@ -294,6 +294,7 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
       <Hall
         view={view}
         me={identity}
+        headingFor={headingFor}
         onHeadFor={setHeadingFor}
         onSocFloor={() => {
           walkedThrough.current = true;
@@ -374,6 +375,7 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
 function Hall({
   view,
   me,
+  headingFor,
   onHeadFor,
   onSocFloor,
   onRedBlue,
@@ -382,6 +384,8 @@ function Hall({
 }: {
   view: LobbyView | null;
   me: FloorIdentity;
+  /** The door this viewer is heading for or waiting on, if any. */
+  headingFor: LobbyDoorId | null;
   onHeadFor: (door: LobbyDoorId | null) => void;
   onSocFloor: () => void;
   onRedBlue: () => void;
@@ -405,6 +409,17 @@ function Hall({
     const door = view.doors.find((entry) => entry.id === id);
     if (!door) return null;
     const open = door.state === 'open' && go !== undefined;
+    const waiting = headingFor === id;
+
+    /*
+     * A doorway that is not built yet is still a doorway you press.
+     *
+     * It is drawn lit, and a lit door that does nothing when clicked is worse
+     * than a dark one. Pressing it puts you in the queue for that room and
+     * pressing it again takes you out, so the count underneath becomes the one
+     * number worth having about a room that does not exist yet: how many people
+     * are waiting for it.
+     */
     return (
       <Portal
         slot={slot}
@@ -412,8 +427,17 @@ function Hall({
         title={door.title}
         blurb={door.blurb}
         dormant={!open}
-        footnote={door.heading === 0 ? 'nobody heading here' : `${door.heading} heading here`}
-        onEnter={open ? walkThrough(id, go) : undefined}
+        marked={!open && waiting}
+        footnote={
+          open
+            ? door.heading === 0
+              ? 'nobody heading here'
+              : `${door.heading} heading here`
+            : door.heading === 0
+              ? 'opening soon'
+              : `opening soon · ${door.heading} waiting`
+        }
+        onEnter={open ? walkThrough(id, go) : () => onHeadFor(waiting ? null : id)}
       />
     );
   };
@@ -509,6 +533,7 @@ function Portal({
   blurb,
   footnote,
   dormant = false,
+  marked = false,
   onEnter,
 }: {
   slot: BaySlot;
@@ -517,20 +542,31 @@ function Portal({
   blurb: string;
   footnote: string;
   dormant?: boolean;
+  /** Set when this viewer is in the queue for a room that is not open yet. */
+  marked?: boolean;
   onEnter?: () => void;
 }) {
   return (
-    <div className={`bay bay--${slot} bay--${accent}${dormant ? ' bay--sealed' : ''}`}>
+    <div
+      className={`bay bay--${slot} bay--${accent}${dormant ? ' bay--sealed' : ''}${
+        marked ? ' bay--marked' : ''
+      }`}
+    >
       <button
         type="button"
         className="bay__arch"
         onClick={onEnter}
         disabled={!onEnter}
-        aria-label={dormant ? `${title}, not open yet` : `Enter ${title}`}
+        aria-pressed={dormant ? marked : undefined}
+        aria-label={
+          dormant
+            ? `${title}, not open yet. ${marked ? 'You are waiting for it.' : 'Wait for it.'}`
+            : `Enter ${title}`
+        }
       >
         <span className="bay__mouth" aria-hidden="true" />
         <span className="bay__rim" aria-hidden="true" />
-        <span className="bay__label">{dormant ? 'sealed' : 'enter'}</span>
+        <span className="bay__label">{dormant ? (marked ? 'waiting' : 'soon') : 'enter'}</span>
       </button>
 
       <div className="bay__plate">
