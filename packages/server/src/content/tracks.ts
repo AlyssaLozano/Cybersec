@@ -331,6 +331,7 @@ export const TRACKS: Track[] = [
     roles: ['IAM Analyst', 'Identity Engineer', 'Access Management Specialist', 'IGA Analyst'],
     foundations: ['identity-fundamentals', 'windows', 'cloud-fundamentals', 'crypto-basics'],
     curriculum: [
+      { title: 'Identity and Access Foundations', summary: 'The whole discipline: factors and phishing-resistant MFA, single sign-on and sessions, permission models, the joiner-mover-leaver process, privileged access, and reviews that produce decisions.', packageId: 'identity-foundations' },
       { title: 'Authentication Flows in Practice', summary: 'What SAML and OIDC actually do on the wire, using Keycloak.', plannedExercises: 18 },
       { title: 'Lifecycle and Governance', summary: 'Joiner-mover-leaver, access reviews, and why orphaned accounts cause breaches.', plannedExercises: 16 },
       { title: 'Privileged Access', summary: 'Standing privilege is the problem; just-in-time access is the answer.', plannedExercises: 14 },
@@ -346,7 +347,7 @@ export const TRACKS: Track[] = [
         note: 'Federal identity work involves PIV and CAC smartcards and ICAM policy, which is a specialised and well-paid niche.',
       },
     ],
-    status: 'planned',
+    status: 'available',
     workRhythm: 'Business hours, ticket-driven, with predictable peaks around joiner and leaver cycles and audit season.',
     entryDifficulty: 'accessible',
   },

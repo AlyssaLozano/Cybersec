@@ -41,6 +41,12 @@ interface PackageBadgeArt {
 }
 
 const PACKAGE_ART: Record<string, PackageBadgeArt> = {
+  'identity-foundations': {
+    title: 'Keyholder',
+    citation: 'Learned who should be able to do what, and how access quietly accumulates.',
+    emblem: 'key',
+    accent: 'indigo',
+  },
   'ot-security-foundations': {
     title: 'Plant Floor',
     citation: 'Learned to secure a process that cannot be paused, patched, or scanned.',

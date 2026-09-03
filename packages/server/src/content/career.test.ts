@@ -188,10 +188,13 @@ describe('foundations are per-track, not universal', () => {
     expect(soc.indexOf('linux-fundamentals')).toBeLessThan(soc.indexOf('log-analysis'));
     expect(soc.indexOf('log-analysis')).toBeLessThan(soc.indexOf('incident-triage'));
 
-    // Identity is the remaining route with nothing built behind it at all:
-    // Privacy and the other risk-adjacent tracks now resolve to the risk
-    // package, so they no longer serve as the empty case.
-    expect(trackPackages('identity')).toEqual([]);
+    /*
+     * The empty case used to be a real track with nothing behind it. Every
+     * track now has playable content, so an unknown id is what is left to
+     * assert on, and it is the more durable assertion anyway: resolving a
+     * track that does not exist must return nothing rather than throwing.
+     */
+    expect(trackPackages('no-such-track')).toEqual([]);
   });
 });
 
