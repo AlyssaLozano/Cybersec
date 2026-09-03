@@ -28,10 +28,14 @@ export function id(argv: string[], ctx: ExecContext): CommandResult {
   const groups = (ctx.vfs.stat('/etc/group')?.content ?? '')
     .split('\n')
     .filter((line) => line.split(':')[3]?.split(',').includes(target!))
-    .map((line) => line.split(':')[0])
-    .filter(Boolean);
+    .map((line) => ({ name: line.split(':')[0], gid: line.split(':')[2] }))
+    .filter((group) => Boolean(group.name));
 
-  const extra = groups.length > 0 ? ',' + groups.map((g) => `27(${g})`).join(',') : '';
+  // The gid comes out of /etc/group like the name does. It used to be hardcoded
+  // to 27, which was invisible while `adm` was the only supplementary group and
+  // wrong the moment a second one existed.
+  const extra =
+    groups.length > 0 ? ',' + groups.map((g) => `${g.gid}(${g.name})`).join(',') : '';
   return ok(`uid=${uid}(${name}) gid=${gid}(${name}) groups=${gid}(${name})${extra}\n`);
 }
 

@@ -39,6 +39,7 @@
  */
 
 import type { LearningPackage } from '@soc/shared';
+import { AISP_HANDS_ON } from './ai-security-pathway-handson.js';
 
 // --- shared teaching material ------------------------------------------------
 
@@ -943,6 +944,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
             'cost rather than compliance. Everything is cheap before the run.',
           practice: [],
         },
+        ...(AISP_HANDS_ON['aisp.3'] ?? []),
       ],
     },
     {
@@ -2893,6 +2895,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
             'property that makes a posture durable against a technique nobody has published yet.',
           practice: [],
         },
+        ...(AISP_HANDS_ON['aisp.10'] ?? []),
       ],
     },
     {
@@ -3153,6 +3156,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
             'refused. The apparatus can grow once it has something true to grow from.',
           practice: [],
         },
+        ...(AISP_HANDS_ON['aisp.11'] ?? []),
       ],
     },
     {

@@ -11,7 +11,14 @@
  */
 
 import { daysAgo, onAugust15, WORLD_NOW } from './clock.js';
-import { AUTH_LOG, CAPTURE, SYSLOG } from './data/generated.js';
+import {
+  AUTH_LOG,
+  CAPTURE,
+  ML_CORPUS,
+  ML_INFERENCE_LOG,
+  ML_REGISTRY,
+  SYSLOG,
+} from './data/generated.js';
 import type { BaseImage, VNode } from './types.js';
 
 const HOME = '/home/student';
@@ -113,6 +120,7 @@ rchen:x:1003:
 testuser:x:1004:
 svc-backup:x:1500:
 sysmon:x:1501:
+mlops:x:1600:student,dokafor
 `;
 
 // Present so that reading it fails with the permission error a real box gives.
@@ -338,6 +346,42 @@ export function buildBaseImage(): BaseImage {
   b.file('/var/log/dpkg.log', DPKG_LOG, { mtime: onAugust15(8, 22, 47) });
   b.file('/var/log/wtmp', '(binary login records)\n', { size: 41_472, mtime: onAugust15(11, 31) });
   b.file('/var/log/lastlog', '(binary)\n', { size: 292_876, mtime: onAugust15(11, 5) });
+  // --- /srv/ml and the assistant's own logs -----------------------------------
+  //
+  // The training corpus is group-readable by `mlops` rather than world-readable,
+  // which is the point of the data-security module: a student in `adm` can read
+  // every system log on the host and still cannot read the data a model was
+  // trained on, because those are different questions with different answers.
+  //
+  // The student account is in mlops, so the exercises work. That membership is
+  // itself the finding in one of them.
+  b.dir('/srv/ml');
+  b.dir('/srv/ml/corpus');
+  b.file('/srv/ml/corpus/tickets.csv', ML_CORPUS, {
+    owner: 'root',
+    group: 'mlops',
+    mode: 0o640,
+    mtime: daysAgo(9),
+  });
+  b.file('/srv/ml/registry.csv', ML_REGISTRY, {
+    owner: 'root',
+    group: 'mlops',
+    mode: 0o644,
+    mtime: daysAgo(3),
+  });
+  // The assistant logs inside its own tree rather than in /var/log, and that is
+  // a deliberate constraint rather than a preference: several Linux Fundamentals
+  // drills count the files under /var/log, so anything added there silently
+  // changes an answer key in a package that has nothing to do with this one.
+  // Self-contained services log this way often enough for it to be honest.
+  b.dir('/srv/ml/logs');
+  b.file('/srv/ml/logs/inference.log', ML_INFERENCE_LOG, {
+    owner: 'root',
+    group: 'mlops',
+    mode: 0o640,
+    mtime: onAugust15(11, 44),
+  });
+
   // --- /etc/suricata ---------------------------------------------------------
   //
   // The vendor ruleset is world-readable and the local one is where a student

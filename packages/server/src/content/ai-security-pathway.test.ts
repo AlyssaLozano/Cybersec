@@ -5,9 +5,10 @@
  *
  * `catalogue.test.ts` runs every TERMINAL exercise's stated solution through the
  * real shell and asserts its own checks pass, because an exercise whose worked
- * answer fails its own grader is a trap. This package contains no terminal
- * exercises at all: every one of its 52 exercises is a multiple-choice or
- * short-answer judgement, so none of them is covered by that file.
+ * answer fails its own grader is a trap. This package was originally all
+ * multiple-choice and short-answer judgement, so none of it was covered by that
+ * file; the hands-on exercises added to aisp.3, aisp.10 and aisp.11 now are,
+ * and are covered again in more depth by ai-security-pathway-handson.test.ts
  *
  * The same guarantee is therefore built here. Every multiple-choice exercise is
  * checked to be answerable and non-trivial (selecting nothing and selecting
@@ -54,9 +55,9 @@ describe('the AI Security Pathway is registered and sized as claimed', () => {
     expect(PACKAGES.map((pkg) => pkg.id)).toContain('ai-security-pathway');
   });
 
-  it('has 52 exercises across 12 modules', () => {
+  it('has 60 exercises across 12 modules', () => {
     expect(AI_SECURITY_PATHWAY.modules).toHaveLength(12);
-    expect(EXERCISES).toHaveLength(52);
+    expect(EXERCISES).toHaveLength(60);
   });
 
   it('uses name-prefixed ids, so a future package cannot collide with these', () => {
@@ -83,9 +84,38 @@ describe('the AI Security Pathway is registered and sized as claimed', () => {
     }
   });
 
-  it('grades judgement only, so nothing here needs the terminal or the lab', () => {
+  it('grades judgement and work, not judgement alone', () => {
+    // This assertion used to read "grades judgement only, so nothing here needs
+    // the terminal or the lab", and it was enforcing a real decision rather than
+    // describing an accident.
+    //
+    // The decision was wrong. A pathway that can describe poisoning, extraction
+    // and injection and never let anybody find one is a syllabus, and a student
+    // could finish all 52 exercises without once seeing what a poisoned corpus
+    // looks like on disk. The terminal exercises added to aisp.3, aisp.10 and
+    // aisp.11 run against a training corpus, an inference log and a model
+    // registry seeded for exactly that purpose.
+    //
+    // What the original decision was right about is that most of this package IS
+    // judgement, and that is still true and still enforced below: the hands-on
+    // work is a minority, and no module is only terminal work.
     for (const exercise of EXERCISES) {
-      expect(['multiple-choice', 'short-answer']).toContain(exercise.kind);
+      expect(['multiple-choice', 'short-answer', 'terminal']).toContain(exercise.kind);
+    }
+
+    const terminal = EXERCISES.filter((exercise) => exercise.kind === 'terminal');
+    expect(terminal.length).toBeGreaterThan(0);
+    expect(terminal.length).toBeLessThan(EXERCISES.length / 2);
+
+    for (const module of AI_SECURITY_PATHWAY.modules) {
+      const written = module.exercises.filter((exercise) => exercise.kind !== 'terminal');
+      expect(written.length, `${module.id} is only hands-on work`).toBeGreaterThan(0);
+    }
+  });
+
+  it('gives every hands-on exercise the full five drills', () => {
+    for (const exercise of EXERCISES.filter((item) => item.kind === 'terminal')) {
+      expect(exercise.practice.length, exercise.id).toBe(5);
     }
   });
 });
