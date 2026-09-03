@@ -131,6 +131,12 @@ export const TRACKS: Track[] = [
       { title: 'Memory Forensics', summary: 'Find what only ever existed in RAM, using Volatility.', plannedExercises: 16 },
       { title: 'Malware Analysis', summary: 'What a suspicious file does and how the answer becomes a detection: methodology, disassembly, runtime analysis, packing, families, command and control, and the report.', packageId: 'malware-analysis' },
       { title: 'Full Investigation', summary: 'Run a multi-host intrusion end to end and write the report.', plannedExercises: 12 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real project against a lab you actually compromised or investigated, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['sec-plus', 'gcih', 'btl1', 'gcfa'],
     sectorNotes: [
@@ -168,6 +174,12 @@ export const TRACKS: Track[] = [
       { title: 'Correlation and Behavioural Detection', summary: 'Rules that need several events to mean anything, baselines that separate an odd-but-normal user from a compromised one, and one ATT&CK technique covered across every way it shows up.', plannedExercises: 16 },
       { title: 'Detection Engineering in Practice', summary: 'Find the gap a real incident walked through, cut a rule firing 500 times a day down to something a SOC can work, and build coverage for a named threat actor.', plannedExercises: 16 },
       { title: 'Detection at Scale', summary: 'Version, test, and retire a hundred rules without chaos, and answer "what can we not detect?" honestly enough to put in front of an executive.', plannedExercises: 10 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real detection project against real or synthetic logs, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['sec-plus', 'cysa-plus', 'sc-200', 'gcih'],
     sectorNotes: [
@@ -199,6 +211,12 @@ export const TRACKS: Track[] = [
       { title: 'Intelligence Tradecraft', summary: 'Source reliability, analytic confidence, and avoiding your own bias.', plannedExercises: 16 },
       { title: 'Adversary Tracking', summary: 'Cluster activity, map it to ATT&CK, and attribute carefully.', plannedExercises: 18 },
       { title: 'Writing Finished Intelligence', summary: 'Produce assessments that change a decision instead of listing indicators.', plannedExercises: 12 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real intelligence product from public sources, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['sec-plus', 'btl1', 'gcih'],
     sectorNotes: [
@@ -229,6 +247,12 @@ export const TRACKS: Track[] = [
       { title: 'Enumeration and Exploitation', summary: 'Find the way in, methodically, against a lab network.', plannedExercises: 24 },
       { title: 'Post-Exploitation and Privilege Escalation', summary: 'Turn a foothold into meaningful access.', plannedExercises: 20 },
       { title: 'Reporting', summary: 'Write the report. This is what clients pay for, and it is the part most testers do badly.', plannedExercises: 10 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real project against a lab you attacked yourself, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['sec-plus', 'ejpt', 'pentest-plus', 'oscp', 'osep'],
     sectorNotes: [
@@ -262,6 +286,12 @@ export const TRACKS: Track[] = [
       { title: 'Secure Code Review', summary: 'Read real code and find the flaw before it ships.', plannedExercises: 18 },
       { title: 'Threat Modelling a Design', summary: 'Catch the problem at the whiteboard, when it is cheap to fix.', plannedExercises: 14 },
       { title: 'Working With Developers', summary: 'Land a finding without becoming the person engineering routes around.', plannedExercises: 10 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real project against code you reviewed or wrote yourself, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['sec-plus', 'pentest-plus'],
     sectorNotes: [
@@ -290,6 +320,12 @@ export const TRACKS: Track[] = [
       { title: 'Scanning and Asset Discovery', summary: 'You cannot protect what you do not know exists.', plannedExercises: 16 },
       { title: 'Prioritisation That Survives Scrutiny', summary: 'Move beyond the CVSS score to exploitability and real exposure.', plannedExercises: 16 },
       { title: 'Remediation and Reporting', summary: 'Get things actually fixed by people who do not report to you.', plannedExercises: 12 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real project against a network or dataset you scanned yourself, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['sec-plus', 'cysa-plus'],
     sectorNotes: [
@@ -319,6 +355,12 @@ export const TRACKS: Track[] = [
       { title: 'Cloud Identity and Permissions', summary: 'IAM is the new perimeter, and over-permissioning is the most common real finding.', plannedExercises: 20 },
       { title: 'Posture and Misconfiguration', summary: 'Audit an account with Prowler and ScoutSuite, then judge what matters.', plannedExercises: 18 },
       { title: 'Cloud Logging and Detection', summary: 'CloudTrail, activity logs, and what an attacker looks like in them.', plannedExercises: 16 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real project against a cloud account you actually control, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['az-900', 'sec-plus', 'az-500', 'aws-security', 'ccsp'],
     sectorNotes: [
@@ -387,6 +429,12 @@ export const TRACKS: Track[] = [
       { title: 'Hardening and Baselines', summary: 'CIS benchmarks applied to real systems, and what breaks when you do.', plannedExercises: 18 },
       { title: 'Network Segmentation', summary: 'Design boundaries that contain an incident instead of decorating a diagram.', plannedExercises: 16 },
       { title: 'Building the Logging Pipeline', summary: 'Get the right telemetry to the right place at a cost somebody will approve.', plannedExercises: 16 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real project on infrastructure you actually hardened or built, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['sec-plus', 'cysa-plus', 'az-500', 'cissp'],
     status: 'available',
@@ -408,6 +456,12 @@ export const TRACKS: Track[] = [
       { title: 'How OT Differs From IT', summary: 'Availability outranks confidentiality, and you cannot patch a turbine on Tuesday.', plannedExercises: 16 },
       { title: 'Industrial Protocols', summary: 'Modbus, DNP3, and what normal traffic looks like on a plant network.', plannedExercises: 16 },
       { title: 'Segmentation and Safety', summary: 'The Purdue model, and security that never compromises a safety system.', plannedExercises: 14 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real project against a simulated plant floor you actually stood up, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['sec-plus', 'gicsp'],
     sectorNotes: [
@@ -439,6 +493,12 @@ export const TRACKS: Track[] = [
     curriculum: [
       { title: 'Risk Management and AI Governance', summary: 'The whole assessment: vocabulary, assets, threat modelling, scoring, controls, continuity, compliance, budget, and the brief that gets a decision. AI risk throughout.', packageId: 'risk-governance-pathway' },
       { title: 'Policy and Third-Party Risk', summary: 'Write a workable policy and assess a vendor without rubber-stamping them.', plannedExercises: 14 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real assessment or policy for a real or realistic organisation, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['sec-plus', 'crisc', 'cisa', 'cism'],
     sectorNotes: [
@@ -471,6 +531,12 @@ export const TRACKS: Track[] = [
       { title: 'Evidence and Sampling', summary: 'Gather proof that withstands a sceptical reviewer.', plannedExercises: 16 },
       { title: 'Testing Controls', summary: 'Design and execute a control test, and document it properly.', plannedExercises: 16 },
       { title: 'Audit Reporting', summary: 'Write findings that land, with ratings you can defend.', plannedExercises: 12 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real audit or control-testing project, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['cisa', 'sec-plus', 'crisc', 'cgrc'],
     sectorNotes: [
@@ -502,6 +568,12 @@ export const TRACKS: Track[] = [
       { title: 'Data Mapping', summary: 'Find out what you actually hold, which is almost never what anyone believes.', plannedExercises: 14 },
       { title: 'Privacy Impact Assessments', summary: 'Assess a new system before it processes anybody\'s data.', plannedExercises: 14 },
       { title: 'Breach Response and Notification', summary: 'The legal clock, and who has to be told what, by when.', plannedExercises: 12 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real privacy assessment or breach-response playbook, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['cipp-us', 'sec-plus'],
     sectorNotes: [
@@ -533,6 +605,12 @@ export const TRACKS: Track[] = [
       { title: 'Why Training Fails', summary: 'Most awareness programmes measure completion, not behaviour change.', plannedExercises: 12 },
       { title: 'Phishing Simulation Done Properly', summary: 'Run a programme that teaches instead of humiliating people.', plannedExercises: 12 },
       { title: 'Measuring Human Risk', summary: 'Metrics that reflect real behaviour rather than click rates.', plannedExercises: 12 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real awareness or training project, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['sec-plus'],
     sectorNotes: [
