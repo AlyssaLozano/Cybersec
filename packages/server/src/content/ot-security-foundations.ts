@@ -42,56 +42,104 @@ import type { Exercise, LearningPackage } from '@soc/shared';
 
 const PRIORITY_TEACH = {
   concept:
-    'IT security is usually taught with confidentiality first: keep the data secret, keep it ' +
-    'correct, keep it available, in that order. On a plant floor the order inverts almost ' +
-    'completely, and everything else in this package follows from that inversion.\n\n' +
+    'Start with what security work actually balances. Almost every decision in this field weighs ' +
+    'three things, often shortened to CIA: CONFIDENTIALITY, keeping information secret so only the ' +
+    'right people can see it; INTEGRITY, keeping information correct so nobody can quietly change ' +
+    'it without being noticed; and AVAILABILITY, keeping a system working so the people who need it ' +
+    'can actually use it. A bank vault shows all three at once: confidentiality is the combination ' +
+    'staying secret, integrity is nobody swapping the gold for painted lead without anyone ' +
+    'noticing, and availability is the door actually opening when the bank needs to pay someone ' +
+    'out. In an ordinary office IT environment, security is usually taught with confidentiality ' +
+    'first: keep the data secret, keep it correct, keep it available, in that order, because a ' +
+    'stolen customer database or a leaked email is treated as the worst thing that can happen.\n\n' +
+    'On a plant floor, meaning anywhere physical equipment such as pumps, valves, furnaces, or ' +
+    'conveyor belts is actually making or moving something real rather than just handling ' +
+    'information on a screen, that order inverts almost completely, and everything else in this ' +
+    'package follows from that inversion.\n\n' +
     'SAFETY comes first, and it is not one of the three: it sits above them. A control that could ' +
     'contribute to somebody being hurt is not a control, whatever it protects. AVAILABILITY comes ' +
     'next, because the process is producing something and stopping it has a cost measured in ' +
     'thousands per minute, or in a city without water. INTEGRITY comes next, because a sensor ' +
     'reading that is wrong is worse than one that is missing: an operator who knows a gauge is ' +
-    'dead will go and look, and one who trusts a false reading will act on it. CONFIDENTIALITY ' +
-    'comes last, and often barely matters, because the set point of a pump is not a secret.\n\n' +
-    'A security professional who arrives on a plant and applies the IT ordering will recommend ' +
-    'things that get them politely ignored, and will deserve it.',
+    'dead will go and look at the equipment directly, and one who trusts a false reading will act ' +
+    'on it as though it were true. CONFIDENTIALITY comes last, and often barely matters, because ' +
+    'the set point of a pump is not a secret worth protecting the way a customer\'s credit card ' +
+    'number is.\n\n' +
+    'A security professional who arrives on a plant and applies the IT ordering, treating a leaked ' +
+    'file as more urgent than a process that could stop or misbehave, will recommend things that ' +
+    'get them politely ignored, and will deserve it. Getting this ordering right on day one is the ' +
+    'single fastest way to be taken seriously by people who have been running the plant for years.',
 } as const;
 
 const ASSET_TEACH = {
   concept:
-    'The equipment has names worth knowing before you talk to anybody who works with it, because ' +
-    'using them correctly is most of what earns you a second conversation.\n\n' +
-    'A PLC, a programmable logic controller, is a small ruggedised computer that reads sensors and ' +
-    'drives actuators on a fixed cycle. It is the thing actually running the process. An HMI, the ' +
-    'human machine interface, is the screen an operator watches and touches: it displays the ' +
-    'process and sends commands, and it is usually an ordinary Windows box, which makes it the ' +
-    'most familiar and most attacked thing on the floor.\n\n' +
-    'SCADA is the supervisory layer that gathers from many controllers across a site or a region ' +
-    'and presents them together. A HISTORIAN is the database of process values over time, and it ' +
-    'is often the one system with a legitimate reason to talk to both the plant network and the ' +
-    'business network, which makes it interesting in both directions. And a SAFETY INSTRUMENTED ' +
-    'SYSTEM is a separate, independent controller whose only job is to bring the process to a safe ' +
-    'state when limits are exceeded. It is deliberately not the same equipment as the control ' +
-    'system, and that separation is the whole point of it.',
+    'An industrial site, a factory, a water plant, a refinery, a power station, runs on a stack of ' +
+    'equipment layered from the physical machinery up to the people watching screens, and each ' +
+    'layer has its own name because the job at that layer is genuinely different, the same way a ' +
+    'hospital has distinct job titles for the surgeon, the nurse, and the administrator even though ' +
+    'all three work at the same building. Learning these names before you talk to anybody who works ' +
+    'with the equipment is most of what earns you a second conversation, because getting them wrong ' +
+    'marks you instantly as someone who has never been on a plant floor.\n\n' +
+    'A PLC, a programmable logic controller, is a small ruggedised computer, built to survive heat, ' +
+    'vibration and dust that would kill an office PC, that reads sensors and drives actuators on a ' +
+    'fixed cycle. Think of it as a factory foreman who never sleeps and never improvises: it checks ' +
+    'a handful of readings hundreds of times a second and instantly opens a valve, starts a motor, ' +
+    'or trips an alarm, based on rules it was given in advance. It has no monitor and no keyboard ' +
+    'for a person to use; it just runs read, decide, act, forever. It is the thing actually running ' +
+    'the process, physically, in real time.\n\n' +
+    'An HMI, the human machine interface, is the screen an operator watches and touches, the ' +
+    'closest thing to a car dashboard but for an entire plant: it displays what the process is ' +
+    'doing and lets a person send commands to it. It is usually an ordinary Windows machine running ' +
+    'special display software, which makes it the most familiar and most attacked thing on the ' +
+    'floor, because anybody who has used a Windows PC already half-knows how to use one.\n\n' +
+    'SCADA (supervisory control and data acquisition) is the layer above all of that: software that ' +
+    'gathers information from many controllers across a whole site or even a whole region and ' +
+    'presents them together, the way an airport\'s central board pulls together the status of every ' +
+    'gate rather than showing you just one. A HISTORIAN is a database that records those process ' +
+    'values over time instead of only showing the current moment, and it is often the one system ' +
+    'with a legitimate reason to talk to both the plant network and the ordinary business network, ' +
+    'which makes it interesting in both directions: useful to the business, and a tempting bridge ' +
+    'for an attacker. And a SAFETY INSTRUMENTED SYSTEM is a separate, independent controller whose ' +
+    'only job is to bring the process to a safe state, closing a valve, tripping a burner, when ' +
+    'limits are exceeded. It is deliberately not the same equipment as the control system, built by ' +
+    'a different team and often a different vendor, and that separation is the whole point of it: ' +
+    'if the thing driving the process fails, the thing meant to catch that failure must not fail ' +
+    'the same way at the same time.',
 } as const;
 
 const PURDUE_TEACH = {
   concept:
-    'The Purdue model is the reference architecture everybody in this field argues about and ' +
-    'everybody uses. It describes a plant as levels: level 0 is the physical process, the sensors ' +
-    'and actuators; level 1 is the controllers, the PLCs; level 2 is supervisory control, the HMIs ' +
-    'and SCADA for one area; level 3 is site-wide operations, including the historian and ' +
-    'engineering workstations; and levels 4 and 5 are the business network and the enterprise, ' +
-    'which is ordinary IT.\n\n' +
-    'Between level 3 and level 4 sits the industrial DMZ, and it is the most important boundary in ' +
-    'the model. Everything the business needs from the plant should be served from there rather ' +
-    'than by reaching down into it, so that a compromise of the corporate network has somewhere to ' +
-    'stop.\n\n' +
-    'Two honest caveats. Real plants are messier than the model: engineering laptops span levels, ' +
-    'vendors dial in, and wireless sensors appear at level 0 with their own radio. And cloud ' +
-    'connectivity has made the neat hierarchy harder to defend, because a level 1 device with a ' +
-    'cellular modem has skipped every boundary you drew. Use the model to describe where things ' +
-    'SHOULD sit and to name what is out of place, rather than as a description of what you will ' +
-    'find.',
+    'A "reference architecture" is just a standardised way of drawing which system talks to which, ' +
+    'so people at different companies who have never met can point at the same diagram and mean ' +
+    'the same thing by it, the way a set of house blueprints uses the same symbols everywhere for a ' +
+    'door or a window even though no two houses are identical. The Purdue model is the reference ' +
+    'architecture for industrial sites: the one everybody in this field argues about and everybody ' +
+    'still uses, because having a shared vocabulary matters more than any single diagram being ' +
+    'perfectly accurate.\n\n' +
+    'It describes a plant as a stack of levels, numbered from the physical world upward. Level 0 is ' +
+    'the physical process itself, the sensors and actuators, the actual valves and motors and ' +
+    'gauges. Level 1 is the controllers, the PLCs, sitting right next to that equipment and driving ' +
+    'it directly. Level 2 is supervisory control, the HMIs and SCADA for one area, where a person ' +
+    'watches and adjusts what a group of controllers is doing. Level 3 is site-wide operations, ' +
+    'including the historian and engineering workstations, where the whole plant is managed as one ' +
+    'thing. And levels 4 and 5 are the business network and the wider enterprise, which is ordinary ' +
+    'office IT: email, payroll, the corporate file servers, nothing that touches physical ' +
+    'equipment.\n\n' +
+    'Between level 3 and level 4 sits the industrial DMZ (demilitarised zone, a term borrowed from ' +
+    'military language for a buffer strip nobody occupies), and it is the most important boundary ' +
+    'in the model. Everything the business needs from the plant should be served from a system ' +
+    'sitting in that buffer zone rather than by reaching down into the plant itself, so that a ' +
+    'compromise of the ordinary corporate network, which happens to companies constantly through ' +
+    'phishing emails and the like, has somewhere to stop before it reaches equipment that can hurt ' +
+    'someone.\n\n' +
+    'Two honest caveats, because the nuance here is what separates somebody who has only read about ' +
+    'the model from somebody who has used it. Real plants are messier than the model: engineering ' +
+    'laptops span levels, vendors dial in from outside entirely, and wireless sensors appear at ' +
+    'level 0 with their own radio link that answers to nobody\'s diagram. And cloud connectivity has ' +
+    'made the neat hierarchy harder to defend, because a level 1 device with its own cellular modem ' +
+    'has skipped every boundary you drew, talking straight to the internet from the factory floor. ' +
+    'Use the model to describe where things SHOULD sit and to name what is out of place, rather ' +
+    'than as a prediction of what you will actually find when you walk the site.',
 } as const;
 
 // --- Module ots.1: what makes OT different -----------------------------------
@@ -158,19 +206,35 @@ const MODULE_OTS_1: Exercise[] = [
       'of the following are legitimate reasons? Select all that apply.',
     teach: {
       concept:
-        'Patching is the clearest case where an IT reflex meets a plant reality, and the plant is ' +
-        'usually right.\n\n' +
-        'Four constraints bind. UPTIME: the process runs continuously, and stopping it may take ' +
-        'hours to restart safely and cost a fortune, so changes wait for a planned outage that ' +
-        'might be twice a year. VENDOR APPROVAL: the control system is often certified as a whole, ' +
-        'and applying an operating system patch the vendor has not validated can void support or ' +
-        'a safety certification, which is not a paperwork problem but a liability one. AGE: a ' +
-        'twenty-year service life is normal, so a lot of equipment runs software that has no ' +
-        'patches and no vendor. And TESTING: nobody applies an untested change to a system that ' +
-        'moves physical mass, and the test rig may not exist.\n\n' +
-        'What follows is not that you give up. It is that the answer is COMPENSATING CONTROLS: ' +
-        'segmentation, allowlisting, monitoring, and strict control of what connects. That is the ' +
-        'actual job here, and it is more interesting than patching.',
+        '"Patching" means installing a small update that fixes a known flaw in a piece of ' +
+        'software, the same idea as a manufacturer recall notice for a car: something was found ' +
+        'wrong, and the fix gets applied to every unit that has the problem. In an ordinary office, ' +
+        'patching runs on autopilot: a laptop restarts overnight and updates itself, and if ' +
+        'something goes wrong, IT reimages it the next morning and nobody outside the IT department ' +
+        'notices. Patching is the clearest case where that IT reflex meets a plant reality, and the ' +
+        'plant is usually right to refuse it.\n\n' +
+        'Four constraints bind, and each one is a genuine, physical or contractual limit rather ' +
+        'than stubbornness. UPTIME: the process runs continuously, day and night, and stopping it ' +
+        'to apply an update may take hours to restart safely afterward and cost a fortune in lost ' +
+        'production, so changes wait for a planned outage that might happen only twice a year. ' +
+        'VENDOR APPROVAL: the control system is often certified as a whole by its manufacturer, ' +
+        'meaning the vendor has tested and guaranteed that exact combination of software works ' +
+        'safely together, and applying an operating system patch the vendor has not validated can ' +
+        'void that support or even a safety certification, which is not a paperwork inconvenience ' +
+        'but a liability one: if something later goes wrong, the plant can no longer point to the ' +
+        'vendor\'s guarantee. AGE: a twenty-year service life is normal for industrial equipment, so ' +
+        'a lot of it runs software so old that no patches exist for it any more and the company ' +
+        'that made it may no longer exist either. And TESTING: nobody applies an untested change to ' +
+        'a system that moves physical mass, real liquid through real pipes, and the spare equipment ' +
+        'needed to test a patch safely offline may not exist at all.\n\n' +
+        'What follows is not that you give up on security here. It is that the answer becomes ' +
+        'COMPENSATING CONTROLS: other protections put around a system that cannot itself be ' +
+        'changed, such as segmentation (physically or logically separating networks so an attacker ' +
+        'who reaches one part cannot reach another), allowlisting (permitting only a known, ' +
+        'approved list of things to run or connect, and blocking everything else by default), ' +
+        'monitoring, and strict control of what is allowed to connect. That is the actual job here, ' +
+        'and it is more interesting than patching, because it asks you to think about the whole ' +
+        'system rather than just running an update.',
     },
     options: [
       { id: 'a', label: 'The process runs continuously and a restart may take hours and cost a great deal.' },
@@ -218,20 +282,34 @@ const MODULE_OTS_1: Exercise[] = [
       'applying standard IT tooling? Select all that apply.',
     teach: {
       concept:
-        'The tools you would reach for without thinking in IT can stop a physical process, and ' +
-        'this is not folklore. Older controllers have small network stacks with very little margin, ' +
-        'and behaviour that a server shrugs off can put one into a fault state.\n\n' +
-        'ACTIVE SCANNING is the main offender. A port scan, or a vulnerability scanner probing a ' +
-        'protocol it does not understand, has knocked PLCs offline in documented cases: the device ' +
-        'is not attacked so much as overwhelmed, and a controller that faults may stop the process ' +
-        'it was driving. AGENTS are the second: an endpoint agent on an HMI can consume resources ' +
-        'the vendor allocated to the control application, and is frequently prohibited by the ' +
-        'support contract anyway.\n\n' +
-        'The alternative is PASSIVE monitoring: a span or tap port copying traffic to a collector ' +
-        'that never transmits. You get an asset inventory and protocol visibility without sending a ' +
-        'single packet into the process network, which is why passive tooling dominates this ' +
-        'market. Where active checks are genuinely needed, they happen in a maintenance window, ' +
-        'with the engineer present, on equipment somebody is watching.',
+        'A "network scan" is a routine IT technique where a tool sends messages to every device on ' +
+        'a network in turn, asking each one "are you there, and what are you running", so you can ' +
+        'build a list of what exists. On an office network of laptops and servers, this is so safe ' +
+        'it barely counts as risky: modern computers field thousands of stray messages a day and do ' +
+        'not notice. The tools you would reach for without thinking in IT, scanning and installing ' +
+        'small monitoring programs called agents, can stop a physical process on a plant floor, and ' +
+        'this is not folklore or an exaggerated warning: it has documented, repeated real-world ' +
+        'consequences. Older controllers have small "network stacks", meaning the software inside ' +
+        'them that handles incoming messages, with very little spare capacity, and behaviour a ' +
+        'server shrugs off without noticing can push one into a FAULT STATE, an error condition the ' +
+        'device cannot recover from on its own.\n\n' +
+        'ACTIVE SCANNING is the main offender. A port scan, which probes a device to see which of ' +
+        'its communication channels are open, or a vulnerability scanner probing a protocol it does ' +
+        'not understand, has knocked PLCs offline in documented cases: the device is not attacked ' +
+        'so much as simply overwhelmed by traffic it was never designed to field, and a controller ' +
+        'that faults may stop the entire process it was driving. AGENTS are the second offender: an ' +
+        'endpoint agent (a small background program IT security teams normally install on every ' +
+        'computer to watch for threats) running on an HMI can consume computing resources the ' +
+        'vendor allocated specifically to the control application, and is frequently prohibited by ' +
+        'the equipment\'s support contract anyway.\n\n' +
+        'The alternative is PASSIVE monitoring: a span or tap port, a piece of network hardware that ' +
+        'silently copies traffic to a separate collector without ever sending anything of its own, ' +
+        'the network equivalent of a security camera that only records and never touches anything. ' +
+        'You get an asset inventory and protocol visibility without sending a single packet into ' +
+        'the process network, which is why passive tooling dominates this market. Where active ' +
+        'checks are genuinely needed, they happen in a maintenance window (a scheduled period when ' +
+        'the process is deliberately paused for work like this), with the engineer present, on ' +
+        'equipment somebody is watching closely enough to catch trouble immediately.',
     },
     options: [
       { id: 'a', label: 'Active port or vulnerability scanning has taken PLCs offline, by overwhelming small network stacks.' },
@@ -280,15 +358,25 @@ const MODULE_OTS_1: Exercise[] = [
       'missing.',
     teach: {
       concept:
-        'You will spend a lot of this career translating, and this is the conversation you will ' +
-        'have most often. The colleague is not stupid and is not wrong about their own domain; they ' +
-        'are applying reasonable rules to a system with different physics.\n\n' +
-        'Three ideas land. The CONSEQUENCE is physical: the failure mode of this system is not lost ' +
-        'data, it is a process stopping or moving when it should not, which can hurt somebody. The ' +
-        'CONSTRAINTS are real and external: vendor validation, safety certification, and outage ' +
-        'windows are not preferences the site could waive if it felt like it. And there IS an ' +
-        'answer, which is compensating controls, so the conversation ends somewhere useful rather ' +
-        'than in a standoff.\n\n' +
+        'This exercise asks for a written answer rather than a multiple-choice one, because the ' +
+        'skill being tested is putting an explanation into your own words, the way you would ' +
+        'actually say it out loud to a colleague. You will spend a lot of this career translating ' +
+        'between two groups who each think the other is being unreasonable, and this exact ' +
+        'conversation, IT wanting to patch and monitor the way it always has, the plant refusing, is ' +
+        'the one you will have most often. The colleague is not stupid and is not wrong about their ' +
+        'own domain; they are applying reasonable rules, built for a world where the worst outcome ' +
+        'is a leaked file, to a system with different physics, where the worst outcome is a person ' +
+        'getting hurt.\n\n' +
+        'Three ideas land in an answer like this. The CONSEQUENCE is physical: the failure mode of ' +
+        'this system, meaning what actually goes wrong when something fails, is not lost data, it ' +
+        'is a process stopping or moving when it should not, which can hurt somebody. The ' +
+        'CONSTRAINTS are real and external, not preferences the site could waive if it simply ' +
+        'agreed to be more cooperative: vendor validation (the manufacturer certifying that a ' +
+        'specific software configuration is safe), safety certification, and outage windows are ' +
+        'facts about how the equipment and its support contracts work, not attitudes. And there IS ' +
+        'an answer, which is compensating controls (protections put around equipment that cannot ' +
+        'itself be changed), so the conversation ends somewhere useful rather than in a standoff ' +
+        'where nobody moves.\n\n' +
         'What does not land is arguing about who is more security-minded. A good answer explains ' +
         'the physical consequence, names at least one hard external constraint, and offers the ' +
         'compensating-control route rather than simply defending the refusal.',
@@ -342,19 +430,28 @@ const MODULE_OTS_1: Exercise[] = [
       'the following are accurate about what you bring? Select all that apply.',
     teach: {
       concept:
-        'Most security fields want you to have done security first. This one frequently does not, ' +
-        'and the reason is that the scarce skill is understanding the process rather than ' +
-        'understanding the attack.\n\n' +
+        'Most security fields expect you to have worked in security before they will hire you: ' +
+        'come from a help desk, then a security operations centre, and work up. This field ' +
+        'frequently does not, and the reason is that the scarce skill here is understanding the ' +
+        'physical process rather than understanding the attack. Security techniques can be taught ' +
+        'from a book; twenty years of knowing how a particular plant actually behaves cannot.\n\n' +
         'What an industrial background gives you is not replaceable by study. You know what the ' +
-        'equipment does and what happens when it stops. You can read a P&ID or a wiring diagram. ' +
-        'You know how a maintenance window is negotiated and who actually has to sign it. And you ' +
-        'have credibility with operators and engineers, who have usually met several security ' +
-        'people and were not impressed by any of them.\n\n' +
-        'What you have to add is genuinely learnable: how attacks work, how networks are ' +
-        'segmented, what a detection is, and the vocabulary to talk to the IT security function ' +
-        'without being dismissed. That direction of travel is much faster than the other one, which ' +
-        'is why the field hires this way, and it is worth knowing when you are deciding whether you ' +
-        'are qualified enough to apply.',
+        'equipment does and what happens physically when it stops. You can read a P&ID (a piping ' +
+        'and instrumentation diagram, the detailed technical drawing showing every pipe, valve and ' +
+        'sensor in a process) or a wiring diagram, which to somebody without that training is just ' +
+        'a page of symbols. You know how a maintenance window, the scheduled pause when changes are ' +
+        'allowed, is actually negotiated, and who has the authority to sign off on one. And you have ' +
+        'credibility with operators and engineers, who have usually met several security people ' +
+        'before and were not impressed by any of them, because those people did not understand what ' +
+        'they were asking for.\n\n' +
+        'What you have to add on top of that is genuinely learnable from a course like this one: how ' +
+        'attacks work, how networks are segmented (divided into separate zones so a problem in one ' +
+        'does not spread to another), what a detection is (an alert that fires when something ' +
+        'suspicious happens), and the vocabulary to talk to the IT security function without being ' +
+        'dismissed as somebody who does not know the field. That direction of travel, from plant ' +
+        'knowledge toward security knowledge, is much faster than the reverse, which is why the ' +
+        'field hires this way, and it is worth knowing when you are deciding whether you are ' +
+        'qualified enough to apply for a role like this.',
     },
     options: [
       { id: 'a', label: 'Knowing what the equipment does and what happens when it stops is the scarce half.' },
@@ -448,19 +545,28 @@ const MODULE_OTS_2: Exercise[] = [
       'accurate about it? Select all that apply.',
     teach: {
       concept:
-        'If you protect one machine on a plant properly, protect this one. The engineering ' +
-        'workstation holds the software that writes logic to controllers, and whoever controls it ' +
-        'can change what the process does rather than merely watching it.\n\n' +
+        'An "engineering workstation" is a laptop or desktop computer loaded with the manufacturer\'s ' +
+        'programming software, the tool used to write and upload the actual logic, the rules a PLC ' +
+        'follows, onto the controller. Where an HMI only watches the process and sends it ordinary ' +
+        'commands within limits somebody already set, the engineering workstation can rewrite those ' +
+        'limits and rules themselves. If you protect one machine on a plant properly, protect this ' +
+        'one, because whoever controls it can change what the process does rather than merely ' +
+        'watching it.\n\n' +
         'Three things make it uniquely exposed. It is INHERENTLY TRUSTED by the controllers: the ' +
-        'protocols involved usually have no authentication, so a controller does what the ' +
-        'workstation tells it because it cannot tell who is asking. It is often MOBILE, carried ' +
-        'between sites, connected to hotel wifi, and used for email; a laptop that lives on the ' +
-        'plant network and also visits the internet is the bridge everybody said did not exist. ' +
-        'And it HOLDS THE PROJECT FILES, which are a complete description of the process and are ' +
-        'exactly what somebody planning a targeted attack needs.\n\n' +
+        'protocols involved (the shared "languages" devices use to talk to each other) usually have ' +
+        'no authentication, meaning no way to check who is asking, so a controller does what the ' +
+        'workstation tells it simply because it has no way to ask "prove you are allowed to give me ' +
+        'this instruction." It is often MOBILE, carried between sites, connected to hotel wifi on a ' +
+        'business trip, and used for ordinary email; a laptop that lives on the sealed plant network ' +
+        'and also visits the open internet is exactly the bridge between the two worlds that a ' +
+        'well-segmented site claims does not exist. And it HOLDS THE PROJECT FILES, the complete ' +
+        'saved description of how the process is programmed to behave, which is exactly what ' +
+        'somebody planning a targeted attack would need in order to design one that does specific, ' +
+        'deliberate damage rather than just causing random chaos.\n\n' +
         'This is not theoretical. Compromise of engineering workstations is a recurring feature of ' +
-        'real ICS intrusions, because it is the shortest path from ordinary IT access to changing ' +
-        'physical behaviour.',
+        'real ICS (industrial control system) intrusions that have actually happened, because it is ' +
+        'the shortest path from ordinary IT access, the kind any company can suffer through a ' +
+        'phishing email, to changing physical behaviour on the plant floor.',
     },
     options: [
       { id: 'a', label: 'Controllers generally accept its instructions without authentication, because the protocols have none.' },
@@ -506,18 +612,29 @@ const MODULE_OTS_2: Exercise[] = [
       'following are workable? Select all that apply.',
     teach: {
       concept:
-        'Everything in security starts with knowing what you have, and OT makes the usual method ' +
-        'unavailable. The alternatives are slower and they work.\n\n' +
-        'PASSIVE NETWORK MONITORING from a tap or span port identifies devices by the traffic they ' +
-        'already send, and industrial protocols are chatty enough that this builds a surprisingly ' +
-        'complete picture including device types and firmware versions. CONFIGURATION FILES from ' +
-        'the engineering workstation list the controllers and their addresses, because somebody had ' +
-        'to configure them. WALKING THE PLANT with an engineer and reading nameplates is not a ' +
-        'joke: it is how you find the equipment that is on no diagram, and OT people do this. And ' +
-        'PROCUREMENT AND MAINTENANCE RECORDS tell you what was bought and what has been serviced.\n\n' +
+        'An "asset inventory" is simply a list of every device that exists on a network, what it ' +
+        'is, and where it lives, the security equivalent of a warehouse knowing what is actually on ' +
+        'its shelves rather than only what the paperwork says should be there. Everything in ' +
+        'security starts with knowing what you have, because you cannot protect a device you do not ' +
+        'know exists, and OT makes the usual IT method of building that list, active scanning, ' +
+        'unavailable for the reasons covered earlier in this module. The alternatives are slower and ' +
+        'they work.\n\n' +
+        'PASSIVE NETWORK MONITORING from a tap or span port (hardware that silently copies traffic ' +
+        'for a collector to read, without ever sending anything itself) identifies devices by the ' +
+        'traffic they already send on their own, and industrial protocols are chatty enough, ' +
+        'constantly reporting status, that this builds a surprisingly complete picture including ' +
+        'device types and firmware versions. CONFIGURATION FILES from the engineering workstation ' +
+        'list the controllers and their addresses, because somebody had to type that information in ' +
+        'when they set the system up in the first place. WALKING THE PLANT with an engineer and ' +
+        'reading nameplates, the small metal labels bolted to equipment listing its model and serial ' +
+        'number, is not a joke: it is how you find the equipment that is on no diagram at all, and ' +
+        'experienced OT people genuinely do this as a matter of course. And PROCUREMENT AND ' +
+        'MAINTENANCE RECORDS, the paperwork trail of what was purchased and what has been serviced, ' +
+        'tell you what exists even when nothing else does.\n\n' +
         'The inventory you end up with will be imperfect and it will still be transformative, ' +
-        'because most sites genuinely do not have one. Expect to find equipment nobody knew was ' +
-        'connected, which is the normal outcome rather than a sign you did it wrong.',
+        'because most sites genuinely do not have one at all. Expect to find equipment nobody knew ' +
+        'was connected, which is the normal outcome of doing this work rather than a sign you did it ' +
+        'wrong.',
     },
     options: [
       { id: 'a', label: 'Passive monitoring from a tap, identifying devices by traffic they already send.' },
@@ -565,21 +682,29 @@ const MODULE_OTS_2: Exercise[] = [
       'to an address outside the company. In three or four sentences, say what you do next.',
     teach: {
       concept:
-        'This finding is common and the right first assumption is almost never an attack. Vendor ' +
-        'remote support, a monitoring service the maintenance team bought, a trial somebody set up ' +
-        'and forgot: all are far more likely than an intrusion, and all are genuine problems ' +
-        'anyway.\n\n' +
-        'The order matters. FIND OUT WHAT IT IS before you do anything to it, by asking maintenance ' +
-        'and the vendor, because disconnecting a link that a support contract depends on can leave ' +
-        'the site unable to get help on a bad day. ESTABLISH WHAT IT REACHES: whether it can only ' +
-        'send readings out or can also accept commands in, which is the difference between a data ' +
-        'leak and a remote control path with no authentication in front of it. Then DOCUMENT IT ' +
-        'AND DECIDE, with the plant, whether it stays, changes, or goes.\n\n' +
-        'What makes this an OT problem rather than an IT one is that the modem has bypassed every ' +
-        'boundary in the architecture. Whatever segmentation exists between levels, this device ' +
-        'is at level 1 with its own path to the internet, so the network diagram is now wrong in a ' +
-        'way that matters. A good answer asks who owns it before touching it, and establishes ' +
-        'whether the path is inbound as well as outbound.',
+        'A "cellular modem" here means a small device with its own mobile-network SIM card, giving ' +
+        'it an internet connection that has nothing to do with the plant\'s own wired network at ' +
+        'all, the same technology that gives a phone data when there is no wifi. Finding one wired ' +
+        'directly into a pump controller is a common finding, and the right first assumption is ' +
+        'almost never an attack. Vendor remote support (the equipment manufacturer dialling in to ' +
+        'help diagnose a problem), a monitoring service the maintenance team bought and installed ' +
+        'themselves, a trial somebody set up years ago and forgot about: all are far more likely ' +
+        'explanations than an intrusion, and all are genuine problems needing attention anyway.\n\n' +
+        'The order in which you act matters a great deal here. FIND OUT WHAT IT IS before you do ' +
+        'anything to it, by asking maintenance and the vendor, because disconnecting a link that a ' +
+        'support contract depends on can leave the site unable to get help on a bad day. ESTABLISH ' +
+        'WHAT IT REACHES: whether it can only send readings out, or can also accept commands coming ' +
+        'in, which is the difference between a minor data leak and a fully working remote control ' +
+        'path into the plant with no authentication in front of it at all, meaning nothing checks ' +
+        'who is sending the commands. Then DOCUMENT IT AND DECIDE, together with the plant staff who ' +
+        'own the equipment, whether it stays, changes, or goes.\n\n' +
+        'What makes this an OT problem rather than an ordinary IT one is that the modem has bypassed ' +
+        'every boundary in the architecture described in the Purdue model teaching. Whatever ' +
+        'segmentation exists between levels, this device sits at level 1, right next to the ' +
+        'controller, with its own private path to the internet that skips every layer of protection ' +
+        'in between, so the network diagram everybody has been relying on is now wrong in a way that ' +
+        'matters. A good answer asks who owns it before touching it, and establishes whether the ' +
+        'path is inbound as well as outbound.',
     },
     hints: [
       'Your first assumption should not be an attacker. What is far more likely?',
@@ -633,19 +758,27 @@ const MODULE_OTS_2: Exercise[] = [
       'of the following are accurate? Select all that apply.',
     teach: {
       concept:
-        'The historian is where the plant and the business genuinely have to meet, which makes it ' +
-        'both essential and the most interesting box on the site.\n\n' +
+        'A "historian" was already introduced as the database that stores process values over time ' +
+        'rather than only the current reading. It is where the plant and the business genuinely ' +
+        'have to meet, which makes it both essential and the most interesting box on the whole ' +
+        'site.\n\n' +
         'It is a legitimate bridge: production reporting, efficiency analysis and regulatory ' +
-        'submissions all need process data on the business side. That is why it exists and why ' +
-        '"just disconnect it" is not an answer. What matters is the DIRECTION of the connections ' +
-        'and who initiates them. The pattern that works is the historian pushing outward into the ' +
-        'DMZ, or a replica living in the DMZ that the business reads, so that nothing on the ' +
-        'corporate network ever opens a connection into the plant.\n\n' +
-        'The pattern that fails is business systems reaching in. It is easier to configure, it is ' +
-        'what you will find, and it means a compromise of an ordinary corporate server has a route ' +
-        'to a system that sits at level 3 with visibility of everything below it. The historian is ' +
-        'also a Windows server with a database on it, which means it has all the ordinary problems ' +
-        'as well as the interesting ones.',
+        'submissions to a government body all need process data on the business side of the ' +
+        'company. That is why it exists and why "just disconnect it" is not an answer anyone will ' +
+        'accept. What matters instead is the DIRECTION of the connections and who initiates them, ' +
+        'meaning which side reaches out first to start talking to the other. The pattern that works ' +
+        'is the historian pushing outward into the industrial DMZ described earlier, or a replica ' +
+        '(a copy of the data, kept separately) living in the DMZ that the business reads from there, ' +
+        'so that nothing on the corporate network ever opens a connection reaching into the plant ' +
+        'itself.\n\n' +
+        'The pattern that fails is business systems reaching inward instead. It is easier to ' +
+        'configure, which is exactly why it is what you will actually find on real sites, and it ' +
+        'means a compromise of an ordinary corporate server, the kind that happens to companies ' +
+        'through phishing emails all the time, has a direct route to a system that sits at level 3 ' +
+        'of the Purdue model with visibility of everything below it. The historian is also, ' +
+        'underneath all of that, just an ordinary Windows server with a database on it, which means ' +
+        'it has all the mundane software problems any office server has, on top of the interesting ' +
+        'OT ones.',
     },
     options: [
       { id: 'a', label: 'It is a legitimate bridge, because the business genuinely needs process data.' },
@@ -742,20 +875,28 @@ const MODULE_OTS_3: Exercise[] = [
       'the following are sound? Select all that apply.',
     teach: {
       concept:
-        'The industrial DMZ exists so that no system on the business network ever needs to open a ' +
-        'connection into the plant. Everything the business wants is served from a system in the ' +
-        'middle, and the plant pushes to it.\n\n' +
-        'Three rules make it work. NO PASS-THROUGH: a protocol that starts on the corporate network ' +
-        'and terminates on a plant device defeats the entire arrangement, however many firewalls ' +
-        'it crosses on the way. REPLICATION RATHER THAN REACH-THROUGH: put a copy of what the ' +
-        'business needs in the DMZ, so a compromise there costs you a copy of some readings rather ' +
-        'than a route. And DIRECTION: connections initiated from the plant outward are far safer ' +
-        'than the reverse, because an attacker on the corporate side then has nothing to connect ' +
-        'to.\n\n' +
-        'Remote access is the hard case and the one that gets negotiated badly. Vendors genuinely ' +
-        'need to support equipment, and the answer is a brokered, monitored, time-limited session ' +
-        'through the DMZ, rather than a permanent VPN into level 2 or, as you will actually find, a ' +
-        'modem nobody documented.',
+        'Recall that the industrial DMZ is a buffer zone of servers sitting between the plant ' +
+        'network and the ordinary corporate network, and that it exists so that no system on the ' +
+        'business side ever needs to open a connection reaching into the plant. Everything the ' +
+        'business wants is instead served from a system living in that middle zone, and the plant ' +
+        'pushes information out to it rather than the business reaching in to grab it.\n\n' +
+        'Three rules make it actually work rather than just look good on a diagram. NO ' +
+        'PASS-THROUGH: a protocol (a shared communication method) that starts on the corporate ' +
+        'network and terminates, meaning ends its journey, on a plant device defeats the entire ' +
+        'arrangement, however many firewalls (devices that filter network traffic by rule) it ' +
+        'crosses on the way, because the DMZ was supposed to be the endpoint, not a tollbooth on a ' +
+        'through road. REPLICATION RATHER THAN REACH-THROUGH: put a copy of exactly what the ' +
+        'business needs in the DMZ itself, so that if that DMZ system is ever compromised, the ' +
+        'attacker gets a copy of some readings rather than a route further into the plant. And ' +
+        'DIRECTION: connections initiated, meaning first opened, from the plant outward are far ' +
+        'safer than the reverse, because an attacker sitting on the compromised corporate side then ' +
+        'has nothing waiting to connect to.\n\n' +
+        'Remote access is the hard case and the one that gets negotiated badly in practice. Vendors ' +
+        'genuinely need to support their own equipment from off site, and the answer is a brokered ' +
+        '(arranged and controlled through a middle system), monitored, time-limited session through ' +
+        'the DMZ, rather than a permanent VPN (a private, always-open tunnel between two networks) ' +
+        'reaching straight into level 2, or, as you will actually find on real sites, a modem nobody ' +
+        'documented at all.',
     },
     options: [
       { id: 'a', label: 'No protocol should begin on the corporate network and terminate on a plant device.' },
@@ -802,18 +943,25 @@ const MODULE_OTS_3: Exercise[] = [
       'ways the model fails to describe what you find? Select all that apply.',
     teach: {
       concept:
-        'The model is a reference, not a survey. Knowing where it stops describing reality is what ' +
-        'separates somebody who has read about OT from somebody who has walked a plant.\n\n' +
-        'Four things break it routinely. DEVICES WITH THEIR OWN CONNECTIVITY: a controller or ' +
-        'sensor with a cellular modem or its own cloud client has skipped every level at once. ' +
-        'MOBILE ASSETS: the engineering laptop and the contractor machine belong to no level and ' +
-        'visit several. WIRELESS: a mesh of battery sensors at level 0 has a radio boundary that ' +
-        'appears on no wired diagram. And CONVERGED VENDOR PLATFORMS: modern systems that bundle ' +
-        'supervision, history and analytics into one product that legitimately spans levels 2 and ' +
-        '3 and talks to a vendor cloud.\n\n' +
+        'The Purdue model, remember, is a reference architecture: a shared, idealised diagram, not ' +
+        'a survey of what any particular plant actually looks like. Knowing where it stops ' +
+        'describing reality is what separates somebody who has only read about OT from somebody ' +
+        'who has actually walked a plant floor.\n\n' +
+        'Four things break the tidy picture routinely. DEVICES WITH THEIR OWN CONNECTIVITY: a ' +
+        'controller or sensor fitted with a cellular modem or its own cloud client (software that ' +
+        'talks directly to a vendor\'s servers over the internet) has skipped every level at once, ' +
+        'connecting straight from the physical process to the outside world. MOBILE ASSETS: the ' +
+        'engineering laptop and the visiting contractor\'s machine belong to no fixed level and ' +
+        'visit several of them in a single afternoon. WIRELESS: a mesh (a network of many small ' +
+        'devices relaying signals to each other) of battery-powered sensors at level 0 has a radio ' +
+        'boundary that appears on no wired diagram at all, because there is no cable to draw. And ' +
+        'CONVERGED VENDOR PLATFORMS: modern systems that bundle supervision, historical data and ' +
+        'analytics into one single product legitimately span levels 2 and 3 and talk to a vendor\'s ' +
+        'cloud service by design.\n\n' +
         'None of this means abandon the model. It means use it to state where things SHOULD sit, ' +
-        'and treat each departure as a specific finding with a named owner, rather than pretending ' +
-        'the site is either compliant or hopeless.',
+        'and treat each departure from that ideal as a specific finding with a named owner, rather ' +
+        'than pretending the site is either fully compliant with the diagram or a hopeless mess not ' +
+        'worth improving.',
     },
     options: [
       { id: 'a', label: 'A controller with its own cellular or cloud connectivity has bypassed every level at once.' },
@@ -861,18 +1009,28 @@ const MODULE_OTS_3: Exercise[] = [
       'are sound approaches? Select all that apply.',
     teach: {
       concept:
-        'Segmenting a live plant is the highest-risk security work you can do there, because ' +
-        'getting it wrong stops the process. It is done in a sequence, and the sequence is the ' +
-        'skill.\n\n' +
-        'First OBSERVE: passively record what actually talks to what, for long enough to include ' +
-        'the monthly report, the quarterly batch and the annual shutdown. A rule set built from a ' +
-        'week of traffic will block something important in month three. Then MONITOR IN ALERT MODE: ' +
-        'deploy the rules so violations are logged rather than dropped, and watch what would have ' +
-        'broken. Then ENFORCE INCREMENTALLY, one boundary at a time, in a maintenance window, with ' +
-        'the engineer present and a tested way to put it back.\n\n' +
-        'What fails is enforcing from day one on a rule set derived from a diagram. The diagram is ' +
-        'wrong, you will discover which parts of it are wrong by stopping production, and you will ' +
-        'not be asked to do the next phase.',
+        '"Segmentation" means dividing a network into separate zones with controlled crossings ' +
+        'between them, so that traffic which is not explicitly permitted gets blocked, the network ' +
+        'equivalent of adding locked doors and checkpoints inside a building that previously had one ' +
+        'open floor plan. A "flat network" is the opposite: one where anything can talk to anything, ' +
+        'because no such doors exist yet. Segmenting a live plant, one that is running and producing ' +
+        'something right now, is the highest-risk security work you can do there, because getting ' +
+        'it wrong by blocking the wrong traffic stops the process itself. It is done in a sequence, ' +
+        'and the sequence is the actual skill being tested here.\n\n' +
+        'First OBSERVE: passively record what actually talks to what, for long enough to include the ' +
+        'monthly report, the quarterly batch (a production run that only happens once every three ' +
+        'months) and the annual shutdown. A rule set built from only a week of traffic will look ' +
+        'complete and will block something important in month three, when a pattern that only ' +
+        'happens quarterly finally occurs and gets treated as forbidden. Then MONITOR IN ALERT MODE: ' +
+        'deploy the rules so that violations are only logged and reported rather than actually ' +
+        'dropped, and watch what would have broken if the rule had been enforced for real. Then ' +
+        'ENFORCE INCREMENTALLY, one boundary at a time, in a maintenance window, with the engineer ' +
+        'present and a tested way to reverse the change immediately if something unexpected ' +
+        'happens.\n\n' +
+        'What fails is enforcing from day one on a rule set derived only from a diagram someone drew ' +
+        'once. The diagram is wrong, in ways nobody currently knows, and you will discover exactly ' +
+        'which parts of it are wrong by stopping production when a legitimate connection gets ' +
+        'blocked, and you will not be asked to do the next phase of the project.',
     },
     options: [
       { id: 'a', label: 'Observe passively first, for long enough to capture periodic and seasonal traffic.' },
@@ -919,15 +1077,22 @@ const MODULE_OTS_3: Exercise[] = [
       'DMZ. In three or four sentences, write the finding.',
     teach: {
       concept:
-        'This is the most common serious finding in OT, and it is easy to write in a way that gets ' +
-        'nothing done. "The network is flat" is a description; what a plant acts on is a specific ' +
-        'consequence and a route to fixing it that does not require stopping production.\n\n' +
-        'State the CURRENT PATH concretely: which network can reach which devices, on what. State ' +
-        'the CONSEQUENCE in plant terms rather than IT ones: an ordinary corporate compromise, ' +
-        'which happens through email and happens to everybody, would reach the equipment that runs ' +
-        'the process, and the failure mode there is production loss or a safety event rather than ' +
-        'data loss. Then give a STAGED REMEDY, because a full re-architecture will be refused and ' +
-        'should be: observation, then alert-mode rules, then one boundary at a time.\n\n' +
+        'This exercise is about writing up what you found, in the style of a real security report, ' +
+        'because a technically correct finding that nobody acts on has accomplished nothing. A flat ' +
+        'network here means the corporate business network and the plant controllers can reach each ' +
+        'other with no zone or filtering in between, the situation the industrial DMZ exists to ' +
+        'prevent. This is the most common serious finding in OT, and it is easy to write in a way ' +
+        'that gets nothing done. "The network is flat" is a description; what a plant actually acts ' +
+        'on is a specific consequence and a route to fixing it that does not require stopping ' +
+        'production to do so.\n\n' +
+        'State the CURRENT PATH concretely: which network can reach which devices, over what. State ' +
+        'the CONSEQUENCE in plant terms rather than IT ones: an ordinary corporate compromise, which ' +
+        'happens through a phishing email and happens to nearly every company eventually, would ' +
+        'reach the equipment that actually runs the physical process, and the failure mode there is ' +
+        'production loss or a safety event, not merely data loss. Then give a STAGED REMEDY, because ' +
+        'a full re-architecture, rebuilding the network from scratch, will be refused and should be: ' +
+        'the same observe, then alert-mode rules, then one boundary at a time sequence from the ' +
+        'previous exercise.\n\n' +
         'A good finding names the direction and reach of the current path, gives a physical ' +
         'consequence rather than a data one, and proposes a staged route rather than a rebuild.',
     },
@@ -985,20 +1150,32 @@ const MODULE_OTS_4: Exercise[] = [
       'accurate? Select all that apply.',
     teach: {
       concept:
-        'The industrial protocols in widest use were designed for serial links between trusted ' +
-        'devices in a locked room, decades before anybody connected them to anything. Modbus dates ' +
-        'from the 1970s. They were then carried over Ethernet and IP essentially unchanged.\n\n' +
+        'A "protocol" is a shared set of rules two devices both follow so they can understand each ' +
+        'other, the way a language lets two people communicate: Modbus and DNP3 are two of the most ' +
+        'widely used protocols for sending commands to industrial controllers. Both were designed ' +
+        'for serial links, meaning a physical cable running directly between two trusted devices ' +
+        'sitting in the same locked room, decades before anybody imagined connecting them to a ' +
+        'wider network. Modbus dates from the 1970s. They were later carried over Ethernet and IP, ' +
+        'the same networking technology behind the ordinary internet, essentially unchanged from ' +
+        'their original design.\n\n' +
         'What that means in practice is stark. There is generally NO AUTHENTICATION: a device does ' +
-        'what it is told because it has no way to ask who is telling it. There is NO ENCRYPTION, so ' +
-        'anybody who can see the traffic can read it, and more importantly can craft it. And there ' +
-        'is often NO INTEGRITY protection beyond a checksum meant for line noise rather than for an ' +
-        'adversary.\n\n' +
-        'So a valid command from an unauthorised source is indistinguishable from a legitimate one. ' +
-        'Not because of a vulnerability to be patched: because the protocol has no concept of an ' +
-        'unauthorised source. Secure variants exist, DNP3 has a secure authentication extension and ' +
-        'newer standards do better, and adoption across installed equipment is slow because the ' +
-        'equipment is old. The security therefore has to come from the network around the protocol, ' +
-        'which is why segmentation matters here far more than it does in IT.',
+        'what it is told because it has no way to ask "who are you, and are you allowed to tell me ' +
+        'this." There is NO ENCRYPTION, meaning the messages are not scrambled into an unreadable ' +
+        'form, so anybody who can see the traffic can read it plainly, and more importantly can ' +
+        'craft their own fake message that looks exactly like a real one. And there is often NO ' +
+        'INTEGRITY protection beyond a simple checksum (a small number calculated from a message to ' +
+        'catch accidental transmission errors) that was meant to catch electrical line noise, not a ' +
+        'deliberate adversary who knows exactly how to make a forged message pass the check.\n\n' +
+        'So a valid command from an unauthorised source is indistinguishable from a legitimate one, ' +
+        'meaning there is no way, from the device\'s point of view, to tell the two apart. Not ' +
+        'because of a vulnerability, a specific flaw that could be patched: because the protocol has ' +
+        'no concept of an unauthorised source at all, the same way a landline telephone from decades ' +
+        'ago had no way to verify who was calling. Secure variants exist, DNP3 has a secure ' +
+        'authentication extension and newer standards do better, and adoption across already ' +
+        'installed equipment is slow because the equipment itself is old and rarely replaced. The ' +
+        'security therefore has to come from the network around the protocol, controlling who can ' +
+        'physically or logically reach the device at all, which is why segmentation matters here far ' +
+        'more than it does in ordinary IT.',
     },
     options: [
       { id: 'a', label: 'They generally provide no authentication, so a device cannot tell who is commanding it.' },
@@ -1046,20 +1223,30 @@ const MODULE_OTS_4: Exercise[] = [
       'Select all that apply.',
     teach: {
       concept:
-        'This is the one place where OT security is genuinely easier than IT, and it is worth ' +
-        'knowing because so much of the rest is harder.\n\n' +
-        'Plant traffic is REGULAR in a way office traffic never is. A controller polls the same ' +
-        'devices at the same interval, forever. The set of devices that talk to each other is ' +
-        'fixed by the process design and changes only when somebody changes the plant. Volumes are ' +
-        'stable and predictable rather than following human working patterns.\n\n' +
-        'That regularity makes anomaly detection realistic here. A new device appearing, a new pair ' +
-        'of devices talking, a familiar device suddenly using a function it has never used, or a ' +
-        'change in polling rhythm are all genuinely unusual rather than being Tuesday. The false ' +
-        'positive problem that makes behavioural detection so painful in IT is much smaller.\n\n' +
+        '"Baselining" means watching a network for a while to learn what its normal behaviour looks ' +
+        'like, so that anything different later stands out. This is the one place where OT security ' +
+        'is genuinely easier than ordinary IT security, and it is worth knowing well because so much ' +
+        'of the rest of this field is harder than its IT equivalent.\n\n' +
+        'Plant traffic is REGULAR in a way office traffic never is. In an office, hundreds of people ' +
+        'browse, email and use dozens of different applications on their own unpredictable schedule. ' +
+        'On a plant, a controller POLLS (repeatedly checks in with) the same devices at the same ' +
+        'fixed interval, forever, with no human variation at all. The set of devices that talk to ' +
+        'each other is fixed by the physical process design and changes only when somebody physically ' +
+        'changes the plant itself. Volumes of traffic are stable and predictable rather than ' +
+        'following human working patterns like a lunch-hour lull or an end-of-month rush.\n\n' +
+        'That regularity makes ANOMALY DETECTION, spotting behaviour that departs from what is ' +
+        'normal, genuinely realistic here in a way it rarely is elsewhere. A new device appearing, a ' +
+        'new pair of devices talking to each other for the first time, a familiar device suddenly ' +
+        'using a command type it has never used before, or a change in the timing of its polling are ' +
+        'all genuinely unusual events here rather than being an ordinary Tuesday. The FALSE POSITIVE ' +
+        'problem, alerts that fire on something perfectly normal and waste everyone\'s time, which ' +
+        'makes this kind of detection so painful in IT, is much smaller here because normal is so ' +
+        'narrow to begin with.\n\n' +
         'The caveat is that periodic events are real: shift changes, batch starts, monthly ' +
-        'reporting, an annual shutdown. A baseline of one week will flag the quarterly batch as an ' +
-        'intrusion, which is how a monitoring deployment loses the plant confidence in its first ' +
-        'month.',
+        'reporting, an annual shutdown for maintenance. A baseline built from only one week of ' +
+        'observation will flag the quarterly batch, something that only happens once every three ' +
+        'months, as an intrusion when it finally occurs, which is exactly how a monitoring ' +
+        'deployment loses the plant\'s confidence in its very first month.',
     },
     options: [
       { id: 'a', label: 'Controllers poll on fixed cycles, so traffic rhythm is stable and departures are meaningful.' },
@@ -1108,19 +1295,28 @@ const MODULE_OTS_4: Exercise[] = [
       'apply.',
     teach: {
       concept:
-        'Nothing here is malformed. The protocol has no view about whether this command should have ' +
-        'happened, so the judgement is entirely yours and it is made from context the protocol ' +
-        'does not carry.\n\n' +
-        'Three kinds of context decide it. TIME AND PATTERN: set point changes usually happen ' +
-        'during shifts, by people, and 02:00 is unusual unless the site runs nights. AUTHORISATION: ' +
-        'process changes go through a change record on a well-run plant, so the fast question is ' +
-        'whether one exists for tonight. And MAGNITUDE AND DIRECTION: a small adjustment within the ' +
-        'normal operating band is a different event from one that moves a value outside it, and ' +
-        'the engineers can tell you instantly which this is.\n\n' +
-        'What you must not do is decide alone. You do not know what the set point does, and the ' +
-        'person who does is on site. This is the exercise where an IT instinct, to contain first ' +
-        'and ask later, is actively dangerous: reverting a process change without understanding it ' +
-        'can be worse than the change.',
+        'A "set point" is the target value a controller tries to hold something at, such as a ' +
+        'temperature, a pressure, or a flow rate; changing it changes what the process is aiming ' +
+        'for, not just how it is being watched. Nothing about this command is malformed or broken: ' +
+        'it is a perfectly valid, correctly formatted instruction. The protocol has no view about ' +
+        'whether this command should have happened, because as covered in the previous exercise, it ' +
+        'has no concept of authorised or unauthorised at all, so the judgement is entirely yours, ' +
+        'and it has to be made from context the protocol itself does not carry.\n\n' +
+        'Three kinds of context decide it. TIME AND PATTERN: set point changes usually happen during ' +
+        'a shift, made deliberately by a person who is present, and 02:00 is unusual unless the site ' +
+        'genuinely runs an overnight shift. AUTHORISATION: process changes go through a change ' +
+        'record, a written note of what was changed and why, on a well-run plant, so the fastest ' +
+        'question to ask is whether one exists for tonight. And MAGNITUDE AND DIRECTION: a small ' +
+        'adjustment that stays within the normal operating band, the safe range the process is ' +
+        'meant to run inside, is a completely different event from one that pushes a value outside ' +
+        'it, and the engineers on site can tell you instantly which this is just by looking at the ' +
+        'number.\n\n' +
+        'What you must not do is decide alone. You do not know what that particular set point ' +
+        'actually does to the process, and the person who does is on site right now. This is the ' +
+        'exercise where an instinct carried over from ordinary IT incident response, to contain ' +
+        'first and ask questions later, is actively dangerous here: reverting a process change ' +
+        'without understanding why it was made can leave the plant in a worse and more dangerous ' +
+        'state than the original change did.',
     },
     options: [
       { id: 'a', label: 'The command is protocol-valid, so the judgement comes entirely from context the protocol does not carry.' },
@@ -1168,18 +1364,26 @@ const MODULE_OTS_4: Exercise[] = [
       'this environment? Select all that apply.',
     teach: {
       concept:
-        'Because normal is so narrow, the best OT detections are ones that would be hopelessly ' +
-        'noisy in IT and are perfectly workable here.\n\n' +
-        'A NEW DEVICE on the network is worth alerting on outright, because the device list is ' +
-        'fixed by the process. A NEW COMMUNICATION PAIR is similar: these two things have never ' +
-        'talked before, and the process design says they should not. An UNUSUAL FUNCTION CODE, ' +
-        'meaning a controller receiving a type of command it has never received, is a strong signal ' +
-        'and includes the ones that matter most, such as a programming command outside a ' +
-        'maintenance window. And a CHANGE TO CONTROLLER LOGIC at any time is worth knowing about ' +
-        'unconditionally, because it should be rare and always deliberate.\n\n' +
+        'A "detection" is a rule that fires an alert when a specific pattern is seen, the automated ' +
+        'version of a security guard who has been told exactly what to watch for. Because normal is ' +
+        'so narrow on a plant network, as the earlier baselining exercise established, the best OT ' +
+        'detections are ones that would be hopelessly noisy if you tried them in an office and are ' +
+        'perfectly workable here.\n\n' +
+        'A NEW DEVICE appearing on the network is worth alerting on outright, with no further ' +
+        'analysis needed, because the device list is fixed by the process design and simply should ' +
+        'not change. A NEW COMMUNICATION PAIR is similar: these two specific things have never ' +
+        'talked to each other before, and the process design says they have no reason to start now. ' +
+        'An UNUSUAL FUNCTION CODE, meaning a controller receiving a type of command it has never ' +
+        'received before, is a strong signal and includes the cases that matter most, such as a ' +
+        'programming command arriving outside a scheduled maintenance window. And a CHANGE TO ' +
+        'CONTROLLER LOGIC, meaning the actual program running on the PLC gets rewritten, is worth ' +
+        'knowing about unconditionally at any time, because it should be rare and always ' +
+        'deliberate.\n\n' +
         'What suits this environment badly is anything that depends on volume thresholds tuned for ' +
-        'human behaviour, or on content inspection of encrypted traffic that is not encrypted ' +
-        'anyway. Write for the narrowness; it is the advantage you have.',
+        'human behaviour, such as "alert if traffic exceeds normal office hours levels", or on ' +
+        'content inspection of encrypted traffic that, as covered earlier, is not actually encrypted ' +
+        'here anyway. Write detections for the narrowness of what counts as normal; it is the ' +
+        'structural advantage this environment gives you that IT security rarely has.',
     },
     options: [
       { id: 'a', label: 'A device appearing that was not previously on the network.' },
@@ -1228,18 +1432,26 @@ const MODULE_OTS_4: Exercise[] = [
       'will act on.',
     teach: {
       concept:
-        'The manager question is fair and the honest answer is not about attacks at all. It is ' +
-        'about what the equipment can and cannot check.\n\n' +
-        'The point to convey is that the controllers cannot tell an authorised instruction from an ' +
-        'unauthorised one, because the protocols they speak have no way to ask. That is not a fault ' +
-        'in the equipment, it is what those protocols were designed for, and it means the ' +
-        'protection has to come from controlling who can reach the equipment at all.\n\n' +
-        'Then the consequence in their terms: anything that can reach a controller can instruct ' +
-        'it, so the security of the process is exactly the security of the network path to it. And ' +
-        'the reassurance, which is real: this is why the answer is segmentation and access control ' +
-        'rather than changing the equipment, which is not being proposed.\n\n' +
-        'A good answer says the controller cannot verify who is instructing it, connects that to ' +
-        'network reachability being the real control, and avoids demanding equipment changes.',
+        'This is a short-answer exercise, testing whether you can compress the protocol lesson from ' +
+        'earlier in this module into something a busy, non-technical manager will actually sit ' +
+        'still for. The manager\'s question is fair, and the honest answer is not about attacks at ' +
+        'all, because "has never been attacked" and "cannot be attacked" are two very different ' +
+        'claims. It is about what the equipment can and cannot check in the first place.\n\n' +
+        'The point to convey is that the controllers cannot tell an authorised instruction apart ' +
+        'from an unauthorised one, because the protocols they speak, as covered earlier, have no ' +
+        'built-in way to ask "who are you, and should I trust this." That is not a fault in the ' +
+        'equipment that could be blamed on poor engineering, it is exactly what those protocols were ' +
+        'designed to do decades ago, and it means the protection has to come instead from ' +
+        'controlling who is allowed to reach the equipment at all.\n\n' +
+        'Then the consequence, stated in terms a manager actually cares about: anything that can ' +
+        'reach a controller can instruct it, so the security of the whole process is exactly the ' +
+        'security of the network path leading to it, nothing more and nothing less. And the ' +
+        'reassurance, which is genuinely true: this is why the answer is segmentation and access ' +
+        'control rather than replacing the equipment, which nobody is proposing and which would cost ' +
+        'far more.\n\n' +
+        'A good answer says the controller cannot verify who is instructing it, connects that ' +
+        'directly to network reachability being the real control, and avoids demanding any change to ' +
+        'the equipment itself.',
     },
     hints: [
       'Do not talk about attacks. Talk about what the equipment can check.',
@@ -1295,19 +1507,28 @@ const MODULE_OTS_5: Exercise[] = [
       'Which of the following are useful compensating controls? Select all that apply.',
     teach: {
       concept:
-        'Compensating controls are the core competence of this field. The vulnerability is not ' +
-        'going away, so you make it unreachable, undetectable to act on, or survivable.\n\n' +
-        'RESTRICT REACHABILITY: if only three named systems can send that device traffic, a flaw ' +
-        'requiring network access is only exploitable from three places, and those three can be ' +
-        'watched closely. ALLOWLIST THE FUNCTIONS: many industrial firewalls can permit read ' +
-        'operations and deny programming commands to a given device, which removes the worst ' +
-        'outcomes without touching the equipment. MONITOR SPECIFICALLY: write a detection for what ' +
-        'exploitation would look like on this device, so that if it happens you know within ' +
-        'minutes.\n\n' +
-        'And PLAN THE REPLACEMENT, with a date, because compensating controls are a bridge and a ' +
-        'bridge with no far end is just an excuse. The one thing that does not count is documenting ' +
-        'the risk and accepting it with no control at all, which is a decision rather than a ' +
-        'control, and should be recorded as one.',
+        'A "vulnerability" is a flaw in software or a device that could let somebody do something ' +
+        'they should not be able to, such as taking control of it. A "compensating control" is a ' +
+        'protection you put around a flaw you cannot directly fix, rather than fixing the flaw ' +
+        'itself, the security equivalent of putting a fence around a broken step instead of ' +
+        'repairing it immediately: the step is still broken, but nobody falls through it. This is ' +
+        'the core competence of OT security. The vulnerability is not going away this year, so you ' +
+        'make it unreachable, hard to act on unnoticed, or survivable instead.\n\n' +
+        'RESTRICT REACHABILITY: if only three named systems are permitted to send that device any ' +
+        'traffic at all, a flaw that requires network access to exploit is only exploitable from ' +
+        'those three places, and those three can then be watched closely. ALLOWLIST THE FUNCTIONS: ' +
+        'many industrial firewalls (devices that filter network traffic by rule) can permit ordinary ' +
+        'read operations, simply asking the device for a status, while denying programming commands ' +
+        'to that same device, which removes the worst possible outcomes without touching the ' +
+        'equipment itself at all. MONITOR SPECIFICALLY: write a detection for exactly what an attempt ' +
+        'to exploit this particular flaw would look like on this device, so that if it happens, you ' +
+        'know within minutes rather than months.\n\n' +
+        'And PLAN THE REPLACEMENT, with an actual date attached, because compensating controls are a ' +
+        'bridge to something better, and a bridge with no far end is just an excuse that never gets ' +
+        'revisited. The one thing that does not count as a compensating control is simply documenting ' +
+        'the risk and accepting it with no protection at all: that is a decision, a legitimate one ' +
+        'sometimes, but it should be recorded honestly as a decision rather than dressed up as a ' +
+        'control that is actually doing something.',
     },
     options: [
       { id: 'a', label: 'Restrict which systems can reach the device at all, so the flaw is exploitable from very few places.' },
@@ -1355,17 +1576,25 @@ const MODULE_OTS_5: Exercise[] = [
       'Select all that apply.',
     teach: {
       concept:
-        'Genuine air gaps are rare and the claim is common, which is a gap worth closing early ' +
-        'because everything else the site believes rests on it.\n\n' +
-        'Air gaps leak through the things that have to cross. REMOVABLE MEDIA: firmware, project ' +
-        'files, vendor updates and data extracts move on USB, and that is the documented route for ' +
-        'more than one significant ICS incident. VENDOR LAPTOPS connect to the isolated network by ' +
-        'design, having been elsewhere last week. TEMPORARY LINKS get created for a project and are ' +
-        'not removed. And the modem or cellular link somebody added for remote monitoring means ' +
-        'the gap has not existed for years.\n\n' +
+        'An "air gap" means a network with no physical or logical connection to any other network ' +
+        'at all: no cable, no wifi, no path in or out whatsoever, the security equivalent of an ' +
+        'island with no bridge or boat to reach it. Genuine air gaps are rare, and the claim that a ' +
+        'network is air gapped is common, which is a gap worth closing early in any assessment, ' +
+        'because everything else the site believes about its own safety rests on that one claim ' +
+        'being true.\n\n' +
+        'Air gaps leak through the things that have to cross regardless of the claimed isolation. ' +
+        'REMOVABLE MEDIA: firmware (the low-level software built into a device), project files, ' +
+        'vendor software updates and data extracts move between networks on USB drives, and that is ' +
+        'the documented route for more than one significant ICS incident already covered in this ' +
+        'package. VENDOR LAPTOPS connect to the supposedly isolated network by design, having been ' +
+        'plugged into other companies\' networks the week before. TEMPORARY LINKS get created for one ' +
+        'project and are quietly never removed once that project ends. And the modem or cellular ' +
+        'link somebody added years ago for remote monitoring means the gap has not actually existed ' +
+        'for a long time, whatever the diagram still says.\n\n' +
         'The useful reframing is that isolation is a control that has to be MAINTAINED and verified ' +
-        'rather than a property a network has. Ask how somebody would know if it were breached, and ' +
-        'if the answer is that nobody would, the isolation is a belief rather than a control.',
+        'continuously, rather than a fixed property a network simply has once and keeps forever. Ask ' +
+        'how somebody would actually know if it were breached, and if the honest answer is that ' +
+        'nobody would find out, the isolation is a belief rather than a working control.',
     },
     options: [
       { id: 'a', label: 'Removable media is a documented route into isolated industrial networks.' },
@@ -1413,20 +1642,23 @@ const MODULE_OTS_5: Exercise[] = [
       'window is in four months. Which of the following are sound? Select all that apply.',
     teach: {
       concept:
-        'Not every OT patch conversation is a refusal, and treating them all as one is how you miss ' +
-        'the ones that could have happened. When the vendor has validated a fix, the constraint is ' +
-        'usually scheduling rather than possibility, and that is negotiable in a way certification ' +
-        'is not.\n\n' +
-        'What helps is being specific about urgency. Is the flaw remotely reachable from anywhere ' +
-        'that matters given your segmentation, is it known to be exploited, and what would ' +
-        'exploitation do to the process? A flaw that is only reachable from a network segment three ' +
-        'named engineers can touch is a genuinely different proposition from one reachable from the ' +
-        'business network, and saying so buys you credibility for the times you do need a window ' +
-        'moved.\n\n' +
-        'It is also worth asking whether the window can be brought forward, because sometimes it ' +
-        'can and nobody asked, and whether a partial measure exists in the meantime. What does not ' +
-        'work is escalating every validated patch as urgent, which spends the credibility you need ' +
-        'for the one that actually is.',
+        'Not every OT patch conversation is a flat refusal, and treating them all as one is how you ' +
+        'miss the ones that could actually have happened sooner. When the vendor has already ' +
+        'validated a fix, meaning tested and approved it for this exact equipment, the constraint is ' +
+        'usually scheduling rather than possibility, and a schedule is negotiable in a way a safety ' +
+        'certification never is.\n\n' +
+        'What helps is being specific about urgency rather than treating every patch the same. Is the ' +
+        'flaw remotely reachable from anywhere that actually matters given the segmentation already ' +
+        'in place, is it known to be actively exploited by attackers already, and what would ' +
+        'exploiting it actually do to the physical process? A flaw only reachable from a network ' +
+        'segment that three named engineers can physically touch is a genuinely different ' +
+        'proposition from one reachable from the ordinary business network, and saying so plainly ' +
+        'buys you credibility for the times you do need a maintenance window moved.\n\n' +
+        'It is also worth simply asking whether the window can be brought forward, because sometimes ' +
+        'it genuinely can and nobody has thought to ask, and whether some partial measure exists to ' +
+        'reduce exposure in the meantime. What does not work is escalating every single validated ' +
+        'patch as urgent, which spends the credibility you actually need for the one time it truly ' +
+        'is.',
     },
     options: [
       { id: 'a', label: 'Assess reachability under the current segmentation before deciding how urgent it is.' },
@@ -1472,19 +1704,27 @@ const MODULE_OTS_5: Exercise[] = [
       'Select all that apply.',
     teach: {
       concept:
-        'Recovery here is not restoring a server, and the things that matter are frequently not ' +
-        'backed up at all because nobody thought of them as data.\n\n' +
-        'CONTROLLER LOGIC is the critical one: the program running on each PLC, in a form that can ' +
-        'be loaded back, held offline. Sites lose this and discover during an incident that the ' +
-        'only copy was on the engineering laptop that also got encrypted. HMI AND SCADA ' +
-        'CONFIGURATION, including the graphics and the tag database, because rebuilding those by ' +
-        'hand takes weeks. DEVICE CONFIGURATION AND FIRMWARE VERSIONS, so a replacement unit can be ' +
-        'brought to the same state.\n\n' +
-        'And the two nobody lists: SPARE HARDWARE, because a twenty-year-old controller cannot be ' +
-        'ordered on Tuesday, and a TESTED PROCEDURE for running the process in a degraded or manual ' +
-        'mode. That last one is what the Ukrainian utilities used in 2015 to restore power with ' +
-        'operators physically closing breakers, and it is the difference between an outage and a ' +
-        'crisis.',
+        'A "backup" is simply a saved copy of something important, kept somewhere separate, so that ' +
+        'if the original is lost or destroyed it can be restored rather than rebuilt from nothing. ' +
+        'In an office, that mostly means files and databases. On a plant, recovery is not about ' +
+        'restoring a server, and the things that actually matter here are frequently not backed up ' +
+        'at all, because nobody ever thought of them as "data" worth saving.\n\n' +
+        'CONTROLLER LOGIC is the critical one: the actual program running on each PLC, saved in a ' +
+        'form that can be loaded straight back onto a replacement device, held somewhere offline so ' +
+        'it cannot be destroyed alongside everything else. Sites lose this constantly and discover ' +
+        'during an incident that the only copy existed on the engineering laptop that also got ' +
+        'encrypted by the same ransomware attack. HMI AND SCADA CONFIGURATION, including the on-screen ' +
+        'graphics and the tag database (the list defining every sensor and value the system tracks), ' +
+        'because rebuilding those by hand from memory takes weeks. DEVICE CONFIGURATION AND FIRMWARE ' +
+        'VERSIONS, so that a brand new replacement unit can be brought to exactly the same working ' +
+        'state as the one it replaces.\n\n' +
+        'And the two nobody lists, because they are not files at all: SPARE HARDWARE, because a ' +
+        'twenty-year-old controller cannot simply be ordered online and arrive on Tuesday, and a ' +
+        'TESTED PROCEDURE for running the process in a degraded or fully manual mode, meaning humans ' +
+        'operating equipment by hand rather than through the computer system. That last one is what ' +
+        'the Ukrainian utilities used in the 2015 incident covered later in this package to restore ' +
+        'power, with operators physically driving to substations and closing breakers by hand, and ' +
+        'it is the difference between an outage and a genuine crisis.',
     },
     options: [
       { id: 'a', label: 'Controller logic for each PLC, held offline in a form that can be loaded back.' },
@@ -1532,21 +1772,26 @@ const MODULE_OTS_5: Exercise[] = [
       'sentences, write what you propose.',
     teach: {
       concept:
-        'This is the characteristic OT proposal and it is judged on whether it can be implemented ' +
-        'without touching the device or the process.\n\n' +
-        'Lead with REACHABILITY, because it is the highest-value change and it happens entirely in ' +
-        'the network: name the small set of systems that legitimately need to talk to it and deny ' +
-        'everything else. Add FUNCTION RESTRICTION where the equipment in the path supports it, so ' +
-        'programming commands are denied while normal operation continues. Add TARGETED MONITORING, ' +
-        'so that if anything does reach it you find out quickly rather than during the next ' +
-        'outage.\n\n' +
-        'Then be explicit about the RESIDUAL and the END DATE. Something remains, the engineers who ' +
-        'legitimately reach the device could still be a route, and the controls are a bridge to the ' +
-        'replacement rather than a substitute for it. A proposal with no end date will be treated ' +
-        'as a permanent answer, and in five years somebody will find the device still there with ' +
-        'the same firmware and a folder of your rules around it.\n\n' +
+        'This exercise pulls together everything the module has covered about compensating controls ' +
+        'into one written proposal, and it is judged on whether it can actually be implemented ' +
+        'without touching the device or the physical process at all, since that is the whole ' +
+        'constraint set out in the scenario.\n\n' +
+        'Lead with REACHABILITY, because restricting it is the highest-value change and it happens ' +
+        'entirely in the network rather than on the device: name the small set of systems that ' +
+        'legitimately need to talk to it, and deny everything else by default. Add FUNCTION ' +
+        'RESTRICTION where the equipment in the path supports it, so programming commands specifically ' +
+        'are denied while ordinary day-to-day operation continues untouched. Add TARGETED ' +
+        'MONITORING, a detection built specifically for this device, so that if anything does reach ' +
+        'it, you find out quickly rather than during the next unplanned outage.\n\n' +
+        'Then be explicit about the RESIDUAL RISK and the END DATE. Something always remains: the ' +
+        'engineers who legitimately reach the device could still, in theory, be a route in, and the ' +
+        'controls you are proposing are a bridge to the eventual replacement rather than a permanent ' +
+        'substitute for it. A proposal with no end date attached will quietly be treated as a ' +
+        'permanent answer, and five years from now somebody will find the exact same device still ' +
+        'there, running the exact same old firmware, with a dusty folder of your rules sitting ' +
+        'around it and nobody remembering why.\n\n' +
         'A good answer restricts who can reach it, adds monitoring, and states both the residual ' +
-        'risk and a replacement horizon, without asking for the device to be touched.',
+        'risk and a replacement horizon, without asking for the device itself to be touched.',
     },
     hints: [
       'Everything you propose has to be implementable without touching the device.',
@@ -1604,19 +1849,29 @@ const MODULE_OTS_6: Exercise[] = [
       'apply.',
     teach: {
       concept:
-        'A safety instrumented system is a separate controller with one job: watch for conditions ' +
-        'that mean the process is heading somewhere dangerous, and put it into a safe state. It ' +
-        'closes a valve, trips a burner, or shuts a unit down.\n\n' +
-        'Three properties define it. It is INDEPENDENT of the control system, deliberately, often ' +
-        'from a different product line and sometimes a different vendor, so that a failure or ' +
-        'compromise of the control system does not take the protection with it. It is CERTIFIED to ' +
-        'a functional safety standard, with its logic reviewed and its failure rates calculated, ' +
-        'which is why nobody changes it casually. And it is the LAST LAYER: when it acts, the ' +
-        'earlier protections have already failed.\n\n' +
-        'For a security person the consequence is simple and absolute. You do not put anything on ' +
-        'it, you do not scan it, and you do not propose changes to it without the functional safety ' +
-        'engineer leading that conversation. Its independence is the control, and anything you do ' +
-        'that couples it to something else has removed the protection you were hired to strengthen.',
+        'A safety instrumented system, first introduced briefly earlier in this package, deserves a ' +
+        'full explanation on its own, because it is the single most important piece of equipment on ' +
+        'many industrial sites. It is a separate controller with exactly one job: watch for ' +
+        'conditions that mean the physical process is heading somewhere dangerous, and put it into ' +
+        'a safe state before that happens. It closes a valve, trips a burner (shuts off the fuel ' +
+        'feeding a flame), or shuts an entire unit down. Think of it as a smoke alarm wired directly ' +
+        'to a fire sprinkler: it does not run the building\'s normal heating and lighting, it exists ' +
+        'purely to catch the one specific failure that could kill somebody.\n\n' +
+        'Three properties define it. It is INDEPENDENT of the ordinary control system that runs the ' +
+        'process day to day, deliberately, often built from a different product line and sometimes ' +
+        'even a different manufacturer entirely, so that a failure or a security compromise of the ' +
+        'control system does not take the protection down with it. It is CERTIFIED to a functional ' +
+        'safety standard, meaning independent experts have reviewed its logic and calculated exactly ' +
+        'how often it is allowed to fail, which is why nobody changes it casually or without going ' +
+        'through that formal process again. And it is the LAST LAYER: when it acts, every earlier ' +
+        'protection, every alarm, every operator response, has already failed to prevent the ' +
+        'dangerous condition from developing.\n\n' +
+        'For a security person the consequence is simple and absolute. You do not install anything ' +
+        'on it, you do not scan it, and you do not propose changes to it without the functional ' +
+        'safety engineer, the specialist responsible for it, leading that conversation. Its ' +
+        'independence from everything else is itself the control, and anything you do that couples ' +
+        'it to something else, even with good security intentions, has removed the exact protection ' +
+        'you were hired to strengthen.',
     },
     options: [
       { id: 'a', label: 'It is separate equipment from the control system, deliberately, so one failure does not remove both.' },
@@ -1665,19 +1920,25 @@ const MODULE_OTS_6: Exercise[] = [
       'all that apply.',
     teach: {
       concept:
-        'Triton is the incident that changed how this field thinks, because it crossed a line ' +
-        'people had assumed nobody would cross.\n\n' +
-        'What was reported: malware reached the engineering workstation for the safety system and ' +
-        'attempted to reprogram Triconex safety controllers at a petrochemical facility. It was ' +
-        'discovered because it went wrong: the controllers detected a fault and tripped the process ' +
-        'into a safe shutdown, which is exactly what they are built to do. The unplanned shutdown ' +
-        'is what prompted the investigation that found the malware.\n\n' +
-        'Why it matters is the intent. Attacking a control system can stop a process or damage ' +
-        'equipment. Attacking the SAFETY system removes the protection that stops a dangerous ' +
-        'condition becoming a catastrophic one, and the only reason to do that is to enable ' +
-        'physical harm. It moved the field from arguing about production loss to arguing about ' +
-        'consequences to people, and it is why the independence rule in this module is stated as ' +
-        'absolutely as it is.',
+        '"Malware" is malicious software, a program written to do something harmful, often without ' +
+        'the owner of the affected system knowing it is there. Triton, also known as Trisis, is the ' +
+        'incident that changed how this whole field thinks, because it crossed a line people had ' +
+        'assumed nobody would actually cross.\n\n' +
+        'What was reported: the malware reached the engineering workstation used specifically to ' +
+        'program the safety system (recall, the separate controller whose only job is to make the ' +
+        'process safe), and attempted to reprogram Triconex safety controllers at a petrochemical ' +
+        'facility, a plant that processes oil-derived chemicals. It was discovered only because it ' +
+        'went wrong: the controllers detected a fault caused by the tampering and tripped the ' +
+        'process into a safe shutdown, exactly what they are built to do in response to any ' +
+        'irregularity. That unplanned shutdown is what prompted the investigation that found the ' +
+        'malware sitting there afterward.\n\n' +
+        'Why it matters is the intent behind it. Attacking an ordinary control system can stop a ' +
+        'process or damage equipment. Attacking the SAFETY system specifically removes the one thing ' +
+        'that stops a dangerous condition from becoming a catastrophic one, and the only real reason ' +
+        'to do that is to enable physical harm to people, not just financial loss to a company. It ' +
+        'moved this whole field from arguing mainly about production loss to arguing about ' +
+        'consequences to human life, and it is why the independence rule taught in the previous ' +
+        'exercise is stated as absolutely as it is.',
     },
     options: [
       { id: 'a', label: 'It targeted safety controllers rather than the control system that runs the process.' },
@@ -1726,19 +1987,24 @@ const MODULE_OTS_6: Exercise[] = [
       'of the following are appropriate? Select all that apply.',
     teach: {
       concept:
-        'You can improve the security of a safety system considerably without ever touching it, ' +
-        'and that is the whole approach.\n\n' +
+        'You can improve the security around a safety system considerably without ever touching the ' +
+        'safety system itself, and that is the whole approach this exercise is testing.\n\n' +
         'What is appropriate: controlling PHYSICAL ACCESS to the equipment and to its programming ' +
-        'key switch, which on many safety controllers is the primary protection against ' +
-        'reprogramming and is often left in the wrong position. Controlling access to its ' +
-        'ENGINEERING WORKSTATION, which is how Triton arrived. Monitoring PASSIVELY for any ' +
-        'communication with the safety controllers, since in normal operation there should be very ' +
-        'little and a programming session should be a planned event somebody can point to. And ' +
-        'ensuring changes go through the FUNCTIONAL SAFETY process, which already exists and is ' +
-        'more rigorous than anything security would impose.\n\n' +
+        'key switch, a physical key that must be turned to a different position before the ' +
+        'controller will accept new logic, which on many safety controllers is the primary ' +
+        'protection against reprogramming and is often, in practice, left sitting in the wrong ' +
+        'position out of convenience. Controlling access to its ENGINEERING WORKSTATION, which is ' +
+        'the exact route Triton used to arrive in the previous exercise. Monitoring PASSIVELY for ' +
+        'any communication reaching the safety controllers at all, since in normal operation there ' +
+        'should be very little of it, and a genuine programming session should be a planned event ' +
+        'somebody can point to and explain. And ensuring changes go through the FUNCTIONAL SAFETY ' +
+        'process, the formal review procedure that already exists for this equipment and is more ' +
+        'rigorous than anything a security team would impose on its own.\n\n' +
         'What is not appropriate: scanning it, installing anything on it, or proposing changes to ' +
-        'its configuration through a security change process. The functional safety engineer leads ' +
-        'anything that touches it, and your role is to make the case and then be useful.',
+        'its configuration through an ordinary security change process rather than the safety one. ' +
+        'The functional safety engineer leads anything that actually touches it, and your role is to ' +
+        'make the case for what needs doing and then be useful in getting it done, not to lead the ' +
+        'change yourself.',
     },
     options: [
       { id: 'a', label: 'Controlling physical access to the controllers and to the programming key switch.' },
@@ -1788,19 +2054,25 @@ const MODULE_OTS_6: Exercise[] = [
       'explain your answer.',
     teach: {
       concept:
-        'This request is reasonable from where it is being made and wrong from where you are ' +
-        'standing, and the way you decline decides whether you get a hearing next time.\n\n' +
-        'Do not lead with a rule. Lead with the CONSEQUENCE: this machine programs certified safety ' +
-        'equipment, and anything that changes its behaviour, its timing, or its supported ' +
-        'configuration puts that certification and the vendor support in question. Then the ' +
-        'AUTHORITY: the functional safety process governs changes here, and it is more rigorous ' +
-        'than the security change process rather than less, so this is not an argument about ' +
-        'whether rules apply.\n\n' +
-        'Then, and this is the part that matters, OFFER THE ALTERNATIVE. The security objective is ' +
-        'visibility and control of a sensitive machine, and that is achievable: restrict what it ' +
-        'connects to, control physical and logon access, log its use, and monitor the network ' +
-        'around it. Declining without an alternative reads as obstruction; declining with one reads ' +
-        'as expertise.\n\n' +
+        'An "endpoint agent" is a small monitoring program a security team normally installs on ' +
+        'every ordinary computer to watch for threats, already mentioned earlier in this package as ' +
+        'something that can misbehave on plant equipment. This request is reasonable from where the ' +
+        'security manager is standing, since a Windows machine is a Windows machine to them, and ' +
+        'wrong from where you are standing, and the way you decline it decides whether you get a ' +
+        'hearing the next time you need one.\n\n' +
+        'Do not lead with a rule. Lead with the CONSEQUENCE: this particular machine programs ' +
+        'certified safety equipment, and anything that changes its behaviour, its timing, or its ' +
+        'supported configuration puts that certification and the manufacturer\'s support in ' +
+        'question. Then the AUTHORITY: the functional safety process governs changes to anything in ' +
+        'this boundary, and it is more rigorous than the ordinary security change process rather ' +
+        'than less, so this is not an argument about whether rules apply at all, only about which ' +
+        'rules do.\n\n' +
+        'Then, and this is the part that actually matters, OFFER THE ALTERNATIVE. The genuine ' +
+        'security objective behind the request, visibility and control of a sensitive machine, is ' +
+        'still achievable another way: restrict what it is allowed to connect to, control physical ' +
+        'and logon access to it, log every time it is used, and monitor the network around it ' +
+        'passively. Declining without offering an alternative reads as obstruction; declining with ' +
+        'one reads as expertise.\n\n' +
         'A good answer names the certification or vendor support consequence, says the safety ' +
         'process governs it, and proposes network and access controls instead.',
     },
@@ -1854,19 +2126,26 @@ const MODULE_OTS_6: Exercise[] = [
       'where it goes? Select all that apply.',
     teach: {
       concept:
-        'The most useful idea in OT security is to start from the worst physical outcomes and work ' +
-        'backwards, rather than starting from a list of vulnerabilities and working forwards. ' +
-        'Approaches with names like consequence-driven engineering formalise this, and the core of ' +
-        'it is simple enough to apply without any of them.\n\n' +
+        'A "vulnerability scanner" is an automated tool that checks software against a list of ' +
+        'known flaws and ranks each one it finds as low, medium, high or critical, based purely on ' +
+        'how bad that flaw would be in the abstract. The most useful idea in OT security is to start ' +
+        'from the worst physical outcomes instead, and work backwards from there, rather than ' +
+        'starting from a scanner\'s list of vulnerabilities and working forwards. Approaches with ' +
+        'formal names like consequence-driven engineering exist to systematise this, but the core ' +
+        'idea is simple enough to apply without needing any of that formal apparatus.\n\n' +
         'Ask the engineers what the worst things that could happen on this site are. They will tell ' +
-        'you immediately, because they have thought about it for years: a runaway reaction, a ' +
-        'release, a specific vessel over pressure. Then work backwards to what would have to occur ' +
-        'for each, then to which systems could contribute, and put your effort there.\n\n' +
-        'What this displaces is prioritising by vulnerability severity, which in OT correlates ' +
-        'poorly with consequence. A critical-rated flaw on a machine that displays a graph matters ' +
-        'less than a medium-rated one on a controller that can open a valve, and no scanner knows ' +
-        'the difference. It also gives you something a plant will engage with, because you are ' +
-        'starting from their language rather than yours.',
+        'you immediately, because they have thought about it for years, often as part of their own ' +
+        'safety training: a runaway chemical reaction, a toxic release, a specific vessel going over ' +
+        'pressure and rupturing. Then work backwards to what would physically have to occur for each ' +
+        'of those, then to which systems could contribute to making it happen, and put your effort ' +
+        'exactly there.\n\n' +
+        'What this displaces is prioritising purely by vulnerability severity rating, which in OT ' +
+        'correlates poorly with actual physical consequence. A critical-rated flaw on a machine that ' +
+        'only displays a graph on a screen matters far less than a medium-rated one on a controller ' +
+        'that can open a valve, and no automated scanner knows the difference between the two, ' +
+        'because it has no idea what either machine is physically connected to. Starting from ' +
+        'consequence instead also gives you something a plant will actually engage with, because you ' +
+        'are starting the conversation in their language rather than a scanner\'s.',
     },
     options: [
       { id: 'a', label: 'Start from the worst physical outcomes the engineers can name, and work backwards.' },
@@ -1920,21 +2199,29 @@ const MODULE_OTS_7: Exercise[] = [
       'Which of the following are accurate as widely reported? Select all that apply.',
     teach: {
       concept:
-        'This is the case worth knowing in most detail, because almost nothing about it was exotic ' +
-        'and the whole shape is reusable.\n\n' +
-        'As reported: attackers gained access to the business networks of Ukrainian electricity ' +
-        'distribution companies months in advance, using phishing with malicious documents that ' +
-        'delivered BlackEnergy. They moved from the business network into the control environment, ' +
-        'harvested credentials, and learned the systems. On the day, they used the operators own ' +
-        'remote access and HMI software to open breakers, cutting power to roughly a quarter of a ' +
-        'million customers.\n\n' +
-        'They also did three things to slow recovery: wiped systems with KillDisk, overwrote ' +
-        'firmware on serial-to-Ethernet converters so devices could not be commanded remotely, and ' +
-        'ran a telephone denial of service against the call centres so customers could not report ' +
-        'outages.\n\n' +
-        'The recovery is the part every OT person cites: operators restored power by driving to ' +
-        'substations and closing breakers by hand. The manual fallback existed, people were trained ' +
-        'on it, and it worked.',
+        'A "breaker" here is a large electrical switch that connects or disconnects a section of the ' +
+        'power grid, the industrial-scale version of the circuit breaker in a home fuse box. This is ' +
+        'the case worth knowing in the most detail of any in this module, because almost nothing ' +
+        'about it was technically exotic, and the whole shape of it is directly reusable to think ' +
+        'about your own site.\n\n' +
+        'As reported: attackers gained access to the ordinary business networks of Ukrainian ' +
+        'electricity distribution companies months in advance of the actual outage, using PHISHING, ' +
+        'sending fake emails with malicious documents attached, that delivered a piece of malware ' +
+        'called BlackEnergy once opened. They then moved from that business network into the control ' +
+        'environment, harvested credentials (stole usernames and passwords), and spent time simply ' +
+        'learning how the systems worked. On the day of the attack itself, they used the operators\' ' +
+        'own remote access and HMI software, the legitimate tools built for the job, to open the ' +
+        'breakers, cutting power to roughly a quarter of a million customers.\n\n' +
+        'They also did three things deliberately to slow the recovery afterward: wiped systems with ' +
+        'a destructive tool called KillDisk, overwrote the firmware on serial-to-Ethernet converters ' +
+        '(small devices that translate between an older wired standard and modern networking) so ' +
+        'those devices could no longer be commanded remotely at all, and ran a telephone denial of ' +
+        'service, flooding the call centres with fake calls, so customers could not even report the ' +
+        'outages that were happening.\n\n' +
+        'The recovery is the part every OT person cites, and for good reason: operators restored ' +
+        'power by physically driving to substations and closing the breakers by hand. The manual ' +
+        'fallback existed, people were trained on it in advance, and it worked when the digital ' +
+        'systems could not be trusted.',
     },
     options: [
       { id: 'a', label: 'Initial access was through the business network, months before the outage.' },
@@ -1984,19 +2271,27 @@ const MODULE_OTS_7: Exercise[] = [
       'that apply.',
     teach: {
       concept:
-        'Stuxnet is the origin story of this field, and the details that matter are not the ' +
-        'espionage ones.\n\n' +
-        'As reported: it spread through removable media and networks, used several previously ' +
-        'unknown Windows vulnerabilities, and specifically sought Siemens Step7 engineering ' +
-        'software and particular PLC configurations. Where it found them, it altered the logic ' +
-        'controlling centrifuge frequency converters, varying speeds in a way that damaged the ' +
-        'centrifuges over time.\n\n' +
-        'The part every OT person remembers is what it did to the operators: while manipulating the ' +
-        'process it replayed previously recorded normal values back to the monitoring systems, so ' +
-        'the displays showed a healthy plant. The integrity of what the operator sees is not a ' +
-        'secondary concern, it is the thing that decides whether a human can intervene.\n\n' +
-        'It also crossed into an environment that was not internet-connected, which is why the ' +
-        'removable media lesson in module five is stated as firmly as it is.',
+        'A "centrifuge" here is a machine that spins at extremely high speed to separate materials, ' +
+        'used in uranium enrichment to concentrate the fissile isotope; running one at the wrong ' +
+        'speed can physically tear it apart. Stuxnet is the origin story of this whole field, the ' +
+        'case that first proved software could reach out and physically destroy machinery, and the ' +
+        'details that matter here are not the espionage ones.\n\n' +
+        'As reported: it spread through removable media (USB drives) and ordinary networks, used ' +
+        'several previously unknown Windows vulnerabilities (flaws nobody had found or patched yet, ' +
+        'making them especially valuable and hard to defend against), and specifically sought out ' +
+        'Siemens Step7 engineering software and particular PLC configurations rather than infecting ' +
+        'indiscriminately. Where it found what it was looking for, it altered the logic controlling ' +
+        'centrifuge frequency converters, varying the spin speed in a way that damaged the ' +
+        'centrifuges gradually over time.\n\n' +
+        'The part every OT person remembers is what it did to the operators watching the process: ' +
+        'while manipulating the equipment, it replayed previously recorded normal values back to the ' +
+        'monitoring systems, so the displays showed a perfectly healthy plant the entire time. The ' +
+        'integrity of what an operator sees on screen is not a secondary concern in this field, it ' +
+        'is the single thing that decides whether a human being can notice a problem and intervene ' +
+        'before it becomes serious.\n\n' +
+        'It also crossed into an environment that was not connected to the internet at all, which is ' +
+        'exactly why the removable media lesson in the earlier module about air gaps is stated as ' +
+        'firmly as it is.',
     },
     options: [
       { id: 'a', label: 'It sought specific Siemens engineering software and particular controller configurations.' },
@@ -2045,20 +2340,27 @@ const MODULE_OTS_7: Exercise[] = [
       'following are accurate as reported? Select all that apply.',
     teach: {
       concept:
-        'This case is misremembered constantly, and getting it right changes what you recommend.\n\n' +
-        'As reported: the ransomware affected business and IT systems, not the operational ' +
-        'technology that moves fuel. The company shut the pipeline down as a precaution, and ' +
-        'reporting indicated a significant factor was the inability to use the business systems ' +
-        'that handle billing and measurement, so the company could not reliably account for what it ' +
-        'was delivering.\n\n' +
-        'That is the lesson. The OT was not compromised and the process stopped anyway, because the ' +
-        'business depends on IT systems to operate commercially, and because with the boundary ' +
-        'uncertain the safe decision was to separate the two. A site that cannot say with ' +
-        'confidence whether an IT compromise reached the plant will shut the plant down, which ' +
-        'means the value of good segmentation is not only preventing spread: it is being able to ' +
-        'prove during an incident that spread did not happen.\n\n' +
-        'The other detail worth carrying is the initial access, reported as a VPN account that was ' +
-        'no longer in use and had no multi-factor authentication.',
+        '"Ransomware" is malware that encrypts, meaning scrambles into unreadable form, a victim\'s ' +
+        'files and then demands payment to unscramble them, effectively holding a company\'s own ' +
+        'data hostage. This case is misremembered constantly, even by people working in security, ' +
+        'and getting it right changes what you would actually recommend to a client afterward.\n\n' +
+        'As reported: the ransomware affected business and IT systems, ordinary office computers and ' +
+        'servers, not the operational technology that actually moves fuel through the pipeline. The ' +
+        'company shut the pipeline down itself as a precaution, and reporting indicated a ' +
+        'significant factor was the inability to use the business systems that handle billing and ' +
+        'measurement, so the company could no longer reliably account for what fuel it was actually ' +
+        'delivering to whom.\n\n' +
+        'That is the lesson. The OT itself was not compromised, and the physical process stopped ' +
+        'anyway, because the business depends on ordinary IT systems to operate commercially at all, ' +
+        'and because with the boundary between the two uncertain during the incident, the safe ' +
+        'decision was to separate them completely rather than risk finding out the hard way. A site ' +
+        'that cannot say with confidence whether an IT compromise reached the plant will shut the ' +
+        'plant down regardless, which means the value of good segmentation is not only preventing ' +
+        'spread: it is being able to prove, during the incident itself, that spread did not happen.\n\n' +
+        'The other detail worth carrying is the initial access, reported as a VPN (a private, ' +
+        'remote-access network connection) account that was no longer in active use and had no ' +
+        'multi-factor authentication, meaning a password alone was enough to get in, with no second ' +
+        'check such as a code sent to a phone.',
     },
     options: [
       { id: 'a', label: 'The ransomware affected business and IT systems rather than the operational technology itself.' },
@@ -2108,21 +2410,26 @@ const MODULE_OTS_7: Exercise[] = [
       'facility in Oldsmar, Florida. Which of the following are accurate? Select all that apply.',
     teach: {
       concept:
-        'This case is in the module because of what happened to the story, which is more useful ' +
-        'than the story.\n\n' +
+        'Sodium hydroxide is a strong chemical used in small, carefully controlled amounts to adjust ' +
+        'the acidity of drinking water; at a high enough level it becomes dangerous. This case is in ' +
+        'the module because of what happened to the story afterward, which turns out to be more ' +
+        'useful to know than the original story itself.\n\n' +
         'The initial reporting in February 2021 described an intruder remotely accessing an HMI and ' +
-        'raising the sodium hydroxide setting dramatically, with an operator noticing and reversing ' +
-        'it. It was cited everywhere as proof of the threat to water utilities, including in ' +
-        'government messaging and in a great many conference talks.\n\n' +
+        'raising the sodium hydroxide setting dramatically, with an alert operator noticing the ' +
+        'change on screen and reversing it before any harm was done. It was cited everywhere ' +
+        'afterward as proof of the threat facing water utilities, including in official government ' +
+        'messaging and in a great many security conference talks.\n\n' +
         'Subsequent reporting cast substantial doubt on that account. In 2023 it was reported that ' +
-        'investigators had found no evidence of an intrusion, and that the incident was likely ' +
-        'attributable to operator error, with the town having concluded much the same. The remote ' +
-        'access software genuinely was in use and shared, which is a real weakness; the intrusion ' +
-        'itself is not supported.\n\n' +
-        'The lesson is about this field rather than about water. OT incidents are reported early, ' +
-        'from partial information, into an audience that wants the story to be true, and ' +
-        'corrections travel far less well than the original. If you cite an incident in a report, ' +
-        'check whether the account still stands.',
+        'investigators had found no actual evidence of an intrusion having occurred, and that the ' +
+        'incident was likely attributable to operator error instead, with the town itself having ' +
+        'concluded much the same thing. The remote access software genuinely was in use and shared ' +
+        'among multiple people, which is a real security weakness regardless; the intrusion account ' +
+        'specifically is simply not supported by what investigators later found.\n\n' +
+        'The lesson here is about this field rather than about water treatment specifically. OT ' +
+        'incidents get reported early, from partial and incomplete information, into an audience ' +
+        'that badly wants the dramatic story to be true, and corrections issued years later travel ' +
+        'far less widely than the original headline did. If you ever cite an incident like this in a ' +
+        'report to a client, check whether the account still stands up before you do.',
     },
     options: [
       { id: 'a', label: 'The initial reporting described a remote intruder raising a chemical setting, and was widely repeated.' },
@@ -2170,21 +2477,26 @@ const MODULE_OTS_7: Exercise[] = [
       'what they have in common that is useful for defending a plant.',
     teach: {
       concept:
-        'Collecting incidents is not the point; finding the shared shape is, because that is what ' +
-        'you can defend against.\n\n' +
-        'Three things recur. The ROUTE IN was ordinary: phishing and business network compromise in ' +
-        'Ukraine, removable media for Stuxnet, an unused VPN account at Colonial. None of them ' +
-        'started with an exotic attack on industrial equipment, and that is why the IT boundary and ' +
-        'account hygiene matter so much here.\n\n' +
-        'The ENGINEERING PATH was central: the engineering workstation for Triton, Step7 software ' +
-        'for Stuxnet, the operators own HMI and remote access in Ukraine. Attackers use the ' +
-        'legitimate means of changing the process, because that is what exists and it does not need ' +
-        'an exploit.\n\n' +
-        'And PREPARATION took months. These were not opportunistic. That is discouraging and it is ' +
-        'also the opportunity: a long dwell time is a long period during which ordinary detection ' +
-        'on ordinary IT systems could have found something.\n\n' +
-        'A good answer names the ordinary route in, the use of legitimate engineering access, and ' +
-        'the long preparation as a detection opportunity.',
+        'This is a short-answer exercise asking you to step back from the four individual case ' +
+        'studies covered in this module and find what they have in common, because collecting ' +
+        'incidents as stories is not really the point; finding the shared shape underneath them is, ' +
+        'since that shape is what you can actually build a defence against.\n\n' +
+        'Three things recur across all four. The ROUTE IN was ordinary in every case: phishing and a ' +
+        'business network compromise in Ukraine, removable media for Stuxnet, an unused VPN account ' +
+        'at Colonial. None of them started with an exotic, never-seen-before attack on specialised ' +
+        'industrial equipment, and that is exactly why the ordinary IT boundary and basic account ' +
+        'hygiene, things like disabling unused accounts and requiring multi-factor authentication, ' +
+        'matter so much here.\n\n' +
+        'The ENGINEERING PATH was central in every case too: the engineering workstation for Triton, ' +
+        'the Step7 programming software for Stuxnet, the operators\' own HMI and remote access ' +
+        'software in Ukraine. Attackers use the legitimate, everyday means of changing the process, ' +
+        'because that access already exists for the people who run the plant, and using it does not ' +
+        'require finding a technical exploit at all.\n\n' +
+        'And PREPARATION took months in each case. None of these were opportunistic, done on a ' +
+        'whim. That is discouraging, since it shows real planning and patience, and it is also the ' +
+        'opportunity: a long DWELL TIME, meaning the period an attacker spends quietly inside a ' +
+        'network before acting, is a long window during which ordinary detection on ordinary IT ' +
+        'systems could have found something and stopped it before any of these incidents happened.',
     },
     hints: [
       'Look at how each one got in, not at what it did once inside.',
@@ -2241,19 +2553,24 @@ const MODULE_OTS_8: Exercise[] = [
       'accurate about how the job works? Select all that apply.',
     teach: {
       concept:
-        'This role has less authority and more influence than its IT equivalent, and people who ' +
-        'expect the reverse struggle.\n\n' +
-        'The CONTROLS ENGINEERS own the systems and will implement most of what actually changes. ' +
-        'They have usually been there far longer than you and have seen security initiatives ' +
-        'arrive and leave. The OPERATORS run the process and notice things no monitoring will: an ' +
-        'operator saying a valve is behaving oddly is a security signal worth more than most ' +
-        'alerts. The PLANT MANAGER carries accountability for output and safety and makes the ' +
-        'decisions you recommend into. And the IT SECURITY TEAM has the tooling, the budget and ' +
-        'usually the wrong instincts for this environment, so part of your job is translating in ' +
-        'both directions.\n\n' +
-        'What does not work is arriving with authority. You will be right about something ' +
-        'important in your first month and be ignored, and the way through that is not escalation, ' +
-        'it is having been useful about three smaller things first.',
+        'This final module is about the human side of the job rather than the technical side, and ' +
+        'it starts with who you actually work alongside. This role has less formal authority and ' +
+        'more influence than its equivalent in an ordinary IT security department, and people who ' +
+        'expect the reverse struggle badly when they arrive.\n\n' +
+        'The CONTROLS ENGINEERS own the systems and will implement most of what actually changes on ' +
+        'the ground. They have usually been at the site far longer than you have, and have watched ' +
+        'security initiatives arrive with fanfare and quietly leave again. The OPERATORS run the ' +
+        'process day to day and notice things no monitoring software ever will: an operator simply ' +
+        'saying a valve is behaving oddly is a security signal worth more than most automated ' +
+        'alerts. The PLANT MANAGER carries accountability for both output and safety, and is the ' +
+        'person who ultimately makes the decisions you recommend into reality or does not. And the ' +
+        'IT SECURITY TEAM has the tooling, the budget and usually the wrong instincts for this ' +
+        'physical environment, so part of your job becomes translating in both directions between ' +
+        'them and the plant.\n\n' +
+        'What does not work is arriving and expecting to be obeyed on authority alone. You will be ' +
+        'right about something important in your first month and be politely ignored anyway, and ' +
+        'the way through that is not escalating to somebody\'s boss, it is having already been ' +
+        'useful about three smaller things first.',
     },
     options: [
       { id: 'a', label: 'Controls engineers own the systems and will implement most of what changes.' },
@@ -2301,19 +2618,25 @@ const MODULE_OTS_8: Exercise[] = [
       'accurate about how that has to happen? Select all that apply.',
     teach: {
       concept:
-        'Plant change control is usually more rigorous than IT change control, not less, and ' +
-        'security people arriving from IT frequently assume the opposite because it is slower.\n\n' +
-        'Even a passive sensor is a change. It needs a description of what is being added and ' +
-        'where, an assessment of what could go wrong including the physical consequence, a review ' +
-        'by people who understand the process, a window, and a rollback. The tap or span port ' +
-        'itself is a change to network equipment, and on some plants that switch is part of a ' +
-        'validated system.\n\n' +
-        'What makes this workable rather than infuriating is preparation. Bring the answers before ' +
-        'you are asked: exactly what the device does and does not transmit, what happens if it ' +
-        'fails, what it is connected to, how it is powered, and who supports it. An engineer whose ' +
-        'questions you have already answered will help you get it approved. One who has to drag ' +
-        'each answer out of you will conclude you have not thought it through, and they will be ' +
-        'right.',
+        '"Change control" is the formal process an organisation uses to review and approve any ' +
+        'modification before it is made, rather than letting people simply make changes whenever ' +
+        'they feel like it. Plant change control is usually more rigorous than IT change control, ' +
+        'not less, and security people arriving from an ordinary IT background frequently assume ' +
+        'the opposite, mistaking slowness for weakness rather than for thoroughness.\n\n' +
+        'Even a purely passive sensor, one that only listens and never sends anything, is still a ' +
+        'change. It needs a written description of what is being added and exactly where, an ' +
+        'assessment of everything that could go wrong including the physical consequence to the ' +
+        'process, a review by people who actually understand that process, a scheduled window to do ' +
+        'the work in, and a rollback plan, a tested way to undo it if something goes wrong. The tap ' +
+        'or span port itself is a change to network equipment, and on some plants that particular ' +
+        'switch is part of a formally validated system, meaning touching it at all triggers its own ' +
+        'review.\n\n' +
+        'What makes this workable rather than simply infuriating is preparation. Bring the answers ' +
+        'before you are even asked: exactly what the device does and does not transmit, what happens ' +
+        'if it fails, what it is physically connected to, how it is powered, and who supports it ' +
+        'going forward. An engineer whose questions you have already answered on paper will help you ' +
+        'get the change approved quickly. One who has to drag each answer out of you individually ' +
+        'will rightly conclude you have not thought it through.',
     },
     options: [
       { id: 'a', label: 'A passive sensor is still a change and goes through the plant change process.' },
@@ -2360,19 +2683,28 @@ const MODULE_OTS_8: Exercise[] = [
       'responding? Select all that apply.',
     teach: {
       concept:
-        'Everything you learned about containment has to be renegotiated here, because the ' +
-        'containment action can be more dangerous than the intrusion.\n\n' +
-        'The decision to isolate, shut down or continue running is a PLANT decision, made with the ' +
-        'plant manager and the engineers, weighing safety and process state. Disconnecting a ' +
-        'controller mid-batch can leave the process in a condition nobody has a procedure for. ' +
-        'There is often a SAFE STATE to reach first, and reaching it takes time.\n\n' +
-        'Evidence collection is constrained too: you may not be able to take a controller offline ' +
-        'to image it, and volatile evidence on an HMI competes with the need to keep the operator ' +
-        'able to see the process. And the response team includes people an IT incident would never ' +
-        'involve: operations, safety, and often a regulator, because in several sectors an ' +
-        'incident affecting a safety or environmental system is reportable.\n\n' +
-        'What holds constant is the value of knowing in advance. The time to agree who can order a ' +
-        'shutdown is not during one.',
+        '"Containment" in security means acting to stop an intrusion from spreading further, ' +
+        'typically by isolating or disconnecting the affected system as quickly as possible. Almost ' +
+        'everything you might have learned about containment from ordinary IT incident response has ' +
+        'to be renegotiated here, because on a plant, the containment action itself can be more ' +
+        'physically dangerous than the intrusion it is responding to.\n\n' +
+        'The decision to isolate a system, shut it down, or keep it running is a PLANT decision, ' +
+        'made together with the plant manager and the engineers, weighing safety and the current ' +
+        'state of the process rather than being made unilaterally by security. Disconnecting a ' +
+        'controller in the middle of a batch (a single production run) can leave the physical ' +
+        'process in a condition nobody has a written procedure for handling. There is often a SAFE ' +
+        'STATE to reach first, meaning bringing the process to a stable, non-hazardous condition ' +
+        'before touching anything else, and reaching it safely takes real time.\n\n' +
+        'Evidence collection is constrained too: you may not be able to take a controller offline to ' +
+        'image it (make a forensic copy of its contents for later analysis), and volatile evidence, ' +
+        'information that only exists while a system is running and disappears the moment it stops, ' +
+        'on an HMI competes directly with the operator\'s need to keep watching the process live. And ' +
+        'the response team includes people an ordinary IT incident would never involve at all: ' +
+        'operations staff, a safety officer, and often a government regulator, because in several ' +
+        'sectors an incident affecting a safety or environmental system must legally be reported.\n\n' +
+        'What holds constant, whatever the specifics of an incident, is the value of knowing all of ' +
+        'this in advance. The time to agree who has the authority to order a shutdown is not in the ' +
+        'middle of one.',
     },
     options: [
       { id: 'a', label: 'Isolating or shutting down is a plant decision, weighing process state and safety.' },
@@ -2419,16 +2751,23 @@ const MODULE_OTS_8: Exercise[] = [
       'sentences, say what you would do in your first ninety days.',
     teach: {
       concept:
-        'The instinct is to assess and report. On a plant that produces a document nobody asked ' +
-        'for, from somebody nobody knows, about equipment you have not seen, and it lands badly.\n\n' +
-        'What works is a different order. LEARN THE PROCESS first: walk the plant with an engineer, ' +
-        'understand what it makes and what the worst outcomes would be, and let the people who run ' +
-        'it explain it to you. BUILD THE INVENTORY next, passively and by walking, because ' +
-        'everything later depends on it and most sites do not have one, so producing it is ' +
-        'immediately useful to people other than you.\n\n' +
-        'Then FIND SOMETHING SMALL AND FIX IT, ideally something that annoys the engineers, ' +
-        'because credibility is built by contribution rather than by findings. Only then ASSESS, ' +
-        'and when you do, frame it by consequence in the language you learned in week one.\n\n' +
+        'This closing exercise asks you to plan the actual opening weeks of a real job, pulling ' +
+        'together the working relationships from earlier in this module with everything the rest of ' +
+        'the package has taught. The natural instinct when starting a new security role is to ' +
+        'assess and report. On a plant, that produces a document nobody asked for, written by ' +
+        'somebody nobody knows yet, about equipment that somebody has not actually seen in person, ' +
+        'and it lands badly every time.\n\n' +
+        'What works is a different order entirely. LEARN THE PROCESS first: walk the plant with an ' +
+        'engineer, understand what it actually makes and what the worst possible outcomes would be, ' +
+        'and let the people who run it every day explain it in their own words. BUILD THE INVENTORY ' +
+        'next, passively and by physically walking the site as covered earlier in this package, ' +
+        'because everything later depends on knowing what exists, and most sites genuinely do not ' +
+        'have one, so producing it is immediately useful to people other than just you.\n\n' +
+        'Then FIND SOMETHING SMALL AND FIX IT, ideally something that has been quietly annoying the ' +
+        'engineers for a while, because credibility here is built by contributing something useful ' +
+        'rather than by producing findings about what is wrong. Only then ASSESS, and when you do, ' +
+        'frame it by physical consequence in the same language the site already uses, the way this ' +
+        'whole package has been teaching.\n\n' +
         'A good answer puts learning the process and building an inventory before assessment, and ' +
         'names relationship or credibility with engineers and operators as a deliberate goal rather ' +
         'than a side effect.',
@@ -2481,20 +2820,25 @@ const MODULE_OTS_8: Exercise[] = [
       'Which of the following are accurate about OT security as a career? Select all that apply.',
     teach: {
       concept:
-        'It is a small field with unusual dynamics, and knowing them helps you decide whether to ' +
-        'enter it.\n\n' +
-        'DEMAND EXCEEDS SUPPLY, consistently, because the skill needs both process understanding ' +
-        'and security understanding and few people have both. Regulation is increasing in several ' +
-        'sectors, which sustains it. The WORK IS SITE-BASED more than most security roles: expect ' +
-        'travel, plant visits, and sometimes protective equipment, which suits some people and not ' +
-        'others. It is BUSINESS HOURS with maintenance windows rather than a rota, so it is one of ' +
-        'the more predictable security careers.\n\n' +
-        'And it is DEFENSIBLE against the pressures that reshape other security work, because the ' +
-        'equipment has a twenty-year life and the judgement is physical, which makes it a poor ' +
-        'candidate for the kind of automation that is changing IT security roles.\n\n' +
-        'The honest caveat is that it is small: fewer employers, fewer roles, and often ' +
-        'concentrated geographically around industry, so mobility can be lower than in mainstream ' +
-        'security.',
+        'This final exercise steps back from the day-to-day work to look at the career itself. It is ' +
+        'a small field with unusual dynamics compared to mainstream cybersecurity, and knowing them ' +
+        'in advance helps you decide honestly whether to enter it.\n\n' +
+        'DEMAND EXCEEDS SUPPLY, consistently, because the skill needed combines both process ' +
+        'understanding and security understanding, and few people genuinely have both at once. ' +
+        'Government regulation is increasing in several industrial sectors, which keeps that demand ' +
+        'sustained rather than a temporary spike. The WORK IS SITE-BASED far more than most security ' +
+        'roles: expect travel, physical plant visits, and sometimes wearing protective equipment ' +
+        'like a hard hat and safety glasses, which genuinely suits some people and not others. It is ' +
+        'BUSINESS HOURS built around maintenance windows rather than a round-the-clock shift rota, so ' +
+        'it is one of the more predictable security careers to build a life around.\n\n' +
+        'And it is DEFENSIBLE against the pressures reshaping other security work, such as growing ' +
+        'automation, because the equipment involved has a twenty-year service life and the judgement ' +
+        'required is fundamentally physical, which makes it a poor candidate for the kind of ' +
+        'software automation that is changing many ordinary IT security roles.\n\n' +
+        'The honest caveat is that it is genuinely small as a field: fewer employers, fewer open ' +
+        'roles at any given time, and often concentrated geographically around wherever heavy ' +
+        'industry actually is, so moving employers or cities can be harder than in mainstream ' +
+        'security work.',
     },
     options: [
       { id: 'a', label: 'Demand consistently exceeds supply, because both process and security understanding are needed.' },
