@@ -47,6 +47,18 @@ import {
   TERMINAL_KESTRELPORT,
   VAULT_MERIDIANEX,
 } from './boards-specialist.js';
+import {
+  BRIDGE_NORTHWAKE,
+  GROUNDSTATION_ORBITAL,
+  PIPELINE_BRANDT,
+  SIGNAL_FENWICK,
+} from './boards-infrastructure.js';
+import {
+  BUREAU_CASTELLAN,
+  CLEARING_HALCYON,
+  IDENTITY_SENTINEL,
+  WAGER_GOLDCREST,
+} from './boards-platforms.js';
 
 const SCENARIOS = new Map<string, RedBlueScenario>([
   [RECON_NORTHWIND.id, RECON_NORTHWIND],
@@ -91,6 +103,14 @@ const POSITIONAL_LIST: PositionalScenario[] = [
   TERMINAL_KESTRELPORT,
   PROGRAMME_HALSTEAD,
   CONSOLE_ARGENT,
+  SIGNAL_FENWICK,
+  PIPELINE_BRANDT,
+  GROUNDSTATION_ORBITAL,
+  BRIDGE_NORTHWAKE,
+  BUREAU_CASTELLAN,
+  CLEARING_HALCYON,
+  IDENTITY_SENTINEL,
+  WAGER_GOLDCREST,
 ];
 
 const POSITIONAL = new Map<string, PositionalScenario>(POSITIONAL_LIST.map((s) => [s.id, s]));
