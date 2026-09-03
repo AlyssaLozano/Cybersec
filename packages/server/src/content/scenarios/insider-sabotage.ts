@@ -151,9 +151,9 @@ export const LAST_DAY: Scenario = {
       id: 'ev.7',
       atSeconds: 850,
       surface: 'alert-queue',
-      summary: 'Scheduled patching activity on the Felixstowe depot servers tonight',
+      summary: 'Scheduled patching activity on the Newark depot servers tonight',
       detail:
-        'Four servers at Felixstowe show reboots and service restarts between 01:00 and 02:20. ' +
+        'Four servers at Newark show reboots and service restarts between 01:00 and 02:20. ' +
         'This is the monthly patching window, documented in the change record, executed by the ' +
         'platform automation account, and all four came back healthy. Rule history: fired 24 times ' +
         'in thirty days, 24 closed as scheduled maintenance.',
@@ -386,7 +386,7 @@ export const LAST_DAY_TRUTH: ScenarioTruth = {
       outOfLaneActions: ['act.triage-high', 'act.isolate', 'act.declare', 'act.preserve'],
       escalateTo: [],
       why:
-        'Four servers rebooting and restarting services at Felixstowe between 01:00 and 02:20, ' +
+        'Four servers rebooting and restarting services at Newark between 01:00 and 02:20, ' +
         'overlapping the start of the real incident. It is the monthly patching window with a change ' +
         'record, executed by the platform automation account, and all four came back healthy. ' +
         'Twenty-four of twenty-four this month were the same. The check is which account and is ' +
@@ -395,7 +395,7 @@ export const LAST_DAY_TRUTH: ScenarioTruth = {
         'session, and the discriminator is the one that runs through the whole board: automation ' +
         'account with a change record, or a named human with neither.',
       standIn:
-        'Four Felixstowe servers rebooting between 01:00 and 02:20 is the monthly patching window, ' +
+        'Four Newark servers rebooting between 01:00 and 02:20 is the monthly patching window, ' +
         'change record exists, platform automation account, all four healthy. Twenty-four of ' +
         'twenty-four this month. Automation with a change record, not a person without one. Closing ' +
         'it.',

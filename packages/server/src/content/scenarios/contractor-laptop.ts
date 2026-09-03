@@ -151,7 +151,7 @@ export const CONTRACTORS_LAPTOP: Scenario = {
       summary: 'Eleven handheld scanners failed to check in this morning',
       detail:
         'Eleven picking scanners have not reported since 06:00. The wireless controller at the ' +
-        'Felixstowe site was rebooted at 05:55 as part of scheduled firmware maintenance with a ' +
+        'Newark site was rebooted at 05:55 as part of scheduled firmware maintenance with a ' +
         'change record, and scanners re-associate on their next scan cycle. Nine have already come ' +
         'back. Rule history: fired 55 times in thirty days, 54 closed as wireless maintenance.',
       source: 'adf-wifi-01',
@@ -405,7 +405,7 @@ export const CONTRACTORS_LAPTOP_TRUTH: ScenarioTruth = {
         'network, so they feel adjacent, and the tell that they are not is direction: our devices ' +
         'went quiet and came back, while the one that matters arrived and stayed.',
       standIn:
-        'Eleven scanners have not checked in since 06:00. Wireless controller at Felixstowe was ' +
+        'Eleven scanners have not checked in since 06:00. Wireless controller at Newark was ' +
         'rebooted at 05:55 for scheduled firmware, change record exists, and nine are already back. ' +
         'Fifty-four of fifty-five this month were the same. Ours went quiet and are returning. ' +
         'Closing it.',

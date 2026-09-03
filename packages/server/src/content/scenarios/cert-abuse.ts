@@ -78,7 +78,7 @@ export const CERTIFICATE_OF_TRUST: Scenario = {
       summary: 'Administrator account authenticated from a warehouse floor terminal',
       detail:
         'The adf-svc-wmsadmin account authenticated to the warehouse management system at 07:12 ' +
-        'from ADF-WS-3312, a shared terminal on the Felixstowe picking floor. That account has ' +
+        'from ADF-WS-3312, a shared terminal on the Newark picking floor. That account has ' +
         'ninety days of history and has only ever been used from the two administrative jump ' +
         'hosts. The authentication succeeded on the first attempt and used no password. Rule ' +
         'history: fired 18 times in thirty days, 16 closed as engineers working from unusual ' +
@@ -202,7 +202,7 @@ export const CERTIFICATE_OF_TRUST_TRUTH: ScenarioTruth = {
         'other than a password was presented, and that is worth ten minutes from somebody.',
       standIn:
         'Admin account authenticated to the warehouse system at 07:12 from a shared terminal on the ' +
-        'Felixstowe picking floor. Ninety days of history and it has only ever come from the two ' +
+        'Newark picking floor. Ninety days of history and it has only ever come from the two ' +
         'jump hosts. No password used and it worked first time. The account holder says it was not ' +
         'them. Raising it.',
       commandOptions: [

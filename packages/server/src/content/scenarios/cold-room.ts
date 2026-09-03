@@ -49,7 +49,7 @@ export const COLD_ROOM: Scenario = {
   difficulty: 'advanced',
   durationMinutes: 60,
   situation:
-    'It is 03:20 at Ardal Freight. Three chilled bays at the Immingham depot are running warmer ' +
+    'It is 03:20 at Ardal Freight. Three chilled bays at the Bayonne depot are running warmer ' +
     'than they should and the building management system says everything is fine. There are ' +
     'nineteen tonnes of pharmaceutical freight in bay four.',
   roles: [
@@ -142,7 +142,7 @@ export const COLD_ROOM: Scenario = {
       detail:
         'The building management segment is routed to the office VLAN through an exception added in ' +
         '2019 so the facilities team could view dashboards from their desks. Every workstation in ' +
-        'the Immingham office can reach the controller management interface. The interface ' +
+        'the Bayonne office can reach the controller management interface. The interface ' +
         'authenticates with a shared password held in the facilities team password manager, ' +
         'unchanged since commissioning.',
       source: 'adf-bms-01',
@@ -197,7 +197,7 @@ export const COLD_ROOM_TRUTH: ScenarioTruth = {
         'Isolation is graded out of lane on this row and it will feel wrong, which is what ev.5 is ' +
         'for.',
       standIn:
-        'Night supervisor at Immingham has a handheld reading 4.1, 4.3 and 3.9 in bays two, four and ' +
+        'Night supervisor at Bayonne has a handheld reading 4.1, 4.3 and 3.9 in bays two, four and ' +
         'seven against a setpoint of 2.0, and the console says 2.0 with no alarm. Two measurements ' +
         'of the same thing disagree. Bay four is nineteen tonnes of pharma with a two to eight ' +
         'limit. Declaring.',
@@ -375,7 +375,7 @@ export const COLD_ROOM_TRUTH: ScenarioTruth = {
         'The second route, and it is the one nobody in the estate thinks of as a route at all. The ' +
         'building management segment is reachable from the office VLAN through a 2019 exception ' +
         'added so facilities could see dashboards from their desks, which was a reasonable request ' +
-        'answered in the simplest way available. So every workstation in the Immingham office can ' +
+        'answered in the simplest way available. So every workstation in the Bayonne office can ' +
         'reach the management interface, and that interface authenticates with a shared password ' +
         'held in a team password manager and unchanged since commissioning. Combined, that is a ' +
         'route from any phished office laptop straight to eleven refrigeration circuits. The ' +
@@ -384,7 +384,7 @@ export const COLD_ROOM_TRUTH: ScenarioTruth = {
         'control.',
       standIn:
         'The building management segment is routed to the office VLAN through a 2019 exception so ' +
-        'facilities could see dashboards at their desks. Every workstation in the Immingham office ' +
+        'facilities could see dashboards at their desks. Every workstation in the Bayonne office ' +
         'can reach the management interface, and it authenticates with a shared password from the ' +
         'team password manager, unchanged since commissioning. Any phished office laptop reaches ' +
         'eleven refrigeration circuits. It is separate on the diagram and routed in the config.',
