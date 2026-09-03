@@ -12,9 +12,11 @@
 import type {
   AnswerFormat,
   Exercise,
+  ExerciseKind,
   LearningModule,
   LearningPackage,
   PackageSummary,
+  PracticeItem,
 } from '@soc/shared';
 
 import { queueForStudent } from '../services/alerts.js';
@@ -347,6 +349,43 @@ export function packageSummaries(): PackageSummary[] {
  * An exercise can still override with `answerFormat` where the default is
  * wrong. Nothing here reveals content -- only length and shape.
  */
+/**
+ * The answer surface a practice drill needs, which is not always its parent's.
+ *
+ * A drill on a multiple-choice exercise is usually free text: the parent offers
+ * four options and the drill asks the student to work the same thing out and say
+ * it, which removes the guess floor that makes five multiple-choice repetitions
+ * worth so little. That only works if the client renders a text box for the
+ * drill rather than the parent's checkboxes.
+ *
+ * Before this existed the client rendered the parent's surface for every drill,
+ * so those drills could be submitted only as option ticks and their
+ * `answer-mentions` checks never saw any text. They were unpassable, and their
+ * tests still went green because a test can hand the grader an answer that the
+ * interface gives a student no way to type.
+ */
+export function practiceKindOf(drill: PracticeItem, exercise: Exercise): ExerciseKind {
+  const types = new Set(drill.checks.map((check) => check.type));
+
+  if (types.has('answer-mentions')) return 'short-answer';
+  if (types.has('choice-equals')) return 'multiple-choice';
+  if (drill.modelId !== undefined) return 'model-probe';
+  for (const type of types) {
+    if (type.startsWith('probe-') || type.startsWith('defence-')) return 'model-probe';
+    if (type.startsWith('triage-')) return 'alert-triage';
+  }
+  // Anything grading output, a command or the filesystem is terminal work.
+  return exercise.kind === 'terminal' ? 'terminal' : 'terminal';
+}
+
+/** The length and shape guidance for a drill, computed from its own checks. */
+export function practiceAnswerFormatFor(
+  drill: PracticeItem,
+  exercise: Exercise,
+): AnswerFormat | undefined {
+  return answerFormatFor({ ...exercise, checks: drill.checks });
+}
+
 export function answerFormatFor(exercise: Exercise): AnswerFormat | undefined {
   if (exercise.answerFormat) return exercise.answerFormat;
 

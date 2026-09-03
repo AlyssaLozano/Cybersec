@@ -1086,8 +1086,12 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
                 )
               ) : (
                 <WrittenAnswer
-                  kind={detail.exercise.kind}
-                  options={detail.exercise.options ?? []}
+                  /* A drill can need a different surface from its parent: a
+                     drill on a multiple-choice exercise is usually free text,
+                     which is what removes the guess floor. Rendering the
+                     parent's checkboxes there made those drills unanswerable. */
+                  kind={activePractice?.kind ?? detail.exercise.kind}
+                  options={activePractice ? [] : (detail.exercise.options ?? [])}
                   busy={busy}
                   onSubmit={submit}
                 />

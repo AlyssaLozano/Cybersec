@@ -23,7 +23,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Exercise, PracticeItem } from '@soc/shared';
 
-import { PACKAGES } from './index.js';
+import { PACKAGES, practiceAnswerFormatFor, practiceKindOf } from './index.js';
 import { evaluate } from './validate.js';
 import { BASE_IMAGE } from '../vfs/image.js';
 import { emptyOverlay } from '../vfs/types.js';
@@ -89,6 +89,46 @@ describe('written practice drills', () => {
         );
       });
     }
+  });
+
+  describe('a drill is answerable in the interface, not only by the grader', () => {
+    /*
+     * The bug this catches, found the hard way: the client rendered the PARENT
+     * exercise's answer surface for every drill. On a multiple-choice parent
+     * that is a set of checkboxes, so a drill graded with `answer-mentions`
+     * received option ids and never any text, and could not be passed by anybody
+     * however correct their reasoning.
+     *
+     * Every test in this file still went green, because a test can hand the
+     * grader an answer the interface gives a student no way to type. That is the
+     * gap between "the content is right" and "the product works", and it is why
+     * this asserts on the surface rather than on the checks.
+     */
+    for (const { exercise, drill } of WRITTEN_DRILLS) {
+      it(`${drill.id} is offered a text box`, () => {
+        expect(practiceKindOf(drill, exercise)).toBe('short-answer');
+      });
+    }
+
+    it('every free-text drill in the catalogue gets one, not just this package', () => {
+      const freeText = PACKAGES.flatMap((pkg) =>
+        pkg.modules.flatMap((module) =>
+          module.exercises.flatMap((exercise) =>
+            exercise.practice
+              .filter((drill) => drill.checks.some((check) => check.type === 'answer-mentions'))
+              .map((drill) => ({ exercise, drill })),
+          ),
+        ),
+      );
+
+      expect(freeText.length).toBeGreaterThan(0);
+      for (const { exercise, drill } of freeText) {
+        expect(practiceKindOf(drill, exercise), drill.id).toBe('short-answer');
+        // And it must be told how long an answer to write, or the box has no
+        // guidance on it and the student guesses.
+        expect(practiceAnswerFormatFor(drill, exercise), drill.id).toBeDefined();
+      }
+    });
   });
 
   describe('drill ids are unique and namespaced under their parent', () => {

@@ -53,6 +53,7 @@ import type {
   LearnerProfile,
   Track,
   Evaluation,
+  AnswerFormat,
   ExerciseKind,
   PackageSummary,
   ProgressOverview,
@@ -207,7 +208,14 @@ export interface ExerciseDetail {
    */
   consultedAlertIds: string[];
   /** Optional extra drills on the same skill. Prompts only; no answers. */
-  practice: Array<{ id: string; prompt: string }>;
+  practice: Array<{
+    id: string;
+    prompt: string;
+    teach?: { note: string; syntax?: string };
+    /** The surface this drill needs, which may differ from its parent's. */
+    kind: ExerciseKind;
+    answerFormat?: AnswerFormat;
+  }>;
   practiceState: Array<{ practiceId: string; passed: boolean; attempts: number }>;
   nextExerciseId: string | null;
   /** Present once passed, or once the student asked to be shown the answer. */

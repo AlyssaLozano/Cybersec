@@ -12,6 +12,8 @@ import {
   getPackage,
   nextExerciseId,
   packageSummaries,
+  practiceAnswerFormatFor,
+  practiceKindOf,
   toStudentView,
 } from '../content/index.js';
 import { TRACKS, getTrack } from '../content/tracks.js';
@@ -204,6 +206,12 @@ learningRouter.get(
         id: drill.id,
         prompt: drill.prompt,
         teach: drill.teach,
+        // The surface this drill needs, which may differ from its parent's: a
+        // drill on a multiple-choice exercise is usually free text. Safe to
+        // ship, and it has to be, or the client cannot render an input the
+        // student can actually answer with.
+        kind: practiceKindOf(drill, exercise),
+        answerFormat: practiceAnswerFormatFor(drill, exercise),
       })),
       practiceState,
       nextExerciseId: nextExerciseId(exerciseId),
