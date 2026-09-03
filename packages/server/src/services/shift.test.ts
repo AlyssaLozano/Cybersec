@@ -4,6 +4,7 @@ import { RoomError, scheduleRoom, takeSeat } from './rooms.js';
 import {
   boardFor,
   buildClaim,
+  buildReadout,
   canClose,
   canStart,
   closeShift,
@@ -181,7 +182,8 @@ describe('closing a shift', () => {
     const running = startShift(seatedRoom(), LEAD.userId, RUNNING);
     expect(canClose(running, OPERATOR.userId).ok).toBe(false);
     expect(canClose(running, LEAD.userId).ok).toBe(true);
-    expect(closeShift(running, LEAD.userId).status).toBe('complete');
+    const readout = buildReadout(running, { findings: ['Credential was already held.'], mitigations: [] });
+    expect(closeShift(running, LEAD.userId, readout, RUNNING).status).toBe('complete');
   });
 
   /*
@@ -192,6 +194,50 @@ describe('closing a shift', () => {
   it('does not require every event to have been worked', () => {
     const running = startShift(seatedRoom(), LEAD.userId, new Date('2026-09-02T19:00:05Z'));
     expect(canClose(running, LEAD.userId).ok).toBe(true);
+  });
+});
+
+describe('the readout', () => {
+  const running = () => startShift(seatedRoom(), LEAD.userId, RUNNING);
+
+  /*
+   * The readout is the hinge of the whole review. It is what the floor believed
+   * at the moment it stopped, and the review is worth something only because it
+   * compares that against what was true. A readout written after the answer key
+   * is visible is a transcription, which is why it is taken at close and never
+   * rewritten.
+   */
+  it('refuses to close on nothing', () => {
+    expect(() => buildReadout(running(), { findings: [], mitigations: [] })).toThrow(/Say what you found/);
+    expect(() => buildReadout(running(), { findings: ['   '], mitigations: [] })).toThrow();
+  });
+
+  it('accepts a floor that did not settle it', () => {
+    const readout = buildReadout(running(), {
+      findings: ['We could not establish whether the administrator knew.'],
+      mitigations: [],
+    });
+    expect(readout.findings).toHaveLength(1);
+  });
+
+  /*
+   * Named rather than counted. A review saying "three seats did not file" lets
+   * everybody assume it was somebody else, and the chairs that went quiet are
+   * usually the finding.
+   */
+  it('names the chairs nobody sat in', () => {
+    const readout = buildReadout(running(), { findings: ['Something.'], mitigations: [] });
+    expect(readout.missingReports.length).toBeGreaterThan(0);
+    expect(readout.missingReports).not.toContain('ir-lead');
+    expect(readout.missingReports).not.toContain('soc-operator');
+  });
+
+  it('records when the shift was closed, from the room clock', () => {
+    const room = running();
+    const readout = buildReadout(room, { findings: ['Done.'], mitigations: [] });
+    const closed = closeShift(room, LEAD.userId, readout, new Date('2026-09-02T19:42:00Z'));
+    expect(closed.closedAtSeconds).toBe(2520);
+    expect(closed.readout?.findings).toEqual(['Done.']);
   });
 });
 
@@ -216,7 +262,8 @@ describe('every scenario can actually be run', () => {
       const board = boardFor(running, 'ir-lead', RUNNING);
       expect(board.events.length, `${scenario.id} showed the lead nothing at 5 minutes`).toBeGreaterThan(0);
       expect(board.briefing, `${scenario.id} has no lead briefing`).not.toBeNull();
-      expect(closeShift(running, LEAD.userId).status).toBe('complete');
+      const readout = buildReadout(running, { findings: ['Closed after the first pass.'], mitigations: [] });
+      expect(closeShift(running, LEAD.userId, readout, RUNNING).status).toBe('complete');
     }
   });
 });

@@ -30,7 +30,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SocRoleId } from '@soc/shared';
 
 import { ApiCallError, rooms } from '../lib/api';
-import type { ClaimScoreView, RoomDetail, SeatBoard, SeatView } from '../lib/api';
+import type {
+  AfterActionView,
+  ClaimScoreView,
+  RoomDetail,
+  SeatBoard,
+  SeatView,
+} from '../lib/api';
 import { WatchFloor } from './WatchFloor';
 
 interface Props {
@@ -51,6 +57,7 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [readingOut, setReadingOut] = useState(false);
 
   const mine: SocRoleId | null = useMemo(
     () =>
@@ -130,10 +137,11 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
     }
   }
 
-  async function close() {
+  async function close(readout: { findings: string[]; mitigations: string[] }) {
     setBusy(true);
     try {
-      await rooms.close(roomId);
+      await rooms.close(roomId, readout);
+      setReadingOut(false);
       await loadChart();
     } catch (caught) {
       setError(caught instanceof ApiCallError ? caught.error.message : 'Could not close the shift.');
@@ -147,6 +155,13 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
 
   const { room, seating, readiness } = detail;
   const seat = seating.find((s) => s.role === mine) ?? null;
+
+  if (readingOut) {
+    return <ReadoutForm busy={busy} onCancel={() => setReadingOut(false)} onSubmit={close} />;
+  }
+  if (room.status === 'complete') {
+    return <ReviewPane roomId={roomId} onLeave={onLeave} />;
+  }
 
   return (
     <section className="watchroom">
@@ -227,7 +242,7 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
               <p className="seat-note">{gates.why}</p>
             ) : null}
             {running && gates.canClose ? (
-              <button type="button" onClick={() => void close()} disabled={busy}>
+              <button type="button" onClick={() => setReadingOut(true)} disabled={busy}>
                 Close the shift and read out
               </button>
             ) : null}
@@ -447,4 +462,209 @@ function statusWord(status: string): string {
   if (status === 'complete') return 'closed';
   if (status === 'cancelled') return 'cancelled';
   return 'not started';
+}
+
+/**
+ * The lead's readout.
+ *
+ * Taken before the review is shown, and that ordering is the whole point. What
+ * the floor believed at the moment it stopped is the thing being reviewed, and
+ * a readout written with the answer key open is a transcription of it. The form
+ * says so, because somebody who does not know that will assume the delay is
+ * bureaucracy.
+ */
+function ReadoutForm({
+  busy,
+  onCancel,
+  onSubmit,
+}: {
+  busy: boolean;
+  onCancel: () => void;
+  onSubmit: (readout: { findings: string[]; mitigations: string[] }) => void;
+}) {
+  const [findings, setFindings] = useState('');
+  const [mitigations, setMitigations] = useState('');
+
+  return (
+    <section className="readout">
+      <h2>Read out the findings</h2>
+      <p className="readout__why">
+        Say what you found and what you would do about it, in your own words, before anything is
+        marked. The review compares this against what actually happened, so it is only worth
+        something if you write it first. Not settling something is a finding: say that too.
+      </p>
+
+      <label>
+        What we found
+        <textarea
+          rows={6}
+          value={findings}
+          onChange={(e) => setFindings(e.target.value)}
+          placeholder={'One per line.\nWhat happened, how far it got, and what you could not establish.'}
+        />
+      </label>
+
+      <label>
+        What we would do about it
+        <textarea
+          rows={4}
+          value={mitigations}
+          onChange={(e) => setMitigations(e.target.value)}
+          placeholder={'One per line. What you would change, and what you are deliberately leaving undone.'}
+        />
+      </label>
+
+      <div className="readout__actions">
+        <button
+          type="button"
+          className="primary"
+          disabled={busy || findings.trim().length === 0}
+          onClick={() =>
+            onSubmit({ findings: lines(findings), mitigations: lines(mitigations) })
+          }
+        >
+          Close the shift
+        </button>
+        <button type="button" className="quiet" onClick={onCancel} disabled={busy}>
+          Back to the floor
+        </button>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * The after action review.
+ *
+ * Ordered deliberately: what the floor said, then what actually happened, then
+ * the critical findings, then how it should have gone. Putting the answer first
+ * turns the readout into something to be embarrassed about rather than
+ * something to compare against.
+ */
+function ReviewPane({ roomId, onLeave }: { roomId: string; onLeave?: () => void }) {
+  const [review, setReview] = useState<AfterActionView | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void rooms
+      .review(roomId)
+      .then((r) => setReview(r.review))
+      .catch((caught) =>
+        setError(caught instanceof ApiCallError ? caught.error.message : 'Review unavailable.'),
+      );
+  }, [roomId]);
+
+  if (error) return <p className="seat-note seat-note--bad">{error}</p>;
+  if (!review) return <p className="seat-note">Building the review…</p>;
+
+  return (
+    <section className="review">
+      <h2>After action review</h2>
+      <p className="review__summary">{review.summary}</p>
+
+      <div className="review__timings">
+        {(
+          [
+            ['Detect', review.timings.detectSeconds],
+            ['Analyse', review.timings.analyseSeconds],
+            ['Correct', review.timings.correctSeconds],
+          ] as const
+        ).map(([label, value]) => (
+          <div key={label}>
+            <strong>{value == null ? '—' : mmss(value)}</strong>
+            <span>{label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* The critical findings are never averaged into the summary. Catching
+          nine of ten events and missing the one that mattered is not ninety
+          per cent of a response. */}
+      {review.criticalFindings.length > 0 ? (
+        <>
+          <h3>The findings that decided it</h3>
+          <ul className="review__critical">
+            {review.criticalFindings.map((c) => (
+              <li key={c.eventId} className={c.caught ? 'caught' : 'missed'}>
+                <span>{c.caught ? 'caught' : 'missed'}</span> {c.what}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+
+      <h3>What you said</h3>
+      <ul className="review__list">
+        {review.readout.findings.map((f) => (
+          <li key={f}>{f}</li>
+        ))}
+      </ul>
+      {review.readout.missingReports.length > 0 ? (
+        <p className="seat-note">
+          Chairs nobody filled: {review.readout.missingReports.join(', ')}. The lead read those
+          out.
+        </p>
+      ) : null}
+
+      <h3>What actually happened</h3>
+      <ul className="review__list">
+        {review.whatHappened.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+
+      {review.improvements.length > 0 ? (
+        <>
+          <h3>What to do differently</h3>
+          <ul className="review__list">
+            {review.improvements.map((i) => (
+              <li key={i.observed}>
+                <strong>{i.observed}</strong> {i.instead}
+                {i.forRoles.length > 0 ? (
+                  <span className="review__forroles"> ({i.forRoles.join(', ')})</span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+
+      <h3>How it should have gone</h3>
+      <ol className="review__ideal">
+        {review.ideal.map((step) => (
+          <li key={step.eventId} className={`ideal ideal--${step.actual}`}>
+            <span className="review__at">{mmss(step.atSeconds)}</span>
+            <strong>{step.owner}</strong>
+            <span className={`ideal__got ideal__got--${step.actual}`}>
+              {step.actual === 'late' && step.afterSeconds != null
+                ? `late by ${mmss(step.afterSeconds - step.atSeconds)}`
+                : step.actual}
+            </span>
+            {/* Plural on purpose. Several commands often reach one finding, and
+                printing a single one as THE answer tells somebody who took
+                another working route that they were wrong. */}
+            <span className="review__move">
+              {step.move}
+              {step.alsoWorks ? ' (more than one route worked here)' : ''}
+            </span>
+            <p>{step.what}</p>
+          </li>
+        ))}
+      </ol>
+
+      {onLeave ? (
+        <button type="button" className="quiet" onClick={onLeave}>
+          Back to the lobby
+        </button>
+      ) : null}
+    </section>
+  );
+}
+
+/** Blank lines are not findings. */
+function lines(raw: string): string[] {
+  return raw
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
 }

@@ -655,9 +655,21 @@ export const rooms = {
       body: JSON.stringify(body),
     }),
 
-  /** The lead closes it, and the review becomes available. */
-  close: (id: string) =>
-    request<{ room: ClientRoom }>(`/rooms/${id}/close`, { method: 'POST' }),
+  /**
+   * The lead closes it by reading out.
+   *
+   * The readout is required and is taken here rather than afterwards, because
+   * it is what the floor believed at the moment it stopped. The review is only
+   * worth something because it compares that against what was true.
+   */
+  close: (id: string, readout: { findings: string[]; mitigations: string[] }) =>
+    request<{ room: ClientRoom; readout: LeadReadoutView }>(`/rooms/${id}/close`, {
+      method: 'POST',
+      body: JSON.stringify(readout),
+    }),
+
+  /** The after action review. Available once the lead has read out. */
+  review: (id: string) => request<{ review: AfterActionView }>(`/rooms/${id}/review`),
 
   handOver: (id: string, toUserId: string) =>
     request<Omit<RoomDetail, 'identity'>>(`/rooms/${id}/handover`, {
@@ -1012,4 +1024,42 @@ export interface ClaimScoreView {
   outOf: number;
   laneViolation: SocRoleId | null;
   why: string;
+}
+
+export interface LeadReadoutView {
+  findings: string[];
+  mitigations: string[];
+  missingReports: SocRoleId[];
+}
+
+/** The after action review, as the client renders it. */
+export interface AfterActionView {
+  scenarioId: string;
+  difficulty: ScenarioDifficulty;
+  whatHappened: string[];
+  readout: LeadReadoutView;
+  ideal: {
+    eventId: string;
+    atSeconds: number;
+    owner: SocRoleId;
+    what: string;
+    /** Every command that answered it, already joined with "or" by the server. */
+    move: string;
+    alsoWorks: boolean;
+    actual: 'caught' | 'late' | 'misread' | 'missed' | 'not-shown';
+    afterSeconds: number | null;
+  }[];
+  improvements: {
+    observed: string;
+    instead: string;
+    eventIds: string[];
+    forRoles: SocRoleId[];
+  }[];
+  criticalFindings: { eventId: string; what: string; caught: boolean }[];
+  timings: {
+    detectSeconds: number | null;
+    analyseSeconds: number | null;
+    correctSeconds: number | null;
+  };
+  summary: string;
 }

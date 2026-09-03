@@ -525,3 +525,42 @@
 .claimscore__why { margin-top: 0.5rem; }
 
 .watchroom__controls { display: grid; gap: 0.4rem; margin-top: 0.8rem; }
+
+/* ── readout and after action review ──────────────────────────────────────
+   The readout comes before the review is visible, so it gets the whole pane
+   rather than sitting in a corner of the floor: somebody writing what they
+   believed should not be reading anything else at the time. */
+
+.readout { max-width: 640px; }
+.readout__why { color: var(--muted, #8299a3); font-size: 0.86rem; margin: 0.3rem 0 1rem; }
+.readout label { display: grid; gap: 0.3rem; margin-bottom: 0.9rem; font-size: 0.82rem; }
+.readout textarea { width: 100%; font: inherit; font-size: 0.86rem; }
+.readout__actions { display: flex; gap: 0.5rem; }
+
+.review { max-width: 720px; }
+.review__summary { font-size: 0.95rem; margin: 0.3rem 0 1rem; }
+
+.review__timings { display: flex; gap: 1.4rem; margin: 0 0 1.2rem; }
+.review__timings strong { display: block; font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+.review__timings span { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted, #8299a3); }
+
+.review h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted, #8299a3); margin: 1.2rem 0 0.4rem; }
+.review__list { margin: 0; padding-left: 1.1rem; font-size: 0.87rem; }
+.review__list li { margin-bottom: 0.35rem; }
+
+/* Never a percentage. Catching nine of ten and missing the one that mattered
+   is not ninety per cent of a response, and a bar chart would say it was. */
+.review__critical { list-style: none; margin: 0; padding: 0; font-size: 0.87rem; }
+.review__critical li { padding: 0.35rem 0; border-bottom: 1px solid var(--rule, #2a3138); }
+.review__critical span {
+  display: inline-block; min-width: 4.2rem;
+  font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.review__critical .caught span { color: #57b894; }
+.review__critical .missed span { color: #d1685f; }
+
+.review__ideal { margin: 0; padding-left: 1.2rem; font-size: 0.87rem; }
+.review__ideal li { margin-bottom: 0.7rem; }
+.review__at { font-variant-numeric: tabular-nums; color: var(--muted, #8299a3); margin-right: 0.4rem; }
+.review__move { display: block; color: var(--muted, #8299a3); font-size: 0.82rem; }
+.review__ideal p { margin: 0.25rem 0 0; }

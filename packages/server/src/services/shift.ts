@@ -28,6 +28,7 @@
 
 import type {
   Claim,
+  LeadReadout,
   RoomSession,
   ScenarioEvent,
   SocRoleId,
@@ -256,8 +257,48 @@ export function canClose(
   return { ok: true };
 }
 
-export function closeShift(room: RoomSession, userId: string): RoomSession {
+/**
+ * The lead's readout, given before any of the answer key is shown.
+ *
+ * This is the whole hinge of the review. The findings and mitigations are what
+ * the floor believed at the moment it stopped, and the review is worth
+ * something only because it compares that against what was true. Building it
+ * afterwards, or letting it be edited once the debrief is open, would turn the
+ * exercise into a transcription of the answer.
+ */
+export function buildReadout(
+  room: RoomSession,
+  input: { findings: string[]; mitigations: string[] },
+): LeadReadout {
+  const findings = input.findings.map((f) => f.trim()).filter(Boolean);
+  const mitigations = input.mitigations.map((m) => m.trim()).filter(Boolean);
+  if (findings.length === 0) {
+    throw new RoomError('Say what you found, even if it is that you did not settle it.');
+  }
+  return {
+    findings,
+    mitigations,
+    /*
+     * Named rather than counted. A review that says "three seats did not file"
+     * lets everybody assume it was somebody else, and the seats that went
+     * quiet are usually the finding.
+     */
+    missingReports: room.seats.filter((s) => !s.occupant).map((s) => s.role),
+  };
+}
+
+export function closeShift(
+  room: RoomSession,
+  userId: string,
+  readout: LeadReadout,
+  now: Date,
+): RoomSession {
   const check = canClose(room, userId);
   if (!check.ok) throw new RoomError(check.reason);
-  return { ...room, status: 'complete' };
+  return {
+    ...room,
+    status: 'complete',
+    readout,
+    closedAtSeconds: elapsedSeconds(room, now),
+  };
 }

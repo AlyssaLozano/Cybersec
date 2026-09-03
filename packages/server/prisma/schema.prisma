@@ -372,6 +372,14 @@ model RoomSession {
   /// never queried across rooms, so a table would buy nothing and cost a join
   /// on every seat change.
   seatsJson  String
+  /// LeadReadout as JSON, written once when the lead closes the shift. Null
+  /// until then. Stored rather than rebuilt because it is what the lead said
+  /// BEFORE seeing the answer key, and the whole value of the review is
+  /// comparing those two things.
+  readoutJson String?
+  /// Seconds after startsAt that the lead closed it. Held explicitly rather
+  /// than derived from updatedAt, which moves every time a seat changes.
+  closedAtSeconds Int?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

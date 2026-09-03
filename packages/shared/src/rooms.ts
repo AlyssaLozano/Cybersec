@@ -21,6 +21,7 @@
 
 import type { ScenarioDifficulty } from './scenarios.js';
 import type { SocRoleId } from './roles.js';
+import type { LeadReadout } from './afterAction.js';
 
 /**
  * Call sign rules, all of them for one reason: it has to survive being said out
@@ -178,6 +179,14 @@ export interface RoomSession {
   status: RoomStatus;
   hostUserId: string;
   seats: SeatAssignment[];
+  /**
+   * What the lead said at the close, before any of the answer key was shown.
+   * Null until the shift is closed, and never rewritten afterwards: the review
+   * is worth something only because it compares this against what was true.
+   */
+  readout?: LeadReadout | null;
+  /** Seconds after startsAt that the lead closed it. */
+  closedAtSeconds?: number | null;
 }
 
 /**

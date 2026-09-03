@@ -48,6 +48,7 @@ import {
   aidFor,
   boardFor,
   buildClaim,
+  buildReadout,
   canClose,
   canStart,
   closeShift,
@@ -56,6 +57,7 @@ import {
 } from '../services/shift.js';
 import { recordClaim, claimsForRoom, claimedEventIds } from '../services/claimStore.js';
 import { scoreClaim } from '../services/scenarios.js';
+import { buildAfterAction, reviewIsAvailable } from '../services/afterAction.js';
 import {
   createRoom,
   getIdentity,
@@ -456,22 +458,78 @@ roomsRouter.post(
   }),
 );
 
-/** The lead closes the shift. After this the review is available. */
+const closeBody = z.object({
+  findings: z.array(z.string().max(2000)).min(1).max(20),
+  mitigations: z.array(z.string().max(2000)).max(20),
+});
+
+/**
+ * The lead closes the shift by reading out.
+ *
+ * The readout is required rather than optional, and is taken here rather than
+ * afterwards, because it is what the floor believed at the moment it stopped.
+ * The review is worth something only because it compares that against what was
+ * true, and a readout written after the answer key is visible is a
+ * transcription.
+ */
 roomsRouter.post(
   '/:id/close',
   asyncRoute(async (request, response) => {
     const userId = userIdOf(request);
+    const body = closeBody.parse(request.body);
     const room = await getRoom(request.params.id!);
     if (!room) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such room.');
 
     try {
-      const done = await persistRoom(closeShift(room, userId));
+      const readout = buildReadout(room, body);
+      const done = await persistRoom(closeShift(room, userId, readout, new Date()));
       sendOk(response, {
         room: toClientRoom(done, userId, titleOf(done.scenarioId)),
-        claims: await claimsForRoom(done.id),
+        readout,
       });
     } catch (error) {
       asHttp(error);
     }
+  }),
+);
+
+/**
+ * The after action review.
+ *
+ * Gated on the readout existing, which is the same gate the debrief has always
+ * had: a floor that reads the review before saying what it thought has not
+ * been reviewed, it has been told.
+ */
+roomsRouter.get(
+  '/:id/review',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const room = await getRoom(request.params.id!);
+    if (!room) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such room.');
+    // Anybody who held a seat may read it, including seats that went quiet.
+    seatOf(room, userId);
+
+    const gate = reviewIsAvailable({
+      closedAtSeconds: room.closedAtSeconds ?? null,
+      readoutDelivered: Boolean(room.readout),
+    });
+    if (!gate.ready) {
+      throw new HttpError(409, API_ERROR_CODES.forbidden, gate.waitingOn ?? 'Not ready yet.');
+    }
+
+    const claims = await claimsForRoom(room.id);
+    const review = buildAfterAction({
+      scenarioId: room.scenarioId,
+      difficulty: room.difficulty,
+      claims,
+      readout: room.readout!,
+      // Seats that committed anything at all are the ones that filed.
+      filedReports: [...new Set(claims.map((c) => c.role))],
+      controlProposedAtSeconds:
+        claims.find((c) => c.actionIds.some((a) => a.startsWith('act.propose-rule')))?.atSeconds ??
+        null,
+      closedAtSeconds: room.closedAtSeconds ?? null,
+    });
+    sendOk(response, { review, claims });
   }),
 );

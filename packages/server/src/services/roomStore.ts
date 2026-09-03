@@ -24,6 +24,7 @@
 
 import { AVATARS, checkCallSign, isAvatarId } from '@soc/shared';
 import type {
+  LeadReadout,
   AvatarId,
   FloorIdentity,
   RoomSession,
@@ -57,6 +58,8 @@ interface RoomRow {
   status: string;
   hostUserId: string;
   seatsJson: string;
+  readoutJson: string | null;
+  closedAtSeconds: number | null;
 }
 
 function rowToRoom(row: RoomRow): RoomSession {
@@ -70,6 +73,8 @@ function rowToRoom(row: RoomRow): RoomSession {
     status: row.status as RoomSession['status'],
     hostUserId: row.hostUserId,
     seats: JSON.parse(row.seatsJson) as SeatAssignment[],
+    readout: row.readoutJson ? (JSON.parse(row.readoutJson) as LeadReadout) : null,
+    closedAtSeconds: row.closedAtSeconds,
   };
 }
 
@@ -169,6 +174,13 @@ export async function persistRoom(room: RoomSession): Promise<RoomSession> {
       status: room.status,
       joinCode: room.joinCode,
       seatsJson: JSON.stringify(room.seats),
+      /*
+       * Written once and never rewritten. The readout is what the lead said
+       * before seeing the answer key, so an update path that could overwrite it
+       * would let a floor revise its own conclusions after reading the review.
+       */
+      ...(room.readout ? { readoutJson: JSON.stringify(room.readout) } : {}),
+      ...(room.closedAtSeconds != null ? { closedAtSeconds: room.closedAtSeconds } : {}),
     },
   });
   return room;
