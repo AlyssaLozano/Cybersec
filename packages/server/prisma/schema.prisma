@@ -33,6 +33,28 @@ model User {
   /// it is chosen when somebody first takes a seat rather than at signup: the
   /// learning platform never needs it, and asking for one during registration
   /// is a question about a product the person has not seen yet.
+  /// The profile somebody builds as they work. Every field optional and
+  /// every field empty by default: a profile is something people fill in
+  /// when they have a reason to, not a form standing between them and the
+  /// product.
+  ///
+  /// Links are stored as bare HANDLES and never as URLs. A column that can
+  /// hold any URL, rendered on a page other people read, is a place to send
+  /// strangers somewhere they did not intend to go. The address is rebuilt
+  /// against a fixed host at render time. See profile.ts in @soc/shared.
+  displayName       String?
+  headline          String?
+  about             String?
+  location          String?
+  githubHandle      String?
+  linkedinHandle    String?
+  openToWork        Boolean @default(false)
+  /// "private" | "members" | "public" -- ProfileVisibility. Private by
+  /// default, because the floor is pseudonymous on purpose and a profile
+  /// carrying a real name undoes that. Somebody may choose it; nobody
+  /// should discover it.
+  profileVisibility String  @default("private")
+
   /// Set when war room access is suspended, and cleared when it lapses. Null
   /// for almost every account. Deliberately separate from any learning-side
   /// state: conduct in a room never costs somebody their coursework.

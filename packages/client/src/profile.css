@@ -1,0 +1,214 @@
+/* The profile page.
+
+   Earned figures first and large, written words underneath and quiet: the
+   ordering is the argument the page makes, so the type sizes have to agree
+   with it. */
+.profile {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.profile__head {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.profile__who {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.profile h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+
+.profile__meta {
+  margin: 0.3rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted, #8b97a3);
+}
+
+.profile__callsign {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--text, #e6edf3);
+}
+
+.profile__headline {
+  margin: 0.6rem 0 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.profile__open {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--good, #57b894);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  color: var(--good, #57b894);
+}
+
+.profile__controls {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+/* The half nobody can type in. */
+.profile__earned {
+  display: flex;
+  gap: 2.5rem;
+  margin: 2rem 0 0;
+  padding: 1.1rem 0;
+  border-top: 1px solid var(--rule, #2a3138);
+  border-bottom: 1px solid var(--rule, #2a3138);
+}
+
+.profile__stat strong {
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.profile__stat span {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.76rem;
+  color: var(--muted, #8b97a3);
+}
+
+.profile__seats {
+  margin: 0.9rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted, #8b97a3);
+}
+
+.profile__seats strong {
+  font-weight: 500;
+  color: var(--text, #e6edf3);
+  text-transform: capitalize;
+}
+
+.profile__about {
+  margin-top: 1.6rem;
+  line-height: 1.65;
+}
+
+.profile__about p {
+  margin: 0 0 0.9rem;
+}
+
+.profile__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.6rem;
+}
+
+.profile__links a {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--rule, #2a3138);
+  border-radius: 6px;
+  font-size: 0.84rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.profile__links a:hover,
+.profile__links a:focus-visible {
+  border-color: var(--accent, #57b894);
+}
+
+.profile__visibility {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule, #2a3138);
+  font-size: 0.8rem;
+  color: var(--muted, #8b97a3);
+}
+
+/* The form. */
+.profile__field {
+  display: block;
+  margin-top: 1.4rem;
+  border: 0;
+  padding: 0;
+}
+
+.profile__field legend,
+.profile__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0;
+}
+
+.profile__field input[type='text'],
+.profile__field input:not([type]),
+.profile__field textarea {
+  width: 100%;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--rule, #2a3138);
+  border-radius: 6px;
+  background: var(--bg, #0d1117);
+  color: inherit;
+  font: inherit;
+}
+
+.profile__hint,
+.profile__problem {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.profile__hint {
+  color: var(--muted, #8b97a3);
+}
+
+.profile__problem {
+  color: var(--bad, #d98080);
+}
+
+.profile__radio {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.3rem 0;
+  cursor: pointer;
+}
+
+.profile__radio strong {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+
+.profile__radio em {
+  display: block;
+  font-style: normal;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--muted, #8b97a3);
+}
+
+.profile__check {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 1.4rem;
+  font-size: 0.86rem;
+  cursor: pointer;
+}

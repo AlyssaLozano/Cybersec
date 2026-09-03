@@ -169,6 +169,12 @@ interface HomeProps {
   onWatchFloor: () => void;
   onBadges: () => void;
   onPortfolio: () => void;
+  /**
+   * The profile somebody builds by hand, as opposed to the portfolio the work
+   * builds for them. Free, like the badges, and for the same reason: it is
+   * their own account of themselves.
+   */
+  onProfile: () => void;
   onInterviewSim: () => void;
   onInterviewPeer: () => void;
   /** Whether the viewer has the paid tier. The UI is identical either way; free
@@ -177,6 +183,15 @@ interface HomeProps {
 }
 
 /** The career paths that open up once the foundations are in place. */
+function ProfileIcon() {
+  return (
+    <svg className="rt-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="20" cy="15" r="6" />
+      <path d="M8 33v-2a9 9 0 0 1 9-9h6a9 9 0 0 1 9 9v2" />
+    </svg>
+  );
+}
+
 const SOC_ROLES: Array<{ name: string; color: string; blurb: string }> = [
   { name: 'Log Analyst', color: 'green', blurb: 'Builds the timeline everyone argues from.' },
   { name: 'Network Analyst', color: 'blue', blurb: 'Tells a beacon from a backup job.' },
@@ -210,6 +225,7 @@ export function Home({
   onWatchFloor,
   onBadges,
   onPortfolio,
+  onProfile,
   onInterviewSim,
   onInterviewPeer,
   paid,
@@ -468,6 +484,19 @@ export function Home({
               {/* Free, and deliberately so: the badges are the record of work
                   already done, and putting a price on somebody's own history
                   would be indefensible. */}
+              <button className="roomtile prof" onClick={onProfile}>
+                <ProfileIcon />
+                <span className="rt-body">
+                  <span className="rt-name">Your profile</span>
+                  <span className="rt-desc">
+                    Who you are, what you did before, and where you are heading. Link your GitHub
+                    and your LinkedIn, and it carries your badges and the shifts you have run
+                    alongside them. Private until you say otherwise.
+                  </span>
+                  <span className="rt-status muted">yours to write</span>
+                </span>
+              </button>
+
               <button className="roomtile badges" onClick={onBadges}>
                 <BadgeShelfIcon />
                 <span className="rt-body">

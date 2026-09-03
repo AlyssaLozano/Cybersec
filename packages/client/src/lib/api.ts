@@ -7,6 +7,8 @@
  */
 
 import type {
+  ProfileVisibility,
+  PublicProfile,
   ReportReasonDefinition,
   ReportReceipt,
   ReportSpace,
@@ -1101,4 +1103,35 @@ export const conduct = {
       method: 'POST',
       body: JSON.stringify(input),
     }),
+};
+
+/**
+ * The profile somebody builds as they work.
+ *
+ * `save` sends whatever was typed into the two link boxes, not a handle. The
+ * server parses it, because a client that parses and a server that trusts is a
+ * client that can be skipped, and the value being parsed is a URL that will be
+ * rendered on a page other people read.
+ */
+export const profile = {
+  mine: () => request<{ profile: PublicProfile }>('/profile/me'),
+
+  save: (fields: {
+    displayName: string;
+    headline: string;
+    about: string;
+    location: string;
+    github: string;
+    linkedin: string;
+    openToWork: boolean;
+    visibility: ProfileVisibility;
+  }) =>
+    request<{ profile: PublicProfile }>('/profile/me', {
+      method: 'PUT',
+      body: JSON.stringify(fields),
+    }),
+
+  /** Somebody else, by the name the floor calls them. */
+  byCallSign: (callSign: string) =>
+    request<{ profile: PublicProfile }>(`/profile/by-call-sign/${encodeURIComponent(callSign)}`),
 };
