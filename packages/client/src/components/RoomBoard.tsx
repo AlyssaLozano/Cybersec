@@ -25,7 +25,7 @@ import { SCENARIO_DIFFICULTIES } from '@soc/shared';
 import type { FloorIdentity, RoomVisibility, ScenarioDifficulty } from '@soc/shared';
 
 import { IdentityForm } from './IdentityForm';
-import { SeatPicker } from './SeatPicker';
+import { WatchRoom } from './WatchRoom';
 
 type Pane = 'list' | 'create';
 
@@ -72,7 +72,11 @@ export function RoomBoard() {
         <button type="button" className="linkish" onClick={() => setOpenRoom(null)}>
           ← All rooms
         </button>
-        <SeatPicker roomId={openRoom.id} joinCode={openRoom.code} />
+        <WatchRoom
+          roomId={openRoom.id}
+          joinCode={openRoom.code}
+          onLeave={() => setOpenRoom(null)}
+        />
       </div>
     );
   }

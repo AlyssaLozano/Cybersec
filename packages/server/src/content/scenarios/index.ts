@@ -110,6 +110,21 @@ function validateScenarios(): void {
         throw new Error(`Scenario "${scenario.id}" event "${event.id}" has no truth entry.`);
       }
     }
+    /*
+     * A required seat has to be a seat this scenario actually runs.
+     *
+     * The failure it guards is silent and total: a scenario requiring a chair
+     * it does not seat can never be started by anybody, and nothing else in
+     * the system would report why.
+     */
+    for (const role of scenario.requiredSeats ?? []) {
+      if (!scenario.roles.includes(role)) {
+        throw new Error(
+          `Scenario "${scenario.id}" requires the ${role} seat but does not run it, so no room for it could ever start.`,
+        );
+      }
+    }
+
     // Truth for an event that does not exist is a key nobody can reach.
     for (const entry of truth.events) {
       if (!eventIds.has(entry.eventId)) {

@@ -440,6 +440,27 @@ export interface Scenario {
   actions: ScenarioAction[];
   /** Seats this scenario actually needs filled. */
   roles: SocRoleId[];
+  /**
+   * Seats that must have a person in them before this scenario can start,
+   * beyond the lead, which every room requires.
+   *
+   * WHY THIS IS PER SCENARIO AND NOT A GLOBAL LIST
+   *
+   * A global requirement has to hold for every incident in the catalogue, and
+   * the moment it names a specialist it makes some scenarios unstartable:
+   * requiring a network analyst would block eleven incidents that have no
+   * network dimension, and a model poisoning incident has no flows to read.
+   * The scenario knows which seats its own evidence cannot do without.
+   *
+   * WHY IT IS USUALLY EMPTY
+   *
+   * Because the stand-in system exists. An empty chair is read out by the lead
+   * on schedule, so a short floor still gets the whole incident, and one person
+   * practising alone at eleven at night is a real user this product is for.
+   * Requiring a seat is for the case where the exercise is genuinely not the
+   * same exercise without it, and that case is rarer than it feels.
+   */
+  requiredSeats?: SocRoleId[];
 }
 
 /**

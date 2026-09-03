@@ -84,6 +84,11 @@ function asHttp(error: unknown): never {
   throw error;
 }
 
+/** Seats this scenario names as mandatory, beyond the lead. Usually none. */
+function requiredSeatsOf(scenarioId: string): SocRoleId[] {
+  return SCENARIOS.find((s) => s.id === scenarioId)?.requiredSeats ?? [];
+}
+
 function titleOf(scenarioId: string): string {
   return SCENARIOS.find((s) => s.id === scenarioId)?.title ?? scenarioId;
 }
@@ -228,7 +233,7 @@ roomsRouter.get(
     sendOk(response, {
       room: toClientRoom(room, userId, titleOf(room.scenarioId)),
       seating: seatingFor(room, userId, now),
-      readiness: readiness(room),
+      readiness: readiness(room, requiredSeatsOf(room.scenarioId)),
       identity: await getIdentity(userId),
     });
   }),
@@ -261,7 +266,7 @@ roomsRouter.post(
       sendOk(response, {
         room: toClientRoom(seated, userId, titleOf(seated.scenarioId)),
         seating: seatingFor(seated, userId, now),
-        readiness: readiness(seated),
+        readiness: readiness(seated, requiredSeatsOf(seated.scenarioId)),
       });
     } catch (error) {
       asHttp(error);
@@ -282,7 +287,7 @@ roomsRouter.delete(
       sendOk(response, {
         room: toClientRoom(left, userId, titleOf(left.scenarioId)),
         seating: seatingFor(left, userId, now),
-        readiness: readiness(left),
+        readiness: readiness(left, requiredSeatsOf(left.scenarioId)),
       });
     } catch (error) {
       asHttp(error);
@@ -306,7 +311,7 @@ roomsRouter.post(
       sendOk(response, {
         room: toClientRoom(moved, userId, titleOf(moved.scenarioId)),
         seating: seatingFor(moved, userId, now),
-        readiness: readiness(moved),
+        readiness: readiness(moved, requiredSeatsOf(moved.scenarioId)),
       });
     } catch (error) {
       asHttp(error);

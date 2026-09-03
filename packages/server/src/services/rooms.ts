@@ -299,7 +299,27 @@ export interface RoomReadiness {
  * students who most need the practice. So the room says what will be missing
  * and lets them decide.
  */
-export function readiness(room: RoomSession): RoomReadiness {
+/**
+ * The three chairs whose absence changes what the shift is, without stopping
+ * it.
+ *
+ * Not requirements. Every one of these is in all 74 scenarios, so requiring
+ * them would be safe and would still be wrong: it would mean one person can
+ * never practise alone, and the stand-in system exists precisely so a short
+ * floor gets the whole incident anyway. What they get instead is a warning
+ * that names what the room is missing, because "you are working it short" is
+ * less useful than "nobody is triaging".
+ */
+const CORE_SEATS: { role: SocRoleId; without: string }[] = [
+  { role: 'soc-operator', without: 'Nobody is on triage, so the queue is being read by whoever gets to it.' },
+  { role: 'log-analyst', without: 'Nobody is building the timeline the rest of you argue from.' },
+  {
+    role: 'mitigation-specialist',
+    without: 'Nobody owns what a remedy costs, so the lead is pricing their own containment.',
+  },
+];
+
+export function readiness(room: RoomSession, requiredSeats: SocRoleId[] = []): RoomReadiness {
   const filled = room.seats.filter((s) => s.occupant).length;
   const empty = room.seats.filter((s) => !s.occupant).map((s) => s.role);
   const blockers: string[] = [];
@@ -308,6 +328,25 @@ export function readiness(room: RoomSession): RoomReadiness {
   if (!room.seats.find((s) => s.role === REQUIRED_SEAT)?.occupant) {
     blockers.push('No lead. Somebody has to take that chair before this can start.');
   }
+
+  /*
+   * A scenario may name seats its own evidence cannot do without. Kept
+   * separate from the lead because that one is structural to every room and
+   * these are a judgement about one incident.
+   */
+  for (const role of requiredSeats) {
+    if (role === REQUIRED_SEAT) continue;
+    const seat = room.seats.find((s) => s.role === role);
+    if (seat && !seat.occupant) {
+      blockers.push(`This incident cannot run without the ${role} chair filled.`);
+    }
+  }
+
+  for (const core of CORE_SEATS) {
+    const seat = room.seats.find((s) => s.role === core.role);
+    if (seat && !seat.occupant) notes.push(core.without);
+  }
+
   if (empty.length > 0) {
     notes.push(
       `${empty.length} chair(s) empty: ${empty.join(', ')}. The lead reads their findings out on ` +

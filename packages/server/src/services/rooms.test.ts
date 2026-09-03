@@ -220,6 +220,63 @@ describe('leaving and handover', () => {
   });
 });
 
+describe('what blocks a start, and what only warns', () => {
+  const seatingOpen = new Date('2026-09-01T18:50:00Z');
+
+  /*
+   * The requirement list was very nearly five roles. Measuring first showed
+   * that requiring a network analyst would make eleven scenarios unstartable,
+   * because an incident with no network dimension does not seat one, and
+   * requiring a vulnerability analyst would break fifty-three. Both were
+   * reasonable-sounding rules that would have silently removed content.
+   */
+  it('blocks on the lead and on nothing else by default', () => {
+    const r = readiness(room());
+    expect(r.blockers).toHaveLength(0);
+    // The lead cannot vacate, so the empty-lead state is built directly. It
+    // still occurs in practice: a room whose host never sat down.
+    const base = room();
+    const noLead: RoomSession = {
+      ...base,
+      seats: base.seats.map((s) => (s.role === 'ir-lead' ? { ...s, occupant: null } : s)),
+    };
+    expect(readiness(noLead).blockers.length).toBeGreaterThan(0);
+  });
+
+  it('names what a missing core chair costs, without refusing to start', () => {
+    const r = readiness(room());
+    // The host holds the lead chair; triage, timeline and containment are all
+    // empty, so all three should be named rather than counted.
+    expect(r.canStart).toBe(true);
+    expect(r.notes.join(' ')).toContain('triage');
+    expect(r.notes.join(' ')).toContain('timeline');
+    expect(r.notes.join(' ')).toContain('remedy costs');
+  });
+
+  it('stops naming a core chair once somebody sits in it', () => {
+    const seated = takeSeat(room(), 'soc-operator', GUEST, seatingOpen);
+    expect(readiness(seated).notes.join(' ')).not.toContain('Nobody is on triage');
+  });
+
+  it('lets a scenario demand a seat its own evidence needs', () => {
+    const base = room();
+    expect(readiness(base, ['forensics']).canStart).toBe(false);
+    const withForensics = takeSeat(base, 'forensics', GUEST, seatingOpen);
+    expect(readiness(withForensics, ['forensics']).canStart).toBe(true);
+  });
+
+  /*
+   * A scenario naming a seat it does not run would be unstartable by anybody,
+   * with nothing reporting why. The catalogue validator refuses it at import,
+   * so this is the belt to that braces.
+   */
+  it('ignores a required seat this scenario does not run', () => {
+    const base = room();
+    const absent = SOC_ROLE_IDS.find((r) => !base.seats.some((s) => s.role === r))!;
+    expect(readiness(base, [absent]).canStart).toBe(true);
+  });
+});
+
 describe('readiness', () => {
   it('blocks only on the lead chair', () => {
     const r = room();

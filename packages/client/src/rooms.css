@@ -397,3 +397,131 @@
   color: var(--muted, #8b97a3);
   font-size: 0.78rem;
 }
+
+/* ── the watch floor as the room view ─────────────────────────────────────
+   The floor is the room rather than a picture above one, so it gets the
+   space and the seat's own screen sits beside it. Below a tablet the two
+   stack, floor first, because the floor is how somebody works out where
+   they are. */
+
+.watchroom__split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 1fr);
+  gap: 1.1rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .watchroom__split { grid-template-columns: 1fr; }
+}
+
+.watchroom__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.watchroom__meta { color: var(--muted, #8299a3); font-size: 0.85rem; margin: 0.15rem 0 0; }
+
+.watchroom__clock { text-align: right; line-height: 1.15; }
+.watchroom__clock strong { display: block; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.watchroom__clock span { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted, #8299a3); }
+
+.watchroom__scope { color: var(--muted, #8299a3); font-size: 0.8rem; margin: 0.4rem 0 0; }
+
+.floor { width: 100%; height: auto; display: block; }
+
+.floor__band { fill: var(--ink, #e4edf0); opacity: 0.085; }
+.floor__band--entry { fill: #57b894; opacity: 0.13; }
+
+.floor__tier {
+  font-size: 13px; font-weight: 700; letter-spacing: 1.6px;
+  fill: var(--ink, #e4edf0); opacity: 0.62;
+}
+.floor__tier--entry { fill: #57b894; opacity: 0.95; }
+.floor__tierwhat { font-size: 11px; fill: var(--muted, #8299a3); opacity: 0.7; }
+
+/* One workstation. The screen is drawn because the seat's screen is the
+   point of the chair: it is the thing that differs between two people
+   looking at one incident. */
+.station__desk { fill: #2a3138; }
+.station__screen { fill: #0f1519; stroke: #3a444d; stroke-width: 1; }
+.station__head { fill: #c9a227; }
+.station__body { fill: #4a5560; }
+.station__empty { fill: none; stroke: #3a444d; stroke-width: 2; stroke-dasharray: 3 3; }
+
+.station__label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.9px;
+  text-anchor: middle; fill: var(--ink, #e4edf0); opacity: 0.85;
+}
+.station__who { font-size: 9.5px; text-anchor: middle; fill: var(--muted, #8299a3); }
+
+.station--selectable { cursor: pointer; }
+.station--selectable:hover .station__desk,
+.station--selectable:focus-visible .station__desk { fill: #36404a; }
+.station--selectable:focus-visible { outline: 2px solid #57b894; outline-offset: 2px; }
+
+/* Your own chair. Somebody who cannot tell which desk is theirs files
+   somebody else's report. */
+.station--mine .station__desk { fill: #3a4b3f; stroke: #57b894; stroke-width: 1.5; }
+.station--mine .station__label { fill: #57b894; opacity: 1; }
+
+.station--busy .station__screen { stroke: #c9a227; }
+
+/* ── the seat's screen ──────────────────────────────────────────────────── */
+
+.screen {
+  border: 1px solid var(--rule, #2a3138);
+  border-radius: 8px;
+  padding: 0.85rem 0.9rem;
+  background: var(--panel, #121a20);
+}
+
+.screen__title { margin: 0 0 0.2rem; font-size: 0.95rem; }
+.screen__remit { margin: 0 0 0.7rem; font-size: 0.83rem; color: var(--muted, #8299a3); }
+.screen h4 { margin: 0.7rem 0 0.3rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted, #8299a3); }
+.screen__list { margin: 0; padding-left: 1.1rem; font-size: 0.83rem; }
+.screen__list li { margin-bottom: 0.2rem; }
+
+.screen__events { list-style: none; margin: 0; padding: 0; max-height: 60vh; overflow-y: auto; }
+
+.ev { border-bottom: 1px solid var(--rule, #2a3138); }
+.ev__head {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.1rem;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  align-items: baseline;
+}
+.ev__time { font-variant-numeric: tabular-nums; font-size: 0.75rem; color: var(--muted, #8299a3); }
+.ev__surface { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted, #8299a3); }
+.ev__summary { font-size: 0.83rem; }
+.ev__done { font-size: 0.66rem; color: #57b894; }
+.ev--claimed .ev__summary { opacity: 0.62; }
+.ev__body { padding: 0.2rem 0.1rem 0.8rem; font-size: 0.83rem; }
+
+.claimform { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
+.claimform__row { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.chip {
+  font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 999px;
+  border: 1px solid var(--rule, #2a3138); cursor: pointer;
+}
+.chip--on { border-color: #57b894; color: #57b894; }
+.chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+.claimform textarea { width: 100%; font: inherit; font-size: 0.83rem; }
+.claimform__conf { font-size: 0.75rem; display: grid; gap: 0.2rem; }
+
+.claimscore { font-size: 0.83rem; }
+.claimscore__total { font-size: 1.3rem; font-weight: 700; margin: 0.2rem 0; }
+.claimscore__line { margin: 0.15rem 0; color: var(--muted, #8299a3); }
+.claimscore__why { margin-top: 0.5rem; }
+
+.watchroom__controls { display: grid; gap: 0.4rem; margin-top: 0.8rem; }
