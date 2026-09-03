@@ -67,6 +67,9 @@ import {
   INVERTER_SUNMARK,
   SAAS_FATHOM,
 } from './boards-markets.js';
+import { ATC_SKYWARD, BEDSIDE_ELLORY, DAM_GLENMARK, REFINERY_REDWATER } from './boards-safety.js';
+import { CABLE_FARHAVEN, CHARGE_VOLTMARK, TRAFFIC_VERHOLT } from './boards-connected.js';
+import { CLUSTER_KELVIN, PROTOCOL_ARCLINE, WAREHOUSE_PALETREE } from './boards-modern.js';
 
 const SCENARIOS = new Map<string, RedBlueScenario>([
   [RECON_NORTHWIND.id, RECON_NORTHWIND],
@@ -129,6 +132,16 @@ const POSITIONAL_LIST: PositionalScenario[] = [
   CARRIER_ALDERGROVE,
   EXCHANGE_CARDINAL,
   SAAS_FATHOM,
+  REFINERY_REDWATER,
+  DAM_GLENMARK,
+  ATC_SKYWARD,
+  BEDSIDE_ELLORY,
+  CABLE_FARHAVEN,
+  TRAFFIC_VERHOLT,
+  CHARGE_VOLTMARK,
+  PROTOCOL_ARCLINE,
+  CLUSTER_KELVIN,
+  WAREHOUSE_PALETREE,
 ];
 
 const POSITIONAL = new Map<string, PositionalScenario>(POSITIONAL_LIST.map((s) => [s.id, s]));
