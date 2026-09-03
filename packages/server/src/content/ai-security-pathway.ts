@@ -1585,7 +1585,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'A well-written limitations section is also the best security artefact in the pack: it ' +
             'is the only place that says out loud where the system has not been tested.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.5.5'] ?? [],
         },
       ],
     },
@@ -1659,7 +1659,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'The uncomfortable consequence: your most valuable asset is being disclosed, one legal ' +
             'request at a time, by the interface you built on purpose.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.6.1'] ?? [],
         },
         {
           id: 'aisp.6.2',
@@ -1723,7 +1723,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'Notice the pattern repeating from module 4: when a class of attack cannot be ' +
             'prevented, the professional move is to price it and to reduce what it wins.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.6.2'] ?? [],
         },
         {
           id: 'aisp.6.3',
@@ -1785,7 +1785,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'This is also why "we tested it and could not extract anything" is a weak claim unless ' +
             'it says how hard the test tried. Negative results need a methodology.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.6.3'] ?? [],
         },
         {
           id: 'aisp.6.4',
@@ -1852,7 +1852,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'Notice the last clause of the worked answer. Presenting a trade-off and leaving the ' +
             'decision with the person accountable for it is most of what a good assessor does.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.6.4'] ?? [],
         },
       ],
     },

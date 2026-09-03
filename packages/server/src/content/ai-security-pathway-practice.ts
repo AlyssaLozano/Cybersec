@@ -3590,4 +3590,781 @@ export const AI_SECURITY_PATHWAY_PRACTICE: Record<string, PracticeItem[]> = {
       ],
     },
   ],
+
+  // --- aisp.5.5: the limitations section ------------------------------------
+  'aisp.5.5': [
+    {
+      id: 'aisp.5.5-p1',
+      prompt:
+        'Rewrite this limitation honestly: "The assistant works best with clear questions." Two or ' +
+        'three sentences.',
+      teach: {
+        note:
+          'A limitation phrased as advice to the user puts the failure on them. The honest version ' +
+          'names what the system does badly and what happens when it does, which is information ' +
+          'somebody can act on rather than a suggestion they try harder.',
+      },
+      solution:
+        'The assistant degrades on questions that are ambiguous, contain several requests at once, or ' +
+        'refer to context from earlier in a long conversation, and in those cases it tends to answer ' +
+        'one part confidently and silently drop the rest rather than asking for clarification. It was ' +
+        'evaluated on single-intent questions of under forty words and performance beyond that is ' +
+        'unmeasured. Users should treat a confident answer to a multi-part question as covering only ' +
+        'part of it.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['ambiguous', 'several', 'multi', 'long', 'earlier', 'complex'],
+            ['drop', 'silently', 'one part', 'without asking', 'confident', 'omits'],
+            ['evaluated', 'unmeasured', 'not tested', 'beyond', 'was assessed'],
+          ],
+          hint: 'Name the specific inputs it does badly on, the shape of the failure, and what was never measured.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.5-p2',
+      prompt:
+        'In two or three sentences, say why understating limitations costs the organisation more than ' +
+        'it saves.',
+      teach: {
+        note:
+          'The commercial argument, which is what actually moves this. Understatement buys a smoother ' +
+          'launch and pays for it at the incident, when the document becomes evidence about what was ' +
+          'known and disclosed.',
+      },
+      solution:
+        'It saves a slightly harder conversation at launch and costs the organisation at the first ' +
+        'incident, when the model card becomes evidence of what was known and said: a vague ' +
+        'limitations section reads either as not having looked or as having looked and not disclosed, ' +
+        'and both are worse positions than a specific one. It also removes the only mechanism that ' +
+        'would have stopped the system being used somewhere it was never evaluated, because the ' +
+        'people making that decision read this document and nothing else. The saving is one ' +
+        'conversation and the cost is the defensibility of the whole deployment.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['incident', 'later', 'evidence', 'afterwards', 'court', 'regulator'],
+            ['not looked', 'not disclosed', 'knew', 'worse position', 'either'],
+            ['used somewhere', 'never evaluated', 'decision', 'read this', 'stop', 'misuse'],
+          ],
+          hint: 'Price both sides, and name what the vagueness fails to prevent.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.5-p3',
+      prompt:
+        'In two or three sentences, say what a limitations section should contain about adversarial ' +
+        'testing specifically.',
+      teach: {
+        note:
+          'The section is usually written about ordinary performance and silent about deliberate ' +
+          'misuse. Naming the technique classes tried and the rate is what stops a reader assuming ' +
+          'nothing was found because nothing was looked for.',
+      },
+      solution:
+        'Which classes of technique were tried, how many attempts each, and the rate at which they ' +
+        'succeeded, rather than an assertion that the system is robust. It should also name the ' +
+        'classes that were not tried and the paths that were out of scope, since a reader who sees ' +
+        'only successes reasonably assumes the coverage was complete. And it should date the result ' +
+        'against a model version, because the next fine-tune invalidates it and somebody has to be ' +
+        'able to notice that.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['classes', 'techniques', 'attempts', 'rate', 'how many', 'succeeded'],
+            ['not tried', 'out of scope', 'untested', 'coverage', 'omitted'],
+            ['version', 'date', 'invalidat', 'fine-tune', 'retrain', 'next'],
+          ],
+          hint: 'Say what to report, what to disclose as untested, and what to tie the result to.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.5-p4',
+      prompt:
+        'A product manager asks you to soften a limitation because it will worry customers. In two or ' +
+        'three sentences, respond.',
+      teach: {
+        note:
+          'The pressure is real and usually well-intentioned. The productive move is to separate the ' +
+          'accuracy of the statement from its framing, because framing is negotiable and accuracy is ' +
+          'not, and offering the first is what makes refusing the second land.',
+      },
+      solution:
+        'I can change how it reads and not what it says: if the phrasing is alarming rather than ' +
+        'accurate I would rather fix that, and I will not remove the specifics, because they are what ' +
+        'stops the system being used somewhere it was never evaluated. A customer who is worried by ' +
+        'an accurate limitation is responding correctly, and one who is reassured by a vague one is ' +
+        'making a decision on our omission. If the limitation is genuinely too alarming to publish, ' +
+        'that is a signal about the product rather than about the document.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['how it reads', 'phrasing', 'wording', 'framing', 'tone', 'happy to'],
+            ['not remove', 'specifics', 'will not', 'accuracy', 'what it says'],
+            ['used somewhere', 'decision', 'omission', 'signal', 'about the product', 'correctly'],
+          ],
+          hint: 'Offer what is negotiable, refuse what is not, and reframe the request.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.5-p5',
+      prompt:
+        'Write two sentences of a limitations section for a model that has never been evaluated on ' +
+        'anything but English.',
+      teach: {
+        note:
+          'A specific and common gap that is almost always omitted, because the team did not think ' +
+          'of it as a limitation so much as a scope. The reader needs to know it degrades rather than ' +
+          'refuses, since a system that fails loudly is safer than one that fails politely.',
+      },
+      solution:
+        'This model was evaluated only on English inputs; performance on any other language is ' +
+        'unmeasured, and it will attempt an answer rather than declining, so a confident response to ' +
+        'a non-English question carries no evidence behind it. Safety behaviour was also evaluated ' +
+        'only in English, so refusals should not be assumed to hold in other languages, which is ' +
+        'where they have historically been weakest.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['english', 'only', 'unmeasured', 'not evaluated', 'other language'],
+            ['attempt', 'will answer', 'not decline', 'confident', 'no evidence', 'still respond'],
+            ['safety', 'refusal', 'not assumed', 'weakest', 'also', 'hold'],
+          ],
+          hint: 'State the evaluation scope, say what the system does outside it, and cover safety separately.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.6.1: the economics of stealing a model --------------------------
+  'aisp.6.1': [
+    {
+      id: 'aisp.6.1-p1',
+      prompt:
+        'In two or three sentences, explain why an attacker does not need a perfect copy of your ' +
+        'model for extraction to have succeeded.',
+      teach: {
+        note:
+          'The misconception that keeps extraction off risk registers: teams imagine the goal is a ' +
+          'replica. The goal is an imitation good enough for the attacker\'s purpose, and that bar is ' +
+          'much lower than replication.',
+      },
+      solution:
+        'The attacker\'s bar is fitness for their purpose, not fidelity to yours: a copy that agrees ' +
+        'with the original most of the time is enough to avoid paying for the API, enough to compete, ' +
+        'and more than enough to serve as an offline oracle for finding inputs that defeat the ' +
+        'original. Perfect replication is a standard nobody is trying to meet. Framing the risk as ' +
+        '"they cannot get an exact copy" is what keeps it off risk registers, because it answers a ' +
+        'question the attacker never asked.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['their purpose', 'good enough', 'fitness', 'not fidelity', 'bar'],
+            ['compete', 'avoid paying', 'oracle', 'offline', 'test against', 'commercial'],
+            ['exact', 'perfect', 'replica', 'nobody is trying', 'wrong question'],
+          ],
+          hint: 'Say what the attacker actually needs, what they use it for, and why the perfection framing misleads.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.1-p2',
+      prompt:
+        'In two or three sentences, say why returning richer responses lowers the cost of extraction, ' +
+        'with a concrete example of "richer".',
+      teach: {
+        note:
+          'Every additional field in a response is training signal. Making that concrete is what lets ' +
+          'somebody make a sensible API design decision rather than treating the response shape as a ' +
+          'usability question only.',
+      },
+      solution:
+        'Every extra field in a response is a free label for the attacker\'s training set, so the ' +
+        'richer the answer the fewer queries they need. A confidence score is the clearest example: ' +
+        'the label alone says which side of the boundary an input fell, and the score says how near ' +
+        'it was, which lets the attacker probe efficiently instead of blindly. Full probability ' +
+        'distributions across classes are richer still, and returning them can reduce the cost of a ' +
+        'usable copy by orders of magnitude.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['field', 'label', 'signal', 'free', 'training set', 'each response'],
+            ['confidence', 'score', 'probabilit', 'distribution', 'how near', 'boundary'],
+            ['fewer quer', 'cheaper', 'efficient', 'orders of magnitude', 'lower cost'],
+          ],
+          hint: 'Say what a response gives away, give the concrete example, and say what it does to the query count.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.1-p3',
+      prompt:
+        'In two or three sentences, explain why an extracted copy is itself a weapon against the ' +
+        'original.',
+      teach: {
+        note:
+          'The second-order consequence that makes extraction more than a commercial loss. It ' +
+          'converts an online, rate-limited, logged attack surface into an offline one with no ' +
+          'constraints at all.',
+      },
+      solution:
+        'With a local copy the attacker can search for inputs that defeat it without limit, without ' +
+        'paying and without appearing in your logs, and adversarial examples found against a ' +
+        'surrogate transfer to the original often enough to be worth the effort. So extraction ' +
+        'converts an online attack surface, which you can rate-limit and monitor, into an offline ' +
+        'one where you have no visibility at all. That is why the risk is not only the commercial ' +
+        'loss of the model: it is the loss of every control that depended on the attacker having to ' +
+        'come to you.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['offline', 'local', 'unlimited', 'no logs', 'not visible', 'without paying'],
+            ['transfer', 'adversarial', 'defeat', 'surrogate', 'works against', 'evade'],
+            ['control', 'rate limit', 'monitor', 'visibility', 'lose', 'no longer'],
+          ],
+          hint: 'Say what the copy enables, why it carries over, and which controls stop applying.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.1-p4',
+      prompt:
+        'In two or three sentences, say how you would estimate whether extraction is economically ' +
+        'worthwhile against your own model.',
+      teach: {
+        note:
+          'Turns the risk into a calculation somebody can actually do. The comparison is the cost of ' +
+          'enough queries against the value of a copy, and both sides are estimable well enough to ' +
+          'decide.',
+      },
+      solution:
+        'Compare two numbers: what it would cost an attacker in queries to get a usable copy, and ' +
+        'what a usable copy is worth to them. The first is roughly the number of queries needed times ' +
+        'the price per query, and the query count falls sharply if we return confidence scores. The ' +
+        'second is whatever the model saves or earns us, since that is the closest proxy for what a ' +
+        'competitor would pay to avoid building it. If the first number is smaller than the second, ' +
+        'extraction is worth doing and rate limits are the only thing standing between the attacker ' +
+        'and a decision they have already made.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['cost', 'quer', 'price', 'how many', 'times'],
+            ['worth', 'value', 'earns', 'saves', 'competitor', 'pay'],
+            ['compare', 'smaller', 'if', 'economic', 'worth doing', 'decision'],
+          ],
+          hint: 'Name both numbers, say how to estimate each, and what the comparison tells you.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.1-p5',
+      prompt:
+        'Write the risk register entry for extraction against a model whose API returns confidence ' +
+        'scores, in two or three sentences.',
+      teach: {
+        note:
+          'The written artefact, and the discipline is naming the specific feature that raises the ' +
+          'risk. "Extraction is possible" is true of every model; "we return confidence scores, which ' +
+          'reduces the query count needed" is a finding with an action attached.',
+      },
+      solution:
+        'Any authorised caller can query the classifier systematically and train a local ' +
+        'approximation of it; because the API returns a confidence score alongside each label, the ' +
+        'number of queries required is substantially lower than it would otherwise be, and the ' +
+        'resulting copy can be used offline to develop inputs that evade the original. The controls ' +
+        'available are economic rather than preventive, and the specific decision open to us is ' +
+        'whether the confidence score is worth what it costs in extraction risk, which is a product ' +
+        'question rather than a security one.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['quer', 'systematic', 'train', 'copy', 'approximat', 'local'],
+            ['confidence', 'score', 'lower', 'fewer', 'reduces', 'substantially'],
+            ['economic', 'not prevent', 'decision', 'worth', 'product', 'whether'],
+          ],
+          hint: 'State the risk, name the feature that worsens it, and end with the decision somebody has to take.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.6.2: what the extraction defences do ----------------------------
+  'aisp.6.2': [
+    {
+      id: 'aisp.6.2-p1',
+      prompt:
+        'In two or three sentences, explain why every real extraction defence works on cost rather ' +
+        'than on prevention.',
+      teach: {
+        note:
+          'The structural reason, and it is worth being able to state without sounding defeatist: ' +
+          'the attack is indistinguishable from the product, so nothing can block it without blocking ' +
+          'the service.',
+      },
+      solution:
+        'Extraction is performed by asking the model questions and recording the answers, which is ' +
+        'exactly what every legitimate customer does, so there is no property of the traffic that ' +
+        'separates the attack from the product. Anything that blocked it would block paying users ' +
+        'doing the same thing at a different scale. So the available controls all raise the number of ' +
+        'queries, the time or the price required, and the honest goal is making the cost exceed what ' +
+        'the model is worth rather than making the attack impossible.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['legitimate', 'same as', 'the product', 'customers do', 'indistinguish', 'no property'],
+            ['block', 'would also', 'paying', 'cannot separate', 'service'],
+            ['cost', 'raise', 'time', 'price', 'exceed', 'worth'],
+          ],
+          hint: 'Say why the traffic cannot be separated, what blocking would cost, and what the goal becomes.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.2-p2',
+      prompt:
+        'In two or three sentences, say what watermarking a model achieves and why it is not a ' +
+        'defence.',
+      teach: {
+        note:
+          'Watermarking is filed wrongly more often than any other control here. It is an ' +
+          'attribution mechanism, which is valuable and entirely after the fact, and calling it a ' +
+          'defence displaces effort from the controls that raise cost.',
+      },
+      solution:
+        'Watermarking makes a stolen copy identifiable afterwards: the model is trained to respond ' +
+        'distinctively to certain inputs, so you can later demonstrate that somebody else\'s system ' +
+        'was derived from yours. That supports a legal claim and stops nothing, because the ' +
+        'extraction has already happened by the time the watermark is useful and nothing about it ' +
+        'raises the attacker\'s cost. It belongs in the register as attribution rather than as ' +
+        'mitigation, and filing it as a defence displaces the controls that actually raise cost.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['identifiab', 'attribut', 'demonstrate', 'prove', 'derived', 'afterwards'],
+            ['legal', 'claim', 'court', 'evidence', 'action'],
+            ['stops nothing', 'not prevent', 'already', 'after', 'no cost', 'not a defence'],
+          ],
+          hint: 'Say what it does, what it supports, and why that is not mitigation.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.2-p3',
+      prompt:
+        'In two or three sentences, say what a contractual prohibition on training competing models ' +
+        'is worth, and against whom.',
+      teach: {
+        note:
+          'Contract terms are a real control with a specific population: they work against parties ' +
+          'who can be identified and sued, and not at all against anonymous ones. Knowing which ' +
+          'population you face decides whether the term is your main control or decoration.',
+      },
+      solution:
+        'It is worth a great deal against a party you can identify and reach, such as a named partner ' +
+        'or an enterprise customer, because it gives a remedy no technical control provides and it ' +
+        'changes their calculation before they start. It is worth nothing against an anonymous ' +
+        'account behind a stolen card. So its value depends entirely on who your callers are: on a ' +
+        'partner API it may be the strongest control available, and on a public endpoint it is ' +
+        'decoration.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['identif', 'named', 'partner', 'enterprise', 'reach', 'known'],
+            ['anonymous', 'stolen', 'public', 'nothing', 'cannot sue', 'unknown'],
+            ['depends', 'who', 'callers', 'strongest', 'decoration', 'population'],
+          ],
+          hint: 'Say who it works against, who it does not, and what that depends on.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.2-p4',
+      prompt:
+        'You can implement exactly one extraction control this quarter. In two or three sentences, ' +
+        'say which and why.',
+      teach: {
+        note:
+          'Forces a commitment. Removing or rounding the confidence score is usually the answer ' +
+          'because it attacks the query economics directly and costs nothing at runtime, but the ' +
+          'reasoning matters more than the choice.',
+      },
+      solution:
+        'Rounding or removing the confidence score, because it attacks the attacker\'s query ' +
+        'economics directly: the score is what lets them probe efficiently, and removing it can raise ' +
+        'the query count needed by orders of magnitude for no runtime cost and no new infrastructure. ' +
+        'Rate limiting is the obvious alternative and it is only as strong as the cost of obtaining ' +
+        'another account, which on a self-service product is nearly nothing. The cost of my choice is ' +
+        'that legitimate consumers who use the score lose something real, and that has to be checked ' +
+        'with them rather than assumed.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['score', 'confidence', 'round', 'remove', 'label only'],
+            ['quer', 'economics', 'orders of magnitude', 'more queries', 'efficient', 'probe'],
+            ['cost', 'legitimate', 'consumers', 'lose', 'rate limit', 'account'],
+          ],
+          hint: 'Choose one, justify it against the alternative, and name what your choice costs.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.2-p5',
+      prompt:
+        'In two or three sentences, describe a monitoring rule for extraction and be honest about its ' +
+        'false positive rate.',
+      teach: {
+        note:
+          'Same discipline as the detection engineering material: a rule proposed without its noise ' +
+          'estimate is not a proposal. Here the benign population is batch integrations, which look ' +
+          'identical on every signal that matters.',
+      },
+      solution:
+        'Alert when a single account\'s requests over a rolling window show high volume together with ' +
+        'unusually low repetition and broad coverage of the input space, since real workloads cluster ' +
+        'and a sweep does not. The false positive rate will be poor at first, because a nightly batch ' +
+        'integration produces exactly that shape, and any customer running one will trip it every ' +
+        'night. So it has to start as a low-severity signal that a human reviews with the account ' +
+        'owner in mind, and the accounts that turn out to be legitimate become an allowlist rather ' +
+        'than a reason to weaken the rule.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['volume', 'repetition', 'coverage', 'distinct', 'window', 'sweep'],
+            ['batch', 'integration', 'legitimate', 'false positive', 'same shape', 'customer'],
+            ['low severity', 'review', 'allowlist', 'human', 'tune', 'not block'],
+          ],
+          hint: 'Give the rule, name the benign population that matches it, and say how you would run it.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.6.3: membership inference ---------------------------------------
+  'aisp.6.3': [
+    {
+      id: 'aisp.6.3-p1',
+      prompt:
+        'In two or three sentences, explain the mechanism behind membership inference without using ' +
+        'the word "overfitting".',
+      teach: {
+        note:
+          'The constraint forces the actual mechanism: the model is measurably more comfortable on ' +
+          'data it has seen, and that difference is the signal. Naming it as a confidence gap rather ' +
+          'than as a training pathology is what makes it predictable.',
+      },
+      solution:
+        'A model tends to be more confident on inputs it saw during training than on ones it did ' +
+        'not, because it was fitted to reduce error on exactly those examples. That difference in ' +
+        'confidence is measurable, so an attacker who can query the model and knows what its ' +
+        'confidence looks like on data it has definitely never seen can compare the two and infer ' +
+        'whether a particular record was in the training set. The wider that gap, the more reliable ' +
+        'the inference.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['confident', 'confidence', 'more certain', 'lower loss', 'comfortable'],
+            ['seen', 'training', 'during', 'was in', 'fitted to'],
+            ['compare', 'baseline', 'difference', 'gap', 'infer', 'measur'],
+          ],
+          hint: 'Say what differs between seen and unseen inputs, and how an attacker uses the difference.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.3-p2',
+      prompt:
+        'In two or three sentences, explain why an attacker needs a baseline and how shadow models ' +
+        'provide one.',
+      teach: {
+        note:
+          'The step that makes the attack practical, and it is why membership inference is not purely ' +
+          'theoretical. A raw confidence number means nothing without knowing what confidence looks ' +
+          'like for a non-member on the same kind of data.',
+      },
+      solution:
+        'A confidence value on its own means nothing: high confidence might indicate membership or ' +
+        'might just be an easy example, and the attacker cannot tell without knowing what the model ' +
+        'looks like on data it definitely never saw. Shadow models supply that: the attacker trains ' +
+        'their own models on data they control, so they know exactly which records were members, and ' +
+        'learns what the confidence gap looks like. They then apply that calibration to the target ' +
+        'model, which is why the attack works without any access to the target\'s training data.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['on its own', 'means nothing', 'easy example', 'cannot tell', 'without'],
+            ['shadow', 'their own', 'trains', 'knows which', 'controls the data'],
+            ['calibrat', 'apply', 'learns what', 'transfer', 'no access'],
+          ],
+          hint: 'Say why a raw number is useless, what the shadow model provides, and how it is applied.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.3-p3',
+      prompt:
+        'Give an example where membership in a dataset is itself the sensitive fact, and say why that ' +
+        'changes the severity.',
+      teach: {
+        note:
+          'The step that converts membership inference from a technical curiosity into a disclosure. ' +
+          'When the inclusion criterion is the sensitive attribute, learning that somebody is in the ' +
+          'set reveals the attribute without revealing a single field.',
+      },
+      solution:
+        'A model trained only on patients diagnosed with a particular condition: learning that ' +
+        'somebody\'s record was in the training set reveals the diagnosis, without any field of the ' +
+        'record ever being disclosed. The inclusion criterion is the sensitive attribute, so ' +
+        'membership and the secret are the same fact. That raises severity sharply, because the usual ' +
+        'mitigations aimed at protecting field values do nothing here and the disclosure happens ' +
+        'through the model behaving normally.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['diagnos', 'condition', 'patients', 'criterion', 'only', 'cohort'],
+            ['reveals', 'membership is', 'same fact', 'discloses', 'infer the'],
+            ['severity', 'no field', 'normal', 'usual mitigation', 'does nothing', 'higher'],
+          ],
+          hint: 'Give the example, say why membership equals the secret, and what that does to severity.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.3-p4',
+      prompt:
+        'In two or three sentences, say what reduces membership inference risk and what it costs.',
+      teach: {
+        note:
+          'The controls are the same ones that reduce memorisation, which is a useful consolidation: ' +
+          'a team that has done the deduplication and regularisation work has already bought a ' +
+          'reduction here without framing it that way.',
+      },
+      solution:
+        'Anything that narrows the confidence gap between members and non-members: stopping training ' +
+        'earlier, regularisation, deduplication, and at the strong end differential privacy, which ' +
+        'bounds the gap formally rather than incidentally. The cost is accuracy, because every one of ' +
+        'those makes the model fit its training data less closely, and that is the same thing as ' +
+        'reducing the signal. It is worth noticing that a team who already deduplicated for ' +
+        'memorisation reasons has bought a reduction here too, and can say so rather than treating ' +
+        'them as separate programmes.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['early stop', 'regularis', 'regulariz', 'dedup', 'differential privacy', 'narrow'],
+            ['accuracy', 'cost', 'fit', 'less closely', 'worse', 'trade'],
+            ['same', 'already', 'memoris', 'memoriz', 'overlap', 'both'],
+          ],
+          hint: 'Name the controls, say what they cost, and note the overlap with memorisation work.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.3-p5',
+      prompt:
+        'A team says membership inference is theoretical and not worth mitigating. In two or three ' +
+        'sentences, give the strongest fair version of their argument and then your answer.',
+      teach: {
+        note:
+          'Steelmanning before answering. Their position is defensible on many systems, and an answer ' +
+          'that does not concede that will be dismissed; the real disagreement is about which ' +
+          'datasets it applies to.',
+      },
+      solution:
+        'Their fair version is that the attack needs many queries, needs a baseline the attacker has ' +
+        'to build, and on most models yields a probabilistic answer about one record that is of ' +
+        'little use to anybody, so the effort is better spent elsewhere. That is right for most ' +
+        'systems and wrong for a specific class: where the training set has a sensitive inclusion ' +
+        'criterion, one probabilistic answer about one person is the disclosure, and the cost to the ' +
+        'attacker stops mattering. So the answer is not "always mitigate" but "check whether ' +
+        'membership is itself sensitive", which is one question rather than a programme.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['many quer', 'baseline', 'effort', 'probabilistic', 'little use', 'expensive'],
+            ['right', 'fair', 'most', 'agree', 'true for'],
+            ['inclusion', 'sensitive', 'criterion', 'that class', 'check whether', 'one question'],
+          ],
+          hint: 'State their case properly, concede where it holds, and name the exception.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.6.4: what differential privacy costs ----------------------------
+  'aisp.6.4': [
+    {
+      id: 'aisp.6.4-p1',
+      prompt:
+        'In two or three sentences, explain what the guarantee of differential privacy actually says, ' +
+        'in terms a product owner would follow.',
+      teach: {
+        note:
+          'The guarantee is precise and easy to overstate. The plain version is about the model being ' +
+          'almost the same either way, which is what makes it a statement about individuals rather ' +
+          'than about the dataset.',
+      },
+      solution:
+        'It says the trained model comes out almost the same whether or not any one person\'s record ' +
+        'was included, and "almost" is a number you choose in advance rather than a hope. Because ' +
+        'that holds for every individual, anything the model reveals about a person could have been ' +
+        'inferred from the rest of the data without them, which is what makes it a genuine ' +
+        'protection rather than an obfuscation. It is the strongest answer we have to both ' +
+        'memorisation and membership inference, and unlike stripping identifiers it comes with a ' +
+        'parameter you can point at.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['almost the same', 'with or without', 'whether or not', 'included', 'either way'],
+            ['number', 'parameter', 'chosen', 'in advance', 'quantif', 'epsilon'],
+            ['every individual', 'could have been', 'without them', 'memoris', 'membership'],
+          ],
+          hint: 'State the guarantee plainly, note that the strength is a chosen number, and say what it covers.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.4-p2',
+      prompt:
+        'In two or three sentences, say what differential privacy costs, concretely enough for a ' +
+        'budget conversation.',
+      teach: {
+        note:
+          'The costs are real and specific, and a recommendation that omits them gets reversed when ' +
+          'the accuracy drop shows up. Naming them in advance is what makes the decision informed ' +
+          'rather than regretted.',
+      },
+      solution:
+        'Accuracy, most visibly on the rare cases, because the mechanism works by limiting how much ' +
+        'any single record can influence the model and rare cases are exactly the ones carried by few ' +
+        'records. Compute and training time, often substantially, and a harder tuning problem with ' +
+        'another parameter to choose. And expertise, because implementing it badly gives you the cost ' +
+        'without the guarantee, which is the worst of both and not visible from the outside.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['accuracy', 'rare', 'minority', 'tail', 'worse on', 'drops'],
+            ['compute', 'time', 'training', 'expensive', 'slower', 'tuning'],
+            ['expertise', 'badly', 'without the guarantee', 'skill', 'implement', 'worst of both'],
+          ],
+          hint: 'Name the three costs, and say which is easiest to get wrong invisibly.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.4-p3',
+      prompt:
+        'In two or three sentences, say when you would recommend differential privacy and when you ' +
+        'would not.',
+      teach: {
+        note:
+          'Making the recommendation conditional is what makes it credible. It is a strong control ' +
+          'for a specific situation and expensive theatre outside it.',
+      },
+      solution:
+        'I would recommend it where the training data is personal and the model will be exposed to ' +
+        'parties who could query it systematically, because that is the case where memorisation and ' +
+        'membership inference are both reachable and both matter. I would not recommend it where the ' +
+        'training data is not personal, where the model is internal and access is already controlled, ' +
+        'or where accuracy on rare cases is the point of the system, since the mechanism damages ' +
+        'exactly that. In those cases deduplication and access control buy most of the benefit for a ' +
+        'fraction of the cost.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['personal', 'exposed', 'quer', 'external', 'systematically', 'sensitive'],
+            ['not personal', 'internal', 'controlled', 'rare cases', 'accuracy', 'would not'],
+            ['dedup', 'access control', 'cheaper', 'most of the benefit', 'instead', 'fraction'],
+          ],
+          hint: 'Give both conditions and name the cheaper alternative for the second case.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.4-p4',
+      prompt:
+        'A vendor says their training is "differentially private". In two or three sentences, say ' +
+        'what you would ask.',
+      teach: {
+        note:
+          'The claim is meaningless without the parameter, and a large enough epsilon makes the ' +
+          'guarantee vacuous while remaining technically true. Asking for the number is the whole ' +
+          'assessment.',
+      },
+      solution:
+        'What the privacy parameter is, because the guarantee is only as strong as that number and a ' +
+        'sufficiently large one makes the claim true and empty. Then what unit it applies to, since ' +
+        'per-record and per-user are very different when one person contributes many records. And ' +
+        'whether it covers the whole pipeline or only one stage, because a private training step ' +
+        'followed by a non-private fine-tune gives you the cost of the first and the guarantee of ' +
+        'neither.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['parameter', 'epsilon', 'number', 'value', 'how strong'],
+            ['unit', 'per record', 'per user', 'applies to', 'granularity', 'many records'],
+            ['whole pipeline', 'stage', 'fine-tune', 'after', 'only one', 'covers'],
+          ],
+          hint: 'Ask about the number, the unit it applies to, and the scope of the pipeline it covers.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.6.4-p5',
+      prompt:
+        'Write the two or three sentences you would give a product owner so the decision is genuinely ' +
+        'theirs.',
+      teach: {
+        note:
+          'The deliverable. A recommendation that hides the trade-off takes the decision away from ' +
+          'the person accountable for it, and one that lists options without a view is an abdication; ' +
+          'the useful form gives both sides and then a recommendation clearly labelled as such.',
+      },
+      solution:
+        'Training with differential privacy would give us a formal guarantee that no individual\'s ' +
+        'record materially shaped the model, which is the strongest answer available to both ' +
+        'memorisation and membership inference and something we could show a regulator. It would cost ' +
+        'accuracy, most on the rare cases the system exists to catch, plus significantly more compute ' +
+        'and a specialist to implement it properly. My recommendation is that we do it if this model ' +
+        'will be exposed outside the organisation and skip it if it stays internal, but the trade ' +
+        'between rare-case accuracy and formal assurance is yours to make.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['guarantee', 'formal', 'no individual', 'regulator', 'strongest', 'show'],
+            ['accuracy', 'rare', 'compute', 'specialist', 'cost'],
+            ['recommend', 'my view', 'yours', 'you decide', 'if', 'exposed'],
+          ],
+          hint: 'Give both sides in their terms, then a recommendation clearly marked as yours and a decision clearly theirs.',
+        },
+      ],
+    },
+  ],
 };
