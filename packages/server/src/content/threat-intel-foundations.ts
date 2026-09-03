@@ -17,35 +17,99 @@ import type { Exercise, LearningPackage } from '@soc/shared';
 
 const INTEL_TEACH = {
   concept:
+    'Picture a detective called to a break-in. From the scene alone, the detective can tell you how ' +
+    'the lock was forced, which room was searched first, and what got taken. That is the incident: a ' +
+    'precise account of what happened, this one time, in this one place. What the scene cannot tell ' +
+    'the detective is whether this matches a known burglar who always checks the bedroom first, or ' +
+    'whether burglars of this kind tend to come back for a second visit once they know the house. ' +
+    'That second kind of knowledge, built from many break-ins rather than just this one, is what a ' +
+    'detective bureau exists to supply. Threat intelligence is the same idea applied to a cyberattack: ' +
+    'the accumulated knowledge of how attackers, as a population, tend to operate, built from many ' +
+    'incidents rather than the one currently in front of you.\n\n' +
     'Threat intelligence answers two questions the incident itself cannot: has anyone seen this ' +
-    'before, and what is this actor likely to do next. It turns the indicators pulled from an ' +
-    'incident into context, mapping behaviour to known techniques and matching tradecraft against ' +
-    'prior campaigns, so the responders are working against a picture of the adversary rather than ' +
-    'a pile of disconnected artefacts.',
+    'before, and what is this actor likely to do next. An incident on its own hands a responder a ' +
+    'pile of raw evidence, an odd process, a strange outbound connection, a file that should not be ' +
+    'there, and that evidence alone says only what happened, not what it means or where it is headed. ' +
+    'Intelligence turns that evidence into context: mapping what happened to techniques attackers use ' +
+    'elsewhere, and matching how this operation was actually carried out, its tradecraft, against ' +
+    'prior campaigns that used a similar approach.\n\n' +
+    'This matters because a responder working from raw evidence alone is guessing at the shape of an ' +
+    'entire attack from a single fragment of it, the way you might try to guess a whole animal from ' +
+    'one footprint. A responder working with intelligence is instead comparing that footprint against ' +
+    'a catalogue of animals that have left similar prints before, and can make an informed guess about ' +
+    'what the rest of the animal looks like, and where it tends to go next. That is why the job exists ' +
+    'as its own seat rather than folding into incident response: someone has to hold that catalogue ' +
+    'and keep matching new fragments against it, while the responder is busy with the fragment ' +
+    'directly in front of them.',
 } as const;
 
 const RESTRAINT_TEACH = {
   concept:
-    'The hardest discipline in intelligence is restraint. Attribution, naming who is behind an ' +
-    'incident, is easy to assert and hard to justify, and a confident wrong attribution has ' +
-    'consequences far beyond the incident: it can misdirect a response, name an innocent party, or ' +
-    'shape a decision made above your head. The professional habit is to state confidence honestly, ' +
-    'hold uncertainty out loud, and attribute only as far as the evidence actually reaches.',
+    'Attribution is the act of naming who is behind an attack: a specific group, a specific country, ' +
+    'a specific person. It sounds like the most satisfying part of the job, since everyone wants to ' +
+    'know who did it. It is also the easiest thing in intelligence to get wrong while sounding ' +
+    'completely certain, which is why the hardest discipline in the field is learning to resist saying ' +
+    'more than you actually know.\n\n' +
+    'Think of a witness to a crime who says, with total certainty, it was the man in the red jacket, ' +
+    'based on a glimpse from across the street. The witness might be right. But a courtroom does not ' +
+    'accept that kind of certainty on its own, because a confident eyewitness has sent innocent people ' +
+    'to prison before, and sounding sure is not the same thing as being right. Attribution in ' +
+    'cybersecurity has exactly the same trap: malware that resembles a known group tooling, or a ' +
+    'technique that overlaps with a previous campaign, feels like recognising the man in the red ' +
+    'jacket, but a resemblance is not proof, and attackers know this well enough to sometimes borrow ' +
+    'each other tools specifically to cause this kind of false recognition.\n\n' +
+    'Restraint matters this much because a confident wrong attribution does real damage well past the ' +
+    'original incident: it can misdirect an entire response toward the wrong adversary, publicly name ' +
+    'an organisation or a country that had nothing to do with it, or shape a decision made by someone ' +
+    'far above the analyst, a diplomatic response, a public statement, a lawsuit, built on a guess that ' +
+    'was delivered as if it were a fact.\n\n' +
+    'The professional habit that avoids this is to say exactly what the evidence supports and no more, ' +
+    'to state how confident you are out loud rather than letting the reader assume more certainty than ' +
+    'you actually have, and to stop attributing at the exact point where the evidence stops, even when ' +
+    'a name is the one thing everyone in the room is waiting to hear.',
 } as const;
 
 const INDICATOR_TEACH = {
   concept:
-    'Not all indicators are equal. An address or a file hash is an indicator of compromise, and it ' +
-    'is cheap for an attacker to change: a new server, a recompiled binary, and your list is stale. ' +
-    'A technique, tactic, or procedure, how the actor actually operates, is expensive to change, ' +
-    'because it is tied to their tooling and habits. Intelligence built on behaviour lasts; ' +
-    'intelligence built only on indicators expires the moment the attacker moves house.',
+    'An indicator of compromise is any specific, concrete fact that signals an attack happened: the ' +
+    'exact IP address a connection came from, the exact hash, a kind of digital fingerprint, of a ' +
+    'malicious file, the exact domain name used in a phishing email. These are the easiest things to ' +
+    'write down and share, and for a long time they were the main currency of threat intelligence: a ' +
+    'list of known bad addresses and hashes to block.\n\n' +
+    'Not all indicators are equally durable, though, and the reason is simple: it costs an attacker ' +
+    'almost nothing to change the cheap ones. Renting a new server produces a new IP address in ' +
+    'minutes. Recompiling the same malware with one line changed produces an entirely new hash, ' +
+    'because a hash is calculated from the exact bytes of a file, and changing even a single byte ' +
+    'changes it completely. The moment an attacker does either of those things, a defender list of ' +
+    'known bad addresses and hashes is stale: correct about the past, and useless for what comes next.\n\n' +
+    'A technique, tactic, or procedure, usually shortened to TTP, describes how an actor actually ' +
+    'operates rather than which specific tool or address they happened to use this time: how they get ' +
+    'their first foothold, how they move around once inside, how they hide what they are doing. This ' +
+    'is expensive for an attacker to change, because it is tied to their training, their habits, and ' +
+    'the tooling they have already built and are comfortable running, not to a single disposable ' +
+    'server or file. Changing an address takes minutes. Changing how an entire team operates takes ' +
+    'months, if it happens at all.\n\n' +
+    'This is why intelligence built on behaviour lasts, and intelligence built only on indicators ' +
+    'expires the moment the attacker, in effect, moves house: a landlord who only records a tenant old ' +
+    'address learns nothing useful once that tenant relocates, but a landlord who has learned that ' +
+    'tenant habits, always pays late, always leaves a light on, can still recognise them at the new ' +
+    'address.',
 } as const;
 
 const CYCLE_TEACH = {
   concept:
-    'Intelligence work runs on a cycle rather than a single step, and naming the steps matters ' +
-    'because most failures happen in the cycle itself, not in any single analytic judgement.\n\n' +
+    'Intelligence work is not something you do in one step, the same way a research paper does not go ' +
+    'straight from a search engine to a finished conclusion. It runs on a cycle, a repeating series of ' +
+    'named steps, and the reason to learn those names is that most failures in the field trace back to ' +
+    'one particular step being skipped or rushed, not to an analyst simply thinking something through ' +
+    'wrong.\n\n' +
+    'Think of how a newsroom works. A reporter is not just told to go find something interesting: an ' +
+    'editor identifies a question worth answering, the reporter gathers material, the material gets ' +
+    'sifted and organised, the reporter forms a judgement about what it actually means, that judgement ' +
+    'gets published, and afterward the newsroom learns whether the story landed, whether it arrived in ' +
+    'time, and whether readers actually cared, and that last piece shapes what the newsroom decides to ' +
+    'cover next. Intelligence work follows the same shape, and naming the steps matters because most ' +
+    'failures happen in the cycle itself, not in any single analytic judgement.\n\n' +
     'REQUIREMENTS is where a decision maker states a question, or where the team infers one: what ' +
     'does security leadership need to decide, and by when. COLLECTION gathers raw material against ' +
     'that question, from open reporting, sensors, a paid feed, or a partner. PROCESSING turns raw ' +
@@ -56,7 +120,9 @@ const CYCLE_TEACH = {
     'form they can use before the moment has passed. FEEDBACK closes the loop: did this answer the ' +
     'question, was it in time, and what should the next requirement be.\n\n' +
     'It is drawn as a circle rather than a line because feedback is not decorative. A cycle without ' +
-    'it repeats the same collection plan forever, whether or not it was ever the right one.',
+    'it repeats the same collection plan forever, whether or not it was ever the right one, the same ' +
+    'way a newsroom that never checks whether anyone read yesterday story has no way of learning what ' +
+    'to cover tomorrow.',
 } as const;
 
 const MODULE_TI_2: Exercise[] = [
@@ -83,10 +149,11 @@ const MODULE_TI_2: Exercise[] = [
       'Analysis is judged by whether the reasoning and sourcing hold up, not by how well the sentences read.',
     ],
     solution:
-      'A, B, C, and E. Requirements sets the question, collection gathers material, processing makes ' +
-      'it usable, and feedback tests whether the product actually answered the question and reshapes ' +
-      'what comes next. D is wrong: analysis is judged by whether the sourcing and reasoning hold up, ' +
-      'not by how well it reads, and plenty of well written analysis has been wrong.',
+      'The correct answers are A, B, C, and E. Requirements sets the question, collection gathers ' +
+      'material, processing makes it usable, and feedback tests whether the product actually answered ' +
+      'the question and reshapes what comes next. D is wrong: analysis is judged by whether the ' +
+      'sourcing and reasoning hold up, not by how well it reads, and plenty of well written analysis ' +
+      'has turned out to be wrong.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -98,7 +165,8 @@ const MODULE_TI_2: Exercise[] = [
     debrief:
       'Treat the cycle as a checklist when something goes wrong: if a product landed badly, ask ' +
       'which of these five steps was actually skipped, rather than assuming the analyst just got it ' +
-      'wrong.',
+      'wrong. New analysts tend to blame the writing. Experienced ones check the cycle first, because ' +
+      'that is where the failure usually lives.',
     practice: [],
   },
   {
@@ -114,9 +182,12 @@ const MODULE_TI_2: Exercise[] = [
       'like progress. Which of the following are genuine consequences? Select all that apply.',
     teach: {
       concept:
-        'Requirements is the step that is easiest to skip, because collection feels like progress ' +
-        'and requirements feels like paperwork. Skipping it does not save time, it moves the cost ' +
-        'downstream.\n\n' +
+        'Requirements, the first step of the intelligence cycle, is simply the question the rest of ' +
+        'the work is meant to answer: what does a decision maker actually need to know, and by when. ' +
+        'It is also the step that is easiest to skip, because collection feels like progress and ' +
+        'requirements feels like paperwork, a delay before the real work starts. Skipping it does not ' +
+        'save time, it just moves the cost downstream, the same way skipping a doctor asking what is ' +
+        'wrong before ordering tests wastes effort on tests that may never have been needed.\n\n' +
         'Without a stated question, analysts tend to collect whatever is easy to reach or interesting ' +
         'to read, rather than what a decision actually needs. The eventual report answers no ' +
         'particular question, so no one specific person is waiting for it, which makes it easy to ' +
@@ -139,11 +210,11 @@ const MODULE_TI_2: Exercise[] = [
       'The fix is a short conversation about what is needed, not a bigger collection effort.',
     ],
     solution:
-      'A, B, C, and E. Skipping requirements means effort goes toward what is easy to collect rather ' +
-      'than what is needed, the result answers no one specific question, and the fix is a decision ' +
-      'maker stating roughly what they need. D is wrong: more collection without a stated question ' +
-      'does not manufacture a requirement after the fact, it just produces more material nobody ' +
-      'asked for.',
+      'The correct answers are A, B, C, and E. Skipping requirements means effort goes toward what is ' +
+      'easy to collect rather than what is needed, the result answers no one specific question, and ' +
+      'the fix is a decision maker stating roughly what they need. D is wrong: more collection without ' +
+      'a stated question does not manufacture a requirement after the fact, it just produces more ' +
+      'material nobody asked for.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -153,8 +224,8 @@ const MODULE_TI_2: Exercise[] = [
       },
     ],
     debrief:
-      'When a report lands with a thud, ask what question it was meant to answer. If nobody can ' +
-      'say, the requirements step never happened.',
+      'When a report lands with a thud, ask what question it was meant to answer. If nobody can say, ' +
+      'the requirements step never happened, and no amount of extra collection would have fixed that.',
     practice: [],
   },
   {
@@ -170,9 +241,12 @@ const MODULE_TI_2: Exercise[] = [
       'result the intelligence product. Which of the following are accurate? Select all that apply.',
     teach: {
       concept:
-        'Processing and analysis are easy to confuse because both look like work on the same ' +
-        'material, but they answer different questions. Processing asks what is here. Analysis asks ' +
-        'what it means and how sure we are.\n\n' +
+        'Processing and analysis sound like two names for the same thing, sorting through material, ' +
+        'but they answer different questions, and mixing them up is one of the most common mistakes a ' +
+        'new analyst makes. Processing asks what is here. Analysis asks what it means and how sure we ' +
+        'are. Think of a librarian who sorts a pile of newspaper clippings into neat folders by topic: ' +
+        'useful work, but the librarian has not told you what the clippings mean for your decision, ' +
+        'only that they are now organised.\n\n' +
         'Extracting indicators from ten reports and deduplicating them is processing: real, necessary ' +
         'work, and still short of intelligence. A reader handed that list knows what was seen ' +
         'somewhere, but not what it means for this organisation, how likely it is to matter, or how ' +
@@ -196,10 +270,11 @@ const MODULE_TI_2: Exercise[] = [
       'A tidy list is processing done well. It becomes analysis only once someone judges what it means.',
     ],
     solution:
-      'A, B, C, and E. Organising and deduplicating is processing, and it leaves the meaning and the ' +
-      'confidence unstated, which is what analysis adds; a reader without that judgement has to ' +
-      'supply it themselves. D is wrong: effort spent on processing does not convert it into ' +
-      'analysis, however much work went in.',
+      'The correct answers are A, B, C, and E. Organising and deduplicating is processing, and it ' +
+      'leaves the meaning and the confidence unstated, which is what analysis adds; a reader without ' +
+      'that judgement has to supply it themselves. D is wrong: effort spent on processing does not ' +
+      'convert it into analysis, however much work went in, because effort and judgement are not the ' +
+      'same currency.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -210,7 +285,8 @@ const MODULE_TI_2: Exercise[] = [
     ],
     debrief:
       'If a product could have been produced by a script instead of an analyst, it is probably still ' +
-      'processing. Analysis is the part that needed a person willing to commit to a judgement.',
+      'processing. Analysis is the part that needed a person willing to commit to a judgement, which ' +
+      'is exactly the part a script cannot do for you.',
     practice: [],
   },
   {
@@ -226,9 +302,12 @@ const MODULE_TI_2: Exercise[] = [
       'Which of the following are accurate about what should happen next? Select all that apply.',
     teach: {
       concept:
-        'Dissemination has its own failure mode: delivering the right content in the wrong form, to ' +
-        'the wrong person, or too late to matter. A report that is technically correct but arrives ' +
-        'after the decision was already made has failed just as completely as one that was wrong.\n\n' +
+        'Dissemination is simply the step where a finished report gets delivered to the person who ' +
+        'needs it, and it has its own failure mode that has nothing to do with whether the analysis ' +
+        'itself was correct: delivering the right content in the wrong form, to the wrong person, or ' +
+        'too late to matter. A report that is technically correct but arrives after the decision was ' +
+        'already made has failed just as completely as one that was wrong, the same way perfect travel ' +
+        'directions handed to someone after their flight has already left are worth nothing.\n\n' +
         'What comes after dissemination is feedback, and it is the step most teams skip once the ' +
         'report has shipped. Feedback asks whether the product actually answered the question, ' +
         'whether it arrived in time to matter, and what that implies for what should be asked next. ' +
@@ -249,9 +328,10 @@ const MODULE_TI_2: Exercise[] = [
       'A report can be correct and still fail, if it never reaches the reader in a form and a time that lets them use it.',
     ],
     solution:
-      'A, B, D, and E. Timing and format are part of dissemination, and feedback is what tells a team ' +
-      'whether the product actually worked and what to ask next. C is wrong: sending the report is ' +
-      'not the end of the cycle, it is the point the cycle depends on to correct itself.',
+      'The correct answers are A, B, D, and E. Timing and format are part of dissemination, and ' +
+      'feedback is what tells a team whether the product actually worked and what to ask next. C is ' +
+      'wrong: sending the report is not the end of the cycle, it is the point the cycle depends on to ' +
+      'correct itself.',
     expectedOutput: 'Options A, B, D, and E selected.',
     checks: [
       {
@@ -262,7 +342,8 @@ const MODULE_TI_2: Exercise[] = [
     ],
     debrief:
       'The habit worth building is asking, after every report, whether it actually got used. That ' +
-      'single question does most of the work of feedback.',
+      'single question does most of the work of feedback, and it is a question most teams simply ' +
+      'forget to ask once the report has shipped.',
     practice: [],
   },
   {
@@ -290,7 +371,9 @@ const MODULE_TI_2: Exercise[] = [
       'what would actually be useful, and because nobody asks whether past reports helped, that ' +
       'mismatch is never corrected and keeps repeating. Fixing feedback is what prevents recurrence, ' +
       'because it is the mechanism that turns a wrong or stale requirement into a corrected one for ' +
-      'the next cycle, rather than leaving the team to guess indefinitely.',
+      'the next cycle, rather than leaving the team to guess indefinitely. Fixing requirements alone ' +
+      'only patches this one cycle; fixing feedback is what stops the next one from drifting the same ' +
+      'way.',
     expectedOutput:
       'An answer naming requirements and feedback as the missing steps, and explaining that feedback ' +
       'is what stops the mismatch recurring.',
@@ -307,15 +390,22 @@ const MODULE_TI_2: Exercise[] = [
     ],
     debrief:
       'This is the single most common failure mode in the field: a team that is busy at every step ' +
-      'except the two that would tell it whether the busyness matters.',
+      'except the two that would tell it whether the busyness matters. It looks like productivity ' +
+      'from the inside, and it is invisible until someone outside the team, like this SOC lead, says ' +
+      'the reports are not helping.',
     practice: [],
   },
 ];
 
 const PYRAMID_TEACH = {
   concept:
-    'The pyramid of pain orders six kinds of detection by how much pain each one causes an attacker ' +
-    'to feel when you act on it, and the answer depends entirely on how expensive that layer is for ' +
+    'The pyramid of pain is a way of ranking different kinds of detection, not by how easy each one ' +
+    'is to build, but by how much genuine pain each one causes an attacker when a defender acts on ' +
+    'it. Think of it as ranking reactions to being caught: changing a licence plate after a witness ' +
+    'notices your car is trivial, done in an afternoon, but changing your entire daily routine after ' +
+    'being recognised by name is not, and might not happen at all. The pyramid orders six kinds of ' +
+    'detection the same way, from the cheapest thing for an attacker to change, at the bottom, to the ' +
+    'most expensive, at the top, and the answer depends entirely on how expensive that layer is for ' +
     'the attacker to change.\n\n' +
     'HASH VALUES sit at the bottom: a single recompile changes every hash, so blocking one costs the ' +
     'attacker nothing to route around. IP ADDRESSES cost a little more, a new host takes minutes to ' +
@@ -330,7 +420,9 @@ const PYRAMID_TEACH = {
     'changing how a whole team works.\n\n' +
     'The trade runs the other way for the defender: a hash rule is trivial to write and instantly ' +
     'stale, while a detection built on tradecraft takes real analytic work to build and keeps paying ' +
-    'off long after the tools and infrastructure underneath it have all been replaced.',
+    'off long after the tools and infrastructure underneath it have all been replaced. Knowing where ' +
+    'a given detection sits on this ladder is what tells you, before an attacker even reacts, roughly ' +
+    'how long it is going to keep working.',
 } as const;
 
 const MODULE_TI_3: Exercise[] = [
@@ -357,12 +449,12 @@ const MODULE_TI_3: Exercise[] = [
       'Cost here is not about whether a replacement exists, it is about what switching actually costs this operation.',
     ],
     solution:
-      'A, B, C, and E. Hashes are the cheapest to change, addresses and domains cost slightly more ' +
-      'but still take minutes to an afternoon, artefacts tied to installation and execution cost more ' +
-      'again, and TTPs sit at the top because they are tied to training and doctrine rather than to ' +
-      'any one piece of software. D is wrong: tools are expensive to replace mid operation, because ' +
-      'doing so means acquiring or rebuilding a capability and possibly retraining whoever runs it, ' +
-      'not simply downloading a new file.',
+      'The correct answers are A, B, C, and E. Hashes are the cheapest to change, addresses and ' +
+      'domains cost slightly more but still take minutes to an afternoon, artefacts tied to ' +
+      'installation and execution cost more again, and TTPs sit at the top because they are tied to ' +
+      'training and doctrine rather than to any one piece of software. D is wrong: tools are expensive ' +
+      'to replace mid operation, because doing so means acquiring or rebuilding a capability and ' +
+      'possibly retraining whoever runs it, not simply downloading a new file.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -373,7 +465,8 @@ const MODULE_TI_3: Exercise[] = [
     ],
     debrief:
       'Keep this ordering in your head whenever you are asked to prioritise a detection backlog. It ' +
-      'tells you which rule will still matter in six months.',
+      'tells you which rule will still matter in six months, and which one will be quietly useless by ' +
+      'next week.',
     practice: [],
   },
   {
@@ -389,8 +482,9 @@ const MODULE_TI_3: Exercise[] = [
       'accurate about the cost to the defender of detecting at each layer? Select all that apply.',
     teach: {
       concept:
-        'Climbing the pyramid is not free for the defender either, and pretending otherwise leads to ' +
-        'a backlog nobody can actually build.\n\n' +
+        'Every layer of the pyramid costs the attacker something to change, but it is easy to forget ' +
+        'that climbing the pyramid also costs the defender something to build. Pretending otherwise ' +
+        'leads to a backlog nobody can actually build.\n\n' +
         'A hash based detection is cheap to write, cheap to update, and useless the moment the file ' +
         'is recompiled. A detection built on tactics, techniques, and procedures takes real analytic ' +
         'work to design, needs tuning against normal activity, and usually tolerates more false ' +
@@ -414,10 +508,11 @@ const MODULE_TI_3: Exercise[] = [
       'The answer to a detection being expensive is rarely to stop building it, it is to budget for it.',
     ],
     solution:
-      'A, B, C, and E. Hash detections are cheap and short lived, TTP detections cost more to build ' +
-      'and tune but survive tool and infrastructure changes, and both halves of that trade are real. ' +
-      'D is wrong: the cost of TTP detections is an argument for budgeting for them properly, not for ' +
-      'abandoning them in favour of a feed that goes stale on its own schedule.',
+      'The correct answers are A, B, C, and E. Hash detections are cheap and short lived, TTP ' +
+      'detections cost more to build and tune but survive tool and infrastructure changes, and both ' +
+      'halves of that trade are real. D is wrong: the cost of TTP detections is an argument for ' +
+      'budgeting for them properly, not for abandoning them in favour of a feed that goes stale on its ' +
+      'own schedule.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -428,7 +523,8 @@ const MODULE_TI_3: Exercise[] = [
     ],
     debrief:
       'When someone asks why a behavioural detection took longer to ship than a blocklist update, ' +
-      'this is the answer: it is not slower work, it is different work with a longer payoff.',
+      'this is the answer: it is not slower work, it is different work with a longer payoff, and that ' +
+      'payoff is exactly why it was worth the wait.',
     practice: [],
   },
   {
@@ -444,9 +540,10 @@ const MODULE_TI_3: Exercise[] = [
       'approaches sit higher on the pyramid, and last longer? Select all that apply.',
     teach: {
       concept:
-        'Two analysts can be asked to detect the same campaign and produce detections at opposite ' +
-        'ends of the pyramid, and the difference shows up the first time the attacker changes ' +
-        'anything.\n\n' +
+        'Two analysts can be asked to detect the exact same campaign and produce detections at ' +
+        'opposite ends of the pyramid, because nothing about the assignment forces them to pick the ' +
+        'same layer, and the difference between their choices shows up the first time the attacker ' +
+        'changes anything.\n\n' +
         'A detection tied to the current callback domain, the exact command line string, or a single ' +
         'file hash breaks the moment that specific value changes, which for an active operator is a ' +
         'matter of when, not if. A detection built on the sequence of steps an actor takes, the way ' +
@@ -467,10 +564,11 @@ const MODULE_TI_3: Exercise[] = [
       'A callback domain is one of the cheapest things on the whole pyramid to replace.',
     ],
     solution:
-      'A, B, D, and E. Each of these targets a sequence, a pattern, or a habit rather than a single ' +
-      'disposable value, which is what makes them survive a change of tool or infrastructure. C is ' +
-      'wrong: a detection tied to the current domain is exactly the kind of thing this campaign will ' +
-      'change first, and refreshing it after each change is a treadmill, not a detection strategy.',
+      'The correct answers are A, B, D, and E. Each of these targets a sequence, a pattern, or a ' +
+      'habit rather than a single disposable value, which is what makes them survive a change of tool ' +
+      'or infrastructure. C is wrong: a detection tied to the current domain is exactly the kind of ' +
+      'thing this campaign will change first, and refreshing it after each change is a treadmill, not ' +
+      'a detection strategy.',
     expectedOutput: 'Options A, B, D, and E selected.',
     checks: [
       {
@@ -481,7 +579,8 @@ const MODULE_TI_3: Exercise[] = [
     ],
     debrief:
       'If a detection needs a ticket every time the attacker registers a new domain, it was never ' +
-      'built on the durable layer. Ask what it would take to break the detection, and aim higher.',
+      'built on the durable layer. Ask what it would take to break the detection, and aim higher up ' +
+      'the pyramid next time.',
     practice: [],
   },
   {
@@ -499,8 +598,9 @@ const MODULE_TI_3: Exercise[] = [
     teach: {
       concept:
         'The pyramid is often misread as a ranking of what is worth doing, when it is actually a ' +
-        'ranking of what lasts. Those are different questions, and indicators do well on one of them ' +
-        'and badly on the other.\n\n' +
+        'ranking of what lasts. Those are different questions, the way "which coat keeps you warmest ' +
+        'longest" is a different question from "which coat should you grab on your way out the door ' +
+        'right now," and indicators do well on one of them and badly on the other.\n\n' +
         'A hash or an IP address is cheap for an attacker to change, which is why it does not last, ' +
         'but that same cheapness makes it fast for a defender to act on: a known bad value can be ' +
         'blocked in minutes with no analytic work required, which matters a great deal in the middle ' +
@@ -522,10 +622,11 @@ const MODULE_TI_3: Exercise[] = [
       'Short lived does not mean useless. It means the wrong thing to build your whole programme on.',
     ],
     solution:
-      'A, B, C, and E. Indicators are fast to act on precisely because they are cheap, which matters ' +
-      'most during an active incident, and the pyramid is an argument for balance rather than for ' +
-      'abandoning the bottom layer. D is wrong: refusing to use indicators at all throws away the one ' +
-      'thing they are genuinely good at, acting immediately, in exchange for nothing.',
+      'The correct answers are A, B, C, and E. Indicators are fast to act on precisely because they ' +
+      'are cheap, which matters most during an active incident, and the pyramid is an argument for ' +
+      'balance rather than for abandoning the bottom layer. D is wrong: refusing to use indicators at ' +
+      'all throws away the one thing they are genuinely good at, acting immediately, in exchange for ' +
+      'nothing.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -536,7 +637,8 @@ const MODULE_TI_3: Exercise[] = [
     ],
     debrief:
       'The pyramid is a lesson about where to invest your long term effort, not a reason to ' +
-      'unsubscribe from a feed. Keep both tools in the box.',
+      'unsubscribe from a feed. Keep both tools in the box, and reach for the right one depending on ' +
+      'whether you need speed right now or durability over the coming months.',
     practice: [],
   },
   {
@@ -581,16 +683,22 @@ const MODULE_TI_3: Exercise[] = [
     ],
     debrief:
       'This is the whole pyramid in one conversation: cheap and disposable at the bottom, expensive ' +
-      'and durable at the top, and a good programme knows which one it is buying at any given moment.',
+      'and durable at the top, and a good programme knows which one it is buying at any given moment, ' +
+      'rather than assuming the cheaper option is automatically the better deal.',
     practice: [],
   },
 ];
 
 const LEVELS_TEACH = {
   concept:
-    'The same underlying facts about an actor can be written up three different ways, and choosing ' +
-    'the right one is as much a part of the analytic job as getting the facts right, because a ' +
-    'report nobody can use has failed regardless of its accuracy.\n\n' +
+    'Think about how a doctor might deliver the same diagnosis three different ways: a short, plain ' +
+    'note for the patient family explaining what it means for life ahead, a fuller conversation with ' +
+    'the patient about treatment options over the coming months, and a technical chart entry for the ' +
+    'next doctor on shift, who needs exact dosages right now and nothing else. Same underlying truth, ' +
+    'three audiences, three different lengths, three different timeframes. Intelligence reporting ' +
+    'works the same way: the same underlying facts about an actor can be written up three different ' +
+    'ways, and choosing the right one is as much a part of the analytic job as getting the facts ' +
+    'right, because a report nobody can use has failed regardless of its accuracy.\n\n' +
     'STRATEGIC intelligence is written for executives, boards, and risk owners deciding things like ' +
     'budget and risk appetite. It covers months to years, describes trends and sector wide targeting ' +
     'patterns, and rarely names a specific indicator, because an indicator will be irrelevant long ' +
@@ -630,9 +738,10 @@ const MODULE_TI_4: Exercise[] = [
       'Match the level to the decision the reader is about to make, not to their job title alone.',
     ],
     solution:
-      'A, B, C, and E. Each level has a distinct reader deciding a distinct thing, and the right ' +
-      'altitude follows the decision rather than the job title. D is wrong: treating every reader as ' +
-      'needing the same document is exactly the mismatch that makes reports get skipped or misused.',
+      'The correct answers are A, B, C, and E. Each level has a distinct reader deciding a distinct ' +
+      'thing, and the right altitude follows the decision rather than the job title. D is wrong: ' +
+      'treating every reader as needing the same document is exactly the mismatch that makes reports ' +
+      'get skipped or misused.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -643,7 +752,8 @@ const MODULE_TI_4: Exercise[] = [
     ],
     debrief:
       'Before writing anything, name the reader and the decision. The altitude falls out of that ' +
-      'almost automatically.',
+      'almost automatically, and skipping this step is how a technically sound report ends up in the ' +
+      'wrong inbox.',
     practice: [],
   },
   {
@@ -657,8 +767,10 @@ const MODULE_TI_4: Exercise[] = [
     prompt: 'Which of the following correctly describe what belongs in each level of product? Select all that apply.',
     teach: {
       concept:
-        'Content, not just audience, changes with altitude, and getting the mix wrong is the most ' +
-        'common way a report fails even when it reaches the right desk.\n\n' +
+        'Content, not just audience, changes with altitude, the same way a doctor chart entry and a ' +
+        'doctor conversation with a worried family cover the same diagnosis in genuinely different ' +
+        'words, not just different lengths of the same words. Getting the mix wrong is the most common ' +
+        'way a report fails even when it reaches the right desk.\n\n' +
         'A strategic product describes trends and sector wide targeting patterns over months or ' +
         'years, and naming a specific indicator in it is usually a sign the analyst wrote at the ' +
         'wrong altitude. An operational product describes a specific campaign or actor targeting this ' +
@@ -680,10 +792,10 @@ const MODULE_TI_4: Exercise[] = [
       'The levels differ in kind, timeframe, and specificity, not just in how much has been written.',
     ],
     solution:
-      'A, B, C, and E. Each level has content suited to its timeframe, from years down to hours, and ' +
-      'specificity increases as the timeframe shortens. D is wrong: a tactical product is not a ' +
-      'longer strategic one, it is a different kind of document built for a different, much shorter, ' +
-      'decision window.',
+      'The correct answers are A, B, C, and E. Each level has content suited to its timeframe, from ' +
+      'years down to hours, and specificity increases as the timeframe shortens. D is wrong: a ' +
+      'tactical product is not a longer strategic one, it is a different kind of document built for a ' +
+      'different, much shorter, decision window.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -694,7 +806,8 @@ const MODULE_TI_4: Exercise[] = [
     ],
     debrief:
       'If a report could be usefully shortened into a different level rather than just trimmed, it ' +
-      'was probably written at the wrong altitude to begin with.',
+      'was probably written at the wrong altitude to begin with, since trimming a strategic report ' +
+      'does not turn it into a tactical one.',
     practice: [],
   },
   {
@@ -711,8 +824,11 @@ const MODULE_TI_4: Exercise[] = [
       'accurate? Select all that apply.',
     teach: {
       concept:
-        'A mismatch in altitude wastes a reading in both directions, and it is worth noticing that ' +
-        'the failure is identical even though the two documents look nothing alike.\n\n' +
+        'A mismatch in altitude wastes a reading in both directions, the way handing a technical ' +
+        'manual to someone who just wants to know if a product is safe to use, or handing a one line ' +
+        'summary to the engineer who has to fix it, both fail the reader even though nothing in either ' +
+        'document is actually wrong. It is worth noticing that the failure here is identical even ' +
+        'though the two documents look nothing alike.\n\n' +
         'A board handed tactical indicators has nothing to do with them: they are not the audience ' +
         'that searches a console for a hash, and the document answers a question they were never ' +
         'asking. A SOC handed a strategic narrative during an active intrusion has the opposite ' +
@@ -734,10 +850,10 @@ const MODULE_TI_4: Exercise[] = [
       'The problem here is altitude, not length. More of the wrong altitude is still the wrong altitude.',
     ],
     solution:
-      'A, B, C, and E. Both readers got a document built for a different decision than the one they ' +
-      'were actually making, and that is an altitude failure rather than a length or detail failure. ' +
-      'D is wrong: adding more of the same wrong altitude does not fix a mismatch, it only makes the ' +
-      'unusable document longer.',
+      'The correct answers are A, B, C, and E. Both readers got a document built for a different ' +
+      'decision than the one they were actually making, and that is an altitude failure rather than a ' +
+      'length or detail failure. D is wrong: adding more of the same wrong altitude does not fix a ' +
+      'mismatch, it only makes the unusable document longer.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -774,10 +890,10 @@ const MODULE_TI_4: Exercise[] = [
       'The mismatched pairing sends a strategic product to someone who needed a tactical one, right now.',
     ],
     solution:
-      'A, B, C, and E. Each of these sends a report at the altitude its reader can actually use, ' +
-      'matched to the decision in front of them. D is wrong: a SOC analyst triaging an alert needs ' +
-      'indicators and guidance usable in the next few minutes, not a year long trends narrative, ' +
-      'however accurate it is.',
+      'The correct answers are A, B, C, and E. Each of these sends a report at the altitude its ' +
+      'reader can actually use, matched to the decision in front of them. D is wrong: a SOC analyst ' +
+      'triaging an alert needs indicators and guidance usable in the next few minutes, not a year long ' +
+      'trends narrative, however accurate it is.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -832,18 +948,23 @@ const MODULE_TI_4: Exercise[] = [
     ],
     debrief:
       'This request comes up constantly outside the SOC. Recognising it as a strategic question, not ' +
-      'a technical one, is most of the skill.',
+      'a technical one, is most of the skill, and answering it with the wrong altitude of product is ' +
+      'the single most common way to lose a non technical reader entirely.',
     practice: [],
   },
 ];
 
 const SAT_TEACH = {
   concept:
-    'Analysts are exactly as vulnerable to bias as anyone else, and confirmation bias, reaching for ' +
-    'a conclusion early and then reading every subsequent report looking for support, is the most ' +
-    'common analytic failure there is. Structured analytic techniques exist to force a check on your ' +
-    'own reasoning before it reaches a decision maker, rather than trusting that carefulness alone ' +
-    'will catch it.\n\n' +
+    'Analysts are exactly as vulnerable to bias as anyone else. Bias, in plain terms, is a tendency ' +
+    'to notice and remember whatever already matches what you expect or want to be true, the same ' +
+    'way a sports fan convinced their team will win tends to notice every good play and explain away ' +
+    'every mistake. Confirmation bias, reaching for a conclusion early and then reading every ' +
+    'subsequent report looking for support, is the most common analytic failure there is, and it is ' +
+    'dangerous precisely because it does not feel like a mistake while it is happening: it feels like ' +
+    'the evidence keeps agreeing with you. Structured analytic techniques exist to force a check on ' +
+    'your own reasoning before it reaches a decision maker, rather than trusting that carefulness ' +
+    'alone will catch it, because carefulness alone is exactly what confirmation bias defeats.\n\n' +
     'ANALYSIS OF COMPETING HYPOTHESES lists every plausible explanation before looking hard at the ' +
     'evidence, then scores each piece of evidence against every hypothesis in turn, not only against ' +
     'the one that seems likeliest. The hypothesis that survives is the one with the least evidence ' +
@@ -882,11 +1003,12 @@ const MODULE_TI_5: Exercise[] = [
       'Evidence that fits every hypothesis equally well tells you nothing about which one is true.',
     ],
     solution:
-      'A, B, D, and E. Listing every hypothesis first, scoring evidence against all of them, and ' +
-      'treating shared evidence as uninformative are the actual mechanics of the technique, and the ' +
-      'point is to slow down a premature conclusion. C is wrong: favouring whichever hypothesis has ' +
-      'the most supporting evidence is exactly the confirmation bias the technique is built to catch, ' +
-      'because it is easy to keep finding evidence for a hypothesis you already believe.',
+      'The correct answers are A, B, D, and E. Listing every hypothesis first, scoring evidence ' +
+      'against all of them, and treating shared evidence as uninformative are the actual mechanics of ' +
+      'the technique, and the point is to slow down a premature conclusion. C is wrong: favouring ' +
+      'whichever hypothesis has the most supporting evidence is exactly the confirmation bias the ' +
+      'technique is built to catch, because it is easy to keep finding evidence for a hypothesis you ' +
+      'already believe.',
     expectedOutput: 'Options A, B, D, and E selected.',
     checks: [
       {
@@ -897,7 +1019,8 @@ const MODULE_TI_5: Exercise[] = [
     ],
     debrief:
       'The counterintuitive part is the whole point. If the technique just confirmed whichever ' +
-      'hypothesis you liked first, it would not be worth the extra work.',
+      'hypothesis you liked first, it would not be worth the extra work, and it would not have caught ' +
+      'anything a less disciplined analyst would have missed.',
     practice: [],
   },
   {
@@ -913,9 +1036,12 @@ const MODULE_TI_5: Exercise[] = [
       'the following are accurate about when and how this works? Select all that apply.',
     teach: {
       concept:
-        'Structured dissent only works if it happens at the right point in the process, and teams ' +
-        'that get the timing wrong often conclude the technique does not help, when really they never ' +
-        'actually tried it.\n\n' +
+        'A structured dissent review is simply the practice of assigning someone to deliberately argue ' +
+        'against the team leading conclusion before that conclusion goes out the door, the way a good ' +
+        'editor reads a draft looking specifically for the weakest claim in it rather than nodding ' +
+        'along. It only works if it happens at the right point in the process, and teams that get the ' +
+        'timing wrong often conclude the technique does not help, when really they never actually ' +
+        'tried it.\n\n' +
         'It works best assigned before the conclusion is finalised and delivered, while there is ' +
         'still time to change course, and given to someone with no personal stake in the leading ' +
         'hypothesis being right, since the person who built the case is the worst placed person to ' +
@@ -936,10 +1062,11 @@ const MODULE_TI_5: Exercise[] = [
       'The value of the review is in what it can still prevent, not in what it can criticise afterward.',
     ],
     solution:
-      'A, B, C, and E. Assigning the review before the conclusion ships, to someone without a stake ' +
-      'in it, is what lets it actually catch a weak case in time to fix it, and the review is aimed ' +
-      'at the reasoning rather than at a person. D is wrong: a review done after delivery cannot ' +
-      'change what the decision maker already read, so it catches nothing that still matters.',
+      'The correct answers are A, B, C, and E. Assigning the review before the conclusion ships, to ' +
+      'someone without a stake in it, is what lets it actually catch a weak case in time to fix it, ' +
+      'and the review is aimed at the reasoning rather than at a person. D is wrong: a review done ' +
+      'after delivery cannot change what the decision maker already read, so it catches nothing that ' +
+      'still matters.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -950,7 +1077,7 @@ const MODULE_TI_5: Exercise[] = [
     ],
     debrief:
       'If your team only ever does this review after a report has shipped, you are not running the ' +
-      'technique, you are running a post mortem.',
+      'technique, you are running a post mortem, and a post mortem cannot save the patient.',
     practice: [],
   },
   {
@@ -966,8 +1093,11 @@ const MODULE_TI_5: Exercise[] = [
       'genuine candidates to test? Select all that apply.',
     teach: {
       concept:
-        'A key assumptions check only works if it targets the right things, and the natural instinct, ' +
-        'to check the facts everyone already agrees on, misses the point entirely.\n\n' +
+        'An assumption, in plain terms, is something you are treating as true without actually having ' +
+        'checked it, the unstated floor a whole argument is standing on. A key assumptions check is ' +
+        'the exercise of listing those unstated floors out loud and testing each one, and it only ' +
+        'works if it targets the right things: the natural instinct, to check the facts everyone ' +
+        'already agrees on, misses the point entirely, because those facts were never the risky part.\n\n' +
         'The candidates worth testing are the ones the assessment quietly depends on without saying ' +
         'so out loud: something taken for granted that would change the conclusion if it turned out ' +
         'to be false, a belief about motive that was inferred rather than confirmed by evidence, or a ' +
@@ -989,11 +1119,11 @@ const MODULE_TI_5: Exercise[] = [
       'Look for the premises the assessment depends on but never says out loud.',
     ],
     solution:
-      'A, B, D, and E. Each of these is an unstated, load bearing premise that the assessment depends ' +
-      'on without examining, which is exactly what the technique is for. C is wrong: a detail that is ' +
-      'genuinely well established and rarely challenged is not the risky kind of assumption this ' +
-      'check is meant to surface, and spending the check on it wastes the time that should go to the ' +
-      'ones that are actually shaky.',
+      'The correct answers are A, B, D, and E. Each of these is an unstated, load bearing premise ' +
+      'that the assessment depends on without examining, which is exactly what the technique is for. ' +
+      'C is wrong: a detail that is genuinely well established and rarely challenged is not the risky ' +
+      'kind of assumption this check is meant to surface, and spending the check on it wastes the time ' +
+      'that should go to the ones that are actually shaky.',
     expectedOutput: 'Options A, B, D, and E selected.',
     checks: [
       {
@@ -1004,7 +1134,8 @@ const MODULE_TI_5: Exercise[] = [
     ],
     debrief:
       'A good key assumptions check usually feels uncomfortable, because it is aimed at the premises ' +
-      'the team has stopped noticing it is relying on.',
+      'the team has stopped noticing it is relying on, the ones that would be embarrassing to say out ' +
+      'loud precisely because nobody has actually verified them.',
     practice: [],
   },
   {
@@ -1032,10 +1163,10 @@ const MODULE_TI_5: Exercise[] = [
       'The problem here is not the conclusion, it is the order: conclusion first, evidence gathered to fit it second.',
     ],
     solution:
-      'A, B, C, and E. The analyst reached a conclusion early and then hunted for support, which ' +
-      'either technique would have interrupted before it shipped. D is wrong: being right this time ' +
-      'does not validate a process that reaches conclusions before weighing evidence, and the next ' +
-      'case run the same way has no reason to end as luckily.',
+      'The correct answers are A, B, C, and E. The analyst reached a conclusion early and then hunted ' +
+      'for support, which either technique would have interrupted before it shipped. D is wrong: being ' +
+      'right this time does not validate a process that reaches conclusions before weighing evidence, ' +
+      'and the next case run the same way has no reason to end as luckily.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -1046,7 +1177,7 @@ const MODULE_TI_5: Exercise[] = [
     ],
     debrief:
       'Judge the process, not just the outcome. An analyst who gets credit for being right by ' +
-      'accident learns exactly the wrong lesson.',
+      'accident learns exactly the wrong lesson, and so does everyone watching them get that credit.',
     practice: [],
   },
   {
@@ -1091,29 +1222,35 @@ const MODULE_TI_5: Exercise[] = [
     ],
     debrief:
       'Notice that the technique does not require more evidence, only a more disciplined way of ' +
-      'weighing what you already have.',
+      'weighing what you already have. That is what makes it usable under a deadline rather than a ' +
+      'luxury for when there is time to spare.',
     practice: [],
   },
 ];
 
 const WEP_TEACH = {
   concept:
-    'Plain language is a poor way to state a probability, because the same word means different ' +
-    'things to different readers. Replicated studies that asked analysts and readers what percentage ' +
+    'Imagine two weather forecasters. One says it will probably rain tomorrow. The other says there ' +
+    'is a 70 percent chance of rain tomorrow. Both may have looked at the exact same data, but the ' +
+    'first one has left you to guess what probably means to them, and different people fill in wildly ' +
+    'different numbers for the same word. Plain language is a poor way to state a probability, ' +
+    'because the same word means different things to different readers. Replicated studies that asked analysts and readers what percentage ' +
     'they privately meant by a word like probable have found answers spread across a wide range for ' +
     'the exact same word, sometimes by fifty points or more. Words of estimative probability exist ' +
-    'to close that gap by tying a small set of standard phrases to a roughly agreed numeric range.\n\n' +
+    'to close that gap by tying a small set of standard phrases to a roughly agreed numeric range, ' +
+    'the same way the second forecaster 70 percent leaves nothing for the listener to guess.\n\n' +
     'ALMOST CERTAIN corresponds to roughly 90 to 99 percent, not to absolute certainty. LIKELY or ' +
     'PROBABLE corresponds to roughly 55 to 80 percent, a real majority but well short of near ' +
     'certainty. ROUGHLY EVEN CHANCE sits near 50 percent, meaning the evidence does not clearly ' +
     'favour one outcome over the other. UNLIKELY corresponds to roughly 20 to 45 percent, and REMOTE ' +
     'or HIGHLY UNLIKELY to roughly 1 to 10 percent, neither of which means impossible.\n\n' +
-    'CONFIDENCE LEVEL is a separate axis entirely, describing how much the analyst trusts the ' +
-    'estimate itself, based on how reliable the sources are, whether the reporting is corroborated by ' +
-    'more than one independent source, and how short and sound the chain of reasoning is between the ' +
-    'evidence and the conclusion. An analyst can be highly confident in a roughly even chance call, ' +
-    'if the evidence for genuine uncertainty is itself strong, and can have low confidence in a ' +
-    'dramatic sounding call, if it rests on a single uncorroborated source.',
+    'CONFIDENCE LEVEL is a separate axis entirely, and it does not mean how dramatic or extreme the ' +
+    'estimate sounds. It describes how much the analyst trusts the estimate itself, based on how ' +
+    'reliable the sources are, whether the reporting is corroborated by more than one independent ' +
+    'source, and how short and sound the chain of reasoning is between the evidence and the ' +
+    'conclusion. An analyst can be highly confident in a roughly even chance call, if the evidence for ' +
+    'genuine uncertainty is itself strong, and can have low confidence in a dramatic sounding call, if ' +
+    'it rests on a single uncorroborated source.',
 } as const;
 
 const MODULE_TI_6: Exercise[] = [
@@ -1140,11 +1277,11 @@ const MODULE_TI_6: Exercise[] = [
       'Nothing on this scale means impossible. Even remote keeps a small percentage attached to it.',
     ],
     solution:
-      'A, B, C, and E. Each phrase maps to a rough range from near certainty down toward near ' +
-      'impossibility, and the whole point of the scale is to make that mapping shared rather than ' +
-      'private. D is wrong: unlikely corresponds to a real, if small, range of roughly 20 to 45 ' +
-      'percent, and treating it as impossible is exactly the kind of misreading the standard scale ' +
-      'exists to prevent.',
+      'The correct answers are A, B, C, and E. Each phrase maps to a rough range from near certainty ' +
+      'down toward near impossibility, and the whole point of the scale is to make that mapping shared ' +
+      'rather than private. D is wrong: unlikely corresponds to a real, if small, range of roughly 20 ' +
+      'to 45 percent, and treating it as impossible is exactly the kind of misreading the standard ' +
+      'scale exists to prevent.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -1155,7 +1292,8 @@ const MODULE_TI_6: Exercise[] = [
     ],
     debrief:
       'The scale exists so that unlikely still means something to plan around. Treating it as ' +
-      'impossible throws away the entire point of stating a range at all.',
+      'impossible throws away the entire point of stating a range at all, and it is exactly the kind ' +
+      'of thing a decision maker under pressure will do if you leave it to their imagination.',
     practice: [],
   },
   {
@@ -1171,8 +1309,9 @@ const MODULE_TI_6: Exercise[] = [
       'judgement and the confidence attached to it? Select all that apply.',
     teach: {
       concept:
-        'Probability and confidence answer different questions, and collapsing them into a single ' +
-        'impression is one of the most common ways an estimate gets misread.\n\n' +
+        'Probability and confidence sound like the same idea, how sure am I, but they answer two ' +
+        'genuinely different questions, and collapsing them into a single impression is one of the ' +
+        'most common ways an estimate gets misread.\n\n' +
         'Probability is the estimated likelihood of the outcome itself. Confidence is how much the ' +
         'analyst trusts that estimate, based on the sourcing and reasoning behind it. An analyst can ' +
         'be highly confident in a roughly even chance call, if the evidence that the odds are ' +
@@ -1194,10 +1333,10 @@ const MODULE_TI_6: Exercise[] = [
       'High confidence describes trust in the estimate, not how extreme the estimate itself is.',
     ],
     solution:
-      'A, B, C, and E. Probability and confidence measure different things and can move independently ' +
-      'of each other, which is exactly why they are reported on separate scales. D is wrong: ' +
-      'confidence describes how well supported an estimate is, not how extreme it is, and a highly ' +
-      'confident roughly even chance call is a perfectly ordinary combination.',
+      'The correct answers are A, B, C, and E. Probability and confidence measure different things ' +
+      'and can move independently of each other, which is exactly why they are reported on separate ' +
+      'scales. D is wrong: confidence describes how well supported an estimate is, not how extreme it ' +
+      'is, and a highly confident roughly even chance call is a perfectly ordinary combination.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -1208,7 +1347,9 @@ const MODULE_TI_6: Exercise[] = [
     ],
     debrief:
       'Watch for a report that states high confidence and a dramatic probability together with ' +
-      'nothing to corroborate either. That combination is worth questioning on its own.',
+      'nothing to corroborate either. That combination is worth questioning on its own, because it is ' +
+      'exactly what an unsupported but appealing conclusion looks like when it is dressed up as ' +
+      'analysis.',
     practice: [],
   },
   {
@@ -1222,8 +1363,9 @@ const MODULE_TI_6: Exercise[] = [
     prompt: 'Which of the following genuinely determine how much confidence should be attached to a judgement? Select all that apply.',
     teach: {
       concept:
-        'Confidence is not a feeling and it is not a matter of seniority. It is a judgement built ' +
-        'from three concrete inputs, and naming them is what keeps the label honest.\n\n' +
+        'Confidence is not a feeling, and it is not a matter of seniority, the way a doctor confidence ' +
+        'in a diagnosis should track the test results, not how many years they have practised. It is a ' +
+        'judgement built from three concrete inputs, and naming them is what keeps the label honest.\n\n' +
         'How reliable the sources behind the judgement have been historically is the first input. ' +
         'Whether the reporting is corroborated by more than one independent source is the second. How ' +
         'short and sound the chain of inference is between the evidence and the conclusion is the ' +
@@ -1245,11 +1387,11 @@ const MODULE_TI_6: Exercise[] = [
       'Confidence tracks the sourcing and reasoning, not the rank of whoever is speaking.',
     ],
     solution:
-      'A, B, C, and E. Source reliability, corroboration, and the length and soundness of the ' +
-      'reasoning chain are what actually determine confidence, and it should be reported honestly ' +
-      'regardless of how it looks. D is wrong: seniority changes nothing about how well supported a ' +
-      'judgement actually is, and letting it influence the stated confidence would make the label ' +
-      'meaningless.',
+      'The correct answers are A, B, C, and E. Source reliability, corroboration, and the length and ' +
+      'soundness of the reasoning chain are what actually determine confidence, and it should be ' +
+      'reported honestly regardless of how it looks. D is wrong: seniority changes nothing about how ' +
+      'well supported a judgement actually is, and letting it influence the stated confidence would ' +
+      'make the label meaningless.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -1260,7 +1402,8 @@ const MODULE_TI_6: Exercise[] = [
     ],
     debrief:
       'If you ever catch yourself rounding a confidence level up because a senior reader wanted a ' +
-      'firmer answer, that is the exact moment the label stops meaning anything.',
+      'firmer answer, that is the exact moment the label stops meaning anything, and it stops being a ' +
+      'measurement and starts being a courtesy.',
     practice: [],
   },
   {
@@ -1289,11 +1432,11 @@ const MODULE_TI_6: Exercise[] = [
       'The response to imprecise language is a shared standard, not abandoning numbers altogether.',
     ],
     solution:
-      'A, B, C, and E. Readers genuinely disagree about what a bare word means, a decision maker can ' +
-      'act on the wrong end of that gap, and standardising the phrase to range mapping narrows it, ' +
-      'especially where the stakes make the gap most dangerous. D is wrong: the imprecision of plain ' +
-      'language is the argument for attaching a standard range, not the argument for abandoning ' +
-      'ranges altogether.',
+      'The correct answers are A, B, C, and E. Readers genuinely disagree about what a bare word ' +
+      'means, a decision maker can act on the wrong end of that gap, and standardising the phrase to ' +
+      'range mapping narrows it, especially where the stakes make the gap most dangerous. D is wrong: ' +
+      'the imprecision of plain language is the argument for attaching a standard range, not the ' +
+      'argument for abandoning ranges altogether.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -1304,7 +1447,8 @@ const MODULE_TI_6: Exercise[] = [
     ],
     debrief:
       'Every time you write probable without a range attached, assume the reader is filling in their ' +
-      'own number, and that it may not be the one you meant.',
+      'own number, and that it may not be the one you meant. The word costs you nothing to write and ' +
+      'the range costs you almost nothing to add.',
     practice: [],
   },
   {
@@ -1349,16 +1493,21 @@ const MODULE_TI_6: Exercise[] = [
     ],
     debrief:
       'Notice that the confidence justification never mentions how likely the outcome is. That ' +
-      'separation is the entire lesson of this module.',
+      'separation is the entire lesson of this module: one sentence states what you think will ' +
+      'happen, the next explains why you trust yourself to say so.',
     practice: [],
   },
 ];
 
 const ADMIRALTY_TEACH = {
   concept:
-    'The Admiralty system, also called the NATO system, grades two different things about a single ' +
-    'piece of reporting on two separate scales, because conflating them is the single most common ' +
-    'source evaluation mistake.\n\n' +
+    'Imagine a witness who has testified in ten previous trials and been proven right in nine of ' +
+    'them. That is a strong track record: reliability. Now imagine that same witness, this time, ' +
+    'reports something no one else saw, and that contradicts what everyone else agrees happened. The ' +
+    'witness good history does not automatically make this one claim true: credibility. The Admiralty ' +
+    'system, also called the NATO system, grades two different things about a single piece of ' +
+    'reporting on two separate scales, because conflating them, letting the witness track record ' +
+    'decide whether to believe this one claim, is the single most common source evaluation mistake.\n\n' +
     'RELIABILITY OF THE SOURCE is graded A through F, based on the track record of that specific ' +
     'source over time: A is a source with a long history of accurate reporting, down through ' +
     'progressively less established histories, to F, a source whose reliability cannot be judged at ' +
@@ -1399,11 +1548,11 @@ const MODULE_TI_7: Exercise[] = [
       'The reliability grade describes the source in general. It never substitutes for checking the specific claim.',
     ],
     solution:
-      'A, B, C, and E. Reliability and credibility are separate, deliberately kept apart, scales, ' +
-      'reported together without merging into one number, precisely so a strong track record cannot ' +
-      'substitute for checking this claim. D is wrong: an A rated source can still be wrong or ' +
-      'deceived on a given occasion, which is exactly why the credibility scale exists as a separate ' +
-      'check.',
+      'The correct answers are A, B, C, and E. Reliability and credibility are separate, deliberately ' +
+      'kept apart, scales, reported together without merging into one number, precisely so a strong ' +
+      'track record cannot substitute for checking this claim. D is wrong: an A rated source can still ' +
+      'be wrong or deceived on a given occasion, which is exactly why the credibility scale exists as a ' +
+      'separate check.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -1414,7 +1563,7 @@ const MODULE_TI_7: Exercise[] = [
     ],
     debrief:
       'A strong reliability grade earns a source a hearing. It does not earn any specific claim a ' +
-      'pass.',
+      'pass, and remembering that distinction is most of what this scale is for.',
     practice: [],
   },
   {
@@ -1431,9 +1580,11 @@ const MODULE_TI_7: Exercise[] = [
       'ways to grade this? Select all that apply.',
     teach: {
       concept:
-        'This scenario is exactly the case the two scale system was built to handle cleanly, because ' +
-        'a single combined score would force an uncomfortable compromise between two facts that are ' +
-        'both true at once.\n\n' +
+        'This scenario is exactly the case the two scale system was built to handle cleanly. Think of ' +
+        'a normally honest friend who tells you something surprising that nobody else has mentioned: ' +
+        'you do not stop trusting the friend in general, but you also do not accept this one surprising ' +
+        'claim just because it came from someone you trust. A single combined score would force an ' +
+        'uncomfortable compromise between two facts that are both true at once.\n\n' +
         'The source reliability rating does not change just because this one claim looks shaky: the ' +
         'track record is what it is, and can still sit at A or B. The credibility of this specific ' +
         'claim is a different question, and here it should be rated low, since it is uncorroborated ' +
@@ -1455,10 +1606,10 @@ const MODULE_TI_7: Exercise[] = [
       'A high reliability grade and a low credibility grade can both be true about the same report at the same time.',
     ],
     solution:
-      'A, B, C, and E. The source keeps its earned reliability rating, the claim earns its own low ' +
-      'credibility rating on its own merits, and the gap between the two is worth stating rather than ' +
-      'hiding. D is wrong: letting a strong reliability rating pull the credibility rating upward ' +
-      'defeats the entire purpose of grading them separately.',
+      'The correct answers are A, B, C, and E. The source keeps its earned reliability rating, the ' +
+      'claim earns its own low credibility rating on its own merits, and the gap between the two is ' +
+      'worth stating rather than hiding. D is wrong: letting a strong reliability rating pull the ' +
+      'credibility rating upward defeats the entire purpose of grading them separately.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -1469,7 +1620,8 @@ const MODULE_TI_7: Exercise[] = [
     ],
     debrief:
       'A reliable source making an unconfirmed claim is not a contradiction. It is the exact ' +
-      'situation the two scale system exists to describe honestly.',
+      'situation the two scale system exists to describe honestly, instead of forcing a single, ' +
+      'misleading verdict.',
     practice: [],
   },
   {
@@ -1484,7 +1636,8 @@ const MODULE_TI_7: Exercise[] = [
     teach: {
       concept:
         'Most source evaluation mistakes come from the same root cause: letting one scale quietly ' +
-        'stand in for the other, instead of doing the separate work each one asks for.\n\n' +
+        'stand in for the other, instead of doing the separate work each one asks for, the same way it ' +
+        'is tempting to let a person general reputation answer for one specific thing they just said.\n\n' +
         'Rating information as credible mainly because the analyst generally likes or trusts the ' +
         'source is one version of this. Letting a strong reliability history substitute for actually ' +
         'checking whether this specific claim is corroborated is another. Skipping the credibility ' +
@@ -1507,11 +1660,11 @@ const MODULE_TI_7: Exercise[] = [
       'The mistake is letting one scale substitute for the other. Doing both scales properly is not the mistake.',
     ],
     solution:
-      'A, B, D, and E. Each of these lets one scale do the work of the other, whether by trusting a ' +
-      'source in general, letting history stand in for corroboration, skipping a scale, or assuming a ' +
-      'grade persists unexamined. C is wrong as an example of a mistake: grading an unfamiliar source ' +
-      'as unknown while still separately checking whether this claim is corroborated is exactly the ' +
-      'correct, two scale practice, not an error.',
+      'The correct answers are A, B, D, and E. Each of these lets one scale do the work of the other, ' +
+      'whether by trusting a source in general, letting history stand in for corroboration, skipping a ' +
+      'scale, or assuming a grade persists unexamined. C is wrong as an example of a mistake: grading ' +
+      'an unfamiliar source as unknown while still separately checking whether this claim is ' +
+      'corroborated is exactly the correct, two scale practice, not an error.',
     expectedOutput: 'Options A, B, D, and E selected.',
     checks: [
       {
@@ -1522,7 +1675,8 @@ const MODULE_TI_7: Exercise[] = [
     ],
     debrief:
       'If you can name the mistake, you can usually see it happen inside your own analysis before it ' +
-      'ships. Look for the point where one scale quietly did the work of the other.',
+      'ships. Look for the point where one scale quietly did the work of the other, before a reader ' +
+      'ever gets the chance to notice.',
     practice: [],
   },
   {
@@ -1540,8 +1694,9 @@ const MODULE_TI_7: Exercise[] = [
     teach: {
       concept:
         'An anonymous, unconfirmed claim is not automatically false, and it is not automatically ' +
-        'worth reporting either. The two scale system gives a disciplined way to hold both ' +
-        'possibilities at once without rushing to either conclusion.\n\n' +
+        'worth reporting either, the same way a rumour overheard from a stranger is not automatically ' +
+        'a lie, but is also not automatically worth repeating as fact. The two scale system gives a ' +
+        'disciplined way to hold both possibilities at once without rushing to either conclusion.\n\n' +
         'The source reliability here is essentially unknown, since there is nothing to judge a track ' +
         'record against, and the credibility of the specific claim is low until something independent ' +
         'corroborates it. Both scales being low is a reason to keep investigating, not a reason to ' +
@@ -1563,11 +1718,11 @@ const MODULE_TI_7: Exercise[] = [
       'Low reliability and low credibility both point the same way: verify further before reporting this as fact.',
     ],
     solution:
-      'A, B, C, and E. An anonymous source with no track record earns an unknown reliability grade, ' +
-      'the specific claim earns a low credibility grade until corroborated, and that grade can move ' +
-      'once corroboration appears, all without rushing the conclusion. D is wrong: the pressure to ' +
-      'avoid being scooped is not evidence, and treating a claim as credible to beat a competitor is ' +
-      'exactly the shortcut the two scale system is built to prevent.',
+      'The correct answers are A, B, C, and E. An anonymous source with no track record earns an ' +
+      'unknown reliability grade, the specific claim earns a low credibility grade until corroborated, ' +
+      'and that grade can move once corroboration appears, all without rushing the conclusion. D is ' +
+      'wrong: the pressure to avoid being scooped is not evidence, and treating a claim as credible to ' +
+      'beat a competitor is exactly the shortcut the two scale system is built to prevent.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -1578,7 +1733,8 @@ const MODULE_TI_7: Exercise[] = [
     ],
     debrief:
       'The grade you assign here is not a verdict on whether the breach happened. It is an honest ' +
-      'statement of how much you currently know, which is not the same thing.',
+      'statement of how much you currently know, which is not the same thing, and confusing the two is ' +
+      'how a rumour turns into a headline nobody can walk back.',
     practice: [],
   },
   {
@@ -1623,16 +1779,21 @@ const MODULE_TI_7: Exercise[] = [
     ],
     debrief:
       'A roughly even track record is a real, common grade. Do not round it up to reliable just ' +
-      'because the contact is someone you know personally.',
+      'because the contact is someone you know personally, since the scale exists precisely to keep ' +
+      'personal warmth from becoming a shortcut around actual evidence.',
     practice: [],
   },
 ];
 
 const TLP_TEACH = {
   concept:
-    'Sharing intelligence between organisations only works if everyone trusts that a marking on the ' +
-    'information will be respected, because the alternative is a constant, private risk calculation ' +
-    'before every exchange, and most people share less under that condition, not more.\n\n' +
+    'Imagine telling a friend something in confidence and saying you can repeat this to your spouse, ' +
+    'but nobody else. That instruction needs to travel with the information itself: if your friend ' +
+    'forgets it and repeats it to a stranger, the trust between you is broken, and you will think ' +
+    'twice before confiding in them again. Sharing intelligence between organisations only works on ' +
+    'the same principle: everyone has to trust that a marking on the information will be respected, ' +
+    'because the alternative is a constant, private risk calculation before every exchange, and most ' +
+    'people share less under that condition, not more.\n\n' +
     'The Traffic Light Protocol lets a sender state how far information may travel, and the marking ' +
     'moves with the information wherever it goes. TLP:RED means the information stays with the ' +
     'people in the room, and goes no further under any circumstance. TLP:AMBER allows sharing within ' +
@@ -1648,9 +1809,14 @@ const TLP_TEACH = {
 
 const BLUF_TEACH = {
   concept:
-    'BLUF stands for bottom line up front, and it changes the shape of a report rather than its ' +
-    'content: the conclusion and the recommended action lead the document, with the narrative that ' +
-    'built up to them placed afterward as supporting detail.\n\n' +
+    'Think about how a newspaper article is written: the headline and the first paragraph give you ' +
+    'the whole story, who, what, and when, and the rest of the article, several paragraphs down, ' +
+    'fills in the background and supporting detail. Almost nobody reads a news article expecting to ' +
+    'find out what actually happened only in the final paragraph, and a report written like a mystery ' +
+    'novel, saving the point for the end, fights against how a busy reader actually reads. BLUF stands ' +
+    'for bottom line up front, and it changes the shape of a report rather than its content: the ' +
+    'conclusion and the recommended action lead the document, with the narrative that built up to ' +
+    'them placed afterward as supporting detail.\n\n' +
     'A decision maker reading under time pressure needs the decision relevant part first, because a ' +
     'chronological account that reaches its point on the last page forces every reader to get there ' +
     'before extracting any value, and many will not finish it in time to act. An actionable report ' +
@@ -1684,10 +1850,10 @@ const MODULE_TI_8: Exercise[] = [
       'One of these five markings is the one built for information with no restriction at all.',
     ],
     solution:
-      'A, B, C, and E. RED, AMBER, and GREEN each carry a real, distinct restriction, and the marking ' +
-      'always travels with the information at the sender discretion. D is wrong: TLP:CLEAR is ' +
-      'specifically the marking for information with no restriction at all, safe for public release ' +
-      'without further sign off.',
+      'The correct answers are A, B, C, and E. RED, AMBER, and GREEN each carry a real, distinct ' +
+      'restriction, and the marking always travels with the information at the sender discretion. D ' +
+      'is wrong: TLP:CLEAR is specifically the marking for information with no restriction at all, ' +
+      'safe for public release without further sign off.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -1699,7 +1865,7 @@ const MODULE_TI_8: Exercise[] = [
     debrief:
       'If you are ever unsure which marking to use, default to the more restrictive one and ask the ' +
       'sender. Loosening a marking later is easy. Recalling information already shared too widely is ' +
-      'not.',
+      'not, in the same way you cannot un-tell a secret once it has left the room.',
     practice: [],
   },
   {
@@ -1728,11 +1894,11 @@ const MODULE_TI_8: Exercise[] = [
       'RED is not automatically the safest choice if it prevents the sharing from doing the job it was meant to do.',
     ],
     solution:
-      'A, B, C, and E. AMBER lets the partner act without the detail travelling further, CLEAR would ' +
-      'remove control entirely, and the choice between AMBER and AMBER+STRICT should follow whether ' +
-      'the partner needs to pass a summary onward. D is wrong: marking everything RED by default can ' +
-      'make the sharing pointless, since RED prevents the partner from acting on it at all, which ' +
-      'defeats the reason for sharing in the first place.',
+      'The correct answers are A, B, C, and E. AMBER lets the partner act without the detail ' +
+      'travelling further, CLEAR would remove control entirely, and the choice between AMBER and ' +
+      'AMBER+STRICT should follow whether the partner needs to pass a summary onward. D is wrong: ' +
+      'marking everything RED by default can make the sharing pointless, since RED prevents the ' +
+      'partner from acting on it at all, which defeats the reason for sharing in the first place.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -1743,7 +1909,8 @@ const MODULE_TI_8: Exercise[] = [
     ],
     debrief:
       'A marking that is too restrictive to be useful is not a safe choice, it is a wasted exchange. ' +
-      'Match the marking to who needs to act, not to how nervous the content makes you.',
+      'Match the marking to who needs to act, not to how nervous the content makes you, since nerves ' +
+      'are not a source evaluation input any more than they are here.',
     practice: [],
   },
   {
@@ -1769,10 +1936,10 @@ const MODULE_TI_8: Exercise[] = [
       'The supporting detail still matters. It just no longer has to be read first to be useful.',
     ],
     solution:
-      'A, B, C, and E. Bottom line up front reorders a report so the decision relevant part comes ' +
-      'first, while the supporting narrative still follows underneath for whoever needs it. D is ' +
-      'wrong: the technique changes the order of a report, not its completeness, and a bottom line ' +
-      'with no evidence behind it is not more actionable, it is just less trustworthy.',
+      'The correct answers are A, B, C, and E. Bottom line up front reorders a report so the decision ' +
+      'relevant part comes first, while the supporting narrative still follows underneath for whoever ' +
+      'needs it. D is wrong: the technique changes the order of a report, not its completeness, and a ' +
+      'bottom line with no evidence behind it is not more actionable, it is just less trustworthy.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -1783,7 +1950,7 @@ const MODULE_TI_8: Exercise[] = [
     ],
     debrief:
       'A good bottom line up front report loses nothing, it just stops making the reader earn the ' +
-      'conclusion by reading to the end first.',
+      'conclusion by reading to the end first, the way a newspaper never makes you earn the headline.',
     practice: [],
   },
   {
@@ -1798,7 +1965,9 @@ const MODULE_TI_8: Exercise[] = [
     teach: {
       concept:
         'A descriptive report and an actionable one can describe the exact same incident and still ' +
-        'leave a reader in completely different positions, because the difference is not in what ' +
+        'leave a reader in completely different positions, the way a car mechanic could either hand ' +
+        'you a full diagnostic printout or simply say replace the brake pads by Friday, or you will be ' +
+        'stranded. Both are honest. Only one tells you what to do. The difference is not in what ' +
         'happened, it is in what the reader is told to do about it.\n\n' +
         'An actionable report states a specific recommended action, rather than a general call for ' +
         'something to be done, names an owner responsible for carrying it out, and attaches a ' +
@@ -1820,10 +1989,10 @@ const MODULE_TI_8: Exercise[] = [
       'Actionable means the reader can move without a follow up question. Thorough only means nothing was left out.',
     ],
     solution:
-      'A, B, C, and E. A specific action, a named owner, a timeframe, and a bottom line the reader ' +
-      'can move on without further questions are what make a report actionable. D is wrong: ' +
-      'completeness of the chronological account is a measure of thoroughness, not of whether the ' +
-      'reader knows what to do next, and a report can have both, or neither, independently.',
+      'The correct answers are A, B, C, and E. A specific action, a named owner, a timeframe, and a ' +
+      'bottom line the reader can move on without further questions are what make a report actionable. ' +
+      'D is wrong: completeness of the chronological account is a measure of thoroughness, not of ' +
+      'whether the reader knows what to do next, and a report can have both, or neither, independently.',
     expectedOutput: 'Options A, B, C, and E selected.',
     checks: [
       {
@@ -1834,7 +2003,8 @@ const MODULE_TI_8: Exercise[] = [
     ],
     debrief:
       'Before sending a report, ask whether a reader could act on it without a follow up question. If ' +
-      'the answer is no, it is still descriptive, however complete it is.',
+      'the answer is no, it is still descriptive, however complete it is, and completeness was never ' +
+      'the thing that was missing.',
     practice: [],
   },
   {
@@ -1854,7 +2024,8 @@ const MODULE_TI_8: Exercise[] = [
       concept:
         'The two habits in this module meet at exactly this point: a report is only as useful as the ' +
         'speed at which the right reader can find the decision in it, and only as safe as the marking ' +
-        'that controls where it can travel once it leaves your hands.\n\n' +
+        'that controls where it can travel once it leaves your hands. Getting one right and the other ' +
+        'wrong still leaves you with a failed report, either unread or unsafe.\n\n' +
         'Fixing the order means moving the recommendation, with a named action, an owner, and a ' +
         'timeframe, to the very first sentence, and keeping the five paragraph narrative underneath as ' +
         'supporting detail rather than deleting it. Fixing the marking means naming who genuinely ' +
@@ -1892,7 +2063,7 @@ const MODULE_TI_8: Exercise[] = [
     debrief:
       'Both fixes here are about respecting the reader: the order respects their time, and the ' +
       'marking respects the trust everyone downstream is placing in you not to let it travel further ' +
-      'than intended.',
+      'than intended. Neither habit costs much once it becomes automatic.',
     practice: [],
   },
 ];
@@ -1941,9 +2112,10 @@ export const THREAT_INTEL_FOUNDATIONS: LearningPackage = {
             'Has anyone seen this before, and what is likely next: that is the intelligence question.',
           ],
           solution:
-            'A. Intelligence supplies context the raw incident lacks: whether the tradecraft has been ' +
-            'seen before and what the actor is likely to do next. Reimaging (B), patching (C), and ' +
-            'triage (D) are other jobs; none of them is what intelligence contributes.',
+            'The correct answer is A. Intelligence supplies context the raw incident lacks: whether ' +
+            'the tradecraft has been seen before and what the actor is likely to do next. Reimaging ' +
+            '(B), patching (C), and triage (D) are other jobs, each important in its own right, but ' +
+            'none of them is what intelligence contributes.',
           expectedOutput: 'Option A selected.',
           checks: [
             {
@@ -1954,7 +2126,10 @@ export const THREAT_INTEL_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Intelligence is the seat that lifts a response out of the immediate. The others ask what ' +
-            'is happening here; intelligence asks who does this, and where it usually goes.',
+            'is happening here; intelligence asks who does this, and where it usually goes. Both ' +
+            'questions matter, but they are not the same question, and mixing them up is how a ' +
+            'response spends all its time on the fire in front of it and none on where the next one is ' +
+            'coming from.',
           practice: [],
         },
         {
@@ -1981,10 +2156,11 @@ export const THREAT_INTEL_FOUNDATIONS: LearningPackage = {
             'Say what the evidence reaches, and say how sure you are, uncertainty included.',
           ],
           solution:
-            'B. The discipline is to report what the evidence actually supports, state your confidence ' +
-            'honestly, and keep the uncertainty visible. Naming a group on a loose overlap (A or D) is ' +
-            'exactly the confident wrong attribution that misdirects a response, and total silence (C) ' +
-            'is not useful either. Calibrated honesty is the job.',
+            'The correct answer is B. The discipline is to report what the evidence actually supports, ' +
+            'state your confidence honestly, and keep the uncertainty visible. Naming a group on a ' +
+            'loose overlap (A or D) is exactly the confident wrong attribution that misdirects a ' +
+            'response, and total silence (C) is not useful either, since the executive still needs ' +
+            'something to act on. Calibrated honesty is the job.',
           expectedOutput: 'Option B selected.',
           checks: [
             {
@@ -1996,7 +2172,8 @@ export const THREAT_INTEL_FOUNDATIONS: LearningPackage = {
           debrief:
             'Confident wrong attribution is the classic intelligence failure, and it has consequences ' +
             'far past the incident: it can misdirect a whole response or name an innocent party. ' +
-            'Saying how sure you are is not weakness, it is the product.',
+            'Saying how sure you are is not weakness, it is the product, and it is the one thing a ' +
+            'confident guess can never give the executive that honest uncertainty can.',
           practice: [],
         },
         {
@@ -2023,10 +2200,10 @@ export const THREAT_INTEL_FOUNDATIONS: LearningPackage = {
             'Behaviour, their techniques and procedures, is the durable thing.',
           ],
           solution:
-            'C. An address (A), a hash (B), and a domain (D) are all cheap indicators an attacker can ' +
-            'swap in minutes. How they operate, their techniques and procedures, is tied to their ' +
-            'tooling and habits and is expensive to change, so intelligence built on behaviour lasts ' +
-            'while indicator lists go stale.',
+            'The correct answer is C. An address (A), a hash (B), and a domain (D) are all cheap ' +
+            'indicators an attacker can swap in minutes. How they operate, their techniques and ' +
+            'procedures, is tied to their tooling and habits and is expensive to change, so ' +
+            'intelligence built on behaviour lasts while indicator lists go stale.',
           expectedOutput: 'Option C selected.',
           checks: [
             {
@@ -2038,7 +2215,8 @@ export const THREAT_INTEL_FOUNDATIONS: LearningPackage = {
           debrief:
             'This is the pyramid of pain in one question: the higher up you detect, from a hash toward ' +
             'behaviour, the more it costs the attacker to adapt. Chasing indicators alone is a ' +
-            'treadmill; understanding tradecraft is leverage.',
+            'treadmill; understanding tradecraft is leverage, and the rest of this package builds on ' +
+            'exactly that distinction.',
           practice: [],
         },
         {
@@ -2063,10 +2241,10 @@ export const THREAT_INTEL_FOUNDATIONS: LearningPackage = {
             'Intelligence says what an actor tends to do; the hunter goes looking for it in the data.',
           ],
           solution:
-            'A. Intelligence tells the hunter what an adversary tends to do, and the hunter ' +
-            'operationalises that by searching the actual environment for those techniques. ' +
+            'The correct answer is A. Intelligence tells the hunter what an adversary tends to do, and ' +
+            'the hunter operationalises that by searching the actual environment for those techniques. ' +
             'Intelligence does not replace the hunt (B), patch systems (C), or close alerts (D); it ' +
-            'points the hunt at the right thing.',
+            'points the hunt at the right thing, which is a different job from doing the hunt itself.',
           expectedOutput: 'Option A selected.',
           checks: [
             {
@@ -2077,7 +2255,8 @@ export const THREAT_INTEL_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Intelligence and hunting are a hand-off: the analyst supplies the what-to-look-for, the ' +
-            'hunter supplies the go-and-look. A good intelligence report half-writes a hunt.',
+            'hunter supplies the go-and-look. A good intelligence report half-writes a hunt, leaving ' +
+            'the hunter to do the part that actually requires being inside the environment.',
           practice: [],
         },
         {
@@ -2123,7 +2302,8 @@ export const THREAT_INTEL_FOUNDATIONS: LearningPackage = {
           debrief:
             'The two lessons are the same instinct pointed at different things: do not claim more ' +
             'than the evidence supports, and do not lean your whole picture on the parts an attacker ' +
-            'can change overnight.',
+            'can change overnight. Both come down to being honest about what you actually know, versus ' +
+            'what merely looks convenient to believe.',
           practice: [],
         },
       ],
