@@ -59,6 +59,14 @@ import {
   IDENTITY_SENTINEL,
   WAGER_GOLDCREST,
 } from './boards-platforms.js';
+import { COLO_KEYSTONE, PLANT_ASHFORD, TOWER_VANGUARD } from './boards-facilities.js';
+import { BROADCAST_SKYLINE, GENOME_HELIX, POLL_MARROW } from './boards-civic.js';
+import {
+  CARRIER_ALDERGROVE,
+  EXCHANGE_CARDINAL,
+  INVERTER_SUNMARK,
+  SAAS_FATHOM,
+} from './boards-markets.js';
 
 const SCENARIOS = new Map<string, RedBlueScenario>([
   [RECON_NORTHWIND.id, RECON_NORTHWIND],
@@ -111,6 +119,16 @@ const POSITIONAL_LIST: PositionalScenario[] = [
   CLEARING_HALCYON,
   IDENTITY_SENTINEL,
   WAGER_GOLDCREST,
+  COLO_KEYSTONE,
+  TOWER_VANGUARD,
+  PLANT_ASHFORD,
+  BROADCAST_SKYLINE,
+  POLL_MARROW,
+  GENOME_HELIX,
+  INVERTER_SUNMARK,
+  CARRIER_ALDERGROVE,
+  EXCHANGE_CARDINAL,
+  SAAS_FATHOM,
 ];
 
 const POSITIONAL = new Map<string, PositionalScenario>(POSITIONAL_LIST.map((s) => [s.id, s]));
