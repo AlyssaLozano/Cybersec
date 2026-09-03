@@ -33,51 +33,130 @@ import { SOC_FOUNDATIONS_PRACTICE } from './soc-foundations-practice.js';
 
 const SOC_TEACH = {
   concept:
-    'A Security Operations Center is the function that watches an organisation for signs of ' +
-    'attack and responds when it finds them. Its day is detect, triage, investigate, respond, and ' +
-    'improve, continuously. It is a detection and response capability, not a promise that nothing ' +
-    'ever gets through, and not the team that owns patching or builds the systems it watches.',
+    'Picture a building with a guard desk in the lobby: banks of monitors showing every camera in ' +
+    'the place, someone watching them around the clock. That desk does not construct the building ' +
+    'and does not fix its locks, and it cannot promise nothing will ever go wrong inside. Its job ' +
+    'is narrower and more urgent than either of those: notice when something is wrong, and act on ' +
+    'it fast. A Security Operations Center, almost always shortened to SOC and said as three ' +
+    'letters, is that desk for a company computers and networks instead of its hallways. It is the ' +
+    'team that watches an organisation for signs of attack, and responds when it finds one.\n\n' +
+    'Why does this need to be a dedicated team rather than something engineers keep half an eye on ' +
+    'between other work? Because computer systems generate an overwhelming amount of activity ' +
+    'every second, logins, file access, network connections, almost all of it completely normal, ' +
+    'and somewhere inside that noise, on any given day, an attacker might be moving. Finding that ' +
+    'one abnormal thread inside millions of normal ones takes people whose entire job is looking, ' +
+    'using tools built for exactly that, watching continuously rather than occasionally. A team ' +
+    'busy building a product cannot also do this well as a side task, so the work becomes its own ' +
+    'team with its own rhythm: detect something might be wrong, triage which alerts deserve a ' +
+    'closer look, investigate the ones that do, respond if they turn out to be real, and use what ' +
+    'was learned to catch the next one faster. Then repeat, continuously, for as long as the ' +
+    'organisation exists.\n\n' +
+    'Here is the nuance almost every newcomer gets wrong at first: a SOC is a detection and ' +
+    'response capability, not a guarantee. It cannot promise nothing ever gets through, because no ' +
+    'team can promise that, any more than a guard desk can promise no crime will ever happen ' +
+    'anywhere in the city it sits in. It also does not own fixing weaknesses before they get ' +
+    'exploited, that is a separate job called vulnerability management, and it does not build the ' +
+    'systems it watches, that is engineering. The SOC watches, decides what matters, and reacts. ' +
+    'Mixing up what it does with what people wish it could prevent is the single most common ' +
+    'misunderstanding a beginner carries into this field.\n\n' +
+    'That boundary matters directly for you. Reading a job advert or sitting in an interview for a ' +
+    'SOC role, knowing this tells you what the job actually is: you will not be expected to patch ' +
+    'every vulnerable system or guarantee perfect security, you will be expected to watch, decide, ' +
+    'and act on what you find. Walking in with that expectation already set is the difference ' +
+    'between a confident first week and a confusing one.',
 } as const;
 
 const TIER_TEACH = {
   concept:
-    'Most SOCs are tiered. Tier 1 is triage: first eyes on every alert, clearing the noise and ' +
-    'escalating the few that matter. Tier 2 investigates what Tier 1 escalates, pulling in logs, ' +
-    'network flows, and context. Tier 3 is the specialists and the incident lead, reached for the ' +
-    'incidents that are real and moving. An alert travels up the tiers, and a good one comes back ' +
-    'down as a new detection so it is caught automatically next time.\n\n' +
-    'Two things about tiers that are easy to get backwards, and both matter to you ' +
-    'specifically.\n\n' +
-    'Tier 1 is where you start. The SOC Operator seat is the one people are hired into with no ' +
-    'prior security job, from a help desk, a support role, the military, or a career change. If ' +
-    'you get a SOC job in the next year, this is almost certainly the job. Every other seat on ' +
-    'the floor is reached from somewhere: two years of triage, or sideways from network ' +
-    'engineering, or from a career in intelligence analysis. None of them is a first job.\n\n' +
-    'And tier is not rank. Tier 1 is not junior in the sense of doing lesser work: it is the seat ' +
-    'with the shortest clock and the widest funnel. Everything arrives there, and deciding ' +
-    'correctly in two minutes what deserves an hour is genuinely hard, and plenty of Tier 3 ' +
-    'specialists would do it badly. What changes as you go up is the clock, the depth, and how ' +
-    'much of the picture you hold. Not how good you have to be.',
+    'Think about how a hospital emergency room sorts patients. A nurse at the door looks at ' +
+    'everyone coming in and makes a fast call: this can wait, this needs a doctor soon, this needs ' +
+    'a doctor right now. Almost nobody who walks in sees a specialist first. They see the person ' +
+    'whose whole job is deciding, quickly, who needs to move up the chain and who does not. Most ' +
+    'SOCs are organised the same way, in TIERS, and an alert moves through them the way a patient ' +
+    'moves through triage.\n\n' +
+    'Tier 1 is that nurse at the door: first eyes on every single alert the tooling raises, ' +
+    'clearing out the ones that are nothing and escalating the handful that are not. Tier 2 is who ' +
+    'Tier 1 hands the real ones to: they investigate properly, pulling in logs, network activity, ' +
+    'and context that takes more than two minutes to gather. Tier 3 is the specialists and the ' +
+    'incident lead, reached only for the incidents that are confirmed and actively unfolding. ' +
+    'Tiers exist because you cannot staff every alert with your most expensive, most specialised ' +
+    'people, there are too many alerts and not enough of them, so the organisation filters at the ' +
+    'front door and saves depth for what has earned it. A good incident also travels back down: ' +
+    'once it is understood, it becomes a new rule, so the exact same thing gets caught ' +
+    'automatically the next time, instead of needing a human to spot it all over again.\n\n' +
+    'Two things about tiers are easy to get backwards, and both matter to you directly if you are ' +
+    'planning a way into this field. First, Tier 1 is where you start. The SOC Operator seat is ' +
+    'the one people are hired into with no prior security job at all, coming from a help desk, a ' +
+    'support role, the military, or any other career change. If you get a SOC job in the next ' +
+    'year, this is almost certainly the job. Every other seat on the floor is reached from ' +
+    'somewhere else first: two years of triage experience, or sideways from network engineering, ' +
+    'or up from a career in intelligence analysis. None of them is where anyone starts.\n\n' +
+    'Second, tier is not the same thing as rank, and this is the part that surprises people most. ' +
+    'Tier 1 is not junior in the sense of doing lesser or easier work, it is the seat with the ' +
+    'shortest clock and the widest funnel: everything in the whole organisation arrives there ' +
+    'first, and deciding correctly in two minutes what deserves an hour of somebody else time is ' +
+    'genuinely hard. Plenty of Tier 3 specialists, dropped straight into that seat with no warning, ' +
+    'would do it badly. What changes as you climb the tiers is the clock you are working against, ' +
+    'how deep you get to dig, and how much of the whole picture you are trusted to hold at once. It ' +
+    'is not a measure of how good you have to be to sit there.',
 } as const;
 
 const ROLE_TEACH = {
   concept:
-    'The SOC is many jobs, not one. The operator clears the queue; the log analyst builds the ' +
-    'timeline everyone else argues from; threat intelligence works out who is behind it and what ' +
-    'they do next; forensics preserves evidence to a courtroom standard; the incident lead decides ' +
-    'what the team does next on incomplete information. Two people looking at one intrusion see ' +
-    'different things, which is the whole reason there is more than one seat.',
+    'It is tempting to picture a SOC as one job with one skill: a person, or a room of similar ' +
+    'people, watching screens for hackers. That picture is wrong in an important way. A SOC is ' +
+    'many different jobs stacked on top of each other, the way a hospital is not one job called ' +
+    '"doctor" but a nurse triaging arrivals, a radiologist reading scans, a surgeon operating, and ' +
+    'an administrator discharging the patient, each looking at the same case and seeing something ' +
+    'completely different in it.\n\n' +
+    'A ROLE, in this sense, just means a specific job with its own responsibility and its own ' +
+    'output, something concrete that role produces that nobody else does. The SOC Operator clears ' +
+    'the queue of alerts. The log analyst builds the timeline everyone else in an incident argues ' +
+    'from. Threat intelligence works out who is likely behind an attack and what they tend to do ' +
+    'next. Forensics preserves evidence to a standard that survives a courtroom. The incident lead ' +
+    'decides what the team does next while the picture is still incomplete. None of those is a ' +
+    'lesser or greater version of the others, they are different jobs entirely.\n\n' +
+    'Why split the work up this way instead of training everyone to do all of it? Because each of ' +
+    'those skills takes real time to build and a different kind of attention to hold: the patience ' +
+    'to reconcile logs is a different muscle from the judgement to decide "contain it now" with ' +
+    'half the facts. Two people looking at exactly the same intrusion genuinely see different ' +
+    'things, because they are trained to look for different things, and that is the whole reason ' +
+    'more than one seat exists at all.\n\n' +
+    'For you, this means the question "what does it take to work in a SOC" does not have one ' +
+    'answer. It has as many answers as there are roles, and figuring out which one of these jobs ' +
+    'actually suits how you think is a large part of what the rest of this platform, and this ' +
+    'package especially, is for.',
 } as const;
 
 const PLACEMENT_TEACH = {
   concept:
-    'Not every SOC role lives in the SOC. Some are core to it: the operator triaging the queue and ' +
-    'the lead running an incident are the SOC. Others are shaped by the organisation. A log ' +
-    'analyst may be embedded on the floor for fast timelines during an incident, or sit with a ' +
-    'data or logging platform team that serves the whole business. Threat intelligence is often a ' +
-    'separate function, and forensics and malware analysis are frequently a specialist team pulled ' +
-    'in only when needed. Where a role sits changes how quickly the SOC can reach it and who it ' +
-    'reports to, not what the work is.',
+    'You would assume every job with "SOC" attached to its purpose sits inside the SOC, on the ' +
+    'same floor, on the same team, reporting to the same manager. That assumption is wrong often ' +
+    'enough to trip up almost everyone new to the field, and understanding why takes a short ' +
+    'analogy. A hospital has doctors who are staff, on its payroll, in its building every day, and ' +
+    'it also calls in a specialist consultant who works for a different practice and is only ever ' +
+    'brought in for the cases that need them. Both are doing medicine. Only one of them is ' +
+    '"inside" the hospital in the sense of being part of its everyday team.\n\n' +
+    'SOC roles split the same way. Some are core to the SOC in the strictest sense possible: they ' +
+    'cannot exist anywhere else, because the seat itself defines what a SOC is. The operator ' +
+    'triaging the alert queue and the incident lead running a live response are the SOC, in the ' +
+    'sense that a SOC without them is not a SOC at all. Other roles are shaped by whatever the ' +
+    'organisation decides makes sense for its size and its structure. A log analyst might be ' +
+    'embedded directly on the SOC floor so a timeline is available fast while an incident is live, ' +
+    'or the same person might sit with a data or logging platform team that serves the whole ' +
+    'business, not just security. Threat intelligence is frequently its own separate function ' +
+    'entirely. Forensics and malware analysis are often a specialist team, elsewhere in the ' +
+    'company or even at another company, pulled in only for the incidents serious enough to need ' +
+    'them.\n\n' +
+    'The nuance worth sitting with is that where a role lives changes how fast the SOC can reach it ' +
+    'and who that person answers to day to day. It does not change what the work itself is. A log ' +
+    'analyst embedded in the SOC and a log analyst on a shared platform team are doing ' +
+    'recognisably the same craft, reconciling logs into a timeline, just serving a different set of ' +
+    'people around them.\n\n' +
+    'This matters directly to you as a job seeker, because it means the same job title can point at ' +
+    'two different working lives. Reading only the title on an advert and assuming you know the ' +
+    'job is how people end up disappointed on day one. Reading where the role sits, and who it ' +
+    'reports to, tells you the actual shape of the work before you accept it.',
 } as const;
 
 export const SOC_FOUNDATIONS: LearningPackage = {
@@ -143,9 +222,13 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Getting this boundary right matters for a job seeker: a SOC role is watch, triage, and ' +
-            'respond. If an advert asks you to own patching or guarantee prevention, it is either ' +
-            'mislabelled or describing a different team.',
+            'The reason to hold this boundary firmly is that it is the difference between a SOC job ' +
+            'and a job that only sounds like one. A SOC role is watch, triage, and respond, full ' +
+            'stop, because those are the three things the team is actually staffed and equipped to ' +
+            'do well. If an advert asks you to own patching every vulnerable system or guarantee ' +
+            'nothing will ever get through, it is either describing a different team entirely, or it ' +
+            'is written by someone who does not fully understand the job they are hiring for, which ' +
+            'is itself useful information about the team you would be joining.',
           practice: [],
         },
         {
@@ -184,9 +267,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Triage is the front door of the whole SOC, and the skill is disposing of the noise ' +
-            'correctly rather than quickly. It is the most common way in, and, done as escalate ' +
-            'everything, the most common way out.',
+            'Triage is the front door of the whole SOC, and the skill being graded there is disposing ' +
+            'of the noise correctly, not quickly. Speed with no accuracy just means the real alert ' +
+            'gets waved through faster. Because it is the entry-level seat, triage is also the most ' +
+            'common way people get into this field, and, done badly as escalating everything to make ' +
+            'the decision go away, it is also the most common way people get pushed back out of it.',
           practice: [],
         },
         {
@@ -227,8 +312,12 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Nearly all of the lead role is communication and decision-making: making a call with ' +
-            'part of the picture, then explaining it to executives who want a number nobody has yet.',
+            'The reason this call belongs to one specific seat rather than whoever happens to be most ' +
+            'technical in the room is accountability: somebody has to be answerable afterwards for a ' +
+            'decision that, made either way, has a cost if it turns out wrong. Nearly all of the lead ' +
+            'role is communication and decision-making built on that responsibility: making a call ' +
+            'with only part of the picture, then explaining it clearly to executives who want a firm ' +
+            'number nobody actually has yet.',
           practice: [],
         },
         {
@@ -268,9 +357,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'And the incident should come back down the tiers as well: once it is understood, a ' +
-            'detection engineer turns it into a rule, so the next occurrence is caught automatically ' +
-            'instead of relying on someone spotting it again.',
+            'The reason a confirmed incident does not just get closed is that closing it would throw ' +
+            'away everything learned in the process of confirming it. Instead the incident should ' +
+            'come back down the tiers once it is understood: a detection engineer turns what was ' +
+            'learned into a rule, so the next occurrence gets caught automatically by the tooling ' +
+            'instead of relying on a person spotting it by hand all over again.',
           practice: [],
         },
         {
@@ -315,9 +406,12 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'This is why two job adverts with the same title can be different jobs. Log Analyst in a ' +
-            'SOC means live-incident timelines; the same title on a data platform team means ' +
-            'pipelines and retention. Read where the role sits, not just what it is called.',
+            'The underlying reason is that a role name describes a skill set, but placement describes ' +
+            'who that skill set serves and on what clock. That is why two job adverts with the exact ' +
+            'same title can be different jobs. Log Analyst inside a SOC means fast, live-incident ' +
+            'timelines under pressure; the same title on a data platform team means pipelines, ' +
+            'retention, and slower, steadier work serving the whole company. Read where the role ' +
+            'sits, not just what it is called.',
           practice: [],
         },
         {
@@ -368,9 +462,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'There is no single right home for the role. Knowing that a title can mean either ' +
-            'placement is the difference between an interview where you ask the right question about ' +
-            'the team, and one where you find out on your first day.',
+            'There is no single right home for this role, because both placements are solving a real ' +
+            'and different problem: speed during an incident versus consistency across the whole ' +
+            'business. Knowing that a title can mean either one is the difference between an ' +
+            'interview where you ask the right question about the team you would actually be ' +
+            'joining, and one where you find out what the job really is on your first day.',
           practice: SOC_FOUNDATIONS_PRACTICE['soc.1.6'] ?? [],
         },
       ],
@@ -397,10 +493,29 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'what is in that queue is:',
           teach: {
             concept:
-              'A detection is a guess that something might be wrong, and most guesses are wrong. The ' +
-              'bulk of any queue is noise: benign activity that happened to match a rule. The skill ' +
-              'of triage is clearing that noise correctly, so the few real alerts are not buried ' +
-              'under it.',
+              'Think of a smoke detector in a kitchen. It goes off when you burn toast far more often ' +
+              'than it goes off for an actual house fire, because it cannot tell the difference ' +
+              'between smoke from danger and smoke from breakfast, it only knows smoke crossed a ' +
+              'threshold. A security DETECTION works the same way: it is a rule that watches for a ' +
+              'pattern, like an unusual login or a strange file being created, and fires whenever that ' +
+              'pattern appears, regardless of whether the cause was an attacker or an employee doing ' +
+              'something ordinary in an unusual way.\n\n' +
+              'Because a detection cannot tell intent from appearance, and because normal daily activity ' +
+              'accidentally matches these patterns constantly, across thousands of employees and ' +
+              'systems, the overwhelming majority of what lands in a queue is noise: benign activity ' +
+              'that happened to trip a rule. This is not a flaw somebody forgot to fix, it is the ' +
+              'unavoidable cost of having any detection broad enough to catch real attacks at all. A ' +
+              'rule narrow enough to never misfire would also be narrow enough to miss most real ' +
+              'attackers.\n\n' +
+              'The nuance worth sitting with is that this is exactly why triage exists as its own job: ' +
+              'somebody has to look at each smoke alarm going off and tell burnt toast from a real ' +
+              'fire, fast, without either ignoring the one real fire or evacuating the building every ' +
+              'single time. That is the actual skill being taught, and it only becomes visible once you ' +
+              'accept that most of the queue was never going to be real.\n\n' +
+              'For your first weeks in a seat like this, expecting the queue to be mostly false alarms, ' +
+              'rather than mostly real threats, changes how you approach it. Going in expecting drama ' +
+              'and finding routine, over and over, is how burnout starts. Going in expecting routine and ' +
+              'staying sharp for the rare real one is the actual job.',
           },
           options: [
             { id: 'a', label: 'Confirmed intrusions that need a response.' },
@@ -425,8 +540,12 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'This is why alert fatigue is the central hazard of the seat. An operator worn down by ' +
-            'noise starts rubber-stamping, and the one real alert of the month goes out with the rest.',
+            'The reason this fact about the queue matters so much is that it is also the root cause of ' +
+            'the biggest hazard in the seat, alert fatigue. Look at hundreds of false alarms in a row ' +
+            'and the brain, entirely predictably, starts treating the next one the same way without ' +
+            'really checking. An operator worn down by pure noise starts rubber-stamping, and the one ' +
+            'real alert of the month goes out with the rest, unnoticed, simply because it looked like ' +
+            'everything else that day.',
           practice: [],
         },
         {
@@ -442,10 +561,25 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'MTTD measure?',
           teach: {
             concept:
-              'Two numbers describe how a SOC performs. Mean Time To Detect is how long an intrusion ' +
-              'runs before anyone notices. Mean Time To Respond is how long from noticing to ' +
-              'containing it. Driving both down is the whole game, because the longer either runs, ' +
-              'the more an attacker gets done.',
+              'Imagine a burglar breaking into a house. There is a gap between when they climb through ' +
+              'the window and when an alarm actually goes off, and a second gap between the alarm ' +
+              'going off and the police actually arriving. Both gaps matter, and they measure two ' +
+              'completely different things: how long it took to notice, and how long it took to react ' +
+              'once noticed. A SOC is judged by the equivalent of both gaps, expressed as two numbers.\n\n' +
+              'MEAN TIME TO DETECT, always shortened to MTTD, is the average time between an intrusion ' +
+              'actually starting and the SOC noticing it happened at all. MEAN TIME TO RESPOND, MTTR, ' +
+              'is the average time from that moment of noticing to the moment the intrusion is actually ' +
+              'contained and stopped. "Mean" here just means average, taken across many incidents over ' +
+              'time, not a measurement of any single one.\n\n' +
+              'Why measure these two things specifically, rather than something simpler like how many ' +
+              'alerts got closed? Because they are the two numbers that track the thing a SOC actually ' +
+              'exists to shrink: the amount of time an attacker gets to operate freely inside a network ' +
+              'before anyone stops them. Every additional hour of MTTD or MTTR is an hour an attacker ' +
+              'spends stealing data, spreading further, or doing more damage, uninterrupted.\n\n' +
+              'The nuance worth being precise about is which gap is which: detect is the delay before ' +
+              'anyone notices anything, respond is the delay after noticing before it is actually shut ' +
+              'down. Mixing the two up is an easy early mistake, and getting it backwards in an ' +
+              'interview reads as not actually understanding what a SOC is measured on.',
           },
           options: [
             { id: 'a', label: 'How long from the attack starting to the SOC noticing it.' },
@@ -470,8 +604,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Attackers count on a long MTTD. The Yahoo and SolarWinds intrusions ran for months ' +
-            'undetected, and nearly all of the damage happened inside that window.',
+            'The reason MTTD gets so much attention is that it is where nearly all the real damage ' +
+            'accumulates. Attackers count on a long detection gap, because it is free time to work in. ' +
+            'The Yahoo and SolarWinds intrusions both ran for months before anyone noticed, and nearly ' +
+            'all of the actual harm, data taken, systems compromised, happened inside that undetected ' +
+            'window, not in the relatively short time it took to respond once the SOC finally saw it.',
           practice: [],
         },
         {
@@ -487,9 +624,26 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'a failure rather than caution?',
           teach: {
             concept:
-              'Triage works only because it filters. An operator who escalates everything has done no ' +
-              'triage at all: the noise just moves to the next tier, which has less capacity, not ' +
-              'more. A queue triaged by escalating everything is the same as a queue nobody triaged.',
+              'Imagine that same emergency room nurse from the tier explanation, except this time, ' +
+              'nervous about missing something serious, she sends every single patient who walks in ' +
+              'straight to a surgeon, including the ones with a papercut. That sounds cautious. It is ' +
+              'actually the opposite of helpful, because the surgeon now has to wade through every ' +
+              'papercut to find the one person who is actually bleeding badly, and there are far fewer ' +
+              'surgeons than there are patients walking through the door.\n\n' +
+              'That is exactly what happens when a Tier 1 operator escalates every alert instead of ' +
+              'triaging it. Triage only works as a concept because it FILTERS: it takes a large, mostly ' +
+              'noisy pile and turns it into a small, mostly real one, so the next tier can actually give ' +
+              'each escalated item real attention. An operator who escalates everything has not been ' +
+              'cautious, they have skipped the one job the seat exists to do.\n\n' +
+              'The nuance here is about where the noise actually goes when you refuse to filter it, not ' +
+              'about the operator personally. It does not disappear. It moves to Tier 2, a team that is ' +
+              'smaller, more specialised, and more expensive per person, and therefore has even less ' +
+              'capacity to absorb a flood than Tier 1 did. A queue where everything gets escalated is, ' +
+              'in every practical sense, identical to a queue nobody looked at, because nothing has ' +
+              'actually been separated from anything else.\n\n' +
+              'This is worth understanding early because "just be safe and escalate it" feels like the ' +
+              'responsible instinct when you are new and unsure. It is not. Learning to actually decide, ' +
+              'and accept that a decision might occasionally be wrong, is the job itself.',
           },
           options: [
             { id: 'a', label: 'It is the correct, safe approach.' },
@@ -514,8 +668,12 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'This is why the operator seat is graded on disposing of the queue correctly, not quickly, ' +
-            'and why escalate-everything is one of the most common ways out of the field.',
+            'The underlying reason this fails so predictably is capacity, not judgement: there is a ' +
+            'fixed, small amount of Tier 2 attention available each day, and spending it all on noise ' +
+            'means there is none left when a real incident actually needs it. This is why the operator ' +
+            'seat is graded on disposing of the queue correctly, not quickly, and why an operator who ' +
+            'defaults to escalating everything to avoid being wrong is one of the most common ways ' +
+            'people quietly get moved out of the field.',
           practice: [],
         },
         {
@@ -531,10 +689,27 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'ones get buried. In two or three sentences, describe that tradeoff and why it is hard.',
           teach: {
             concept:
-              'Every triage decision risks one of two mistakes. Dismiss a real alert and an intrusion ' +
-              'runs unseen. Escalate too freely and the real ones drown in the volume you sent up. The ' +
-              'operator has seconds per alert and cannot avoid both risks at once, which is exactly ' +
-              'what makes the seat hard rather than boring.',
+              'Picture someone standing at a fork in the road, except the fork appears again every ' +
+              'thirty seconds, all day, and every single time they have to pick a direction with only ' +
+              'a glance at the map. That is roughly the position a triage operator is in on every ' +
+              'single alert: a decision has to be made quickly, and there is a real cost whichever way ' +
+              'it goes.\n\n' +
+              'A TRADEOFF, in plain terms, is a situation where making one kind of mistake less likely ' +
+              'automatically makes a different kind of mistake more likely, so you cannot just try ' +
+              'harder and avoid both. Triage is exactly this. Dismiss an alert that turns out to be ' +
+              'real and an intrusion runs unseen, doing damage the whole time nobody is watching it. ' +
+              'Escalate too freely, out of caution, and (as the previous exercise showed) the genuinely ' +
+              'real alerts drown in a flood of unfiltered noise sent to a tier that cannot absorb it.\n\n' +
+              'The specific nuance to hold onto is that these two failures pull in opposite directions. ' +
+              'Becoming more cautious about missing something pushes you toward escalating more, which ' +
+              'directly increases the risk of burying something real in volume. Becoming more selective ' +
+              'to keep the queue manageable pushes you toward dismissing more, which directly increases ' +
+              'the risk of missing something real outright. With only seconds available per alert, an ' +
+              'operator cannot fully eliminate either risk, only choose which one they are leaning ' +
+              'toward on any given call.\n\n' +
+              'This is why the job is described as hard rather than boring, despite looking repetitive ' +
+              'from the outside. Every single decision, however routine it looks, is a small bet made ' +
+              'under real uncertainty, and doing it well for an entire shift is genuinely demanding.',
           },
           hints: [
             'There are two opposite ways to get triage wrong. Name both.',
@@ -560,8 +735,12 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Naming this tradeoff is what separates an operator who is learning from one who is just ' +
-            'clicking. The good ones know which risk they are taking on each call, and why.',
+            'Being able to name this tradeoff out loud is what separates an operator who is actually ' +
+            'learning the job from one who is just clicking through a queue on instinct. The reason it ' +
+            'matters is accountability: a decision you can explain, even a wrong one, is something you ' +
+            'can learn from and defend afterwards, while a decision made without knowing which risk you ' +
+            'were leaning into is just a guess that happened to have a reason attached after the fact. ' +
+            'The good operators know which risk they are taking on each call, and why.',
           practice: SOC_FOUNDATIONS_PRACTICE['soc.2.4'] ?? [],
         },
         {
@@ -577,10 +756,26 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'thing is caught faster next time?',
           teach: {
             concept:
-              'A SOC that only reacts never gets ahead. The loop closes when a handled incident ' +
-              'becomes a new detection: the detection engineer takes what caught it by hand and writes ' +
-              'the rule that catches it automatically. That is how a painful incident today becomes a ' +
-              'routine alert tomorrow.',
+              'Consider two ways a person could learn to avoid a pothole in the road. One learns it by ' +
+              'hitting it every single day and swerving late each time, forever. The other hits it ' +
+              'once, marks it clearly, and after that everyone who drives the road avoids it without ' +
+              'even thinking. A SOC that only reacts to incidents without ever changing anything is ' +
+              'the first driver: capable, but doomed to relearn the same lesson painfully, over and ' +
+              'over, forever.\n\n' +
+              'A mature SOC closes that loop instead. Once an incident is investigated and understood, ' +
+              'the specific pattern that revealed it, the login sequence, the file behaviour, whatever ' +
+              'it was, gets handed to a detection engineer, who writes a rule that fires on that exact ' +
+              'pattern automatically. Something that took a skilled analyst hours to piece together by ' +
+              'hand becomes something the tooling notices in seconds, every future time it happens.\n\n' +
+              'The reason this step matters so much, and why it is easy to skip under pressure, is that ' +
+              'an incident that gets fully resolved and then forgotten has taught the organisation ' +
+              'nothing. All the effort that went into understanding it evaporates the moment the ' +
+              'ticket is closed, unless somebody deliberately turns that understanding into something ' +
+              'permanent.\n\n' +
+              'This is the difference, practically speaking, between a SOC that is treading water and ' +
+              'one that is actually getting better over time: whether painful incidents this month ' +
+              'become routine, automatically caught alerts next month, or whether the exact same kind ' +
+              'of intrusion has to be caught by hand again and again, indefinitely.',
           },
           options: [
             { id: 'a', label: 'Nothing; the incident is over.' },
@@ -606,8 +801,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'This is the difference between a SOC that treads water and one that improves. Every ' +
-            'incident either teaches the tooling something or is destined to happen again.',
+            'The underlying reason this step cannot be skipped is that human attention does not scale: ' +
+            'there will never be enough analysts to catch every recurrence of every past incident by ' +
+            'hand forever. Turning what was learned into a rule is what frees a human up to go find ' +
+            'the next new thing instead. Every incident either teaches the tooling something ' +
+            'permanent, or it is destined to happen again with nobody the wiser until it does.',
           practice: [],
         },
       ],
@@ -634,10 +832,26 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'else argues from. Which role?',
           teach: {
             concept:
-              'The clearest way to tell SOC roles apart is by what each one produces. The log analyst ' +
-              'produces the timeline: raw logs reconciled into an ordered account of what happened ' +
-              'when. Everyone else in the incident reasons from that account, which is why the seat ' +
-              'matters more than it sounds.',
+              'A LOG is just a record a computer system keeps, automatically, of things that happened: ' +
+              'this user logged in at this time, this file was opened, this connection was made. Every ' +
+              'system on a network keeps its own logs, in its own format, on its own clock, and during ' +
+              'a real incident there can be thousands of these tiny records scattered across dozens of ' +
+              'systems, each one useless on its own.\n\n' +
+              'The clearest way to tell any two SOC roles apart, when their descriptions start to blur ' +
+              'together, is to ask what each one actually produces, the concrete thing they hand to ' +
+              'everyone else. What the log analyst produces is a TIMELINE: those scattered, ' +
+              'differently formatted records pulled together, reconciled against each other (including ' +
+              'fixing the fact that different systems often disagree on the exact time something ' +
+              'happened), and laid out in the order events actually occurred.\n\n' +
+              'Why does this matter enough to be its own dedicated job rather than something everyone ' +
+              'does a bit of? Because without an agreed, ordered account of what happened first, ' +
+              'second, and third, every other person working the incident is arguing from a different, ' +
+              'partial picture. The operator who spotted the alert, the lead deciding whether to ' +
+              'contain it, the analyst asking who is behind it, all of them need the same shared story ' +
+              'of events to reason about the same incident together.\n\n' +
+              'This is a quiet seat that rarely gets the credit an incident lead or a forensics analyst ' +
+              'gets, but it is foundational: get the timeline wrong and every decision built on top of ' +
+              'it is built on sand.',
           },
           options: [
             { id: 'a', label: 'SOC Operator' },
@@ -663,8 +877,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'A weak timeline sinks an incident: if nobody can say what happened in what order, every ' +
-            'other decision is a guess. That is why this quiet seat carries so much weight.',
+            'The reason a weak timeline can sink an entire incident response is that every subsequent ' +
+            'decision, contain or wait, escalate or close, depends on knowing what happened in what ' +
+            'order. If nobody can say for certain whether the attacker got in before or after a ' +
+            'specific system was patched, every decision made from that point on is closer to a guess ' +
+            'than a judgement. That is why this quiet, unglamorous seat carries so much weight.',
           practice: [],
         },
         {
@@ -680,9 +897,24 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'in time into a rule that catches the next one automatically?',
           teach: {
             concept:
-              'Most SOC seats investigate what already happened. One does not. The detection engineer ' +
-              'produces rules: the logic that decides what fires an alert at all. Its output is ' +
-              'preventive, measured by what gets caught next time rather than by any single incident.',
+              'Almost every job on a SOC floor is INVESTIGATIVE: it starts once something has already ' +
+              'happened and works backward to understand it, the way a detective arrives after a crime ' +
+              'and pieces together what occurred. One SOC role does not work that way at all.\n\n' +
+              'The detection engineer produces something different from everyone else on the floor: ' +
+              'RULES, the actual logic, written in advance, that decides whether a piece of activity is ' +
+              'suspicious enough to raise an alert in the first place. Every alert an operator ever ' +
+              'sees exists only because a detection engineer, at some earlier point, decided that ' +
+              'specific pattern was worth flagging and wrote the rule that watches for it.\n\n' +
+              'That makes this role PREVENTIVE rather than investigative, and it is worth being precise ' +
+              'about what that word means here: it does not stop attacks by itself, but it determines ' +
+              'whether the next occurrence of a known bad pattern gets caught automatically or slips ' +
+              'through unnoticed. Its success is not measured by how well it explained any one ' +
+              'incident, because it does not investigate incidents, it is measured by how much gets ' +
+              'caught going forward that would previously have been missed.\n\n' +
+              'This distinction is worth holding onto because it is the one role on the floor whose ' +
+              'work product is code that runs against the whole environment continuously, rather than a ' +
+              'finding about one specific event, which is also why the role sits at the boundary ' +
+              'between the SOC and software engineering.',
           },
           options: [
             { id: 'a', label: 'Detection Engineer' },
@@ -708,8 +940,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'This is why the detection engineer sits at the boundary of the SOC and engineering: the ' +
-            'output is code that runs against the whole estate, not a note on one incident.',
+            'The reason this role sits so close to software engineering, rather than purely inside the ' +
+            'SOC, is that its output behaves like software: a rule written once keeps running against ' +
+            'the whole environment continuously, needs testing so it does not misfire constantly, and ' +
+            'needs maintaining as the environment changes around it, none of which describes writing a ' +
+            'note about one incident.',
           practice: [],
         },
         {
@@ -725,10 +960,25 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'between them?',
           teach: {
             concept:
-              'Almost every SOC seat is triggered by something: an alert, a rule gap, an intel report. ' +
-              'The threat hunter is the exception. It is proactive and hypothesis-driven: it assumes a ' +
-              'breach already happened and goes looking for the evidence that no alert ever fired on. A ' +
-              'good hunt ends by handing the detection engineer a new rule.',
+              'Almost every SOC role only starts working once something has already triggered them: an ' +
+              'alert lands, a rule gap gets flagged, an intel report arrives naming a new adversary ' +
+              'technique. Something outside the person has to happen first before they act. That covers ' +
+              'nearly the whole floor, but not every seat on it.\n\n' +
+              'The threat hunter is the exception, and understanding why requires distinguishing two ' +
+              'words that sound similar but describe opposite starting points. REACTIVE work begins ' +
+              'because a trigger arrived, like the operator working an alert the tooling already raised. ' +
+              'PROACTIVE work begins with nothing at all except a person going looking on their own ' +
+              'judgement.\n\n' +
+              'A threat hunter is proactive and HYPOTHESIS-DRIVEN, meaning they start from an educated ' +
+              'guess rather than a queued item: they assume, correctly, that some intrusions never trip ' +
+              'any alert at all, and they go searching the raw data by hand for evidence of exactly that ' +
+              'kind of intrusion, the sort no rule was ever written to catch. There is no ticket waiting ' +
+              'for them when the day starts, only a question they chose to ask.\n\n' +
+              'Why does a SOC need this seat if detections already cover so much? Because detections can ' +
+              'only ever catch patterns somebody already thought to write a rule for, and attackers are ' +
+              'actively trying new techniques nobody has written a rule for yet. A good hunt ends by ' +
+              'handing the detection engineer exactly that: a newly found technique, now turned into a ' +
+              'new rule, so it becomes something the tooling catches automatically from then on.',
           },
           options: [
             {
@@ -758,9 +1008,12 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Threat hunting is also distinct from detection engineering and threat intel: the hunter ' +
-            'finds the undetected intrusion by hand, the engineer automates catching it, and intel ' +
-            'says which adversary technique to hunt for in the first place.',
+            'It is worth separating threat hunting clearly from two other roles it gets confused with, ' +
+            'because the confusion is common and each one starts from a different place: the hunter ' +
+            'finds an undetected intrusion by manually searching the data, the detection engineer ' +
+            'automates catching it once it is found, and the threat intelligence analyst is often the ' +
+            'one who tells the hunter which adversary technique is worth going looking for in the first ' +
+            'place.',
           practice: [],
         },
         {
@@ -776,10 +1029,27 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'memory before disk and hashing before touching anything. Which role?',
           teach: {
             concept:
-              'Forensics is slow, procedural, and unforgiving of shortcuts. Order of operations ' +
-              'matters, memory before disk and a hash before a touch, because evidence collected ' +
-              'wrongly is evidence that cannot be used at all. That discipline is what separates it ' +
-              'from the faster, decision-driven seats around it.',
+              'Think about how police handle a crime scene: they do not just walk in and start picking ' +
+              'things up. They photograph everything first, wear gloves so they do not add their own ' +
+              'fingerprints, and follow a strict order, because evidence handled carelessly, even if the ' +
+              'conclusion drawn from it is correct, can become worthless in court. Digital forensics is ' +
+              'the same discipline applied to a computer instead of a room.\n\n' +
+              'The specific order matters for a reason that is easy to miss if you have never thought ' +
+              'about it: information on a running computer disappears in stages. What is in memory (the ' +
+              'part of a computer that holds what is actively happening right now) vanishes the moment ' +
+              'the machine is switched off or even just sits idle for a while, while what is written to ' +
+              'disk tends to stick around. So a forensics analyst captures memory before disk, because ' +
+              'memory is the more fragile evidence and disk can wait. And before touching anything at ' +
+              'all, they take a HASH, a short fingerprint-like code calculated from the exact contents of ' +
+              'a file or drive, so they can later prove nothing was altered during their own ' +
+              'investigation.\n\n' +
+              'The nuance to hold onto is WHY this level of ceremony exists at all, when other roles on ' +
+              'the floor move fast and decide under uncertainty. Forensics evidence sometimes has to ' +
+              'survive a courtroom, be cross-examined by a lawyer, and hold up months or years later. A ' +
+              'brilliant conclusion reached by touching evidence in the wrong order can be thrown out ' +
+              'entirely on a technicality, regardless of whether it was actually correct.\n\n' +
+              'That is what separates this seat from the faster, decision-driven ones around it: speed ' +
+              'is not the priority here, defensibility is.',
           },
           options: [
             { id: 'a', label: 'Incident Response Lead' },
@@ -805,8 +1075,10 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'This is also why forensics is often a specialist team pulled in as needed rather than a ' +
-            'full-time SOC seat: the rigour is expensive and only some incidents need it.',
+            'The reason forensics is so often a specialist team pulled in only for specific incidents, ' +
+            'rather than a permanent seat on every SOC floor, follows directly from this: the rigour is ' +
+            'genuinely expensive in time and training, and only the incidents likely to end up in legal ' +
+            'or regulatory proceedings actually need evidence held to that standard. Most do not.',
           practice: [],
         },
         {
@@ -822,11 +1094,25 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'detecting threats. In a few sentences, say how each one is different from the other two.',
           teach: {
             concept:
-              'These three seats are easy to blur and are genuinely different jobs. The detection ' +
-              'engineer writes the rules that automate catching a threat. The threat intel analyst ' +
-              'researches adversaries and produces the indicators and techniques worth watching for. ' +
-              'The threat hunter takes a hypothesis and searches the environment by hand for what no ' +
-              'alert has caught. One automates, one researches, one hunts.',
+              'These three roles all have the word threat or detection in them somewhere, all deal in ' +
+              'catching attackers, and are genuinely three different jobs with three different outputs, ' +
+              'which is exactly why they get blurred together so easily by anyone new to the field.\n\n' +
+              'The clearest way to separate them is the same trick used earlier in this module: ask what ' +
+              'each one physically produces at the end of a day of work, rather than what they broadly ' +
+              '"deal with". The detection engineer writes and tunes RULES, the logic that automatically ' +
+              'flags a known bad pattern going forward. The threat intelligence analyst researches ' +
+              'actual adversary groups and their campaigns, producing INTELLIGENCE, meaning specific ' +
+              'indicators and techniques worth watching for, essentially answering "who is likely ' +
+              'attacking people like us, and how do they usually operate". The threat hunter takes a ' +
+              'HYPOTHESIS, an educated guess with no alert behind it, and manually searches the ' +
+              'environment for a specific intrusion nobody has found yet.\n\n' +
+              'One automates detection for the future, one supplies the knowledge of what is worth ' +
+              'detecting in the first place, and one goes looking by hand for what has already slipped ' +
+              'past everything else. They frequently feed each other directly: intel tells the hunter ' +
+              'where to look, and a successful hunt hands the engineer a new rule.\n\n' +
+              'Being able to hold these three apart cleanly, rather than treating them as roughly the ' +
+              'same thing, is exactly the kind of understanding that separates someone who has studied ' +
+              'the floor from someone who has only heard the job titles.',
           },
           hints: [
             'Start from the output of each: a rule, a piece of intelligence, or a found intrusion.',
@@ -860,8 +1146,12 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Blurring these is a common interview stumble. Being able to say cleanly what each one ' +
-            'produces shows you understand the floor as a set of jobs, not one undifferentiated role.',
+            'Blurring these three together is one of the most common stumbles in a first interview, ' +
+            'because it is an easy trap: all three sound similar on paper and only become distinct once ' +
+            'you have thought about what each one actually produces. Being able to say cleanly what ' +
+            'each one produces, rather than reciting the job titles, shows a panel you understand the ' +
+            'floor as a set of genuinely different jobs, not one undifferentiated "does security stuff" ' +
+            'role.',
           practice: SOC_FOUNDATIONS_PRACTICE['soc.3.5'] ?? [],
         },
       ],
@@ -888,10 +1178,28 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'alerts and escalate the real ones. What is that arrangement called?',
           teach: {
             concept:
-              'Not every organisation staffs its own SOC. Many buy monitoring from an MSSP, a Managed ' +
-              'Security Service Provider, that watches many clients at once. In-house means deep ' +
-              'context but high cost. An MSSP means lower cost and round-the-clock coverage from day ' +
-              'one, but a vendor that knows your environment less well than your own people would.',
+              'A company deciding how to get its computers monitored around the clock faces the same ' +
+              'kind of choice a small business faces deciding whether to hire its own security guards ' +
+              'or pay an outside security firm to patrol the building. Building your own team means ' +
+              'people who know this specific building intimately, but costs a lot and takes time to ' +
+              'staff up. Paying an outside firm means coverage starts almost immediately and costs ' +
+              'less, but that firm is also patrolling other buildings and never knows this one as ' +
+              'intimately as a dedicated team would.\n\n' +
+              'The version of the outside firm for computer security is called an MSSP, short for ' +
+              'Managed Security Service Provider. Rather than a company hiring, training, and rostering ' +
+              'its own round-the-clock monitoring team (an IN-HOUSE SOC), it pays a vendor whose entire ' +
+              'business is watching security alerts, and that vendor does the same job simultaneously ' +
+              'for many different client companies at once.\n\n' +
+              'Why would a company choose one over the other? In-house buys deep context, its own ' +
+              'people slowly build an intimate understanding of exactly what normal looks like on that ' +
+              'specific network, at real cost in salaries, training, and time before the team is fully ' +
+              'effective. An MSSP buys speed and lower cost, round-the-clock coverage can start almost ' +
+              'immediately without hiring a single person, at the cost of a vendor watching your ' +
+              'environment through a lens shared with dozens of other unrelated clients, who ' +
+              'inevitably understands your specific network less deeply than dedicated staff would.\n\n' +
+              'This distinction matters directly to you as a job seeker, because it describes two ' +
+              'genuinely different working environments you might end up in, not just two ways of ' +
+              'buying the same service.',
           },
           options: [
             { id: 'a', label: 'An MSSP (Managed Security Service Provider).' },
@@ -917,9 +1225,12 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Job adverts split along this line. An in-house SOC role means deep context on one estate; ' +
-            'an MSSP role means breadth across many clients and a faster pace. Neither is better, but ' +
-            'they are different jobs.',
+            'The reason this distinction is worth remembering as you job hunt is that adverts split ' +
+            'cleanly along this line without always saying so directly. An in-house SOC role means deep ' +
+            'context on one specific environment and a slower, more settled pace; an MSSP role means ' +
+            'breadth across many different client environments, faster context-switching, and often a ' +
+            'quicker route to broad experience. Neither is objectively better, but they are meaningfully ' +
+            'different jobs, and it is worth knowing which one you are walking into.',
           practice: [],
         },
         {
@@ -935,10 +1246,26 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'rely on ANOTHER team for, rather than doing itself? Select all that apply.',
           teach: {
             concept:
-              'A SOC watches and responds; it does not run everything it touches. Patching belongs to ' +
-              'vulnerability management, the applications belong to engineering, and user accounts ' +
-              'belong to identity and access management. The SOC leans on all three and owns none of ' +
-              'them. Knowing that boundary is how you read where a job actually sits.',
+              'Think of the SOC as the fire department for an organisation computers. Firefighters ' +
+              'respond to fires, and they will absolutely tell a building owner that the wiring is a ' +
+              'hazard, but they do not personally rewire the building, that is an electrician job. A ' +
+              'SOC works the same way: it watches, decides what matters, and responds, but it does not ' +
+              'personally do the underlying work of every team whose systems it happens to be watching.\n\n' +
+              'This matters because a SOC constantly touches other teams work without owning it. When it ' +
+              'sees an unpatched, vulnerable system, that is not the SOC job to fix, that belongs to ' +
+              'VULNERABILITY MANAGEMENT, the team responsible for finding and patching weaknesses before ' +
+              'they get exploited. When an alert traces back to a flaw in how an application was built, ' +
+              'fixing that application is ENGINEERING work, the team that actually builds and maintains ' +
+              'it. When an alert involves who has access to what account, managing those accounts ' +
+              'belongs to IDENTITY AND ACCESS MANAGEMENT, sometimes shortened to IAM.\n\n' +
+              'Why keep these separate at all, rather than having the SOC just do everything it notices ' +
+              'needs doing? Because each of those is a full, specialised job in its own right, patching ' +
+              'thousands of systems safely, building reliable software, and administering access for an ' +
+              'entire company are each too large and too different a skill set for one team to also do ' +
+              'well on the side. The SOC leans on all three constantly and owns none of them.\n\n' +
+              'Knowing this boundary is exactly how you read what a job actually is, rather than what it ' +
+              'sounds like. A role that spends its time actually patching systems is a vulnerability ' +
+              'management job wearing a security-sounding title, not a SOC job.',
           },
           options: [
             { id: 'a', label: 'Patching vulnerable systems (vulnerability management).' },
@@ -964,9 +1291,13 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'When an incident needs a patch, a code fix, or an account disabled, the SOC asks the ' +
-            'team that owns it. A SOC that tries to own all of that directly is a SOC that has stopped ' +
-            'being a SOC.',
+            'The reason this handoff matters in practice, not just on an org chart, is that during a ' +
+            'real incident the SOC has to know instantly whom to call rather than trying to do the fix ' +
+            'itself under time pressure. When an incident needs a patch, a code fix, or an account ' +
+            'disabled, the SOC asks the team that already owns it, because that team knows the system ' +
+            'and can act safely on it. A SOC that tries to own all of that directly, rather than ' +
+            'coordinate with the teams who actually run those systems, has quietly stopped being a SOC ' +
+            'and started being everything at once, badly.',
           practice: [],
         },
         {
@@ -982,10 +1313,26 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'usually has to be brought in?',
           teach: {
             concept:
-              'Some incidents outgrow the SOC. A breach of customer data carries legal duties, ' +
-              'regulatory clocks, and reputational stakes that the SOC is not equipped to own. Legal, ' +
-              'executives, and communications get pulled in, because the consequences reach well ' +
-              'beyond the technical containment the SOC handles.',
+              'A SOC is built and staffed to solve a technical problem: find the intrusion, contain it, ' +
+              'understand it. Some incidents, though, stop being purely technical problems at all, the ' +
+              'moment customer data is confirmed stolen. That is worth pausing on, because it is a real ' +
+              'shift, not just a bigger version of the same job.\n\n' +
+              'A breach involving customer data creates obligations that have nothing to do with ' +
+              'firewalls or logs. Many places have laws requiring companies to notify affected ' +
+              'customers, and sometimes a government regulator, within a set number of days of ' +
+              'discovering a breach, a REGULATORY CLOCK that starts ticking the moment it is confirmed. ' +
+              'There are also decisions about what to tell the public and when, which affect the company ' +
+              'reputation and are not decisions a security team is trained or authorised to make alone. ' +
+              'And there is genuine legal exposure: what the company says, and when, can affect lawsuits ' +
+              'and fines down the line.\n\n' +
+              'This is why LEGAL, executives, and a communications or public relations team get pulled ' +
+              'into the response directly, not as a courtesy but as a necessity: the consequences of a ' +
+              'data breach reach into notification law, regulatory deadlines, and public trust, none of ' +
+              'which the SOC has the authority or the training to own.\n\n' +
+              'For you, the nuance worth keeping is where the line actually falls: the SOC still owns ' +
+              'the technical containment, finding and stopping the intrusion, but it does not own the ' +
+              'notification, the public statement, or the legal exposure that follows. Those decisions ' +
+              'move to people whose job that specifically is.',
           },
           options: [
             { id: 'a', label: 'Nobody; the SOC handles everything end to end.' },
@@ -1014,9 +1361,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'This is why the incident response lead spends so much time communicating upward. Past a ' +
-            'certain severity, the hardest parts of an incident are decisions the SOC informs but does ' +
-            'not make.',
+            'The reason the incident response lead spends so much of their time communicating upward, ' +
+            'rather than heads-down on the technical work, follows directly from this: past a certain ' +
+            'severity, the hardest and most consequential parts of an incident are decisions the SOC ' +
+            'informs with facts but does not actually make, because they carry legal and reputational ' +
+            'weight the SOC was never set up to carry.',
           practice: [],
         },
         {
@@ -1032,11 +1381,23 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'running it in-house.',
           teach: {
             concept:
-              'The choice between an in-house SOC and an MSSP is a real tradeoff. An MSSP gives you ' +
-              'round-the-clock coverage and pooled expertise from day one, usually for less than ' +
-              'staffing a full team. The cost is context: a vendor watching many clients knows your ' +
-              'environment less well than your own people, and can be slower to grasp what is normal ' +
-              'for you.',
+              'Go back to the security-guard comparison from earlier: hiring your own guards versus ' +
+              'paying an outside patrol firm. Neither choice is simply better, each one trades one thing ' +
+              'for another, and that is exactly what choosing between an in-house SOC and an MSSP is ' +
+              'like.\n\n' +
+              'What an MSSP gives you is speed and scale you could not otherwise afford quickly: ' +
+              'round-the-clock coverage from almost day one, without having to hire, train, and roster a ' +
+              'team yourself, and access to expertise the vendor has built up across many other clients, ' +
+              'usually for a lower cost than staffing an equivalent team in-house.\n\n' +
+              'What it costs you is CONTEXT, and this is the part worth understanding rather than just ' +
+              'memorising. A vendor analyst working across dozens of unrelated client environments ' +
+              'cannot build the same intimate sense of what normal looks like for your specific network ' +
+              'that a dedicated in-house team develops over months of watching only your systems. That ' +
+              'gap in familiarity means a vendor can be slower to recognise that something is genuinely ' +
+              'unusual for you, mistaking your normal for suspicious, or your suspicious for normal.\n\n' +
+              'Neither side of that tradeoff is a mistake to choose, it depends entirely on what the ' +
+              'organisation actually needs and can afford, which is exactly why this decision keeps ' +
+              'coming up rather than having settled into one obvious right answer years ago.',
           },
           hints: [
             'Think about what an MSSP gives you cheaply and quickly.',
@@ -1062,9 +1423,13 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'There is no universal right answer, which is the point. A small company may be far safer ' +
-            'with an MSSP than with a single overworked analyst; a large one may need the context only ' +
-            'an in-house team can hold.',
+            'There is no universal right answer here, and that is genuinely the point rather than a ' +
+            'dodge: the correct choice depends on the organisation size, budget, and risk. A small ' +
+            'company may be far safer with an MSSP watching around the clock than with a single ' +
+            'overworked analyst trying to cover nights, weekends, and a full time job alone; a large, ' +
+            'high-stakes organisation may need the deep, specific context that only a dedicated ' +
+            'in-house team can build over time. Recognising which situation you are looking at is the ' +
+            'actual skill.',
           practice: SOC_FOUNDATIONS_PRACTICE['soc.4.4'] ?? [],
         },
       ],
@@ -1089,11 +1454,26 @@ export const SOC_FOUNDATIONS: LearningPackage = {
           prompt: 'Customer data is being stolen from a company right now. Who is first to catch it?',
           teach: {
             concept:
-              'No single seat always sees an attack first. An automated alert usually lands in the ' +
-              'Tier 1 queue, so the operator is often first eyes on it. But a log analyst hunting ' +
-              'through logs, or a network analyst reviewing traffic, can spot something the tooling ' +
-              'missed and kick it up to be verified. Whoever catches it hands it off, and that hand-off ' +
-              'runs in whatever direction confirms and resolves the attack, not one fixed ladder.',
+              'It is tempting to imagine the SOC as a strict, single-file ladder: every attack starts ' +
+              'at the bottom rung with the operator, and climbs up through the tiers in a fixed order, ' +
+              'the way a letter always goes through the same sorting steps at a post office. Real SOCs ' +
+              'do not actually work quite that cleanly, and this module now moves from describing the ' +
+              'roles individually to watching one attack move through several of them together.\n\n' +
+              'Most of the time, yes, an automated detection fires and lands directly in the Tier 1 ' +
+              'queue, which makes the operator genuinely first eyes on it more often than anyone else. ' +
+              'But that is a tendency, not a rule. A log analyst manually working through logs for an ' +
+              'unrelated reason, or a network analyst reviewing traffic patterns, can just as easily ' +
+              'notice something the automated tooling never flagged at all, something no rule was ever ' +
+              'written to catch.\n\n' +
+              'The nuance worth taking from this is that whoever notices something suspicious first ' +
+              'does the same next thing regardless of their seat: they hand it off to be verified and, ' +
+              'if confirmed, escalated. That hand-off travels in whatever direction actually confirms and ' +
+              'resolves the situation, not down one predetermined ladder, because the goal is catching ' +
+              'and stopping the attack, not preserving a tidy org chart.\n\n' +
+              'Understanding this matters for how you picture the job: you are not one fixed link in a ' +
+              'strict chain, you are one of several people who might be first to notice something, and ' +
+              'knowing what to do the moment you notice it matters more than which seat you happen to ' +
+              'be sitting in.',
           },
           options: [
             {
@@ -1124,9 +1504,10 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Whoever catches it, the next move is the same: hand it off to be verified and escalated. ' +
-            'That hand-off is not a one-way ladder; it runs in whatever direction confirms the attack ' +
-            'and reaches the person who can act.',
+            'The reason this flexibility matters is that an attack does not care which seat happens to ' +
+            'notice it, only that someone does. Whoever catches it, the next move is the same: hand it ' +
+            'off to be verified and escalated. That hand-off is not a fixed, one-way ladder, it runs in ' +
+            'whatever direction actually confirms the attack and reaches the person able to act on it.',
           practice: [],
         },
         {
@@ -1140,9 +1521,22 @@ export const SOC_FOUNDATIONS: LearningPackage = {
           prompt: 'The alert is real. Who reconstructs exactly what the attacker accessed and stole?',
           teach: {
             concept:
-              'Noticing is not understanding. Once an alert is escalated, the log analyst digs into the ' +
-              'raw logs and builds the timeline: what was touched, when, and what left the building. ' +
-              'That timeline is what the rest of the response is argued from.',
+              'Spotting smoke and knowing exactly which room is on fire, how it started, and what was ' +
+              'lost are three completely different levels of knowledge. Confirming an alert is real is ' +
+              'the equivalent of spotting the smoke: it tells you something is wrong, but almost nothing ' +
+              'about the specifics.\n\n' +
+              'Once an alert is confirmed and escalated, somebody has to go find out what actually ' +
+              'happened, and that job belongs to the log analyst. They dig into the raw logs, the ' +
+              'automatic records every system kept of what occurred, and reconstruct exactly what the ' +
+              'attacker touched, in what order, and critically, what left the network, since that is the ' +
+              'difference between an attempted breach and data actually being stolen.\n\n' +
+              'The reason this has to be a separate, deliberate step rather than something the operator ' +
+              'just figures out while triaging is that it takes real time and depth: reconciling logs ' +
+              'from many different systems into an accurate account of exactly what was accessed is not ' +
+              'something that fits into the seconds-per-alert pace of triage.\n\n' +
+              'That timeline the log analyst produces is what the entire rest of the response gets ' +
+              'argued from: the containment decision, the legal notification decision, the executive ' +
+              'briefing, all of it depends on this reconstructed account of what actually happened.',
           },
           options: [
             { id: 'a', label: 'The log analyst, who builds the timeline from the logs.' },
@@ -1163,8 +1557,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             { type: 'choice-equals', optionIds: ['a'], hint: 'Who turns raw logs into an account of what happened?' },
           ],
           debrief:
-            'The operator answers "is this worth a look"; the log analyst answers "what actually ' +
-            'happened". Two different jobs, two different seats.',
+            'The clean way to hold these two roles apart, and the reason they cannot be merged into ' +
+            'one, is the question each one is actually answering: the operator answers "is this worth a ' +
+            'closer look", a fast yes-or-no call, while the log analyst answers "what actually ' +
+            'happened", a slow, detailed reconstruction. Two genuinely different questions, two ' +
+            'different seats.',
           practice: [],
         },
         {
@@ -1180,9 +1577,25 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'the attacker off, and direct everyone else. Whose call is that?',
           teach: {
             concept:
-              'Investigation informs the decision; someone still has to make it and own it. The ' +
-              'incident response coordinator declares the incident, makes the containment calls on ' +
-              'incomplete information, and directs the other seats.',
+              'Even once the log analyst has a solid timeline, the facts alone do not act on ' +
+              'themselves: cutting an attacker off is a decision, with real consequences either way, and ' +
+              'somebody specific has to be the one who makes that call and answers for it afterwards. ' +
+              'Investigation informs a decision, it does not replace the need for someone to actually ' +
+              'make one.\n\n' +
+              'That person is the incident response coordinator (elsewhere in this package called the ' +
+              'incident response lead, the same role). They formally declare the incident, which matters ' +
+              'because it is what actually pulls the wider team, and sometimes people outside the SOC ' +
+              'entirely, into a coordinated response rather than everyone working it separately. They ' +
+              'make the call on whether to cut the attacker off now or watch a little longer, almost ' +
+              'always on incomplete information, and they direct what every other seat does next.\n\n' +
+              'Why does this need to be a distinct seat rather than falling to whoever is technically ' +
+              'strongest in the room at the time? Because being right about the technical details and ' +
+              'being able to weigh an irreversible decision under pressure, then explain it clearly to ' +
+              'people who were not in the room, are different skills. IT departments execute changes to ' +
+              'systems, they do not typically own this kind of judgement call, and the most technical ' +
+              'person present is not automatically the best person to decide.\n\n' +
+              'This is the seat where the whole incident, everything every other role produced, gets ' +
+              'turned into an actual decision.',
           },
           options: [
             { id: 'a', label: 'The IT team, who control the systems.' },
@@ -1203,8 +1616,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             { type: 'choice-equals', optionIds: ['b'], hint: 'Which seat declares the incident and directs the response?' },
           ],
           debrief:
-            'Someone has to be able to say "isolate it now" on sixty percent of the picture and answer ' +
-            'for it afterwards. That is the coordinator, not the person who can type fastest.',
+            'The underlying reason this seat exists at all is that someone has to be able to say ' +
+            '"isolate it now" while holding maybe sixty percent of the full picture, and then answer for ' +
+            'that call afterwards, whichever way it turns out. That is what the coordinator role is ' +
+            'built for, and it is a different skill from being the person who can type the fastest or ' +
+            'knows the tooling best.',
           practice: [],
         },
         {
@@ -1220,10 +1636,25 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'own, can they say for certain it is an attack?',
           teach: {
             concept:
-              'The whole point of having many seats is that one incident looks different from each ' +
-              'chair. The network analyst sees the connection, but needs the log analyst (what process ' +
-              'is doing this?), threat intel (is that address known bad?), and the malware analyst (is ' +
-              'something on the host causing it?) before anyone can be sure.',
+              'Three witnesses to the same car accident, standing on three different corners, will each ' +
+              'describe something slightly different, and none of them alone has the full picture. That ' +
+              'is the whole point of splitting a SOC into many different seats: one incident genuinely ' +
+              'looks different depending on which chair you are sitting in, and no single seat sees ' +
+              'everything.\n\n' +
+              'A network analyst watching traffic sees only the connection itself: a server reaching out ' +
+              'to an address every hour, regular as clockwork. That alone is not evidence of anything, a ' +
+              'perfectly ordinary scheduled backup job or a software update check would look identical ' +
+              'from where they are sitting. Confirming whether it is actually dangerous needs pieces ' +
+              'only other seats hold: the log analyst can say what process on the machine is actually ' +
+              'making that connection, threat intelligence can say whether that specific address is ' +
+              'already known to be associated with attackers, and the malware analyst can say whether ' +
+              'something running on the host is responsible for it.\n\n' +
+              'The reason no one person can just decide alone, however confident they feel, is that each ' +
+              'seat is structurally missing information the others hold, not because any one of them is ' +
+              'less capable. It is not a confidence problem, it is a visibility problem.\n\n' +
+              'This is the practical reason a SOC is a team sport rather than a collection of ' +
+              'individuals each covering their own patch: a confident, correct answer to "is this an ' +
+              'attack" usually requires combining several of those different views into one.',
           },
           options: [
             { id: 'a', label: 'No. They need the log analyst, threat intel, and others to confirm it.' },
@@ -1250,8 +1681,10 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'This is why the floor has more than one chair. Each seat holds one piece of the picture, ' +
-            'and a confident answer usually needs several of them at once.',
+            'This is the underlying reason the floor has more than one chair in the first place, rather ' +
+            'than one generalist role doing everything. Each seat holds one piece of the picture that ' +
+            'the others do not, and a genuinely confident answer usually needs several of those pieces ' +
+            'combined at once.',
           practice: [],
         },
         {
@@ -1265,10 +1698,25 @@ export const SOC_FOUNDATIONS: LearningPackage = {
           prompt: 'An incident is confirmed. Which of these happens FIRST?',
           teach: {
             concept:
-              'A response runs in an order for a reason: you cannot contain what you have not ' +
-              'declared, and you cannot improve detection before you understand what happened. Roughly ' +
-              'the sequence is declare, contain, investigate, preserve evidence, find the root cause, ' +
-              'recover, and only then improve detection.',
+              'Building a house has to happen in an order: you cannot put up walls before there is a ' +
+              'foundation, and you cannot paint a wall that does not exist yet. Skipping ahead does not ' +
+              'save time, it just means redoing work later, or worse. An incident response runs in an ' +
+              'order for the same reason: each step depends on something the previous one produced.\n\n' +
+              'Roughly, the sequence runs: declare the incident (make it official and pull people in), ' +
+              'contain it (stop it from getting worse), investigate (find out what happened), preserve ' +
+              'evidence (in case it is needed later), find the root cause (how did the attacker actually ' +
+              'get in), recover (restore normal operation), and only then improve detection (turn what ' +
+              'was learned into a better rule for next time).\n\n' +
+              'The nuance worth being precise about is why declaring comes first, ahead of everything ' +
+              'else, including containment. You cannot formally contain, coordinate, or assign work on ' +
+              'something that has not been officially recognised as an incident yet, because nobody ' +
+              'outside the person who spotted it even knows to act. Declaring is what turns "I think ' +
+              'something might be wrong" into "the team is now responding to this", and every later step ' +
+              'depends on that team already being pulled in.\n\n' +
+              'Getting the order backwards is not a minor inefficiency. Trying to improve detection ' +
+              'rules before anyone understands what actually happened means tuning for the wrong thing ' +
+              'entirely, and recovering systems before containment means restoring a machine the ' +
+              'attacker can simply walk straight back into.',
           },
           options: [
             { id: 'a', label: 'Improve the detection rules.' },
@@ -1290,8 +1738,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             { type: 'choice-equals', optionIds: ['b'], hint: 'What has to happen before anything else can be coordinated?' },
           ],
           debrief:
-            'Getting the order wrong is expensive: recover too early and you leave the attacker in; ' +
-            'tune detection before you understand the attack and you tune for the wrong thing.',
+            'The reason this order is worth memorising rather than treating as common sense in the ' +
+            'moment is that getting it wrong is genuinely expensive, not just untidy: recover a system ' +
+            'too early, before containment, and the attacker simply walks straight back in; tune a ' +
+            'detection rule before the attack is properly understood and you end up tuning for the ' +
+            'wrong signal entirely.',
           practice: [],
         },
         {
@@ -1307,10 +1758,25 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'or three sentences, explain why no single role could have stopped it alone.',
           teach: {
             concept:
-              'Each seat holds one piece. The operator spots it, the log analyst confirms it, the ' +
-              'coordinator decides, the network analyst contains it, intel and the malware analyst ' +
-              'explain it, forensics preserves it, and detection engineering makes sure it is caught ' +
-              'faster next time. Take any one link away and the chain breaks.',
+              'A relay race is won or lost as much on the handoffs between runners as on any single leg ' +
+              'being run fast. Drop the baton once and the fastest team in the world still loses. An ' +
+              'incident response works the same way: each person does one leg well, and the whole thing ' +
+              'only succeeds if the handoffs between them hold.\n\n' +
+              'Walking through one intrusion end to end, as this module has done, the operator spots the ' +
+              'alert, the log analyst confirms what actually happened and builds the timeline, the ' +
+              'coordinator makes the call to contain it, a network or containment-capable role acts on ' +
+              'that call, threat intel and a malware analyst explain who did this and how, forensics ' +
+              'preserves the evidence properly in case it is needed later, and detection engineering ' +
+              'makes sure the exact same thing gets caught automatically next time.\n\n' +
+              'The reason no single one of those people could have done the whole thing alone is not ' +
+              'just that it is a lot of work, it is that each step genuinely needs a different, deep ' +
+              'skill: the patience to reconcile logs is not the same skill as the judgement to make an ' +
+              'irreversible call under pressure, which is not the same skill as knowing how to preserve ' +
+              'evidence so it survives a courtroom.\n\n' +
+              'Take any single one of those links away and the whole chain breaks somewhere: without the ' +
+              'log analyst nobody knows what actually happened, without the coordinator nobody decides, ' +
+              'without detection engineering the same incident happens again next month exactly the same ' +
+              'way.',
           },
           hints: [
             'Think of it as a hand-off: each seat does one thing and passes it on.',
@@ -1337,9 +1803,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'This is the mindset the rest of the platform builds on. You will specialise into one of ' +
-            'these seats, but you are always one link in a chain, and the hand-off is where incidents ' +
-            'are won or lost.',
+            'This is the mindset the rest of the platform is built on, and it is worth carrying with ' +
+            'you past this module. You will eventually specialise into one of these seats, and it is ' +
+            'natural to focus on getting good at that one job, but you are always one link in a longer ' +
+            'chain, and the handoff on either side of you is just as often where an incident is ' +
+            'actually won or lost.',
           practice: SOC_FOUNDATIONS_PRACTICE['soc.5.6'] ?? [],
         },
       ],
@@ -1366,18 +1834,37 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'actually does? Select all that apply.',
           teach: {
             concept:
-              'A SIEM is a place where logs from everywhere arrive, get normalised into a common ' +
-              'shape, and can be searched together. That last word is the whole point. A firewall log ' +
-              'and a Windows event log describe the same login in completely different vocabularies, ' +
-              'and a SIEM makes them comparable so one query can cross both.\n\n' +
-              'On top of that it runs saved queries continuously and raises an alert when one ' +
-              'matches. That is where the queue an operator works comes from: somebody wrote a rule, ' +
-              'the rule matched, and a row appeared.\n\n' +
-              'What a SIEM does not do is understand anything. It has no opinion about whether a ' +
-              'match matters, it only knows a pattern fired. It also cannot see what was never sent ' +
-              'to it, which is the most important limitation of all: a SIEM covers exactly the ' +
-              'sources somebody onboarded, and the gap between what is logged and what is collected ' +
-              'is invisible from inside the tool.',
+              'This module steps back from the roles and the process, and looks at the actual software ' +
+              'a SOC lives inside all day. Start with the tool at the centre of most of them: the SIEM, ' +
+              'said as one word, short for Security Information and Event Management.\n\n' +
+              'Recall the log concept from earlier in this package: a log is an automatic record a ' +
+              'system keeps of something that happened. A single company might run thousands of ' +
+              'systems, each one quietly writing its own logs, in its own place, in its own format, ' +
+              'with nobody looking at any of them individually. A SIEM is the place all of that gets ' +
+              'pulled together: logs from everywhere arrive in it, get NORMALISED, meaning translated ' +
+              'into one common shape, and become searchable as one connected pool instead of thousands ' +
+              'of separate ones. Normalising is the whole point, and it is worth seeing why: a firewall ' +
+              'records a login one way, a Windows machine records the same kind of login a completely ' +
+              'different way, using different field names and formats, and without a SIEM translating ' +
+              'both into a shared vocabulary, nobody could write one search that finds a suspicious ' +
+              'login pattern across both systems at once.\n\n' +
+              'On top of that pooled, searchable data, a SIEM runs saved queries continuously in the ' +
+              'background and raises an alert whenever one of them matches. This is literally where the ' +
+              'queue an operator works every day comes from: at some earlier point somebody wrote a ' +
+              'rule describing a suspicious pattern, the rule matched real activity, and a new row ' +
+              'appeared in the queue for a human to look at.\n\n' +
+              'The specific nuance this exercise is testing is what a SIEM does NOT do, because the ' +
+              'name and the marketing around these products make it sound smarter than it is. A SIEM ' +
+              'has no actual opinion about whether a match matters, it only knows a pattern fired, the ' +
+              'same way a smoke alarm does not know whether it is toast or a real fire, it just knows ' +
+              'smoke crossed a threshold. And the more important limitation: a SIEM can only see what ' +
+              'was actually sent to it. A server whose logs were never connected, never ONBOARDED in ' +
+              'the industry term, is completely invisible to the SIEM, and nothing in the tool itself ' +
+              'will ever hint that the gap exists.\n\n' +
+              'Understanding both halves of this, what a SIEM does and what it quietly cannot do, ' +
+              'matters because it is the tool you will spend most of your working hours inside, and ' +
+              'trusting it to know things it structurally cannot know is a mistake that costs real time ' +
+              'during a real incident.',
           },
           options: [
             { id: 'a', label: 'Collects logs from many different systems into one searchable place.' },
@@ -1408,9 +1895,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Coverage is the question nobody asks of a SIEM until after an incident. Knowing which ' +
-            'systems are onboarded, and which are not, is a more useful thing to be able to say than ' +
-            'knowing any query language.',
+            'Coverage is the question almost nobody thinks to ask about a SIEM until after an incident ' +
+            'has already exposed the gap, because the tool itself gives no visible signal that ' +
+            'anything is missing, it just looks quiet where a real problem was happening unseen. Being ' +
+            'able to say confidently which systems are onboarded, and which are not, is a more useful ' +
+            'and more senior thing to know than fluency in any particular query language.',
           practice: [],
         },
         {
@@ -1426,19 +1915,32 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'can actually answer it? Select all that apply.',
           teach: {
             concept:
-              'The tools on a SOC floor overlap enough to be confusing and are not interchangeable.\n\n' +
-              'A SIEM answers questions ACROSS systems and over time: has this address touched ' +
-              'anything else, did this pattern happen before, what else occurred in that ten ' +
-              'minutes. Its strength is breadth and history.\n\n' +
-              'An EDR answers questions about ONE ENDPOINT in depth: which process started which, ' +
-              'what a binary did after it ran, what it touched on disk. Its strength is the detail ' +
-              'a log summary throws away, and modern EDR can also act, isolating a machine from the ' +
-              'console.\n\n' +
-              'A case or ticketing system answers questions about the WORK: what was decided, by ' +
-              'whom, when, and what happened next. It is the only one of the three that remembers ' +
-              'why a human did something, which is why it is the artefact an audit asks for.\n\n' +
-              'Reaching for the tool you know rather than the tool that holds the answer is the ' +
-              'most common way an hour disappears.',
+              'A hammer and a screwdriver both fix things to a wall, and using the wrong one anyway, ' +
+              'because it is the one already in your hand, wastes real time and sometimes ruins the ' +
+              'job. The tools on a SOC floor have exactly this problem: they overlap enough in what ' +
+              'they touch to be genuinely confusing to someone new, and they are absolutely not ' +
+              'interchangeable.\n\n' +
+              'A SIEM, as the previous exercise covered, answers questions ACROSS many systems and over ' +
+              'time, because it pools normalised logs from everywhere. Has this address touched ' +
+              'anything else in the whole company this month, did this exact pattern happen before, ' +
+              'what else occurred in the same ten minutes elsewhere. Its strength is breadth and ' +
+              'history.\n\n' +
+              'An EDR, short for Endpoint Detection and Response, is a completely different kind of ' +
+              'tool: it answers deep questions about ONE ENDPOINT, meaning one individual computer, ' +
+              'laptop, or server. Which process on this specific machine started which other process, ' +
+              'what exactly a suspicious file did after it ran, what it touched on that machine disk. ' +
+              'Its strength is the fine-grained detail a log summary in a SIEM would never capture, and ' +
+              'unlike a SIEM, a modern EDR can also act directly, isolating a single infected machine ' +
+              'from the network at the click of a button in its console.\n\n' +
+              'A case or ticketing system answers a third, entirely different kind of question, about ' +
+              'the WORK itself rather than the systems: what was decided, by whom, when, and what ' +
+              'happened as a result. It is the only one of the three tools that remembers why a human ' +
+              'made a particular call, which is exactly why it is the record an audit or legal review ' +
+              'asks for afterwards.\n\n' +
+              'The specific nuance this exercise is testing is what happens when you reach for the ' +
+              'wrong one anyway, usually because it is the tool you already have open, rather than the ' +
+              'tool that actually holds the answer to your question. That habit, more than any lack of ' +
+              'skill, is the single most common way a working hour quietly disappears on a SOC floor.',
           },
           options: [
             { id: 'a', label: 'Has this external address been seen anywhere else in the estate this month: the SIEM.' },
@@ -1468,8 +1970,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Before you start searching, say out loud which tool should hold the answer. It takes ' +
-            'five seconds and it is the difference between a five-minute question and a lost morning.',
+            'The habit worth building before you ever start searching is to say out loud, or at least ' +
+            'ask yourself deliberately, which tool should actually hold the answer to this specific ' +
+            'question, before opening anything. It takes five seconds, and the reason it is worth the ' +
+            'pause is that the alternative, digging through the wrong tool out of habit, is the ' +
+            'difference between a five-minute question and a lost morning.',
           practice: [],
         },
         {
@@ -1485,18 +1990,29 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'all that apply.',
           teach: {
             concept:
-              'Automation in a SOC, often sold as SOAR, is worth exactly as much as the judgement it ' +
-              'frees up. The rule for what to automate is simple: work that is repetitive, that has ' +
-              'one correct answer, and whose failure is cheap and visible.\n\n' +
-              'That covers a lot. Enriching an alert with the things an operator would look up ' +
-              'anyway, gathering context from three systems into one view, opening and routing a ' +
-              'ticket, closing a class of alert that is known benign and provably so. All of that is ' +
-              'clerical work that a person is slower and no better at.\n\n' +
-              'What must not be automated is the judgement, and specifically anything irreversible ' +
-              'made on an inference. Automatically disabling a user account on a single medium ' +
-              'confidence alert will eventually lock out a surgeon mid-shift, and the cost of that ' +
-              'is not paid by the SOC. The test is whether a wrong decision can be undone cheaply. ' +
-              'Enrichment that is wrong wastes a minute; containment that is wrong stops a hospital.',
+              'A dishwasher is a good use of automation: washing plates is repetitive, there is one ' +
+              'correct outcome (clean plates), and if it fails, the cost is rewashing a plate. Nobody ' +
+              'would build a machine that automatically decides to evict a tenant based on a noise ' +
+              'complaint, because that decision has real, hard-to-reverse consequences for a real ' +
+              'person if the machine gets it wrong. Deciding what to automate in a SOC follows the same ' +
+              'logic as those two examples.\n\n' +
+              'This kind of automation is often sold as a product called SOAR, short for Security ' +
+              'Orchestration, Automation and Response, and it is worth exactly as much as the human ' +
+              'judgement it genuinely frees up, no more. The rule for what belongs in it is simple: work ' +
+              'that is repetitive, that has one clearly correct answer, and whose failure, if the ' +
+              'automation gets it wrong, is cheap and visible.\n\n' +
+              'That description covers more than it might sound like. Enriching an alert with context ' +
+              'an operator would have looked up manually anyway, pulling information from three systems ' +
+              'into one combined view, opening and routing a ticket to the right queue, closing a whole ' +
+              'class of alert that has already been proven, repeatedly, to be benign. All of that is ' +
+              'clerical, repetitive work that a machine does faster and no worse than a person.\n\n' +
+              'What must never be automated is the judgement itself, and specifically anything ' +
+              'IRREVERSIBLE done purely on an inference, meaning a guess based on a pattern rather than ' +
+              'a certainty. Automatically disabling any account that trips a medium-confidence alert ' +
+              'sounds efficient right up until it locks a surgeon out of a hospital system mid-shift, and ' +
+              'when that goes wrong, the SOC is not the one who pays the real cost. The actual test to ' +
+              'apply is whether a wrong decision can be cheaply undone: enrichment that turns out wrong ' +
+              'wastes a minute of somebody time; containment that turns out wrong can stop a hospital.',
           },
           options: [
             { id: 'a', label: 'Enriching every alert with the context an operator would have looked up anyway.' },
@@ -1528,9 +2044,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Note what C carries with it: a record of each closure. Automation you cannot audit is ' +
-            'indistinguishable from alerts being dropped, and one of those is a decision while the ' +
-            'other is a gap.',
+            'It is worth noticing exactly what option C carries with it beyond the auto-closure itself: ' +
+            'a record of each closure. The reason that record matters is that automation nobody can ' +
+            'audit afterwards is functionally indistinguishable from alerts simply being silently ' +
+            'dropped, and those two things are very different: one is a documented, defensible ' +
+            'decision, the other is an invisible gap in coverage.',
           practice: [],
         },
         {
@@ -1546,15 +2064,24 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'alerts without it. In three or four sentences, explain why the ticket matters.',
           teach: {
             concept:
-              'It is easy to think the work is the investigation and the ticket is admin. It is the ' +
-              'other way round: the investigation happens in somebody head and disappears, and the ' +
-              'ticket is the only part that survives to be used by anybody else.\n\n' +
-              'Three things depend on it. CONTINUITY: shifts hand over, and the next operator either ' +
-              'reads what you found or starts again. PATTERN: one alert closed as benign is noise, ' +
-              'but forty tickets closed for the same reason is a tuning case somebody can act on, ' +
-              'and that pattern only exists if the reasons were written down. And ACCOUNTABILITY: ' +
-              'when an incident is reviewed months later, the question is what was known and decided ' +
-              'at the time, and an undocumented decision is indistinguishable from no decision.\n\n' +
+              'It is a completely natural first instinct to think the real work is the investigation, ' +
+              'the actual looking and reasoning, and the ticket is just paperwork attached to it ' +
+              'afterwards. It is genuinely the other way round, and understanding why requires thinking ' +
+              'about what happens to the investigation itself once it is over.\n\n' +
+              'An investigation that only ever existed inside one person head disappears the moment ' +
+              'that person moves on to the next alert, goes home, or leaves the company. It cannot be ' +
+              'read by anyone else, checked later, or built on. The ticket is the only part of the work ' +
+              'that survives long enough to be used by somebody other than the person who did it.\n\n' +
+              'Three specific things depend on that written record existing. CONTINUITY: shifts hand ' +
+              'over constantly on a round-the-clock operation, and the next operator either reads what ' +
+              'was found and picks up where it left off, or has no choice but to start again from ' +
+              'nothing. PATTERN: closing one alert as benign tells nobody anything useful, but forty ' +
+              'tickets closed for the exact same reason is a tuning case a detection engineer can ' +
+              'actually act on, and that pattern is only visible at all if each reason was written down ' +
+              'somewhere searchable. And ACCOUNTABILITY: when an incident gets reviewed months later, ' +
+              'the question asked is always what was known and decided at the time, and a decision with ' +
+              'no record is, to anyone reviewing it afterwards, indistinguishable from no decision ' +
+              'having been made at all.\n\n' +
               'A good answer names at least the handover or continuity value, the pattern that only ' +
               'emerges across many records, and the fact that the ticket is what an audit or review ' +
               'actually reads.',
@@ -1590,8 +2117,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Operators who write good tickets get noticed faster than operators who close more of ' +
-            'them, because the ticket is the only part of the work a manager can actually see.',
+            'The reason this is worth internalising early, before it costs you anything, is a fact ' +
+            'about visibility: a manager cannot see an investigation that happened only inside your ' +
+            'head, only the record you left of it. Operators who write good tickets consistently get ' +
+            'noticed and promoted faster than operators who simply close more of them, because the ' +
+            'ticket is the only part of the work a manager, or anyone else, can actually see and judge.',
           practice: [],
         },
         {
@@ -1607,18 +2137,33 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'following are accurate? Select all that apply.',
           teach: {
             concept:
-              'Job adverts name products because whoever wrote the advert named the product the team ' +
-              'happens to own. What the team actually needs is somebody who can take a question and ' +
-              'turn it into a search, read what comes back, and know when the answer is wrong.\n\n' +
-              'That skill transfers almost completely. The query languages differ in syntax and are ' +
-              'the same in shape: filter to the events you care about, extract a field, group and ' +
-              'count, sort. Somebody fluent in one is productive in another within about a week, and ' +
-              'every hiring manager who has done the job knows it.\n\n' +
-              'Two honest caveats. Product familiarity is worth real money at interview, so getting ' +
-              'hands on a free tier and being able to say you have used it is worth an evening. And ' +
-              'a hard requirement is sometimes genuinely hard, usually because of a contract or a ' +
-              'certification the employer has to evidence. Read the advert, apply anyway, and name ' +
-              'the transferable skill rather than pretending to the product.',
+              'A driving instructor who has only ever taught in one brand of car can still drive any ' +
+              'other car competently within a few minutes, because the actual skill, judging distance, ' +
+              'reading the road, controlling the vehicle, is not tied to one specific dashboard layout. ' +
+              'Job adverts asking for years of experience in one specific security product make the ' +
+              'same mistake a nervous learner driver would make: confusing the specific dashboard with ' +
+              'the underlying skill.\n\n' +
+              'Job adverts name a specific product, like Splunk (a well-known SIEM), simply because ' +
+              'whoever wrote the advert was describing the tool their own team already owns. What that ' +
+              'team actually needs, underneath the product name, is somebody who can take a question, ' +
+              'turn it into a search, read what comes back critically, and recognise when an answer ' +
+              'looks wrong.\n\n' +
+              'That underlying skill transfers almost completely between products. Every one of these ' +
+              'tools query languages differs in exact syntax, the specific words and punctuation you ' +
+              'type, but they share the same underlying shape: filter down to the events you care ' +
+              'about, pull out a specific field, group similar things together and count them, sort the ' +
+              'result. Somebody genuinely fluent in one such language becomes productive in a different ' +
+              'one within about a week, and any hiring manager who has actually done this job knows ' +
+              'that from direct experience.\n\n' +
+              'Two honest caveats are worth holding alongside that, though, because the confident answer ' +
+              'above is not the whole picture. First, naming a specific product credibly is still worth ' +
+              'real money at interview, since it removes doubt from a panel mind, so spending an evening ' +
+              'in a free tier of a common tool, enough to say honestly that you have used it, is time ' +
+              'well spent. Second, a hard requirement is occasionally genuinely hard rather than just ' +
+              'lazily written, usually because of a client contract or a certification the employer has ' +
+              'to formally evidence to someone else. The right move either way is to read the advert, ' +
+              'apply anyway, and describe the transferable skill honestly rather than pretending to ' +
+              'product experience you do not have.',
           },
           options: [
             { id: 'a', label: 'The underlying skill, turning a question into a search and reading the result, transfers between platforms.' },
@@ -1650,8 +2195,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'This is the single most common reason career changers do not apply for roles they would ' +
-            'get. The product list is a description of the toolbox, not a description of the person.',
+            'This misunderstanding, treating an unfamiliar product name as a hard wall rather than a ' +
+            'detail, is one of the single most common reasons capable career changers rule themselves ' +
+            'out of roles they would actually get if they applied. The product list on an advert is a ' +
+            'description of the toolbox the team happens to own, not a description of the person they ' +
+            'need.',
           practice: [],
         },
       ],
@@ -1678,18 +2226,30 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'accurate? Select all that apply.',
           teach: {
             concept:
-              'Most Tier 1 SOC roles cover nights and weekends, because attacks do not keep office ' +
-              'hours. That is a fact about the job worth knowing before you take it rather than ' +
-              'after, and it is the single most common reason people leave a first security role ' +
-              'that they were otherwise good at.\n\n' +
-              'The trade is real in both directions. Shift work pays more, often substantially, and ' +
-              'night shifts are quieter, which means more time to read and learn than a day operator ' +
-              'ever gets. Many people do a year of it deliberately, learn faster than their peers, ' +
-              'and move to a business hours role afterwards.\n\n' +
-              'The costs are equally real and are not evenly distributed. Rotating shifts are harder ' +
-              'on health and on anybody with caring responsibilities or a partner on a fixed ' +
-              'schedule. A fixed night rota is often easier to live with than one that rotates every ' +
-              'week. Ask which pattern the team actually runs, because the advert will not say.',
+              'This module shifts from what the job is to what living inside it actually feels like, ' +
+              'week to week. Start with the part people underestimate most before they take the job: ' +
+              'the schedule itself.\n\n' +
+              'A ROTA is simply a schedule showing who is working which shift and when, and a "24 by 7 ' +
+              'rota" means the team covers every hour of every day, including nights and weekends, ' +
+              'with different people rotating through those hours. Most Tier 1 SOC roles run this way, ' +
+              'for a very direct reason: attackers do not keep office hours, so a SOC that only watches ' +
+              'nine to five is only watching a third of the day. This is worth knowing clearly before ' +
+              'you accept a role rather than discovering it after, and it is genuinely the single most ' +
+              'common reason people leave a first security role they were otherwise good at.\n\n' +
+              'The trade is real in both directions, not simply a cost to be endured. Shift work ' +
+              'usually pays more than an equivalent daytime role, often substantially so, and night ' +
+              'shifts tend to be genuinely quieter, meaning more time available to read, study, and ' +
+              'learn the environment than a busy day operator ever gets. A meaningful number of people ' +
+              'choose a year of shift work deliberately for exactly this reason, learn faster than ' +
+              'their daytime peers as a result, and move into a business-hours role once they have.\n\n' +
+              'The costs are equally real, and importantly, they are not spread evenly across everyone: ' +
+              'a rota that ROTATES, meaning it changes which hours you work every week or two, is ' +
+              'noticeably harder on the body and on anyone with caring responsibilities or a partner ' +
+              'working a fixed schedule than a FIXED rota, where you consistently work the same shift ' +
+              'pattern. A fixed night rota, oddly, is often easier to build a life around than one that ' +
+              'keeps changing under you. The specific nuance worth acting on is that job adverts almost ' +
+              'never state which kind of rota a team actually runs, so it has to be asked about ' +
+              'directly rather than assumed.',
           },
           options: [
             { id: 'a', label: 'Most Tier 1 roles involve nights and weekends, because monitoring is continuous.' },
@@ -1721,9 +2281,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Ask three questions at interview: is the pattern fixed or rotating, how many people ' +
-            'cover the night, and what happens when somebody is off sick. The answers tell you more ' +
-            'about the team than anything on the advert.',
+            'The reason it is worth asking rather than assuming is that the answers reveal how the ' +
+            'team is actually run, not just what hours you would work. Ask three specific questions at ' +
+            'interview: is the pattern fixed or rotating, how many people cover the night shift, and ' +
+            'what happens when somebody is off sick. Together, the answers tell you far more about the ' +
+            'team you would actually be joining than anything written on the advert itself.',
           practice: [],
         },
         {
@@ -1740,18 +2302,28 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'each time. In three or four sentences, write the handover.',
           teach: {
             concept:
-              'A shift handover is not a summary of your shift. It is a briefing for somebody who is ' +
-              'about to become responsible, and it is written for their next hour rather than about ' +
-              'your last eight.\n\n' +
-              'Three things go in it. WHAT IS LIVE AND WAITING ON SOMETHING, with what it is waiting ' +
-              'for, so the incoming operator knows what to chase rather than discovering it at ' +
-              'midnight. WHAT HAS BEEN ESCALATED AND TO WHOM, so nobody escalates it twice or ' +
-              'assumes somebody has it. And ANYTHING RECURRING, because a detection that has fired ' +
-              'eleven times is not eleven alerts, it is one tuning problem, and saying so stops the ' +
-              'next person working it again from scratch.\n\n' +
-              'Leave out everything that is finished and unremarkable. A handover that lists all ' +
-              'forty alerts you closed is a handover nobody reads, which is functionally the same as ' +
-              'not writing one.',
+              'Think about the difference between a diary entry and a briefing note handed to someone ' +
+              'about to take over your car halfway through a long road trip. A diary entry describes ' +
+              'everything that happened to you. A briefing note tells the next driver only what they ' +
+              'need to know right now: how much fuel is left, where you are headed, and anything ' +
+              'unusual about the car. A shift handover in a SOC is a briefing note, not a diary entry, ' +
+              'and mixing the two up is the most common mistake a new operator makes with it.\n\n' +
+              'A handover is written for somebody who is about to become personally responsible for ' +
+              'whatever you are describing, and it should be written for their next hour, not as a ' +
+              'summary of your last eight. Three specific things belong in it. WHAT IS STILL LIVE AND ' +
+              'WAITING ON SOMETHING, stated along with exactly what it is waiting for, so the incoming ' +
+              'operator knows what to actively chase rather than stumbling onto it cold at midnight. ' +
+              'WHAT HAS ALREADY BEEN ESCALATED AND TO WHOM, so nobody escalates the same thing twice, ' +
+              'and nobody wrongly assumes somebody already has it covered. And ANYTHING RECURRING, ' +
+              'because a single detection that has fired eleven times in one shift is not eleven ' +
+              'separate pieces of news, it is one underlying tuning problem, and naming it as one thing ' +
+              'stops the next person from re-investigating the same noise from scratch.\n\n' +
+              'The specific nuance this exercise is testing is what NOT to include: everything that is ' +
+              'finished, resolved, and unremarkable should be left out entirely. A handover that ' +
+              'dutifully lists all forty alerts closed during the shift, most of which needed no ' +
+              'follow-up at all, buries the three things that actually matter under noise, and a ' +
+              'handover nobody reads all the way through is functionally identical to never having ' +
+              'written one.',
           },
           hints: [
             'Write for their next hour, not about your last eight.',
@@ -1784,9 +2356,12 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'The eleven firings are the part most people get wrong. Reporting them as eleven alerts ' +
-            'is accurate and useless; reporting them as one tuning case is what gets the noise ' +
-            'removed for everybody.',
+            'The eleven firings are the specific part of this exercise most people get wrong, and the ' +
+            'reason it matters so much is what each framing does for the next reader: reporting it as ' +
+            'eleven separate alerts is technically accurate and practically useless, because it gives ' +
+            'the next operator nothing to act on beyond repeating the same closure eleven more times ' +
+            'tomorrow. Reporting it as one tuning case is what actually gets the underlying noise fixed ' +
+            'for everybody, permanently, instead of endured by everybody, forever.',
           practice: [],
         },
         {
@@ -1802,20 +2377,34 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'the following are accurate? Select all that apply.',
           teach: {
             concept:
-              'Alert fatigue is what happens to any human working a queue that is overwhelmingly ' +
-              'false. After several hundred alerts that turned out to be nothing, the brain stops ' +
-              'genuinely assessing each one and starts pattern-matching to the outcome it expects, ' +
-              'which is closure. It happens to conscientious people, it happens quickly, and it is ' +
-              'not a character flaw.\n\n' +
-              'It also does not respond to the interventions managers reach for first. Telling people ' +
-              'to be more careful does nothing, because they are already trying. Adding a second ' +
-              'reviewer doubles the cost and produces two fatigued people. Measuring throughput makes ' +
-              'it worse by rewarding exactly the behaviour causing the misses.\n\n' +
-              'What works is reducing the volume: tuning the detections that produce the noise, ' +
-              'automating provable benign closures, and giving the queue a realistic size. That is ' +
-              'why tuning is a first-class activity in a healthy SOC rather than something done when ' +
-              'there is time, and why an operator who documents why an alert was benign is doing the ' +
-              'work that eventually fixes it.',
+              'Ask a proofreader to check the same single sentence for typos two hundred times in a row ' +
+              'and, by the two hundredth pass, their eyes will slide over an obvious mistake they would ' +
+              'have caught instantly the first time. This is not because they stopped caring, it is ' +
+              'because human attention genuinely, predictably degrades under enough repetition. That ' +
+              'exact mechanism, not a character flaw, is what alert fatigue actually is.\n\n' +
+              'Alert fatigue happens to anybody working a queue that is overwhelmingly false, which, as ' +
+              'this package established early on, describes almost every real SOC queue. After several ' +
+              'hundred alerts in a row that all turned out to be nothing, the brain stops genuinely ' +
+              'assessing each new one on its own merits and starts pattern-matching toward the outcome ' +
+              'it has learned to expect, which is closure. It happens even to the most conscientious ' +
+              'people, it happens quickly, often within a single long shift, and it says nothing about ' +
+              'someone character or work ethic.\n\n' +
+              'The specific nuance worth understanding is why the interventions managers usually reach ' +
+              'for first do not actually work. Telling people to be more careful accomplishes nothing, ' +
+              'because they are already trying as hard as they can, the mechanism causing the misses is ' +
+              'physiological, not a lack of effort. Adding a second reviewer to double-check doubles the ' +
+              'cost and simply produces two fatigued people staring at the same noise instead of one. ' +
+              'Measuring people on how many alerts they close per hour makes the problem actively worse, ' +
+              'because it explicitly rewards the exact fast, shallow behaviour that causes real alerts ' +
+              'to get missed.\n\n' +
+              'What actually works is attacking the cause rather than the symptom: reducing the sheer ' +
+              'volume, by tuning the specific detections producing the noise, automating the closures ' +
+              'that are already provably benign, and keeping the queue at a size a human can genuinely ' +
+              'give real attention to. This is why tuning is treated as first-class, ongoing work in a ' +
+              'healthy SOC rather than something squeezed in when there happens to be spare time, and ' +
+              'why an operator who carefully documents exactly why an alert was benign is doing the ' +
+              'work that eventually fixes the underlying problem for everyone, not just filling in a ' +
+              'form.',
           },
           options: [
             { id: 'a', label: 'It is a predictable response to a queue that is mostly false positives, not a lack of diligence.' },
@@ -1847,9 +2436,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'If you ever run a queue, watch the false positive rate rather than the closure rate. ' +
-            'One of those numbers tells you whether the work is possible; the other tells you how ' +
-            'fast people are giving up on it.',
+            'The reason these two numbers point in such different directions is what each one actually ' +
+            'measures. If you ever end up running a queue yourself, watch the false positive rate ' +
+            'rather than the closure rate: one of those numbers tells you honestly whether the work in ' +
+            'front of your team is even humanly possible at that volume, while the other only tells you ' +
+            'how quickly people are being pushed toward giving up on genuinely assessing each alert.',
           practice: [],
         },
         {
@@ -1865,19 +2456,32 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'all that apply.',
           teach: {
             concept:
-              'Every metric is an instruction, whatever it was intended as. People optimise what is ' +
-              'measured, so the only useful question about a proposed metric is what behaviour it ' +
-              'will produce when somebody is under pressure to move it.\n\n' +
-              'Good SOC metrics point at the outcome rather than the activity. How long until a real ' +
-              'incident was detected, and until it was contained, both measure the thing the SOC ' +
-              'exists for. The proportion of alerts that turn out to be false measures whether the ' +
-              'queue is workable at all. Detection coverage against a framework measures whether you ' +
-              'can see the attacks that matter.\n\n' +
-              'Bad ones measure activity and are trivially gamed. Alerts closed per operator per ' +
-              'hour rewards fast closure regardless of correctness, which is the exact behaviour ' +
-              'behind missed incidents. Number of alerts generated rewards noisy detections. Both ' +
-              'produce charts that improve while the SOC gets worse, which is the worst possible ' +
-              'outcome because it removes the pressure to fix anything.',
+              'A school that only ever measures pass rates on an easy test will see that number climb ' +
+              'every year, right up until it becomes obvious that students learned to pass the easy ' +
+              'test rather than to actually understand the subject. A METRIC is simply a number chosen ' +
+              'to track how well something is going, and once you announce that a specific number is ' +
+              'being watched and judged, people, entirely rationally, start optimising to move that ' +
+              'number, whether or not moving it actually reflects doing better work.\n\n' +
+              'That means every metric functions as an instruction whether it was meant to or not, and ' +
+              'the only genuinely useful question to ask about a proposed one is what behaviour it will ' +
+              'produce in somebody under real pressure to improve it, especially under pressure that ' +
+              'makes cutting a corner tempting.\n\n' +
+              'Good SOC metrics point at the OUTCOME the SOC actually exists to produce, rather than at ' +
+              'raw activity. How long it takes to detect a real incident, and how long from there to ' +
+              'contain it, both directly measure the thing covered earlier in this package as MTTD and ' +
+              'MTTR, the actual purpose of the SOC. The proportion of alerts that turn out to be false ' +
+              'measures whether the queue is even humanly workable, tying directly back to the alert ' +
+              'fatigue mechanism just covered. Detection coverage measured against a recognised ' +
+              'framework measures whether the SOC can actually see the kinds of attacks that matter, ' +
+              'rather than only the ones somebody happened to write a rule for already.\n\n' +
+              'Bad metrics measure raw activity instead, and are trivially gamed as a direct ' +
+              'consequence. Alerts closed per operator per hour rewards fast, shallow closure regardless ' +
+              'of whether it was correct, which is precisely the behaviour behind missed real incidents. ' +
+              'Raw number of alerts generated rewards detections that are noisy rather than accurate. ' +
+              'Both of those can produce a chart that climbs steadily upward every quarter while the ' +
+              'actual SOC quietly gets worse underneath it, which is close to the worst possible outcome, ' +
+              'because a good-looking chart removes exactly the pressure that would otherwise force ' +
+              'somebody to fix the real problem.',
           },
           options: [
             { id: 'a', label: 'Time from an incident starting to it being detected.' },
@@ -1909,8 +2513,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'You will be measured on something. Being able to say what a metric will do to behaviour ' +
-            'is a senior skill and it is worth practising long before anybody asks your opinion.',
+            'Whatever seat you end up in, you will be measured on something, whether or not you get a ' +
+            'say in choosing it. Being able to predict what a proposed metric will actually do to ' +
+            'behaviour, before it gets rolled out and the damage is already done, is a genuinely senior ' +
+            'skill, and it is worth practising the habit of asking that question long before anybody in ' +
+            'a room actually asks for your opinion on one.',
           practice: [],
         },
         {
@@ -1926,19 +2533,31 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'you would do with the time, and why that is the job rather than a way of filling it.',
           teach: {
             concept:
-              'Most shifts contain no incident, and what an operator does with the quiet hours is ' +
-              'most of what separates somebody who is promoted in a year from somebody still on the ' +
-              'same queue in three.\n\n' +
-              'The productive uses are all forms of turning experience into something durable. ' +
-              'Reading back through recent closed alerts to see what you would decide differently ' +
-              'now. Documenting a noisy detection well enough that somebody can tune it. Learning ' +
-              'the environment: which servers exist, what normal traffic looks like, where the ' +
-              'crown jewels are, so that when something is abnormal you recognise it instead of ' +
-              'having to derive it. Following up threads from earlier shifts that were left open.\n\n' +
-              'The thing that makes all of that the job rather than self-improvement is that a quiet ' +
-              'queue is not evidence of safety, it is the only time available to get better at ' +
-              'noticing. An operator who knows the estate spots the odd thing in seconds; one who ' +
-              'does not never spots it at all.',
+              'An experienced security guard walking the same building every night for years develops ' +
+              'a feel for it: they know instinctively which door is normally locked, what the building ' +
+              'sounds like at 3am, which shadows are always there. A brand new guard on the same beat ' +
+              'sees only shapes and darkness, with no way yet to tell odd from ordinary. The difference ' +
+              'between them was not built during a break-in, it was built on hundreds of uneventful ' +
+              'nights that the new guard has not lived through yet.\n\n' +
+              'Most SOC shifts contain no real incident at all, and what an operator chooses to do with ' +
+              'those quiet hours is most of what separates somebody who gets promoted within a year ' +
+              'from somebody still stuck on exactly the same queue three years later.\n\n' +
+              'The genuinely productive uses of quiet time are all, in one way or another, forms of ' +
+              'turning today experience into something that pays off later. Reading back through ' +
+              'recently closed alerts to check whether you would still make the same call on them now. ' +
+              'Documenting a noisy detection thoroughly enough that a detection engineer can actually ' +
+              'tune it, rather than just closing it and moving on. Deliberately learning the ' +
+              'environment, which servers exist, what normal traffic actually looks like, where the ' +
+              'most valuable data in the whole company physically sits, so that when something genuinely ' +
+              'abnormal appears later, it is instantly recognisable rather than something you have to ' +
+              'painstakingly work out from scratch under pressure. Following up open threads left ' +
+              'behind by earlier shifts before they go completely cold.\n\n' +
+              'The nuance that makes all of that count as the actual job, rather than optional ' +
+              'self-improvement squeezed in on the side, is this: a quiet queue is not evidence that ' +
+              'everything is safe, it is simply the only time available to build the instinct that ' +
+              'catches the thing that is not safe, later. An operator who has learned the estate spots ' +
+              'the odd thing in seconds, the way that experienced guard does. One who has not, never ' +
+              'quite spots it at all, no matter how carefully they look in the moment.',
           },
           hints: [
             'A quiet queue is not evidence that nothing is happening. What does that suggest is worth doing?',
@@ -1972,8 +2591,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Every experienced analyst can name the quiet month where they learned the network. It ' +
-            'is the least visible and most valuable thing you will do in a first year.',
+            'Nearly every experienced analyst, asked directly, can name the specific quiet month or ' +
+            'two when they actually learned the network inside and out, and can usually connect it to ' +
+            'a moment later when that knowledge let them catch something nobody else noticed. It is the ' +
+            'least visible, least glamorous, and most valuable thing you will do in your entire first ' +
+            'year in this field.',
           practice: [],
         },
       ],
@@ -2000,19 +2622,31 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'actually assessing? Select all that apply.',
           teach: {
             concept:
-              'Nobody hiring for Tier 1 expects you to know their environment, their tooling, or ' +
-              'much of their threat landscape. They expect to teach you all of that. What they ' +
-              'cannot teach quickly is how you think, so that is what the questions are for.\n\n' +
-              'Four things are being assessed. STRUCTURED REASONING: given an ambiguous alert, do you ' +
-              'ask sensible questions in a sensible order, or guess. HONESTY UNDER UNCERTAINTY: can ' +
-              'you say you do not know and describe how you would find out, which is the single ' +
-              'strongest answer available to a junior. CURIOSITY: have you looked at anything on your ' +
-              'own, and can you talk about it. And RELIABILITY: a rota depends on people turning up ' +
-              'and doing what they said, and a SOC will take a dependable learner over a brilliant ' +
-              'one every time.\n\n' +
-              'What they are not assessing is whether you can recite port numbers. Some interviewers ' +
-              'still ask; the answer matters far less than what you do when you hit one you do not ' +
-              'know.',
+              'This final module turns from the job itself to the practical question of getting hired ' +
+              'into it and moving on from it, since for most people reading this, that is the actual ' +
+              'reason they are here.\n\n' +
+              'Start with the interview itself, and a piece of reassurance worth taking seriously: ' +
+              'nobody hiring for a Tier 1 role genuinely expects a candidate to already know their ' +
+              'specific environment, their particular tooling, or the fine detail of their threat ' +
+              'landscape. A competent employer expects to teach all of that on the job. What cannot be ' +
+              'taught quickly, in a few weeks of onboarding, is how a person actually thinks under ' +
+              'pressure, so that is what interview questions are almost always actually probing for, ' +
+              'even when they sound like they are asking about something else.\n\n' +
+              'Four things tend to be under real assessment. STRUCTURED REASONING: given a deliberately ' +
+              'ambiguous scenario, does the candidate ask sensible questions in a sensible order, or ' +
+              'jump straight to guessing an answer. HONESTY UNDER UNCERTAINTY: can the candidate say ' +
+              'plainly that they do not know something, and then describe exactly how they would go ' +
+              'about finding out, which is genuinely the single strongest answer available to anyone ' +
+              'junior, precisely because it is rare. CURIOSITY: has this person looked into anything on ' +
+              'their own initiative, unprompted, and can they actually talk about it in detail. And ' +
+              'RELIABILITY: a round-the-clock rota depends entirely on people consistently turning up ' +
+              'and doing what they said they would, and a SOC will choose a dependable learner over a ' +
+              'brilliant but unreliable candidate every single time, because one missed night shift can ' +
+              'leave a whole team exposed.\n\n' +
+              'What is specifically NOT being assessed, despite how it can feel in the room, is whether ' +
+              'a candidate can recite technical trivia like port numbers from memory. Some interviewers ' +
+              'still ask questions like that out of habit, but the actual answer given matters far less ' +
+              'than what the candidate does the moment they hit one they genuinely do not know.',
           },
           options: [
             { id: 'a', label: 'Whether you reason through an ambiguous situation in a sensible order.' },
@@ -2045,8 +2679,12 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Practise saying "I do not know, here is how I would find out" out loud until it is ' +
-            'comfortable. It is the answer that separates candidates, and almost nobody rehearses it.',
+            'The reason this specific line is worth rehearsing, and not just understanding ' +
+            'intellectually, is that it rarely comes naturally under interview pressure, where the ' +
+            'instinct is to guess rather than admit a gap. Practise saying "I do not know, here is how ' +
+            'I would find out" out loud, ahead of time, until it feels comfortable rather than like an ' +
+            'admission of failure. It is the answer that quietly separates candidates from each other, ' +
+            'and almost nobody walks in having actually rehearsed it.',
           practice: [],
         },
         {
@@ -2062,17 +2700,30 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'are accurate? Select all that apply.',
           teach: {
             concept:
-              'Certifications do one job well: they get a CV past a filter. Many organisations, and ' +
-              'nearly all government and defence work, screen on them before a human reads anything, ' +
-              'so in those places a missing certificate is a wall rather than a preference.\n\n' +
-              'They also give a structured syllabus to somebody who does not yet know what they do ' +
-              'not know, which is genuinely valuable when you are starting and have no map.\n\n' +
-              'What they do not do is demonstrate that you can do the work. Everybody on the panel ' +
-              'knows the exam is multiple choice, so a certificate opens the conversation and ' +
-              'evidence wins it: something you built, an investigation you can walk through, a ' +
-              'home lab, a write-up. The strongest position for a career changer is a screening ' +
-              'certificate plus one piece of work you can talk about in detail, and the second half ' +
-              'is what people skip.',
+              'A driving test certificate proves someone learned the rules of the road and can handle a ' +
+              'car under controlled conditions. It does not prove they can safely navigate a genuine ' +
+              'emergency at speed on ice, that only comes from actually having driven in difficult ' +
+              'conditions. A security certification works the same way, and understanding exactly what ' +
+              'it does and does not prove saves a lot of wasted time and money.\n\n' +
+              'A CERTIFICATION is a credential earned by passing an exam, usually multiple choice, ' +
+              'covering a defined body of knowledge. It does one job genuinely well: it gets a CV past ' +
+              'an automated or HR filter before a human ever reads it properly. Many organisations, and ' +
+              'nearly all government or defence-related work, screen candidates on specific ' +
+              'certifications before anything else happens, which means in those specific places, a ' +
+              'missing certificate is not just a mild preference against you, it is a hard wall you ' +
+              'cannot get past regardless of ability.\n\n' +
+              'They also do something genuinely useful for a total beginner specifically: they hand you ' +
+              'a structured syllabus when you do not yet even know what you do not know, which is ' +
+              'valuable precisely because starting from nothing, with no map at all, is disorienting.\n\n' +
+              'What a certification cannot do, and this is the nuance that trips up career changers who ' +
+              'invest heavily in stacking them, is demonstrate that you can actually do the work. Every ' +
+              'experienced person on a hiring panel knows the underlying exam was multiple choice, so a ' +
+              'certificate opens the door to a conversation, it does not win the conversation on its ' +
+              'own. Real evidence wins it: something you built yourself, an investigation you can walk ' +
+              'someone through in detail, a home lab, a written analysis. The strongest position for ' +
+              'anyone changing careers into this field is one screening certificate combined with one ' +
+              'genuine piece of work you can discuss in real depth, and it is the second half of that ' +
+              'pairing that people most often skip.',
           },
           options: [
             { id: 'a', label: 'They get a CV past automated and HR screening, which is a real barrier in many places.' },
@@ -2103,8 +2754,12 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'If you are choosing between a second certificate and finishing something you can ' +
-            'demonstrate, finish the thing. The certificate gets you read; the work gets you hired.',
+            'The reason this priority order matters practically is that these two things solve two ' +
+            'different problems: getting your CV in front of a human, and convincing that human to ' +
+            'actually hire you once it is there. If you are ever choosing between studying for a second ' +
+            'certificate and finishing something you could actually demonstrate, finish the thing. The ' +
+            'certificate is what gets your application read; the demonstrable work is what gets you ' +
+            'hired.',
           practice: [],
         },
         {
@@ -2120,18 +2775,27 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'four sentences, describe how you would structure that answer, whatever the subject was.',
           teach: {
             concept:
-              'Candidates answer this question by describing what they found, which is the least ' +
-              'interesting part. The panel already assumes the exercise worked out; they are ' +
-              'listening for how you got there.\n\n' +
-              'A strong answer has four moves. THE QUESTION you were trying to answer, stated ' +
-              'plainly, because a specific starting question shows you were not just clicking about. ' +
-              'WHAT YOU LOOKED AT AND WHY THAT SOURCE, which is where reasoning becomes visible. ' +
-              'WHAT SURPRISED YOU or turned out wrong, which is the most credible thing a junior can ' +
-              'say and almost nobody says it. And WHAT YOU CONCLUDED, with its limits: what you could ' +
-              'establish and what remained unknown.\n\n' +
-              'It does not need to be a real breach. A home lab, an exercise, or a public dataset is ' +
-              'completely acceptable, and being straightforward about that is far stronger than ' +
-              'dressing it up as something it was not.',
+              'Ask most beginners to describe an investigation and they will tell you what they found, ' +
+              'as if the answer were the whole story. It is genuinely the least interesting part of the ' +
+              'answer to an interviewer, and understanding why reframes the whole question.\n\n' +
+              'A hiring panel, asking someone to walk through an investigation, already assumes it more ' +
+              'or less worked out, because the candidate chose to bring it up. What they are actually ' +
+              'listening for is HOW the candidate got there, because that reasoning process is the part ' +
+              'that predicts how they will handle the next unfamiliar problem, one where the panel does ' +
+              'not already know the answer.\n\n' +
+              'A strong answer has four distinct moves. THE QUESTION being answered, stated plainly at ' +
+              'the start, because a specific starting question, rather than a vague wander through some ' +
+              'logs, shows the work had real direction. WHAT WAS LOOKED AT AND WHY THAT SOURCE ' +
+              'SPECIFICALLY, which is exactly where the reasoning becomes visible to somebody who ' +
+              'cannot see inside the candidate head. WHAT SURPRISED THEM, or what they initially got ' +
+              'wrong and had to correct, which is the single most credible thing a junior candidate can ' +
+              'say, and almost nobody says it, because it feels risky to admit rather than impressive. ' +
+              'And WHAT WAS CONCLUDED, stated honestly along with its limits: what could actually be ' +
+              'established from the evidence, and what genuinely remained unknown.\n\n' +
+              'It does not need to have been a real breach at a real company. A home lab exercise, a ' +
+              'training scenario, or a public dataset is completely acceptable and expected for someone ' +
+              'starting out, and being straightforward about that fact is far stronger in front of a ' +
+              'panel than quietly dressing it up as something more dramatic than it actually was.',
           },
           hints: [
             'The panel assumes you found the answer. What are they actually listening for?',
@@ -2165,8 +2829,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'The third move is the one that gets people hired. A candidate who describes correcting ' +
-            'their own mistake is describing the single most useful habit in this job.',
+            'The third move, admitting what surprised you or what you initially got wrong, is ' +
+            'consistently the one that actually gets people hired, and the reason is what it signals: a ' +
+            'candidate who describes catching and correcting their own mistake is demonstrating, live in ' +
+            'the interview, the single most useful daily habit in this entire job, checking yourself ' +
+            'before a wrong assumption becomes a wrong decision.',
           practice: [],
         },
         {
@@ -2182,19 +2849,28 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             'that apply.',
           teach: {
             concept:
-              'Tier 1 is a starting position and it is meant to be left. It is unusually good as a ' +
-              'first role because it exposes you to the whole estate and to every kind of alert, ' +
-              'which means you find out what you actually like doing rather than guessing.\n\n' +
-              'The common routes out are visible from the floor. Tier 2 and incident response, for ' +
-              'people who want the investigation rather than the triage. Detection engineering, for ' +
-              'people who keep noticing that a rule is wrong and want to fix it, which is a natural ' +
-              'move for anybody who has been documenting benign closures. Threat intelligence, for ' +
-              'people drawn to the actor rather than the event. Threat hunting, which usually wants ' +
-              'a couple of years of pattern recognition first. And out of the SOC entirely into ' +
-              'security engineering, cloud security, or GRC.\n\n' +
-              'What does not happen is jumping straight into the specialist seats with no operational ' +
-              'grounding. It is not gatekeeping: the specialisms all depend on knowing what normal ' +
-              'looks like, and the queue is where that is learned.',
+              'Think of Tier 1 as the ground floor of a building with many different upper floors, not ' +
+              'as a room you get stuck in. It is a genuine starting position, and it is explicitly meant ' +
+              'to be left eventually, that is how it is designed to work. It is also unusually good as a ' +
+              'first role for a reason worth naming directly: it exposes you to the whole estate and to ' +
+              'every kind of alert that comes through, which means you find out, from direct experience ' +
+              'rather than guesswork, what kind of work you actually enjoy before committing years to it.\n\n' +
+              'The common routes upward and outward are all genuinely visible from the floor itself, ' +
+              'once you know to look for them. Tier 2 and incident response, for people who find they ' +
+              'want the deeper investigation more than the fast triage. Detection engineering, for ' +
+              'people who keep noticing a rule is subtly wrong and want to be the one who fixes it, ' +
+              'which is a natural next step for anybody who has already been carefully documenting why ' +
+              'alerts were benign, as covered earlier in this package. Threat intelligence, for people ' +
+              'drawn more to understanding the adversary behind an attack than to the individual event ' +
+              'itself. Threat hunting, which usually wants a couple of years of built-up pattern ' +
+              'recognition first, the same instinct that experienced security guard develops over many ' +
+              'quiet nights. And moving out of the SOC entirely into security engineering, cloud ' +
+              'security, or governance, risk, and compliance work.\n\n' +
+              'What genuinely does not happen, and this is the specific nuance worth being clear-eyed ' +
+              'about, is jumping straight into any of those specialist seats with no operational time ' +
+              'served first. That restriction is not gatekeeping for its own sake: every one of those ' +
+              'specialisms depends on already knowing what normal looks like across a real environment, ' +
+              'and the queue, as tedious as it can feel, is where that foundation actually gets built.',
           },
           options: [
             { id: 'a', label: 'Tier 2 and incident response, for people who prefer the investigation to the triage.' },
@@ -2227,9 +2903,11 @@ export const SOC_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Pick a direction in your first six months and start bending your spare time towards it. ' +
-            'The people who move fastest are the ones who chose, not the ones who waited to be ' +
-            'chosen.',
+            'The practical takeaway from all of this is to pick a direction within your first six ' +
+            'months on the floor and start deliberately bending your spare time toward it, rather than ' +
+            'waiting passively to see what comes along. The reason that matters is that the people who ' +
+            'move fastest through this field are consistently the ones who actively chose a direction ' +
+            'for themselves, not the ones who waited around to be chosen by somebody else.',
           practice: [],
         },
       ],
