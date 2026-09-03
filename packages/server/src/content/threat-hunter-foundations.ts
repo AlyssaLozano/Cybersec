@@ -25,50 +25,106 @@ import type { Exercise, LearningPackage } from '@soc/shared';
 
 const HUNT_TEACH = {
   concept:
-    'Threat hunting is the one job on the floor that does not wait to be told. Instead of working ' +
-    'an alert, a hunter forms a hypothesis about how an attacker might be operating, and goes ' +
-    'looking in the raw telemetry for the evidence, before and without any alert firing. It exists ' +
-    'because the tooling only catches what somebody already taught it to catch, and a capable ' +
-    'intruder spends real effort staying under exactly those thresholds.',
+    'Start with the everyday picture of a security team. Most of the people working on a security ' +
+    'operations floor, usually shortened to a SOC, spend their day reacting. A piece of monitoring ' +
+    'software called a SIEM watches everything happening across a company network, and when ' +
+    'something matches a rule somebody already wrote in advance, a login from a country nobody ' +
+    'expected, a file that matches a known virus, it raises an ALERT: a ticket dropped into a queue ' +
+    'for a person to look at. That is the entire job for most seats in a SOC: wait for the alert, ' +
+    'then work it.\n\n' +
+    'Threat hunting is the one job on the floor that does not wait for that ticket. Instead of ' +
+    'starting from something the software already flagged, a hunter starts from a HYPOTHESIS, an ' +
+    'educated guess about how an attacker might be operating right now, quietly, in a way that ' +
+    'never trips any of those rules. The hunter then goes looking for it themselves, digging ' +
+    'through the raw TELEMETRY, the underlying record of everything that actually happened: every ' +
+    'login, every process that ran, every network connection, for evidence the guess is right, ' +
+    'before any alert ever fires, and often when none ever will.\n\n' +
+    'Why bother, when the SIEM is already watching? Because a rule can only catch what somebody ' +
+    'already thought to write a rule for. Picture a guard who only stops people carrying a weapon ' +
+    'past a metal detector: someone who knows exactly where the detector sits, and carries nothing ' +
+    'metal, walks straight through. A capable intruder studies the tools defending a company the ' +
+    'same way, and spends real effort staying under exactly the thresholds those tools are ' +
+    'watching, using techniques nobody has written a rule for yet, or ordinary admin tools nobody ' +
+    'thought to flag. Nothing about that intruder trips an alert, which means nothing about them ' +
+    'gets caught unless somebody goes looking on purpose.\n\n' +
+    'That gap, between everything a company monitoring can see and everything an attacker could ' +
+    'actually be doing, is the whole reason this job exists. Threat hunting is a human, deliberately, ' +
+    'closing that gap by hand.',
 } as const;
 
 const MINDSET_TEACH = {
   concept:
-    'Two habits define the hunter. The first is assume breach: work as though an adversary is ' +
-    'already inside and simply has not been flagged, rather than treating the network as clean ' +
-    'until an alert says otherwise. The second is a testable hypothesis: not a feeling that ' +
-    'something is wrong, but a specific claim of the form if an attacker did X, then the data would ' +
-    'show Y, which you can then go and check against real logs. A hunt that cannot be tested against ' +
-    'data is a worry, not a hunt.',
+    'Two habits define the hunter, and both run against the natural instinct of somebody new to ' +
+    'the job.\n\n' +
+    'The first is ASSUME BREACH. The natural assumption, and the one most people start with, is ' +
+    'that a network is clean unless something proves otherwise, the way you assume your house is ' +
+    'empty unless the alarm goes off. A hunter deliberately assumes the opposite: work as though an ' +
+    'adversary is already inside, right now, and simply has not been caught by anything watching, ' +
+    'the way a careful homeowner checks every room after a trip even when the alarm never sounded, ' +
+    'because they know the alarm only covers certain doors and windows. Assuming breach does not ' +
+    'mean believing an attack is definitely happening. It means refusing to treat silence from the ' +
+    'tools as proof that nothing is wrong, since silence is also exactly what a successful, ' +
+    'undetected attacker looks like.\n\n' +
+    'The second is a TESTABLE HYPOTHESIS. In everyday language, a hypothesis is just an educated ' +
+    'guess you can actually check, the way a doctor does not simply say a patient feels unwell, ' +
+    'they say I think it is this specific condition, and here is the test that would confirm or ' +
+    'rule it out. A hunter hypothesis works the same way: not a vague feeling that something is ' +
+    'wrong, but a specific claim shaped like if an attacker did X, then the data would show Y, ' +
+    'something that can be checked directly against real logs. Y either shows up or it does not, ' +
+    'and either answer is useful.\n\n' +
+    'Put together, these two habits are what separates a hunt from a worry. Assume breach gives the ' +
+    'hunter a reason to look even when nothing has gone wrong yet. A testable hypothesis gives them ' +
+    'something specific to look for, and a way to know when they have actually found an answer, ' +
+    'rather than sitting with a bad feeling that never resolves either way.',
 } as const;
 
 const RELATE_TEACH = {
   concept:
-    'A hunter sits between the reactive floor and the engineers. Against the SOC operator: the ' +
-    'operator triages what the tools raise; the hunter searches for what the tools missed, ' +
-    'self-directed, with nothing telling them to look. Against the detection engineer: the two are ' +
-    'a loop. The hunter finds a gap by hand; a successful hunt hands its finding to the detection ' +
-    'engineer, who turns it into a rule so the next occurrence is caught automatically. Finding it ' +
-    'once is the hunt; making sure it is never missed again is engineering.',
+    'To see what a hunter actually does day to day, it helps to place the role between the two ' +
+    'seats nearest to it.\n\n' +
+    'Against the SOC OPERATOR: an operator is the person working the alert queue described above, ' +
+    'TRIAGING what the tools already raised, deciding for each ticket whether it is a real problem ' +
+    'or a false alarm, and escalating the real ones. Their whole day is shaped by whatever the ' +
+    'software decided to flag. A hunter has no queue at all. They search, self-directed, for ' +
+    'exactly what the tools missed, which by definition means nothing is telling them where to ' +
+    'look. That is a genuinely different kind of work: the operator gets handed a haystack with the ' +
+    'needle already circled, and the hunter has to go and find their own haystack first.\n\n' +
+    'Against the DETECTION ENGINEER, the relationship is less a comparison and more a loop, worth ' +
+    'understanding as one connected process rather than two separate jobs. A detection engineer is ' +
+    'the person who writes the rules a SIEM uses to raise alerts in the first place. When a hunt ' +
+    'succeeds, finding a technique or a piece of activity the existing rules never would have ' +
+    'caught, the hunter does not just quietly close the case. They hand that finding to the ' +
+    'detection engineer, who turns it into a new rule, so the exact same thing gets caught ' +
+    'automatically the very next time it happens, with no human hunter needed.\n\n' +
+    'That handoff is the whole point of the loop. Finding something once, by hand, is the hunt. ' +
+    'Making sure it can never sneak past unnoticed again is engineering. Skip the handoff, and the ' +
+    'company only ever catches that technique on the days a hunter happens to go looking for it ' +
+    'again, which is a much weaker guarantee than a rule running every second of every day.',
 } as const;
 
 // --- Module th.2: building a testable hypothesis ----------------------------
 
 const HYP_SHAPE_TEACH = {
   concept:
-    'A hunt hypothesis is a claim with three properties, and a sentence missing any one of them is ' +
-    'not ready to hunt on yet.\n\n' +
+    'The last module introduced the idea of a hypothesis as an educated guess you can actually ' +
+    'check. This module gets precise about what makes one ready to act on. A hunt hypothesis is a ' +
+    'claim with three properties, and a sentence missing any one of them is not ready to hunt on ' +
+    'yet, however reasonable it sounds out loud.\n\n' +
     'STRUCTURE: it takes the shape if an attacker did X, the data would show Y. X names a specific ' +
-    'technique or behaviour, not a category of concern, and Y names the evidence that behaviour ' +
-    'would leave in telemetry the hunter actually holds. FALSIFIABILITY: it must be possible for ' +
-    'the hunt to end with nothing, and the hunter has to accept that as a real outcome rather than ' +
-    'evidence they looked in the wrong place. A claim that reinterprets every possible result as ' +
-    'confirmation is not a hypothesis, it is a belief. SCOPE: it commits up front to a bounded ' +
-    'population of hosts or accounts, a named data source, and a time window, because a hunt with ' +
-    'no boundary never finishes and never fails, which sounds safe and is actually useless.\n\n' +
-    'Most of the skill in hunting lives here, before a single query is written. A tight hypothesis ' +
-    'turns a vague unease into work that can be planned, timeboxed, and handed to somebody else to ' +
-    'run if the original hunter gets pulled onto something else.',
+    'technique or behaviour, not a broad category of concern, and Y names the exact evidence that ' +
+    'behaviour would leave behind in telemetry the hunter can actually get access to. ' +
+    'FALSIFIABILITY, a word borrowed from how scientists judge a theory, means it must be genuinely ' +
+    'possible for the hunt to end with nothing, and the hunter has to accept an empty result as a ' +
+    'real, valid outcome rather than proof they simply looked in the wrong place. A claim that ' +
+    'reinterprets every possible result as confirmation, so that finding nothing somehow still ' +
+    'means the attacker is just hiding better, is not a hypothesis at all, it is a belief that ' +
+    'cannot lose. SCOPE: it commits up front to a bounded population of hosts or accounts, a named ' +
+    'data source, and a time window, because a hunt with no boundary never finishes and never ' +
+    'technically fails either, which sounds safe and is actually useless: work with no edges is ' +
+    'work that never produces an answer.\n\n' +
+    'Most of the real skill in hunting lives here, before a single query is ever written. A tight ' +
+    'hypothesis turns a vague unease into work that can be planned, given a deadline, and handed to ' +
+    'somebody else to pick up if the original hunter gets pulled onto something else.',
 } as const;
 
 const MODULE_TH_2: Exercise[] = [
@@ -110,7 +166,9 @@ const MODULE_TH_2: Exercise[] = [
     ],
     debrief:
       'Keep these three words nearby while you write your first hypotheses: structure, falsifiable, ' +
-      'scoped. A claim missing any one of them is a worry wearing the costume of a hunt.',
+      'scoped. A claim missing any one of them is a worry wearing the costume of a hunt, and the ' +
+      'costume is convincing precisely because a worry sounds serious even when there is nothing in ' +
+      'it that could actually be checked against a log.',
     practice: [],
   },
   {
@@ -155,7 +213,10 @@ const MODULE_TH_2: Exercise[] = [
     ],
     debrief:
       'This is the single most common failure mode in a new hunt programme: hypotheses that name a ' +
-      'real threat category and nothing else. Naming the category is the easy half.',
+      'real threat category and nothing else. Naming the category is the easy half, the kind of ' +
+      'sentence anyone could write after reading a single headline. The hard half, naming the ' +
+      'specific technique, the evidence it would leave, and the boundary of the search, is where the ' +
+      'actual hunting work begins.',
     practice: [],
   },
   {
@@ -171,17 +232,29 @@ const MODULE_TH_2: Exercise[] = [
       'before writing the first query? Select all that apply.',
     teach: {
       concept:
-        'Scope is not a formality, it is the thing that turns an open-ended search into a piece of ' +
-        'work with an end.\n\n' +
-        'Four decisions belong here. THE TIME WINDOW: how far back the hunt looks, chosen for a ' +
-        'reason, such as matching a suspected dwell time or the retention of the data source ' +
-        'involved. THE POPULATION: which hosts, accounts, or business unit the hunt covers, rather ' +
-        'than the whole estate by default. THE DATA SOURCE: which telemetry will actually be ' +
-        'queried, named specifically enough that somebody else could run the same hunt. And WHAT IS ' +
-        'EXPLICITLY OUT OF SCOPE: naming what this hunt will not check, so a null result is not later ' +
-        'read as clearing ground it never touched.\n\n' +
-        'The wrong instinct is to maximise coverage on the theory that more is safer. A hunt scoped ' +
-        'to everything is a hunt nobody can finish, and an unfinished hunt teaches nothing.',
+        'Scope is not paperwork, it is the difference between a search that can actually finish and ' +
+        'one that quietly runs forever. Picture being asked to find a specific person somewhere in ' +
+        'a city, with no other details: you could wander every street for the rest of your life and ' +
+        'never be sure you had covered it all. Told instead to check three named apartment ' +
+        'buildings, for a person last seen this week, the job becomes something you can actually ' +
+        'complete and report back on. That difference, an unbounded search against a scoped one, is ' +
+        'exactly why hunt scope matters.\n\n' +
+        'Four decisions belong here. THE TIME WINDOW: how far back the hunt looks, chosen for a real ' +
+        'reason rather than a round number, such as matching a suspected DWELL TIME, how long ' +
+        'investigators believe an attacker has likely been sitting quietly in the network before ' +
+        'being noticed, or the length of time the relevant logs are actually kept before they age ' +
+        'out. THE POPULATION: which specific hosts, accounts, or business unit the hunt covers, ' +
+        'rather than defaulting to the whole ESTATE, meaning every single computer and account the ' +
+        'company owns. THE DATA SOURCE: exactly which telemetry will be queried, named specifically ' +
+        'enough that a different person could pick up the same hunt and run it the same way. And ' +
+        'WHAT IS EXPLICITLY OUT OF SCOPE: stating plainly what this hunt will not check, so that ' +
+        'finding nothing later is never misread as proof the whole company is clean, when really ' +
+        'only three servers out of three thousand were ever looked at.\n\n' +
+        'The tempting mistake is to reach for maximum coverage, on the theory that checking ' +
+        'everything is always safer than checking something narrow. It is the opposite. A hunt ' +
+        'scoped to everything is a hunt that never actually finishes, and a hunt that never finishes ' +
+        'teaches nobody anything. A narrow, clearly bounded hunt that actually completes and gets ' +
+        'written up is worth more than an ambitious one still running six months later.',
     },
     options: [
       { id: 'a', label: 'A time window chosen for a reason, such as a suspected dwell time or a data retention limit.' },
@@ -211,7 +284,8 @@ const MODULE_TH_2: Exercise[] = [
     ],
     debrief:
       'Write the scope down before the hypothesis, not after. A hunt that drifts wider as it goes is ' +
-      'a hunt with no stopping point, and stopping points are what let a hunter run more than one.',
+      'a hunt with no stopping point, and stopping points are what let a hunter actually finish one ' +
+      'hunt and move on to the next, rather than one enormous search that never quite closes.',
     practice: [],
   },
   {
@@ -251,8 +325,10 @@ const MODULE_TH_2: Exercise[] = [
       },
     ],
     debrief:
-      'Notice that B came directly from the intel line. Turning a report into a hypothesis is mostly ' +
-      'a translation exercise once you know the shape to translate it into.',
+      'Notice that option B came directly from the intel line in the prompt, reworded into the if X ' +
+      'then Y shape this module teaches. Turning a report into a hypothesis is mostly a translation ' +
+      'exercise once you know the shape to translate it into: name the technique, name the evidence, ' +
+      'name the boundary, and a paragraph of prose becomes a sentence you can actually run.',
     practice: [],
   },
   {
@@ -298,8 +374,9 @@ const MODULE_TH_2: Exercise[] = [
     ],
     debrief:
       'This is the whole job in miniature: a report becomes a claim, a claim names its evidence, and ' +
-      'the claim is bounded enough to actually run. Everything after this exercise is investigating ' +
-      'hypotheses shaped like the one you just wrote.',
+      'the claim is bounded enough to actually run. Everything after this exercise, the rest of this ' +
+      'package and every real hunt that follows it, is investigating hypotheses shaped like the one ' +
+      'you just wrote.',
     practice: [],
   },
 ];
@@ -308,19 +385,29 @@ const MODULE_TH_2: Exercise[] = [
 
 const SOURCES_TEACH = {
   concept:
-    'A hypothesis has to start somewhere, and in practice it starts from one of four springboards.\n\n' +
-    'INTEL-DRIVEN: a report or advisory describes a technique relevant to your sector or your ' +
-    'software, and the hunt asks whether that technique has already been used here. GAP-DRIVEN: a ' +
-    'coverage map, most often built against the ATT&CK matrix, shows a technique your detections do ' +
-    'not cover, and the hunt asks whether the absence has been exploited rather than merely noting ' +
-    'the absence. ANOMALY-DRIVEN: exploring the data itself for its own sake surfaces something odd, ' +
-    'such as a rare parent-child process pair or a host talking to a peer it never talks to, and the ' +
-    'hunt follows that oddity to see what it is. TIP-DRIVEN: a colleague or an operator on the floor ' +
-    'has a hunch, built from experience that has not yet been put into words.\n\n' +
-    'None of the four outranks the others, and a mature programme draws from all of them. What ' +
-    'distinguishes a good instance of any of them from a weak one is not the source, it is whether ' +
-    'the lead is specific enough, current enough, and relevant enough to your own environment to ' +
-    'turn into the kind of hypothesis the last module described.',
+    'A hunt hypothesis does not appear out of nowhere, it starts from a LEAD: some piece of ' +
+    'information or observation that gives the hunter a reason to look in one place rather than ' +
+    'another. In practice, nearly every lead traces back to one of four springboards.\n\n' +
+    'INTEL-DRIVEN: a report or advisory, written by a security vendor or a government agency, ' +
+    'describes a specific technique being used by real attackers against companies like yours, and ' +
+    'the hunt asks whether that same technique has already shown up here. GAP-DRIVEN: a COVERAGE ' +
+    'MAP is a document a security team keeps, usually built against the ATT&CK matrix, a widely ' +
+    'used, public catalogue of known attacker techniques maintained by a nonprofit called MITRE ' +
+    'that gives security teams a shared vocabulary for describing what attackers actually do. A ' +
+    'gap-driven hunt starts when that map shows a technique nobody has built a detection for, and ' +
+    'it asks whether that unwatched technique has actually been exploited, rather than just noting ' +
+    'on paper that nobody would notice if it were. ANOMALY-DRIVEN: sometimes a hunter is not chasing ' +
+    'anything specific, just exploring the data for its own sake, and something odd jumps out, such ' +
+    'as a rare PARENT-CHILD PROCESS PAIR, one program launching another it almost never launches, ' +
+    'the way a word processor spawning a command-line tool would be strange, or a computer suddenly ' +
+    'talking to another computer it has never talked to before. The hunt then follows that oddity ' +
+    'to find out what it actually is. TIP-DRIVEN: a colleague, or an operator working the floor, has ' +
+    'a hunch built from years of experience they have not yet managed to put into precise words.\n\n' +
+    'None of the four outranks the others, and a mature hunt programme draws leads from all of them ' +
+    'rather than leaning on just one. What separates a strong lead from a weak one is never which of ' +
+    'the four springboards it came from, it is whether the lead is specific enough, recent enough, ' +
+    'and actually relevant to your own environment to be turned into the kind of tight, testable ' +
+    'hypothesis the last module described.',
 } as const;
 
 const MODULE_TH_3: Exercise[] = [
@@ -360,9 +447,11 @@ const MODULE_TH_3: Exercise[] = [
       },
     ],
     debrief:
-      'Keep a running list of leads from all four springboards. A hunt programme that only ever runs ' +
-      'intel-driven hunts is reading somebody else homework and missing what is specific to its own ' +
-      'environment.',
+      'Keep a running list of leads from all four springboards rather than waiting for the next ' +
+      'report to land in an inbox. A hunt programme that only ever runs intel-driven hunts is ' +
+      'reading somebody else homework, useful, but written for a different company, and it misses ' +
+      'the anomalies and hunches that are specific to its own environment and that nobody else could ' +
+      'ever have written a report about.',
     practice: [],
   },
   {
@@ -378,17 +467,26 @@ const MODULE_TH_3: Exercise[] = [
       'ways to judge which one is worth that day? Select all that apply.',
     teach: {
       concept:
-        'A lead is not a hypothesis yet, and most leads never should become one. Screening them is ' +
-        'a cheap step that saves an expensive one.\n\n' +
-        'Three questions do most of the work. RELEVANCE: does the technique even apply to software ' +
-        'and infrastructure you actually run, since a report about a platform you do not have is ' +
-        'interesting reading and not a lead. SPECIFICITY: does the lead name a technique concrete ' +
-        'enough to turn into the if X then Y shape, or is it a category. RECENCY: is the reporting ' +
-        'current enough that the behaviour described is still how the activity looks, since ' +
-        'techniques and tooling both drift.\n\n' +
-        'A lead that is relevant, specific, and current is worth the day even from an unglamorous ' +
-        'source. A lead missing any of the three is worth screening out before it consumes anybody ' +
-        'time, whatever the source claims to be.',
+        'A lead is raw material, not a finished hypothesis, and most raw material a hunter comes ' +
+        'across should never turn into a full day of work. Screening a lead first is a five-minute ' +
+        'step that exists specifically to avoid wasting a much more expensive one: a hunter has a ' +
+        'limited number of days in a year, and a day spent chasing a lead that was never going to ' +
+        'pan out is a day not spent on one that would have.\n\n' +
+        'Three questions do most of the screening work, the same way a doctor triages ten patients ' +
+        'before treating any of them. RELEVANCE: does the technique described even apply to ' +
+        'software or infrastructure your organisation actually runs. A brilliantly written report ' +
+        'about an attack against a system you have never installed is interesting reading, and it ' +
+        'is not a lead, because there is nothing here to go and check. SPECIFICITY: does the lead ' +
+        'name a concrete technique precise enough to eventually become the if X then Y shape from ' +
+        'the earlier module, or is it still just a broad category of worry with nothing to point a ' +
+        'query at. RECENCY: is the reporting current enough that the behaviour it describes still ' +
+        'matches how the activity actually looks today, since the specific tools and techniques ' +
+        'attackers use keep changing, and a technique from three years ago may bear little ' +
+        'resemblance to what is really happening now.\n\n' +
+        'A lead that clears all three, relevant, specific, and current, is worth a day of work even ' +
+        'if it came from an unglamorous source, such as a colleague hunch rather than a paid ' +
+        'report. A lead missing even one of the three is worth screening out before it consumes ' +
+        'anybody time, whatever the source claims to be.',
     },
     options: [
       { id: 'a', label: 'Check whether the technique even applies to software or infrastructure you actually run.' },
@@ -416,8 +514,10 @@ const MODULE_TH_3: Exercise[] = [
       },
     ],
     debrief:
-      'A tip from an operator who has been on the floor for years often passes all three checks ' +
-      'better than a glossy report about an actor that has never targeted your sector.',
+      'A tip from an operator who has been on the floor for years often passes all three checks, ' +
+      'relevance, specificity, and recency, better than a glossy report about an actor that has ' +
+      'never targeted your sector. Experience is a legitimate source of a specific, current, ' +
+      'relevant lead, even when it arrives as an offhand comment rather than a formatted document.',
     practice: [],
   },
   {
@@ -434,18 +534,27 @@ const MODULE_TH_3: Exercise[] = [
     teach: {
       concept:
         'A coverage map is one of the most useful documents a hunt programme keeps, and it is also ' +
-        'the one most often misread.\n\n' +
-        'An empty cell means exactly one thing: nobody would be alerted if that technique were used. ' +
-        'It does not mean the technique has been used, and it does not mean it has not been. That is ' +
-        'precisely the uncertainty a gap-driven hunt exists to reduce: the hunt asks whether the ' +
-        'silence hides something, using the same manual investigation any other hunt would use, ' +
-        'since there is by definition no rule to lean on.\n\n' +
-        'The map itself is worth maintaining for its own sake, independent of any single hunt, ' +
-        'because it lets the programme prioritise gap-driven hunts toward techniques that matter to ' +
-        'its actual threat model rather than picking gaps at random. What a gap is not is a finding ' +
-        'in itself: reporting "we have no detection for X" is a fact about tooling, and "we hunted ' +
-        'for X and found nothing" or "we hunted for X and found it" is a fact about the environment. ' +
-        'Confusing the two overstates or understates the real state of things.',
+        'the one most often read wrong. Picture a simple grid: down one side, a long list of known ' +
+        'attacker techniques, usually taken from the ATT&CK matrix mentioned in the last module, and ' +
+        'across the top, whether the team has a working detection rule for each one. Most cells are ' +
+        'filled in, meaning yes, something would alert on this. Some cells are empty, meaning no ' +
+        'rule exists for that technique at all.\n\n' +
+        'An empty cell means exactly one thing, and it is worth being precise about what that one ' +
+        'thing is: nobody would be alerted if that technique were used. It does not mean the ' +
+        'technique has actually been used, and it does not mean it has not been, it is genuinely ' +
+        'silent on that question. That silence is exactly the uncertainty a gap-driven hunt exists ' +
+        'to reduce: the hunt goes and manually checks whether the gap is hiding something real, ' +
+        'using the same kind of investigation any other hunt would use, since by definition there is ' +
+        'no automated rule to lean on for this one.\n\n' +
+        'The map itself is worth keeping up to date for its own sake, separate from any single hunt, ' +
+        'because it lets a team choose which gaps to hunt first based on which techniques actually ' +
+        'matter to their real threat model, rather than picking at random. What a gap is not, and ' +
+        'this is the mistake worth guarding against, is a finding in itself. Reporting "we have no ' +
+        'detection for this technique" is a fact about the tooling. Reporting "we specifically ' +
+        'checked for this technique and found nothing" or "we checked and found it" is a fact about ' +
+        'what is actually happening in the environment. Treating the first kind of statement as ' +
+        'though it were the second either overstates how bad things might be or understates it, and ' +
+        'a report that blurs the two is misleading either way.',
     },
     options: [
       { id: 'a', label: 'An empty cell means nobody would be alerted if that technique were used, nothing more.' },
@@ -475,7 +584,9 @@ const MODULE_TH_3: Exercise[] = [
     ],
     debrief:
       'The map tells you where to look, not what you will find. That distinction is the whole reason ' +
-      'gap-driven hunting is still hunting, and not just filling in a spreadsheet.',
+      'gap-driven hunting is still genuine hunting, and not just filling in a spreadsheet: the map ' +
+      'only points at the question, and a human still has to go and answer it by actually checking ' +
+      'the data.',
     practice: [],
   },
   {
@@ -514,8 +625,10 @@ const MODULE_TH_3: Exercise[] = [
       },
     ],
     debrief:
-      'Notice that C is the only one you could turn into a hypothesis in the shape from the last ' +
-      'module. That is not a coincidence: the same three questions screen leads and shape hypotheses.',
+      'Notice that option C is the only one you could actually turn into a hypothesis in the shape ' +
+      'from the last module: a named technique, a named platform, a recent report. That is not a ' +
+      'coincidence. The same three questions, relevance, specificity, and recency, that screen a ' +
+      'lead also turn out to be exactly what a workable hypothesis needs.',
     practice: [],
   },
   {
@@ -559,8 +672,10 @@ const MODULE_TH_3: Exercise[] = [
       },
     ],
     debrief:
-      'A hunch is the raw material, not the finished product. The hunter job is the conversion, not ' +
-      'the source, and that is true whichever of the four springboards a lead comes from.',
+      'A hunch is the raw material, not the finished product. The hunter job is the conversion, ' +
+      'turning a vague feeling into a claim specific enough to check, and that is true whichever of ' +
+      'the four springboards a lead comes from: a report, a coverage map, an odd pattern in the ' +
+      'data, or a colleague hunch like this one.',
     practice: [],
   },
 ];
@@ -569,20 +684,30 @@ const MODULE_TH_3: Exercise[] = [
 
 const LOOP_TEACH = {
   concept:
-    'Hunting is often described as a loop of four stages, and the description most teams use traces ' +
-    'back to the hunting loop popularised by the threat hunting platform Sqrrl. It is worth learning ' +
-    'by name because it describes what actually happens, not an idealised version of it.\n\n' +
-    'HYPOTHESIZE is the stage covered in the last two modules: form a specific, falsifiable, scoped ' +
-    'claim. INVESTIGATE is where the hunter actually queries telemetry, using whatever tools and ' +
-    'techniques the environment supports, and revises course as the data complicates the picture, ' +
-    'which it usually does. UNCOVER is naming what was found along the way, whether or not it is ' +
-    'what the hypothesis predicted: new tactics, techniques and procedures, a false path ruled out, ' +
-    'or a visibility gap discovered in the middle of looking for something else. INFORM AND ENRICH ' +
-    'closes the loop by feeding what was uncovered back into the system: a new detection rule, an ' +
-    'updated baseline, a sharpened piece of intel, or a better-scoped hypothesis for the next hunt.\n\n' +
-    'It is called a loop rather than a line because the last stage feeds the first. A hunt that ends ' +
-    'without informing anything downstream has value only to the hunter who ran it, and the whole ' +
-    'point of a programme is that value should compound.',
+    'Everything the last two modules covered, building a hypothesis and finding a good lead for ' +
+    'one, is really the first stage of a larger, repeating process. Hunting is often described as a ' +
+    'loop of four stages, and the specific description most teams still use today traces back to a ' +
+    'model popularised by an early threat-hunting software company called Sqrrl. It is worth ' +
+    'learning by its actual name, because it describes what a real hunt looks like in practice, not ' +
+    'a tidied-up version written for a slide.\n\n' +
+    'HYPOTHESIZE is the stage the last two modules already covered in depth: form a specific, ' +
+    'falsifiable, scoped claim before touching any data. INVESTIGATE is where the hunter actually ' +
+    'queries the telemetry, using whatever tools the environment gives them, and here is the part ' +
+    'beginners often do not expect: the first query almost never gives a clean answer. Real data is ' +
+    'messy, and a hunter usually has to revise their approach as what comes back complicates the ' +
+    'original picture. UNCOVER means naming, honestly, whatever was actually found along the way, ' +
+    'whether or not it matches what the hypothesis predicted. That might be evidence of a genuinely ' +
+    'new attacker TTP, short for tactics, techniques, and procedures, the standard shorthand for ' +
+    'describing how an attacker actually operates, a dead end that can now be ruled out for good, ' +
+    'or a gap in visibility discovered by accident while looking for something else entirely. ' +
+    'INFORM AND ENRICH is what closes the loop: whatever was uncovered gets fed back into the wider ' +
+    'system, as a new detection rule, an updated baseline of normal behaviour, a sharper piece of ' +
+    'intelligence, or a better-scoped hypothesis to start the next hunt with.\n\n' +
+    'It is called a loop, not a straight line, because that last stage feeds directly back into the ' +
+    'first. A hunt that ends without informing anything downstream only ever benefits the one ' +
+    'hunter who happened to run it. The entire reason a hunt programme is worth building, rather ' +
+    'than just letting individual hunters look around on their own, is that this loop lets the ' +
+    'value of each hunt compound into the next one.',
 } as const;
 
 const MODULE_TH_4: Exercise[] = [
@@ -624,7 +749,7 @@ const MODULE_TH_4: Exercise[] = [
     debrief:
       'Say all four stages out loud before your next hunt. Skipping straight to investigate without ' +
       'a real hypothesis, or stopping before inform and enrich, are the two most common shortcuts, ' +
-      'and both throw away most of the value.',
+      'and both throw away most of the value the loop was designed to capture in the first place.',
     practice: [],
   },
   {
@@ -664,7 +789,8 @@ const MODULE_TH_4: Exercise[] = [
     ],
     debrief:
       'Budget time for iteration when you plan a hunt. A hunt scoped for one query and one answer ' +
-      'has scoped out the part of the loop where the interesting findings actually turn up.',
+      'has scoped out the part of the loop where the interesting findings actually turn up, since ' +
+      'real telemetry almost never resolves a hypothesis in a single pass.',
     practice: [],
   },
   {
@@ -705,7 +831,9 @@ const MODULE_TH_4: Exercise[] = [
     ],
     debrief:
       'Write down every uncover, even from a hunt that finds nothing on its main question. The side ' +
-      'findings are frequently worth more than the answer to the original hypothesis.',
+      'findings are frequently worth more than the answer to the original hypothesis, precisely ' +
+      'because nobody went looking for them on purpose, which is often how the most useful ' +
+      'discoveries happen.',
     practice: [],
   },
   {
@@ -745,7 +873,8 @@ const MODULE_TH_4: Exercise[] = [
     debrief:
       'This is the answer to "does hunting scale". It does not scale by running more hunters, it ' +
       'scales by each hunt making the automated layer smarter, so fewer future hunts are needed for ' +
-      'the same technique.',
+      'the same technique, and hunters are freed to spend their limited time on ground nobody has ' +
+      'checked yet.',
     practice: [],
   },
   {
@@ -794,7 +923,8 @@ const MODULE_TH_4: Exercise[] = [
     ],
     debrief:
       'Notice the hunt "failed" its original hypothesis and still produced a durable detection. That ' +
-      'is the loop working exactly as intended, not a consolation prize.',
+      'is the loop working exactly as intended, not a consolation prize: a rule that outlives the ' +
+      'hunt itself is worth more than a single confirmed finding that only ever helps once.',
     practice: [],
   },
 ];
@@ -803,21 +933,32 @@ const MODULE_TH_4: Exercise[] = [
 
 const DISTINCT_TEACH = {
   concept:
-    'Hunting, investigation, and routine monitoring often use the same tools and the same data, ' +
-    'which is exactly why it is easy to blur them, and why the distinction has to be made on ' +
-    'purpose.\n\n' +
-    'HUNT VERSUS INVESTIGATION: an investigation starts because something has already been declared, ' +
-    'an incident, an alert escalated to that level, and its scope is set by that declaration. Its ' +
-    'aim is to establish what happened, contain it, and support attribution or remediation. A hunt ' +
-    'has no declared trigger, and its aim is discovery: finding out whether something is there at ' +
-    'all.\n\n' +
-    'HUNT VERSUS MONITORING: monitoring is continuous and rule-based, watching for conditions ' +
-    'somebody already decided are worth an alert. A hunt is episodic and exploratory, looking for a ' +
-    'pattern that has no rule yet, which is the entire reason a human has to do it by hand.\n\n' +
-    'HUNT VERSUS VULNERABILITY MANAGEMENT: vulnerability management finds weaknesses that could be ' +
-    'exploited, working from what is wrong with the systems. A hunt looks for exploitation that may ' +
-    'already have happened, working from what an attacker would have done, regardless of whether a ' +
-    'known vulnerability was involved at all.',
+    'Hunting, investigation, and routine monitoring often run on the exact same tools, and often ' +
+    'query the exact same logs, which is precisely why it is easy, for anyone new to a SOC floor, ' +
+    'to lump them together as just staring at data all day. They are different jobs, and the ' +
+    'difference is worth being able to state precisely, on purpose, because it is what tells you ' +
+    'which questions each seat is actually allowed to answer.\n\n' +
+    'HUNT VERSUS INVESTIGATION: an investigation starts because something has already been formally ' +
+    'DECLARED, an incident opened, or an alert escalated up to that level, and its scope is set ' +
+    'entirely by that declaration: an investigator works within the boundary of what was reported. ' +
+    'Its goal is to establish exactly what happened, stop it from continuing, and support whatever ' +
+    'comes after, whether that is fixing the hole or holding somebody accountable. A hunt has no ' +
+    'declared trigger at all. Its goal is discovery: finding out whether something is even there in ' +
+    'the first place, with nobody having reported anything yet.\n\n' +
+    'HUNT VERSUS MONITORING: monitoring, the SIEM-and-alert-queue system described earlier in this ' +
+    'package, is continuous and rule-based, constantly watching for conditions somebody already ' +
+    'decided, in advance, were worth an alert. A hunt is episodic, meaning it happens for a while ' +
+    'and then ends, rather than running forever, and exploratory, looking for a pattern that has no ' +
+    'rule yet, which is the entire reason it takes a human doing it by hand rather than software ' +
+    'doing it automatically.\n\n' +
+    'HUNT VERSUS VULNERABILITY MANAGEMENT: vulnerability management is the practice of finding ' +
+    'WEAKNESSES, meaning software flaws or misconfigurations, that could be exploited if an ' +
+    'attacker tried, and it works entirely from what is wrong with the systems themselves, usually ' +
+    'with an automated scanner. A hunt looks for exploitation that may already have happened, ' +
+    'working from what an attacker would actually have done, regardless of whether a known, ' +
+    'nameable vulnerability was even involved. Plenty of real attacks use no vulnerability at all, ' +
+    'just a legitimate tool used in an illegitimate way, which vulnerability management, by design, ' +
+    'has no way to see.',
 } as const;
 
 const MODULE_TH_5: Exercise[] = [
@@ -857,7 +998,9 @@ const MODULE_TH_5: Exercise[] = [
       },
     ],
     debrief:
-      'The tools will not tell you which seat you are in. The trigger and the aim will, every time.',
+      'The tools will not tell you which seat you are in, since the same query in the same SIEM can ' +
+      'belong to either job. The trigger and the aim will, every time: ask what started this work ' +
+      'and what it is actually trying to establish, and the answer sorts itself out.',
     practice: [],
   },
   {
@@ -898,7 +1041,8 @@ const MODULE_TH_5: Exercise[] = [
     ],
     debrief:
       'A mature programme measures this directly: techniques that used to require a hunt every ' +
-      'quarter and now have a standing rule instead. That is the loop from the last module paying off.',
+      'quarter and now have a standing rule instead, so the same ground never has to be manually ' +
+      'searched again. That is the loop from the last module paying off in practice.',
     practice: [],
   },
   {
@@ -939,7 +1083,9 @@ const MODULE_TH_5: Exercise[] = [
     ],
     debrief:
       'A vulnerability scan and a hunt answer two different questions about the same system: is it ' +
-      'weak, and has that weakness, or something needing no weakness at all, already been used.',
+      'weak, and has that weakness, or something needing no weakness at all, already been used. A ' +
+      'clean scan answers only the first question, and a report that treats it as answering both is ' +
+      'quietly overclaiming.',
     practice: [],
   },
   {
@@ -981,7 +1127,8 @@ const MODULE_TH_5: Exercise[] = [
     ],
     debrief:
       'Most of a SOC floor day is exactly this scenario, and it is not hunting, however skilled the ' +
-      'analyst working it. Naming it correctly is what keeps the distinction useful.',
+      'analyst working it. Naming it correctly is what keeps the distinction useful: calling every ' +
+      'closed ticket a hunt would erase the very difference this module exists to teach.',
     practice: [],
   },
   {
@@ -1026,7 +1173,8 @@ const MODULE_TH_5: Exercise[] = [
     ],
     debrief:
       'This is the answer worth having ready, because the question comes up constantly on a real ' +
-      'floor, usually from somebody trying to figure out which seat they are actually being asked to fill.',
+      'floor, usually from somebody trying to figure out which seat they are actually being asked to ' +
+      'fill, and a clear answer helps them understand what they are expected to do next.',
     practice: [],
   },
 ];
@@ -1035,21 +1183,32 @@ const MODULE_TH_5: Exercise[] = [
 
 const DATA_TEACH = {
   concept:
-    'A hunter needs telemetry that can actually show the evidence a hypothesis named, and "good ' +
-    'enough" is a specific standard, not a synonym for "everything".\n\n' +
-    'The sources a hunter reaches for most often are ENDPOINT telemetry, meaning process creation, ' +
-    'command-line arguments, and module loads, not just antivirus verdicts; NETWORK telemetry, ' +
-    'meaning flow records, DNS queries, and proxy logs; and AUTHENTICATION AND IDENTITY logs, ' +
-    'meaning logons, privilege use, and account changes. Which of these matters most depends ' +
-    'entirely on the hypothesis: a claim about lateral movement needs different data than a claim ' +
-    'about command-and-control beaconing.\n\n' +
-    'Two properties decide whether a given source is good enough for a given hunt. RETENTION: the ' +
-    'data has to reach back far enough to cover the dwell time the hypothesis is worried about, ' +
-    'which is often weeks to months, not the handful of days many tools keep by default. FIDELITY: ' +
-    'the data has to carry enough detail to show the specific evidence named, a process name alone ' +
-    'is not the same as a full command line, and a NetFlow summary is not the same as the DNS query ' +
-    'itself. Good enough means the minimum combination of source, retention, and fidelity that would ' +
-    'actually show the hypothesis evidence, no more and no less.',
+    'A hunt hypothesis only means something if there is data that could actually prove or disprove ' +
+    'it, and "good enough" is a specific, checkable standard here, not a vague synonym for as much ' +
+    'data as possible.\n\n' +
+    'Three families of telemetry are the ones a hunter reaches for most often. ENDPOINT telemetry ' +
+    'means the record of what happened on an individual computer: which processes were created, ' +
+    'the exact COMMAND-LINE ARGUMENTS typed or scripted when a program was launched, not just the ' +
+    'fact that it ran but exactly what it was told to do, and which software modules got loaded, ' +
+    'and it is worth stressing that this means far more than an antivirus verdict, which only fires ' +
+    'on files the antivirus already recognises as bad. NETWORK telemetry covers what crossed the ' +
+    'wire between machines: flow records, a summary of who talked to whom and how much data moved, ' +
+    'without necessarily the content, DNS queries, which names got looked up, and proxy logs, a ' +
+    'record of web traffic passing through a company gateway. AUTHENTICATION AND IDENTITY logs ' +
+    'cover logons, privilege use, meaning an account doing something that requires elevated ' +
+    'permission, and account changes. Which of the three matters most for a given hunt depends ' +
+    'entirely on the hypothesis: a claim about an attacker moving between servers needs different ' +
+    'evidence than a claim about a compromised machine quietly phoning home.\n\n' +
+    'Two properties decide whether a specific data source clears the bar of good enough for a ' +
+    'specific hunt. RETENTION is simply how far back the data actually goes before it gets deleted, ' +
+    'and it has to reach back far enough to cover the dwell time the hypothesis is worried about, ' +
+    'the length of time an attacker is suspected to have already been present, which is often weeks ' +
+    'or months, not the handful of days many tools keep by default before rotating old logs out. ' +
+    'FIDELITY is how much detail the data actually carries. A bare process name is not the same as ' +
+    'a full command line showing exactly what that process was told to do, and a network flow ' +
+    'summary showing only byte counts is not the same as the actual DNS query itself. Good enough ' +
+    'means the minimum combination of source, retention, and fidelity that would genuinely show the ' +
+    'specific evidence the hypothesis named, no more and no less.',
 } as const;
 
 const MODULE_TH_6: Exercise[] = [
@@ -1091,7 +1250,9 @@ const MODULE_TH_6: Exercise[] = [
     ],
     debrief:
       'Before writing a hypothesis, ask which of the three families would actually show the evidence ' +
-      'you are describing. If the answer is none of them, the hypothesis is not ready yet.',
+      'you are describing. If the answer is none of them, the hypothesis is not ready yet, whatever ' +
+      'else about it looks right, since a claim with no data that could ever confirm or disprove it ' +
+      'is not testable at all.',
     practice: [],
   },
   {
@@ -1132,7 +1293,9 @@ const MODULE_TH_6: Exercise[] = [
     ],
     debrief:
       'Good enough is a question you can only answer once you have a hypothesis. Ask it of your data ' +
-      'sources every time, rather than assuming last quarter answer still holds.',
+      'sources every time, rather than assuming last quarter answer still holds, since retention ' +
+      'windows shrink, tools get replaced, and what was good enough for one claim may not be good ' +
+      'enough for the next.',
     practice: [],
   },
   {
@@ -1146,17 +1309,20 @@ const MODULE_TH_6: Exercise[] = [
     prompt: 'Partway through a hunt, you discover the data needed does not exist. Which of the following are sound responses? Select all that apply.',
     teach: {
       concept:
-        'A data gap found while hunting is not a wasted afternoon, it is a finding, and it is often ' +
-        'more valuable than the hunt would have been if the data had been there.\n\n' +
-        'The right response has three parts. NAME THE GAP explicitly: what source is missing, or what ' +
-        'retention or fidelity fell short of what the hypothesis needed. NARROW OR REDIRECT the ' +
-        'hunt: either scale the hypothesis to what the available data actually can show, or find a ' +
-        'different source that can, rather than quietly declaring a clean result the data was never ' +
-        'able to produce. And REPORT IT alongside, or instead of, the hunt outcome, since closing the ' +
-        'gap is now a real backlog item with a name attached.\n\n' +
-        'What must never happen is silence: closing the hunt with "not supported" when the honest ' +
-        'answer is "could not check" misrepresents the environment to everyone downstream who reads ' +
-        'the coverage map.',
+        'Discovering partway through a hunt that the data you actually need does not exist is not a ' +
+        'wasted afternoon. It is a finding in its own right, and often a more valuable one than the ' +
+        'original hunt would have been if the data had simply been there.\n\n' +
+        'The right response has three parts. NAME THE GAP explicitly: state exactly which source is ' +
+        'missing, or exactly how its retention or fidelity fell short of what the hypothesis needed, ' +
+        'rather than leaving the shortfall vague. NARROW OR REDIRECT the hunt: either scale the ' +
+        'hypothesis down to match what the available data can actually show, or go find a different ' +
+        'source that can, rather than quietly reporting a clean result the data was never even ' +
+        'capable of producing. And REPORT IT, alongside the hunt outcome or in place of it, since ' +
+        'closing that gap is now a genuine piece of backlog work with a specific name attached to ' +
+        'it, not just a private frustration.\n\n' +
+        'What must never happen is silence. Closing a hunt as "not supported" when the honest answer ' +
+        'is really "we had no way to check" misrepresents the true state of the environment to ' +
+        'everyone downstream who later reads the coverage map and trusts what it says.',
     },
     options: [
       { id: 'a', label: 'Name the specific gap: which source, or which property of it, fell short of the hypothesis.' },
@@ -1185,7 +1351,8 @@ const MODULE_TH_6: Exercise[] = [
     ],
     debrief:
       'Some of the most valuable outputs a hunt programme produces are not findings about attackers ' +
-      'at all, they are honest maps of where the organisation cannot currently see.',
+      'at all, they are honest maps of where the organisation cannot currently see, and those maps ' +
+      'are what eventually get the missing logging or retention actually funded.',
     practice: [],
   },
   {
@@ -1228,7 +1395,8 @@ const MODULE_TH_6: Exercise[] = [
     ],
     debrief:
       'Matching data to hypothesis this precisely is what separates a hunt that can actually conclude ' +
-      'something from one that produces a shrug regardless of what is really happening.',
+      'something from one that produces a shrug regardless of what is really happening, because the ' +
+      'data it queried was never capable of showing the answer either way.',
     practice: [],
   },
   {
@@ -1273,7 +1441,8 @@ const MODULE_TH_6: Exercise[] = [
     ],
     debrief:
       'The honest version of this answer is less satisfying than pretending 14 days answers a 90-day ' +
-      'question, and it is the only version that does not quietly mislead whoever reads the report.',
+      'question, and it is the only version that does not quietly mislead whoever reads the report, ' +
+      'since a reader with no reason to doubt it would otherwise assume the whole window was checked.',
     practice: [],
   },
 ];
@@ -1282,35 +1451,45 @@ const MODULE_TH_6: Exercise[] = [
 
 const ENDING_TEACH = {
   concept:
-    'A hunt has exactly three legitimate endings, and a student who only recognises one of them ' +
-    'will find hunting demoralising for no good reason.\n\n' +
-    'A WRITTEN FINDING of confirmed activity is the ending everybody pictures: the hypothesis was ' +
-    'right, and there is evidence to show for it. A NEW DETECTION is the ending where the loop from ' +
-    'an earlier module closes, whether or not the original hypothesis was confirmed: something ' +
-    'learned along the way becomes a rule. And HYPOTHESIS NOT SUPPORTED, written up honestly rather ' +
-    'than left unrecorded, is the third ending, and it is a real result: it reduces uncertainty about ' +
-    'a question that mattered enough to ask, and it means nobody has to spend another day re-asking ' +
-    'it blind.\n\n' +
-    'What is not a legitimate ending is silence: a hunt that finds nothing and is never written up at ' +
-    'all teaches the organisation nothing, wastes the effort spent, and leaves the next hunter free ' +
-    'to duplicate exactly the same work.',
+    'A hunt has exactly three legitimate endings, and a student who only recognises one of them, ' +
+    'the dramatic one, will find the job needlessly demoralising, since most hunts do not end that ' +
+    'way.\n\n' +
+    'A WRITTEN FINDING of confirmed activity is the ending everybody pictures when they imagine ' +
+    'threat hunting: the hypothesis turns out to be right, and there is real evidence in hand to ' +
+    'show it. A NEW DETECTION is a different, equally legitimate ending, one where the loop from an ' +
+    'earlier module actually closes, whether or not the original hypothesis itself was confirmed: ' +
+    'something learned along the way gets turned into a rule that will catch the next occurrence ' +
+    'automatically. And HYPOTHESIS NOT SUPPORTED, written up honestly rather than left unspoken, is ' +
+    'the third ending, and it is a real result, not a failure. It genuinely reduces uncertainty ' +
+    'about a question that mattered enough to spend a day asking, and it means nobody on the team ' +
+    'has to spend another day re-asking the exact same question blind.\n\n' +
+    'What is never a legitimate ending is silence. A hunt that finds nothing and is simply never ' +
+    'written up teaches the organisation nothing at all, wastes the real effort that went into it, ' +
+    'and leaves the next hunter completely free to duplicate the exact same work months later, ' +
+    'having no idea it was already done.',
 } as const;
 
 const METRIC_TEACH = {
   concept:
-    'Once a hunt programme exists, somebody will ask how to measure it, and the easy answer, the ' +
-    'number of hunts run, is exactly the one to avoid.\n\n' +
-    'A count of hunts is trivially gameable: a hunter under pressure to hit a number can run many ' +
-    'narrow, low-effort hunts instead of fewer hard ones, and the count goes up while the programme ' +
-    'gets worse at its actual job. Better signals connect to what hunting is for. The ratio of hunts ' +
-    'that produced a new detection or a closed gap is one, since it measures the loop actually ' +
-    'closing rather than merely spinning. Coverage of the ATT&CK matrix over time, tracked regardless ' +
-    'of whether each hunt found anything, is another, since a technique tested and cleared is still ' +
-    'progress. This kind of tracking is close to what the Hunting Maturity Model, associated with the ' +
-    'researcher David Bianco, describes as a programme moving from ad hoc activity toward automated, ' +
-    'repeatable hunting.\n\n' +
-    'What all of the better signals share is that gaming them requires actually doing better hunting, ' +
-    'not just doing more of it.',
+    'Once a hunt programme exists for a while, somebody in leadership will eventually ask how to ' +
+    'measure whether it is working, and the easy answer, count the number of hunts run, is exactly ' +
+    'the one to avoid.\n\n' +
+    'A raw count of hunts is trivially gamed, in the same way a salesperson judged purely on number ' +
+    'of calls made ends up making many short, useless ones instead of fewer good ones. A hunter ' +
+    'under pressure to hit a target number can run many narrow, low-effort hunts instead of fewer ' +
+    'difficult, meaningful ones, and the count climbs while the programme quietly gets worse at its ' +
+    'actual job. Better signals connect directly back to what hunting is supposed to accomplish. ' +
+    'The share of hunts that produced a new detection or closed a real gap is one such signal, ' +
+    'since it measures whether the loop from the earlier module is actually closing rather than ' +
+    'just spinning in place. Coverage of the ATT&CK matrix over time is another, tracked regardless ' +
+    'of whether any individual hunt found something, since a technique that was tested and cleared ' +
+    'is still real progress, not a wasted trip. This style of tracking is close to what the Hunting ' +
+    'Maturity Model, a framework associated with the researcher David Bianco, describes as a ' +
+    'programme growing from ad hoc, one-off activity toward a repeatable, structured practice.\n\n' +
+    'What every one of the better signals shares is that gaming them requires actually doing better ' +
+    'hunting. There is no cheap way to inflate a detection-closure rate or real ATT&CK coverage ' +
+    'without genuinely doing the work, which is exactly what makes them worth measuring in the ' +
+    'first place.',
 } as const;
 
 const MODULE_TH_7: Exercise[] = [
@@ -1351,7 +1530,8 @@ const MODULE_TH_7: Exercise[] = [
     ],
     debrief:
       'If a hunt programme report only ever lists confirmed findings, ask where all the not-supported ' +
-      'results went. They did not stop happening, they stopped being written down.',
+      'results went. They did not stop happening, they stopped being written down, and a programme ' +
+      'that only records its wins is hiding most of the actual work it does.',
     practice: [],
   },
   {
@@ -1392,7 +1572,8 @@ const MODULE_TH_7: Exercise[] = [
     ],
     debrief:
       'A hunt programme that punishes not-supported results, even quietly, teaches its hunters to ' +
-      'avoid asking hard questions. That is the opposite of what the programme exists to encourage.',
+      'avoid asking hard questions and to only ever chase leads they already suspect will pan out. ' +
+      'That is the opposite of what the programme exists to encourage.',
     practice: [],
   },
   {
@@ -1431,8 +1612,9 @@ const MODULE_TH_7: Exercise[] = [
       },
     ],
     debrief:
-      'Whatever you measure, a hunter will optimise for it. Measure the loop closing and the coverage ' +
-      'growing, and that is what you will get more of.',
+      'Whatever you measure, a hunter will optimise for it, consciously or not. Measure the loop ' +
+      'closing and the coverage growing, and that is what you will get more of, since those are the ' +
+      'signals that actually reward the harder, more useful kind of hunting.',
     practice: [],
   },
   {
@@ -1472,7 +1654,8 @@ const MODULE_TH_7: Exercise[] = [
     ],
     debrief:
       'This is why the metrics in the previous exercise all connect to substance rather than volume. ' +
-      'A metric anyone could raise without doing better work will get raised that way.',
+      'A metric anyone could raise without doing better work will get raised that way, since that is ' +
+      'always the cheapest path when a person is being measured against a number.',
     practice: [],
   },
   {
@@ -1516,7 +1699,8 @@ const MODULE_TH_7: Exercise[] = [
     ],
     debrief:
       'A manager who accepts this answer once will keep asking for it this way. The report you give ' +
-      'the first time sets the standard for every one after it.',
+      'the first time sets the standard for every one after it, which is exactly why it is worth ' +
+      'getting right from the very first month rather than fixing it later.',
     practice: [],
   },
 ];
@@ -1525,18 +1709,25 @@ const MODULE_TH_7: Exercise[] = [
 
 const SEAM_TEACH = {
   concept:
-    'A hunt finding is worth most when it leaves the hunter hands promptly and correctly, and the ' +
-    'two seams that matter most are the ones into incident response and into detection engineering.\n\n' +
-    'Live, ongoing compromise goes to INCIDENT RESPONSE. The hunter job was discovery, not containment ' +
-    'or declaration, and continuing to quietly poke at a live intrusion alone risks tipping off the ' +
-    'attacker or missing the coordination a real incident response needs. A confirmed detection gap ' +
-    'goes to DETECTION ENGINEERING, who turn it into a durable rule, which is the same loop covered ' +
-    'earlier in this package.\n\n' +
-    'A good handoff is not a drop and disappear. The hunter documents what was found and exactly how, ' +
-    'so the receiving team does not have to re-derive the work, and stays available afterward to ' +
-    'answer questions about it. What a hunter should not do is treat their own speed as a reason to ' +
-    'do the next team job themselves: containing a live intrusion personally, or writing a production ' +
-    'rule without engineering review, both trade a faster feeling for a worse outcome.',
+    'A hunt finding is worth the most when it leaves the hunter hands promptly and lands correctly, ' +
+    'and the two handoffs that matter most in this job are the one into incident response and the ' +
+    'one into detection engineering.\n\n' +
+    'Live, ongoing compromise goes to INCIDENT RESPONSE, the team formally responsible for ' +
+    'containing and remediating an active intrusion. The hunter job was discovery, finding that ' +
+    'something is there, not containment or the formal declaration of an incident, and continuing ' +
+    'to quietly poke around a live intrusion alone carries real risk: it can tip off an attacker who ' +
+    'is still active and watching, or it can miss the careful coordination a genuine incident ' +
+    'response effort actually requires, such as legal notification, timing, or containing multiple ' +
+    'footholds at once rather than just the one the hunter happened to find first. A confirmed ' +
+    'detection gap, by contrast, goes to DETECTION ENGINEERING, who turn it into a durable, ' +
+    'production-quality rule, which is the same loop the earlier module already described.\n\n' +
+    'A good handoff is never a drop and disappear. The hunter documents exactly what was found and ' +
+    'precisely how they found it, so the receiving team does not have to redo that investigative ' +
+    'work from scratch, and stays available afterward to answer follow-up questions about it. What ' +
+    'a hunter should never do is treat their own speed as a reason to do the next team job ' +
+    'themselves: containing a live intrusion personally, or shipping a production detection rule ' +
+    'without engineering review, both trade a faster feeling in the moment for a genuinely worse ' +
+    'outcome down the line.',
 } as const;
 
 const MODULE_TH_8: Exercise[] = [
@@ -1578,7 +1769,9 @@ const MODULE_TH_8: Exercise[] = [
     ],
     debrief:
       'Speed matters far less here than coordination. A hunter who hands off cleanly and stays ' +
-      'available is worth more to the response than one who acted first and explained later.',
+      'available is worth more to the response than one who acted first and explained later, because ' +
+      'a fast, uncoordinated move can undo containment work a bigger team is already carefully ' +
+      'staging.',
     practice: [],
   },
   {
@@ -1592,18 +1785,29 @@ const MODULE_TH_8: Exercise[] = [
     prompt: 'Which of the following are accurate about confirmation bias during a hunt? Select all that apply.',
     teach: {
       concept:
-        'Confirmation bias is the specific trap of a hunter who already suspects a story: once a ' +
-        'shape forms in the mind, evidence that fits it becomes easy to notice and evidence that does ' +
-        'not becomes easy to explain away, without the hunter ever deciding to do either.\n\n' +
-        'Two mitigations actually work. Deliberately looking for evidence that would DISPROVE the ' +
-        'hypothesis, not just evidence that supports it, forces attention onto the cases the bias ' +
-        'would otherwise skip. And having a SECOND ANALYST review the evidence without being told the ' +
-        'suspected story first catches a distortion the original hunter cannot see in themselves, ' +
-        'because the bias operates on what feels obviously relevant, which is exactly what a second ' +
-        'set of eyes with no story yet does not share.\n\n' +
+        'Confirmation bias is a well-documented pattern in how human minds work, not something ' +
+        'unique to security, and it helps to see the plain version before looking at how it ' +
+        'specifically distorts a hunt. It is the tendency, in anyone, to notice and remember ' +
+        'evidence that fits a story they already suspect, while barely registering, or quietly ' +
+        'explaining away, evidence that does not fit. It is the same reason someone convinced a ' +
+        'particular route is always the fastest keeps noticing the days it is fast and forgets the ' +
+        'days it was not.\n\n' +
+        'In a hunt, this trap has a specific shape. Once a hunter already suspects a story, an ' +
+        'insider is stealing data, say, evidence that fits that story becomes easy to notice, and ' +
+        'evidence that does not fit becomes easy to explain away, without the hunter ever ' +
+        'consciously deciding to do either. It happens quietly, underneath deliberate reasoning, ' +
+        'which is exactly what makes it hard to catch in yourself.\n\n' +
+        'Two mitigations actually work against it. Deliberately looking for evidence that would ' +
+        'DISPROVE the hypothesis, not just evidence that supports it, forces attention onto the ' +
+        'cases the bias would otherwise skip past entirely. And having a SECOND ANALYST review the ' +
+        'same evidence without being told the suspected story first catches a distortion the ' +
+        'original hunter genuinely cannot see in themselves, because the bias operates on what ' +
+        'feels obviously relevant, and a second set of eyes with no story yet in mind does not share ' +
+        'that same blind spot.\n\n' +
         'What does not work, and often makes things worse, is trusting a rising sense of confidence ' +
         'as the hunt goes on. Confidence is a feeling generated by pattern recognition, not a form of ' +
-        'evidence, and time spent looking does not make a story more true.',
+        'evidence in itself, and spending more time looking does not, on its own, make a story any ' +
+        'more true.',
     },
     options: [
       { id: 'a', label: 'Once a hunter suspects a specific story, evidence that fits becomes easy to notice and evidence that does not becomes easy to explain away.' },
@@ -1634,7 +1838,8 @@ const MODULE_TH_8: Exercise[] = [
     debrief:
       'The blind second review is worth institutionalising. Ask a colleague to look at the raw ' +
       'evidence before you tell them what story you suspect, and see whether they land somewhere ' +
-      'different.',
+      'different, since a colleague who lands in the same place without ever hearing your theory is ' +
+      'far stronger confirmation than your own rising confidence ever could be.',
     practice: [],
   },
   {
@@ -1648,16 +1853,20 @@ const MODULE_TH_8: Exercise[] = [
     prompt: 'Which of the following are accurate about the pressure to find something after a long hunt? Select all that apply.',
     teach: {
       concept:
-        'The second trap specific to this seat sits opposite alert fatigue. Where alert fatigue is ' +
-        'the temptation to stop caring, this is the temptation to care too much about the time already ' +
-        'spent: after days on a hunt with nothing to show, there is real pressure to find something, ' +
-        'anything, that justifies it.\n\n' +
-        'The honest position is uncomfortable and simple: time already spent is not evidence that ' +
-        'something is there. Softening the bar for what counts as a finding to justify the days spent ' +
-        'produces a report nobody downstream can act on, because it points at something that is not ' +
-        'actually supported by the evidence. Writing up "hypothesis not supported" after significant ' +
-        'time is a legitimate outcome, not a failure, and naming the pressure out loud to a peer or a ' +
-        'lead before writing the conclusion is a real check against quietly giving in to it.',
+        'The second trap specific to this seat sits opposite alert fatigue, the numbness that sets ' +
+        'in from working too many alerts, covered elsewhere in this platform. Where alert fatigue is ' +
+        'the temptation to stop caring, this is the opposite problem: caring too much about time ' +
+        'already spent. After several days on a hunt with nothing solid to show for it, there is ' +
+        'genuine, understandable pressure to find something, anything, that justifies the effort ' +
+        'already sunk into it.\n\n' +
+        'The honest position here is uncomfortable, and it is also simple: time already spent on a ' +
+        'hunt is not evidence that something is actually there. Softening the bar for what counts as ' +
+        'a finding, purely to justify the days already spent, produces a report nobody downstream ' +
+        'can actually act on, because it ends up pointing at something the evidence does not ' +
+        'genuinely support. Writing up "hypothesis not supported" after significant time invested is ' +
+        'a completely legitimate outcome, not a personal failure, and naming the pressure out loud ' +
+        'to a peer or a lead before writing the final conclusion is a real, practical check against ' +
+        'quietly giving in to it without even noticing.',
     },
     options: [
       { id: 'a', label: 'Time already spent on a hunt is not evidence that something is there, however uncomfortable that is to sit with.' },
@@ -1687,7 +1896,8 @@ const MODULE_TH_8: Exercise[] = [
     ],
     debrief:
       'The discomfort of writing "not supported" after nine days is real, and it is also the correct ' +
-      'signal that the process is working as designed rather than bending to fit a deadline.',
+      'signal that the process is working as designed rather than bending under pressure to produce ' +
+      'a finding the evidence never actually supported.',
     practice: [],
   },
   {
@@ -1734,7 +1944,7 @@ const MODULE_TH_8: Exercise[] = [
     debrief:
       'Keeping these two results apart is the whole discipline of this module in one decision: the ' +
       'honest close and the genuine lead both survive intact, instead of being merged into a single ' +
-      'report that overstates one and buries the other.',
+      'report that overstates one and buries the other, leaving nobody able to trust either.',
     practice: [],
   },
 ];
@@ -1800,7 +2010,8 @@ export const THREAT_HUNTER_FOUNDATIONS: LearningPackage = {
           debrief:
             'This is the line that separates hunting from the rest of the SOC. If a job advert says ' +
             '"respond to alerts", it is a triage seat. If it says "proactively search for undetected ' +
-            'threats", it is a hunt.',
+            'threats", it is a hunt, and the wording is worth reading carefully the next time you ' +
+            'compare two job descriptions that otherwise sound similar.',
           practice: [],
         },
         {
@@ -1839,7 +2050,8 @@ export const THREAT_HUNTER_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Assume breach is not paranoia, it is a working method. It turns "is anything wrong" into ' +
-            '"where would it be hiding", which is a question you can actually take to the data.',
+            '"where would it be hiding", which is a question you can actually take to the data, ' +
+            'rather than a feeling with nowhere to go.',
           practice: [],
         },
         {
@@ -1881,7 +2093,8 @@ export const THREAT_HUNTER_FOUNDATIONS: LearningPackage = {
           debrief:
             'Hunter and detection engineer are a cycle, not rivals: the hunt finds what the rules ' +
             'miss, and engineering makes sure the rules stop missing it. A hunt with no rule at the ' +
-            'end of it will be re-run against the same gap forever.',
+            'end of it will be re-run against the same gap forever, because nothing was ever changed ' +
+            'about how the tools watch for it.',
           practice: [],
         },
         {
@@ -1922,7 +2135,9 @@ export const THREAT_HUNTER_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Notice the same data underlies several of these: logs, auth records, host telemetry. What ' +
-            'makes it a hunt is not the data, it is that nobody told you to look at it.',
+            'makes it a hunt is not the data, it is that nobody told you to look at it, which is why ' +
+            'the trigger, not the tool, is always the right place to start when sorting these seats ' +
+            'apart.',
           practice: [],
         },
         {
@@ -1961,7 +2176,9 @@ export const THREAT_HUNTER_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Most of the skill in hunting is upstream of any tool: turning a vague unease into a ' +
-            'specific, checkable claim. A good hypothesis half-writes the query.',
+            'specific, checkable claim. A good hypothesis half-writes the query, since once you know ' +
+            'exactly what evidence you are looking for, the rest is mostly a matter of finding where ' +
+            'it would live.',
           practice: [],
         },
         {
@@ -2006,7 +2223,8 @@ export const THREAT_HUNTER_FOUNDATIONS: LearningPackage = {
           debrief:
             'If you can hold these three straight, you understand where hunting sits: it is the ' +
             'proactive front of the same loop the operator and the detection engineer work the ' +
-            'reactive ends of.',
+            'reactive ends of, and everything the rest of this package covers is a closer look at how ' +
+            'that front end actually operates.',
           practice: [],
         },
       ],
