@@ -17,215 +17,400 @@ import type { Exercise, LearningPackage } from '@soc/shared';
 
 const EVIDENCE_TEACH = {
   concept:
-    'Forensics recovers what was done and preserves it to a standard that survives challenge. The ' +
-    'work is slow and procedural because the value of evidence is fragile: evidence collected the ' +
-    'wrong way is not weaker evidence, it is unusable evidence. The discipline is not about being ' +
-    'clever, it is about doing every step in the right order and being able to prove you did.',
+    'Imagine a detective walking into a room where a crime just happened. Before anyone touches ' +
+    'anything, the scene gets photographed, evidence gets bagged and labeled, and a record starts ' +
+    'of exactly who enters and what they do. That is not caution for its own sake: a fingerprint ' +
+    'lifted correctly can help convict someone, and that exact same fingerprint lifted carelessly, ' +
+    'smudged by an ungloved hand, dropped and picked back up, sitting in an unmarked bag for a ' +
+    'week, can get thrown out of court entirely, even though the finger that made it never changed. ' +
+    'The physical mark did not get weaker. It became something a defense lawyer can make disappear ' +
+    'with one good question: how do we know nobody touched this?\n\n' +
+    'Digital forensics is that same discipline applied to computers, phones, and networks instead ' +
+    'of a physical room. A forensics analyst figures out what happened on a device, who ran a ' +
+    'program, what file was opened, when a connection was made, and preserves the proof of it to a ' +
+    'standard that can survive somebody actively trying to pick it apart later: a defense attorney, ' +
+    'a skeptical manager, an opposing expert witness. That is why the work is slow and procedural ' +
+    'instead of fast and clever. A brilliant insight nobody can verify is worth nothing in this ' +
+    'field, because the whole discipline exists to answer one question under pressure: how do you ' +
+    'know?\n\n' +
+    'The hard part to accept is this: evidence collected the wrong way is not weaker evidence, it ' +
+    'is unusable evidence. There is no partial credit. A finding based on sloppy handling and a ' +
+    'finding based on rigorous handling can point to the exact same fact, and only one of them will ' +
+    'survive being challenged. So forensics is not about being the smartest person examining the ' +
+    'evidence, it is about following the right steps in the right order, every time, and being able ' +
+    'to prove afterward that you did. That habit, doing it right and documenting that you did it, ' +
+    'is what this whole package builds toward, and it is exactly what separates a finding that ' +
+    'holds up from one that gets quietly discarded.',
 } as const;
 
 const VOLATILITY_TEACH = {
   concept:
-    'Data disappears at different speeds, and you capture it fastest-fading first. Memory, and the ' +
-    'live state of a running system, are gone the moment it is powered off, so they come before the ' +
-    'disk, which persists. This is the order of volatility, and getting it backwards means reaching ' +
-    'for the durable evidence while the fragile evidence you needed most evaporates.',
+    'Picture two kinds of evidence at a crime scene: a footprint pressed into fresh snow, and a ' +
+    'footprint pressed into wet concrete that has since dried solid. The concrete one will still be ' +
+    'there next week, whenever anyone gets around to photographing it. The snow one is gone as soon ' +
+    'as the sun comes out, or the next person walks through, or it simply melts. If you only have ' +
+    'time to protect one of the two before doing anything else, you protect the snow, not because ' +
+    'the concrete does not matter, but because the concrete is not going anywhere and the snow ' +
+    'definitely is.\n\n' +
+    'A running computer holds two very different kinds of evidence in exactly that same way. Its ' +
+    'DISK, the hard drive or solid-state drive that stores files, is like the concrete: switch the ' +
+    'machine off, switch it back on, and the disk contents are still there, essentially unchanged. ' +
+    'Its MEMORY (also called RAM), the fast, working storage a computer uses only while it is ' +
+    'actually running, is like the snow. Memory holds the list of programs currently running, which ' +
+    'remote computers this machine is currently talking to, and even secrets like an encryption key ' +
+    'that has been unlocked for active use. All of that lives in memory ONLY while the power stays ' +
+    'on. The instant someone switches the machine off, or pulls the plug to "be safe", every bit of ' +
+    'it is gone, permanently, with nothing on the disk that ever held a copy of it.\n\n' +
+    'That is why forensics has a rule called the ORDER OF VOLATILITY: capture the fastest-fading ' +
+    'evidence first. In practice this means memory and other live, running state get captured before ' +
+    'the disk does, even though the disk feels like the "real" evidence because it is bigger and ' +
+    'more familiar. Getting this order backwards, spending precious time imaging a disk that will ' +
+    'still be there in an hour while a running attacker live connections and unlocked secrets ' +
+    'evaporate in the background, is one of the most common and most costly mistakes a new analyst ' +
+    'can make. Reach for the thing that is disappearing before you reach for the thing that is not ' +
+    'going anywhere.',
 } as const;
 
 const INTEGRITY_TEACH = {
   concept:
-    'Two rules keep evidence trustworthy. Hash before you touch: take a cryptographic hash of an ' +
-    'artefact before and after handling, so anyone can prove it did not change in your hands. And ' +
-    'chain of custody: an unbroken record of who held the evidence, when, and what they did, with ' +
-    'no gaps. A single unexplained gap, or a hash that does not match, can throw out an entire ' +
-    'case, however true the underlying finding is.',
+    'Trustworthy evidence rests on two separate guarantees, and it helps to keep them apart from ' +
+    'the start.\n\n' +
+    'The first is about the evidence content: has it changed since it was collected? A HASH is a ' +
+    'short string of letters and numbers, produced by running a file through a mathematical ' +
+    'formula, that acts as a fingerprint of its exact contents. Change even one character inside a ' +
+    'huge file and the hash comes out completely different; leave the file untouched and the hash ' +
+    'comes out identical every single time, no matter how many times you compute it. So an analyst ' +
+    'hashes an artefact, a file, a disk image, anything they are about to handle, before they touch ' +
+    'it, and hashes it again afterward. If the two hashes match, that is proof, not just a claim, ' +
+    'that the artefact exact bytes did not change while it was in that analyst hands. This is ' +
+    'called hashing before you touch, and it turns "trust me, I did not change anything" into ' +
+    'something that can actually be checked.\n\n' +
+    'The second guarantee is about the evidence whereabouts: who had possession of it, and when? ' +
+    'Think of a police evidence locker, where every item that goes in or out gets signed for on a ' +
+    'log, naming exactly who took it, when, and what they did with it. Digital forensics keeps the ' +
+    'same kind of log, called CHAIN OF CUSTODY: an unbroken record of every person who has ever ' +
+    'held a piece of evidence, in order, with no gaps. The word "unbroken" is doing real work there. ' +
+    'A single stretch of time where the log cannot say who had the evidence, even a few hours, is ' +
+    'called a gap, and a gap is enough for someone challenging the finding to argue that anything ' +
+    'could have happened to the evidence during that window, whether or not it actually did.\n\n' +
+    'Both guarantees matter because a case can fail for either reason, regardless of how true the ' +
+    'underlying finding is: a hash that does not match means the content itself is now in question, ' +
+    'and a chain of custody gap means nobody can vouch for where the evidence was, even if the ' +
+    'content never changed at all.',
 } as const;
 
 const CUSTODY_TEACH = {
   concept:
-    'Chain of custody is not a form, it is an argument: everyone who has ever handled a piece of ' +
-    'evidence, when they had it, and what they did with it, can be named, in order, with no ' +
-    'unexplained interval. That is what an unbroken chain looks like. TRANSFER means the moment ' +
-    'evidence moves from one person control to another, and it is the event the record exists to ' +
-    'capture: hand a drive to a colleague without logging it and, for legal purposes, nobody can say ' +
-    'where it was for that stretch. MINIMUM HANDLING is the discipline of keeping the list of people ' +
-    'who ever touch the evidence as short as the case allows, because every additional name is ' +
-    'another person whose actions have to be accounted for and, if necessary, defended under ' +
-    'questioning. SEALING, tamper-evident bags and numbered tape, exists so a break in the seal is ' +
-    'visible without anyone needing to trust anyone word about it. And the log itself needs to ' +
-    'answer four questions for every entry: who, when, what was done, and where the item went next. ' +
-    'Leave any of the four blank and the record does not document a transfer, it documents that ' +
-    'something happened.',
+    'Chain of custody is the paper trail proving nobody could have tampered with evidence between ' +
+    'the moment it was seized and the moment it is presented in court: an unbroken account of who ' +
+    'held it, when, and what they did with it, the same idea as a police evidence locker sign-out ' +
+    'sheet, except followed with even more care because a digital case can turn on a single missing ' +
+    'signature. It is not a form to fill in, it is an argument: everyone who has ever handled a ' +
+    'piece of evidence can be named, in order, with no unexplained interval, and that is what an ' +
+    'unbroken chain looks like. This module goes past the basic definition and into the specific ' +
+    'vocabulary and mechanics that make a custody record actually hold up.\n\n' +
+    'TRANSFER is the name for the exact moment evidence moves from one person control to another, ' +
+    'for example a technician handing a seized hard drive to the lab analyst who will image it. It ' +
+    'is the single event the whole custody record exists to capture, because it is the moment risk ' +
+    'enters the picture: hand a drive to a colleague in the hallway without writing it down, and, ' +
+    'for legal purposes, nobody can say where it was for that stretch.\n\n' +
+    'MINIMUM HANDLING is the discipline of keeping the list of people who ever touch a piece of ' +
+    'evidence as short as the case genuinely requires, the digital equivalent of an evidence bag ' +
+    'passing through as few hands as possible on its way from the scene to the courtroom. Every ' +
+    'additional name added to that list is another person whose actions have to be accounted for ' +
+    'and, if necessary, defended under questioning.\n\n' +
+    'SEALING is physically closing evidence, a tamper-evident bag, numbered tape across a drive ' +
+    'ports, so that any attempt to open or access it leaves a visible mark. It exists so a break in ' +
+    'the seal is visible to anyone looking, without needing anyone to simply trust another person ' +
+    'word about it.\n\n' +
+    'And the log itself needs to answer four questions for every entry: who, when, what was done, ' +
+    'and where the item went next. Leave any of the four blank and the record does not document a ' +
+    'transfer, it documents that something happened.',
 } as const;
 
 const HASH_LIMITS_TEACH = {
   concept:
-    'A hash is a fixed-length fingerprint of a file exact bytes: change one bit anywhere in the ' +
-    'input and the output is completely different, which is what makes a match meaningful. Forensic ' +
-    'tools have converged on SHA-256 as the default primary hash, because MD5 and SHA-1 both have ' +
-    'known COLLISION weaknesses, meaning two different inputs can, with enough deliberate effort, be ' +
-    'made to produce the same hash. That has never been shown to matter in an ordinary case, where ' +
-    'nobody is trying to forge a matching file, but "has never happened here" is not a standard a ' +
-    'methodology can rest on, so tools default to the stronger algorithm and often compute a second ' +
-    'one, commonly MD5 alongside SHA-256, purely so a system or a court built around the older ' +
-    'standard still has something it recognises.\n\n' +
-    'What a hash proves is narrow and worth stating precisely: identical hashes before and after ' +
-    'handling mean the bytes did not change in that stretch. What it does NOT prove is who had the ' +
-    'item, whether it was seized lawfully, or whether the thing first hashed was itself the genuine ' +
-    'original rather than an already-substituted copy. A hash is a check on integrity from the ' +
-    'moment it was first computed onward. It has nothing to say about anything before that moment.',
+    'A hash is best understood as a fingerprint for a file exact bytes, not for anything about what ' +
+    'the file means or looks like. It is a short, fixed-length string of letters and numbers ' +
+    'produced by running the entire file through a mathematical formula. Change one bit anywhere in ' +
+    'the input, even something invisible to a human looking at it, and the output is completely ' +
+    'different; leave the file untouched and the formula produces the identical result every single ' +
+    'time. That is what makes a match meaningful: it is not a guess or an approximation, it is a ' +
+    'near-certain signal that the bytes are unchanged.\n\n' +
+    'Forensic tools have converged on SHA-256 as the default primary hash today, for a specific ' +
+    'reason. Two older algorithms, MD5 and SHA-1, both have a known COLLISION weakness, meaning two ' +
+    'different inputs can, with enough deliberate computing effort, be engineered to produce the ' +
+    'same hash, defeating the entire point of using a hash as a fingerprint. Think of it like ' +
+    'discovering that, with enough effort, two different people actual fingerprints could be ' +
+    'engineered to look identical to a scanner. That has never been shown to matter in an ordinary ' +
+    'case, where nobody is trying to forge a matching file, but "has never happened here" is not a ' +
+    'standard a methodology can rest on, so tools default to the stronger algorithm and often ' +
+    'compute a second one, commonly MD5 alongside SHA-256, purely so a system or a court built ' +
+    'around the older standard still has something it recognises.\n\n' +
+    'What a hash proves is narrow and worth stating precisely, because it is easy to ask a hash to ' +
+    'answer more than it can: identical hashes before and after handling mean the bytes did not ' +
+    'change in that stretch. What it does NOT prove is who had the item, whether it was seized ' +
+    'lawfully, or whether the thing first hashed was itself the genuine original rather than an ' +
+    'already-substituted copy. A hash is a check on integrity from the moment it was first computed ' +
+    'onward. It has nothing to say about anything before that moment.',
 } as const;
 
 const PREFETCH_TEACH = {
   concept:
-    'Windows keeps a small file in the Prefetch folder for many programs the first several times ' +
-    'they run, recording which executable ran, how many times, and the last several run timestamps, ' +
-    'purely so Windows can load the program faster next time. An examiner reads it for a different ' +
-    'reason: a Prefetch entry is evidence a specific program executed on this machine, at roughly a ' +
-    'given time, and it survives even after the program own executable has been deleted, because it ' +
-    'lives in a completely separate location. It answers one question precisely: did this program ' +
-    'run, and roughly when and how often, not what the program did once it was running.',
+    'Every time you use a computer, the operating system, the software that manages the whole ' +
+    'machine, quietly keeps small records of what happened, mostly for its own benefit rather than ' +
+    'for anyone investigating later. One of those records, on Windows specifically, is the Prefetch ' +
+    'folder. Think of it like a coffee shop that keeps a tally of how many times a regular customer ' +
+    'has ordered a specific drink, purely so the barista can have it ready faster next time that ' +
+    'customer walks in. Windows does the same thing with programs: the first several times a ' +
+    'particular piece of software runs, Windows creates or updates a small file recording which ' +
+    'executable ran, how many times it has run in total, and the last several times it ran, purely ' +
+    'so the program can load a bit faster next time.\n\n' +
+    'An examiner reads that same small file for a completely different reason than Windows created ' +
+    'it for. A Prefetch entry is evidence a specific program executed on this machine, at roughly a ' +
+    'given time, and here is the part that makes it valuable in an investigation: it survives even ' +
+    'after the program own executable has been deleted, because the Prefetch record lives in a ' +
+    'completely separate location from the program itself. An attacker can delete the malicious ' +
+    'tool they ran, but the small receipt Windows wrote about having run it once can still be ' +
+    'sitting there afterward.\n\n' +
+    'It is worth being precise about what that receipt does and does not say. Prefetch answers one ' +
+    'question, and only one: did this program run, and roughly when and how often? It says nothing ' +
+    'about what the program actually did once it was running, what files it touched, what it sent ' +
+    'over the network, or anything else. It is a record of execution, not a record of behaviour.',
 } as const;
 
 const RUNKEY_TEACH = {
   concept:
-    'A handful of registry locations, commonly grouped under the name Run keys, list programs ' +
-    'Windows starts automatically at boot or at logon. Legitimate software uses them constantly, an ' +
-    'antivirus agent, a cloud sync client, so their presence alone means nothing; what an examiner ' +
-    'looks for is an entry pointing somewhere it should not, a script in a temp folder, an ' +
-    'executable with a name close to but not quite a real Windows process. Run keys answer a ' +
-    'persistence question: what did this attacker, or this software, arrange to survive a reboot and ' +
-    'start again unattended? They say nothing about a one-off action that ran once and left no ' +
-    'persistence behind.',
+    'Windows keeps almost all of its settings, including which programs should start themselves ' +
+    'automatically, in a giant structured database called the REGISTRY, essentially a massive ' +
+    'filing cabinet of configuration settings that both Windows itself and installed software read ' +
+    'from constantly. Buried inside that filing cabinet are a handful of specific locations, ' +
+    'commonly grouped under the name Run keys, whose entire job is to list programs Windows should ' +
+    'start automatically, with no one clicking anything, either the moment the computer boots up or ' +
+    'the moment a specific user logs in.\n\n' +
+    'The analogy worth holding onto is a standing order left with a service: every morning, without ' +
+    'anyone asking again, do this. Legitimate software leans on that mechanism constantly, an ' +
+    'antivirus agent that needs to be running before anything risky happens, a cloud sync client ' +
+    'that should reconnect the instant a user logs in, so the mere presence of entries in a Run key ' +
+    'means nothing by itself. What an examiner actually looks for is an entry pointing somewhere it ' +
+    'should not, a script sitting in a temporary folder that gets wiped on reboot, or an executable ' +
+    'with a name deliberately close to, but not quite, a real Windows process name, hoping nobody ' +
+    'looks closely.\n\n' +
+    'Run keys answer a specific question, called a PERSISTENCE question: what did this attacker, or ' +
+    'this software, arrange to survive a reboot and start again, unattended, without needing to be ' +
+    'reinstalled or relaunched by hand? They say nothing about a one-off action that ran once and ' +
+    'left no standing order behind it. A piece of malware that ran a single time, did its damage, ' +
+    'and never touched a Run key would be invisible to this particular check, which is exactly why ' +
+    'an examiner treats Run keys as one tool among several, not the whole investigation.',
 } as const;
 
 const TIMESTAMP_TEACH = {
   concept:
-    'NTFS keeps four timestamps per file, commonly abbreviated MACB. MODIFIED is when the file ' +
-    'content last changed. ACCESSED is when it was last opened or read, though many modern systems ' +
-    'update this only loosely, so treat it as approximate. CHANGED, sometimes called Entry Modified, ' +
-    'is when the file own metadata, permissions, name, size record, last changed, which is distinct ' +
-    'from the content itself changing. And BIRTH, or CREATED, is when the file first appeared on ' +
-    'this volume, which is not necessarily when it was first created anywhere: copying a file to a ' +
-    'new drive gives it a new birth time there. Read together, and cross-checked against other ' +
-    'artefacts, these four numbers are the backbone of most timelines; read in isolation, especially ' +
-    'ACCESSED, they are one of the easiest things for an attacker to falsify.',
+    'Every file stored on a Windows computer disk sits inside a file system called NTFS, the ' +
+    'underlying structure that keeps track of where each file physically lives and what is known ' +
+    'about it. Alongside a file actual content, NTFS keeps a small set of dates and times about ' +
+    'that file, the same way a library keeps a card in the back of a book recording when it was ' +
+    'checked in and out. On an NTFS disk, every file carries four such timestamps, commonly ' +
+    'abbreviated MACB, one letter for each.\n\n' +
+    'MODIFIED is when the file content itself last changed, the moment someone last saved new ' +
+    'information into it. ACCESSED is when the file was last opened or read, though many modern ' +
+    'systems update this only loosely or not at all for performance reasons, so treat it as ' +
+    'approximate rather than exact. CHANGED, sometimes called Entry Modified, is when the file own ' +
+    'metadata, its permissions, its name, its recorded size, last changed, which is distinct from ' +
+    'the content itself changing: renaming a file or altering its permissions can happen without ' +
+    'touching a single byte inside it. And BIRTH, or CREATED, is when the file first appeared on ' +
+    'this particular volume, which is not necessarily the same as when it was first created ' +
+    'anywhere at all: copying a file from one drive to a brand new one gives it a brand new birth ' +
+    'time there, even if the file itself is years old.\n\n' +
+    'Read together, and cross-checked against other artefacts, these four numbers are the backbone ' +
+    'of most timelines, letting an examiner line up "this file appeared here" against "this program ' +
+    'ran" against "this connection happened" and see the order events actually occurred in. Read in ' +
+    'isolation, especially ACCESSED, they are one of the easiest things on a computer for a ' +
+    'knowledgeable attacker to falsify, which is exactly why a later module in this package covers ' +
+    'that kind of tampering and how to spot it.',
 } as const;
 
 const BROWSER_TEACH = {
   concept:
-    'A browser history, downloads, and cache are, in effect, a log of what a machine asked the ' +
-    'internet for and what came back. Search terms can show intent or knowledge a person otherwise ' +
-    'denies: searching how to clear an event log is a very different fact from having merely visited ' +
-    'a news site. Download records tie a specific file to a specific moment it entered the system, ' +
-    'often with the source URL still attached. And cached pages and cookies can corroborate exactly ' +
-    'when a session happened, even after the live page has changed or vanished. None of it proves ' +
-    'who was physically at the keyboard: a compromised account, a shared login, or a scheduled task ' +
-    'can generate identical records, so browser artefacts answer "what did this profile request and ' +
-    'when", not "who pressed the keys".',
+    'Every time someone uses a web browser, the browser itself quietly keeps a diary of what it ' +
+    'did: which pages were visited, what was typed into a search box, which files were downloaded ' +
+    'and from where, and copies of pages it has recently shown, stored locally so they load faster ' +
+    'the next time. Put together, that diary, history, downloads, and cache, is in effect a log of ' +
+    'what a machine asked the internet for and what came back, written by the browser purely for ' +
+    'the user own convenience but readable by an examiner for something else entirely.\n\n' +
+    'Search terms can show intent or knowledge a person otherwise denies having: searching how to ' +
+    'clear an event log, or how to wipe a hard drive, is a very different fact from having merely ' +
+    'visited a news site that happened to mention the same topic. Download records tie a specific ' +
+    'file to the specific moment it entered the system, often with the original web address it came ' +
+    'from still attached, which is powerful when the question is exactly when a particular tool ' +
+    'showed up on a machine. And cached pages and cookies, small pieces of data websites leave ' +
+    'behind to remember a visitor, can corroborate exactly when a browsing session happened, ' +
+    'sometimes even after the live page on the internet has since changed or vanished entirely.\n\n' +
+    'None of it, though, proves who was physically at the keyboard. A compromised account being ' +
+    'used by someone else, a login shared between coworkers, or a scheduled task that automatically ' +
+    'visits a page can all generate records that look identical to a real person typing and ' +
+    'clicking. So browser artefacts answer "what did this profile request and when", not "who ' +
+    'pressed the keys", and mixing those two questions up is one of the easiest overreaches to make ' +
+    'with this kind of evidence.',
 } as const;
 
 const ARTEFACT_ATTRIBUTION_TEACH = {
   concept:
-    'Each host artefact in this module answers a narrow, specific question: did a program run ' +
-    '(Prefetch), what was arranged to survive a reboot (Run keys), when did a file content or ' +
-    'metadata change (NTFS timestamps), or what did a browser profile request (history). None of ' +
-    'them, individually or together, places a named human being hands on the keyboard. Attribution ' +
-    'to a specific person is a separate, harder problem than establishing what happened on the ' +
-    'machine, and conflating the two is one of the most common overreaches in a forensic report.',
+    'Step back and look at the four host artefacts this module has covered together: Prefetch ' +
+    'tells you whether a program ran, Run keys tell you what was arranged to survive a reboot, ' +
+    'NTFS timestamps tell you when a file content or metadata changed, and browser history tells ' +
+    'you what a browser profile requested. Notice the pattern: every single one of them answers a ' +
+    'narrow, specific question about the machine, and not one of them, alone or combined, places a ' +
+    'named human being hands on the keyboard at the time it happened.\n\n' +
+    'The analogy worth holding onto is a security camera aimed at a locked door: it can show ' +
+    'exactly when the door opened and closed, but if someone used a stolen key, the footage alone ' +
+    'cannot say whose key it actually was. Attribution, tying an action to one specific, named ' +
+    'person, is a separate and genuinely harder problem than establishing what happened on a ' +
+    'machine, because a login, a keystroke, or a program launch can be produced by the account ' +
+    'rightful owner, by someone who has compromised that account, or by an automated process acting ' +
+    'on a schedule. Conflating "this machine did X" with "this named person did X" is one of the ' +
+    'most common overreaches in a forensic report, and one of the fastest ways for an otherwise ' +
+    'solid finding to fall apart under a single good question.',
 } as const;
 
 const MEMORY_ONLY_TEACH = {
   concept:
-    'Order of volatility says capture memory before disk. This module is about a sharper version of ' +
-    'that idea: some categories of evidence exist ONLY in memory and have no equivalent on disk at ' +
-    'all, so if memory is never captured, they are not delayed, they are gone permanently. RUNNING ' +
-    'PROCESSES AND NETWORK CONNECTIONS: which programs are executing right now, and which remote ' +
-    'hosts they are talking to, is a live fact about a live system; once it is powered off there is ' +
-    'no file anywhere holding "the process list at this moment", because that was never a file, it ' +
-    'was a state. DECRYPTED SECRETS: an encryption key that is unlocked and sitting in RAM so a ' +
-    'mounted volume can be read is, by design, never written to disk in that unlocked form, that is ' +
-    'the whole point of the encryption. FILELESS MALWARE: code injected directly into a legitimate ' +
-    'process memory, with no executable ever written to disk, leaves nothing for a disk image to ' +
-    'find, because there genuinely is nothing there. And smaller things, like clipboard contents, ' +
-    'are transient in the same way. None of this argues against imaging the disk. It argues for ' +
-    'capturing memory FIRST, and for recognising that a host powered off before that capture has ' +
-    'already destroyed evidence no later analysis can recover.',
+    'Order of volatility, from earlier in this package, says capture memory before disk because ' +
+    'memory fades fast and disk persists. This module sharpens that idea into something more ' +
+    'absolute: some categories of evidence exist ONLY in memory and have no equivalent copy on disk ' +
+    'at all, ever, under any circumstances. If memory is never captured, that evidence is not ' +
+    'merely delayed until someone gets around to imaging the disk later, it is gone permanently, ' +
+    'the way a spoken conversation in an empty room is gone the moment it ends unless somebody was ' +
+    'recording it; no transcript appears on paper afterward just because the conversation was ' +
+    'important.\n\n' +
+    'RUNNING PROCESSES AND NETWORK CONNECTIONS: which programs are executing right now, and which ' +
+    'remote hosts they are currently talking to, is a live fact about a live, running system. Once ' +
+    'that system is powered off, there is no file anywhere on the disk holding "the process list at ' +
+    'this exact moment", because that list was never written to a file in the first place, it ' +
+    'existed only as the machine current state. DECRYPTED SECRETS: an encryption key that has been ' +
+    'unlocked and is sitting in RAM so a protected volume can actually be read is, by design, never ' +
+    'written to disk in that unlocked form, that is the whole point of encrypting it in the first ' +
+    'place. FILELESS MALWARE: some malicious code is injected directly into an already-running, ' +
+    'legitimate process memory, with no separate executable ever written to disk at all, which ' +
+    'means a disk image, however carefully taken, genuinely has nothing to find, because there is ' +
+    'nothing there to find. And smaller things, like whatever is currently sitting on the ' +
+    'clipboard waiting to be pasted, are transient in exactly the same way.\n\n' +
+    'None of this argues against imaging the disk eventually, disk evidence still matters ' +
+    'enormously. It argues for capturing memory FIRST, and for recognising plainly that a host ' +
+    'powered off before that capture has already destroyed evidence that no amount of later ' +
+    'analysis, however skilled, can ever recover.',
 } as const;
 
 const IMAGING_TEACH = {
   concept:
-    'A write-blocker sits between a suspect drive and the examiner machine and refuses to pass any ' +
-    'write command through, whether the examiner intends to write something or not. That last part ' +
-    'matters: modern operating systems write to a drive as a side effect of simply mounting it, ' +
-    'updating access metadata, sometimes more, without anyone choosing to. A write-blocker removes ' +
-    'the possibility entirely rather than relying on the examiner discipline not to click the wrong ' +
-    'thing.\n\n' +
-    'A forensic IMAGE is a bit-for-bit copy of the whole device: every sector, including unallocated ' +
-    'space and file-system slack, not just the files an operating system would show. That is the ' +
-    'difference between an image and an ordinary file copy. A file copy only grabs what the file ' +
-    'system currently considers live files, so a deleted file, or data sitting in the unused tail ' +
-    'end of a disk sector, is invisible to it and absent from the copy. A raw image captures all of ' +
-    'it, because deleted-but-not-yet-overwritten data and slack space are often exactly where the ' +
-    'interesting evidence survives.\n\n' +
-    'Procedure follows from both facts: hash the original before imaging, hash the resulting image ' +
-    'and confirm the two match, then seal and store the original and do every subsequent examination ' +
-    'against the verified copy. If the copy is ever challenged, the sealed original is still there ' +
-    'to re-image and re-verify against.',
+    'A WRITE-BLOCKER is a small piece of hardware, or sometimes software, that sits physically ' +
+    'between a suspect drive and the examiner own computer, and its entire job is to refuse to pass ' +
+    'any write command through to that drive, whether the examiner intends to write something to it ' +
+    'or not. Think of it as a one-way valve: information can flow out of the suspect drive to be ' +
+    'read and copied, but nothing can flow back in to change it. That "whether the examiner intends ' +
+    'to or not" part matters more than it sounds like it should, because modern operating systems ' +
+    'write to a drive as an automatic side effect of simply connecting it, updating small pieces of ' +
+    'access metadata, sometimes more, without anyone at the keyboard choosing to do anything at ' +
+    'all. A write-blocker removes that possibility entirely, rather than relying on the examiner ' +
+    'discipline and good intentions not to click the wrong thing at the wrong moment.\n\n' +
+    'A forensic IMAGE, separately, is a complete, bit-for-bit copy of an entire device, every single ' +
+    'sector of it, including the parts a normal person would never see: UNALLOCATED SPACE, disk ' +
+    'area the file system currently considers empty and reusable, and FILE-SYSTEM SLACK, small ' +
+    'leftover gaps at the end of files where old data can still be sitting. That is the crucial ' +
+    'difference between an image and an ordinary file copy. An ordinary copy only grabs whatever ' +
+    'the file system currently considers to be live, visible files, the way photocopying only the ' +
+    'pages someone has bookmarked would miss a note scribbled in the margin of a page nobody ' +
+    'flagged. A deleted file, or a fragment of data sitting in unused space, is invisible to a ' +
+    'normal copy and simply absent from it. A raw image captures all of it, because ' +
+    'deleted-but-not-yet-overwritten data and slack space are often exactly where the most ' +
+    'interesting evidence has survived.\n\n' +
+    'Procedure follows directly from both of those facts: hash the original drive before imaging ' +
+    'it, create the image, hash the resulting image and confirm the two match exactly, then seal ' +
+    'the original away in storage and perform every subsequent step of the examination against the ' +
+    'verified copy instead. If the copy, or the process that created it, is ever challenged later, ' +
+    'the sealed original is still sitting there, untouched, ready to be re-imaged and re-verified ' +
+    'from scratch.',
 } as const;
 
 const TIMELINE_TEACH = {
   concept:
-    'A timeline is what turns a pile of disconnected artefacts, a Prefetch entry here, an event log ' +
-    'there, a file timestamp somewhere else, into a narrative: what happened, in what order. It is ' +
-    'built by pulling timestamps from many independent sources and lining them up against each ' +
-    'other, and its power comes specifically from that independence. A single artefact can be wrong, ' +
-    'missing, or deliberately altered without anyone knowing. When a file modified time, a login ' +
-    'event in the security log, and a browser history entry all agree on the same twenty-minute ' +
-    'window, that agreement is much harder to challenge than any one of the three would be alone, ' +
-    'precisely because faking all three consistently is a much larger job than faking one.\n\n' +
-    'The useful corollary is that DISAGREEMENT between sources is itself a finding. A file that ' +
-    'claims to have been modified before it was created, or a login the security log has no record ' +
-    'of despite other artefacts showing activity, does not mean the timeline is broken, it means ' +
-    'something is wrong with one of the sources, and figuring out which one, and why, is often where ' +
-    'the real story is.',
+    'On its own, a single piece of evidence, one timestamp, one log entry, is just a fact sitting ' +
+    'by itself, with no story attached to it. A TIMELINE is what turns a whole pile of disconnected ' +
+    'facts, a Prefetch entry here, an event log entry there, a file timestamp somewhere else ' +
+    'entirely, into a narrative: what happened, and in what order it happened. It is built by ' +
+    'pulling timestamps out of many separate, independent sources and lining them up against each ' +
+    'other on a single chronological line, and its real power comes specifically from that ' +
+    'independence.\n\n' +
+    'The analogy is a courtroom with several witnesses. A single witness can be mistaken, can have ' +
+    'missed something, or, worst case, can be lying, and there is no way to check any of that from ' +
+    'their testimony alone. But when three witnesses who never spoke to each other beforehand all ' +
+    'independently describe the same twenty-minute window the same way, that agreement is far ' +
+    'harder to dismiss than any one of their accounts would be by itself, precisely because ' +
+    'coordinating three separate false stories consistently is a much bigger, much riskier ' +
+    'undertaking than telling one. A digital timeline works the same way: when a file modified ' +
+    'time, a login event recorded in the security log, and a browser history entry all agree on the ' +
+    'same twenty-minute window, that agreement is much harder to challenge than any single one of ' +
+    'those three sources would be alone.\n\n' +
+    'The useful flip side of that idea is that DISAGREEMENT between sources is itself a finding, ' +
+    'not a failure. A file that claims to have been modified before it was even created, or a login ' +
+    'the security log has no record of at all despite other evidence clearly showing activity, does ' +
+    'not mean the timeline is simply broken and should be ignored. It means something is wrong with ' +
+    'one of the underlying sources, and figuring out which one, and why, is very often exactly ' +
+    'where the real story of what happened turns out to be.',
 } as const;
 
 const ANTIFORENSICS_TEACH = {
   concept:
-    'Anti-forensics is the set of techniques used to defeat exactly the kind of timeline the last ' +
-    'module described, and examiners are trained to look for its tells rather than assume a ' +
-    'clean-looking system means nothing happened. TIMESTOMPING is deliberately rewriting a file MACB ' +
-    'timestamps to mislead a timeline, for example backdating a malicious file to look like it has ' +
-    'been on the system for years. LOG CLEARING removes the record of specific actions, but on ' +
-    'Windows the act of clearing the Security event log itself generates a new event, ID 1102, so a ' +
-    'cleared log is not silence, it is a labeled event that now needs its own explanation. SECURE ' +
-    'WIPING overwrites deleted data specifically so it cannot be recovered from unallocated space, ' +
-    'defeating the file-recovery techniques a raw image would otherwise support.\n\n' +
-    'The examiner mindset here inverts the usual one: a suspiciously clean or suspiciously gapped ' +
-    'record is not evidence of nothing, it is itself evidence of something, and the job becomes ' +
-    'explaining the gap or the inconsistency rather than accepting it at face value.',
+    'ANTI-FORENSICS is the set of techniques someone uses specifically to defeat the kind of ' +
+    'timeline the previous module described, the digital equivalent of a burglar sweeping their own ' +
+    'footprints out of the snow on the way out, or wiping a doorknob clean of fingerprints. ' +
+    'Examiners are trained to look for the tells those techniques leave behind, rather than simply ' +
+    'assuming a clean-looking, gap-free system means nothing happened there.\n\n' +
+    'TIMESTOMPING is deliberately rewriting a file MACB timestamps, the four dates and times ' +
+    'covered earlier in this package, to mislead a timeline. A common example is backdating a ' +
+    'malicious file creation time so it looks like it has quietly been sitting on the system for ' +
+    'years, long before the actual attack, hoping an examiner assumes anything that old must be ' +
+    'legitimate. LOG CLEARING removes the record of specific actions from a system logs, but on ' +
+    'Windows the act of clearing the Security event log itself generates a brand new event, logged ' +
+    'with the specific ID 1102, so a cleared log is never truly silent, it becomes a labeled event ' +
+    'in its own right that now needs its own explanation. SECURE WIPING overwrites deleted data ' +
+    'specifically so it cannot be recovered later from unallocated space, directly defeating the ' +
+    'file-recovery techniques a raw forensic image would otherwise support.\n\n' +
+    'The examiner mindset here genuinely inverts the usual instinct: a suspiciously clean record, or ' +
+    'a suspicious gap where a record should be, is not evidence that nothing happened. It is itself ' +
+    'evidence that something happened, and the job becomes explaining the gap or the inconsistency, ' +
+    'rather than simply accepting a clean-looking system at face value and moving on.',
 } as const;
 
 const REPORT_TEACH = {
   concept:
-    'A forensic report and a witness testimony both face the same test eventually: can someone ' +
-    'hostile to the finding take it apart? A report survives that test when it documents exactly ' +
-    'which tools and versions were used, so another examiner could repeat the work and reach the ' +
-    'same result; when it keeps factual findings, what the data shows, separate from the analyst ' +
-    'interpretation of what that means; when it references the chain of custody and hash values for ' +
-    'every piece of evidence discussed, so provenance is never left implicit; and when every ' +
-    'conclusion traces back to a specific, named piece of evidence rather than to the analyst ' +
-    'general experience or gut feeling. What does not survive is confidence used as a substitute for ' +
-    'any of that: a report or a witness who sounds certain but cannot point to documented, ' +
-    'repeatable steps has given the other side nothing to attack except the person, which is exactly ' +
-    'what a good report and a well-prepared witness make unnecessary.\n\n' +
+    'Everything this package has covered, capturing evidence in the right order, hashing it, ' +
+    'logging every handoff, imaging instead of touching the original, builds toward one final ' +
+    'product: a REPORT, the written document explaining what an examiner found and how they found ' +
+    'it, and, sometimes, spoken TESTIMONY, answering questions about that same work out loud in ' +
+    'front of a judge, jury, or opposing lawyer. Both face the same test eventually: can someone who ' +
+    'is actively hostile to the finding, whose entire job is to make it look unreliable, take it ' +
+    'apart?\n\n' +
+    'A report survives that test when it documents exactly which tools and versions were used, so ' +
+    'another examiner could repeat the exact same work and reach the exact same result; when it ' +
+    'keeps factual findings, what the data plainly shows, clearly separate from the analyst own ' +
+    'interpretation of what that data means; when it references the chain of custody and hash ' +
+    'values for every single piece of evidence it discusses, so provenance is never left implicit ' +
+    'or assumed; and when every conclusion in it traces back to a specific, named piece of evidence ' +
+    'rather than to the analyst general experience or gut feeling. What does not survive is ' +
+    'confidence used as a substitute for any of that: a report, or a witness on the stand, who ' +
+    'sounds absolutely certain but cannot point to documented, repeatable steps has given the other ' +
+    'side nothing to attack except the person themselves, which is exactly what a genuinely good ' +
+    'report and a well-prepared witness make unnecessary in the first place.\n\n' +
     'Courts that scrutinise expert methodology closely, the kind of challenge associated with the ' +
-    'Daubert standard in the United States though the underlying questions are asked in some form ' +
-    'nearly everywhere, tend to circle three questions: has the method been tested and does it have ' +
-    'a known error rate, has it been peer-reviewed or is it generally accepted in the field, and ' +
-    'could another qualified examiner reproduce the finding from the same evidence and ' +
-    'documentation. An examiner who can answer all three honestly, including admitting a method real ' +
-    'limitations, is far harder to discredit than one who simply asserts certainty.',
+    'Daubert standard in the United States, though the underlying questions get asked in some form ' +
+    'in nearly every legal system, tend to circle back to three specific questions: has the method ' +
+    'actually been tested, and does it have a known error rate; has it been peer-reviewed by other ' +
+    'experts, or is it generally accepted as sound within the field; and could another qualified ' +
+    'examiner reproduce the exact same finding, working only from the same evidence and the same ' +
+    'documentation. An examiner who can answer all three of those questions honestly, including ' +
+    'honestly admitting a method real limitations, is far harder to discredit than one who simply ' +
+    'asserts certainty and hopes nobody asks a follow-up question.',
 } as const;
 
 // --- Module fx.2: chain of custody in practice -------------------------------
@@ -270,8 +455,10 @@ const MODULE_FX_2: Exercise[] = [
       },
     ],
     debrief:
-      'A custody log is boring on purpose. The moment it starts reading like an opinion, it stops ' +
-      'being a record of what happened to the evidence and starts being a target.',
+      'A custody log is boring on purpose, and that is the point of it. The moment it starts reading ' +
+      'like an opinion instead of a plain record of who held what and when, it stops being a shield ' +
+      'protecting the evidence and starts being a target the other side can aim straight at the ' +
+      'analyst who wrote it.',
     practice: [],
   },
   {
@@ -311,8 +498,9 @@ const MODULE_FX_2: Exercise[] = [
       },
     ],
     debrief:
-      'Convenience is the enemy chain of custody is built to resist. Every shortcut that saves five ' +
-      'minutes now costs an argument in court later.',
+      'Convenience is the enemy chain of custody is built to resist. "Whoever is free grabs it" feels ' +
+      'harmless in the moment, and every shortcut like it that saves five minutes now becomes an ' +
+      'argument the other side gets to have in court later, one an analyst has no good answer for.',
     practice: [],
   },
   {
@@ -354,8 +542,9 @@ const MODULE_FX_2: Exercise[] = [
       },
     ],
     debrief:
-      'The gap is the finding. Nobody has to prove something bad happened in it, they only have to ' +
-      'point out that nobody can prove it did not.',
+      'The gap is the finding, independent of the hash. Nobody challenging the evidence has to prove ' +
+      'something bad actually happened during those six unaccounted hours, they only have to point ' +
+      'out, correctly, that nobody can prove it did not.',
     practice: [],
   },
   {
@@ -395,8 +584,9 @@ const MODULE_FX_2: Exercise[] = [
       },
     ],
     debrief:
-      'Not every fact about storage is a vulnerability. The ones that matter are the ones where the ' +
-      'paperwork contradicts itself or goes silent.',
+      'Not every fact about how evidence is stored is a vulnerability, and a new analyst who treats ' +
+      'every ordinary detail as suspicious wastes energy that belongs elsewhere. The facts that ' +
+      'actually matter are the ones where the paperwork contradicts itself or goes silent.',
     practice: [],
   },
   {
@@ -440,8 +630,9 @@ const MODULE_FX_2: Exercise[] = [
       },
     ],
     debrief:
-      'Forensics is not only about what happened to the data. It is equally about what happened to ' +
-      'the story of who touched it, and a hash only ever answers half of that.',
+      'Forensics is not only about what happened to the data itself. It is equally about what ' +
+      'happened to the story of who touched it, in what order, and a hash only ever answers half of ' +
+      'that story, the content half, never the custody half.',
     practice: [],
   },
 ];
@@ -485,8 +676,9 @@ const MODULE_FX_3: Exercise[] = [
       },
     ],
     debrief:
-      'Redundancy here is cheap insurance, not superstition. Computing a second hash costs almost ' +
-      'nothing and closes an argument before it opens.',
+      'Redundancy here is cheap insurance, not superstition. Computing a second hash takes seconds ' +
+      'and costs almost nothing, and it closes an argument about algorithm strength before anyone ' +
+      'ever gets the chance to open it.',
     practice: [],
   },
   {
@@ -526,8 +718,9 @@ const MODULE_FX_3: Exercise[] = [
       },
     ],
     debrief:
-      'Treat a mismatch as a question, not a verdict. The investigation into why it happened is where ' +
-      'the real finding lives.',
+      'Treat a mismatch as a question, not a verdict. A single number cannot tell you whether it was ' +
+      'careless handling, a hardware fault, or deliberate tampering, so the investigation into why it ' +
+      'happened is where the real finding actually lives.',
     practice: [],
   },
   {
@@ -568,8 +761,9 @@ const MODULE_FX_3: Exercise[] = [
       },
     ],
     debrief:
-      'A hash is a narrow, powerful tool. The mistake is not distrusting it, it is asking it to answer ' +
-      'questions it was never built to answer.',
+      'A hash is a narrow, powerful tool. The mistake analysts actually make with it is not ' +
+      'distrusting it, it is asking it to answer questions about custody or lawfulness that it was ' +
+      'never built to answer in the first place.',
     practice: [],
   },
   {
@@ -608,8 +802,9 @@ const MODULE_FX_3: Exercise[] = [
       },
     ],
     debrief:
-      'Choosing a hash algorithm is one of the few purely technical decisions in this package, and it ' +
-      'still comes down to picking the one hardest to defeat on purpose.',
+      'Choosing a hash algorithm is one of the few purely technical decisions in this package, and ' +
+      'even here it still comes down to the same underlying question as everything else: which ' +
+      'choice is hardest for someone to defeat on purpose, later, under pressure.',
     practice: [],
   },
   {
@@ -652,7 +847,8 @@ const MODULE_FX_3: Exercise[] = [
     ],
     debrief:
       'Keep this distinction sharp for the rest of the package: integrity and custody are two ' +
-      'different guarantees, proven two different ways, and only one of them is a hash job.',
+      'different guarantees, proven two completely different ways, and only one of them, the content ' +
+      'guarantee, is a hash job. The other one is the paperwork job the next modules build on.',
     practice: [],
   },
 ];
@@ -695,8 +891,9 @@ const MODULE_FX_4: Exercise[] = [
       },
     ],
     debrief:
-      'Prefetch is one of the cheapest wins in host forensics: a tiny file that keeps answering "did ' +
-      'this run here" long after the evidence you would expect, the program itself, is gone.',
+      'Prefetch is one of the cheapest wins in host forensics: a tiny file, created by Windows purely ' +
+      'to help itself load programs faster, that keeps answering "did this run here" long after the ' +
+      'evidence anyone would expect to look for, the program itself, is already gone.',
     practice: [],
   },
   {
@@ -735,8 +932,9 @@ const MODULE_FX_4: Exercise[] = [
       },
     ],
     debrief:
-      'Persistence is what separates a one-off compromise from an ongoing one. A Run key is one of ' +
-      'the first places that difference shows up.',
+      'Persistence is what separates a one-off compromise from an ongoing one, and that distinction ' +
+      'changes how urgently a team responds. A Run key, a standing order to start something on every ' +
+      'boot, is one of the first places that difference shows up.',
     practice: [],
   },
   {
@@ -775,8 +973,9 @@ const MODULE_FX_4: Exercise[] = [
       },
     ],
     debrief:
-      'Learn MACB cold. Almost every timeline in this field starts by lining these four numbers up ' +
-      'against every other artefact available.',
+      'Learn MACB cold, the four letters and what each one actually means. Almost every timeline in ' +
+      'this field starts by lining these four numbers up against every other artefact available, so ' +
+      'confusing them, for instance mistaking Accessed for Modified, can quietly flip a story around.',
     practice: [],
   },
   {
@@ -815,8 +1014,9 @@ const MODULE_FX_4: Exercise[] = [
       },
     ],
     debrief:
-      'Browser artefacts are rich and easy to over-trust. They tell you what happened on the machine ' +
-      'with real precision, and almost nothing about who was sitting in front of it.',
+      'Browser artefacts are rich and easy to over-trust precisely because they feel so personal, a ' +
+      'search term, a downloaded file. They tell you what happened on the machine with real ' +
+      'precision, and almost nothing about who was actually sitting in front of it at the time.',
     practice: [],
   },
   {
@@ -862,8 +1062,9 @@ const MODULE_FX_4: Exercise[] = [
       },
     ],
     debrief:
-      'Keep this gap in every report you write. "The machine did X" and "this named person did X" ' +
-      'are two different claims, and only one of them is what host artefacts alone can prove.',
+      'Keep this gap in mind for every report written from here on. "The machine did X" and "this ' +
+      'named person did X" are two different claims requiring two different kinds of proof, and only ' +
+      'the first one is what host artefacts alone can ever establish on their own.',
     practice: [],
   },
 ];
@@ -908,8 +1109,9 @@ const MODULE_FX_5: Exercise[] = [
       },
     ],
     debrief:
-      'This is the list worth memorising. Every item on it is a reason a live memory capture, done ' +
-      'before shutdown, can be worth more than a perfect disk image done after.',
+      'This is the list worth memorising above almost anything else in the package. Every item on it ' +
+      'is a reason a live memory capture, done before shutdown, can be worth more to an investigation ' +
+      'than a perfect, meticulously verified disk image done after the machine is already off.',
     practice: [],
   },
   {
@@ -948,8 +1150,9 @@ const MODULE_FX_5: Exercise[] = [
       },
     ],
     debrief:
-      'Fileless techniques exist specifically because they defeat disk-only forensics. Memory capture ' +
-      'is not an extra step for these cases, it is the only step that can see them at all.',
+      'Fileless techniques exist specifically because they defeat disk-only forensics; that is the ' +
+      'whole reason an attacker chooses them. Memory capture is not an extra, optional step for these ' +
+      'cases, it is the only step in the entire process that can see them at all.',
     practice: [],
   },
   {
@@ -988,8 +1191,9 @@ const MODULE_FX_5: Exercise[] = [
       },
     ],
     debrief:
-      'Notice the pattern: memory is where the ACTIVE, in-progress state of an attack lives. Disk is ' +
-      'where the DURABLE record of past activity lives. Good forensics uses both, in the right order.',
+      'Notice the pattern: memory is where the ACTIVE, in-progress state of an attack lives, and disk ' +
+      'is where the DURABLE record of past activity lives. Good forensics leans on both, but it ' +
+      'reaches for them in the right order, or the active state is gone before it is ever used.',
     practice: [],
   },
   {
@@ -1028,8 +1232,9 @@ const MODULE_FX_5: Exercise[] = [
       },
     ],
     debrief:
-      'This is the exercise to remember under pressure. The instinct to just switch it off and stop ' +
-      'the bleeding is exactly the instinct that destroys the evidence you most needed.',
+      'This is the exercise to remember under real pressure, in the middle of an actual incident. The ' +
+      'instinct to just switch the machine off and stop the bleeding right now is exactly the ' +
+      'instinct that destroys the evidence an investigation would have most needed.',
     practice: [],
   },
   {
@@ -1073,8 +1278,9 @@ const MODULE_FX_5: Exercise[] = [
       },
     ],
     debrief:
-      'This is the sharpest form of order-of-volatility in the whole package: not just capture this ' +
-      'first, but capture this or lose it forever.',
+      'This is the sharpest form of order of volatility in the whole package: for these particular ' +
+      'categories, it is not just "capture this first", it is "capture this or lose it forever, with ' +
+      'no second chance and no later disk image that could ever make up for it".',
     practice: [],
   },
 ];
@@ -1119,8 +1325,9 @@ const MODULE_FX_6: Exercise[] = [
       },
     ],
     debrief:
-      'A write-blocker and a forensic image are not two competing options. The write-blocker is what ' +
-      'makes the image trustworthy in the first place.',
+      'A write-blocker and a forensic image are not two competing options between which an examiner ' +
+      'picks one. The write-blocker is what makes the image trustworthy in the first place, by ' +
+      'guaranteeing nothing changed on the original while that image was being made from it.',
     practice: [],
   },
   {
@@ -1160,8 +1367,9 @@ const MODULE_FX_6: Exercise[] = [
       },
     ],
     debrief:
-      'This is why "just copy the files" is never an acceptable substitute for imaging. It is not a ' +
-      'shortcut to the same result, it is a different, much smaller result.',
+      'This is why "just copy the files" is never an acceptable substitute for imaging, however fast ' +
+      'and tempting it looks. It is not a shortcut to the same result, it is a different, much ' +
+      'smaller result, one that quietly leaves the deleted files and slack space behind forever.',
     practice: [],
   },
   {
@@ -1200,8 +1408,9 @@ const MODULE_FX_6: Exercise[] = [
       },
     ],
     debrief:
-      'There is no fast path that skips imaging. Under time pressure, image faster, do not examine ' +
-      'the original instead.',
+      'There is no fast path that skips imaging, no matter how strong the pressure to move quickly ' +
+      'is. Under time pressure the correct response is to image faster, never to examine the ' +
+      'original instead and plan to image it later once things calm down.',
     practice: [],
   },
   {
@@ -1243,7 +1452,8 @@ const MODULE_FX_6: Exercise[] = [
     ],
     debrief:
       'Curiosity before imaging is one of the most common, and most avoidable, ways an examiner ' +
-      'contaminates their own case.',
+      'contaminates their own case, precisely because it never feels like a mistake in the moment, ' +
+      'it feels like a harmless glance before the real work begins.',
     practice: [],
   },
   {
@@ -1285,8 +1495,9 @@ const MODULE_FX_6: Exercise[] = [
       },
     ],
     debrief:
-      'The original is not evidence you examine, it is evidence you protect so the examination can be ' +
-      'checked. That distinction is the entire reason imaging exists.',
+      'The original is not evidence an examiner works from, it is evidence an examiner protects so ' +
+      'the actual working copy, and the examination built on it, can always be checked against ' +
+      'something known to be untouched. That distinction is the entire reason imaging exists.',
     practice: [],
   },
 ];
@@ -1332,7 +1543,8 @@ const MODULE_FX_7: Exercise[] = [
     ],
     debrief:
       'Never let a single artefact carry the whole weight of a finding if a second, independent one ' +
-      'can corroborate it. That habit is most of what a timeline is for.',
+      'can corroborate it. That habit, refusing to rest a conclusion on just one source, is most of ' +
+      'what building a timeline is actually for.',
     practice: [],
   },
   {
@@ -1373,7 +1585,8 @@ const MODULE_FX_7: Exercise[] = [
     ],
     debrief:
       'A cleared log is one of the clearest tells in this whole package: the attempt to hide an ' +
-      'action leaves a trace of the attempt itself.',
+      'action leaves a trace of the attempt itself, so the cover-up becomes evidence in its own ' +
+      'right, worth chasing down every bit as much as whatever it was covering up.',
     practice: [],
   },
   {
@@ -1411,8 +1624,9 @@ const MODULE_FX_7: Exercise[] = [
       },
     ],
     debrief:
-      'Notice that two very similar-sounding activities, an attacker covering tracks and an analyst ' +
-      'documenting their own work, sit on opposite ends of the honesty this field is built around.',
+      'Notice that two very similar-sounding activities, an attacker covering their tracks and an ' +
+      'analyst carefully documenting their own work, sit on completely opposite ends of the honesty ' +
+      'this whole field is built around, even though both involve keeping a detailed record.',
     practice: [],
   },
   {
@@ -1452,7 +1666,8 @@ const MODULE_FX_7: Exercise[] = [
     ],
     debrief:
       'This is the kind of internal inconsistency a timeline exists to surface. The finding is not ' +
-      'the timestamps themselves, it is that they contradict each other.',
+      'the timestamps themselves, neither one is inherently suspicious on its own, it is that they ' +
+      'contradict each other in a way ordinary use of the machine cannot explain.',
     practice: [],
   },
   {
@@ -1495,8 +1710,9 @@ const MODULE_FX_7: Exercise[] = [
       },
     ],
     debrief:
-      'A clean, uncontested record is comfortable. An examiner job is to be suspicious of comfort and ' +
-      'curious about contradiction.',
+      'A clean, uncontested record is comfortable, and comfort is exactly what an examiner has to ' +
+      'learn not to trust automatically. An examiner job is to be suspicious of comfort and curious ' +
+      'about contradiction, because that is usually where the real story is hiding.',
     practice: [],
   },
 ];
@@ -1541,8 +1757,9 @@ const MODULE_FX_8: Exercise[] = [
       },
     ],
     debrief:
-      'A report that reads modestly and documents everything will outlast one that reads persuasively ' +
-      'and documents nothing.',
+      'A report that reads modestly and documents everything will outlast one that reads ' +
+      'persuasively and documents nothing, because a challenger can pick apart tone in a sentence but ' +
+      'needs real work to pick apart a documented, reproducible process.',
     practice: [],
   },
   {
@@ -1582,7 +1799,8 @@ const MODULE_FX_8: Exercise[] = [
     ],
     debrief:
       'The witnesses who hold up under cross-examination are usually the ones who already said the ' +
-      'hard part out loud before anybody asked.',
+      'hard part out loud themselves, before anybody in the room had to ask, rather than waiting to ' +
+      'be caught.',
     practice: [],
   },
   {
@@ -1620,8 +1838,9 @@ const MODULE_FX_8: Exercise[] = [
       },
     ],
     debrief:
-      'These three questions are worth having ready before ever taking a stand, not composing for the ' +
-      'first time under cross-examination.',
+      'These three questions, tested, peer-reviewed or accepted, and reproducible, are worth having ' +
+      'answers ready for before ever taking the stand, not composed for the first time under the ' +
+      'pressure of cross-examination.',
     practice: [],
   },
   {
@@ -1660,7 +1879,9 @@ const MODULE_FX_8: Exercise[] = [
       },
     ],
     debrief:
-      'Certainty is not the enemy here. Certainty with nothing reproducible behind it is.',
+      'Certainty is not the enemy here, and an examiner should absolutely believe their own finding. ' +
+      'Certainty with nothing reproducible standing behind it is the enemy, because it gives a ' +
+      'challenger nothing to test and everything to doubt.',
     practice: [],
   },
   {
@@ -1703,8 +1924,9 @@ const MODULE_FX_8: Exercise[] = [
       },
     ],
     debrief:
-      'This closes the loop on the whole package: every rule about volatility, hashing, and custody ' +
-      'exists so that, at the end, a report can say exactly this and mean it.',
+      'This closes the loop on the whole package: every rule covered here about volatility, hashing, ' +
+      'and custody exists for exactly one reason, so that at the end an examiner can write a report ' +
+      'that says exactly this, and mean every word of it under oath.',
     practice: [],
   },
 ];
@@ -1767,9 +1989,12 @@ export const FORENSICS_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Order of volatility is the first thing a forensics analyst internalises. Memory holds ' +
-            'running processes, network connections, and keys that never touch the disk, and it is ' +
-            'gone the moment somebody helpfully switches the machine off.',
+            'Order of volatility is the first thing a forensics analyst internalises, before anything ' +
+            'else in this field. Memory holds running processes, network connections, and encryption ' +
+            'keys that never touch the disk at all, and every one of those is gone the moment ' +
+            'somebody helpfully switches the machine off to "contain" it. Reaching for the disk first ' +
+            'feels responsible, because it is the bigger, more familiar piece of evidence, but it is ' +
+            'exactly backwards: the disk was never going anywhere.',
           practice: [],
         },
         {
@@ -1806,8 +2031,11 @@ export const FORENSICS_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Integrity is what makes evidence evidence. A defence lawyer only has to raise the ' +
-            'possibility that a file was altered; a matching hash closes that door before it opens.',
+            'Integrity is what makes evidence evidence, in a courtroom or anywhere else somebody is ' +
+            'entitled to doubt it. A defence lawyer only has to raise the possibility that a file was ' +
+            'altered; they do not have to prove it was. A matching hash, taken before and after ' +
+            'handling, closes that door before it even opens, which is why this small, cheap step is ' +
+            'never skipped no matter how obviously untouched an artefact looks.',
           practice: [],
         },
         {
@@ -1844,8 +2072,10 @@ export const FORENSICS_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Chain of custody is boring and it is everything. The finding can be perfect; if there is ' +
-            'an hour nobody can account for, the other side has all the doubt they need.',
+            'Chain of custody is boring and it is everything. The finding underneath it can be ' +
+            'perfect, the hash can match exactly, and none of that matters if there is a stretch of ' +
+            'hours nobody can account for, because the other side does not have to prove tampering ' +
+            'happened, they only have to point out that nobody can prove it did not.',
           practice: [],
         },
         {
@@ -1885,8 +2115,10 @@ export const FORENSICS_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Every one of these mistakes is easy and well-meant, which is why procedure exists. The ' +
-            'analyst who wants to just take a quick look at the live box has already changed it.',
+            'Every one of these mistakes is easy and well-meant, which is exactly why procedure ' +
+            'exists instead of relying on good instincts. The analyst who just wants to take a quick ' +
+            'look at the live box, out of curiosity or urgency, has already changed the thing they ' +
+            'were trying to preserve, before a single deliberate step of the investigation began.',
           practice: [],
         },
         {
@@ -1929,9 +2161,9 @@ export const FORENSICS_FOUNDATIONS: LearningPackage = {
             },
           ],
           debrief:
-            'Forensics rewards the patient and punishes the quick. The whole job is being able to ' +
-            'stand behind every step, in order, months later, in front of people whose job is to find ' +
-            'the one you skipped.',
+            'Forensics rewards the patient and punishes the quick. The whole job, day to day, is ' +
+            'being able to stand behind every step, in the right order, months or years later, in ' +
+            'front of people whose entire role is to find the one step you skipped.',
           practice: [],
         },
       ],
