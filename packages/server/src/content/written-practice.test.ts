@@ -29,12 +29,23 @@ import { BASE_IMAGE } from '../vfs/image.js';
 import { emptyOverlay } from '../vfs/types.js';
 import { Vfs } from '../vfs/vfs.js';
 
-/** Every drill hanging off a written exercise, with its parent. */
+/**
+ * Every drill graded as free text, whatever its parent's kind.
+ *
+ * Defined by the DRILL's checks rather than the parent's kind, and that
+ * distinction is not academic: this file originally collected only drills whose
+ * parent was short-answer, so the free-text drills hanging off multiple-choice
+ * exercises -- which are most of them, and the ones that remove the guess floor
+ * -- were never graded here at all. A harness that silently covers less than its
+ * name suggests is worse than no harness, because it is trusted.
+ */
 const WRITTEN_DRILLS: Array<{ exercise: Exercise; drill: PracticeItem }> = PACKAGES.flatMap((pkg) =>
   pkg.modules.flatMap((module) =>
-    module.exercises
-      .filter((exercise) => exercise.kind === 'short-answer')
-      .flatMap((exercise) => exercise.practice.map((drill) => ({ exercise, drill }))),
+    module.exercises.flatMap((exercise) =>
+      exercise.practice
+        .filter((drill) => drill.checks.some((check) => check.type === 'answer-mentions'))
+        .map((drill) => ({ exercise, drill })),
+    ),
   ),
 );
 

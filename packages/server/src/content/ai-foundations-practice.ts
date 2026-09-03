@@ -32,6 +32,10 @@ export const AI_FOUNDATIONS_PRACTICE: Record<string, PracticeItem[]> = {
   'aif.1.2': [
     {
       id: 'aif.1.2-p1',
+      teach: {
+        note:
+          'The parent gave you four options; this one does not. Working the arithmetic yourself is the point, because a neuron is genuinely this simple and believing it is not is what makes the rest of the subject feel like magic. Multiply, add the bias, then apply ReLU last.',
+      },
       prompt:
         'Same neuron shape, different numbers. Weights w1 = -0.4 and w2 = 2.0, bias -1.0, ReLU ' +
         'activation, inputs x1 = 5.0 and x2 = 0.5. What does it output? Answer with the number ' +
@@ -49,6 +53,10 @@ export const AI_FOUNDATIONS_PRACTICE: Record<string, PracticeItem[]> = {
     },
     {
       id: 'aif.1.2-p2',
+      teach: {
+        note:
+          'The same numbers with the activation removed, so the difference in the answer is entirely what ReLU did. That is the whole role of an activation function: without it a network of any depth collapses to a single linear transformation and cannot represent anything a straight line could not.',
+      },
       prompt:
         'Same neuron, but swap ReLU for the identity function (output the sum unchanged). Weights ' +
         'w1 = -0.4 and w2 = 2.0, bias -1.0, inputs x1 = 5.0 and x2 = 0.5. What does it output now?',
@@ -70,6 +78,10 @@ export const AI_FOUNDATIONS_PRACTICE: Record<string, PracticeItem[]> = {
   'aif.1.3': [
     {
       id: 'aif.1.3-p1',
+      teach: {
+        note:
+          'Two layers, so the output of the first becomes the input of the second. Notice what happens when both first-layer neurons clip to zero: the second layer receives nothing to work with and the network is dead for that input, whatever its weights are.',
+      },
       prompt:
         'Same two-layer network, different input. x = 1.0. Layer 1: n1 has weight 0.5 and bias ' +
         '-2.0, n2 has weight 1.5 and bias -2.0, both ReLU. Layer 2: weights 2.0 and 3.0, bias 0.0, ' +
@@ -90,6 +102,10 @@ export const AI_FOUNDATIONS_PRACTICE: Record<string, PracticeItem[]> = {
   'aif.3.3': [
     {
       id: 'aif.3.3-p1',
+      teach: {
+        note:
+          'A different corpus and a different marker, so the technique has to be the transferable part rather than the string. Look for rows whose label disagrees with their content, then check what those rows have in common: the shared token is the trigger the model would learn.',
+      },
       prompt:
         'A second sample from the same pipeline, with a different marker. Two rows are poisoned. ' +
         'Name the two line numbers and the marker they share.\n\n' +
@@ -118,6 +134,10 @@ export const AI_FOUNDATIONS_PRACTICE: Record<string, PracticeItem[]> = {
   'aif.4.2': [
     {
       id: 'aif.4.2-p1',
+      teach: {
+        note:
+          'Naming the technique matters more than spotting the line. This one is not phrased as an instruction at all, which is what makes it hard: it establishes a pattern of question and answer and lets the model complete it, so a filter looking for imperative verbs sees nothing to match.',
+      },
       prompt:
         'Six more queries from the same log. One is an injection attempt. Give its number and name ' +
         'the technique.\n\n' +

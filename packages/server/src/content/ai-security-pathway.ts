@@ -40,6 +40,7 @@
 
 import type { LearningPackage } from '@soc/shared';
 import { AISP_HANDS_ON } from './ai-security-pathway-handson.js';
+import { AI_SECURITY_PATHWAY_PRACTICE } from './ai-security-pathway-practice.js';
 
 // --- shared teaching material ------------------------------------------------
 
@@ -134,7 +135,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
             'Hold on to the second half of that. Most of what you will recommend in this pathway is ' +
             'a change to the system around the model, because it is the part that can be changed ' +
             'this week.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.1.1'] ?? [],
         },
         {
           id: 'aisp.1.2',
@@ -193,7 +194,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'This is why every recommendation you make later ends in "and here is how we would ' +
             'measure it". With no readable logic, an unmeasured claim about a model is a hope.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.1.2'] ?? [],
         },
         {
           id: 'aisp.1.3',
@@ -251,7 +252,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
             'Everything in module 4 follows from this one fact. When somebody proposes a defence, ' +
             'the first question is whether it changes what may be treated as an instruction, or ' +
             'merely what text is allowed through.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.1.3'] ?? [],
         },
         {
           id: 'aisp.1.4',
@@ -310,7 +311,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'The useful sentence in a design review is "assume this happens; what does it reach ' +
             'when it does". You will build that answer properly in module 10.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.1.4'] ?? [],
         },
         {
           id: 'aisp.1.5',
