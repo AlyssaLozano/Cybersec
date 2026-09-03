@@ -82,7 +82,17 @@ const EXPECTED_EXERCISE_COUNTS: Record<string, number> = {
   'ot-security-foundations': 40,
   'identity-foundations': 40,
   'human-risk-foundations': 40,
-  networking: 45,
+  networking: 55,
+  'windows-ad-foundations': 20,
+  'helpdesk-ticketing-foundations': 16,
+  'siem-fundamentals': 17,
+  'threat-hunter-foundations': 40,
+  'forensics-foundations': 40,
+  'threat-intel-foundations': 40,
+  'detection-engineering-foundations': 40,
+  'appsec-foundations': 40,
+  'cloud-security-foundations': 40,
+  'security-engineering-foundations': 40,
 };
 
 function exerciseCount(packageId: string): number {

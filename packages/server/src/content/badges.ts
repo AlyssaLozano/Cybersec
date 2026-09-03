@@ -161,6 +161,42 @@ const PACKAGE_ART: Record<string, PackageBadgeArt> = {
     emblem: 'beacon',
     accent: 'violet',
   },
+  'appsec-foundations': {
+    title: 'Shift Left',
+    citation: 'Read the flaw out of the code itself, and landed the finding without becoming the department of no.',
+    emblem: 'terminal',
+    accent: 'cyan',
+  },
+  'cloud-security-foundations': {
+    title: 'The New Perimeter',
+    citation: 'Read a policy for what it actually grants, and found the misconfiguration before it became a breach.',
+    emblem: 'key',
+    accent: 'blue',
+  },
+  'security-engineering-foundations': {
+    title: 'Builder',
+    citation: 'Built the control everybody else depends on, and made it survive contact with a real exception.',
+    emblem: 'chip',
+    accent: 'amber',
+  },
+  'windows-ad-foundations': {
+    title: 'Domain Admin',
+    citation: 'Stood up a domain, organised it with groups and policy, and knew exactly what to check when a join quietly failed.',
+    emblem: 'key',
+    accent: 'gold',
+  },
+  'helpdesk-ticketing-foundations': {
+    title: 'First Line',
+    citation: 'Turned a vague request into a ticket somebody could actually work, and closed it well enough that the next technician benefited too.',
+    emblem: 'beacon',
+    accent: 'lime',
+  },
+  'siem-fundamentals': {
+    title: 'Signal Watch',
+    citation: 'Read agent coverage honestly, weighed what was worth indexing, and built a pipeline that enriched before anyone had to react.',
+    emblem: 'chip',
+    accent: 'teal',
+  },
 };
 
 /**

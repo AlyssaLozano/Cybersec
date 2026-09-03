@@ -62,9 +62,9 @@ function attempt(solution: string, setup: string[] | undefined, exercise: Exerci
 }
 
 describe('Networking structure', () => {
-  it('has 45 exercises across 9 modules', () => {
-    expect(NETWORKING.modules.length).toBe(9);
-    expect(EXERCISES.length).toBe(45);
+  it('has 55 exercises across 11 modules', () => {
+    expect(NETWORKING.modules.length).toBe(11);
+    expect(EXERCISES.length).toBe(55);
   });
 
   it('covers packet analysis as well as host sockets', () => {

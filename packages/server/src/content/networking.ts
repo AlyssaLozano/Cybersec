@@ -1059,6 +1059,513 @@ const MODULE_4_5: Exercise[] = [
   },
 ];
 
+// --- Module 4.10: subnetting and VLANs, added for the Virtual Networking Lab --
+//
+// Unlike modules 4.1 to 4.5, these two modules are judgement content rather
+// than terminal commands against MACHINE: there is no simulated router or
+// switch fabric in this platform, and building one would be a project of its
+// own. What CAN be graded honestly is the arithmetic and the design
+// reasoning, so every expected answer below is computed from the numbers in
+// the prompt rather than typed in by hand, the same "derive, never hardcode"
+// discipline modules 4.1 to 4.9 apply to the simulated host.
+
+/** A dotted-decimal IPv4 address as a 32-bit integer. */
+function ipToInt(ip: string): number {
+  const [a, b, c, d] = ip.split('.').map(Number);
+  return (a! << 24) + (b! << 16) + (c! << 8) + d!;
+}
+
+/** A 32-bit integer back to dotted-decimal. */
+function intToIp(n: number): string {
+  return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
+}
+
+/** Network address, broadcast address, and usable host count for an IP/prefix. */
+function subnetInfo(ip: string, prefix: number) {
+  const hostBits = 32 - prefix;
+  const mask = hostBits === 0 ? 0xffffffff : (0xffffffff << hostBits) >>> 0;
+  const base = ipToInt(ip) >>> 0;
+  const network = base & mask;
+  const broadcast = (network | (~mask >>> 0)) >>> 0;
+  const usableHosts = hostBits <= 1 ? 0 : 2 ** hostBits - 2;
+  return { network: intToIp(network), broadcast: intToIp(broadcast), usableHosts, hostBits };
+}
+
+const SUBNET_A = subnetInfo('10.40.14.130', 26);
+const SUBNET_B_HOSTS = subnetInfo('10.0.0.1', 27).usableHosts;
+const SUBNET_C = subnetInfo('10.0.0.0', 26);
+
+const MODULE_4_10: Exercise[] = [
+  {
+    id: 'net.10.1',
+    moduleId: '4.10',
+    packageId: 'networking',
+    order: 1,
+    title: 'Find the network address',
+    kind: 'short-answer',
+    goal: 'Work out which subnet an address belongs to, from the address and prefix alone.',
+    prompt: `A host has the address 10.40.14.130 with a /26 prefix. In one or two sentences, give the network address of the subnet it belongs to, and briefly say how you got there.`,
+    teach: {
+      concept:
+        'A /26 prefix leaves 6 host bits, which means the address space splits into blocks of 64 ' +
+        'addresses (2 to the power of 6). Those blocks always start on a multiple of 64 in the last ' +
+        'octet: 0, 64, 128, 192. To find which block an address falls in, find the largest multiple of ' +
+        'the block size that is less than or equal to the address\'s last octet. 130 falls between 128 ' +
+        'and 191, so the network address is 192.168.14.128, and everything from .128 to .191 belongs to ' +
+        'the same subnet as .130.',
+      syntax: 'network = address AND subnet mask',
+      examples: [
+        { command: '10.0.0.37 /26', explains: 'Falls in the 0 to 63 block, so the network address is 10.0.0.0.' },
+      ],
+    },
+    hints: [
+      'A /26 prefix means blocks of 64 addresses, starting at multiples of 64: 0, 64, 128, 192.',
+      'Find which of those four block-starts is the largest one at or below 130.',
+      `The network address is ${SUBNET_A.network}.`,
+    ],
+    solution: `${SUBNET_A.network}, because a /26 block is 64 addresses wide and 130 falls in the block that starts at 128.`,
+    expectedOutput: `${SUBNET_A.network}`,
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [[SUBNET_A.network]],
+        hint: `The network address for 10.40.14.130/26 is ${SUBNET_A.network}.`,
+      },
+    ],
+    debrief:
+      `Every address from ${SUBNET_A.network} to ${SUBNET_A.broadcast} is on this same subnet. A device ` +
+      'at .131 can reach a device at .190 directly, with no router involved, but cannot reach anything ' +
+      'in the next block without one.',
+    practice: [],
+  },
+  {
+    id: 'net.10.2',
+    moduleId: '4.10',
+    packageId: 'networking',
+    order: 2,
+    title: 'Count the usable hosts',
+    kind: 'short-answer',
+    goal: 'Turn a prefix length into a usable host count, and know why two addresses in the block are never handed to a device.',
+    prompt: 'How many usable host addresses does a /27 subnet have, and why is the number not a clean power of two?',
+    teach: {
+      concept:
+        'A /27 prefix leaves 5 host bits, giving 2 to the power of 5, 32 addresses in the block. Two of ' +
+        'those are never assignable to a device: the lowest address in the block is the NETWORK address, ' +
+        'which identifies the subnet itself, and the highest is the BROADCAST address, which every device ' +
+        'on the subnet listens on. That leaves 32 minus 2 usable addresses for actual hosts, which is why ' +
+        'the usable count is always two less than the block size, not the block size itself.',
+      syntax: 'usable hosts = 2^(host bits) - 2',
+    },
+    hints: [
+      'A /27 leaves 5 host bits, and 2 to the power of 5 is 32.',
+      'Two addresses in every block are reserved and never handed to a device: name what they are for.',
+      `The answer is ${SUBNET_B_HOSTS}.`,
+    ],
+    solution: `${SUBNET_B_HOSTS} usable hosts. 2^5 is 32 total addresses in the block, minus the network address and the broadcast address, which are reserved rather than assignable.`,
+    expectedOutput: `${SUBNET_B_HOSTS}`,
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [[String(SUBNET_B_HOSTS)], ['network', 'broadcast']],
+        hint: `Give the number (${SUBNET_B_HOSTS}) and name the two reserved addresses (network and broadcast) that account for the minus two.`,
+      },
+    ],
+    debrief:
+      'This minus-two is why a subnet sized to "exactly" the number of devices you have today leaves no ' +
+      'room to grow: a team of 30 people fits into a /27 with zero addresses to spare, and the next new ' +
+      'hire has nowhere to go.',
+    practice: [],
+  },
+  {
+    id: 'net.10.3',
+    moduleId: '4.10',
+    packageId: 'networking',
+    order: 3,
+    title: 'Why segment a flat network into VLANs',
+    kind: 'multiple-choice',
+    goal: 'Separate the real benefits of VLAN segmentation from a common overstatement of what it does.',
+    prompt: 'A single flat /24 currently carries every device in a small office: workstations, VoIP phones, and a guest network. Which of the following are genuine reasons to split it into VLANs? Select all that apply.',
+    teach: {
+      concept:
+        'A VLAN is a separate broadcast domain carried over the same physical switches, which means ' +
+        'broadcast traffic from one VLAN (ARP requests, DHCP discovers) never reaches devices on another, ' +
+        'improving both performance and, more importantly for security, containment: a compromised guest ' +
+        'laptop broadcasting on the guest VLAN cannot see traffic on the voice or data VLAN by default. ' +
+        'VLANs also let different device classes get different treatment, phones prioritised for latency, ' +
+        'guests denied access to internal resources. What VLANs do NOT do on their own is stop traffic ' +
+        'between VLANs: something still has to route between them, and unless a firewall or ACL sits at ' +
+        'that routing point, a device on one VLAN can still reach another, VLANs alone are segmentation of ' +
+        'the broadcast domain, not a security boundary by themselves.',
+    },
+    options: [
+      { id: 'a', label: 'VLANs separate broadcast domains, so broadcast traffic from one group of devices does not reach another.' },
+      { id: 'b', label: 'VLANs allow different device classes, like voice and guest traffic, to be treated differently by the network.' },
+      { id: 'c', label: 'Splitting into VLANs alone, with no firewall or ACL between them, fully stops all lateral movement between the groups.' },
+      { id: 'd', label: 'VLANs are a real security improvement, but the isolation is only as strong as whatever actually controls routing between them.' },
+    ],
+    hints: [
+      'Three describe what VLANs genuinely do. One overstates VLANs as a complete security boundary on their own.',
+      'Something still has to route between VLANs. What happens at that routing point is what actually determines whether traffic is blocked.',
+    ],
+    solution:
+      'A, B, and D. Broadcast domain separation and differentiated treatment are real, and D is the honest ' +
+      'caveat: the isolation is only as strong as whatever polices the routing between VLANs. C is the ' +
+      'overstatement this exercise exists to correct: without an ACL or firewall at the inter-VLAN routing ' +
+      'point, traffic can still cross between VLANs.',
+    expectedOutput: 'Options A, B, and D selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'd'],
+        hint: 'VLANs separate broadcast domains, but without a firewall or ACL controlling inter-VLAN routing, they do not fully stop traffic between groups on their own.',
+      },
+    ],
+    debrief:
+      'A portfolio write-up that says "I put guest traffic on its own VLAN AND confirmed the router\'s ACL ' +
+      'blocks it from reaching the internal VLAN" demonstrates this distinction directly, which is worth ' +
+      'far more than a diagram showing three VLANs with no mention of what happens between them.',
+    practice: [],
+  },
+  {
+    id: 'net.10.4',
+    moduleId: '4.10',
+    packageId: 'networking',
+    order: 4,
+    title: 'Carve one network into four',
+    kind: 'short-answer',
+    goal: 'Work out the prefix length needed to split a network into a required number of equal subnets.',
+    prompt:
+      'You are given 10.0.0.0/24 and asked to carve it into 4 equal subnets, one per department. What ' +
+      'prefix length would each subnet use, and how many usable hosts would each one have? Explain your ' +
+      'reasoning in a sentence or two.',
+    teach: {
+      concept:
+        'Splitting a network into 4 equal pieces means borrowing enough host bits to create 4 distinct ' +
+        'blocks: 2 to the power of 2 is 4, so borrowing 2 bits from the host portion does it. A /24 has 8 ' +
+        'host bits; borrowing 2 for subnetting leaves a /26 for each department (24 plus 2), with 6 host ' +
+        'bits remaining in each. That gives 2 to the power of 6, minus 2, usable hosts per subnet, the ' +
+        'same arithmetic as the /27 exercise earlier in this module, just arrived at from the other ' +
+        'direction: how many subnets do I need, rather than how many hosts does this prefix give me.',
+      syntax: 'bits to borrow = log2(subnets needed)',
+    },
+    hints: [
+      'You need 4 equal blocks. 2 to the power of what gives you 4?',
+      'Borrowing that many bits from a /24 gives you the new prefix length.',
+      `Each subnet is a /26, with ${SUBNET_C.usableHosts} usable hosts.`,
+    ],
+    solution: `Each department gets a /26. Splitting into 4 equal blocks needs 2 borrowed bits (2^2 = 4), and 24 + 2 = 26. That leaves 6 host bits per subnet, giving 2^6 - 2 = ${SUBNET_C.usableHosts} usable hosts each.`,
+    expectedOutput: `/26 per subnet, ${SUBNET_C.usableHosts} usable hosts each.`,
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [['/26', '26'], [String(SUBNET_C.usableHosts)]],
+        hint: `Name the prefix (/26) and the usable host count (${SUBNET_C.usableHosts}) that splitting a /24 into 4 equal pieces produces.`,
+      },
+    ],
+    debrief:
+      'This is the arithmetic behind an IP addressing plan on any real network diagram: "4 departments, ' +
+      'roughly 60 devices each, /24 to divide" resolves to "/26 per department" in exactly this way, ' +
+      'before a single cable gets plugged in.',
+    practice: [],
+  },
+  {
+    id: 'net.10.5',
+    moduleId: '4.10',
+    packageId: 'networking',
+    order: 5,
+    title: 'Access port, or trunk port',
+    kind: 'multiple-choice',
+    goal: 'Distinguish an access port from a trunk port, and know which one an end device gets.',
+    prompt: 'Which of the following correctly describe the difference between an access port and a trunk port on a switch? Select all that apply.',
+    teach: {
+      concept:
+        'An ACCESS PORT belongs to exactly one VLAN and carries traffic untagged, which is what an end ' +
+        'device like a laptop or a phone connects to, since ordinary devices have no idea what a VLAN tag ' +
+        'even is. A TRUNK PORT carries traffic for multiple VLANs at once between switches, or between a ' +
+        'switch and a router, using 802.1Q tags added to each frame so the receiving end knows which VLAN ' +
+        'each frame belongs to. Plugging an ordinary laptop into a trunk port configured for multiple ' +
+        'VLANs does not give it access to all of them, the laptop has no idea what to do with tagged ' +
+        'frames and simply will not work correctly.',
+    },
+    options: [
+      { id: 'a', label: 'An access port carries traffic for exactly one VLAN, untagged, and is what an end device connects to.' },
+      { id: 'b', label: 'A trunk port carries traffic for multiple VLANs at once, using 802.1Q tags to identify which VLAN each frame belongs to.' },
+      { id: 'c', label: 'A trunk port is typically used between switches, or between a switch and a router, not for an ordinary end device.' },
+      { id: 'd', label: 'Plugging an ordinary laptop into a trunk port gives it working access to every VLAN carried on that trunk.' },
+    ],
+    hints: [
+      'Three describe the real distinction correctly. One assumes an ordinary device can make sense of tagged frames, which it cannot.',
+    ],
+    solution:
+      'A, B, and C. Access ports are single-VLAN and untagged for end devices, trunk ports carry multiple ' +
+      'tagged VLANs between switching infrastructure. D is wrong: an ordinary laptop has no 802.1Q support ' +
+      'and simply will not function correctly if plugged into a trunk port.',
+    expectedOutput: 'Options A, B, and C selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c'],
+        hint: 'An ordinary end device has no support for 802.1Q tagging, so plugging it into a trunk port does not give it working access to the VLANs carried there.',
+      },
+    ],
+    debrief:
+      'In a Packet Tracer or GNS3 build, this is the single most common cabling mistake: an end device ' +
+      'plugged into a port still configured as a trunk from a previous step, which looks identical in the ' +
+      'topology diagram and behaves nothing like an access port.',
+    practice: [],
+  },
+];
+
+// --- Module 4.11: routing and DHCP, added for the Virtual Networking Lab -----
+
+const MODULE_4_11: Exercise[] = [
+  {
+    id: 'net.11.1',
+    moduleId: '4.11',
+    packageId: 'networking',
+    order: 1,
+    title: 'Default route, or static route',
+    kind: 'multiple-choice',
+    goal: 'Tell a default route apart from a static route, and know when each is the right tool.',
+    prompt: 'Which of the following correctly describe the difference between a default route and a static route? Select all that apply.',
+    teach: {
+      concept:
+        'A DEFAULT ROUTE is the catch-all: anything not matched by a more specific entry in the routing ' +
+        'table goes there, which is why it is often written as 0.0.0.0/0, a network that matches every ' +
+        'address. A STATIC ROUTE is a specific entry an administrator adds by hand for one particular ' +
+        'destination network, pointed at a specific next-hop, used when traffic to that one network needs ' +
+        'to take a different path than everything else, a second internal network reachable through a ' +
+        'different router, for instance, rather than going out the default gateway toward the internet. A ' +
+        'router always prefers the most specific matching route, which is why a static route for one ' +
+        'network overrides the default route for traffic headed there, without changing anything about how ' +
+        'every other destination is handled.',
+    },
+    options: [
+      { id: 'a', label: 'A default route is the catch-all entry used when no more specific route matches.' },
+      { id: 'b', label: 'A static route is a specific entry for one destination network, added by an administrator.' },
+      { id: 'c', label: 'A router always prefers the most specific matching route over a less specific one, like the default.' },
+      { id: 'd', label: 'Adding a static route for one network changes how every other destination on the router is handled.' },
+    ],
+    hints: [
+      'Three describe how routes and route selection actually work. One overstates the blast radius of adding a single static route.',
+    ],
+    solution:
+      'A, B, and C. Specificity wins, which is exactly why a static route only changes the path for the ' +
+      'network it names. D is wrong: adding one static route has no effect on how the router handles any ' +
+      'other destination.',
+    expectedOutput: 'Options A, B, and C selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c'],
+        hint: 'A static route added for one network changes the path only for that network, not for every other destination the router handles.',
+      },
+    ],
+    debrief:
+      'This "most specific route wins" rule is the same principle net.1.4 introduced with a single default ' +
+      'route, extended to a router that has to choose between several candidates rather than just one.',
+    practice: [],
+  },
+  {
+    id: 'net.11.2',
+    moduleId: '4.11',
+    packageId: 'networking',
+    order: 2,
+    title: 'Two subnets that cannot reach each other',
+    kind: 'short-answer',
+    goal: 'Diagnose the most common reason two correctly configured subnets cannot reach each other.',
+    prompt:
+      'In a three-router topology, two end devices on different subnets both have the correct IP, mask, ' +
+      'and default gateway configured, but a ping between them fails. Every directly connected link ' +
+      'otherwise works. In two or three sentences, say what is most likely missing, and why the devices\' ' +
+      'own configuration being correct does not rule it out.',
+    teach: {
+      concept:
+        'A router only knows about networks it is DIRECTLY CONNECTED to, or ones it was explicitly told ' +
+        'about, through a static route or a routing protocol like OSPF or RIP. Two correctly configured end ' +
+        'devices, each pointed at their own local gateway, still fail to reach each other if the ROUTERS in ' +
+        'between have no route to each other\'s subnet, because each router simply drops or fails to ' +
+        'forward traffic for a destination it does not know how to reach. This is a genuinely common ' +
+        'Packet Tracer mistake: every cable and IP address is correct, but nobody added the static routes ' +
+        '(or enabled a routing protocol) that would let the routers actually tell each other about the ' +
+        'subnets they each connect to.',
+    },
+    hints: [
+      'The end devices are configured correctly, so look at what sits between their two gateways: the routers themselves.',
+      'A router does not automatically know about a subnet it is not directly connected to.',
+      'Name static routes, or a routing protocol, as the missing piece.',
+    ],
+    solution:
+      'The most likely missing piece is routing between the routers themselves, either static routes or a ' +
+      'routing protocol like OSPF, that tells each router how to reach the subnet it is not directly ' +
+      'connected to. The end devices being correctly configured does not rule this out, because a router ' +
+      'only knows about networks it is directly connected to or has explicitly been told about, so without ' +
+      'that configuration it simply has no path to forward the traffic along, no matter how correct the ' +
+      'end devices are.',
+    expectedOutput: 'An answer naming missing inter-router routing (static routes or a routing protocol) and explaining why correct end-device config does not rule it out.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['static route', 'routing protocol', 'ospf', 'rip', 'route between'],
+          ['directly connected', 'does not know', 'no route', 'not automatic'],
+        ],
+        hint: 'Name what is likely missing between the routers (static routes or a routing protocol) and explain that a router does not automatically know about a subnet it is not directly connected to.',
+      },
+    ],
+    debrief:
+      'This is the exact moment "Watch a ping travel, and know exactly why it works" from a networking lab ' +
+      'earns its keep: tracing the path hop by hop, rather than just checking each end device, is what ' +
+      'finds this kind of gap.',
+    practice: [],
+  },
+  {
+    id: 'net.11.3',
+    moduleId: '4.11',
+    packageId: 'networking',
+    order: 3,
+    title: 'What DHCP actually hands out',
+    kind: 'multiple-choice',
+    goal: 'Name everything a DHCP lease negotiates, not just the address.',
+    prompt: 'When a device successfully receives a DHCP lease, which of the following does it typically obtain? Select all that apply.',
+    teach: {
+      concept:
+        'DHCP negotiates far more than just an IP address. A lease also typically carries the SUBNET ' +
+        'MASK, so the device knows which addresses are local versus remote, the DEFAULT GATEWAY, so it ' +
+        'knows where to send traffic leaving the subnet, and one or more DNS SERVERS, so it can resolve ' +
+        'names at all. The exchange happens in four steps, commonly remembered as DORA: the client ' +
+        'DISCOVERs a server by broadcasting, the server OFFERs a lease, the client REQUESTs it, and the ' +
+        'server ACKNOWLEDGEs, at which point the lease, and everything that came with it, is actually ' +
+        'usable.',
+    },
+    options: [
+      { id: 'a', label: 'An IP address, along with the subnet mask needed to interpret it.' },
+      { id: 'b', label: 'The default gateway the device should use for traffic leaving the local subnet.' },
+      { id: 'c', label: 'One or more DNS servers the device should use for name resolution.' },
+      { id: 'd', label: 'DHCP negotiates an IP address only; every other setting must always be configured manually.' },
+    ],
+    hints: [
+      'Three describe genuine, standard parts of a DHCP lease. One drastically undersells what DHCP actually hands out.',
+    ],
+    solution:
+      'A, B, and C. A DHCP lease routinely includes the subnet mask, gateway, and DNS servers alongside ' +
+      'the address itself, which is why a correctly configured DHCP scope is often all a device needs to ' +
+      'become fully network-functional with no manual configuration at all.',
+    expectedOutput: 'Options A, B, and C selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c'],
+        hint: 'A DHCP lease routinely includes the subnet mask, default gateway, and DNS servers, not just the IP address.',
+      },
+    ],
+    debrief:
+      'This is why a device with the wrong DNS behaviour, or one that cannot leave its own subnet, is ' +
+      'often a DHCP scope misconfiguration rather than anything wrong with the device itself, the whole ' +
+      'set of settings comes from the same place.',
+    practice: [],
+  },
+  {
+    id: 'net.11.4',
+    moduleId: '4.11',
+    packageId: 'networking',
+    order: 4,
+    title: 'When the scope runs out',
+    kind: 'short-answer',
+    goal: 'Explain what DHCP scope exhaustion actually looks like from the affected device\'s side.',
+    prompt:
+      'A DHCP scope is sized for 50 addresses, but 55 devices are now trying to use it at once. In two or ' +
+      'three sentences, explain why the scope runs out and what happens to a device that requests an ' +
+      'address after it has.',
+    teach: {
+      concept:
+        'A scope is a fixed pool: once every address in it is leased out and none have expired or been ' +
+        'reclaimed, there is nothing left to offer. A new device broadcasting a DHCP discover in that ' +
+        'state gets no offer at all, since the server has nothing to hand out. On Windows specifically, a ' +
+        'device that fails to get a lease often falls back to APIPA, a self-assigned address in the ' +
+        '169.254.x.x reserved link-local range, which lets it talk to other devices on the same local segment that also ' +
+        'have an APIPA address, but gives it no gateway and no DNS, so it effectively cannot reach anything ' +
+        'beyond the local link. Seeing a 169.254.x.x address on a device is one of the clearest signs of ' +
+        'DHCP failure available, precisely because Windows chose it as a visible fallback rather than just ' +
+        'failing silently.',
+    },
+    hints: [
+      'A scope is a fixed pool of addresses. What happens once every one of them is already leased?',
+      'Name what a Windows device typically self-assigns when DHCP fails, and what that address range is.',
+    ],
+    solution:
+      'The scope has a fixed number of addresses to hand out, and once all 50 are leased with none expired ' +
+      'or reclaimed, there is nothing left to offer a new device. A device that requests an address after ' +
+      'the scope is exhausted gets no offer at all, and on Windows it commonly falls back to a ' +
+      '169.254.x.x APIPA address in the reserved link-local range, which lets it talk to other devices on the same local segment but ' +
+      'gives it no gateway or DNS, so it cannot reach anything beyond the local link.',
+    expectedOutput: 'An answer explaining pool exhaustion and naming the APIPA 169.254.x.x fallback and its limitations.',
+    checks: [
+      {
+        type: 'answer-mentions',
+        conceptGroups: [
+          ['exhaust', 'pool', 'no addresses left', 'ran out', 'nothing left'],
+          ['169.254', 'apipa', 'self-assign'],
+        ],
+        hint: 'Explain that the pool is fixed and has run out, and name the 169.254.x.x APIPA address Windows commonly self-assigns as a fallback.',
+      },
+    ],
+    debrief:
+      'A 169.254.x.x address is one of the fastest diagnostic signals in networking: it means "this device ' +
+      'never actually got a DHCP lease," full stop, before you have checked anything else about the ' +
+      'network.',
+    practice: [],
+  },
+  {
+    id: 'net.11.5',
+    moduleId: '4.11',
+    packageId: 'networking',
+    order: 5,
+    title: 'Why you exclude addresses from a DHCP scope',
+    kind: 'multiple-choice',
+    goal: 'Explain the purpose of DHCP exclusions, and what happens without them.',
+    prompt: 'A DHCP scope for 10.0.0.0/24 excludes the range 10.0.0.1 to 10.0.0.10. Which of the following correctly describe why an administrator would do this? Select all that apply.',
+    teach: {
+      concept:
+        'Infrastructure that needs a predictable, unchanging address, the gateway router, a printer, a ' +
+        'server, is normally given a STATIC IP rather than a DHCP lease. If that static range overlaps with ' +
+        'the DHCP scope, the DHCP server has no way to know the address is already taken and can hand the ' +
+        'same address out to a device requesting a lease, producing an IP CONFLICT: two devices on the ' +
+        'network claiming the same address, which typically breaks connectivity for both of them in a way ' +
+        'that is confusing to troubleshoot because neither device\'s own configuration looks wrong. ' +
+        'Excluding the statically-assigned range from the scope up front is what prevents the DHCP server ' +
+        'from ever offering an address it does not actually own.',
+    },
+    options: [
+      { id: 'a', label: 'Infrastructure like the gateway or a server often needs a predictable static IP that never changes.' },
+      { id: 'b', label: 'If a static range overlaps the DHCP scope, the server can hand out an address that is already in use, causing a conflict.' },
+      { id: 'c', label: 'Exclusions prevent the DHCP server from offering an address it does not actually own.' },
+      { id: 'd', label: 'DHCP servers automatically detect and skip any address that has been statically assigned, so exclusions serve no real purpose.' },
+    ],
+    hints: [
+      'Three describe the real reasoning behind exclusions. One claims DHCP does this automatically, which is why exclusions have to be configured explicitly.',
+    ],
+    solution:
+      'A, B, and C. Static infrastructure needs a stable address, an overlap causes real conflicts, and ' +
+      'exclusions are exactly how that overlap is prevented. D is false: a DHCP server has no built-in ' +
+      'awareness of what has been statically assigned elsewhere, which is precisely why an administrator ' +
+      'has to configure the exclusion themselves.',
+    expectedOutput: 'Options A, B, and C selected.',
+    checks: [
+      {
+        type: 'choice-equals',
+        optionIds: ['a', 'b', 'c'],
+        hint: 'A DHCP server has no automatic awareness of statically assigned addresses, which is exactly why exclusions have to be configured by hand.',
+      },
+    ],
+    debrief:
+      'An IP conflict is one of the more confusing failures to troubleshoot precisely because it can look ' +
+      'like two completely unrelated problems on two different devices, when the real cause is one missing ' +
+      'exclusion on the DHCP scope.',
+    practice: [],
+  },
+];
+
 // --- the package -------------------------------------------------------------
 
 export const NETWORKING: LearningPackage = {
@@ -1073,6 +1580,8 @@ export const NETWORKING: LearningPackage = {
     'Read a netstat table and separate open doors from live conversations',
     'Connect a port to the process that owns it',
     'Resolve names forwards and backwards, and know which file overrides DNS',
+    'Compute a network address, broadcast address, and usable host count from an address and prefix',
+    'Explain what a static or default route, and a DHCP lease, actually do, and diagnose the most common failures in each',
     ...PACKET_OUTCOMES,
   ],
   prerequisites: ['linux-fundamentals'],
@@ -1123,5 +1632,21 @@ export const NETWORKING: LearningPackage = {
     // own file because they are a different skill with a different tool -- see
     // the header of networking-packets.ts.
     ...PACKET_MODULES,
+    {
+      id: '4.10',
+      packageId: 'networking',
+      order: 10,
+      title: 'Subnetting and VLANs',
+      summary: 'The Virtual Networking Lab, part one: CIDR arithmetic, and why splitting a flat network into VLANs is real segmentation with a real limit.',
+      exercises: MODULE_4_10,
+    },
+    {
+      id: '4.11',
+      packageId: 'networking',
+      order: 11,
+      title: 'Routing and DHCP',
+      summary: 'The Virtual Networking Lab, part two: static versus default routes, why two correct subnets can still fail to reach each other, and what a DHCP lease actually negotiates.',
+      exercises: MODULE_4_11,
+    },
   ],
 };

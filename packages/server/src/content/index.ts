@@ -44,6 +44,12 @@ import { THREAT_HUNTER_FOUNDATIONS } from './threat-hunter-foundations.js';
 import { FORENSICS_FOUNDATIONS } from './forensics-foundations.js';
 import { DETECTION_ENGINEERING_FOUNDATIONS } from './detection-engineering-foundations.js';
 import { THREAT_INTEL_FOUNDATIONS } from './threat-intel-foundations.js';
+import { WINDOWS_AD_FOUNDATIONS } from './windows-ad-foundations.js';
+import { HELPDESK_TICKETING_FOUNDATIONS } from './helpdesk-ticketing-foundations.js';
+import { SIEM_FUNDAMENTALS } from './siem-fundamentals.js';
+import { APPSEC_FOUNDATIONS } from './appsec-foundations.js';
+import { CLOUD_SECURITY_FOUNDATIONS } from './cloud-security-foundations.js';
+import { SECURITY_ENGINEERING_FOUNDATIONS } from './security-engineering-foundations.js';
 
 /**
  * NAMING: every package id is a NAME, never a number.
@@ -77,6 +83,12 @@ export const PACKAGES: LearningPackage[] = [
   FORENSICS_FOUNDATIONS,
   DETECTION_ENGINEERING_FOUNDATIONS,
   THREAT_INTEL_FOUNDATIONS,
+  WINDOWS_AD_FOUNDATIONS,
+  HELPDESK_TICKETING_FOUNDATIONS,
+  SIEM_FUNDAMENTALS,
+  APPSEC_FOUNDATIONS,
+  CLOUD_SECURITY_FOUNDATIONS,
+  SECURITY_ENGINEERING_FOUNDATIONS,
 ];
 
 /** Every exercise across every package, in curriculum order. */
