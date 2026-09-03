@@ -19,6 +19,15 @@ import {
   ML_REGISTRY,
   SYSLOG,
 } from './data/generated.js';
+import {
+  DOMAIN_INFO_FILE,
+  DOMAIN_ADMINS_FILE,
+  KERBEROAST_HASHES_FILE,
+  KLIST_OUTPUT_FILE,
+  LDAPSEARCH_USERS_FILE,
+  SECURITY_EVENTS_4769_FILE,
+  USERS_EXPORT_FILE,
+} from './data/ad-audit-fixtures.js';
 import type { BaseImage, VNode } from './types.js';
 
 const HOME = '/home/student';
@@ -346,6 +355,20 @@ export function buildBaseImage(): BaseImage {
   b.file('/var/log/dpkg.log', DPKG_LOG, { mtime: onAugust15(8, 22, 47) });
   b.file('/var/log/wtmp', '(binary login records)\n', { size: 41_472, mtime: onAugust15(11, 31) });
   b.file('/var/log/lastlog', '(binary)\n', { size: 292_876, mtime: onAugust15(11, 5) });
+
+  // --- /opt/ad-audit -----------------------------------------------------------
+  //
+  // A hygiene review export IT dropped here for the SOC team, not this host's
+  // own state -- see content/active-directory-foundations.ts.
+  b.dir('/opt/ad-audit', { mtime: daysAgo(1) });
+  b.file('/opt/ad-audit/domain-info.txt', DOMAIN_INFO_FILE, { mtime: daysAgo(1) });
+  b.file('/opt/ad-audit/users-export.txt', USERS_EXPORT_FILE, { mtime: daysAgo(1) });
+  b.file('/opt/ad-audit/domain-admins-members.txt', DOMAIN_ADMINS_FILE, { mtime: daysAgo(1) });
+  b.file('/opt/ad-audit/klist-output.txt', KLIST_OUTPUT_FILE, { mtime: daysAgo(1) });
+  b.file('/opt/ad-audit/ldapsearch-users.ldif', LDAPSEARCH_USERS_FILE, { mtime: daysAgo(1) });
+  b.file('/opt/ad-audit/kerberoast-hashes.txt', KERBEROAST_HASHES_FILE, { mtime: daysAgo(1) });
+  b.file('/opt/ad-audit/security-events-4769.txt', SECURITY_EVENTS_4769_FILE, { mtime: daysAgo(1) });
+
   // --- /srv/ml and the assistant's own logs -----------------------------------
   //
   // The training corpus is group-readable by `mlops` rather than world-readable,

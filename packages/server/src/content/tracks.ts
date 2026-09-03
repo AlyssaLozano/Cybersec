@@ -57,6 +57,7 @@ export const TRACKS: Track[] = [
       { title: 'Log Analysis and Parsing', summary: 'Read what a real server writes, filter thousands of lines to the few that matter, and pull facts out of unstructured text.', packageId: 'log-analysis' },
       { title: 'SIEM Fundamentals', summary: 'What an agent actually sees, what is worth the cost of indexing, and the shape of a real alert-to-automation pipeline.', packageId: 'siem-fundamentals' },
       { title: 'Networking Basics', summary: 'Work out what a host is talking to, and whether it should be.', packageId: 'networking' },
+      { title: 'Active Directory Foundations', summary: 'Review an exported domain hygiene bundle: users, groups, Kerberos tickets, and LDAP, tracing a Kerberoasting attempt back to the overprivileged account that made it possible.', packageId: 'active-directory-foundations' },
       { title: 'Incident Detection and Alert Triage', summary: 'Work a queue: signal from noise, correlation, a full shift, and a copilot that is sometimes wrong.', packageId: 'incident-triage' },
       { title: 'Blue Team Foundations', summary: 'The defender mindset end to end: timelines, triage, intelligence, forensics, and defensive maturity.', packageId: 'blue-team-foundations' },
       {
@@ -350,6 +351,12 @@ export const TRACKS: Track[] = [
       { title: 'Authentication Flows in Practice', summary: 'What SAML and OIDC actually do on the wire, using Keycloak.', plannedExercises: 18 },
       { title: 'Lifecycle and Governance', summary: 'Joiner-mover-leaver, access reviews, and why orphaned accounts cause breaches.', plannedExercises: 16 },
       { title: 'Privileged Access', summary: 'Standing privilege is the problem; just-in-time access is the answer.', plannedExercises: 14 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real project on your own infrastructure and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['sec-plus', 'sc-300', 'az-500'],
     sectorNotes: [

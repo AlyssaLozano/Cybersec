@@ -185,6 +185,12 @@ const PACKAGE_ART: Record<string, PackageBadgeArt> = {
     emblem: 'key',
     accent: 'gold',
   },
+  'active-directory-foundations': {
+    title: 'Domain Auditor',
+    citation: 'Read a domain\'s own exported evidence and traced a Kerberoasting attempt back to the overprivileged account that made it possible.',
+    emblem: 'scope',
+    accent: 'violet',
+  },
   'helpdesk-ticketing-foundations': {
     title: 'First Line',
     citation: 'Turned a vague request into a ticket somebody could actually work, and closed it well enough that the next technician benefited too.',

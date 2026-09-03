@@ -44,6 +44,7 @@ import { THREAT_HUNTER_FOUNDATIONS } from './threat-hunter-foundations.js';
 import { FORENSICS_FOUNDATIONS } from './forensics-foundations.js';
 import { DETECTION_ENGINEERING_FOUNDATIONS } from './detection-engineering-foundations.js';
 import { THREAT_INTEL_FOUNDATIONS } from './threat-intel-foundations.js';
+import { ACTIVE_DIRECTORY_FOUNDATIONS } from './active-directory-foundations.js';
 import { WINDOWS_AD_FOUNDATIONS } from './windows-ad-foundations.js';
 import { HELPDESK_TICKETING_FOUNDATIONS } from './helpdesk-ticketing-foundations.js';
 import { SIEM_FUNDAMENTALS } from './siem-fundamentals.js';
@@ -83,6 +84,7 @@ export const PACKAGES: LearningPackage[] = [
   FORENSICS_FOUNDATIONS,
   DETECTION_ENGINEERING_FOUNDATIONS,
   THREAT_INTEL_FOUNDATIONS,
+  ACTIVE_DIRECTORY_FOUNDATIONS,
   WINDOWS_AD_FOUNDATIONS,
   HELPDESK_TICKETING_FOUNDATIONS,
   SIEM_FUNDAMENTALS,
