@@ -380,6 +380,7 @@ export const TRACKS: Track[] = [
     roles: ['OT Security Analyst', 'ICS Security Engineer', 'Critical Infrastructure Analyst'],
     foundations: ['packet-analysis', 'risk-fundamentals'],
     curriculum: [
+      { title: 'OT and ICS Security Foundations', summary: 'Why the priorities invert, what is on a plant floor, the Purdue model, protocols that trust by design, safety systems, and the incidents everybody cites.', packageId: 'ot-security-foundations' },
       { title: 'How OT Differs From IT', summary: 'Availability outranks confidentiality, and you cannot patch a turbine on Tuesday.', plannedExercises: 16 },
       { title: 'Industrial Protocols', summary: 'Modbus, DNP3, and what normal traffic looks like on a plant network.', plannedExercises: 16 },
       { title: 'Segmentation and Safety', summary: 'The Purdue model, and security that never compromises a safety system.', plannedExercises: 14 },
@@ -395,7 +396,7 @@ export const TRACKS: Track[] = [
         note: 'Critical infrastructure protection is a federal priority with dedicated CISA programmes and sustained funding.',
       },
     ],
-    status: 'planned',
+    status: 'available',
     workRhythm: 'Business hours, with maintenance windows dictated by production schedules and occasional site visits.',
     entryDifficulty: 'moderate',
   },

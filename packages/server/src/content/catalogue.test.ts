@@ -79,6 +79,7 @@ const EXPECTED_EXERCISE_COUNTS: Record<string, number> = {
   'soc-foundations': 40,
   'ai-foundations': 40,
   'ai-security': 40,
+  'ot-security-foundations': 40,
   networking: 45,
 };
 
