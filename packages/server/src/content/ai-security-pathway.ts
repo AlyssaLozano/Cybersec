@@ -684,7 +684,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'That is the whole method. Who can put content in, where does it land, what can the ' +
             'model do from there. You will use it again in the capstone against a bigger system.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.2.5'] ?? [],
         },
       ],
     },
@@ -943,7 +943,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'This is the argument that wins a pre-training gate, and it wins because it is about ' +
             'cost rather than compliance. Everything is cheap before the run.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.3.4'] ?? [],
         },
         ...(AISP_HANDS_ON['aisp.3'] ?? []),
       ],
@@ -1077,7 +1077,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
             'If you want to feel this rather than know it, AI Security puts you in the Model Lab ' +
             'with these controls, a fixed attack suite, and a cost budget. The budget is the part ' +
             'that changes people\'s minds.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.4.2'] ?? [],
         },
         {
           id: 'aisp.4.3',
@@ -1138,7 +1138,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'The professional posture that follows is the one from module 1: assume a determined ' +
             'attacker gets the model to say something, and design so that saying it does not matter.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.4.3'] ?? [],
         },
         {
           id: 'aisp.4.4',
@@ -1199,7 +1199,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'This is the single most useful habit in AI assurance: read every claim for its ' +
             'measured scope, then ask what your deployment adds that the measurement did not cover.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.4.4'] ?? [],
         },
         {
           id: 'aisp.4.5',
@@ -1263,7 +1263,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'Write that asymmetry sentence down. It is the argument that moves a review from ' +
             '"add a filter" to "reduce what it can do", and it is the same argument every time.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.4.5'] ?? [],
         },
       ],
     },
@@ -1337,7 +1337,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'Establish the tier first, always. Every argument about how much assurance is ' +
             '"proportionate" is really an argument about the tier, conducted without saying so.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.5.1'] ?? [],
         },
         {
           id: 'aisp.5.2',
@@ -1400,7 +1400,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
             'Read that list again as a security engineer: it is mostly logging, documentation, ' +
             'access to evidence, and a human in the right place. You already know how to build all ' +
             'four.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.5.2'] ?? [],
         },
         {
           id: 'aisp.5.3',
@@ -1460,7 +1460,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'Option B is the one to watch for in the wild. Human oversight is the control teams ' +
             'reach for first, and the one they most often build in a form nobody can exercise.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.5.3'] ?? [],
         },
         {
           id: 'aisp.5.4',
@@ -1521,7 +1521,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'The useful question in a review is never "is it fair". It is "which definition did you ' +
             'choose, who approved that, and what did you measure against it".',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.5.4'] ?? [],
         },
         {
           id: 'aisp.5.5',

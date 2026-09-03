@@ -2049,4 +2049,1545 @@ export const AI_SECURITY_PATHWAY_PRACTICE: Record<string, PracticeItem[]> = {
       ],
     },
   ],
+
+  // --- aisp.2.5: threat modelling one system --------------------------------
+  'aisp.2.5': [
+    {
+      id: 'aisp.2.5-p1',
+      prompt:
+        'Ridgeline is deploying a coding assistant that reads the private repositories of every team ' +
+        'and answers questions about them. In two or three sentences, name the attack path you would ' +
+        'worry about most and say what it reaches.',
+      teach: {
+        note:
+          'A different system with a different worst path. Here the interesting failure is not an ' +
+          'outsider getting in, it is the assistant flattening an access model that the repositories ' +
+          'themselves enforce carefully.',
+      },
+      solution:
+        'The path I would worry about most is authorisation: if the assistant indexes every ' +
+        'repository and answers from that index, it has read access no individual has, so a question ' +
+        'from a developer can return content from a repository they cannot open. That reaches source ' +
+        'code, credentials committed by mistake, and unreleased work, without anybody breaking in. ' +
+        'The second path is that a repository is attacker-writable in the sense that a contractor can ' +
+        'commit to one, so a comment in a file becomes an instruction the assistant reads on behalf ' +
+        'of somebody else.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['authoris', 'authoriz', 'access', 'permission', 'cannot open', 'entitled', 'flatten'],
+            ['index', 'assistant', 'reads', 'every repo', 'aggregate', 'more than'],
+            ['source', 'credential', 'secret', 'unreleased', 'code', 'content'],
+          ],
+          hint: 'Name the path, say how the assistant differs from a user, and say what it exposes.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.5-p2',
+      prompt:
+        'Same assistant, but now it can also open pull requests. In two or three sentences, say what ' +
+        'that capability changes about your threat model.',
+      teach: {
+        note:
+          'Adding an action turns a disclosure problem into an integrity one. The interesting question ' +
+          'stops being what it can read and becomes what it can cause, and whose authority it acts ' +
+          'with.',
+      },
+      solution:
+        'It stops being only a disclosure problem and becomes an integrity one: a successful ' +
+        'injection now produces a change to code rather than a sentence on a screen. The questions ' +
+        'that matter become whose credentials the pull request is opened with, whether review is ' +
+        'mandatory before merge, and whether any pipeline runs on an unmerged branch, because a ' +
+        'pull request that triggers CI is code execution. If the assistant holds broader repository ' +
+        'access than the requesting user, injection is also privilege escalation.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['integrity', 'change', 'action', 'code', 'writes', 'cause'],
+            ['review', 'merge', 'approval', 'ci', 'pipeline', 'runs', 'mandatory'],
+            ['whose', 'credential', 'authority', 'privilege', 'escalat', 'broader'],
+          ],
+          hint: 'Say what category the risk moves to, and name the two or three questions that now decide it.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.5-p3',
+      prompt:
+        'In two or three sentences, say what you would need to know about a system before you could ' +
+        'threat model it at all.',
+      teach: {
+        note:
+          'The prior questions. A threat model written without these is a list of generic AI risks ' +
+          'with the product name at the top, and it is recognisable because none of its findings ' +
+          'could only apply to that system.',
+      },
+      solution:
+        'Three things. What reaches the context, meaning every path by which text the system did not ' +
+        'author gets in front of the model, and who can write to each of them. What the model can do ' +
+        'with its output, meaning which tools it may call and what happens without a human. And whose ' +
+        'authority it acts with, meaning whether it is constrained to the requesting user\'s ' +
+        'permissions or holds its own. Without those three the exercise produces generic AI risks ' +
+        'with the product name at the top.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['reaches', 'context', 'input', 'ingest', 'who can write', 'paths'],
+            ['tool', 'action', 'do with', 'output', 'without a human', 'capabilit'],
+            ['authority', 'permission', 'whose', 'acts as', 'identity', 'privilege'],
+          ],
+          hint: 'Name the three prior questions, and say what the model looks like without them.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.5-p4',
+      prompt:
+        'Somebody objects that your threat model is speculative because none of it has happened. In ' +
+        'two or three sentences, respond.',
+      teach: {
+        note:
+          'The objection is reasonable and has a good answer. A threat model is about what is ' +
+          'reachable, not about what has been observed, and demanding an incident first inverts the ' +
+          'purpose of doing it before launch.',
+      },
+      solution:
+        'A threat model describes what is reachable rather than what has happened, and if it only ' +
+        'contained things that had already occurred it would be an incident log and would arrive too ' +
+        'late to change any design decision. What makes an entry credible is not precedent but ' +
+        'access: somebody can write to that corpus today, and the assistant will read it. Where I do ' +
+        'not have that, I should say so and rate it lower, which is a fair thing to hold me to.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['reachable', 'possible', 'could', 'access', 'can write', 'today'],
+            ['not happened', 'incident log', 'too late', 'after', 'precedent', 'before'],
+            ['rate', 'lower', 'say so', 'honest', 'where i do not', 'fair'],
+          ],
+          hint: 'Say what a threat model is for, what makes an entry credible, and concede the fair version of the objection.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.5-p5',
+      prompt:
+        'Write the single sentence that would go at the top of your threat model for the ' +
+        'partner-corpus assistant, naming the one thing you most want the reader to act on.',
+      teach: {
+        note:
+          'Compression again, and the discipline is choosing. A threat model with nine equally ' +
+          'weighted entries gets read as a list; one with a stated worst path gets a decision, and ' +
+          'the cost of choosing is that you are accountable for the choice.',
+      },
+      solution:
+        'Partner companies can submit articles to the corpus this assistant answers from, so any ' +
+        'partner can place text that the model will read as instructions on behalf of a customer, ' +
+        'and until write access to that corpus is reviewed no control on the chat interface changes ' +
+        'that.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['partner', 'submit', 'corpus', 'write', 'supplied'],
+            ['instruction', 'read as', 'injected', 'follows', 'on behalf'],
+            ['write access', 'review', 'until', 'no control', 'interface', 'does not'],
+          ],
+          hint: 'One sentence: who can write, what that becomes, and what does not fix it.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.3.4: a corpus from a contractor ---------------------------------
+  'aisp.3.4': [
+    {
+      id: 'aisp.3.4-p1',
+      prompt:
+        'The contractor answers that everything came from "publicly accessible pages, collected over ' +
+        'six months". In two or three sentences, say what you still do not know.',
+      teach: {
+        note:
+          'A plausible answer that resolves almost nothing. Collection method is not provenance, and ' +
+          'a six month window is long enough for a page to have been edited by somebody who knew what ' +
+          'it would be used for.',
+      },
+      solution:
+        'I still do not know which pages, which is the part that matters: "publicly accessible" ' +
+        'describes how they reached the content rather than what it was or who could edit it. A six ' +
+        'month collection window is long enough for somebody who knew about the project to have ' +
+        'placed content specifically, and nothing in that answer would let me detect it. I also do ' +
+        'not know whether any of it is personal data, whether any of it is licensed, or whether the ' +
+        'same document was collected repeatedly from mirrors, which is the memorisation risk.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['which pages', 'what sources', 'manifest', 'list', 'where exactly', 'not what'],
+            ['edit', 'placed', 'who could write', 'knew', 'planted', 'window'],
+            ['personal', 'licence', 'license', 'copyright', 'duplicate', 'mirror', 'repeated'],
+          ],
+          hint: 'Say what their answer describes rather than establishes, and name two or three specific gaps.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.4-p2',
+      prompt:
+        'The team says the deadline is fixed and asks what the minimum acceptable check is. In two or ' +
+        'three sentences, give them one they can do this week.',
+      teach: {
+        note:
+          'Refusing without offering an alternative gets overruled. The useful move is a check ' +
+          'proportionate to the time available that is aimed where the risk has to be, plus an ' +
+          'explicit statement of what it does not cover.',
+      },
+      solution:
+        'A source manifest and a targeted review rather than a full audit: make them list the ' +
+        'sources with a row count each, then look at the sources nobody can vouch for and at any ' +
+        'token or reference appearing with unusual consistency across a small number of rows. Add ' +
+        'deduplication, which costs nothing and directly reduces the memorisation risk. I would write ' +
+        'down that this covers placed content that was careless and does not cover a careful ' +
+        'backdoor, so the residual is recorded rather than implied.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['manifest', 'list', 'sources', 'count', 'inventory'],
+            ['targeted', 'consistent', 'unusual', 'review', 'dedup', 'sample'],
+            ['does not cover', 'residual', 'record', 'write down', 'not exhaustive', 'careful'],
+          ],
+          hint: 'Give a proportionate check, and say explicitly what it leaves uncovered.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.4-p3',
+      prompt:
+        'In two or three sentences, say why you would want the manifest even if you never audited a ' +
+        'single row of it.',
+      teach: {
+        note:
+          'The artefact has value beyond the review it enables. It converts an unbounded question ' +
+          'into a bounded one later, and it makes somebody accountable for an assertion at the time ' +
+          'they make it.',
+      },
+      solution:
+        'Because it turns an unanswerable question into a bounded one later: when somebody asks in a ' +
+        'year whether a particular source was in the training data, the manifest answers it in ' +
+        'minutes instead of never. It also changes the contractor\'s incentives at the moment they ' +
+        'write it, since asserting a source list in writing is a different act from saying "public ' +
+        'sources" in a meeting. And if a problem does surface, it scopes the response: without it, ' +
+        'a single bad source means retraining from nothing, because you cannot say what else came ' +
+        'from the same place.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['later', 'in a year', 'answer', 'bounded', 'question', 'minutes'],
+            ['incentive', 'in writing', 'assert', 'accountab', 'different act', 'record'],
+            ['scope', 'response', 'which else', 'same source', 'retrain', 'contain'],
+          ],
+          hint: 'Give three uses that do not require anybody to read the rows.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.4-p4',
+      prompt:
+        'The corpus turns out to contain scraped content from a competitor\'s documentation. In two ' +
+        'or three sentences, say who you would tell and what the decision actually is.',
+      teach: {
+        note:
+          'Not every corpus finding is a security finding, and knowing when to route rather than ' +
+          'own is part of the job. This one is legal and commercial, and a security team that treats ' +
+          'it as theirs will make a decision they are not qualified to make.',
+      },
+      solution:
+        'This is a legal and commercial question rather than a security one, so it goes to legal and ' +
+        'to whoever owns the product, with the evidence attached and without me proposing the answer. ' +
+        'The decision is whether the model can be used given how it was built, and the options are ' +
+        'narrow: proceed and accept the exposure, retrain without that source, or negotiate. My job ' +
+        'is to make sure the decision is taken by the people who can take it and recorded, rather ' +
+        'than absorbed quietly by an engineering team who found it first.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['legal', 'commercial', 'not security', 'counsel', 'product owner', 'route'],
+            ['retrain', 'remove', 'proceed', 'accept', 'negotiate', 'options'],
+            ['record', 'decision', 'who takes', 'not mine', 'escalat', 'documented'],
+          ],
+          hint: 'Say who owns it, what the options are, and what your role is.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.4-p5',
+      prompt:
+        'Write the acceptance criteria you would attach to a future contract for supplied training ' +
+        'data, in two or three sentences.',
+      teach: {
+        note:
+          'Turning the lesson into something that prevents the next occurrence. Criteria written into ' +
+          'a contract are the only version of this that survives the person who learned it moving on.',
+      },
+      solution:
+        'Delivery includes a source manifest listing every origin with row counts, collection dates, ' +
+        'and the licence or basis relied on for each, and the supplier warrants that no source was ' +
+        'writable by an unreviewed third party. Data is delivered deduplicated, with direct ' +
+        'identifiers removed and the removal method stated. We reserve the right to reject any source ' +
+        'that cannot be evidenced, and payment is against an accepted manifest rather than against ' +
+        'volume, because paying per row rewards exactly the behaviour we are trying to prevent.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['manifest', 'source', 'row count', 'date', 'licence', 'license', 'basis'],
+            ['dedup', 'identifier', 'removed', 'method', 'clean'],
+            ['reject', 'warrant', 'payment', 'accept', 'evidence', 'right to'],
+          ],
+          hint: 'Write criteria somebody could put in a contract, including what happens when they are not met.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.4.2: what each defence buys -------------------------------------
+  'aisp.4.2': [
+    {
+      id: 'aisp.4.2-p1',
+      prompt:
+        'In two or three sentences, explain why a structural control does not need to recognise the ' +
+        'payload, and give an example.',
+      teach: {
+        note:
+          'The single most useful distinction in injection defence. Pattern controls have to win a ' +
+          'recognition contest against an attacker who can rephrase; structural controls never enter ' +
+          'it, which is why obfuscation does not help against them.',
+      },
+      solution:
+        'A structural control acts on what the system is allowed to do rather than on what the text ' +
+        'says, so it never has to read the payload and obfuscating it changes nothing. Requiring ' +
+        'human confirmation before the assistant sends an email is the example: it holds whether the ' +
+        'instruction arrived in plain English, base64, a homoglyph substitution or a set of worked ' +
+        'examples, because none of those change the fact that a send was attempted. A pattern control ' +
+        'has to win a recognition contest against somebody who can rephrase indefinitely, and a ' +
+        'structural one never enters that contest.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['what it can do', 'action', 'permission', 'capability', 'allowed', 'not the text'],
+            ['never reads', 'does not recognise', 'does not recognize', 'obfuscat', 'encoding', 'regardless', 'whatever'],
+            ['confirm', 'human', 'approval', 'example', 'send', 'tool'],
+          ],
+          hint: 'Say what the control acts on, why the carrier is irrelevant to it, and give one concrete example.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.2-p2',
+      prompt:
+        'In two or three sentences, say why output validation is containment rather than prevention, ' +
+        'and why the distinction matters.',
+      teach: {
+        note:
+          'A precise wording point with an operational consequence. Calling containment prevention ' +
+          'leads a team to stop looking for the injection, because they believe the model is no ' +
+          'longer being compromised.',
+      },
+      solution:
+        'Output validation runs after the model has already been influenced: the injection succeeded, ' +
+        'the model produced whatever the attacker asked for, and the check stops it reaching a ' +
+        'downstream system. That is containment, and it is valuable, but calling it prevention leads ' +
+        'a team to believe the model is no longer being compromised and to stop looking for the ' +
+        'injections that are still landing. The distinction shows up in monitoring: a blocked output ' +
+        'is a detection worth alerting on, and a team who thinks they prevented it never wires that ' +
+        'alert.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['after', 'already', 'succeeded', 'influenced', 'downstream', 'too late'],
+            ['contain', 'stop it reaching', 'limits', 'not prevent', 'still happened'],
+            ['alert', 'monitor', 'detect', 'stop looking', 'signal', 'blocked'],
+          ],
+          hint: 'Say when it acts, what it does and does not stop, and the practical consequence of the mislabel.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.2-p3',
+      prompt:
+        'A team proposes normalising all input to plain ASCII before the filter runs. In two or three ' +
+        'sentences, say what that fixes and what it does not.',
+      teach: {
+        note:
+          'Normalisation is genuinely the right companion to a pattern control and it is not a ' +
+          'defence on its own. It closes the encoding carriers and leaves the entire space of ' +
+          'rephrasing untouched.',
+      },
+      solution:
+        'It closes the carrier problem: homoglyphs, zero-width characters and unusual encodings stop ' +
+        'letting a payload past a filter that would otherwise have matched it, so the filter finally ' +
+        'sees the same text the model will. What it does not fix is that the filter still has to ' +
+        'recognise the payload, and an attacker can rephrase indefinitely without using any unusual ' +
+        'character at all. So normalisation raises a pattern control to its actual ceiling rather ' +
+        'than raising the ceiling, and it can also break legitimate input in other scripts, which is ' +
+        'a real cost on a multilingual system.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['homoglyph', 'encoding', 'zero-width', 'carrier', 'unicode', 'same text'],
+            ['still', 'rephrase', 'recognise', 'recognize', 'does not fix', 'wording', 'ceiling'],
+            ['break', 'legitimate', 'multilingual', 'other script', 'cost', 'false positive'],
+          ],
+          hint: 'Name what it closes, what it leaves open, and a cost it carries.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.2-p4',
+      prompt:
+        'Rank these three by how much they reduce the risk of an injection that reaches a payment ' +
+        'API: a better keyword filter, normalisation, or a spending cap. Justify the order.',
+      teach: {
+        note:
+          'Forces the structural-beats-pattern principle into a decision. The cap is unglamorous, ' +
+          'bounds the worst case regardless of technique, and is the one a team is least likely to ' +
+          'propose because it does not feel like security.',
+      },
+      solution:
+        'The spending cap first, by a distance: it bounds the worst case regardless of which ' +
+        'technique got through, needs no recognition of anything, and cannot be rephrased around. ' +
+        'Normalisation second, because it makes whatever pattern control exists actually see the text ' +
+        'and closes the entire carrier class cheaply. The better keyword filter last: it raises the ' +
+        'cost of the attacks somebody already thought of and does nothing about the ones they have ' +
+        'not, so it is the most effort for the least durable gain, and it is the one teams reach for ' +
+        'first because it feels like security.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['cap', 'first', 'bound', 'worst case', 'regardless', 'limit'],
+            ['normalis', 'normaliz', 'second', 'carrier', 'sees the text'],
+            ['filter', 'last', 'thought of', 'rephrase', 'least', 'feels like'],
+          ],
+          hint: 'Give the order and justify each place by what it does and does not depend on.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.2-p5',
+      prompt:
+        'In two or three sentences, say why "a sufficiently good input filter" is not a plan, phrased ' +
+        'so an engineer who proposed one would still listen.',
+      teach: {
+        note:
+          'The tone constraint is the drill. Being right about this and dismissive about it produces ' +
+          'an engineer who stops bringing you designs, which costs more than the filter would have.',
+      },
+      solution:
+        'The filter is worth building and it should be part of the design; the problem is only that ' +
+        'it cannot be the thing we rely on, because it has to recognise every phrasing of an ' +
+        'instruction and the attacker only has to find one it does not. That asymmetry does not ' +
+        'improve with effort: a better filter raises the cost of the attacks we have thought of, ' +
+        'which is worth having and is not a floor. So I would build it and then ask what happens when ' +
+        'it fails, and put the real limit there, on what the model is allowed to act on.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['worth', 'build it', 'part of', 'keep', 'should', 'value'],
+            ['every phrasing', 'one', 'asymmetr', 'only has to', 'cannot recognise', 'cannot recognize'],
+            ['when it fails', 'allowed to act', 'limit', 'bound', 'real', 'behind it'],
+          ],
+          hint: 'Credit the proposal, state the asymmetry, and say where the durable limit goes.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.4.3: why a jailbreak works at all -------------------------------
+  'aisp.4.3': [
+    {
+      id: 'aisp.4.3-p1',
+      prompt:
+        'In two or three sentences, explain why roleplay framing works on a model, without using the ' +
+        'word "jailbreak".',
+      teach: {
+        note:
+          'Forces the mechanism rather than the label. Roleplay works because it changes which ' +
+          'continuation is most likely, and saying that plainly is what lets somebody predict which ' +
+          'other framings will work too.',
+      },
+      solution:
+        'Refusal is a learned tendency rather than a rule, so it competes with everything else in the ' +
+        'context for what the most likely continuation is. Framing the request as fiction, a ' +
+        'character speaking, or a hypothetical shifts that balance: in the training distribution, ' +
+        'text that sets up a story is followed by story content rather than by a refusal. Nothing is ' +
+        'switched off; the probability of the refusal is simply pushed below the probability of ' +
+        'complying, which is why the same request in a different frame gets a different answer.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['tendency', 'learned', 'not a rule', 'competes', 'probability', 'likel'],
+            ['fiction', 'story', 'character', 'hypothetical', 'frame', 'roleplay'],
+            ['shift', 'below', 'more likely', 'balance', 'not switched off', 'pushed'],
+          ],
+          hint: 'Say what refusal is, what the framing does to the distribution, and what is not happening.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.3-p2',
+      prompt:
+        'In two or three sentences, explain why requests phrased far from the training distribution ' +
+        'are where safety behaviour is thinnest.',
+      teach: {
+        note:
+          'The predictive part of the idea: it tells you where to test. Safety training covered the ' +
+          'cases somebody anticipated, so the gaps are in the unusual language, the rare framing and ' +
+          'the low-resource script.',
+      },
+      solution:
+        'Safety behaviour was trained on examples somebody assembled, so it is strongest where those ' +
+        'examples were dense and weakest where they were sparse: an unusual language, an obscure ' +
+        'notation, a heavily nested framing, a domain the safety set barely covered. The model still ' +
+        'generalises, but less reliably the further it gets from what it was shown, so refusal ' +
+        'becomes probabilistic in exactly the places nobody thought to cover. That is a testing ' +
+        'instruction as much as an explanation: probe the edges of the distribution rather than the ' +
+        'middle, because the middle is where the training was.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['trained on', 'examples', 'assembled', 'dense', 'sparse', 'covered'],
+            ['unusual', 'language', 'obscure', 'rare', 'nested', 'far from', 'edge'],
+            ['test', 'probe', 'where to look', 'edges', 'instruction'],
+          ],
+          hint: 'Say where the safety training was dense, where it was not, and what that tells you to test.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.3-p3',
+      prompt:
+        'In two or three sentences, explain incremental escalation and why it defeats a per-request ' +
+        'check.',
+      teach: {
+        note:
+          'The multi-turn case, and the one most detections miss structurally rather than by ' +
+          'accident. Every individual request is defensible; only the trajectory is not, and a check ' +
+          'scoped to one request cannot see a trajectory.',
+      },
+      solution:
+        'The attacker asks for something innocuous, then something slightly further, and repeats, ' +
+        'with each step small enough that refusing it would be unreasonable given what was already ' +
+        'answered. A check that evaluates one request at a time never sees anything worth refusing, ' +
+        'because the objectionable thing is the trajectory rather than any point on it. Catching it ' +
+        'needs state across the conversation, which most guardrails do not keep, and that is a ' +
+        'design gap rather than a tuning problem.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['step', 'gradual', 'incremental', 'slightly', 'small', 'one at a time'],
+            ['per-request', 'each request', 'one at a time', 'never sees', 'individually', 'in isolation'],
+            ['trajectory', 'across', 'state', 'conversation', 'history', 'cumulative'],
+          ],
+          hint: 'Describe the technique, say what a per-request check sees, and name what would be needed instead.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.3-p4',
+      prompt:
+        'A colleague says refusal training is enforced outside the model, so context cannot affect ' +
+        'it. In two or three sentences, correct them carefully.',
+      teach: {
+        note:
+          'They are wrong about the model and right about something real: many deployments do add an ' +
+          'external filter. The correction has to separate the two without dismissing the part they ' +
+          'have half-right, or it will not land.',
+      },
+      solution:
+        'Refusal in the model itself is learned behaviour, so it is exactly the thing context can ' +
+        'shift, and that is why the same request succeeds in one framing and fails in another. What ' +
+        'they may be thinking of is a separate moderation layer in front of or behind the model, ' +
+        'which some deployments do add and which is enforced rather than learned. That layer is a ' +
+        'real and useful control, and it is a different component with its own bypasses, so it is ' +
+        'worth being precise about which one we are relying on.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['learned', 'in the model', 'tendency', 'context', 'shift', 'not enforced'],
+            ['separate', 'moderation', 'external', 'layer', 'in front', 'classifier'],
+            ['different', 'own bypass', 'precise', 'which one', 'both', 'useful'],
+          ],
+          hint: 'Correct the claim about the model, name the thing they are half-right about, and keep the distinction.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.3-p5',
+      prompt:
+        'Given that jailbreak families all work the same way, in two or three sentences say what that ' +
+        'implies for how you would test a model rather than what you would test it with.',
+      teach: {
+        note:
+          'The methodological payoff. If the families share a mechanism, testing should sample the ' +
+          'mechanism rather than collect payloads, and results should be reported per class so a ' +
+          'gap is visible.',
+      },
+      solution:
+        'Because they all work by shifting which continuation is most likely, a list of specific ' +
+        'payloads is the wrong unit: the payloads go stale as models change while the classes do ' +
+        'not. I would define the classes instead, such as fictional framing, persona, hypothetical, ' +
+        'incremental escalation, unusual language and structural or example-based prompting, and ' +
+        'sample several fresh attempts from each. Reporting per class is what makes a gap visible: ' +
+        '"held against five classes and failed on the sixth" is actionable, and a single overall ' +
+        'pass rate hides exactly the thing somebody needs to fix.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['class', 'famil', 'categor', 'technique class', 'kinds'],
+            ['payload', 'list', 'stale', 'specific', 'wrong unit', 'change'],
+            ['per class', 'report', 'gap', 'visible', 'rate', 'which one failed'],
+          ],
+          hint: 'Say why a payload list is the wrong unit, what to enumerate instead, and how to report it.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.4.4: reading a vendor safety claim ------------------------------
+  'aisp.4.4': [
+    {
+      id: 'aisp.4.4-p1',
+      prompt:
+        'A supplier says their model "refuses harmful requests". In two or three sentences, say what ' +
+        'you would ask to turn that into something you could verify.',
+      teach: {
+        note:
+          'Converting an adjective into a measurement is most of vendor assessment. The questions are ' +
+          'always the same three: whose definition, measured how, and what was the rate.',
+      },
+      solution:
+        'Three questions. Whose definition of harmful, since theirs is a content policy written for ' +
+        'their market and may not include the things that would hurt us, such as disclosing another ' +
+        'customer\'s data or taking an unauthorised action. How was it measured, meaning on what ' +
+        'evaluation set, constructed by whom, and was it adversarial or benign. And what was the ' +
+        'rate, because "refuses" as an absolute is not a result and a number with a denominator is. ' +
+        'If the answers are not available, the claim is marketing and should be recorded as such.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['whose', 'definition', 'their', 'content policy', 'what counts', 'category'],
+            ['measured', 'evaluation', 'test set', 'how', 'adversarial', 'constructed'],
+            ['rate', 'number', 'denominator', 'how often', 'percentage', 'not absolute'],
+          ],
+          hint: 'Ask the three questions that turn the adjective into evidence.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.4-p2',
+      prompt:
+        'In two or three sentences, explain why a supplier\'s safety claim does not transfer your ' +
+        'accountability to them.',
+      teach: {
+        note:
+          'A misuse worth being able to shut down precisely, because it appears in real governance ' +
+          'documents. Under every regime that has addressed it, the deployer is accountable for the ' +
+          'deployment, and a contractual term redistributes cost rather than duty.',
+      },
+      solution:
+        'Accountability for a deployment sits with the deployer under every regime that has addressed ' +
+        'the question: we chose the model, we chose what it is connected to, and we decided what it ' +
+        'is allowed to do without a human. A supplier term can redistribute cost after the fact ' +
+        'through indemnity, and it cannot move the duty, because the supplier had no view of our ' +
+        'context and no control over our integration. Practically that means their claim is an input ' +
+        'to our assessment rather than a substitute for it.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['deployer', 'we chose', 'our', 'sits with', 'accountab', 'responsib'],
+            ['indemnit', 'cost', 'contract', 'after the fact', 'redistribut', 'money'],
+            ['context', 'integration', 'connected', 'no view', 'input', 'not a substitute'],
+          ],
+          hint: 'Say where accountability sits, what a contract can and cannot move, and what the claim is good for.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.4-p3',
+      prompt:
+        'In two or three sentences, say what a supplier claim tells you about the risks specific to ' +
+        'your deployment, such as one customer reaching another\'s data.',
+      teach: {
+        note:
+          'The gap between a content-safety claim and a deployment risk is total, and naming that ' +
+          'plainly is what stops the claim being pasted into a risk register as a mitigation.',
+      },
+      solution:
+        'Almost nothing, because it is a claim about a category of content rather than about our ' +
+        'architecture: cross-customer disclosure is a function of how we scope retrieval and how we ' +
+        'pass identity, and the supplier has no visibility of either. The same is true of ' +
+        'unauthorised actions, which depend on which tools we connected. So their claim can be cited ' +
+        'for the content category it covers and cannot be cited as a mitigation for anything arising ' +
+        'from our own integration, which is where most of our real risk is.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['nothing', 'little', 'does not', 'says nothing', 'not about'],
+            ['our architecture', 'integration', 'retrieval', 'identity', 'tools', 'we connected'],
+            ['content', 'category', 'their scope', 'cannot be cited', 'not a mitigation'],
+          ],
+          hint: 'Say what the claim is about, what your risks are about, and why they do not overlap.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.4-p4',
+      prompt:
+        'The supplier offers evaluation results showing a 0.3% failure rate. In two or three ' +
+        'sentences, say what you would want to know before using that number.',
+      teach: {
+        note:
+          'A number is more useful than an adjective and is not self-explanatory. The denominator and ' +
+          'the construction of the test set decide what it means, and 0.3% of a benign set is not ' +
+          'comparable to 0.3% under adversarial pressure.',
+      },
+      solution:
+        'What the denominator is and how the set was built: 0.3% of a benign evaluation set says ' +
+        'something quite different from 0.3% under adversarial pressure, and only the second is ' +
+        'relevant to us. I would also want to know who constructed the attempts, since a set written ' +
+        'by the people who trained the model tends to cover what they anticipated, and whether the ' +
+        'figure is per attempt or per conversation. Then I would want the same measurement on our own ' +
+        'prompts, because their distribution is not ours.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['denominator', 'of what', 'set', 'how many', 'sample'],
+            ['adversarial', 'benign', 'who wrote', 'constructed', 'anticipated', 'pressure'],
+            ['our own', 'our prompts', 'our data', 'distribution', 'reproduce', 'same measurement'],
+          ],
+          hint: 'Interrogate the denominator, the construction of the set, and whether it reflects your traffic.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.4-p5',
+      prompt:
+        'Write the sentence you would put in a risk register describing reliance on a supplier safety ' +
+        'claim, without either dismissing it or over-relying on it.',
+      teach: {
+        note:
+          'The balanced written form. Registers tend to record vendor claims either as mitigations ' +
+          'or not at all, and the accurate version records what the claim covers and what it leaves ' +
+          'to us.',
+      },
+      solution:
+        'The supplier states that the model refuses requests in their harmful-content categories, ' +
+        'measured on their own evaluations; we treat this as reducing the likelihood of that specific ' +
+        'class of output and not as evidence about cross-customer disclosure, unauthorised tool use, ' +
+        'or any risk arising from our integration, for which the controls and the accountability are ' +
+        'ours.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['their', 'supplier', 'own evaluation', 'their categor', 'states'],
+            ['likelihood', 'reduces', 'that class', 'specific', 'covers'],
+            ['not evidence', 'ours', 'our integration', 'accountab', 'not', 'remains'],
+          ],
+          hint: 'One sentence: what it is, what it reduces, and what it explicitly does not cover.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.4.5: the control that would have changed the outcome ------------
+  'aisp.4.5': [
+    {
+      id: 'aisp.4.5-p1',
+      prompt:
+        'Same assistant, different capability: it can now book meetings on the user\'s calendar. An ' +
+        'injected instruction makes it invite an outside address to a confidential internal meeting. ' +
+        'In two or three sentences, name the control that would have prevented it.',
+      teach: {
+        note:
+          'The same reasoning against a capability that sounds harmless. Booking a meeting is not a ' +
+          'dangerous action until you notice that the invitee list is a disclosure channel and the ' +
+          'invitation body carries content.',
+      },
+      solution:
+        'A bound on who can be invited rather than a filter on the text: refuse to add external ' +
+        'addresses to an existing internal meeting without the user confirming, which holds however ' +
+        'the instruction was phrased. The general form is the same as with sending mail, because ' +
+        'inviting an outsider to a meeting is a disclosure even though the capability sounds ' +
+        'administrative. Filtering the instruction is the wrong layer, since the phrasing space is ' +
+        'unbounded and the set of actions is small and enumerable.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['confirm', 'approve', 'refuse', 'bound', 'restrict', 'not allow'],
+            ['external', 'outside', 'invitee', 'address', 'who can be'],
+            ['not the text', 'phrasing', 'filter', 'wrong layer', 'however', 'regardless'],
+          ],
+          hint: 'Name the bound on the action, and say why filtering the instruction is the wrong layer.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.5-p2',
+      prompt:
+        'The team proposes fixing the email incident by blocking messages containing the word ' +
+        '"forward". In two or three sentences, say why you would not accept that as the fix.',
+      teach: {
+        note:
+          'The instinctive remedy after an incident, and it is aimed at the instance rather than the ' +
+          'class. Accepting it closes the ticket and leaves the capability unbounded, which is worse ' +
+          'than leaving the ticket open.',
+      },
+      solution:
+        'It addresses the sentence that happened rather than the capability that made it matter: the ' +
+        'next instruction says "send", or "share", or describes the action without naming it, and ' +
+        'the assistant is still able to send mail autonomously. It also creates the impression the ' +
+        'issue is closed, which is worse than an open ticket, because the capability stays unbounded ' +
+        'while everybody believes it is fixed. I would accept it as a stopgap alongside a bound on ' +
+        'sending, never instead of one.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['rephrase', 'send', 'share', 'another word', 'next instruction', 'describe'],
+            ['capability', 'still', 'unbounded', 'able to', 'not changed', 'remains'],
+            ['stopgap', 'alongside', 'not instead', 'closed', 'impression', 'believe'],
+          ],
+          hint: 'Say what it does not stop, what stays unchanged, and what you would accept it as.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.5-p3',
+      prompt:
+        'In two or three sentences, explain the principle of separating the component that reads ' +
+        'untrusted content from the one that can act.',
+      teach: {
+        note:
+          'The architectural version of the control, and the most durable one. If the reader cannot ' +
+          'act and the actor never sees untrusted text, an injection has nowhere to go regardless of ' +
+          'how good it is.',
+      },
+      solution:
+        'One component reads the untrusted content and produces a summary or a structured proposal, ' +
+        'and a second component decides and acts, having never seen the original text. An injection ' +
+        'landing in the first can only influence what it outputs, and if that output is constrained ' +
+        'to a fixed shape, such as a category and a short summary rather than free text, there is ' +
+        'nowhere for an instruction to survive. It costs a design that is harder to build than one ' +
+        'model doing everything, and it is the only arrangement where the attacker\'s cleverness ' +
+        'stops mattering.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['reads', 'first', 'summar', 'proposal', 'one component'],
+            ['acts', 'second', 'never sees', 'decides', 'does not read'],
+            ['structured', 'fixed shape', 'constrained', 'category', 'nowhere', 'cannot survive'],
+          ],
+          hint: 'Describe both components, what passes between them, and why the shape of that matters.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.5-p4',
+      prompt:
+        'In two or three sentences, say why "require the user to confirm" is not always an adequate ' +
+        'control.',
+      teach: {
+        note:
+          'The honest limit of the control being taught, which is what stops it becoming a ritual. ' +
+          'Confirmation only works if the user can tell what they are confirming and is not asked so ' +
+          'often that they stop reading.',
+      },
+      solution:
+        'Confirmation only works if the user can see what they are approving and is asked rarely ' +
+        'enough to still be reading: an assistant that asks twenty times a day trains people to click ' +
+        'through, and at that point the control is a log entry rather than a decision. It also fails ' +
+        'when the thing being confirmed is not legible, such as a summary that hides the recipient. ' +
+        'So it needs to be reserved for consequential actions and to show the specifics, which means ' +
+        'deciding which actions are consequential rather than confirming everything.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['click through', 'habitual', 'fatigue', 'stop reading', 'twenty', 'too often', 'ritual'],
+            ['see', 'legible', 'what they are', 'hides', 'specifics', 'recipient'],
+            ['reserve', 'consequential', 'which actions', 'rarely', 'not everything'],
+          ],
+          hint: 'Name both failure modes and say what has to be decided for it to work.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.5-p5',
+      prompt:
+        'Write the two or three sentences you would put in the incident write-up explaining why the ' +
+        'root cause is not "the model followed an instruction".',
+      teach: {
+        note:
+          'Root cause framing decides what gets fixed. "The model followed an instruction" describes ' +
+          'a property and produces no action; the causes that can actually be addressed are the ones ' +
+          'in the architecture around it.',
+      },
+      solution:
+        'Following instructions in its context is what the model does, and it has no way to tell an ' +
+        'instruction from the user apart from one embedded in the mail it was asked to read, so ' +
+        'naming that as the root cause describes a property and produces nothing anybody can fix. The ' +
+        'causes we can address are architectural: untrusted content reached the same context as the ' +
+        'system instructions, and the assistant held an unbounded send capability with no ' +
+        'confirmation step. Those are the two things that will appear as actions, and the model ' +
+        'behaving as designed is context rather than cause.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['what it does', 'property', 'as designed', 'cannot tell', 'no way to distinguish'],
+            ['untrusted', 'same context', 'reached', 'concatenat', 'architecture'],
+            ['send', 'capability', 'unbounded', 'confirmation', 'actions', 'fix'],
+          ],
+          hint: 'Say why the obvious cause produces no action, and name the two that do.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.5.1: which tier is this system in -------------------------------
+  'aisp.5.1': [
+    {
+      id: 'aisp.5.1-p1',
+      prompt:
+        'Ridgeline wants to use a model to triage which patients are called back first after a scan. ' +
+        'In two or three sentences, say how you would tier it and what makes it that tier.',
+      teach: {
+        note:
+          'Tiering is about consequence, not about how clever the system is. This one is a scheduling ' +
+          'tool on its face and a clinical prioritisation decision in substance, which is the ' +
+          'distinction the classification turns on.',
+      },
+      solution:
+        'High risk, because it determines access to healthcare: a patient placed lower in the queue ' +
+        'waits longer, and the consequence of a wrong ordering falls on a person who cannot see the ' +
+        'decision or contest it. It would be tempting to classify it as scheduling and therefore ' +
+        'administrative, and that is the error the tiering is designed to catch, since what matters ' +
+        'is the effect on the person rather than the label on the system. The technology involved is ' +
+        'irrelevant to the classification.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['high risk', 'highest', 'high-risk'],
+            ['healthcare', 'health', 'access', 'patient', 'clinical', 'wait'],
+            ['consequence', 'effect on', 'cannot see', 'contest', 'not the label', 'not the technology'],
+          ],
+          hint: 'Give the tier, name the consequence that puts it there, and note the tempting misclassification.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.1-p2',
+      prompt:
+        'In two or three sentences, say why regulators tier by consequence rather than by the ' +
+        'technology used.',
+      teach: {
+        note:
+          'The design reason, and it explains why a simple system can be high risk while a ' +
+          'sophisticated one is not. Tiering by technology would be obsolete on publication and ' +
+          'trivially avoidable.',
+      },
+      solution:
+        'Because the harm comes from the decision rather than from the method: a person refused ' +
+        'credit is equally affected whether the decision came from a large model, a small one, or a ' +
+        'spreadsheet of weights somebody wrote by hand. Tiering by technology would also be obsolete ' +
+        'the moment it was published and trivially avoidable by changing implementation while keeping ' +
+        'the same effect on people. Consequence is the stable thing, which is why a simple system can ' +
+        'be high risk and a sophisticated one need not be.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['harm', 'decision', 'effect', 'person', 'consequence', 'affected'],
+            ['obsolete', 'avoid', 'change implementation', 'out of date', 'evade', 'rewrite'],
+            ['simple', 'sophisticated', 'spreadsheet', 'either way', 'regardless', 'method'],
+          ],
+          hint: 'Say where the harm comes from, and give the two ways technology-based tiering would fail.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.1-p3',
+      prompt:
+        'A team argues their CV screening tool is not high risk because a human makes the final ' +
+        'decision. In two or three sentences, respond.',
+      teach: {
+        note:
+          'The most common attempt to tier down, and it turns on whether the human oversight is real. ' +
+          'A human who sees only the shortlist is ratifying the model rather than deciding, and the ' +
+          'claim then does not hold.',
+      },
+      solution:
+        'It depends entirely on what the human actually does: if they only ever see the candidates ' +
+        'the model shortlisted, the model made the decision that mattered and the human is ratifying ' +
+        'it, so the classification does not change. The rejected candidates are the ones affected and ' +
+        'nobody reviews those at all. For the argument to hold, the reviewer would need to see and be ' +
+        'able to act on the excluded set, and be resourced to do it, which is a claim about staffing ' +
+        'rather than about design.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['depends', 'what the human', 'only sees', 'shortlist', 'ratif', 'rubber'],
+            ['rejected', 'excluded', 'filtered out', 'nobody reviews', 'those affected'],
+            ['resourced', 'time', 'able to', 'staffing', 'meaningful', 'act on'],
+          ],
+          hint: 'Say what decides it, name who is unreviewed, and state what would have to be true.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.1-p4',
+      prompt:
+        'Give an example of an AI use that is genuinely low risk, and say what makes it so.',
+      teach: {
+        note:
+          'The inverse, and it is worth being able to give: a security person who tiers everything ' +
+          'as high risk is as unhelpful as one who tiers nothing that way, and gets ignored just as ' +
+          'quickly.',
+      },
+      solution:
+        'A model that suggests tags for internal documents so people can find them more easily is ' +
+        'genuinely low risk: a wrong suggestion costs a moment of search, nobody is denied anything, ' +
+        'and the person affected can see and override the output immediately. The features that make ' +
+        'it low risk are that the consequence is trivial and reversible, the subject is the same ' +
+        'person as the user, and nothing about a person is being decided. Saying so plainly matters, ' +
+        'because a review process that treats everything as high risk gets routed around.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['tag', 'suggest', 'search', 'internal', 'autocomplete', 'summar', 'example'],
+            ['trivial', 'reversible', 'override', 'immediately', 'small', 'no consequence'],
+            ['nobody denied', 'not about a person', 'same person', 'no decision', 'routed around', 'plainly'],
+          ],
+          hint: 'Give one example and name the properties that make it low risk.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.1-p5',
+      prompt:
+        'A system starts as an internal drafting aid and is later connected to the customer-facing ' +
+        'portal. In two or three sentences, say what happens to its classification and what that ' +
+        'implies for process.',
+      teach: {
+        note:
+          'Classification is a property of the deployment rather than the model, so it changes when ' +
+          'the deployment does. That is only useful if something triggers a re-assessment, which is a ' +
+          'process question rather than a legal one.',
+      },
+      solution:
+        'The classification is a property of how the system is used, so connecting it to customers ' +
+        'can move it into a higher tier even though nothing about the model changed. The implication ' +
+        'is that classification cannot be a one-off at procurement: a change in who is affected, what ' +
+        'is decided, or what it is connected to has to trigger a re-assessment. In practice that ' +
+        'means the trigger belongs in the change process rather than in an annual review, because ' +
+        'annual review will discover it eleven months late.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['use', 'deployment', 'how it is used', 'not the model', 'context', 'property of'],
+            ['higher', 'changes', 'reclassif', 're-assess', 'reassess', 'moves'],
+            ['change process', 'trigger', 'not annual', 'one-off', 'procurement', 'late'],
+          ],
+          hint: 'Say what classification attaches to, what changed, and where the trigger has to live.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.5.2: what high risk obliges you to prove ------------------------
+  'aisp.5.2': [
+    {
+      id: 'aisp.5.2-p1',
+      prompt:
+        'In two or three sentences, explain the difference between having a risk management process ' +
+        'and being able to demonstrate one.',
+      teach: {
+        note:
+          'Every obligation in this space is an evidence obligation, and teams routinely satisfy the ' +
+          'first half and fail the second. The artefact is the requirement, not the activity.',
+      },
+      solution:
+        'Having one means the work happens; demonstrating it means somebody outside the team can see ' +
+        'that it happened, which needs artefacts with dates on them: recorded risks, the decisions ' +
+        'taken about each, who took them, and what changed as a result. A team that discusses risk ' +
+        'thoughtfully in meetings and writes nothing down has the first and fails the second, and ' +
+        'from a regulator\'s position those are indistinguishable from doing nothing. The practical ' +
+        'consequence is that the artefact is the obligation, so it has to be produced as the work ' +
+        'happens rather than reconstructed afterwards.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['artefact', 'artifact', 'record', 'written', 'evidence', 'document'],
+            ['outside', 'regulator', 'somebody else', 'auditor', 'see', 'indistinguishable'],
+            ['as it happens', 'not reconstruct', 'afterwards', 'dated', 'at the time'],
+          ],
+          hint: 'Say what demonstration requires, why the undocumented version fails, and when the artefact has to be made.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.2-p2',
+      prompt:
+        'In two or three sentences, say what makes human oversight meaningful rather than nominal, ' +
+        'with a concrete test.',
+      teach: {
+        note:
+          'The obligation everybody claims and few can evidence. A usable test is whether the ' +
+          'reviewer has ever overridden the system, because a reviewer who never disagrees is not ' +
+          'exercising oversight.',
+      },
+      solution:
+        'Meaningful oversight means the person can actually reach a different outcome: they see the ' +
+        'inputs, have time to consider them, understand the system well enough to disagree with it, ' +
+        'and face no penalty for doing so. The concrete test is the override rate: if nobody has ever ' +
+        'overridden the system, either it is perfect or the oversight is nominal, and the second is ' +
+        'far more likely. That number is also easy to produce and hard to argue with, which makes it ' +
+        'a better thing to ask for than a policy statement.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['time', 'sees', 'understand', 'able to', 'different outcome', 'disagree'],
+            ['override', 'rate', 'how often', 'ever', 'disagreed', 'changed'],
+            ['nominal', 'penalty', 'pressure', 'rubber', 'paper', 'more likely'],
+          ],
+          hint: 'List what has to be true, then give a number that tests it.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.2-p3',
+      prompt:
+        'In two or three sentences, say why nobody asks you to prove the system will never fail, and ' +
+        'what is asked instead.',
+      teach: {
+        note:
+          'Corrects the over-reading of regulation that makes teams treat compliance as impossible ' +
+          'and therefore ignore it. The obligations are about management and evidence, and reading ' +
+          'them as a demand for perfection is a way of avoiding them.',
+      },
+      solution:
+        'Because it is not achievable for any system and a regime that demanded it would be ignored: ' +
+        'what is required is that risks are identified, managed and evidenced, not that they are ' +
+        'eliminated. So the questions are whether you knew about the failure mode, what you did about ' +
+        'it, whether the decision was proportionate, and whether a person could intervene. Teams who ' +
+        'read the obligation as a demand for perfection usually conclude compliance is impossible and ' +
+        'do nothing, which is the worst available outcome and also the least defensible.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['not achievable', 'no system', 'impossible', 'never fail', 'perfect'],
+            ['identif', 'manage', 'evidence', 'proportionate', 'documented', 'known'],
+            ['do nothing', 'conclude', 'give up', 'worst', 'misread', 'ignore'],
+          ],
+          hint: 'Say why perfection is not the standard, name the actual standard, and the failure mode of misreading it.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.2-p4',
+      prompt:
+        'In two or three sentences, say what "traceable records" means in practice for a model that ' +
+        'made a decision eighteen months ago.',
+      teach: {
+        note:
+          'Makes the obligation concrete by putting a date on it. Reproducing a decision after the ' +
+          'model has been retrained twice requires versioning that has to be designed in advance, ' +
+          'not recovered afterwards.',
+      },
+      solution:
+        'It means being able to say which version of the model made that decision, what inputs it ' +
+        'received, what it output, and who if anyone reviewed it, eighteen months later and after two ' +
+        'retrains. That requires versioning the model artefact, retaining the inputs and outputs ' +
+        'against that version, and keeping the mapping, none of which can be recovered afterwards if ' +
+        'it was not designed in. In practice the obligation is a retention and versioning decision ' +
+        'taken before launch, which is why it surfaces as an architecture requirement rather than a ' +
+        'compliance one.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['which version', 'model version', 'artefact', 'artifact', 'retrain'],
+            ['input', 'output', 'what it received', 'decision', 'reviewed'],
+            ['retention', 'versioning', 'designed in', 'before', 'cannot recover', 'in advance'],
+          ],
+          hint: 'Say what has to be reproducible, and what that requires to have been decided in advance.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.2-p5',
+      prompt:
+        'You are asked to produce the evidence pack for a high-risk system in two weeks and it does ' +
+        'not exist. In two or three sentences, say what you would do.',
+      teach: {
+        note:
+          'The realistic version, where the honest answer includes not fabricating. Reconstructing ' +
+          'records after the fact and presenting them as contemporaneous is a much worse position ' +
+          'than a gap you disclosed.',
+      },
+      solution:
+        'I would assemble what genuinely exists, date it honestly, and be explicit about which ' +
+        'artefacts are being produced now rather than at the time, because a reconstruction presented ' +
+        'as contemporaneous is a far worse position than an acknowledged gap. Then I would prioritise ' +
+        'the obligations where absence is most consequential, which is usually oversight evidence and ' +
+        'the record of what the system was tested on. And I would say plainly that the gap is a ' +
+        'process failure to be fixed going forward rather than something two weeks can close.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['honest', 'date', 'explicit', 'produced now', 'not contemporaneous', 'acknowledge'],
+            ['reconstruct', 'fabricat', 'worse', 'backdate', 'pretend', 'presented as'],
+            ['prioritis', 'prioritiz', 'gap', 'going forward', 'process', 'fix'],
+          ],
+          hint: 'Say what you would produce, what you would refuse to do, and how you would frame the gap.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.5.3: compliance claims that do not survive scrutiny -------------
+  'aisp.5.3': [
+    {
+      id: 'aisp.5.3-p1',
+      prompt:
+        'A team says users consented to AI processing because it is in the terms of service. In two ' +
+        'or three sentences, say why that will not hold.',
+      teach: {
+        note:
+          'Consent has a definition and a blanket term does not meet it. Being able to say why in a ' +
+          'sentence is what stops the claim being pasted into a DPIA.',
+      },
+      solution:
+        'Consent has to be informed, specific and freely given, and a clause inside a long document ' +
+        'that somebody had to accept to use the service is none of those: it is not specific to this ' +
+        'processing, most users have not read it, and refusing meant not using the product. It also ' +
+        'usually predates the AI feature entirely, so it cannot be consent to something that did not ' +
+        'exist when it was accepted. If consent is genuinely the basis being relied on it needs a ' +
+        'separate, specific ask, and often another basis is a better fit than trying to make consent ' +
+        'work.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['informed', 'specific', 'freely given', 'unambiguous', 'definition'],
+            ['not read', 'long', 'bundled', 'had to accept', 'no choice', 'blanket'],
+            ['predates', 'did not exist', 'separate', 'another basis', 'specific ask'],
+          ],
+          hint: 'State what consent requires, say how the term fails each part, and what would be needed instead.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.3-p2',
+      prompt:
+        'A model reports 94% accuracy overall. In two or three sentences, say what that figure hides ' +
+        'and what you would ask for.',
+      teach: {
+        note:
+          'The aggregate is the most common way a fairness problem stays invisible: a subgroup that ' +
+          'is a small share of the data can be failed almost entirely without moving the headline ' +
+          'number.',
+      },
+      solution:
+        'An aggregate is silent about the subgroup the system fails: if a group is five per cent of ' +
+        'the data, the model can be wrong about them most of the time and the overall figure barely ' +
+        'moves. So the number is compatible with the system working well for the majority and badly ' +
+        'for exactly the people least able to challenge it. I would ask for performance broken down ' +
+        'by the groups that matter for this decision, with the sample size for each, because a ' +
+        'breakdown over thirty people is its own kind of misleading.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['subgroup', 'group', 'broken down', 'segment', 'population'],
+            ['small share', 'barely moves', 'aggregate', 'hides', 'silent', 'majority'],
+            ['sample size', 'per group', 'breakdown', 'ask for', 'disaggregat', 'how many'],
+          ],
+          hint: 'Say what the aggregate conceals arithmetically, and what you would ask for including the caveat.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.3-p3',
+      prompt:
+        'A supplier holds a certification for their model. In two or three sentences, say what it ' +
+        'does and does not tell you about your use of it.',
+      teach: {
+        note:
+          'Certification is evidence about a thing under conditions, and the conditions are rarely ' +
+          'yours. It is genuinely useful for narrowing what you have to assess yourself, which is ' +
+          'worth saying so the point is not heard as blanket scepticism.',
+      },
+      solution:
+        'It tells you an assessor examined something against a defined scheme at a point in time, ' +
+        'which is genuine evidence and narrows what I have to establish myself. It does not tell me ' +
+        'about my use, because the certification covers their product under their assumed conditions, ' +
+        'and my deployment adds an integration, a data flow and a set of connected tools that were ' +
+        'not in scope. So it is worth having and it is an input to my assessment rather than a ' +
+        'replacement for it, and the useful next step is reading the scope statement rather than the ' +
+        'certificate.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['assessor', 'scheme', 'point in time', 'examined', 'genuine', 'evidence'],
+            ['their', 'not my', 'scope', 'conditions', 'integration', 'deployment'],
+            ['input', 'not a replacement', 'still', 'read the scope', 'narrows'],
+          ],
+          hint: 'Give it its due, say what it does not cover, and name the practical next step.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.3-p4',
+      prompt:
+        'In two or three sentences, describe what "oversight nobody can exercise" looks like in ' +
+        'practice, using a concrete example.',
+      teach: {
+        note:
+          'Making the abstraction visible. The failure is usually arithmetic rather than malicious: ' +
+          'the volume and the time available make the review impossible, and nobody did that ' +
+          'multiplication when the process was designed.',
+      },
+      solution:
+        'One reviewer assigned to check four hundred model decisions a day, with the outputs ' +
+        'presented as a score and no underlying detail, and a target that assumes they agree. The ' +
+        'policy says a human reviews every decision and the arithmetic says they have under a minute ' +
+        'each with nothing to review, so the oversight exists on paper and cannot be exercised. The ' +
+        'failure is almost never a decision to fake it: it is that nobody multiplied the volume by ' +
+        'the time when the process was designed.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['volume', 'hundred', 'per day', 'minute', 'time', 'arithmetic'],
+            ['no detail', 'score', 'cannot see', 'nothing to review', 'not legible'],
+            ['on paper', 'policy says', 'nobody multiplied', 'not designed', 'target'],
+          ],
+          hint: 'Give the concrete numbers, say what the reviewer sees, and name why it happens.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.3-p5',
+      prompt:
+        'Write the one sentence you would use to challenge a compliance claim in a review, phrased so ' +
+        'it invites evidence rather than an argument.',
+      teach: {
+        note:
+          'Tone is the drill. The same challenge phrased as an accusation produces defensiveness and ' +
+          'phrased as a request for evidence produces either the evidence or a useful silence, and ' +
+          'the second is what you want in a meeting with people you have to work with again.',
+      },
+      solution:
+        'That may well be right, and it is the kind of claim we would need to evidence if we were ' +
+        'asked in twelve months, so what would we point at to show it?',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['evidence', 'point at', 'show', 'demonstrate', 'artefact', 'artifact', 'record'],
+            ['asked', 'later', 'twelve months', 'audit', 'regulator', 'if we were'],
+            ['may be right', 'might', 'could', 'we', 'happy to', 'kind of claim'],
+          ],
+          hint: 'One sentence that concedes the possibility, invokes a future asker, and asks for the artefact.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.5.4: fairness metrics ------------------------------------------
+  'aisp.5.4': [
+    {
+      id: 'aisp.5.4-p1',
+      prompt:
+        'In two or three sentences, explain why you cannot generally satisfy every fairness metric at ' +
+        'once, and what follows for a team that wants to.',
+      teach: {
+        note:
+          'The impossibility result is the reason the choice is normative. A team that does not know ' +
+          'it will keep optimising and treat the residual disagreement as a bug in their pipeline.',
+      },
+      solution:
+        'The common definitions make incompatible demands whenever the base rates differ between ' +
+        'groups: equalising one measure moves another, and no amount of engineering removes that, ' +
+        'because it is a property of the arithmetic rather than of the implementation. What follows ' +
+        'is that a team trying to satisfy all of them will keep tuning and keep failing, and will ' +
+        'usually conclude their pipeline is broken. The honest path is to choose which definition ' +
+        'matters for this decision, record why, and report the others alongside rather than hiding ' +
+        'them.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['base rate', 'differ', 'incompatible', 'cannot both', 'trade', 'arithmetic'],
+            ['keep tuning', 'never', 'conclude', 'broken', 'fail', 'chase'],
+            ['choose', 'record', 'report the others', 'which definition', 'decide'],
+          ],
+          hint: 'Say why they conflict, what a team does when it does not know that, and what the honest path is.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.4-p2',
+      prompt:
+        'In two or three sentences, say why the choice of fairness definition is not a technical ' +
+        'decision, and who should make it.',
+      teach: {
+        note:
+          'The sentence that matters most in a review. Whoever writes the notebook picks a default, ' +
+          'and a default chosen for convenience becomes the organisation\'s position on who bears ' +
+          'the cost of error.',
+      },
+      solution:
+        'Each definition encodes a different view of what fairness means here: whether it is worse to ' +
+        'wrongly reject someone than to wrongly accept them, and which group should bear the residual ' +
+        'error. That is a value judgement about people, not a modelling question, so it belongs with ' +
+        'the organisation, its legal advisers and where relevant its regulator, informed by whoever ' +
+        'understands the metrics. Left unstated it still gets made, by whoever wrote the notebook, ' +
+        'and it becomes the organisation\'s position without anybody having decided it.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['value', 'normative', 'judgement', 'judgment', 'view of', 'ethical'],
+            ['organisation', 'organization', 'legal', 'regulator', 'business', 'owner', 'not the engineer'],
+            ['unstated', 'default', 'notebook', 'still gets made', 'by whoever', 'implicit'],
+          ],
+          hint: 'Say what the choice encodes, who should own it, and what happens if nobody does.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.4-p3',
+      prompt:
+        'A team removes the protected attribute from the features and reports the model is now fair. ' +
+        'In two or three sentences, say why that does not follow.',
+      teach: {
+        note:
+          'Fairness through unawareness, and it is the most durable misconception in the area. ' +
+          'Removing the column removes the audit trail and leaves every correlated feature standing.',
+      },
+      solution:
+        'The attribute is usually reconstructible from the features that remain: postcode, name, ' +
+        'purchase history and employment record all correlate with it, and a model will find that ' +
+        'structure without ever being told the attribute. So removing the column removes the ability ' +
+        'to measure disparity while leaving the disparity in place, which is strictly worse than ' +
+        'keeping it. Measuring fairness requires knowing group membership, so the attribute usually ' +
+        'has to be retained for evaluation even where it is excluded from the features.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['proxy', 'correlat', 'postcode', 'reconstruct', 'infer', 'remaining features'],
+            ['cannot measure', 'removes the ability', 'blind', 'no longer see', 'worse'],
+            ['retain', 'for evaluation', 'need to know', 'measure', 'keep it'],
+          ],
+          hint: 'Say why the attribute survives its own removal, and what removing it costs you.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.4-p4',
+      prompt:
+        'In two or three sentences, say what you would put in a report when the fairness result is ' +
+        'genuinely ambiguous.',
+      teach: {
+        note:
+          'Reporting an unresolved result honestly is harder than reporting a clear one, and the ' +
+          'temptation is to pick the metric that reads best. The useful form gives the decision-maker ' +
+          'the disagreement rather than a resolution you invented.',
+      },
+      solution:
+        'I would report both results and name the disagreement rather than picking the flattering ' +
+        'one: the model satisfies one definition and fails another, and here is the group and the ' +
+        'size of the gap under each. Then I would state which definition I think fits this decision ' +
+        'and why, marked clearly as a recommendation rather than a finding. The decision-maker needs ' +
+        'to see the tension, because resolving it silently is exactly how an organisation ends up ' +
+        'with a position nobody chose.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['both', 'each', 'disagree', 'tension', 'name it', 'conflict'],
+            ['gap', 'group', 'size', 'how much', 'numbers', 'which group'],
+            ['recommend', 'my view', 'marked', 'not a finding', 'decision-maker', 'they decide'],
+          ],
+          hint: 'Say what you report, what you add, and how you label your own opinion.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.5.4-p5',
+      prompt:
+        'In two or three sentences, explain what an equal error rate across groups does and does not ' +
+        'tell you about the people affected.',
+      teach: {
+        note:
+          'Pushes past metric literacy into consequence. Equal rates say nothing about equal harm, ' +
+          'because the same error can cost one group far more than another, and that asymmetry is ' +
+          'invisible to every standard metric.',
+      },
+      solution:
+        'It tells you the model is wrong about each group equally often, which is worth knowing and ' +
+        'is a statement about the model rather than about the people. It does not tell you the harm ' +
+        'is equal: the same false rejection may cost one group a minor inconvenience and another ' +
+        'their only route to the service, and that asymmetry is invisible to every rate-based metric. ' +
+        'So an equal rate can coexist with a badly unequal outcome, which is why the metric is a ' +
+        'starting point for the conversation and not the end of it.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['equally often', 'same rate', 'wrong', 'about the model', 'frequency'],
+            ['harm', 'cost', 'consequence', 'impact', 'not equal', 'severity'],
+            ['invisible', 'does not capture', 'coexist', 'starting point', 'not the end'],
+          ],
+          hint: 'Say what the metric measures, what it cannot see, and what that means for how you use it.',
+        },
+      ],
+    },
+  ],
 };
