@@ -41,6 +41,12 @@ interface PackageBadgeArt {
 }
 
 const PACKAGE_ART: Record<string, PackageBadgeArt> = {
+  'human-risk-foundations': {
+    title: 'Human Factor',
+    citation: 'Learned that people are the most relied-upon control, and how to support one.',
+    emblem: 'beacon',
+    accent: 'rose',
+  },
   'identity-foundations': {
     title: 'Keyholder',
     citation: 'Learned who should be able to do what, and how access quietly accumulates.',

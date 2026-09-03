@@ -506,6 +506,7 @@ export const TRACKS: Track[] = [
     roles: ['Security Awareness Manager', 'Human Risk Analyst', 'Security Culture Specialist'],
     foundations: ['security-writing', 'risk-fundamentals', 'threat-modelling'],
     curriculum: [
+      { title: 'Security Awareness and Human Risk Foundations', summary: 'Why training fails and what works instead, how people decide under pressure, simulations run ethically, the metrics that reward reporting, and designing so the secure path is the easy one.', packageId: 'human-risk-foundations' },
       { title: 'Why Training Fails', summary: 'Most awareness programmes measure completion, not behaviour change.', plannedExercises: 12 },
       { title: 'Phishing Simulation Done Properly', summary: 'Run a programme that teaches instead of humiliating people.', plannedExercises: 12 },
       { title: 'Measuring Human Risk', summary: 'Metrics that reflect real behaviour rather than click rates.', plannedExercises: 12 },
@@ -517,7 +518,7 @@ export const TRACKS: Track[] = [
         note: 'Large organisations fund dedicated awareness roles, and a teaching or communications background is a direct qualification rather than a consolation prize.',
       },
     ],
-    status: 'planned',
+    status: 'available',
     workRhythm: 'Business hours, campaign-driven, with peaks around annual training cycles.',
     entryDifficulty: 'accessible',
   },

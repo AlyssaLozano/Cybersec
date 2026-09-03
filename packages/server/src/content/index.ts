@@ -38,6 +38,7 @@ import { AI_SECURITY_PATHWAY } from './ai-security-pathway.js';
 import { RISK_GOVERNANCE_PATHWAY } from './risk-governance-pathway.js';
 import { OT_SECURITY_FOUNDATIONS } from './ot-security-foundations.js';
 import { IDENTITY_FOUNDATIONS } from './identity-foundations.js';
+import { HUMAN_RISK_FOUNDATIONS } from './human-risk-foundations.js';
 import { MALWARE_ANALYSIS } from './malware-analysis.js';
 
 /**
@@ -67,6 +68,7 @@ export const PACKAGES: LearningPackage[] = [
   MALWARE_ANALYSIS,
   OT_SECURITY_FOUNDATIONS,
   IDENTITY_FOUNDATIONS,
+  HUMAN_RISK_FOUNDATIONS,
 ];
 
 /** Every exercise across every package, in curriculum order. */
