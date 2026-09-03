@@ -25,33 +25,104 @@ import type { LearningPackage } from '@soc/shared';
 
 const SCOPE_TEACH = {
   concept:
-    'An authorised assessment and a break-in do the same things to the same systems. The only ' +
-    'difference is a document: written permission from someone empowered to grant it, and a scope ' +
-    'that says which systems and methods are in bounds and which are not. No finding, however ' +
-    'serious, makes an out-of-scope action retroactively legal.',
+    'Picture two people trying every door and window on a house to see which ones open. One was ' +
+    'hired by the homeowner, who signed a letter saying "test my locks, here is which doors you ' +
+    'may try, and call me the moment you find a way in." The other was not hired by anyone. From ' +
+    'the street, at the exact moment either one is jiggling a doorknob, they look identical. What ' +
+    'separates them, entirely, is that letter.\n\n' +
+    'That is the whole idea behind an authorised security assessment, often called a penetration ' +
+    'test or a red team engagement. A company pays a tester to attack its own systems the way a ' +
+    'real attacker would, probing for open doors, weak locks, and forgotten windows, so the ' +
+    'company can fix them before someone with bad intentions finds them first. The tester uses the ' +
+    'same tools and the same techniques a criminal would use. Nothing about the technical work ' +
+    'marks it as legitimate.\n\n' +
+    'What makes it legitimate is AUTHORISATION: written permission, signed by someone at the ' +
+    'company who actually has the standing to grant it, not just any employee who happens to say ' +
+    'yes. Paired with it is SCOPE, the precise list of which systems, addresses, and methods are ' +
+    'fair game and which are off limits. A scope might say "you may test these three web servers, ' +
+    'you may not touch payroll, and you may not use methods that could crash anything." Without ' +
+    'both of these in writing before a single action is taken, there is no assessment, only an ' +
+    'unauthorised intrusion that happens to be technically identical to one.\n\n' +
+    'This is worth internalising before any of the technical material in this package, because ' +
+    'nothing that follows changes it. Finding a serious flaw does not retroactively excuse going ' +
+    'outside the agreed scope to prove it, the same way discovering a house\'s back door was ' +
+    'unlocked does not excuse a locksmith walking in through a window they were never asked to ' +
+    'test. Every exercise in this package assumes that paperwork already exists, because it is the ' +
+    'one thing that turns hacking into a job.',
 } as const;
 
 const RECON_TEACH = {
   concept:
-    'Reconnaissance is passive or active. Passive recon draws only on public and third-party ' +
-    'sources -- the company site, WHOIS registries, certificate transparency logs, job posts -- ' +
-    'and never sends a packet to the target, so it leaves nothing in the target\'s logs. Active ' +
-    'recon touches the host directly, and every touch can be logged, correlated, and alerted on.',
+    'Before a burglar ever touches a house, they learn about it: they might walk past and notice ' +
+    'which windows are lit at night, ask a neighbour an offhand question, or read the estate ' +
+    'listing that describes the layout. None of that requires touching the house itself, and the ' +
+    'owner has no way of knowing anyone was looking. RECONNAISSANCE, or recon, is the same idea ' +
+    'applied to a target\'s computer systems: gathering information before doing anything that ' +
+    'could be noticed.\n\n' +
+    'Recon comes in two forms that matter enormously for how safe it is. PASSIVE recon draws only ' +
+    'on information that already exists somewhere public or semi-public: the company\'s own ' +
+    'website, WHOIS registries (public records of who owns a domain name), certificate ' +
+    'transparency logs (public records of the security certificates a company has requested), and ' +
+    'job postings that describe what software a company runs. None of these require sending so ' +
+    'much as a single packet, a small unit of data travelling across a network, to the target\'s ' +
+    'own systems, so nothing the target owns ever records that anyone looked.\n\n' +
+    'ACTIVE recon is different: it means directly touching the target\'s own systems, for example ' +
+    'by sending a request to one of their servers to see how it responds. The moment you do that, ' +
+    'you have left a trace, because a well-run system logs its connections. That log entry can be ' +
+    'read, matched against other entries, and turned into an alert that tells the defenders someone ' +
+    'is looking at them. Nothing about this makes active recon wrong; an assessment needs it ' +
+    'eventually. But it spends something passive recon does not: the target\'s ignorance that anyone ' +
+    'is interested in them at all, which is exactly what the next exercises are about spending as ' +
+    'slowly and deliberately as possible.',
 } as const;
 
 const OPSEC_TEACH = {
   concept:
-    'Detection scales with how much you touch a target and how fast. A broad, fast scan is a ' +
-    'textbook signature; a slow, narrow probe hides in normal traffic; a lookup against a public ' +
-    'source touches the target not at all. Operational discipline is spending the quietest method ' +
-    'that answers the question, and no louder one.',
+    'Think about the difference between someone who tries the handle of one door on their way past, ' +
+    'and someone who runs down an entire street rattling every handle on every house in under a ' +
+    'minute. Both are "checking whether doors are locked," but only one of them looks, to anyone ' +
+    'glancing out a window, like something is wrong. That difference, how much you touch and how ' +
+    'fast, is most of what separates a scan nobody notices from one that sets off every alarm in ' +
+    'the building.\n\n' +
+    'On a computer network, the same principle governs DETECTION, the process by which a defender ' +
+    'notices that something suspicious is happening. Security tools are typically tuned to notice ' +
+    'patterns: many connection attempts landing on many different services in a short window is ' +
+    'exactly the shape of an automated scanning tool, and it is one of the easiest patterns to ' +
+    'write an automatic alert for. A single, slow, narrow probe against one thing looks, by ' +
+    'contrast, almost indistinguishable from the ordinary background noise of a busy network. And ' +
+    'a lookup against a source the target does not even control, like a public registry, generates ' +
+    'no traffic on the target\'s own systems at all, so there is nothing there to notice.\n\n' +
+    'OPERATIONAL SECURITY, or opsec, is the discipline built on this fact: always reach for the ' +
+    'quietest method that still answers the question you are asking, and only escalate to ' +
+    'something louder once the quiet methods run out. It is not about being clever, it is about ' +
+    'restraint, asking every single time "is there a way to learn this that touches the target ' +
+    'less?" before touching it at all. For someone testing a system\'s defences this is ' +
+    'professional discipline; for a defender reading this material, the mirror image matters just ' +
+    'as much, because it explains exactly what a detection tool is built to watch for, and why.',
 } as const;
 
 const READ_TEACH = {
   concept:
-    'A scan result is read, not skimmed. The promising vector is rarely the most obvious service; ' +
-    'it is the one where an outdated version meets an exposed surface meets weak authentication. A ' +
-    'patched, current service on a well-known port is usually the worst place to spend effort.',
+    'Imagine a home inspector handed a list of every door, window, and appliance in a house, each ' +
+    'with its age and condition noted. A brand-new, correctly installed front door is not the ' +
+    'finding that matters, even though it is the most obvious way in or out of the house. What ' +
+    'matters is the window round the back with a broken latch that nobody thought to check, ' +
+    'because that is the one thing on the list that is actually a weakness right now.\n\n' +
+    'A network SCAN produces the same kind of list: a tool tests a target\'s systems and reports ' +
+    'what it finds open and responding, usually including the specific software and version ' +
+    'running behind each one. Reading that list well means resisting the pull toward whichever ' +
+    'line sounds the most dramatic or the most familiar, and instead comparing every line on the ' +
+    'same three questions: is the version out of date, is the thing reachable from somewhere it ' +
+    'should not be, and is the access it offers weakly protected. The finding that answers yes to ' +
+    'more than one of those is the real vector, almost regardless of how ordinary or exciting its ' +
+    'name sounds.\n\n' +
+    'This matters because the instinct to chase the scariest-sounding service is exactly the ' +
+    'instinct an attacker, and a tester standing in for one, has to train out of themselves. A ' +
+    'service that is fully patched and configured correctly is, by definition, not currently a ' +
+    'weakness, no matter how sensitive the data behind it is, and time spent attacking it is time ' +
+    'wasted. The promising vector is almost never the loudest name on the list. It is the quiet ' +
+    'line where an old version, an exposed surface, and weak protection all happen to line up at ' +
+    'once.',
 } as const;
 
 export const RED_TEAM_FOUNDATIONS: LearningPackage = {
@@ -105,8 +176,9 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
           solution:
             'A, B, C, and E. Authorisation, scope, a timeframe with a contact, and rules of ' +
             'engagement are the paperwork that makes the work lawful and bounded. D is wrong: ' +
-            'whether the blue team is informed is a property of the engagement (a covert test ' +
-            'versus an announced one), not a precondition, and secrecy is never a substitute for ' +
+            'whether the blue team (the organisation\'s own defenders, the people who would respond ' +
+            'to a real intrusion) is told in advance is a property of the engagement, a covert test ' +
+            'versus an announced one, not a precondition, and secrecy is never a substitute for ' +
             'authorisation.',
           expectedOutput: 'Options A, B, C, and E selected.',
           checks: [
@@ -369,22 +441,32 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'red teaming, as opposed to a penetration test or a vulnerability scan?',
           teach: {
             concept:
-              'People use "red team", "penetration test", and "vulnerability scan" as if they were ' +
-              'the same job, and they are not. A vulnerability scan is automated breadth: a tool ' +
-              'checks many hosts against a database of known flaws and hands you a list. A ' +
-              'penetration test is human depth against a defined target: a tester tries to exploit ' +
-              'the flaws in a scoped system and proves which ones are real. A red team engagement is ' +
-              'broader and quieter than either. It picks an objective a real adversary would have -- ' +
-              'reach the payroll database, prove you could stop the production line -- and pursues it ' +
-              'across people, process, and technology, while the defenders are meant to try to catch ' +
-              'you.\n\n' +
-              'The distinction is not snobbery, it is scope and success criteria. A pentest succeeds ' +
-              'by finding vulnerabilities; a red team engagement succeeds by testing whether the ' +
-              'organisation can detect and respond to a determined attacker heading somewhere ' +
-              'specific. That is why a red team report talks about dwell time and missed alerts as ' +
-              'much as it talks about the flaw that got them in. Knowing which one you have been ' +
-              'hired to do sets everything else: how loud you can be, what counts as done, and who is ' +
-              'allowed to know you are there.',
+              'Offensive security work is not one job, it is several, and they get lumped together ' +
+              'in casual conversation because they all involve someone deliberately attacking a ' +
+              'system. Think of it the way a building\'s safety could be tested at three different ' +
+              'depths: a checklist inspector who walks every floor with a clipboard and flags ' +
+              'anything that does not meet code, a specialist hired to actually try to pick one ' +
+              'specific lock and prove whether it can be defeated, and an actor hired to try to steal ' +
+              'a particular file from the safe without the building\'s own security guards catching ' +
+              'them. All three make the building safer. They are not the same job.\n\n' +
+              'A VULNERABILITY SCAN is the checklist inspector: automated software checks many ' +
+              'systems at once against a database of known flaws and hands back a list of what it ' +
+              'found, fast and broad but shallow. A PENETRATION TEST, or pentest, is the lock ' +
+              'specialist: a human tester is pointed at one defined target and actually tries to ' +
+              'exploit the flaws in it, proving which ones are real rather than just theoretically ' +
+              'possible. A RED TEAM engagement is the broadest and quietest of the three. It picks an ' +
+              'objective a real adversary would actually want, reach the payroll database, prove you ' +
+              'could stop the production line, and pursues it across people, process, and technology ' +
+              'together, while the organisation\'s own defenders (the "blue team") are meant to try to ' +
+              'notice and stop it, exactly as they would a real attack.\n\n' +
+              'The distinction is not snobbery, it is scope and success criteria. A scan succeeds by ' +
+              'listing flaws; a pentest succeeds by proving which flaws are exploitable; a red team ' +
+              'engagement succeeds by testing whether the organisation can detect and respond to a ' +
+              'determined attacker heading somewhere specific, regardless of which flaw got them in. ' +
+              'That is why a red team report talks about dwell time (how long the attacker went ' +
+              'unnoticed) and missed alerts as much as it talks about the technical flaw itself. ' +
+              'Knowing which one you have been hired to do sets everything else: how loud you can be, ' +
+              'what counts as done, and who is allowed to know you are there.',
           },
           options: [
             { id: 'a', label: 'Automated tooling scans the whole estate and produces a ranked list of known vulnerabilities.' },
@@ -433,19 +515,32 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'lifecycle is this?',
           teach: {
             concept:
+              'A break-in, whether it is a burglar in a house or an attacker on a network, is not ' +
+              'one action, it is a sequence of them, and each step in that sequence only becomes ' +
+              'possible because of the step before it. A burglar cannot ransack a bedroom before ' +
+              'they have gotten through the front door, and they cannot keep coming back next week ' +
+              'unless they have arranged some way back in, a copied key, an unlocked window left ' +
+              'ajar. Computer intrusions follow the same logic, and security professionals have ' +
+              'named the recurring steps so that everyone can talk about them precisely: this is the ' +
+              'ATTACK LIFECYCLE.\n\n' +
               'Almost every intrusion, criminal or authorised, moves through the same phases: ' +
-              'reconnaissance, initial access, execution, persistence, privilege escalation, lateral ' +
-              'movement, collection and exfiltration, and finally impact, with evasion running ' +
-              'alongside all of them. The names differ between frameworks, but the shape does not, ' +
-              'because each phase depends on the one before it. You cannot move laterally until you ' +
-              'have a foothold, and you cannot keep a foothold worth having until you have some form ' +
-              'of persistence.\n\n' +
-              'The reason to memorise the sequence is not tidiness. It is that the phase you are in ' +
-              'tells you what you are trying to achieve right now and what evidence you are about to ' +
-              'generate. Lateral movement -- using access on one system to reach another -- looks ' +
-              'different in the logs from privilege escalation, which is climbing from a low-rights ' +
-              'account to an administrative one on the same system. A tester who cannot name the phase ' +
-              'they are in cannot reason about either their next move or their exposure.',
+              'reconnaissance (learning about the target), initial access (getting in the first ' +
+              'time), execution (running something once inside), persistence (arranging to get back ' +
+              'in without repeating initial access), privilege escalation (gaining more rights on a ' +
+              'system you are already on), lateral movement (using access on one system to reach a ' +
+              'different one), collection and exfiltration (gathering and removing data), and finally ' +
+              'impact (the actual harm done), with evasion (staying unnoticed) running alongside all ' +
+              'of them. The exact names differ a little between frameworks, but the shape does not, ' +
+              'because each phase genuinely depends on the one before it: you cannot move laterally ' +
+              'until you have a foothold, and you cannot keep a foothold worth having until you have ' +
+              'some form of persistence.\n\n' +
+              'The reason to memorise the sequence is not tidiness, it is that the phase you are in ' +
+              'tells you what is actually being attempted right now and what evidence it is about to ' +
+              'generate. Lateral movement, using access on one system to reach another, looks ' +
+              'different in a defender\'s logs from privilege escalation, which is climbing from a ' +
+              'low-rights account to an administrative one on the same system. A tester, or a ' +
+              'defender reading a timeline, who cannot name the phase they are looking at cannot ' +
+              'reason about either the next move or how exposed it will be.',
           },
           options: [
             { id: 'a', label: 'Privilege escalation: they gained more rights than they started with.' },
@@ -494,12 +589,17 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'understand.',
           teach: {
             concept:
-              'The attack surface is the sum of every point where an attacker could try to get in or ' +
-              'get data out: every open port, every login page, every employee who can be phoned, ' +
-              'every third-party integration, every forgotten test server. Thinking in terms of ' +
-              'surface rather than individual bugs is the shift that turns a tool operator into a ' +
-              'tester. Any single vulnerability is a door; the attack surface is the whole perimeter, ' +
-              'including the doors nobody remembers building.\n\n' +
+              'Picture a large building with a single locked front door, a dozen windows, a loading ' +
+              'dock round the back, a fire escape, and a vent nobody has thought about in years. Each ' +
+              'of those is a place a burglar could try, whether or not it is actually weak. The ' +
+              'ATTACK SURFACE is exactly that idea applied to an organisation\'s computer systems: the ' +
+              'sum of every point where an attacker could attempt to get in or get data out, every ' +
+              'open port (a numbered channel a service listens on for connections), every login page, ' +
+              'every employee who can be phoned or emailed, every third-party integration, every ' +
+              'forgotten test server nobody remembers is still running. Thinking in terms of surface ' +
+              'rather than individual bugs is the shift that turns someone who just runs a tool into ' +
+              'an actual tester. Any single vulnerability is a door; the attack surface is the whole ' +
+              'perimeter, including the doors nobody remembers building.\n\n' +
               'The reason this matters is that surface tends to grow silently. A team stands up a ' +
               'quick demo server, a marketing site adds a new form, a contractor is given VPN access ' +
               'for a project that ended a year ago. None of these is a vulnerability by itself, but ' +
@@ -553,11 +653,19 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             '(IOC) rather than a technique, tactic, or procedure (TTP)?',
           teach: {
             concept:
-              'Two acronyms run through every threat report. TTPs -- techniques, tactics, and ' +
-              'procedures -- describe how an adversary behaves: they phish finance staff, they use ' +
-              'stolen credentials rather than malware, they exfiltrate slowly over DNS. IOCs -- ' +
-              'indicators of compromise -- are the concrete artefacts an intrusion leaves behind: a ' +
-              'specific file hash, a particular attacker address, a registry key, a filename. The ' +
+              'If police were tracking a burglar, they would keep two very different kinds of notes. ' +
+              'One is about habits: this person always enters through a back window, always works ' +
+              'between two and four in the morning, always avoids houses with dogs. The other is ' +
+              'about physical evidence from a specific break-in: a particular shoe print, a ' +
+              'fingerprint, a tool mark on a windowsill. The habits describe how the person operates. ' +
+              'The evidence describes what one specific crime left behind. Threat reports about ' +
+              'computer intrusions keep the same two kinds of notes, and give each one an acronym.\n\n' +
+              'TTPs, techniques, tactics, and procedures, describe how an adversary behaves: they ' +
+              'phish finance staff, they use stolen credentials rather than malware, they exfiltrate ' +
+              'slowly over DNS (the system that turns website names into addresses, covered properly ' +
+              'in the networking package). IOCs, indicators of compromise, are the concrete artefacts ' +
+              'one specific intrusion leaves behind: a file\'s hash (a short fingerprint computed from ' +
+              'its exact contents), a particular attacker address, a registry key, a filename. The ' +
               'difference is behaviour versus evidence.\n\n' +
               'It matters because the two age very differently. An IOC is cheap for an attacker to ' +
               'change: a new build has a new hash, a new domain is a few dollars, so blocking ' +
@@ -616,7 +724,10 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'for each of those four actions, in order.',
           teach: {
             concept:
-              'A real intrusion is a chain, and reading it back as a sequence of phases is the ' +
+              'The previous exercises named the phases of an attack lifecycle one at a time. The ' +
+              'real skill is applying those names to a messy, real story: given a description of what ' +
+              'someone actually did, breaking it back down into the individual phases it was built ' +
+              'from. A real intrusion is a chain, and reading it back as a sequence of phases is the ' +
               'single most useful analytic habit in this field. Both attackers and defenders do it: ' +
               'the attacker plans forward through the phases, and the responder reconstructs them ' +
               'backward from the evidence. When you can look at four actions and label each one -- ' +
@@ -688,13 +799,18 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'following belong in it? Select all that apply.',
           teach: {
             concept:
-              'A threat model is a structured answer to four questions: what are we protecting, who ' +
-              'would want it, what could go wrong, and what happens if it does. Formally that breaks ' +
-              'into the asset (the thing of value), the threat actors (who might come for it, from ' +
-              'bored insiders to organised crime to nation states), their motive and capability (why ' +
-              'they want it and what they can actually do), the vulnerabilities and paths available ' +
-              'to them, and the impact if they succeed. Skip any one of these and the model lies to ' +
-              'you.\n\n' +
+              'Before spending money on locks, cameras, and guards, a sensible business owner asks ' +
+              'four questions first: what am I actually protecting, who would want it, how might they ' +
+              'try to get it, and what would it cost me if they succeeded. Skipping straight to ' +
+              'buying security equipment without answering those questions usually means overspending ' +
+              'on the wrong things and underspending on the ones that matter. A THREAT MODEL is the ' +
+              'disciplined, written-down version of exactly that thinking, applied to a computer ' +
+              'system instead of a building.\n\n' +
+              'Formally that breaks into the asset (the thing of value being protected), the threat ' +
+              'actors (who might come for it, from bored insiders to organised crime to nation ' +
+              'states), their motive and capability (why they want it and what they can actually do), ' +
+              'the vulnerabilities and paths available to them, and the impact if they succeed. Skip ' +
+              'any one of these and the model lies to you.\n\n' +
               'The discipline exists to stop two opposite mistakes. One is defending everything ' +
               'equally, which spreads effort so thin that the crown jewels are protected no better ' +
               'than the cafeteria menu. The other is fixating on an exciting attack that no plausible ' +
@@ -752,7 +868,11 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             '  Path C: Break the AES encryption on last night\'s database backup.',
           teach: {
             concept:
-              'When a model lays out several ways to reach the same asset, the attacker does not ' +
+              'A thief planning to steal a painting from a museum has options ranging from tunnelling ' +
+              'under the building to simply befriending a guard who already has a key. Movies favour ' +
+              'the tunnel. Real thieves favour the guard, because a real attacker is not trying to ' +
+              'look impressive, they are trying to succeed at the lowest possible cost and risk. When ' +
+              'a threat model lays out several ways to reach the same asset, the attacker does not ' +
               'pick the most impressive one. They pick the cheapest one that works, weighing effort, ' +
               'reliability, and the chance of being caught. A path that needs a zero-day nobody has ' +
               'found yet, or that requires breaking strong modern encryption, is enormously expensive ' +
@@ -811,6 +931,12 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'tactical one?',
           teach: {
             concept:
+              'A general planning a military campaign decides, months ahead, what the war is even ' +
+              'trying to achieve, how long the campaign can run, and how much risk the army can ' +
+              'afford to take. On the day of a specific battle, an officer decides, in the moment, ' +
+              'which hill to take first or which road to send troops down. Both are real decisions, ' +
+              'but they are not the same kind of decision, and mixing them up is how campaigns fail. ' +
+              'Offensive security testing draws the identical line between STRATEGY and TACTICS.\n\n' +
               'Strategy is the shape of the whole engagement: the objective, the phases, the ' +
               'timeline, how much risk of detection you are willing to accept, and what you will do ' +
               'if the primary plan fails. Tactics are the individual moves that carry the strategy ' +
@@ -868,7 +994,10 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'primary path?',
           teach: {
             concept:
-              'A plan with only one path is a wish, not a plan. Real engagements are full of ' +
+              'Anyone who has driven somewhere important knows to have a rough idea what they will ' +
+              'do if the highway is closed, and most people also decide in advance, without thinking ' +
+              'much about it, how late they can leave and still arrive on time before they simply ' +
+              'give up. A plan with only one path is a wish, not a plan. Real engagements are full of ' +
               'surprises: the vulnerable server gets patched the night before, the phishing email ' +
               'lands in a spam filter, a defender notices something and starts watching. A serious ' +
               'plan assumes this and carries secondary and tertiary paths, so that a blocked primary ' +
@@ -940,8 +1069,13 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'sending a packet to any Northwind system. Which public source is the right one?',
           teach: {
             concept:
-              'Open-source intelligence is not one activity, it is a toolkit of very different ' +
-              'sources, each of which gives up a different kind of fact. Job postings reveal the ' +
+              'This module goes deeper on the passive side of the recon covered in module one: ' +
+              'gathering facts about a target from sources that are already public, so that nothing ' +
+              'the target owns ever notices anyone looked. OPEN-SOURCE INTELLIGENCE, usually ' +
+              'shortened to OSINT, is not one activity, it is a toolkit of very different sources, ' +
+              'each of which gives up a different kind of fact, the same way a public library, a ' +
+              'phone book, and a newspaper archive each answer different questions about a person ' +
+              'without you ever having to knock on their door. Job postings reveal the ' +
               'technology stack a company runs and the teams it is growing. WHOIS and DNS records ' +
               'reveal registration details, mail servers, and name servers. Certificate transparency ' +
               'logs -- public, append-only records of every TLS certificate a public authority ' +
@@ -1003,8 +1137,13 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'exposed without anyone attacking anything? Select all that apply.',
           teach: {
             concept:
-              'A great deal of what a tester finds was never stolen -- it was published by accident. ' +
-              'Developers commit an API key or password to a public code repository and it stays in ' +
+              'Not every leak is the result of an attack. A great deal of what a tester finds was ' +
+              'never stolen at all, it was published by accident, the same way a person might ' +
+              'accidentally leave a spare key taped under the doormat while doing something ' +
+              'completely unrelated, like having a package delivered while they were out. Developers ' +
+              'commit an API key or password (credentials that let software or a person prove who ' +
+              'they are) to a public code repository, a shared, often publicly viewable store of a ' +
+              'project\'s source code, and it stays in the history even after they delete the file. ' +
               'the history even after they delete the file. Documents posted on a website carry ' +
               'metadata: the author\'s name, the software version, sometimes internal file paths and ' +
               'usernames. Old versions of pages sit in web archives long after the live site is ' +
@@ -1066,9 +1205,13 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'together.',
           teach: {
             concept:
-              'The central insight of OSINT is aggregation: pieces of information that are each ' +
-              'harmless on their own become dangerous when combined. A job posting that names a VPN ' +
-              'product is just marketing. An employee\'s name on a professional network is just a ' +
+              'Knowing someone\'s street is harmless. Knowing they are on holiday is harmless. ' +
+              'Knowing they leave a window unlatched is harmless. Put all three together and you have ' +
+              'a burglary plan, even though nobody handed it over in one piece. The central insight ' +
+              'of OSINT is AGGREGATION: pieces of information that are each harmless on their own ' +
+              'become dangerous when combined. A job posting that names a VPN product (software that ' +
+              'lets someone log in remotely to a company\'s private network as if they were sitting ' +
+              'inside the building) is just marketing. An employee\'s name on a professional network is just a ' +
               'career. A leaked password in a breach dump is one of billions. But put them together ' +
               '-- this product, run by this named person, whose reused password has leaked -- and ' +
               'you have assembled a specific, testable way in that none of the three facts revealed ' +
@@ -1129,9 +1272,14 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'it?',
           teach: {
             concept:
-              'Reading public information is lawful almost everywhere, even when the information ' +
-              'itself is sensitive: a leaked password sitting in a breach dump can be looked at, ' +
-              'because looking at a public record is not a crime. Using it is a different act ' +
+              'Overhearing a stranger\'s conversation in a public place is not a crime, even if what ' +
+              'they said turns out to be sensitive. Acting on it, walking straight to their house and ' +
+              'letting yourself in because you overheard where the spare key was kept, is a different ' +
+              'act entirely, and this is one of the sharpest, most important lines in this whole ' +
+              'pathway. Reading public information is lawful almost everywhere, even when the ' +
+              'information itself is sensitive: a leaked password sitting in a BREACH DATABASE (a ' +
+              'public or semi-public archive of credentials stolen in past incidents) can be looked ' +
+              'at, because looking at a public record is not a crime. Using it is a different act ' +
               'entirely. The moment you take that password and try it against a login, you are ' +
               'attempting authentication, and whether that is lawful depends completely on your ' +
               'scope. Finding a credential does not authorise using it any more than finding a key ' +
@@ -1201,6 +1349,9 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'query does. What class of vulnerability is this?',
           teach: {
             concept:
+              'A VULNERABILITY, in plain terms, is a mistake in how software is built or configured ' +
+              'that lets it be made to do something it should not, the digital equivalent of a lock ' +
+              'that can be popped open with the wrong tool because of a flaw in how it was made. ' +
               'Vulnerabilities fall into a handful of families, and recognising the family is more ' +
               'useful than memorising any single bug. Injection flaws happen when untrusted input is ' +
               'mixed into a command or query so that data is mistaken for instructions -- SQL ' +
@@ -1264,8 +1415,11 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'you?',
           teach: {
             concept:
-              'CVSS, the Common Vulnerability Scoring System, puts a number from zero to ten on a ' +
-              'vulnerability so that teams can talk about severity in a shared language. Roughly, ' +
+              'Every vulnerability discovered anywhere in the world needs some way to say how bad it ' +
+              'is, in terms everyone agrees on, the same way a hurricane gets a category number so ' +
+              'that a warning means the same thing to everyone who hears it, regardless of where they ' +
+              'live. CVSS, the Common Vulnerability Scoring System, puts a number from zero to ten on ' +
+              'a vulnerability so that teams can talk about severity in a shared language. Roughly, ' +
               'nine and above is critical, seven and up is high, four and up is medium, and below ' +
               'that is low. The score is built from technical factors: how the flaw is reached (over ' +
               'the network or only locally), how hard it is to exploit, whether it needs a logged-in ' +
@@ -1327,8 +1481,11 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'explain why the lower-scored finding may deserve attention first.',
           teach: {
             concept:
-              'The single most important habit in vulnerability management is refusing to patch ' +
-              'purely by score. CVSS measures the flaw in isolation, but risk is severity multiplied ' +
+              'A smoke detector going off in an empty storage shed with nothing flammable in it is ' +
+              'less urgent than a faint gas smell in an occupied nursery, even though the alarm is ' +
+              'the louder signal. Vulnerability management runs into the identical problem constantly. ' +
+              'The single most important habit in it is refusing to patch purely by score. CVSS ' +
+              'measures the flaw in isolation, but real RISK is severity multiplied ' +
               'by exposure multiplied by what is at stake. A critical flaw on an isolated lab box ' +
               'with no data and no internet path is a low real risk, because almost nothing can reach ' +
               'it and nothing is lost if it falls. A medium flaw on the internet-facing system that ' +
@@ -1387,7 +1544,12 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'give you?',
           teach: {
             concept:
-              'The world coordinates on vulnerabilities through a shared naming scheme. A CVE ' +
+              'If every hospital, newspaper, and government agency in the world used a different name ' +
+              'for the same disease, coordinating a response to it would be chaos. Vulnerabilities ' +
+              'have the same problem: a single flaw might get discussed by a software vendor, a news ' +
+              'outlet, and a dozen security researchers, all of whom need to be certain they are ' +
+              'talking about the exact same thing. The world coordinates on vulnerabilities through a ' +
+              'shared naming scheme for exactly this reason. A CVE ' +
               '(Common Vulnerabilities and Exposures) identifier is a unique label of the form ' +
               'CVE-year-number that everyone can use to mean the same specific flaw, so a vendor ' +
               'advisory, a news article, and a scanner all agree on what they are discussing. The ' +
@@ -1458,8 +1620,10 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'organisation? Select all that apply.',
           teach: {
             concept:
-              'Initial access is the phase that gets an attacker from outside to any position ' +
-              'inside, and the striking thing about it is how rarely it involves a dramatic exploit. ' +
+              'Every intrusion has a moment where an attacker goes from having no presence in an ' +
+              'organisation at all to having some presence, however small. That moment is INITIAL ' +
+              'ACCESS: the phase that gets an attacker from outside to any position inside, and the ' +
+              'striking thing about it is how rarely it involves a dramatic exploit. ' +
               'The common vectors are mundane: a phishing email that harvests a password or delivers ' +
               'a malicious attachment, a reused or leaked credential tried against a login, an ' +
               'unpatched internet-facing service, a misconfigured remote-access portal, or a trusted ' +
@@ -1522,8 +1686,12 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'single feature is the strongest sign this is phishing?',
           teach: {
             concept:
-              'Phishing works by pairing a trigger with a trap. The trigger is usually manufactured ' +
-              'urgency or fear -- your account will be closed, a payment failed, a document needs ' +
+              'PHISHING is a message, usually an email, that pretends to come from someone trustworthy ' +
+              'in order to trick the reader into handing over information or taking an action they ' +
+              'would not otherwise take. It is the digital version of a con artist showing up at your ' +
+              'door in a uniform that looks official enough that you let your guard down. It works by ' +
+              'pairing a trigger with a trap. The trigger is usually manufactured ' +
+              'urgency or fear, your account will be closed, a payment failed, a document needs ' +
               'signing now -- because a person who feels they must act immediately stops checking ' +
               'details. The trap is an action that serves the attacker: click this link, open this ' +
               'attachment, enter your password here. Learning to read phishing is learning to slow ' +
@@ -1585,7 +1753,10 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'more often, and where the attacker gets those details.',
           teach: {
             concept:
-              'Mass phishing is a numbers game: send a generic lure to enough people and a few will ' +
+              'A form letter addressed to "Dear Customer" gets thrown away far more often than a ' +
+              'letter that uses your actual name and mentions the actual order you placed last week. ' +
+              'Phishing follows the same logic, and it comes in two very different shapes. Mass ' +
+              'phishing is a numbers game: send a generic lure to enough people and a few will ' +
               'fall for it, but the generic quality is also its weakness, because a message that ' +
               'could be addressed to anyone rings false to almost everyone. Spear phishing inverts ' +
               'the economics. Instead of a wide net, it targets one person with a message built from ' +
@@ -1649,8 +1820,11 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'is the safest response for the employee?',
           teach: {
             concept:
-              'Pretexting is social engineering by invented story. The attacker phones or messages ' +
-              'wearing a role that carries authority or that invites helpfulness -- IT support, a ' +
+              'SOCIAL ENGINEERING is the umbrella term for manipulating a person, rather than a ' +
+              'machine, into doing something that helps an attacker, and PRETEXTING is its main tool: ' +
+              'social engineering by invented story. It is the same trick as a con artist claiming to ' +
+              'be a building inspector to get let inside a home. The attacker phones or messages ' +
+              'wearing a role that carries authority or that invites helpfulness, IT support, a ' +
               'senior executive, a vendor, a new colleague -- and uses that borrowed authority to ' +
               'request information or action. It leans on two deep human instincts: deference to ' +
               'authority and the desire to be helpful, especially under time pressure. The story ' +
@@ -1725,9 +1899,12 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'add a persistence mechanism such as a scheduled task before doing anything else?',
           teach: {
             concept:
-              'A foothold that lives only in a running process is fragile: reboot the machine, kill ' +
+              'A squatter who has climbed in through an unlocked window loses their spot the instant ' +
+              'someone locks that window again, unless they have also cut themselves a spare key. A ' +
+              'foothold on a computer that lives only in a running process (a program currently ' +
+              'executing) is exactly that fragile: reboot the machine, kill ' +
               'the process, or simply wait for it to end and the attacker\'s access is gone. ' +
-              'Persistence is any mechanism that survives those events and lets the attacker get back ' +
+              'PERSISTENCE is any mechanism that survives those events and lets the attacker get back ' +
               'in automatically -- a scheduled task, a new service set to start at boot, an entry in ' +
               'a startup folder, an extra key added to a list of authorised logins, a small script ' +
               'left on a web server. Each one arranges for the attacker\'s access to reappear without ' +
@@ -1789,9 +1966,15 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'captures the real trade-off?',
           teach: {
             concept:
-              'Every persistence method sits somewhere on a line between stealth and reliability, ' +
-              'and the two pull against each other. The simplest, most reliable methods -- a ' +
-              'scheduled task, a new service -- are dependable precisely because they use ordinary, ' +
+              'A spare house key hidden under the doormat is easy to find again and always works, but ' +
+              'it is also the very first place anyone would look. A spare key welded inside a hollow ' +
+              'fence post three gardens away is much harder to find, but it is also much easier to ' +
+              'lose track of, or to have the fence post itself get replaced without you knowing. ' +
+              'Every persistence method for a compromised computer sits somewhere on that same line ' +
+              'between stealth and reliability, and the two pull against each other. The simplest, ' +
+              'most reliable methods, a scheduled task (a job the operating system is told to run ' +
+              'automatically at a set time), a new service (a program registered to start ' +
+              'automatically with the machine), are dependable precisely because they use ordinary, ' +
               'well-supported operating-system features, but that same ordinariness is why defenders ' +
               'know to look at them first. The stealthiest methods hide in places few people inspect, ' +
               'but they tend to be complex, fragile, and dependent on conditions that a patch or a ' +
@@ -1852,8 +2035,11 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'generally the HARDEST for a defender to notice?',
           teach: {
             concept:
-              'Once something is left on a compromised system, the operator has to talk to it, and ' +
-              'that conversation is command and control, or C2. The channel matters enormously, ' +
+              'A getaway driver waiting outside a bank is useless without some way for the robbers ' +
+              'inside to signal when to pull up. Once something (usually called an IMPLANT: a small ' +
+              'piece of software left running on a compromised machine) is left on a system, the ' +
+              'operator has to talk to it, sending it instructions and receiving results back, and ' +
+              'that conversation is COMMAND AND CONTROL, or C2. The channel matters enormously, ' +
               'because it is often the loudest thing an intrusion does: a compromised host that ' +
               'connects straight to an obvious attacker address on an odd port is trivial to spot in ' +
               'network logs. The whole art of C2 is making the attacker\'s traffic look like traffic ' +
@@ -1915,8 +2101,11 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'limited. In two or three sentences, explain the reasoning behind that choice.',
           teach: {
             concept:
-              'Choosing a C2 channel is an exercise in reading the defender. In a lightly watched ' +
-              'environment, a fast and simple channel is fine, because nobody is looking hard enough ' +
+              'A getaway car that speeds through empty back roads at midnight is fine when nobody is ' +
+              'watching those roads, and reckless when a patrol car is parked on every corner. ' +
+              'Choosing a C2 channel is the same exercise in reading the defender. In a lightly ' +
+              'watched environment, a fast and simple channel is fine, because nobody is looking hard ' +
+              'enough ' +
               'to notice. In a heavily monitored one -- a bank, say, with mature detection and ' +
               'analysts who investigate anomalies -- speed becomes a liability, because a fast, ' +
               'direct, high-volume connection to an unusual destination is exactly the pattern such ' +
@@ -1987,10 +2176,18 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'administrator of Workstation A. Which is this, and why?',
           teach: {
             concept:
-              'Two movements dominate the middle of an intrusion, and they are easy to confuse ' +
-              'because both increase the attacker\'s reach. Privilege escalation is vertical: on a ' +
-              'single system, you climb from a low-rights account to a higher one, ideally ' +
-              'administrator or root, which lets you do far more on that machine. Lateral movement is ' +
+              'Think of a large office building where each floor is a different computer and the ' +
+              'lifts and stairwells connecting them are the network. Once someone slips past the ' +
+              'lobby security desk, they can do two different kinds of moving around: they can talk ' +
+              'their way from being a visitor to holding a staff keycard on the floor they are ' +
+              'already on, or they can use whatever access they already have to walk onto a different ' +
+              'floor entirely. Two movements dominate the middle of a computer intrusion in exactly ' +
+              'this way, and they are easy to confuse because both increase the attacker\'s reach. ' +
+              'PRIVILEGE ESCALATION is vertical: on a ' +
+              'single system, you climb from a low-rights account (one allowed to do only ordinary, ' +
+              'limited things) to a higher one, ideally administrator or root (the account with ' +
+              'essentially unlimited power over that machine), which lets you do far more on that ' +
+              'machine. LATERAL MOVEMENT is ' +
               'horizontal: you use your position on one system to reach a different system you could ' +
               'not touch before. Up versus across is the whole distinction, and it is worth getting ' +
               'exact because the two look different in the logs and call for different defences.\n\n' +
@@ -2049,8 +2246,11 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'one machine spread across the whole fleet, and name one control that breaks it.',
           teach: {
             concept:
-              'Lateral movement is easiest when the attacker does not have to exploit anything at ' +
-              'all, only reuse a credential that already works elsewhere. The classic enabler is a ' +
+              'A landlord who uses the same master key on every unit in a building has made a single ' +
+              'stolen key far more dangerous than it needed to be: whoever copies it from one door now ' +
+              'has every door. Lateral movement on a network is easiest when the attacker does not ' +
+              'have to exploit anything at all, only reuse a credential (a username and password, or ' +
+              'similar proof of identity) that already works elsewhere. The classic enabler is a ' +
               'shared local administrator password: if every workstation has the same one, then ' +
               'cracking or extracting it from a single machine hands the attacker administrator ' +
               'access to all of them at once. No exploit, no vulnerability, just a valid login ' +
@@ -2111,8 +2311,11 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'root on a system? Select all that apply.',
           teach: {
             concept:
-              'Privilege escalation usually comes not from a single exotic exploit but from ' +
-              'ordinary mistakes in how a system is configured and maintained. An unpatched flaw in ' +
+              'Most break-ins do not require a master locksmith. They happen because a maintenance ' +
+              'worker left a service door propped open, or a spare key was hung on a hook visible ' +
+              'through a window. Privilege escalation usually comes not from a single exotic exploit ' +
+              'but from ordinary mistakes in how a system is configured and maintained. An unpatched ' +
+              'flaw in ' +
               'the operating-system kernel can let a normal user run code with the highest rights. A ' +
               'file or program that runs as a powerful account but can be modified or influenced by a ' +
               'weak one hands over that power. An over-generous permission -- a user allowed to run a ' +
@@ -2173,7 +2376,12 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'what unusual pattern gives it away.',
           teach: {
             concept:
-              'Lateral movement with valid credentials is quiet because nothing is technically ' +
+              'A neighbour who always leaves for work at eight and returns at six is not doing ' +
+              'anything wrong by walking into their own house. A neighbour who normally does that but ' +
+              'is suddenly seen entering three different houses on the street at three in the ' +
+              'morning is doing something that is, individually, still just "using a key," yet is ' +
+              'obviously worth a second look. Lateral movement with valid credentials on a network is ' +
+              'quiet in the same way, because nothing is technically ' +
               'broken: a real account logging in with a real password raises no exploit alert and ' +
               'trips no antivirus. This is exactly why it is so favoured, and why detecting it is one ' +
               'of the harder problems in defence. But quiet is not silent. The movement still ' +
@@ -2245,7 +2453,11 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'ordinary logging is enabled? Select all that apply.',
           teach: {
             concept:
-              'Modern systems are noisy recorders. Authentication systems log who signed in, from ' +
+              'A modern building keeps far more of a record of who moved through it than most people ' +
+              'realise: badge readers log every door opened, cameras catch every hallway, and a sign-in ' +
+              'sheet at reception notes every visitor. A LOG is the computer equivalent, a ' +
+              'timestamped written record that a system keeps of things that happened on it. Modern ' +
+              'systems are noisy recorders. Authentication systems log who signed in, from ' +
               'where, and when, and whether they failed first. Operating systems can record process ' +
               'creation, so a program being run leaves a trace. Networks log connections: which host ' +
               'talked to which, on what port, and how much data moved. Applications log their own ' +
@@ -2304,6 +2516,8 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'sentences, explain how thorough logging and missed detection can both be true at once.',
           teach: {
             concept:
+              'A building can have a camera on every hallway and still miss a break-in, if nobody is ' +
+              'ever actually watching the hundred hours of footage those cameras produce every day. ' +
               'There is a gap between recording an event and detecting an attack, and attackers live ' +
               'in that gap. A large organisation generates enormous volumes of log data every day, ' +
               'far more than any team could read. Detection therefore depends on automated rules ' +
@@ -2366,8 +2580,12 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'attacker?',
           teach: {
             concept:
-              'Beginners imagine evasion as invisibility -- a way to touch systems and leave no ' +
-              'trace at all. That is not how it works. As the earlier exercises showed, activity ' +
+              'A thief who wants to leave no trace at all cannot exist in the real world; even ' +
+              'walking across a room disturbs the dust. The realistic goal is not to leave no ' +
+              'footprint, it is to leave a footprint that looks like everyone else\'s. EVASION on a ' +
+              'computer network works the same way. Beginners imagine evasion as invisibility, a way ' +
+              'to touch systems and leave no trace at all. That is not how it works. As the earlier ' +
+              'exercises showed, activity ' +
               'gets logged, so the realistic goal is not to leave no evidence but to leave evidence ' +
               'that does not stand out. Evasion is camouflage, not invisibility: you make your ' +
               'actions resemble the legitimate activity all around them, so that the traces you ' +
@@ -2426,8 +2644,10 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'LEAST likely to stand out to a watchful defender?',
           teach: {
             concept:
-              'Evasion principles are only worth anything when they change what you actually do, so ' +
-              'the test of understanding is choosing the quieter option under pressure. The same ' +
+              'Knowing that camouflage exists is useless if you cannot actually pick the outfit that ' +
+              'blends in when it matters. Evasion principles are only worth anything when they change ' +
+              'what you actually do, so the test of understanding is choosing the quieter option ' +
+              'under pressure. The same ' +
               'objective -- here, copying some files -- can be pursued in ways that range from ' +
               'screamingly obvious to nearly invisible, and the difference is entirely in how much ' +
               'the method resembles normal activity. A huge transfer at three in the morning to an ' +
@@ -2498,7 +2718,10 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'needs to remove a sensitive dataset. Which approach best fits those constraints?',
           teach: {
             concept:
-              'Exfiltration is the act of getting stolen data out of the target network, and it is ' +
+              'A jewel thief can pick a lock silently and stand in the vault for hours without ' +
+              'triggering anything, but the moment they try to carry the jewels out past the loading ' +
+              'dock, they cross the one checkpoint built specifically to catch exactly that. ' +
+              'EXFILTRATION is the act of getting stolen data out of the target network, and it is ' +
               'frequently the moment an intrusion gets caught, because moving data is inherently ' +
               'visible in a way that quietly reading it is not. Defenders know this and watch for it ' +
               'with data-loss-prevention tools and outbound traffic monitoring tuned to spot large ' +
@@ -2561,8 +2784,11 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'or three sentences, explain what staging and slow timing each buy the attacker.',
           teach: {
             concept:
-              'Careful exfiltration usually has two stages, and each solves a different problem. ' +
-              'Staging is the quiet internal step: the attacker collects the data they want from ' +
+              'A shoplifter who wants to walk out with an entire cart of goods first quietly gathers ' +
+              'everything into one bag near the exit, then waits for a quiet moment rather than ' +
+              'making one dramatic dash past the till. Careful exfiltration usually has two stages ' +
+              'for the same reason, and each solves a different problem. STAGING is the quiet internal ' +
+              'step: the attacker collects the data they want from ' +
               'wherever it lives into a single location inside the network they control. Moving data ' +
               'between internal systems is far less scrutinised than moving it out, so staging lets ' +
               'the attacker assemble everything without yet crossing the boundary that DLP watches. ' +
@@ -2623,7 +2849,11 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'these are real forms of impact the organisation may face? Select all that apply.',
           teach: {
             concept:
-              'The final phase of an attack is impact: the actual harm done, which is also the ' +
+              'A house fire does not only destroy what burns. There is smoke damage in rooms the ' +
+              'fire never reached, the cost of temporarily housing the family elsewhere, the ' +
+              'insurance premium going up afterward, and the fact that the house is now harder to ' +
+              'sell. IMPACT, the final phase of an attack, works the same way: it is the actual harm ' +
+              'done, which is also the ' +
               'reason the whole engagement matters. It is a mistake to think of impact as only the ' +
               'data that left the building. A serious breach radiates cost across several ' +
               'dimensions. There is operational impact, when systems are down or work stops. There ' +
@@ -2689,8 +2919,12 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'more useful.',
           teach: {
             concept:
-              'A red team engagement is only valuable if it changes what the organisation does, and ' +
-              'organisations act on risk they can weigh, not on technical facts they cannot ' +
+              'Telling a homeowner "the wiring in your attic is old" means little on its own. Telling ' +
+              'them "the wiring in your attic is old, and that is the leading cause of house fires in ' +
+              'homes your age, which is why your insurer would refuse a claim" is the sentence that ' +
+              'actually gets the electrician called. A red team engagement is only valuable if it ' +
+              'changes what the organisation does, and organisations act on risk they can weigh, not ' +
+              'on technical facts they cannot ' +
               'interpret. "We reached the customer database" is a true statement that means little ' +
               'to the executives who control budgets, because it does not tell them what it would ' +
               'cost them. Translating the finding into likely consequences -- the regulatory ' +
@@ -2762,8 +2996,16 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'What made this approach so effective?',
           teach: {
             concept:
-              'The SolarWinds compromise, disclosed in late 2020, is the defining example of a ' +
-              'supply-chain attack. Rather than attacking thousands of organisations one by one, the ' +
+              'The next two modules leave the abstract vocabulary behind and look at real, publicly ' +
+              'documented breaches, because the attack lifecycle stops being an abstraction the ' +
+              'moment you watch it play out against an actual company. If a single factory poisoned ' +
+              'the ingredient it shipped to every bakery in the country, every loaf of bread made from ' +
+              'it would be poisoned too, no matter how careful each individual bakery was. A ' +
+              'SUPPLY-CHAIN ATTACK applies that same idea to software: instead of attacking a ' +
+              'company\'s defences directly, an attacker poisons something upstream that the company ' +
+              'trusts and installs without a second thought. The SolarWinds compromise, disclosed in ' +
+              'late 2020, is the defining example of one. Rather than attacking thousands of ' +
+              'organisations one by one, the ' +
               'intruders compromised a single trusted software vendor and hid a backdoor inside a ' +
               'routine product update. Every customer who installed that signed, legitimate-looking ' +
               'update installed the backdoor along with it, so one compromise propagated to thousands ' +
@@ -2825,8 +3067,13 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'clearest lesson for defenders?',
           teach: {
             concept:
-              'The Equifax breach of 2017 exposed the personal data of roughly 147 million people, ' +
-              'and its cause was mundane: a critical vulnerability in a widely used web framework had ' +
+              'A recall notice for a faulty car part protects nobody if the owner never actually ' +
+              'takes the car in to have it replaced. Software has the exact same gap between a fix ' +
+              'existing and a fix being applied, and PATCHING (installing the update that closes a ' +
+              'known vulnerability) is how that gap gets closed. The Equifax breach of 2017 exposed ' +
+              'the personal data of roughly 147 million people, and its cause was mundane: a critical ' +
+              'vulnerability in a widely used web framework (a set of pre-built software components ' +
+              'many applications are built on top of) had ' +
               'a patch available, and that patch was not applied in time. Attackers used the known, ' +
               'fixable flaw to get in and then reached vast quantities of sensitive data. There was ' +
               'no exotic zero-day and no unstoppable adversary -- just a gap between when a fix ' +
@@ -2887,7 +3134,10 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'systems. What weakness did this exploit?',
           teach: {
             concept:
-              'The Target breach of 2013 began somewhere nobody would think to defend hardest: a ' +
+              'A bank vault can have perfect walls and still be robbed if the cleaning crew\'s master ' +
+              'key happens to open the vault door too, because nobody thought to check what a ' +
+              'cleaner\'s key should and should not open. The Target breach of 2013 began exactly ' +
+              'that way, somewhere nobody would think to defend hardest: a ' +
               'contractor responsible for heating and cooling, who had been given network access to ' +
               'do their job. Attackers compromised that third party first, then used its legitimate ' +
               'connection into Target\'s network as a bridge, moving from the low-value foothold ' +
@@ -2951,7 +3201,9 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'defensive lesson and explain why multi-factor authentication would have mattered.',
           teach: {
             concept:
-              'The Colonial Pipeline attack of 2021 disrupted fuel supply across a large part of the ' +
+              'A single spare key left under a doormat can, in principle, let someone into an entire ' +
+              'house no matter how good every other lock is. The Colonial Pipeline attack of 2021 ' +
+              'disrupted fuel supply across a large part of the ' +
               'eastern United States, and its entry point was strikingly small: a single VPN account ' +
               'whose credential had been compromised, protected by nothing but that password. The ' +
               'account was reportedly no longer even in active use, but it still worked, and it still ' +
@@ -3025,8 +3277,11 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'themselves. Which of these are part of good opsec? Select all that apply.',
           teach: {
             concept:
-              'Operational security is the discipline of not giving yourself away, and for a red ' +
-              'teamer it runs wider than most beginners expect. It covers technical measures -- ' +
+              'A spy is undone as often by a careless habit, mentioning the mission to a friend, ' +
+              'reusing a name they used on a previous job, as by any brilliant piece of counter-' +
+              'espionage. OPERATIONAL SECURITY, or opsec, is the discipline of not giving yourself ' +
+              'away, and for a red teamer it runs wider than most beginners expect. It covers ' +
+              'technical measures, ' +
               'using dedicated infrastructure rather than personal accounts and devices, keeping ' +
               'communications encrypted, separating the tooling for one engagement from everything ' +
               'else -- but it also covers behaviour. Varying the timing of activity so it forms no ' +
@@ -3089,8 +3344,11 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'pathway began with.',
           teach: {
             concept:
-              'This pathway opened with authorisation, and it closes with it, because it is the ' +
-              'single fact that defines the profession. A red teamer and a criminal can run the same ' +
+              'Two surgeons can make an identical incision with an identical scalpel; one is healing ' +
+              'a patient who consented to the operation, and the other, without that consent, has ' +
+              'committed an assault. This pathway opened with authorisation, and it closes with it, ' +
+              'because it is the single fact that defines the profession. A red teamer and a criminal ' +
+              'can run the same ' +
               'scan, exploit the same flaw, and reach the same data; the actions are ' +
               'indistinguishable in isolation. What separates them is not skill or intent alone but ' +
               'a signed agreement: written permission from someone empowered to grant it, a defined ' +
@@ -3151,8 +3409,12 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'if to a real intrusion. What is the professional thing to do?',
           teach: {
             concept:
-              'Being detected is not failure -- often it is a success, because testing whether the ' +
-              'defenders can catch you may be the whole point of the engagement. What matters is how ' +
+              'A fire drill that the fire department mistakes for a real fire and responds to with ' +
+              'trucks and sirens is not a disaster, provided the building manager can immediately ' +
+              'show the fire crew the paperwork proving it was a planned drill. Being detected during ' +
+              'a security assessment is not failure, either, often it is a success, because testing ' +
+              'whether the defenders can catch you may be the whole point of the engagement. What ' +
+              'matters is how ' +
               'you handle it. In a covert test, the responders genuinely believe they are dealing ' +
               'with a real attacker, and they may be about to spend a stressful night, escalate to ' +
               'management, or even involve law enforcement. Handling detection well means being ' +
@@ -3217,7 +3479,12 @@ export const RED_TEAM_FOUNDATIONS: LearningPackage = {
             'should now be able to reason about, and the discipline that must underpin all of it.',
           teach: {
             concept:
-              'Readiness for adversarial practice is not about knowing exploits; this pathway has ' +
+              'A newly licensed driver is not ready for the road because they memorised a list of ' +
+              'traffic laws in isolation. They are ready because they can watch a moving intersection ' +
+              'and reason, in real time, about what every other driver is likely to do next, while ' +
+              'never forgetting that the rules exist and apply to them too. Readiness for adversarial ' +
+              'practice in this pathway means the same combination. It is not about knowing exploits; ' +
+              'this pathway has ' +
               'deliberately taught almost none. It is about being able to reason through an ' +
               'engagement the way an attacker does and a defender must: understanding the attack ' +
               'lifecycle as a connected sequence, seeing how reconnaissance feeds initial access, ' +
