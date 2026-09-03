@@ -651,4 +651,1402 @@ export const AI_SECURITY_PATHWAY_PRACTICE: Record<string, PracticeItem[]> = {
       ],
     },
   ],
+
+  // --- aisp.1.5: explaining it to somebody who owns the platform -------------
+  'aisp.1.5': [
+    {
+      id: 'aisp.1.5-p1',
+      prompt:
+        'A penetration testing lead says the assistant is in scope for their next engagement and they ' +
+        'will "test it like any other web app". In two or three sentences, say what that will and ' +
+        'will not cover.',
+      teach: {
+        note:
+          'A different audience with a different wrong assumption. The web application testing is ' +
+          'genuinely necessary and it examines the service around the model, which leaves the model ' +
+          'itself entirely untested unless somebody asks for that separately.',
+      },
+      solution:
+        'It will cover the service around the model properly: authentication, authorisation, rate ' +
+        'limiting, injection into the ordinary layers, and whether one tenant can reach another. It ' +
+        'will not cover the model, because there is no request that makes it misbehave in the way a ' +
+        'web vulnerability does; the failures there are prompt injection, extraction and the ' +
+        'behaviour of the retrieval path, and they are tested by probing behaviour over many attempts ' +
+        'and reporting a rate. I would ask for both and keep them as separate workstreams with ' +
+        'separate reporting, because merging them hides whichever one produced fewer findings.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['auth', 'rate limit', 'tenant', 'service', 'api', 'ordinary', 'web'],
+            ['model', 'prompt', 'injection', 'extraction', 'retrieval', 'behaviour', 'behavior'],
+            ['rate', 'many attempts', 'probe', 'separate', 'both', 'different'],
+          ],
+          hint: 'Say what the web testing genuinely covers, what it leaves untouched, and what you would ask for.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.1.5-p2',
+      prompt:
+        'A data protection officer asks whether the model "contains" personal data. In two or three ' +
+        'sentences, answer them.',
+      teach: {
+        note:
+          'Harder than it looks because the honest answer is "not in the way you mean, and yes in a ' +
+          'way that matters". Saying only the first half is technically defensible and leaves them ' +
+          'with a false sense of the position.',
+      },
+      solution:
+        'Not as records: there is no table inside the model and no query that retrieves a person, so ' +
+        'it does not contain personal data the way a database does. It does carry the influence of ' +
+        'whatever it was trained on, and where a record was distinctive or repeated it can sometimes ' +
+        'be reproduced in output, which is a disclosure even though it is not storage. So the ' +
+        'practical position is that erasure cannot be done by deleting a row, and the model has to ' +
+        'be treated as a thing that may emit training data rather than as a thing that holds it.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['not', 'no record', 'not a database', 'not stored', 'no table', 'not like'],
+            ['reproduce', 'emit', 'memoris', 'memoriz', 'output', 'disclos', 'repeat'],
+            ['erasure', 'delete', 'retrain', 'cannot', 'row', 'treat'],
+          ],
+          hint: 'Answer both halves: what it does not contain, and what it can still do.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.1.5-p3',
+      prompt:
+        'An engineering manager says they will add unit tests for the model so regressions get caught ' +
+        'in CI. In two or three sentences, say what such a test can and cannot assert.',
+      teach: {
+        note:
+          'The instinct is right and the shape has to change. A unit test asserts an exact output, ' +
+          'and a model has no exact output to assert, so the useful version measures a rate over a ' +
+          'set and fails on a threshold.',
+      },
+      solution:
+        'A test can assert that the model still behaves acceptably on a fixed set of inputs: it ' +
+        'refuses the things it should refuse, answers the things it should answer, and does not leak ' +
+        'the system prompt. It cannot assert an exact output, because generation varies between runs ' +
+        'and even a fixed seed does not survive a model upgrade. So the working form is a suite that ' +
+        'measures a pass rate across many cases and fails the build when the rate drops below a ' +
+        'threshold, which is a different thing from an assertion and has to be explained as such.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['set of inputs', 'cases', 'suite', 'behaviour', 'behavior', 'refuse', 'fixed set'],
+            ['exact', 'cannot assert', 'varies', 'not identical', 'no single output', 'sampling'],
+            ['rate', 'threshold', 'proportion', 'percentage', 'fails when', 'below'],
+          ],
+          hint: 'Say what is assertable, what is not, and what shape the test has to take instead.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.1.5-p4',
+      prompt:
+        'The platform lead accepts the point and asks what evidence they should require before the ' +
+        'assistant goes live. In two or three sentences, give them a short list.',
+      teach: {
+        note:
+          'The constructive half. Having explained what does not work, you are obliged to say what ' +
+          'would, and a list somebody can put in a launch checklist is worth more than a correct ' +
+          'objection they cannot act on.',
+      },
+      solution:
+        'Three things. A record of what reaches the context, meaning which corpora are retrieved from ' +
+        'and who can write to them, because that is where an attacker gets in without touching us. A ' +
+        'measured result from adversarial testing, reported as a rate across named technique classes ' +
+        'rather than as a pass. And a statement of what the model is permitted to do with its output: ' +
+        'which tools it can call and what a human must approve, because that is what bounds the ' +
+        'damage when the rate turns out to be non-zero.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['corpus', 'context', 'retriev', 'write access', 'what reaches', 'sources'],
+            ['test', 'rate', 'adversarial', 'measured', 'technique', 'probe'],
+            ['tool', 'permission', 'approve', 'allowed', 'output', 'bound', 'human'],
+          ],
+          hint: 'Name three concrete artefacts, each of which somebody could actually produce.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.1.5-p5',
+      prompt:
+        'Rewrite the core of your explanation in one sentence, for a change advisory board with two ' +
+        'minutes on the agenda.',
+      teach: {
+        note:
+          'Compression is the skill being drilled. A board does not need the mechanism; it needs to ' +
+          'know that the usual evidence does not apply here and what is being offered instead, and ' +
+          'that fits in a sentence if you are ruthless about it.',
+      },
+      solution:
+        'The model\'s behaviour was learned from data rather than written as rules, so code review ' +
+        'cannot tell us what it will do and the assurance we are offering instead is measured ' +
+        'behaviour under adversarial testing, plus hard limits on what it is allowed to act on.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['learned', 'not written', 'from data', 'no rules', 'not specified'],
+            ['review', 'inspect', 'read', 'code', 'cannot tell'],
+            ['measur', 'test', 'behaviour', 'behavior', 'limit', 'allowed', 'bound'],
+          ],
+          hint: 'One sentence: why the usual evidence fails, and what replaces it.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.2.1: sorting failures by what they cost --------------------------
+  'aisp.2.1': [
+    {
+      id: 'aisp.2.1-p1',
+      prompt:
+        'Classify each of these and say why in one clause each: (a) a fine-tuned model starts ' +
+        'recommending a competitor because its training data was manipulated, (b) an attacker ' +
+        'discovers the exact thresholds a fraud model uses by querying it, (c) a malformed prompt ' +
+        'crashes the inference service.',
+      teach: {
+        note:
+          'The same triad against three fresh cases. Sorting by what the attacker gained rather than ' +
+          'by how the attack was performed is the habit: two attacks using identical technique can ' +
+          'land in different columns depending on what changed.',
+      },
+      solution:
+        'A is integrity: the decision itself was changed by manipulating what the model learned, and ' +
+        'nothing was disclosed. B is confidentiality: the thresholds are operating detail the attacker ' +
+        'now holds, and the model still behaves exactly as before. C is availability: nothing was ' +
+        'disclosed and no decision was altered, the service simply stopped answering.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['integrity', 'changed', 'altered', 'decision'],
+            ['confidential', 'disclos', 'leak', 'reveal', 'learned'],
+            ['availab', 'crash', 'stopped', 'denial', 'outage', 'down'],
+          ],
+          hint: 'One classification each, and say what the attacker gained rather than how they did it.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.1-p2',
+      prompt:
+        'An attacker extracts a usable copy of a model. In two or three sentences, say why that is a ' +
+        'confidentiality failure even though nothing about the original changed.',
+      teach: {
+        note:
+          'The case people hesitate over, because nothing was taken in the ordinary sense: the ' +
+          'original is untouched and still serving. What was disclosed is the asset itself, which is ' +
+          'the point at which "model as intellectual property" stops being a slogan.',
+      },
+      solution:
+        'The model is the asset, and the attacker now has it: the training data, the compute and the ' +
+        'tuning that produced it were the investment, and a copy that behaves like it captures most ' +
+        'of that value. Nothing changed about the original and nothing stopped working, which rules ' +
+        'out integrity and availability. What was lost is exclusive possession of something ' +
+        'confidential, which is a disclosure even though the mechanism was answering questions ' +
+        'normally.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['asset', 'value', 'investment', 'intellectual', 'property', 'the model itself'],
+            ['copy', 'possess', 'now has', 'obtained', 'holds'],
+            ['unchanged', 'nothing changed', 'still works', 'not altered', 'disclos'],
+          ],
+          hint: 'Say what the asset is, what the attacker now has, and why the other two categories do not fit.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.1-p3',
+      prompt:
+        'Give an example of a single AI incident that is a failure in two of the three categories at ' +
+        'once, and say which two.',
+      teach: {
+        note:
+          'The triad is a sorting aid, not a partition, and pretending every incident lands in one ' +
+          'box produces reports that undersell what happened. Being able to name a genuine overlap ' +
+          'is what stops the framework becoming a filing exercise.',
+      },
+      solution:
+        'A prompt injection that makes a customer-facing assistant disclose another user\'s ' +
+        'conversation and then act on the attacker\'s instruction is both. It is a confidentiality ' +
+        'failure because a conversation that belonged to someone else was disclosed, and an integrity ' +
+        'failure because the assistant then took an action nobody authorised. Reporting only one of ' +
+        'those would understate it, and the response differs for each half: one drives a notification ' +
+        'decision and the other drives a rollback.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['confidential', 'disclos', 'leak', 'another user', 'exposed'],
+            ['integrity', 'action', 'changed', 'altered', 'authorised', 'authorized', 'wrote'],
+            ['both', 'two', 'each', 'differ', 'understate', 'response'],
+          ],
+          hint: 'Give one concrete incident, name both categories, and say why reporting one is not enough.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.1-p4',
+      prompt:
+        'In two or three sentences, say why availability failures on AI systems usually arrive as a ' +
+        'bill rather than as an outage.',
+      teach: {
+        note:
+          'The AI-specific twist on a familiar category. Inference is metered, so exhausting the ' +
+          'resource looks like spend rather than downtime, and the control that stops it is a budget ' +
+          'alarm rather than anything a security team usually owns.',
+      },
+      solution:
+        'Inference is metered and usually elastic, so an attacker driving volume does not knock the ' +
+        'service over, they run up the cost until somebody notices the invoice or a quota trips. That ' +
+        'makes the failure slower and quieter than an outage and it lands on a budget holder rather ' +
+        'than on a monitoring dashboard. The controls are correspondingly unusual for a security ' +
+        'team: per-account rate limits, spend alerts and hard caps, which have to be set before the ' +
+        'month they are needed.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['cost', 'spend', 'bill', 'invoice', 'budget', 'expensive'],
+            ['elastic', 'scale', 'metered', 'not down', 'keeps serving', 'quota'],
+            ['rate limit', 'cap', 'alert', 'quota', 'control', 'set'],
+          ],
+          hint: 'Say what happens instead of downtime, who notices, and what the control is.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.1-p5',
+      prompt:
+        'You have to explain to a board why "the model leaked its system prompt" is more serious on a ' +
+        'detection system than on a customer chatbot. Two or three sentences.',
+      teach: {
+        note:
+          'Applies the classification to a severity decision, which is where it earns its keep. The ' +
+          'same technique in two places produces disclosures of very different value, and the ' +
+          'difference is what the prompt contains rather than the fact of the leak.',
+      },
+      solution:
+        'On a chatbot the system prompt is usually tone and scope instructions, so disclosing it is ' +
+        'embarrassing and tells an attacker little they could not infer. On a detection system the ' +
+        'prompt often carries the live rules and thresholds, so disclosing it hands an attacker the ' +
+        'specification of what we detect and lets them tune their activity to sit underneath it. The ' +
+        'technique is identical and the consequence is not, which is why severity has to be argued ' +
+        'from what was disclosed rather than from the class of finding.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['tone', 'scope', 'little', 'embarrass', 'infer', 'harmless'],
+            ['threshold', 'rule', 'detection', 'logic', 'specification', 'what we detect'],
+            ['tune', 'evade', 'underneath', 'below', 'avoid', 'stay under'],
+          ],
+          hint: 'Contrast what each prompt contains, and say what the attacker does with the second one.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.2.2: where an attack enters, and where it must be addressed ------
+  'aisp.2.2': [
+    {
+      id: 'aisp.2.2-p1',
+      prompt:
+        'A team proposes a runtime filter to catch poisoned training data. In two or three sentences, ' +
+        'say why the control is in the wrong place.',
+      teach: {
+        note:
+          'Entry point determines remedy, and this is the clearest case: by runtime the poisoning is ' +
+          'already inside the weights, so a filter on the request path is inspecting the wrong thing ' +
+          'at the wrong time.',
+      },
+      solution:
+        'By the time a request arrives, poisoning has already been learned: it is in the parameters, ' +
+        'and a filter on the input path cannot remove what the model knows. The runtime filter would ' +
+        'only see the trigger if it could guess it, and the whole point of a backdoor trigger is ' +
+        'that nobody outside the attacker knows what it looks like. Poisoning has to be addressed ' +
+        'before or during training, through provenance and validation of the corpus, and remediated ' +
+        'by retraining, which is why it is priced in weeks rather than in a deploy.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['already', 'learned', 'in the weights', 'in the model', 'parameters', 'too late'],
+            ['trigger', 'guess', 'unknown', 'cannot know', 'hidden'],
+            ['training', 'before', 'provenance', 'retrain', 'corpus', 'validat'],
+          ],
+          hint: 'Say when the damage was done, why runtime cannot see it, and where the control belongs.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.2-p2',
+      prompt:
+        'In two or three sentences, say why rate limiting is a reasonable control against extraction ' +
+        'and a poor one against prompt injection.',
+      teach: {
+        note:
+          'Matching a control to a failure mode by the shape of the attack. Extraction needs many ' +
+          'requests and injection needs one, so a control priced in requests helps against exactly ' +
+          'one of them.',
+      },
+      solution:
+        'Extraction needs volume: the attacker has to query systematically to map the decision ' +
+        'surface, so anything that reduces requests per account directly raises the time and cost. ' +
+        'Injection needs one well-crafted request, so a limit that permits a thousand a day permits ' +
+        'the attack a thousand times over and constrains nothing. The general rule is that ' +
+        'rate-based controls work against attacks priced in requests and do nothing against attacks ' +
+        'priced in cleverness.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['volume', 'many', 'systematic', 'thousands', 'repeated', 'quantity'],
+            ['one', 'single', 'once', 'a single request', 'one prompt'],
+            ['cost', 'raise', 'slow', 'does nothing', 'no effect', 'constrain'],
+          ],
+          hint: 'Contrast how many requests each attack needs, and draw the general rule.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.2-p3',
+      prompt:
+        'A vendor supplies a pre-trained model that scores well on every benchmark you run. In two or ' +
+        'three sentences, say what the benchmarks do not tell you and what you would ask for instead.',
+      teach: {
+        note:
+          'The supply chain case. A backdoor is dormant without its trigger, so it is invisible to ' +
+          'exactly the evidence a procurement process collects, and the useful questions are about ' +
+          'provenance rather than about performance.',
+      },
+      solution:
+        'Benchmarks measure ordinary performance and a backdoor is dormant until its trigger appears, ' +
+        'so a backdoored model scores normally on every one of them: the evidence and the risk do not ' +
+        'overlap at all. What I would ask for is provenance: what the model was trained on, who ' +
+        'assembled that data, what fine-tuning was applied afterwards and by whom, and whether the ' +
+        'artefact is signed so we can tell we received what they built. None of that proves it is ' +
+        'clean; it establishes who is accountable if it is not.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['dormant', 'trigger', 'normal', 'scores well', 'invisible', 'hidden', 'until'],
+            ['provenance', 'trained on', 'who', 'fine-tun', 'fine tun', 'supply', 'sign'],
+            ['not prove', 'does not prove', 'accountab', 'responsib', 'establish', 'no guarantee'],
+          ],
+          hint: 'Say why the benchmark misses it, what you would ask for, and what that does and does not settle.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.2-p4',
+      prompt:
+        'In two or three sentences, explain how fine-tuning a safe model can make it unsafe, and what ' +
+        'that implies for a team that fine-tunes on customer data.',
+      teach: {
+        note:
+          'The entry point people create for themselves. Safety behaviour is learned and further ' +
+          'training can overwrite it, so a team improving accuracy can degrade refusal behaviour ' +
+          'without ever intending to and without any measurement telling them.',
+      },
+      solution:
+        'Safety behaviour is learned rather than enforced, so further training moves the same ' +
+        'parameters and can erode it: fine-tuning on ordinary domain data has been shown to weaken ' +
+        'refusals even when nothing in the data is adversarial. For a team fine-tuning on customer ' +
+        'data that means two things: the customer data is now a poisoning channel, and the safety ' +
+        'properties of the base model do not survive the tune automatically. Both are checkable only ' +
+        'by re-running the safety evaluation against the fine-tuned artefact rather than citing the ' +
+        'base model\'s results.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['learned', 'not enforced', 'same parameters', 'overwrite', 'erode', 'weaken'],
+            ['customer data', 'poison', 'channel', 'attacker', 'who can write', 'their data'],
+            ['re-run', 'rerun', 'evaluate again', 'retest', 're-test', 'not inherit', 'against the fine-tuned'],
+          ],
+          hint: 'Say why safety degrades, name the second risk the data itself introduces, and give the check.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.2-p5',
+      prompt:
+        'Pick any one of the five entrances and describe the cheapest control that meaningfully ' +
+        'reduces it, being honest about what the control costs.',
+      teach: {
+        note:
+          'Forces a commitment rather than a survey. Naming a cost alongside a control is what makes ' +
+          'a recommendation credible to whoever has to approve it, and a control described as free ' +
+          'is usually one nobody has costed.',
+      },
+      solution:
+        'For the retrieval path, the cheapest meaningful control is restricting who can write to the ' +
+        'indexed corpus. It costs almost nothing at runtime, needs no model changes and no latency, ' +
+        'and it removes the entire class of attack where an outsider plants an instruction in a ' +
+        'document. What it costs is organisational rather than technical: somebody has to own an ' +
+        'approval step for corpus content, and teams who could previously publish straight to the ' +
+        'wiki now wait, which is exactly the friction that gets controls quietly removed six months ' +
+        'later.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['retriev', 'corpus', 'training', 'input', 'supply', 'fine-tun', 'entrance'],
+            ['restrict', 'control', 'limit', 'approval', 'validate', 'rate limit', 'review'],
+            ['cost', 'friction', 'latency', 'slows', 'someone has to', 'wait', 'overhead'],
+          ],
+          hint: 'Name the entrance, name the control, and be specific about the price somebody pays.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.2.3: who is positioned to do it ---------------------------------
+  'aisp.2.3': [
+    {
+      id: 'aisp.2.3-p1',
+      prompt:
+        'A threat model lists "nation state actors" as the top risk to a customer service assistant. ' +
+        'In two or three sentences, say what is wrong with that as a starting point.',
+      teach: {
+        note:
+          'Capability without access is not a threat to this system. Starting from actor labels ' +
+          'rather than from who can reach the surfaces produces a threat model that is impressive ' +
+          'and useless, because every control it suggests is aimed at the wrong population.',
+      },
+      solution:
+        'It starts from capability rather than access, and access is what decides who can actually do ' +
+        'anything here. The people positioned against a customer assistant are the ones who can reach ' +
+        'its surfaces: anybody who can type into it, anybody who can get content into whatever corpus ' +
+        'it retrieves from, and the suppliers and insiders who sit next to the training data. A ' +
+        'sophisticated actor with none of that access is less of a threat to this system than a ' +
+        'contractor with write access to the wiki, and a threat model that inverts that will spend ' +
+        'its budget in the wrong place.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['access', 'reach', 'position', 'who can', 'able to'],
+            ['capability', 'sophistic', 'skill', 'resources', 'nation'],
+            ['insider', 'supplier', 'contractor', 'user', 'anybody who can type', 'corpus', 'wiki'],
+          ],
+          hint: 'Name the distinction being missed, then say who is actually positioned.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.3-p2',
+      prompt:
+        'In two or three sentences, explain why a published jailbreak technique is not by itself an ' +
+        'intrusion into your systems, and what it does change.',
+      teach: {
+        note:
+          'A common category error that produces incident tickets for news articles. The publication ' +
+          'changes the population who can perform the technique, which is a real change worth ' +
+          'responding to, but responding to it as an incident wastes the response process.',
+      },
+      solution:
+        'A published technique is a capability that now exists in the world, not an event that ' +
+        'happened to us: nobody has touched our systems and there is nothing to contain or ' +
+        'eradicate. What it changes is the population able to use it, which goes from people who ' +
+        'could invent it to anybody who can read, so the likelihood of somebody trying it against us ' +
+        'rises sharply. The right response is to test whether our deployment is susceptible and to ' +
+        'add it to the regression suite, not to open an incident.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['not an incident', 'no intrusion', 'nothing happened', 'not an event', 'capability'],
+            ['population', 'anybody', 'more people', 'likelihood', 'easier', 'widely'],
+            ['test', 'check', 'regression', 'suite', 'assess', 'try it'],
+          ],
+          hint: 'Say what it is not, what it genuinely changes, and what to do about it.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.3-p3',
+      prompt:
+        'You are threat modelling an internal HR assistant available only to employees. In two or ' +
+        'three sentences, say who you would treat as the adversary and why.',
+      teach: {
+        note:
+          'Internal-only removes the external attacker and does not remove the threat. The awkward ' +
+          'part is that the adversary is a colleague, which is a real conversation with HR and legal ' +
+          'rather than a purely technical judgement.',
+      },
+      solution:
+        'The adversary is an employee, because that is who has access, and the interesting cases are ' +
+        'somebody curious about salaries or somebody trying to reach records that belong to another ' +
+        'person. A compromised employee account is the same adversary with a different motive, and ' +
+        'has to be assumed. That framing is uncomfortable to write down and it is the accurate one: ' +
+        'the control that matters is not keeping outsiders out, it is making sure the assistant ' +
+        'cannot answer beyond what the asking employee is already entitled to see.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['employee', 'insider', 'staff', 'colleague', 'internal user'],
+            ['compromis', 'stolen', 'account', 'phish', 'taken over'],
+            ['entitled', 'authoris', 'authoriz', 'permission', 'their own', 'access control', 'beyond'],
+          ],
+          hint: 'Name the adversary honestly, include the compromised-account case, and say what the control has to enforce.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.3-p4',
+      prompt:
+        'In two or three sentences, explain why somebody who can get content indexed into your ' +
+        'retrieval corpus has a path that never touches your pipeline.',
+      teach: {
+        note:
+          'The asymmetry that makes retrieval the most under-defended surface. The attacker writes to ' +
+          'a system that was never considered security-relevant, and the payload is delivered by your ' +
+          'own retriever on behalf of an innocent user.',
+      },
+      solution:
+        'They never have to send you anything at request time: they write a document, your indexer ' +
+        'picks it up on its next run, and your retriever later inserts it into the model\'s context ' +
+        'on behalf of a user asking an ordinary question. Every control on the request path is ' +
+        'irrelevant because nothing the user typed is unusual, and every control on the training ' +
+        'pipeline is irrelevant because no training happened. The surface they attacked is whatever ' +
+        'system holds the corpus, which is usually a wiki or a ticketing tool nobody classified as ' +
+        'security-relevant.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['index', 'retriev', 'corpus', 'document', 'wiki', 'ticket'],
+            ['nothing the user', 'ordinary', 'innocent', 'on behalf', 'normal question', 'request path'],
+            ['not classified', 'not security', 'never considered', 'wiki', 'other system', 'unprotected'],
+          ],
+          hint: 'Trace the path from writing the document to it reaching the model, and say which controls miss it.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.3-p5',
+      prompt:
+        'Rank these three by how cheaply each could poison a training corpus, and justify the order: ' +
+        'an external attacker, a data supplier, an employee on the ML team.',
+      teach: {
+        note:
+          'Forces the access-not-capability idea into an explicit ordering. The uncomfortable answer ' +
+          'is usually that the cheapest path belongs to somebody you already trust, which is why ' +
+          'supplier and insider controls matter more here than perimeter ones.',
+      },
+      solution:
+        'The ML team employee is cheapest: they already have write access to the corpus and their ' +
+        'changes look like ordinary work, so the attack costs them nothing beyond the decision. The ' +
+        'data supplier is next, because they control a whole feed we ingest largely on trust, and ' +
+        'anything they include arrives already inside the pipeline. The external attacker is by far ' +
+        'the most expensive, since they have to find some indirect route such as a public source we ' +
+        'scrape or a system they can write to that we later ingest. That ordering says the controls ' +
+        'worth having are provenance, review of supplier feeds and separation of duties on the ' +
+        'corpus, not perimeter defence.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['employee', 'insider', 'ml team', 'cheapest', 'already has'],
+            ['supplier', 'feed', 'vendor', 'ingest', 'trust'],
+            ['external', 'expensive', 'hardest', 'indirect', 'scrape', 'public'],
+          ],
+          hint: 'Give the order, justify each position by access, and say what the order implies for controls.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.2.4: adversarial examples, honestly ------------------------------
+  'aisp.2.4': [
+    {
+      id: 'aisp.2.4-p1',
+      prompt:
+        'A team keeps their model weights private and concludes adversarial examples are not a ' +
+        'concern. In two or three sentences, say why that does not follow.',
+      teach: {
+        note:
+          'Transferability is the result that kills security-by-privacy for models. An attacker ' +
+          'trains their own approximation, crafts against that, and a good share of what works there ' +
+          'works against yours because both learned similar structure from similar data.',
+      },
+      solution:
+        'Adversarial examples transfer: an attacker can train their own model on similar data, craft ' +
+        'inputs that defeat it, and a meaningful share of those will also defeat yours, because both ' +
+        'models learned similar structure from a similar distribution. So keeping the weights private ' +
+        'raises the cost of a targeted attack and does not remove the class. It also does not help ' +
+        'against an attacker who can simply query your model, since responses are enough to guide ' +
+        'the search without ever seeing a parameter.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['transfer', 'similar', 'their own model', 'another model', 'carry over'],
+            ['private', 'weights', 'secret', 'not enough', 'does not remove', 'raises cost'],
+            ['quer', 'responses', 'api', 'without seeing', 'black box', 'feedback'],
+          ],
+          hint: 'Name the phenomenon, say what privacy does buy, and give the second route that ignores it.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.4-p2',
+      prompt:
+        'In two or three sentences, say why calling an adversarial example "a bug in the inference ' +
+        'code" leads a team to the wrong remedy.',
+      teach: {
+        note:
+          'Diagnosis determines remedy. If it is read as a coding defect the team goes looking for a ' +
+          'patch, finds nothing, and concludes the report was wrong; the actual remedies are all in ' +
+          'training and architecture.',
+      },
+      solution:
+        'It is not a defect in the code: the inference path executed correctly and returned the ' +
+        'model\'s genuine answer for that input, and there is no line to fix. Reading it as a bug ' +
+        'sends the team hunting for a patch that does not exist, and when they fail to find one they ' +
+        'tend to conclude the finding was overstated. The real remedies are elsewhere: adversarial ' +
+        'training, input transformation, ensembling, or accepting the rate and bounding what a ' +
+        'misclassification can cause, none of which look like a code change.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['not a defect', 'no bug', 'correct', 'executed', 'no line', 'working as'],
+            ['patch', 'fix', 'looking for', 'no such', 'dismiss', 'overstated'],
+            ['adversarial training', 'transform', 'ensemble', 'bound', 'accept', 'architecture', 'elsewhere'],
+          ],
+          hint: 'Say what the code actually did, what the wrong diagnosis causes, and where the remedies really are.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.4-p3',
+      prompt:
+        'Adversarial training is proposed for a malware classifier. In two or three sentences, say ' +
+        'what it buys and what it costs.',
+      teach: {
+        note:
+          'The honest cost statement is what makes the recommendation usable. Adversarial training ' +
+          'genuinely works and it takes ordinary accuracy and a lot of compute with it, and a ' +
+          'proposal that omits that will be reversed the first time detection rates dip.',
+      },
+      solution:
+        'It buys a real reduction in susceptibility: training against perturbed inputs moves the ' +
+        'learned boundary so that the perturbations you trained against stop working. It costs ' +
+        'ordinary accuracy, because the model is now fitting a harder objective and usually gets ' +
+        'slightly worse on clean traffic, and it costs substantially more compute per training run. ' +
+        'It also only covers the perturbation types you trained against, so it is a reduction rather ' +
+        'than a fix, and stating that up front is what stops it being reversed when detection rates ' +
+        'dip.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['reduce', 'less susceptible', 'harder', 'moves', 'improve', 'robust'],
+            ['accuracy', 'clean', 'ordinary', 'worse', 'cost', 'compute', 'expensive'],
+            ['only', 'trained against', 'not all', 'reduction', 'not a fix', 'other perturbations'],
+          ],
+          hint: 'State the benefit, both costs, and the limit on coverage.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.4-p4',
+      prompt:
+        'In two or three sentences, explain why a perturbation too small for a person to notice can ' +
+        'change a model\'s answer, without saying the words "high dimensional".',
+      teach: {
+        note:
+          'The constraint forces plain language. This is the explanation you need for anybody who ' +
+          'has to sign off on the risk, and jargon here reliably converts a real concern into an ' +
+          'abstraction they discount.',
+      },
+      solution:
+        'The model is not looking at the input the way a person does: it is measuring many small ' +
+        'numerical features and combining them, and its notion of "similar" is not ours. A change ' +
+        'spread across many of those features can be individually tiny, invisible to a human, and ' +
+        'still add up to a large movement in the terms the model actually uses. So two inputs that ' +
+        'look identical to us can sit comfortably on opposite sides of the line it learned.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['many', 'features', 'numbers', 'measures', 'combin', 'spread across'],
+            ['tiny', 'small', 'invisible', 'imperceptible', 'unnoticeable', 'each'],
+            ['add up', 'accumulate', 'large', 'different', 'not the same', 'opposite', 'line'],
+          ],
+          hint: 'Describe what the model measures, why small changes accumulate, and what that does to the answer.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.2.4-p5',
+      prompt:
+        'Your model is evaded by an adversarial sample in production. In two or three sentences, say ' +
+        'what you would do first, given that you cannot patch the model today.',
+      teach: {
+        note:
+          'The incident version. The remedies all take a retraining cycle, so the first move has to ' +
+          'be compensating rather than corrective, and knowing that in advance is what stops the ' +
+          'first hour going on an argument about whose fault it is.',
+      },
+      solution:
+        'Nothing I can do to the model helps today, so the first move is compensating control: raise ' +
+        'the weight of other signals for that decision, add a human review step for the affected ' +
+        'class, or block on a cruder rule that the perturbation does not touch. In parallel I would ' +
+        'preserve the sample, because it is the seed of both the detection and the adversarial ' +
+        'training set. The model change comes in the next training cycle and I would say so ' +
+        'explicitly, so nobody waits for a fix that is weeks away while the compensating control is ' +
+        'quietly removed.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['compensat', 'other signal', 'human', 'review', 'second control', 'rule', 'block'],
+            ['preserve', 'keep', 'sample', 'collect', 'seed', 'add to'],
+            ['next', 'retrain', 'cycle', 'weeks', 'later', 'not today', 'say so'],
+          ],
+          hint: 'Give the immediate action, what you keep, and what you tell people about the timeline.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.3.1: what gets memorised ----------------------------------------
+  'aisp.3.1': [
+    {
+      id: 'aisp.3.1-p1',
+      prompt:
+        'A team is about to train on a corpus scraped from the open web. In two or three sentences, ' +
+        'say which single preprocessing step most reduces memorisation risk and why it works.',
+      teach: {
+        note:
+          'Deduplication is the cheapest privacy control available and it is usually skipped because ' +
+          'it looks like a data-quality chore rather than a security one. Repetition is the strongest ' +
+          'predictor of what can be pulled back out.',
+      },
+      solution:
+        'Deduplication, including near-duplicates rather than only exact matches. Repetition is the ' +
+        'strongest predictor of whether a specific string can be recovered from the model, and web ' +
+        'scrapes are full of the same document mirrored across many sites, so a record that appears ' +
+        'once in the world can appear hundreds of times in the corpus. Collapsing those to a single ' +
+        'instance costs nothing at inference, needs no change to the architecture, and directly ' +
+        'attacks the mechanism rather than trying to filter the output afterwards.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['dedup', 'duplicate', 'near-duplicate', 'repeated', 'mirror', 'collapse'],
+            ['repetition', 'many times', 'appears', 'frequency', 'how often', 'predictor'],
+            ['cheap', 'costs nothing', 'no change', 'before training', 'mechanism', 'directly'],
+          ],
+          hint: 'Name the step, say why repetition matters, and say what makes it a cheap control.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.1-p2',
+      prompt:
+        'In two or three sentences, explain why a rare account number is more recoverable from a ' +
+        'model than a common phrase that appears in most documents.',
+      teach: {
+        note:
+          'The counter-intuitive half: frequency across the corpus and distinctiveness of the string ' +
+          'pull in different directions. A phrase everyone uses becomes a general pattern, and a ' +
+          'string nobody else uses has to be stored as itself.',
+      },
+      solution:
+        'A common phrase is learned as a general pattern because it appears in many contexts, so the ' +
+        'model represents the regularity rather than any particular occurrence, and there is no ' +
+        'specific instance to recover. A rare, long, structured string like an account number has no ' +
+        'pattern behind it: the only way to reproduce it is to have retained that exact sequence. So ' +
+        'distinctiveness is what makes something recoverable, and it is exactly the property that ' +
+        'sensitive identifiers have by design.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['pattern', 'general', 'regularity', 'many contexts', 'common', 'generalis', 'generaliz'],
+            ['rare', 'distinct', 'unusual', 'unique', 'structured', 'long', 'no pattern'],
+            ['recover', 'reproduce', 'retain', 'exact', 'memoris', 'memoriz', 'specific'],
+          ],
+          hint: 'Contrast what the model does with each, and say which property makes something recoverable.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.1-p3',
+      prompt:
+        'A team trains for many more epochs on a small dataset because accuracy keeps improving. In ' +
+        'two or three sentences, say what they are also doing.',
+      teach: {
+        note:
+          'The metric they are watching and the risk they are creating move together, which is why ' +
+          'this happens to careful teams. Training-set accuracy improving late in a run is often the ' +
+          'model committing examples to memory.',
+      },
+      solution:
+        'Past a certain point the accuracy gains come from the model memorising individual examples ' +
+        'rather than learning anything that generalises, which is why the improvement shows on the ' +
+        'training set and not on held-out data. That is precisely the condition under which specific ' +
+        'records can later be extracted, so they are trading a metric that looks good for a ' +
+        'disclosure risk that is invisible on the dashboard. The check is the gap between training ' +
+        'and validation performance, and a widening gap is the signal to stop.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['memoris', 'memoriz', 'individual', 'examples', 'overfit', 'commit'],
+            ['generalis', 'generaliz', 'held out', 'held-out', 'validation', 'unseen', 'not improving'],
+            ['extract', 'recover', 'disclos', 'risk', 'privacy', 'gap', 'stop'],
+          ],
+          hint: 'Say what the late accuracy gain actually is, where it does not show, and what risk it creates.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.1-p4',
+      prompt:
+        'In two or three sentences, describe how you would test whether a model has memorised ' +
+        'something it should not have.',
+      teach: {
+        note:
+          'Turning the property into a procedure. The technique is prefix completion: give the model ' +
+          'the start of a record you know is in the corpus and see whether it produces the rest, ' +
+          'which requires knowing your own corpus well enough to construct the prefix.',
+      },
+      solution:
+        'Take records you know were in the training data, feed the model the first part of each, and ' +
+        'see whether it completes them accurately: a model that reproduces the remainder of a rare ' +
+        'string has retained that string rather than learned a pattern. Sample deliberately from the ' +
+        'distinctive end of the corpus, since common text will complete plausibly whether it was ' +
+        'memorised or not and tells you nothing. Report it as a rate over many attempts, and note ' +
+        'that a negative result only covers the prefixes you tried.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['prefix', 'first part', 'beginning', 'start of', 'complete', 'continuation'],
+            ['known', 'training data', 'in the corpus', 'records we', 'distinctive', 'rare'],
+            ['rate', 'many', 'sample', 'only covers', 'not exhaustive', 'attempts'],
+          ],
+          hint: 'Describe the procedure, say which records to choose, and be honest about what a negative proves.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.1-p5',
+      prompt:
+        'In two or three sentences, say why "we removed names before training" is a weaker control ' +
+        'than it sounds.',
+      teach: {
+        note:
+          'Identifier removal addresses one field and leaves the combination. It is worth doing and ' +
+          'it is routinely described as though it settled the question, which is the claim to push ' +
+          'back on.',
+      },
+      solution:
+        'Removing names removes one identifier and leaves everything else, and people are ' +
+        're-identifiable from combinations that individually look harmless: a postcode, a date, a job ' +
+        'title and an employer will often pick out one person. It also does nothing about the free ' +
+        'text, where an email address, a reference number or a distinctive turn of phrase can carry ' +
+        'the identity the name field no longer does. So it is a useful step and not a sufficient one, ' +
+        'and describing the result as anonymised is a claim that needs testing rather than asserting.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['combination', 'together', 'quasi', 'postcode', 'date', 'other fields', 're-identif', 'reidentif'],
+            ['free text', 'unstructured', 'email', 'reference', 'remains', 'still in'],
+            ['not sufficient', 'weaker', 'useful', 'not enough', 'claim', 'test'],
+          ],
+          hint: 'Say what is left behind in the structured data, what is left in the free text, and how to describe the result honestly.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.3.2: deletion, erasure and what a model keeps -------------------
+  'aisp.3.2': [
+    {
+      id: 'aisp.3.2-p1',
+      prompt:
+        'A customer asks for erasure. In two or three sentences, say what you can honestly promise ' +
+        'them about the model, as opposed to the database.',
+      teach: {
+        note:
+          'A drill in saying something uncomfortable accurately. Over-promising here is a compliance ' +
+          'exposure in itself, and the honest answer has a shape: what is removed now, what is ' +
+          'removed on a schedule, and what is a residual.',
+      },
+      solution:
+        'I can promise the records are removed from the warehouse and from any future training set, ' +
+        'and that they will not be used to build anything from here on. I cannot promise the current ' +
+        'model has forgotten them, because what it learned is distributed across parameters and no ' +
+        'deletion touches that; only retraining without the record, or an approved unlearning ' +
+        'procedure, changes it. So the honest answer names a date at which a retrained model replaces ' +
+        'the current one, and describes the interim as a residual we are accepting rather than as ' +
+        'compliance already achieved.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['warehouse', 'database', 'removed', 'future training', 'deleted', 'records'],
+            ['cannot', 'not forget', 'still', 'learned', 'distributed', 'parameters'],
+            ['retrain', 'unlearn', 'date', 'schedule', 'residual', 'interim'],
+          ],
+          hint: 'Separate what is genuinely done from what is not, and say what would change it and when.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.2-p2',
+      prompt:
+        'A colleague argues that because the training data was publicly available, consent and lawful ' +
+        'basis are settled. In two or three sentences, respond.',
+      teach: {
+        note:
+          'The most common misunderstanding in AI data protection, and it is not a technical point at ' +
+          'all. Public availability speaks to accessibility, not to permission, and the purpose the ' +
+          'data is now being used for is a new one.',
+      },
+      solution:
+        'Public availability says the data could be accessed, not that it may be processed for a new ' +
+        'purpose: personal data posted on a forum is still personal data, and training a commercial ' +
+        'model on it is a different purpose from the one it was shared for. Consent is not implied by ' +
+        'visibility, and where consent is not the basis relied on, something else has to be, which ' +
+        'means somebody has to have chosen and recorded it. It is also a question that gets much ' +
+        'harder to answer after the training run than before it.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['public', 'available', 'accessible', 'visible', 'posted'],
+            ['purpose', 'different', 'new', 'not what', 'shared for', 'processing'],
+            ['consent', 'lawful basis', 'not implied', 'recorded', 'chosen', 'still personal'],
+          ],
+          hint: 'Separate accessibility from permission, name the purpose problem, and say what still has to be established.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.2-p3',
+      prompt:
+        'In two or three sentences, say why the decisions about erasure and lawful basis belong before ' +
+        'the training run rather than after it.',
+      teach: {
+        note:
+          'The economics point that makes the governance argument land. Before the run these are ' +
+          'filtering decisions costing nothing; after it, every one of them is priced in a full ' +
+          'retraining cycle.',
+      },
+      solution:
+        'Before the run they are filtering decisions: excluding a source or a set of records costs ' +
+        'nothing beyond the choice, because nothing has been built yet. After the run every one of ' +
+        'them is priced in a retraining cycle, which means compute, time and a revalidation of ' +
+        'everything downstream, so the same decision that was free on Monday costs weeks in ' +
+        'September. That asymmetry is the whole argument for a data review gate, and it is why ' +
+        '"we will sort the data questions out later" is a decision to pay much more for the same ' +
+        'answer.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['before', 'filter', 'exclude', 'choice', 'costs nothing', 'cheap'],
+            ['after', 'retrain', 'compute', 'weeks', 'expensive', 'cycle', 'revalidat'],
+            ['gate', 'review', 'asymmetr', 'later', 'more', 'why'],
+          ],
+          hint: 'Price the same decision at both times, and draw the conclusion about where the gate belongs.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.2-p4',
+      prompt:
+        'In two or three sentences, explain what machine unlearning offers and why it is not simply ' +
+        'the answer to erasure.',
+      teach: {
+        note:
+          'Worth knowing about honestly rather than dismissing or over-claiming. It is a real research ' +
+          'area with real methods, and the approximate ones make a claim about a model that is hard ' +
+          'to verify, which is exactly the property a regulator will press on.',
+      },
+      solution:
+        'Unlearning aims to remove a record\'s influence from a trained model without a full ' +
+        'retrain, and where it works it is much cheaper than the alternative. The difficulty is ' +
+        'evidence: exact methods require the training to have been structured for it in advance, and ' +
+        'approximate methods leave you asserting that influence was removed without a practical way ' +
+        'to demonstrate it. So it is worth building for if you expect erasure requests at volume, and ' +
+        'it does not yet let you tell a regulator that the data is gone in the way deleting a row ' +
+        'does.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['remove', 'influence', 'without retrain', 'cheaper', 'faster'],
+            ['exact', 'approximat', 'evidence', 'verif', 'demonstrat', 'prove', 'assert'],
+            ['in advance', 'structured', 'not yet', 'regulator', 'unlike', 'row'],
+          ],
+          hint: 'Say what it promises, where the difficulty is, and how that compares to deleting a record.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.2-p5',
+      prompt:
+        'Write the two or three sentences you would add to a model card describing the erasure ' +
+        'position, for somebody who will read it in a year.',
+      teach: {
+        note:
+          'The durable artefact. A model card outlives the conversation, and the sentence that ' +
+          'matters is the one saying which model version corresponds to which state of the data, ' +
+          'because that is the question somebody will actually arrive with.',
+      },
+      solution:
+        'This model was trained on data as it stood at the snapshot date recorded above; erasure ' +
+        'requests received after that date are honoured in the source systems and in subsequent ' +
+        'training sets, and are not reflected in this version\'s parameters. A record removed from ' +
+        'the warehouse may therefore still have influenced this model, and the first version in which ' +
+        'it has not is the next full retrain. Anyone assessing compliance should compare the request ' +
+        'date against the snapshot date rather than assuming deletion propagated.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['snapshot', 'as at', 'date', 'trained on', 'version'],
+            ['not reflected', 'still', 'influenced', 'may have', 'not removed'],
+            ['retrain', 'next', 'subsequent', 'compare', 'assess', 'propagat'],
+          ],
+          hint: 'Tie the model version to a data date, state the residual plainly, and tell the reader what to compare.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.3.3: poisoning, and why sampling will not find it ---------------
+  'aisp.3.3': [
+    {
+      id: 'aisp.3.3-p1',
+      prompt:
+        'In two or three sentences, explain why reviewing a random one per cent of a training corpus ' +
+        'gives almost no assurance against a backdoor.',
+      teach: {
+        note:
+          'A sampling-power argument, and worth being able to make numerically. A backdoor needs very ' +
+          'few examples, so a small random sample will usually contain none of them, and finding ' +
+          'nothing is the expected result whether or not the corpus is poisoned.',
+      },
+      solution:
+        'A backdoor may need only a few dozen examples out of hundreds of thousands, so a one per ' +
+        'cent random sample will usually contain none of them and finding nothing is the expected ' +
+        'outcome either way. The review therefore cannot distinguish a clean corpus from a poisoned ' +
+        'one, which means it produces confidence without evidence. What does help is targeted rather ' +
+        'than random: examining the rows whose labels disagree with their content, the rows from ' +
+        'sources that can write without review, and anything that appears with unusual consistency.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['few', 'dozen', 'small number', 'tiny', 'handful', 'rare'],
+            ['random', 'sample', 'miss', 'none', 'expected', 'cannot distinguish'],
+            ['targeted', 'label', 'disagree', 'source', 'consistency', 'instead', 'provenance'],
+          ],
+          hint: 'Make the sampling argument, say what finding nothing proves, and give what would work instead.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.3-p2',
+      prompt:
+        'In two or three sentences, explain why a targeted backdoor is cheaper for an attacker than ' +
+        'shifting a model\'s general behaviour.',
+      teach: {
+        note:
+          'The economics run opposite to intuition and it is the reason to worry about the specific ' +
+          'attack rather than the dramatic one. A backdoor competes with nothing; broad behaviour ' +
+          'change competes with the entire rest of the corpus.',
+      },
+      solution:
+        'A backdoor only has to teach one association between a rare trigger and a chosen output, and ' +
+        'because the trigger appears nowhere else in the corpus there is nothing competing with it, ' +
+        'so a few dozen consistent examples are enough. Shifting general behaviour means outweighing ' +
+        'everything else the model saw about that topic, which takes a substantial share of the ' +
+        'corpus and is correspondingly hard to place. So the cheap attack is the precise one, which ' +
+        'is also the one that hides from benchmarks because it is dormant until its trigger appears.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['trigger', 'rare', 'nothing else', 'no competition', 'one association', 'consistent'],
+            ['outweigh', 'share', 'large', 'everything else', 'substantial', 'majority'],
+            ['dormant', 'benchmark', 'hides', 'normal', 'until', 'invisible'],
+          ],
+          hint: 'Contrast what each attack has to overcome, and note the detection consequence.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.3-p3',
+      prompt:
+        'A model is found to be backdoored. In two or three sentences, say what remediation actually ' +
+        'requires and why filtering the input will not do.',
+      teach: {
+        note:
+          'The remedy is expensive and people reach for a cheaper one that does not work. A runtime ' +
+          'filter would have to recognise a trigger nobody knows, which is the same impossibility as ' +
+          'blocklisting an unknown password.',
+      },
+      solution:
+        'Remediation means retraining from a corpus you have reason to trust, which is a full cycle ' +
+        'plus the data review that should have happened first, so it is priced in weeks rather than ' +
+        'in a deploy. Filtering the input cannot work because the trigger is whatever the attacker ' +
+        'chose and nobody else knows it: you would be blocking a string you cannot name. The only ' +
+        'interim control is compensating rather than corrective, such as requiring a second signal ' +
+        'before acting on the model\'s output in the affected decision class.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['retrain', 'from scratch', 'clean', 'trusted', 'full cycle', 'weeks'],
+            ['trigger', 'unknown', 'cannot name', 'do not know', 'attacker chose'],
+            ['compensat', 'second signal', 'human', 'interim', 'bound', 'other control'],
+          ],
+          hint: 'State the real remedy and its price, say why filtering fails, and give the interim.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.3-p4',
+      prompt:
+        'In two or three sentences, say what a backdoored model would look like on your monitoring, ' +
+        'assuming the trigger has not been used yet.',
+      teach: {
+        note:
+          'The uncomfortable answer, and important because a team that expects to detect this will ' +
+          'not invest in prevention. A dormant backdoor is behaviourally identical to a clean model, ' +
+          'which is what pushes the control back to provenance.',
+      },
+      solution:
+        'It would look exactly like a healthy model: accuracy normal, latency normal, error ' +
+        'distribution normal, because a dormant backdoor changes nothing until its trigger appears. ' +
+        'There is no drift to alert on and no anomaly to catch, so monitoring gives you nothing ' +
+        'before the fact and only tells you afterwards, if the trigger produces an outcome somebody ' +
+        'notices. That is precisely why the control has to be provenance at training time rather ' +
+        'than detection at runtime.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['normal', 'healthy', 'nothing', 'identical', 'no difference', 'looks fine'],
+            ['dormant', 'until', 'trigger', 'no drift', 'no anomaly'],
+            ['provenance', 'training', 'prevent', 'before', 'not detection', 'upstream'],
+          ],
+          hint: 'Say what the monitoring shows, why, and what that implies about where the control belongs.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.3.3-p5',
+      prompt:
+        'You have one week and cannot review the whole corpus. In two or three sentences, say which ' +
+        'rows you would look at and why those.',
+      teach: {
+        note:
+          'Prioritisation under a real constraint, which is the form this question always takes. ' +
+          'Provenance beats content: start from who could write, because that is a much smaller set ' +
+          'than what was written.',
+      },
+      solution:
+        'I would start from provenance rather than content: the rows from sources that can write ' +
+        'without review, which on most corpora is a small fraction of the whole and covers every ' +
+        'cheap poisoning path. Within those I would look at rows whose label disagrees with their ' +
+        'text, and at any token or reference that appears with unusual consistency across a small ' +
+        'set of rows, since a trigger has to be consistent to be learned. That is a few hours of ' +
+        'work rather than a week, and it is aimed at where the attack has to be rather than spread ' +
+        'evenly over where it probably is not.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['provenance', 'source', 'who can write', 'without review', 'feed', 'supplier'],
+            ['label', 'disagree', 'content', 'mismatch', 'does not match'],
+            ['consistent', 'repeated token', 'marker', 'unusual', 'appears across', 'trigger'],
+          ],
+          hint: 'Give the ordering, and justify each filter by where the attack has to live.',
+        },
+      ],
+    },
+  ],
+
+  // --- aisp.4.1: direct and indirect injection ------------------------------
+  'aisp.4.1': [
+    {
+      id: 'aisp.4.1-p1',
+      prompt:
+        'Classify each and say why in a clause: (a) a calendar invite whose description tells an ' +
+        'assistant to forward the user\'s next meeting notes, (b) a user pasting an override into ' +
+        'the chat box, (c) a PDF the assistant is asked to summarise containing hidden instructions.',
+      teach: {
+        note:
+          'The same sort against three new carriers. Notice that two of these arrive through ordinary ' +
+          'business features nobody thinks of as an input path, which is what makes indirect the ' +
+          'harder half to defend.',
+      },
+      solution:
+        'A is indirect: the attacker wrote a calendar invite and the assistant collected it, so ' +
+        'nothing was typed at the system by the attacker. B is direct, because the attacker is ' +
+        'present at the interface and every input control sees the text. C is indirect as well: the ' +
+        'instruction arrived inside a document the user asked about, so the user delivered the ' +
+        'payload without knowing it.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['indirect', 'collected', 'ingested', 'fetched', 'not typed'],
+            ['direct', 'typed', 'chat box', 'interface', 'present'],
+            ['document', 'pdf', 'calendar', 'invite', 'user delivered', 'without knowing'],
+          ],
+          hint: 'Classify all three, and in each case say who put the text where the model found it.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.1-p2',
+      prompt:
+        'In two or three sentences, say why indirect injection is harder to defend than direct, given ' +
+        'that the payload is the same either way.',
+      teach: {
+        note:
+          'The asymmetry is about who is present and what your controls can see, not about the ' +
+          'sophistication of the payload. Direct injection meets an authenticated request you can ' +
+          'rate-limit and attribute; indirect meets none of that.',
+      },
+      solution:
+        'With direct injection the attacker is at the interface: they are authenticated, their ' +
+        'request is logged and attributable, and every input control is looking straight at the text. ' +
+        'With indirect injection nobody suspicious sends anything: an ordinary user asks an ordinary ' +
+        'question, and your own retrieval or ingestion delivers the payload on their behalf. So the ' +
+        'controls you have are pointed at the wrong place, and the attack surface becomes whatever ' +
+        'system holds the content, which is usually not one the security team was asked to review.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['authenticated', 'logged', 'attributable', 'present', 'sees the text', 'input control'],
+            ['ordinary user', 'nothing suspicious', 'on their behalf', 'own retrieval', 'delivers', 'innocent'],
+            ['wrong place', 'other system', 'not reviewed', 'surface', 'elsewhere'],
+          ],
+          hint: 'Contrast what your controls can see in each case, and say where the surface moves to.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.1-p3',
+      prompt:
+        'A screening assistant reads CVs. In two or three sentences, describe the indirect injection ' +
+        'risk and the control you would put on it.',
+      teach: {
+        note:
+          'A case where the attacker is the data subject, which is unusual and instructive: the ' +
+          'person supplying the document has a direct incentive to manipulate the outcome, and the ' +
+          'document is one you are obliged to accept.',
+      },
+      solution:
+        'The candidate controls the document and has an obvious incentive, so a CV can carry hidden ' +
+        'text, white-on-white or in metadata, instructing the assistant to rate the candidate ' +
+        'highly, and the assistant reads it as part of the same sequence as its own instructions. ' +
+        'The control I would put on it is not text filtering, because the phrasing is unbounded: it ' +
+        'is that the assistant produces a summary for a human decision rather than a score that ' +
+        'feeds an automatic filter. Extracting text to a plain, normalised form before it reaches ' +
+        'the model closes off the hidden-formatting trick specifically, and is worth doing as well.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['hidden', 'white', 'metadata', 'invisible', 'concealed', 'formatting'],
+            ['incentive', 'candidate', 'controls the document', 'supplies', 'benefits'],
+            ['human', 'decision', 'not automatic', 'summary', 'normalis', 'normaliz', 'plain text', 'extract'],
+          ],
+          hint: 'Name the carrier, note who controls it, and give a control that does not depend on filtering text.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.1-p4',
+      prompt:
+        'In two or three sentences, say why a support ticket written by a customer is an injection ' +
+        'carrier even though the customer is a legitimate user.',
+      teach: {
+        note:
+          'Legitimacy of the author is irrelevant, which is the point people find hardest. The ' +
+          'question is only whether the text is attacker-controlled and whether it reaches the ' +
+          'context, and a legitimate customer can be an attacker or can be relaying one.',
+      },
+      solution:
+        'Being a legitimate user says nothing about whether the text they supplied is safe: the ' +
+        'ticket body is attacker-controlled content by definition, since the customer wrote it, and ' +
+        'a triage assistant that reads it is putting that text into the same sequence as its own ' +
+        'instructions. The customer may be acting deliberately or may themselves be relaying content ' +
+        'from somewhere else. The useful question is never who the author is but whether the text ' +
+        'is controlled by someone outside your trust boundary and whether it reaches the model.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['legitimate', 'does not matter', 'irrelevant', 'says nothing', 'still'],
+            ['wrote it', 'attacker-controlled', 'attacker controlled', 'supplied', 'their text', 'controlled by'],
+            ['reaches', 'same sequence', 'context', 'model reads', 'concatenat'],
+          ],
+          hint: 'Say why authorship is not the test, and give the test that actually applies.',
+        },
+      ],
+    },
+    {
+      id: 'aisp.4.1-p5',
+      prompt:
+        'List the ingestion paths you would enumerate for an assistant before testing it, and say why ' +
+        'the list matters more than the payloads.',
+      teach: {
+        note:
+          'Coverage beats cleverness in this kind of testing. A brilliant payload against one of five ' +
+          'paths leaves four untested, and the list is the artefact that makes the report mean ' +
+          'something rather than a collection of anecdotes.',
+      },
+      solution:
+        'Everything the system reads that it did not author: what the user types, any document or ' +
+        'file it is given, anything it retrieves from a corpus, anything it fetches over the network, ' +
+        'and any tool response it reads back. The list matters more than the payloads because a ' +
+        'clever payload against one path says nothing about the other four, and an untested path is ' +
+        'where the finding will be. It is also the thing that makes the report meaningful later: ' +
+        '"held against nine techniques on all five ingestion paths" is a claim somebody can act on, ' +
+        'and "we tried some prompts" is not.',
+      checks: [
+        {
+          type: 'answer-mentions',
+          conceptGroups: [
+            ['user', 'document', 'file', 'upload', 'retriev', 'corpus', 'fetch', 'tool'],
+            ['coverage', 'untested', 'other paths', 'says nothing', 'one path'],
+            ['report', 'claim', 'meaningful', 'scope', 'act on', 'later'],
+          ],
+          hint: 'Enumerate the paths, then say what completeness buys that a good payload does not.',
+        },
+      ],
+    },
+  ],
 };

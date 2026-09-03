@@ -374,7 +374,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'Note what you did not do: you did not tell them their review process is worthless. It ' +
             'covers what it covers. Naming the boundary precisely is how you get a second meeting.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.1.5'] ?? [],
         },
       ],
     },
@@ -446,7 +446,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'Bias and misalignment fit none of the three, which is exactly why they are missed by ' +
             'security programmes that count breaches. Module 5 gives them their own treatment.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.2.1'] ?? [],
         },
         {
           id: 'aisp.2.2',
@@ -505,7 +505,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'Carry the five entrances with you. Most of the remaining modules are a slow walk ' +
             'through them, and the capstone asks you to cover all five in one assessment.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.2.2'] ?? [],
         },
         {
           id: 'aisp.2.3',
@@ -564,7 +564,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'Option D is the one that gets missed in design reviews, because the ingestion path is ' +
             'usually owned by a different team from the one that owns the chat box.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.2.3'] ?? [],
         },
         {
           id: 'aisp.2.4',
@@ -624,7 +624,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
             'If you want to generate these rather than reason about them, that is the Adversarial ' +
             'Machine Learning foundation, and it needs gradients this platform does not simulate. ' +
             'What you need here is the argument you can make in a review.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.2.4'] ?? [],
         },
         {
           id: 'aisp.2.5',
@@ -757,7 +757,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'This is why "we removed the obvious identifiers" is a weaker claim than it sounds. The ' +
             'high-surprisal strings are exactly the ones a redaction pass tends to miss.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.3.1'] ?? [],
         },
         {
           id: 'aisp.3.2',
@@ -818,7 +818,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'The sentence to carry into a design review: after the training run, every remaining ' +
             'option costs a retrain. That is the whole argument for a data review gate.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.3.2'] ?? [],
         },
         {
           id: 'aisp.3.3',
@@ -880,7 +880,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'Notice where that leaves you: the effective controls are all about knowing where data ' +
             'came from. Which is the next exercise, and the reason lineage is not paperwork.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.3.3'] ?? [],
         },
         {
           id: 'aisp.3.4',
@@ -1015,7 +1015,7 @@ export const AI_SECURITY_PATHWAY: LearningPackage = {
           debrief:
             'Indirect injection is where the surprises are, because the ingestion path is usually ' +
             'owned by a team that was never in the security review for the chat box.',
-          practice: [],
+          practice: AI_SECURITY_PATHWAY_PRACTICE['aisp.4.1'] ?? [],
         },
         {
           id: 'aisp.4.2',
