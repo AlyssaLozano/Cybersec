@@ -170,7 +170,10 @@ describe('foundations are per-track, not universal', () => {
     expect(soc.indexOf('linux-fundamentals')).toBeLessThan(soc.indexOf('log-analysis'));
     expect(soc.indexOf('log-analysis')).toBeLessThan(soc.indexOf('incident-triage'));
 
-    expect(trackPackages('privacy')).toEqual([]);
+    // Identity is the remaining route with nothing built behind it at all:
+    // Privacy and the other risk-adjacent tracks now resolve to the risk
+    // package, so they no longer serve as the empty case.
+    expect(trackPackages('identity')).toEqual([]);
   });
 });
 
