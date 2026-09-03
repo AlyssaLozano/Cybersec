@@ -166,6 +166,55 @@
   width: 100%;
 }
 
+/* A real fork: one branch, a divider, then the trunk pair grouped together
+   rather than three tiles reading as equal, unrelated options. */
+.stage-fork {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.fork-branch {
+  display: flex;
+  flex: 0 1 340px;
+}
+.fork-branch .techbtn { flex: 1 1 auto; max-width: none; }
+
+.fork-trunk {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  flex: 1 1 620px;
+  padding: 10px 16px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.fork-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.fork-divider span {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-faint);
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-raised);
+}
+
+
 /* --- tech console button --- */
 .techbtn {
   --tb: var(--accent);
@@ -418,6 +467,9 @@
 @media (max-width: 640px) {
   .stage-tiles { flex-direction: column; align-items: stretch; }
   .techbtn, .roomtile, .tile-tree { max-width: none; }
+  .stage-fork { flex-direction: column; align-items: stretch; }
+  .fork-branch { flex: 1 1 auto; }
+  .fork-divider span { margin: 0 auto; }
 }
 @media (prefers-reduced-motion: reduce) {
   .spine-pulse, .node-blip, .live-dot { animation: none; }

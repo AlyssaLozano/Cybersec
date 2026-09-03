@@ -275,53 +275,61 @@ export function Home({
             </div>
           </section>
 
-          {/* The trunk: Linux and Networking together, the two foundations every hands-on path shares */}
+          {/*
+            Fork, drawn as one: a real branch (Risk, no terminal at all) on one
+            side and the trunk (Linux and Networking, which share a foundation)
+            on the other. Grouping the trunk pair visually and setting Risk
+            apart with a divider is what makes it read as a fork rather than
+            three equally-weighted tiles in a row.
+          */}
           <section className="stage">
             <div className="stage-node">02</div>
             <div className="stage-label">Learn the basics and practice</div>
-            <div className="stage-tiles">
-              <button className="techbtn green" onClick={onLinux}>
-                <span className="tb-tag">The main trunk</span>
-                <span className="tb-name">Linux Foundations</span>
-                <span className="tb-desc">
-                  Linux, logs, and networking in a simulated terminal. The ground floor every
-                  hands-on path shares, and the way on to the SOC.
-                </span>
-                <span className="tb-enter">Open module &rsaquo;&rsaquo;</span>
-              </button>
+            <div className="stage-fork">
+              <div className="fork-branch">
+                <button className="techbtn amber" onClick={onRisk}>
+                  <span className="tb-tag">No prerequisites needed</span>
+                  <span className="tb-name">Go into Risk</span>
+                  <span className="tb-desc">
+                    Governance, risk, and compliance: decisions and evidence, no command line. A
+                    path you can take without the terminal at all.
+                  </span>
+                  <span className="tb-enter">Explore Risk &amp; GRC &rsaquo;&rsaquo;</span>
+                </button>
+              </div>
 
-              <button className="techbtn violet" onClick={onNetworking}>
-                <span className="tb-tag">The main trunk</span>
-                <span className="tb-name">Networking Basics</span>
-                <span className="tb-desc">
-                  What a host is talking to, and whether it should be. The other half of the ground
-                  floor, and where the exfiltration connection from Linux Fundamentals finally gets
-                  found.
-                </span>
-                <span className="tb-enter">Open module &rsaquo;&rsaquo;</span>
-              </button>
-            </div>
-          </section>
+              <div className="fork-divider" aria-hidden="true">
+                <span>or</span>
+              </div>
 
-          {/* Risk stands alone: the one path that skips the terminal entirely */}
-          <section className="stage">
-            <div className="stage-node">03</div>
-            <div className="stage-tiles">
-              <button className="techbtn amber" onClick={onRisk}>
-                <span className="tb-tag">No prerequisites needed</span>
-                <span className="tb-name">Go into Risk</span>
-                <span className="tb-desc">
-                  Governance, risk, and compliance: decisions and evidence, no command line. Start
-                  here directly, skipping Linux and Networking entirely.
-                </span>
-                <span className="tb-enter">Explore Risk &amp; GRC &rsaquo;&rsaquo;</span>
-              </button>
+              <div className="fork-trunk">
+                <button className="techbtn green" onClick={onLinux}>
+                  <span className="tb-tag">The main trunk</span>
+                  <span className="tb-name">Linux Foundations</span>
+                  <span className="tb-desc">
+                    Linux, logs, and networking in a simulated terminal. The ground floor every
+                    hands-on path shares, and the way on to the SOC.
+                  </span>
+                  <span className="tb-enter">Open module &rsaquo;&rsaquo;</span>
+                </button>
+
+                <button className="techbtn violet" onClick={onNetworking}>
+                  <span className="tb-tag">The main trunk</span>
+                  <span className="tb-name">Networking Basics</span>
+                  <span className="tb-desc">
+                    What a host is talking to, and whether it should be. The other half of the
+                    ground floor, and where the exfiltration connection from Linux Fundamentals
+                    finally gets found.
+                  </span>
+                  <span className="tb-enter">Open module &rsaquo;&rsaquo;</span>
+                </button>
+              </div>
             </div>
           </section>
 
           {/* From Linux and Networking: SOC Foundations, fanning into roles */}
           <section className="stage">
-            <div className="stage-node">04</div>
+            <div className="stage-node">03</div>
             <div className="stage-label">Learn the skills, and practice them on the roles</div>
             <div className="role-grid">
               {SOC_ROLES.map((role) => (
