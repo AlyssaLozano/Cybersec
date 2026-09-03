@@ -38,36 +38,66 @@ import type { Exercise, LearningPackage } from '@soc/shared';
 
 const BEHAVIOUR_TEACH = {
   concept:
-    'The central mistake in awareness work is treating a behaviour problem as a knowledge problem. ' +
-    'Almost everybody already knows they should not reuse passwords and should be careful with ' +
-    'attachments. Telling them again changes nothing, because the gap is not ignorance.\n\n' +
-    'What actually drives behaviour is the situation: how much attention somebody has at that ' +
-    'moment, how much friction the secure path carries, what everybody around them does, and ' +
-    'whether the insecure option is the one that gets the work finished. A person who clicks a ' +
-    'convincing invoice at 16:50 on a Friday is not uninformed, they are busy, and no amount of ' +
-    'additional information alters the conditions that produced the click.\n\n' +
-    'So the interventions that work are usually not education at all. Reduce the number of ' +
-    'decisions people have to make, make the secure path the easy one, design systems that fail ' +
-    'safely when somebody gets it wrong, and reserve communication for the small number of things ' +
-    'that genuinely need a human judgement. Training has a place inside that, and it is a much ' +
-    'smaller place than the industry sells.',
+    'Start with what this whole package is reacting against. "Security awareness training" is the ' +
+    'umbrella name for anything an organisation does to get employees to behave more safely online: ' +
+    'a video about spotting fake emails, a poster about not reusing passwords, a yearly quiz nearly ' +
+    'everyone clicks through without reading. The unstated theory behind almost all of it is that ' +
+    'people behave insecurely because they do not know better, and that telling them the rules again ' +
+    'will fix it.\n\n' +
+    'That theory is wrong, and it is worth being precise about why, because it is a mistake you will ' +
+    'see repeatedly in this field: it treats a BEHAVIOUR problem as a KNOWLEDGE problem. Almost ' +
+    'everybody already knows, in the abstract, that they should not reuse the same password ' +
+    'everywhere and should be careful opening an attachment (a file sent along with an email) from ' +
+    'somebody they do not recognise. Telling them again changes nothing, because the gap between ' +
+    'what they know and what they do was never about missing information in the first place.\n\n' +
+    'What actually drives behaviour is the SITUATION a person is in at the exact moment of the ' +
+    'decision: how much attention they have left, how much extra effort the safe choice costs ' +
+    'compared with the easy one (that extra effort is what this package will keep calling FRICTION), ' +
+    'what the people around them appear to do, and whether the unsafe option is the one that actually ' +
+    'gets the work finished on time. Picture somebody who clicks a convincing fake invoice at 16:50 ' +
+    'on a Friday, racing to clear their inbox before the weekend. That person is not uninformed. They ' +
+    'are busy and under a deadline, and no amount of earlier training alters the conditions that ' +
+    'produced the click, because the click was never a knowledge failure to begin with.\n\n' +
+    'So the interventions that actually work are usually not education at all. They reduce the number ' +
+    'of decisions people have to make, make the safe path the easy one, design systems that fail ' +
+    'safely when somebody does get it wrong, and save direct communication for the small number of ' +
+    'moments that genuinely need a human being to exercise judgement. Training still has a place in ' +
+    'that mix, it is just a much smaller place than the industry that sells training courses would ' +
+    'like you to believe.',
 } as const;
 
 const REPORTING_TEACH = {
   concept:
-    'If you measure one thing in this discipline, measure REPORTING rather than clicking.\n\n' +
-    'A click is one person having a bad moment, and some proportion of clicks is inevitable in any ' +
-    'population against a competent lure. A report is the organisation finding out, and it is the ' +
-    'only thing that shortens the time between an attack landing and somebody responding. Ten ' +
-    'people clicking and one reporting within two minutes is a far better outcome than nobody ' +
-    'clicking and nobody reporting, because the second case tells you nothing and buys no time.\n\n' +
-    'The metric that follows is TIME TO FIRST REPORT, which is the number that changes what the ' +
-    'security team can actually do. A report at four minutes means a campaign can be pulled from ' +
-    'every mailbox before most people have opened it; a report at four hours means cleaning up.\n\n' +
-    'Optimising for click rate produces the opposite behaviour. It rewards suppressing reports, ' +
-    'because a report is evidence somebody nearly clicked, and it pushes teams towards easier ' +
-    'simulations that produce flattering numbers. Optimising for reporting rewards exactly what ' +
-    'you want people to do.',
+    'Before the metric, the attack behind it. PHISHING is an email, text or chat message that ' +
+    'pretends to come from somebody trustworthy, a bank, a colleague, the IT department, in order to ' +
+    'trick the reader into doing something harmful: typing a password into a fake login page, ' +
+    'opening a file that installs malicious software, or approving a payment to the wrong account. ' +
+    'The fake message itself is called a LURE, and whether somebody falls for it is usually ' +
+    'described as a CLICK, because the decisive action is almost always clicking a link or opening ' +
+    'an attachment.\n\n' +
+    'With that in place: if you measure one thing in this discipline, measure REPORTING rather than ' +
+    'clicking.\n\n' +
+    'A click is one person having a bad moment. Some proportion of clicks is inevitable in any group ' +
+    'of people against a lure that is well made, no matter how well trained they are, in the same ' +
+    'way no smoke detector catches every fire the instant it starts. A REPORT, meaning somebody ' +
+    'flags the message to the security team as suspicious, is the organisation finding out that an ' +
+    'attack is under way at all, and finding out quickly is the only thing that shortens the gap ' +
+    'between the attack landing and somebody doing something about it. Ten people clicking a bad ' +
+    'link, with one of them reporting it within two minutes, is a far better outcome than nobody ' +
+    'clicking and nobody reporting, because the second case tells the security team nothing and buys ' +
+    'them no time.\n\n' +
+    'The number that follows from this is TIME TO FIRST REPORT: how long between the phishing ' +
+    'message arriving and the first person telling security about it. This is the number that ' +
+    'actually changes what the security team can do. A report at four minutes means the message can ' +
+    'potentially be pulled from every other mailbox before most people have even opened it; a report ' +
+    'at four hours means there is nothing left to do but clean up the damage.\n\n' +
+    'Now consider what happens if the team instead treats CLICK RATE, the percentage of people who ' +
+    'fell for it, as its main success measure. It quietly rewards the opposite of what you want: a ' +
+    'report is evidence that somebody nearly clicked, so a workforce that has learned reporting ' +
+    'draws attention to near misses will report less, not more, to keep the number looking good. It ' +
+    'also pushes the team toward easier, less realistic lures that produce a flattering low click ' +
+    'rate but teach nothing useful. Measuring reporting instead rewards exactly the behaviour you ' +
+    'actually want people to build.',
 } as const;
 
 // --- Module hrf.1: why awareness training fails ------------------------------
@@ -133,11 +163,17 @@ const MODULE_HRF_1: Exercise[] = [
     teach: {
       concept:
         'Mandatory annual training exists for reasons, and being clear-eyed about which ones stops ' +
-        'you fighting the wrong battle.\n\n' +
-        'Its real purposes are largely EVIDENTIARY: a regulator, an insurer, a customer ' +
-        'questionnaire or a certification requires that staff were trained, and completion records ' +
-        'are the evidence. That is a legitimate organisational need and it is not a behaviour ' +
-        'change programme, however it is described.\n\n' +
+        'you fighting a battle that does not need fighting.\n\n' +
+        'Its real purpose is mostly EVIDENTIARY, meaning it exists to prove to somebody outside the ' +
+        'organisation that a thing happened. A regulator (a government body with the power to set ' +
+        'and enforce rules for an industry), an insurer who wants proof of basic precautions before ' +
+        'paying out on a claim, a customer questionnaire, or a security certification the company ' +
+        'holds, any of these can require that staff "were trained", and a record of who completed ' +
+        'the module is the evidence that satisfies the requirement. It works the way a fire drill ' +
+        'sign-in sheet works: the drill itself may or may not make anybody safer, but the sheet is ' +
+        'what proves to an inspector that the building ran one. That evidentiary function is a ' +
+        'legitimate organisational need, and it is not a behaviour change programme, whatever it is ' +
+        'called on the slide.\n\n' +
         'It does a couple of useful things beyond that. It establishes a baseline of shared ' +
         'vocabulary, so that a later message about a specific threat has something to attach to. ' +
         'And it is the one moment the organisation formally states what it expects, which matters ' +
@@ -145,7 +181,7 @@ const MODULE_HRF_1: Exercise[] = [
         'What it does not do is change what somebody does at 16:50 on a Friday. So the productive ' +
         'position is not to fight it: deliver it, keep it short and inoffensive, get the completion ' +
         'evidence, and spend your actual effort elsewhere. Teams that try to make the annual module ' +
-        'carry the behaviour programme end up with a longer module and the same incidents.',
+        'carry the whole behaviour programme end up with a longer module and the same incidents.',
     },
     options: [
       { id: 'a', label: 'Its primary function is usually evidentiary: proving to a third party that training happened.' },
@@ -194,21 +230,28 @@ const MODULE_HRF_1: Exercise[] = [
       'consequences of that framing? Select all that apply.',
     teach: {
       concept:
-        'The phrase is common and it is actively harmful, in ways that are worth naming precisely ' +
-        'rather than treating as a matter of tone.\n\n' +
-        'It SUPPRESSES REPORTING, which is the outcome you care about most. Somebody who believes ' +
-        'they will be treated as the problem will not report the thing they just clicked, and the ' +
-        'delay between the click and the report is where the entire cost of the incident ' +
-        'accumulates.\n\n' +
-        'It LOCATES THE FAULT in the person rather than the system, which stops the useful ' +
-        'question being asked. If one person clicking a link can compromise the organisation, the ' +
-        'finding is about architecture, not about that person.\n\n' +
-        'It also ignores that people are frequently the DETECTION, spotting things no control ' +
-        'caught, and it damages the relationship with the rest of the business that the awareness ' +
-        'function depends on entirely.\n\n' +
+        '"The weakest link" is a phrase people in security use to mean that, out of every defence an ' +
+        'organisation has, its own employees are the easiest one for an attacker to break through. ' +
+        'It is common, and it is actively harmful, in ways worth naming precisely rather than ' +
+        'dismissing as just an unfortunate turn of phrase.\n\n' +
+        'It SUPPRESSES REPORTING, which is the outcome you care about most (the previous exercise ' +
+        'covered why reporting matters more than clicking). Somebody who believes they will be ' +
+        'treated as the problem will not report the thing they just clicked, and the delay between ' +
+        'the click and the report is where the entire cost of an incident accumulates: the longer an ' +
+        'attacker has unnoticed access to an account or a system, the more damage they can do before ' +
+        'anybody stops them.\n\n' +
+        'It also LOCATES THE FAULT in the person rather than the system, which stops the useful ' +
+        'question from being asked. If a single click by one person is enough to compromise (break ' +
+        'into and gain unauthorised control of) the whole organisation, the real finding is about the ' +
+        'architecture, meaning how the systems and permissions were built, not about that one ' +
+        'person. A building where one dropped match burns the whole block has a fire-safety design ' +
+        'problem, not just a careless match-dropper.\n\n' +
+        'It also ignores that people are frequently the DETECTION, spotting things no automated ' +
+        'control caught, and it damages the relationship with the rest of the business that the ' +
+        'awareness function depends on entirely to do its job.\n\n' +
         'The replacement framing is not flattery. It is that people are a heavily relied-upon ' +
-        'control, usually under-supported, and the job is to support them and to reduce how much ' +
-        'weight rests on them.',
+        'control, usually under-supported, and the job is to support them and reduce how much weight ' +
+        'rests on any one person alone.',
     },
     options: [
       { id: 'a', label: 'It suppresses reporting, because people expect to be blamed for what they report.' },
@@ -266,10 +309,15 @@ const MODULE_HRF_1: Exercise[] = [
         'What these have in common is that no filter can adjudicate them, because the message is ' +
         'genuine-looking, the person is physically present, or the judgement depends on business ' +
         'context. Technology helps at the margins and the decision remains human.\n\n' +
-        'By contrast, whether a macro should run, whether a password meets policy, or whether a ' +
-        'known-bad domain should resolve are decisions that should never reach a person at all. ' +
-        'Every one of those you push back into technology frees attention for the ones that cannot ' +
-        'be.',
+        'By contrast, consider three decisions that look similar but are not. Whether a MACRO should ' +
+        'run (a macro is a small piece of automated code embedded inside a document, such as a Word ' +
+        'or Excel file, and attackers routinely hide malicious code inside one, hoping a person will ' +
+        'click "enable"). Whether a password meets a length-and-complexity policy. Whether a KNOWN-' +
+        'BAD DOMAIN should resolve, meaning whether a web address already identified as malicious ' +
+        'should even be allowed to load. None of those three should ever reach a person at all: a ' +
+        'computer can check them instantly and consistently, with no bad day and no deadline pressure ' +
+        'involved. Every one of those you push back into technology frees up attention for the ' +
+        'decisions that genuinely cannot be automated away.',
     },
     options: [
       { id: 'a', label: 'A finance clerk deciding whether an urgent request to change bank details is genuine.' },
@@ -318,18 +366,28 @@ const MODULE_HRF_1: Exercise[] = [
       'the human-factors part of the incident review.',
     teach: {
       concept:
-        'The review will be read by the person involved and by their colleagues, and what it says ' +
-        'determines whether the next person reports faster or more slowly. That is a security ' +
-        'outcome, not a courtesy.\n\n' +
+        'First, the mechanics behind the scenario. Logging in usually asks for two things in ' +
+        'sequence: a password (something you know), and increasingly a second check called MFA, ' +
+        'short for multi-factor authentication, which is usually an approval prompt sent to your ' +
+        'phone (something you have). The idea is that a stolen password alone should not be enough ' +
+        'to get in. A PHISHING-RESISTANT factor is a stronger version of that second check, such as a ' +
+        'physical security key you plug in or tap, which is built so it cannot be tricked into ' +
+        'approving a login on a fake site the way a simple "tap approve" prompt can. A COMPROMISED ' +
+        'MAILBOX is an email account an attacker has taken over and can now send from as if they were ' +
+        'the real owner.\n\n' +
+        'With that in mind: the review you write will be read by the person involved and by their ' +
+        'colleagues, and what it says determines whether the next person reports faster or more ' +
+        'slowly. That is a security outcome, not a courtesy.\n\n' +
         'Describe the BEHAVIOUR and the CONDITIONS without adjectives about the person: what the ' +
         'message looked like, what made it plausible, what else was happening. Then ask the ' +
-        'systemic questions. Why did a password plus an approval grant full access, when a ' +
-        'phishing-resistant factor would have refused? What did the account reach once entered? ' +
-        'Was there a fast way to report, and was it used?\n\n' +
+        'systemic questions. Why did a password plus one approval tap grant full access, when a ' +
+        'phishing-resistant factor would have refused to release anything to a fake site regardless ' +
+        'of what the user did? What did the account reach once entered? Was there a fast way to ' +
+        'report, and was it used?\n\n' +
         'Then say what changes, and make the changes structural. Phishing-resistant authentication ' +
-        'on that population, a reporting button that takes one click, detection on internal ' +
-        'phishing from a compromised mailbox. None of those depend on anybody being more careful ' +
-        'next time.\n\n' +
+        'on that population, a reporting button that takes one click, detection built to notice ' +
+        'internal phishing coming from a mailbox the organisation already owns. None of those depend ' +
+        'on anybody being more careful next time.\n\n' +
         'A good answer avoids blaming the individual, asks why the click was so consequential, and ' +
         'proposes a systemic control rather than more training.',
     },
@@ -388,19 +446,26 @@ const MODULE_HRF_2: Exercise[] = [
       'apply.',
     teach: {
       concept:
-        'Effective lures do not rely on the target being careless. They rely on well-understood ' +
-        'features of how people make fast decisions under load.\n\n' +
-        'URGENCY compresses the time available to think, and a deadline is the cheapest way to ' +
-        'stop somebody checking. AUTHORITY borrows the weight of somebody it would be costly to ' +
-        'question, which is why messages appearing to come from executives work far beyond their ' +
-        'plausibility. FAMILIARITY makes the request routine: a message that matches a process the ' +
-        'person performs weekly does not present as a decision at all. And CONTEXT makes it ' +
-        'specific, which is why an attacker who has read a supplier invoice, or is inside a real ' +
-        'email thread, is enormously more effective than one sending generic mail.\n\n' +
-        'What matters practically is that none of these are defeated by knowing about them. People ' +
-        'who can list all four still fall for messages that use them, because the mechanism ' +
-        'operates below deliberate reasoning, and the person who is busiest is the most exposed. ' +
-        'That is the strongest argument that awareness alone cannot be the control.',
+        'A LURE is the fake message an attacker sends, and the TARGET is the person they are trying ' +
+        'to trick. Effective lures do not rely on the target being careless or unintelligent. They ' +
+        'rely on well-understood features of how everybody, including careful and intelligent ' +
+        'people, makes fast decisions under load.\n\n' +
+        'URGENCY compresses the time available to think, and a deadline is the cheapest way to stop ' +
+        'somebody checking: "act within the hour" leaves no room to pause and verify. AUTHORITY ' +
+        'borrows the weight of somebody it would be costly to question, which is why messages ' +
+        'appearing to come from a senior executive work far beyond how plausible they actually are, ' +
+        'nobody wants to be the person who challenged the CEO over nothing. FAMILIARITY makes the ' +
+        'request routine: a message that matches a process the person performs every week, like ' +
+        'approving an invoice, does not even register as a decision, it just gets done. And CONTEXT ' +
+        'makes it specific: an attacker who has read a real supplier invoice, or has actually broken ' +
+        'into an existing email conversation and is replying inside it (this is sometimes called ' +
+        'thread hijacking), is enormously more convincing than one sending a generic, mass-produced ' +
+        'message.\n\n' +
+        'What matters practically is that none of these four are defeated simply by knowing about ' +
+        'them. People who can list all four from memory still fall for messages that use them, ' +
+        'because the mechanism operates below deliberate, conscious reasoning, and the person who is ' +
+        'busiest is the most exposed, not the least informed. That is the strongest argument that ' +
+        'awareness alone can never be the control.',
     },
     options: [
       { id: 'a', label: 'Urgency, which compresses the time available to check anything.' },
@@ -448,8 +513,15 @@ const MODULE_HRF_2: Exercise[] = [
       'accounts. Which of the following are accurate? Select all that apply.',
     teach: {
       concept:
-        'When the secure path is harder than the work, people route around it, and they are not ' +
-        'being defiant: they have a job to do and the organisation is paying them to do it.\n\n' +
+        'FRICTION is how much extra effort a safe action takes compared with an unsafe one, the same ' +
+        'way a heavy door has more friction than one that swings open on its own. A WORKAROUND is ' +
+        'what people build when the friction is too high: an unofficial way of getting the job done ' +
+        'that skips the approved process entirely. And SANCTIONED simply means officially approved ' +
+        'and supported by the organisation, as opposed to something an employee found and started ' +
+        'using on their own.\n\n' +
+        'When the secure, sanctioned path is harder than the work needs it to be, people route around ' +
+        'it, and they are not being defiant: they have a job to do and the organisation is paying ' +
+        'them to do it.\n\n' +
         'Every workaround is a design failure with a signal attached. Emailing documents to a ' +
         'personal account tells you people need to move large files and have no sanctioned way. A ' +
         'shared password in a spreadsheet tells you the access request process is too slow. ' +
@@ -509,10 +581,14 @@ const MODULE_HRF_2: Exercise[] = [
       concept:
         'Human risk is not evenly distributed, and treating everybody identically spends the ' +
         'budget where it matters least.\n\n' +
-        'Concentrate on people whose mistake has OUTSIZED CONSEQUENCE. Finance staff who can move ' +
-        'money are the target of the highest-value fraud in most organisations. Executives and ' +
-        'their assistants combine authority with time pressure and are heavily researched. IT ' +
-        'administrators hold access that turns one compromise into all of them. HR handles ' +
+        'Concentrate on people whose mistake has OUTSIZED CONSEQUENCE, meaning it costs far more than ' +
+        'an average mistake would. Finance staff who can move money are the target of the ' +
+        'highest-value fraud (deliberate deception for financial gain) in most organisations. ' +
+        'Executives and their assistants combine authority with time pressure and are heavily ' +
+        'researched by attackers beforehand. IT administrators hold the kind of broad system access ' +
+        'that turns one single compromised account into control over everything else the ' +
+        'organisation runs. HR handles personal data at volume and receives unsolicited attachments ' +
+        '(such as CVs from strangers) as a normal part of their job, which is an unusually difficult ' +
         'personal data at volume and receives unsolicited attachments as a normal part of their ' +
         'job, which is an unusually difficult position.\n\n' +
         'Also worth attention are people under STRUCTURAL PRESSURE to be helpful: the help desk ' +
@@ -567,8 +643,10 @@ const MODULE_HRF_2: Exercise[] = [
       'all that apply.',
     teach: {
       concept:
-        'People take their cue from what they believe is normal around them far more than from ' +
-        'what a policy says, and that is a lever most awareness programmes never touch.\n\n' +
+        'A NORM, in this context, is simply what people believe is normal and typical among the ' +
+        'group around them, regardless of what any rulebook says. People take their cue from that ' +
+        'far more than from what a written policy says, and it is a lever most awareness programmes ' +
+        'never touch.\n\n' +
         'What works: telling people what OTHERS ACTUALLY DO, when the true number is encouraging. ' +
         '"Sixty per cent of your team reported this campaign" changes behaviour in a way that ' +
         '"you should report phishing" does not. VISIBLE LEADER BEHAVIOUR, because a director who ' +
@@ -625,16 +703,21 @@ const MODULE_HRF_2: Exercise[] = [
       'three or four sentences, argue for a process change instead.',
     teach: {
       concept:
-        'The executive is responding sensibly to a real problem with the tool they know. The case ' +
-        'against is not that training is useless, it is that this specific risk has a control ' +
+        'INVOICE FRAUD is an attack where somebody impersonates a supplier, or a senior colleague, ' +
+        'and asks finance staff to pay a bill or change the bank account a supplier gets paid into, ' +
+        'so the money goes to the attacker instead. The executive proposing more training is ' +
+        'responding sensibly to a real problem with the tool they know best. The case against extra ' +
+        'training is not that training is useless, it is that this specific risk has a control ' +
         'available that does not depend on anybody being alert.\n\n' +
         'Name the MECHANISM: invoice fraud works by making an unusual request look routine and ' +
         'urgent, and a trained person under time pressure is still susceptible, so an intervention ' +
         'that relies on vigilance will fail some proportion of the time by design.\n\n' +
-        'Offer the SPECIFIC CONTROL: verified callback to a number already on file before any bank ' +
-        'detail change, a second approver for payments above a threshold, and a rule that bank ' +
-        'details are never changed on the basis of an emailed request. Those work when somebody is ' +
-        'busy, new, or being deceived by a genuinely convincing message.\n\n' +
+        'Offer the SPECIFIC CONTROL: a VERIFIED CALLBACK, meaning phoning the supplier back on a ' +
+        'number already on file (never a number given in the suspicious message itself) before any ' +
+        'bank detail change goes through; a SECOND APPROVER, meaning a separate person must also sign ' +
+        'off on payments above a set amount; and a standing rule that bank details are never changed ' +
+        'purely on the basis of an emailed request. Those all work when somebody is busy, new, or ' +
+        'being deceived by a genuinely convincing message.\n\n' +
         'And do not reject the training outright, because there is a place for it: the procedure ' +
         'has to be taught, and people need to know it is expected and that following it will not be ' +
         'held against them when a senior person is impatient.\n\n' +
@@ -697,8 +780,12 @@ const MODULE_HRF_3: Exercise[] = [
       'apply.',
     teach: {
       concept:
-        'Simulations are the most common awareness activity and the most commonly misused, largely ' +
-        'because teams are unclear about what they are for.\n\n' +
+        'A PHISHING SIMULATION is a fake phishing message an organisation sends to its own staff on ' +
+        'purpose, using the same tricks a real attacker would, but harmless: clicking it teaches a ' +
+        'lesson instead of handing anything to a criminal. It is the fire drill of this discipline, ' +
+        'a rehearsal for a real event using a safe, staged version of it. Simulations are the most ' +
+        'common awareness activity and also the most commonly misused, largely because teams are ' +
+        'unclear about what they are actually for.\n\n' +
         'Legitimate purposes. PRACTISING REPORTING, which is the main one: the reporting route only ' +
         'works if people have used it, and a simulation is a safe place to build the reflex. ' +
         'TESTING THE RESPONSE PIPELINE, meaning what happens after a report arrives, how fast the ' +
@@ -756,8 +843,10 @@ const MODULE_HRF_3: Exercise[] = [
       'appropriate? Select all that apply.',
     teach: {
       concept:
-        'A simulation borrows the organisation credibility to deceive its own staff, which is a ' +
-        'real thing to do to people and needs limits.\n\n' +
+        'Running a simulation means the organisation is deliberately deceiving its own staff, using ' +
+        'its own credibility as an employer to make the deception convincing. That is a real thing to ' +
+        'do to a person, not a neutral technical exercise, and it needs limits on what kind of ' +
+        'deception is acceptable.\n\n' +
         'Appropriate lures resemble what attackers actually send: a delivery notification, a ' +
         'document share, an IT notice, an invoice. They are realistic, they test something, and ' +
         'nobody is harmed by having fallen for one.\n\n' +
@@ -816,9 +905,11 @@ const MODULE_HRF_3: Exercise[] = [
       'that apply.',
     teach: {
       concept:
-        'The moment after a click is where a simulation either builds the reporting culture or ' +
-        'destroys it, and most programmes get it wrong by being punitive in ways they do not ' +
-        'recognise as punitive.\n\n' +
+        'When somebody clicks a simulated phishing link, instead of reaching a real fake login page ' +
+        'they land on a LANDING PAGE, a screen the simulation tool shows them on the spot that reveals ' +
+        'this was a test and explains what to look for next time. That moment right after the click ' +
+        'is where a simulation either builds the organisation reporting culture or destroys it, and ' +
+        'most programmes get it wrong by being punitive in ways they do not recognise as punitive.\n\n' +
         'What works: a SHORT, NON-JUDGEMENTAL landing page explaining what the cues were, ' +
         'delivered immediately, because that is the teachable moment and it lasts about a minute. ' +
         'A clear ROUTE TO REPORT from that page, so somebody who clicked can still do the right ' +
@@ -879,12 +970,15 @@ const MODULE_HRF_3: Exercise[] = [
       concept:
         'A falling click rate is the number every awareness programme reports and it supports much ' +
         'less than it appears to.\n\n' +
-        'Several things produce it that are not improved security. DIFFICULTY DRIFT: if this year ' +
-        'lures were easier, the fall is an artefact, and difficulty is rarely controlled. ' +
-        'FAMILIARITY: people learn to recognise the SIMULATION rather than phishing, spotting the ' +
-        'sending platform or the pattern of when tests arrive. AVOIDANCE: staff who suspect a test ' +
-        'may simply not engage with unusual mail at all, which lowers clicks and does nothing for ' +
-        'real attacks. And SURVIVORSHIP, if the population changed.\n\n' +
+        'Several things produce a falling number that are not improved security. DIFFICULTY DRIFT: ' +
+        'if this year lures were simply easier to spot than last year, the fall is an artefact of ' +
+        'the test, not of people, and difficulty is rarely controlled precisely. FAMILIARITY: people ' +
+        'learn to recognise the SIMULATION rather than phishing itself, spotting the sending platform ' +
+        'or the pattern of when tests usually arrive. AVOIDANCE: staff who suspect a test may simply ' +
+        'not engage with any unusual mail at all, which lowers the click number and does nothing for ' +
+        'real attacks. And SURVIVORSHIP: if the group of people being measured changed, for instance ' +
+        'because people who clicked a lot left the company, the number can fall for reasons that ' +
+        'have nothing to do with anyone getting better.\n\n' +
         'What would support a claim of improvement: reporting rate up as well as clicks down, time ' +
         'to first report falling, difficulty held constant or increasing, and ideally corroboration ' +
         'from real incidents rather than simulations.\n\n' +
@@ -1050,12 +1144,16 @@ const MODULE_HRF_4: Exercise[] = [
       'Which of the following metrics would harm a human risk programme? Select all that apply.',
     teach: {
       concept:
-        'Every metric instructs somebody, so the test is always what a person under pressure would ' +
-        'do to move it.\n\n' +
+        'A METRIC is simply a number an organisation tracks to judge whether something is working. ' +
+        'Every metric quietly instructs whoever is being measured by it, because people adjust their ' +
+        'behaviour to make the number they are judged on look good, whether or not that actually ' +
+        'helps. So the test to apply to any proposed metric is always: what would a person under ' +
+        'pressure do to move this number, and would that action make anyone safer?\n\n' +
         'TRAINING COMPLETION PERCENTAGE rewards making the module shorter and easier and chasing ' +
-        'the last few people, and has no relationship to behaviour. DEPARTMENTAL CLICK LEAGUE ' +
-        'TABLES create competition that gets managed by suppressing reports rather than by ' +
-        'improving behaviour, and they publicly shame teams. NUMBER OF SIMULATIONS SENT rewards ' +
+        'the last few stragglers to click through it, and has no relationship to behaviour. ' +
+        'DEPARTMENTAL CLICK LEAGUE TABLES, a public ranking of which team clicked the most, create ' +
+        'competition that gets managed by suppressing reports rather than by improving behaviour, ' +
+        'and they publicly shame teams into the bargain. NUMBER OF SIMULATIONS SENT rewards ' +
         'volume, which annoys people and degrades results. And COUNT OF POLICY VIOLATIONS ' +
         'DISCIPLINED explicitly rewards catching people, which is the fastest way to end reporting ' +
         'entirely.\n\n' +
@@ -1109,14 +1207,18 @@ const MODULE_HRF_4: Exercise[] = [
       'Select all that apply.',
     teach: {
       concept:
-        'Simulations dominate the discipline and are a narrow instrument. Better signals exist and ' +
-        'most of them are already being collected by somebody else.\n\n' +
-        'REAL REPORTED MESSAGES tell you what people are actually seeing and whether they report ' +
+        'Simulations dominate the discipline and are a narrow instrument, one artificial test among ' +
+        'many possible SIGNALS, meaning any piece of real-world data that tells you something about ' +
+        'how people actually behave. Better signals exist, and most of them are already being ' +
+        'collected by somebody else in the organisation, just not looked at through this lens.\n\n' +
+        'REAL REPORTED MESSAGES, meaning actual suspicious emails staff flag on their own without ' +
+        'being prompted by a test, tell you what people are actually seeing and whether they report ' +
         'unprompted, which is more informative than any simulation. HELP DESK CONTACTS about ' +
-        'suspicious messages or lockouts show where people are confused and where processes bite. ' +
-        'WORKAROUND PREVALENCE, such as how much use unsanctioned file sharing gets, measures ' +
-        'friction directly. And DATA FROM NEAR MISSES, meaning incidents that were caught, tells ' +
-        'you which control caught them and whether it was a person.\n\n' +
+        'suspicious messages or account lockouts show where people are confused and where processes ' +
+        'bite. WORKAROUND PREVALENCE, such as how much use unsanctioned file sharing gets, measures ' +
+        'friction directly. And DATA FROM NEAR MISSES, meaning attacks that were caught before they ' +
+        'succeeded, tells you which control caught them, and specifically whether it was a person who ' +
+        'noticed.\n\n' +
         'What is a weak signal is self-reported confidence from a survey. People consistently ' +
         'overestimate their ability to spot phishing, the answers correlate poorly with behaviour, ' +
         'and a survey mostly measures how somebody wants to be seen. It is worth running for ' +
@@ -1168,8 +1270,11 @@ const MODULE_HRF_4: Exercise[] = [
       'Select all that apply.',
     teach: {
       concept:
-        'A board is deciding whether to fund things and whether to worry, so the presentation has ' +
-        'to answer both in language that is not about your activity.\n\n' +
+        'A BOARD is the small group of senior people, often including outsiders to the company, who ' +
+        'hold ultimate responsibility for how an organisation is run, including what gets funded. In ' +
+        'a board meeting you are deciding whether they fund things and whether they worry, so the ' +
+        'presentation has to answer both, in language about outcomes rather than about your team ' +
+        'activity.\n\n' +
         'What belongs: the EXPOSURE in business terms, such as what a successful invoice fraud ' +
         'would cost given what has been attempted. The TREND on a metric that resists gaming, ' +
         'stated with its limits. A DECISION you want from them, with the money or authority ' +
@@ -1296,13 +1401,19 @@ const MODULE_HRF_5: Exercise[] = [
     teach: {
       concept:
         'The most effective awareness interventions are not communications at all. They alter what ' +
-        'is easy, and people follow the easy path without being persuaded of anything.\n\n' +
-        'A ONE-CLICK REPORT BUTTON in the mail client raises reporting more than any campaign, ' +
-        'because the barrier was effort rather than willingness. A PASSWORD MANAGER deployed and ' +
-        'supported does more for password reuse than a decade of telling people not to reuse. ' +
-        'DEFAULTS that are secure work because most people never change a default, which is the ' +
-        'most reliable finding in this entire field. And REMOVING DECISIONS, such as blocking ' +
-        'macros centrally, means the decision cannot be got wrong.\n\n' +
+        'is easy, and people follow the easy path without being persuaded of anything, the same way ' +
+        'far more people take the escalator next to a staircase than climb the stairs out of ' +
+        'principle.\n\n' +
+        'A ONE-CLICK REPORT BUTTON built into the mail program (so reporting a suspicious email is a ' +
+        'single click rather than forwarding it, writing an explanation and finding the right ' +
+        'address) raises reporting more than any campaign, because the barrier was effort rather than ' +
+        'willingness. A PASSWORD MANAGER, a tool that generates and remembers a different strong ' +
+        'password for every account so nobody has to, deployed and supported by the organisation does ' +
+        'more for password reuse than a decade of telling people not to reuse passwords. DEFAULTS ' +
+        'that are secure work because most people never change a default setting, which is one of the ' +
+        'most reliable findings in this entire field. And REMOVING DECISIONS, such as blocking macros ' +
+        '(described in an earlier module) centrally for everybody, means the decision cannot be got ' +
+        'wrong because no individual is ever asked to make it.\n\n' +
         'The thing to notice is that each of these makes the person life EASIER as well as safer. ' +
         'Interventions that trade user pain for security get worked around; interventions that ' +
         'remove pain get adopted without a campaign. When you can find one of the second kind, it ' +
@@ -1352,9 +1463,11 @@ const MODULE_HRF_5: Exercise[] = [
       'apply.',
     teach: {
       concept:
-        'People have a limited tolerance for security getting in the way, and it is a shared budget ' +
-        'across everything security does. Spend it on low-value controls and there is none left ' +
-        'for the one that matters.\n\n' +
+        'People have a limited tolerance for security getting in the way of their work, the same way ' +
+        'a household has a limited tolerance for having its routine disrupted. That tolerance is a ' +
+        'shared budget across everything security asks of them, not a separate allowance for each ' +
+        'individual control. Spend it on low-value controls and there is none left for the one ' +
+        'control that actually matters.\n\n' +
         'The consequences are practical. Every unnecessary prompt trains people to click through ' +
         'prompts, so the important warning arrives to somebody already in the habit of dismissing ' +
         'them. Controls that cost more than they are worth produce workarounds, as the earlier ' +
@@ -1410,7 +1523,9 @@ const MODULE_HRF_5: Exercise[] = [
       'it more effective? Select all that apply.',
     teach: {
       concept:
-        'Most security warnings are ignored, and the reasons are well understood.\n\n' +
+        'A BANNER is a strip of text an email program can automatically add to a message, usually at ' +
+        'the top, to flag something about it, such as that it came from outside the company. Most ' +
+        'security warnings, banners included, are ignored, and the reasons are well understood.\n\n' +
         'What helps: SPECIFICITY, because a banner that says something concrete such as "this ' +
         'sender is external and has never emailed you before" carries information a generic ' +
         '"external sender" banner does not. RARITY, because a warning on every external message is ' +
@@ -1467,14 +1582,18 @@ const MODULE_HRF_5: Exercise[] = [
       'help? Select all that apply.',
     teach: {
       concept:
-        'Design changes are made by people who do not work for you and have their own roadmap, so ' +
-        'the skill is influence rather than requirement.\n\n' +
+        'Design changes to a product are made by the team who builds it, people who do not work for ' +
+        'you and have their own ROADMAP, meaning their own planned list of what they are building ' +
+        'next and in what order. So the skill here is influence rather than requirement, persuading ' +
+        'rather than instructing.\n\n' +
         'What helps: bringing EVIDENCE from their own users rather than a general principle, ' +
         'because a support ticket from a customer who did the wrong thing outweighs any policy ' +
         'citation. Framing it in THEIR terms, since a confirmation step that reduces accidental ' +
         'destructive actions is a usability improvement and a support-cost reduction as well as a ' +
-        'security one. Proposing something SMALL AND SPECIFIC that fits a sprint rather than a ' +
-        'programme. And ASKING EARLY, at design rather than after build, when changing it is cheap.\n\n' +
+        'security one. Proposing something SMALL AND SPECIFIC that fits inside a SPRINT, meaning the ' +
+        'short block of a week or two that most product teams plan their work in, rather than a whole ' +
+        'programme of work. And ASKING EARLY, at design time rather than after the thing is already ' +
+        'built, when changing it is cheap.\n\n' +
         'What fails is a security requirement handed over with a policy reference and a deadline. ' +
         'It gets scheduled behind everything the team actually cares about, and you have spent ' +
         'goodwill to achieve a ticket nobody will pick up.',
@@ -1523,11 +1642,14 @@ const MODULE_HRF_5: Exercise[] = [
       'autocompletes similar addresses. In three or four sentences, say how you would address it.',
     teach: {
       concept:
-        'This is a design problem wearing the costume of a user error, and the giveaway is that it ' +
-        'happens to careful people repeatedly.\n\n' +
-        'The mechanism is autocomplete offering a similar address and the person confirming what ' +
-        'they expected to see, which is how attention works rather than a failure of it. Telling ' +
-        'people to check more carefully addresses none of it, because they believe they did.\n\n' +
+        'AUTOCOMPLETE is the feature where a mail program guesses the rest of an address as soon as ' +
+        'you start typing a name, based on addresses you have used before, and offers to fill it in ' +
+        'for you. This scenario is a design problem wearing the costume of a user error, and the ' +
+        'giveaway is that it happens to careful people repeatedly.\n\n' +
+        'The mechanism is autocomplete offering a similar-looking address and the person confirming ' +
+        'what they expected to see rather than what is actually on the screen, which is how ' +
+        'attention works rather than a failure of it. Telling people to check more carefully ' +
+        'addresses none of it, because they believe they already did.\n\n' +
         'The design responses are well established. A CONFIRMATION for external recipients on ' +
         'messages with attachments, fired rarely enough to be read. DELAYED SEND, giving a short ' +
         'window to recall, which turns an irreversible mistake into a recoverable one and is ' +
@@ -1592,8 +1714,9 @@ const MODULE_HRF_6: Exercise[] = [
       'make the message more effective? Select all that apply.',
     teach: {
       concept:
-        'Security communication competes with everything else in somebody inbox and usually loses, ' +
-        'so it has to earn attention in the first line.\n\n' +
+        'Security communication competes with everything else in somebody inbox, meeting invites, ' +
+        'customer requests, their actual job, and it usually loses, so it has to earn attention in ' +
+        'the first line or it will not be read at all.\n\n' +
         'What works: leading with WHAT TO DO, because the action is the point and burying it under ' +
         'context guarantees it is missed. Being SPECIFIC about what the recipient will see, so ' +
         'recognition is possible: a subject line and a sender pattern beat "be vigilant". Being ' +
@@ -1657,10 +1780,12 @@ const MODULE_HRF_6: Exercise[] = [
         'comfortable response to a large threat you cannot affect is to stop thinking about it. A ' +
         'message that makes the problem sound enormous and offers one small action is therefore ' +
         'worse than one that makes it sound manageable and offers the same action.\n\n' +
-        'It also HABITUATES fast: the second alarming campaign lands weaker than the first, and by ' +
-        'the fourth it is background. And the imagery is actively unhelpful, because the hooded ' +
-        'figure creates a mental model of a hostile outsider that does not match a plausible email ' +
-        'from a supplier, so people fail to recognise the actual thing when it arrives.\n\n' +
+        'It also HABITUATES fast, meaning people get used to it and stop reacting: the second ' +
+        'alarming campaign lands weaker than the first, and by the fourth it is background noise. ' +
+        'And the imagery is actively unhelpful, because a hooded figure creates a mental picture of a ' +
+        'menacing outsider that does not match what a real attack actually looks like, a plausible, ' +
+        'ordinary-looking email from a supplier, so people fail to recognise the real thing when it ' +
+        'arrives.\n\n' +
         'What works better is competence and specificity: here is what this looks like, here is ' +
         'what you do, here is what happened when a colleague did it. Concrete beats frightening.',
     },
@@ -1710,14 +1835,18 @@ const MODULE_HRF_6: Exercise[] = [
       'different groups? Select all that apply.',
     teach: {
       concept:
-        'One message to everybody is easy to produce and is relevant to almost nobody, which is why ' +
-        'it is ignored. Segmentation costs effort and is most of the difference between a ' +
-        'communications function and a broadcast one.\n\n' +
-        'Useful segments. By THREAT: finance sees invoice fraud, HR sees malicious attachments in ' +
-        'applications, developers see dependency and repository attacks, and each of those deserves ' +
-        'its own specific message rather than a paragraph in a general one. By CONSEQUENCE: ' +
-        'privileged users need to know why the extra controls apply to them, and hearing it framed ' +
-        'as their importance rather than their suspiciousness matters. By CONTEXT: remote and field ' +
+        'SEGMENTATION means splitting your audience into groups and sending each group something ' +
+        'tailored to them, rather than one identical message to everybody. One message to everybody ' +
+        'is easy to produce and is relevant to almost nobody, which is why it is ignored. ' +
+        'Segmentation costs more effort and is most of the difference between a communications ' +
+        'function and a broadcast one that just shouts the same thing at everyone.\n\n' +
+        'Useful segments. By THREAT: finance sees invoice fraud, HR sees malicious attachments ' +
+        'hidden in job applications, developers see attacks aimed at the code libraries and ' +
+        'repositories (shared code storage systems) they work with, and each of those deserves its ' +
+        'own specific message rather than a paragraph in a general one. By CONSEQUENCE: PRIVILEGED ' +
+        'USERS, meaning people whose accounts have broader-than-normal system access such as IT ' +
+        'administrators, need to know why extra controls apply to them, and hearing it framed as ' +
+        'reflecting their importance rather than their suspiciousness matters. By CONTEXT: remote and ' +
         'staff face different physical and network risks from office staff. And by LANGUAGE and ' +
         'accessibility, because a message somebody cannot comfortably read is not a message.\n\n' +
         'What is not a good segmentation is by past clicking, for the reasons the simulation module ' +
@@ -1890,14 +2019,18 @@ const MODULE_HRF_7: Exercise[] = [
       'apply.',
     teach: {
       concept:
-        'Phishing dominates the discipline because it is easy to simulate and easy to count, not ' +
+        'SOCIAL ENGINEERING is the general term for tricking a person, rather than a computer, into ' +
+        'doing something that helps an attacker: phishing is one form of it, but not the only one. ' +
+        'Phishing dominates this discipline because it is easy to simulate and easy to count, not ' +
         'because it is the only human risk that matters.\n\n' +
         'Worth attention. DATA HANDLING: what people put into external tools, share externally, or ' +
         'take with them when they leave, which has grown enormously as work moved into services ' +
-        'the organisation does not control. PHYSICAL and social access: tailgating, unattended ' +
-        'screens, and visitors, which are unfashionable and still effective. VOICE and messaging ' +
-        'social engineering, which is rising sharply because it bypasses email controls entirely ' +
-        'and is far harder to filter. And UNINTENTIONAL DISCLOSURE, meaning what people post ' +
+        'the organisation does not control. PHYSICAL and social access: TAILGATING, meaning ' +
+        'following a legitimate employee through a secure door without badging in yourself, along ' +
+        'with unattended unlocked screens and unchallenged visitors, all unfashionable topics and ' +
+        'still effective attacks. VOICE and messaging social engineering, meaning phone calls and ' +
+        'text messages rather than email, which is rising sharply because it bypasses email controls ' +
+        'entirely and is far harder to filter automatically. And UNINTENTIONAL DISCLOSURE, meaning ' +
         'publicly about systems, projects and colleagues, which is the raw material for the ' +
         'targeted attacks that actually work.\n\n' +
         'What is a different discipline is malicious insider activity. It overlaps, and it is ' +
@@ -1952,7 +2085,10 @@ const MODULE_HRF_7: Exercise[] = [
       'sound responses? Select all that apply.',
     teach: {
       concept:
-        'This is the current version of a very old problem, and the old lessons apply directly.\n\n' +
+        'An external AI assistant here means a chat tool run by an outside company, not one the ' +
+        'organisation controls or has reviewed, so nobody can say for certain what happens to ' +
+        'anything typed into it afterwards. Staff using one to speed up their work with customer data ' +
+        'is the current version of a very old problem, and the old lessons apply directly.\n\n' +
         'People are doing it because it makes their work faster and nothing sanctioned does the ' +
         'same job, which is a requirement statement. Blocking without an alternative produces the ' +
         'usual result: the behaviour moves to personal devices and personal accounts, where you ' +
@@ -2451,8 +2587,9 @@ const MODULE_HRF_8: Exercise[] = [
         'genuinely determines response time, so improvement in time to first report is a real ' +
         'capability improvement with a number attached. NEAR MISSES are concrete: the fraud ' +
         'attempts that were stopped by somebody following a process are countable and have amounts ' +
-        'against them. And the COUNTERFACTUAL is arguable at the level of a single case: this ' +
-        'attempted transfer was for this much and it was stopped here.\n\n' +
+        'against them. And the COUNTERFACTUAL, meaning what would have happened if the control had ' +
+        'not been there, is arguable at the level of a single case: this attempted transfer was for ' +
+        'this much, and it was stopped here.\n\n' +
         'Then be honest about the LIMIT: you cannot prove the incidents that never started, and a ' +
         'claim you cannot defend will be tested. Saying so is what makes the rest credible.\n\n' +
         'And connect to what leadership already worries about, which is usually fraud loss, ' +
