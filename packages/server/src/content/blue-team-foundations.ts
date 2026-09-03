@@ -66,6 +66,15 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'that apply.',
           teach: {
             concept:
+              'Start from the basic picture. Somewhere out there are people who try to break into ' +
+              'computer systems that are not theirs, to steal data, hold it for ransom, or cause ' +
+              'damage. The people and systems whose job is to stop them are called defenders, and by ' +
+              'a long-standing convention in this field the defending side is nicknamed the BLUE ' +
+              'TEAM (the attacking side, by the same convention, is the red team). Many ' +
+              'organisations that take this seriously staff a dedicated group for it, often called a ' +
+              'SOC (Security Operations Centre): a room, physical or virtual, whose entire job is ' +
+              'watching for and responding to attacks, the way an air-traffic control room\'s entire ' +
+              'job is watching the skies. This package is about how that room thinks.\n\n' +
               'A blue team is the defence: the people and systems that watch for attacks, decide ' +
               'which signals are real, respond to the ones that are, and feed what they learn back ' +
               'into better defences. They work continuously, because attacks do not keep office ' +
@@ -110,7 +119,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Everything in this package follows from that shift: since you cannot prevent every ' +
-            'attack, you build the ability to catch and contain the ones that get through.',
+            'attack, you build the ability to catch and contain the ones that get through. Every ' +
+            'later module -- baselines, logs, triage, incident response -- is one piece of that ' +
+            'ability, learned in turn.',
           practice: [],
         },
         {
@@ -125,6 +136,12 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'Which statement best captures why defending is harder than attacking?',
           teach: {
             concept:
+              'Think of a house with one burglar and one homeowner. The burglar only has to find a ' +
+              'single unlocked window, out of dozens, on any night they choose. The homeowner has to ' +
+              'keep every window, every door, and every night secure, forever, because they do not ' +
+              'get to pick which one the burglar tries. That imbalance, one attempt needed to win ' +
+              'versus everything needed to hold, is exactly the situation a defender is in, just at ' +
+              'the scale of an entire organisation\'s computers instead of one house.\n\n' +
               'Attack and defence are not symmetric, and the asymmetry runs in the attacker\'s ' +
               'favour. An attacker needs only one path to work once: they can try a hundred ' +
               'approaches, fail ninety-nine times, and still win with the hundredth, because a ' +
@@ -170,7 +187,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'The asymmetry is not a counsel of despair. It is the reason the whole discipline pivots ' +
-            'from "build a perfect wall" to "detect fast and respond well".',
+            'from "build a perfect wall" to "detect fast and respond well" -- you cannot out-lock a ' +
+            'burglar who only needs one window, but you can make sure you notice the second they ' +
+            'climb through it.',
           practice: [],
         },
         {
@@ -187,7 +206,11 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'response is still badly exposed.',
           teach: {
             concept:
-              'Prevention is the first layer of defence and a necessary one: firewalls, antivirus, ' +
+              'A house with a strong lock on the front door is safer than a house with no lock at ' +
+              'all, but a lock alone is not a security system: it does nothing once a window is ' +
+              'left open, a key is copied, or someone simply picks it while nobody is home to ' +
+              'notice. Prevention in computer security plays the same role as the lock. It is the ' +
+              'first layer of defence and a necessary one: firewalls, antivirus, ' +
               'encryption, and good access control stop a great deal of routine attack. But ' +
               'prevention can never be complete, because the ground keeps shifting. New ' +
               'vulnerabilities are discovered in software you already run, employees are tricked or ' +
@@ -232,7 +255,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'This is why defence in depth exists: prevent, detect, respond, recover. Each layer ' +
-            'assumes the one before it will sometimes fail, and catches what slips past.',
+            'assumes the one before it will sometimes fail, and catches what slips past -- the lock ' +
+            'plus the alarm plus the neighbour who calls the police, not the lock alone.',
           practice: [],
         },
         {
@@ -248,7 +272,12 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'service after an incident. Which layer of defence in depth is this?',
           teach: {
             concept:
-              'Defence in depth is usually described as four layers, each doing a different job. ' +
+              'Picture a medieval castle: a moat around the outside, thick walls behind the moat, ' +
+              'guards on the walls watching for anyone who gets across, soldiers ready to fight off ' +
+              'anyone who gets over the wall, and stonemasons on standby to rebuild whatever gets ' +
+              'knocked down. No single layer is expected to stop everything by itself; each one ' +
+              'catches what got past the layer before it. Defence in depth is that same idea applied ' +
+              'to computer systems. It is usually described as four layers, each doing a different job. ' +
               'Prevention tries to stop attacks before they happen: firewalls, patching, access ' +
               'control. Detection tries to notice attacks that got past prevention: monitoring, ' +
               'logging, alerting. Response tries to stop an attack in progress and limit its damage: ' +
@@ -293,7 +322,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Naming the layer keeps you from sequencing wrong. Recovery before eradication is a ' +
-            'classic mistake: a clean rebuild is worthless if the attacker still has a way back in.',
+            'classic mistake: a clean rebuild is worthless if the attacker still has a way back in, ' +
+            'the way rebuilding a castle wall means nothing if the enemy is still camped inside it.',
           practice: [],
         },
         {
@@ -311,13 +341,23 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           teach: {
             concept:
               'Defenders rely on several categories of tool, and confusing them wastes money and ' +
-              'leaves gaps. A SIEM (Security Information and Event Management) is the central ' +
-              'nervous system: it collects logs from everywhere, correlates events across sources to ' +
-              'find patterns no single log would reveal, and raises alerts. An IDS or IPS watches ' +
-              'network traffic for attack signatures. EDR (Endpoint Detection and Response) lives on ' +
-              'individual computers and servers, watching process execution and file changes and ' +
-              'able to isolate a host. A firewall controls what traffic is allowed in and out. Each ' +
-              'sees a different slice of the world.\n\n' +
+              'leaves gaps. Each is built for a different question, so it helps to think of a SOC as ' +
+              'a security control room wired up to several different kinds of sensor, the way a ' +
+              'building\'s control room might have door sensors, motion detectors, and cameras, each ' +
+              'answering a different question about what is happening.\n\n' +
+              'A SIEM (Security Information and Event Management, usually said as "sim") is the ' +
+              'central nervous system: it collects logs from everywhere, correlates events across ' +
+              'sources to find patterns no single log would reveal, and raises alerts. An IDS ' +
+              '(Intrusion Detection System, which only watches and warns) or an IPS (Intrusion ' +
+              'Prevention System, which can also actively block) watches network traffic for attack ' +
+              'signatures, the digital equivalent of a guard checking envelopes for a return address ' +
+              'known to be trouble. EDR (Endpoint Detection and Response) lives on individual ' +
+              'computers and servers, watching process execution and file changes and able to ' +
+              'isolate a host -- an ENDPOINT, in this vocabulary, just means any individual computer, ' +
+              'laptop, or server, the "end" of the network where a person or a service actually does ' +
+              'work. A firewall controls what traffic is allowed in and out, like a checkpoint that ' +
+              'only lets traffic through if it matches an allowed rule. Each sees a different slice ' +
+              'of the world.\n\n' +
               'The SIEM is distinctive because its value is correlation, not any single feed. A ' +
               'failed login on one server is nothing; the same account failing on forty servers in a ' +
               'minute, then succeeding, is an attack, and only something that sees all forty logs ' +
@@ -357,7 +397,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           debrief:
             'The SIEM is where a scattered set of harmless-looking events becomes a visible attack. ' +
             'Its power is correlation, which is also why it is only as good as the logs and rules ' +
-            'behind it.',
+            'behind it -- these acronyms (SIEM, IDS, IPS, EDR) will keep coming back through this ' +
+            'package, so it is worth being able to say in one sentence what each one actually does.',
           practice: [],
         },
         {
@@ -373,7 +414,10 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'two or three sentences, explain why it is still not well defended.',
           teach: {
             concept:
-              'Security tools are powerful and necessary, but they are instruments, not defenders. A ' +
+              'A smoke detector that nobody ever checks the batteries on, and whose alarm nobody is ' +
+              'around to hear, does not put out a fire. It is still a perfectly good smoke detector; ' +
+              'the missing piece is a person who hears it and acts. Security tools are powerful and ' +
+              'necessary, but they are instruments, not defenders, in exactly that sense. A ' +
               'SIEM that no one tunes drowns its operators in false alarms; an EDR whose alerts no ' +
               'one reads catches malware into a void; threat intelligence nobody acts on is just an ' +
               'expensive feed. Tools generate signals, but signals only become defence when a ' +
@@ -418,7 +462,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           debrief:
             'The scarce resource in a SOC is rarely the software; it is the analyst who knows what ' +
             'the software is not telling them. Keep that in mind through every tool this package ' +
-            'names.',
+            'names: a SIEM, an EDR agent, a firewall, are all smoke detectors. You are learning to be ' +
+            'the person who hears them.',
           practice: [],
         },
       ],
@@ -446,8 +491,11 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'illustrate?',
           teach: {
             concept:
-              'Detection rests on a deceptively simple idea: you cannot recognise abnormal until ' +
-              'you know normal. When an event appears in a log, the question is not "is this ' +
+              'A doctor cannot tell you your heart rate is dangerously high without first knowing ' +
+              'what your normal resting heart rate is, because "high" only means something relative ' +
+              'to your own baseline: what is alarming for one person is a Tuesday for a marathon ' +
+              'runner. Detection rests on that same deceptively simple idea: you cannot recognise ' +
+              'abnormal until you know normal. When an event appears in a log, the question is not "is this ' +
               'inherently bad" but "is this normal here", and the answer depends entirely on the ' +
               'organisation. File access at three in the morning is unremarkable at a warehouse that ' +
               'runs a night shift and deeply suspicious at a firm whose office empties at five. ' +
@@ -491,7 +539,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'This is why the first job at any new environment is to learn its normal. Every ' +
-            'detection you build later is a comparison against that baseline.',
+            'detection you build later is a comparison against that baseline, the same way every ' +
+            'reading on a heart monitor only means something once you know the patient\'s resting ' +
+            'rate.',
           practice: [],
         },
         {
@@ -509,7 +559,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           teach: {
             concept:
               'A baseline is only useful when you can compare an observation against it and see what ' +
-              'sticks out. The skill is to hold several dimensions of normal in mind at once -- ' +
+              'sticks out, the way you would notice a stranger\'s car in your driveway precisely ' +
+              'because you know which cars belong there. The skill is to hold several dimensions of normal in mind at once -- ' +
               'timing, volume, who, from where, how much data -- and notice which observation ' +
               'violates one or more of them. A single dimension being slightly off is often nothing; ' +
               'an observation that departs sharply, especially on a dimension that maps to a real ' +
@@ -552,7 +603,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Anomaly detection is comparison, not drama. The event to chase is the one that breaks ' +
-            'the baseline in a way that matches a real attacker behaviour.',
+            'the baseline in a way that matches a real attacker behaviour, not the one that merely ' +
+            'looks the most dramatic on a screen.',
           practice: [],
         },
         {
@@ -568,8 +620,11 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'negative in detection, and why you cannot simply eliminate both at once.',
           teach: {
             concept:
-              'Detection makes two kinds of mistake, and they pull in opposite directions. A false ' +
-              'positive is an alert on legitimate activity -- the system cried wolf, and an analyst ' +
+              'A smoke detector can fail in exactly two ways: it can shriek because someone burnt ' +
+              'toast, or it can stay silent while the house genuinely burns. Detection in security ' +
+              'makes those same two kinds of mistake, and they pull in opposite directions. A false ' +
+              'positive is an alert on legitimate activity, the burnt-toast case -- the system cried ' +
+              'wolf, and an analyst ' +
               'spends time confirming nothing happened. A false negative is the reverse and the ' +
               'worse of the two: a real attack that produced no alert, that slipped through looking ' +
               'like normal activity. Every detection system sits somewhere on the spectrum between ' +
@@ -613,7 +668,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Every detection decision lives on this spectrum. There is no error-free setting, only a ' +
-            'chosen balance -- which is why tuning is a permanent job, not a one-time fix.',
+            'chosen balance -- which is why tuning is a permanent job, not a one-time fix, the same ' +
+            'way you cannot build a smoke detector that never chirps at toast and never misses a ' +
+            'real fire.',
           practice: [],
         },
         {
@@ -629,7 +686,10 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'than the team can review. What is the most dangerous consequence?',
           teach: {
             concept:
-              'A detection system that produces too many alerts is not safer than one that produces ' +
+              'There is an old fable about a shepherd boy who shouts "wolf!" as a joke so many times ' +
+              'that when a real wolf finally shows up, the villagers who come running every previous ' +
+              'time no longer bother, and the sheep are lost. Alert fatigue is that fable playing out ' +
+              'inside a SOC. A detection system that produces too many alerts is not safer than one that produces ' +
               'too few -- it is often more dangerous, and the reason is human. When a team faces ' +
               'tens of thousands of alerts a day and the overwhelming majority are false alarms, no ' +
               'one can investigate them all. The maths is unforgiving: a handful of analysts have ' +
@@ -674,7 +734,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Alert fatigue is why tuning is a safety issue, not just an efficiency one. A quieter, ' +
-            'higher-quality alert stream is what lets the real one stand out.',
+            'higher-quality alert stream is what lets the real one stand out -- the villagers only ' +
+            'come running if the boy has not already worn out their trust.',
           practice: [],
         },
         {
@@ -691,7 +752,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'you must watch for when you do.',
           teach: {
             concept:
-              'Improving a noisy alert means raising its specificity -- making it fire on real ' +
+              'SPECIFICITY, in this context, just means how narrowly an alert\'s conditions describe ' +
+              'a real attack rather than describing ordinary life too. Improving a noisy alert means raising its specificity -- making it fire on real ' +
               'attacks and stay quiet on legitimate activity -- and there are a few reliable ways to ' +
               'do it. The most powerful is to require multiple signals together rather than one ' +
               'alone: instead of alerting on any out-of-hours login, alert only when an out-of-hours ' +
@@ -740,7 +802,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           debrief:
             'This is the tuning loop the whole SOC lives in: raise specificity where added ' +
             'conditions genuinely track attacks, and keep watching what the tighter rule can no ' +
-            'longer see.',
+            'longer see. Every tightened alert is a small, deliberate bet about what real attacks ' +
+            'look like.',
           practice: [],
         },
       ],
@@ -767,7 +830,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             '192.0.2.50, at 02:14. Read literally, what does this entry establish?',
           teach: {
             concept:
-              'A log is a record of an event: when something happens on a system, an entry is ' +
+              'A ship\'s captain keeps a log book: a running, timestamped record of everything that ' +
+              'happened on the voyage, written as it happens, so that anyone can later reconstruct ' +
+              'exactly what occurred and when. Computer systems keep the same kind of record. A log is a record of an event: when something happens on a system, an entry is ' +
               'written describing it. Each entry is a small structured fact -- a timestamp, a ' +
               'source, an event type, and details such as an account name or an address. Reading one ' +
               'correctly means taking exactly what it says and no more: this account, from this ' +
@@ -813,7 +878,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Read logs literally, then reason about meaning separately. Conflating the two -- ' +
-            '"jsmith logged in" becoming "jsmith did it" -- is how investigations go wrong.',
+            '"jsmith logged in" becoming "jsmith did it" -- is how investigations go wrong, the same ' +
+            'way a ship\'s log entry saying "storm sighted" does not by itself tell you who was on ' +
+            'watch.',
           practice: [],
         },
         {
@@ -834,8 +901,11 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
               'live in operating-system security logs. File access and changes live in OS and audit ' +
               'logs. Malware detections live in antivirus and EDR logs. And network activity -- who ' +
               'connected to whom, on what port, and how much data moved -- lives in network logs: ' +
-              'firewall, proxy, and network-monitoring records. An outbound transfer to an external ' +
-              'server is a network event, so the network logs are where its evidence lives.\n\n' +
+              'firewall, proxy, and network-monitoring records. A PROXY, if the word is new, is a ' +
+              'server that sits between users and the internet and relays their traffic, so it sees ' +
+              'and can log every outbound connection that passes through it. An outbound transfer to ' +
+              'an external server is a network event, so the network logs are where its evidence ' +
+              'lives.\n\n' +
               'Reaching for the wrong source wastes time and can lead to a false conclusion that ' +
               '"there is no evidence" when you were simply looking in the wrong place. A defender ' +
               'builds a mental map of the estate: for any question, which system would have seen it. ' +
@@ -873,7 +943,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'A defender keeps a mental map of which system saw what. It answers questions fast, and ' +
-            'it turns a missing record into a clue rather than a dead end.',
+            'it turns a missing record into a clue rather than a dead end, because "there is no ' +
+            'evidence" and "I looked in the wrong log" produce the same blank screen.',
           practice: [],
         },
         {
@@ -890,7 +961,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'rarely enough on its own.',
           teach: {
             concept:
-              'Logs arrive as an unordered heap of individual facts, each true but each nearly ' +
+              'A detective\'s corkboard covered in photographs and string only tells a story once ' +
+              'someone connects the pins in order: this person was seen here, then there, then at ' +
+              'the scene. Any one photograph pinned alone proves almost nothing. Logs arrive as an unordered heap of individual facts, each true but each nearly ' +
               'meaningless alone. The analyst\'s core craft is to turn that heap into a timeline: ' +
               'ordering events by time, across sources, so that a sequence and therefore a story ' +
               'emerges. A file created, then executed, then a network connection to an external ' +
@@ -935,7 +1008,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Timeline-building is the master skill. Spotting C2, characterising an incident, doing ' +
-            'forensics -- each is this same craft aimed at a particular question.',
+            'forensics -- each is this same craft aimed at a particular question: the corkboard and ' +
+            'the string, just built from log entries instead of photographs.',
           practice: [],
         },
         {
@@ -952,7 +1026,10 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'timeline?',
           teach: {
             concept:
-              'A timeline is only as trustworthy as the timestamps it is ordered by, and timestamps ' +
+              'UTC (Coordinated Universal Time) is worth naming here: it is a single, fixed reference ' +
+              'time that does not shift with time zones or daylight saving, the way a ship\'s log ' +
+              'traditionally used one reference clock regardless of which port it was near, so that ' +
+              'entries from different voyages could still be compared. A timeline is only as trustworthy as the timestamps it is ordered by, and timestamps ' +
               'from different systems are rarely directly comparable. Machines sit in different time ' +
               'zones, so 10:15 on one may be 18:15 on another; clocks drift, so a device may be a ' +
               'minute or two off true time; and some log in local time while others log in UTC. ' +
@@ -997,7 +1074,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Normalising timestamps is dull and decisive. Skip it and an out-of-order timeline can ' +
-            'send an entire investigation chasing the wrong first move.',
+            'send an entire investigation chasing the wrong first move -- which is exactly why ' +
+            'converting everything to one shared reference like UTC is one of the first things done ' +
+            'to any set of logs before real analysis starts.',
           practice: [],
         },
         {
@@ -1014,7 +1093,10 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'is itself meaningful evidence, even though it contains no events.',
           teach: {
             concept:
-              'Analysts are trained to read what the logs say, but some of the most important ' +
+              'If a security guard\'s patrol log shows entries every fifteen minutes all night except ' +
+              'for one two-hour block that is simply blank, most people\'s instinct is not to assume ' +
+              'the building was fine during that block. The blank stretch is itself the thing worth ' +
+              'asking about. Analysts are trained to read what the logs say, but some of the most important ' +
               'evidence is what the logs do not say. A gap where records should exist -- logging ' +
               'disabled for a window, a log file truncated, an expected event absent from an ' +
               'otherwise complete sequence -- is not nothing. It is a hole shaped like something, and ' +
@@ -1058,7 +1140,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Reading absence is an advanced habit worth building early: know what should be there, ' +
-            'and treat its disappearance as one of the loudest signals you can get.',
+            'and treat its disappearance as one of the loudest signals you can get, the same way a ' +
+            'blank stretch in a guard\'s patrol log is not proof nothing happened.',
           practice: [],
         },
       ],
@@ -1085,7 +1168,12 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'worth a closer look?',
           teach: {
             concept:
-              'Networks speak in well-known ports, and fluency in them is the first tool for ' +
+              'A single computer can run many different network services at once, a web server, an ' +
+              'email server, a file-sharing service, all listening on the same address at the same ' +
+              'time. A PORT is the number that tells incoming traffic which one of those services it ' +
+              'is meant for, the same way an apartment building has one street address but each unit ' +
+              'has its own number: mail addressed to Apartment 443 does not get delivered to ' +
+              'Apartment 22, even though both are in the same building. Networks speak in well-known ports, and fluency in them is the first tool for ' +
               'spotting the odd one out. Web browsing runs over ports 80 and 443, DNS over 53, email ' +
               'over 25, remote administration over 22, Windows file sharing over 445. Most of what a ' +
               'network does every day is this ordinary, expected traffic to ordinary, expected ' +
@@ -1129,7 +1217,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Knowing the common ports turns a wall of traffic into a readable page. The connection ' +
-            'that breaks the vocabulary is where you start.',
+            'that breaks the vocabulary is where you start, the same way mail addressed to an ' +
+            'apartment number that does not exist in the building is the letter worth opening first.',
           practice: [],
         },
         {
@@ -1145,7 +1234,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'an attacker moving through it?',
           teach: {
             concept:
-              'The asymmetry that makes defence hard on the whole -- one path to attack, everything ' +
+              'A burglar inside an unfamiliar house knows only the room they are standing in; the ' +
+              'homeowner, if they had cameras in every room, would see the burglar\'s entire path ' +
+              'through the house at once. The asymmetry that makes defence hard on the whole -- one path to attack, everything ' +
               'to protect -- has one place where it flips in the defender\'s favour: visibility on ' +
               'their own network. An attacker moving through a network sees only the traffic they ' +
               'themselves generate. They know they connected from the web server to the file server; ' +
@@ -1193,7 +1284,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           debrief:
             'This is why you instrument the inside, not just the edge. Once an attacker is past the ' +
             'perimeter they are on your ground, where you see everything and they see almost ' +
-            'nothing.',
+            'nothing, the way a burglar who thinks they are alone in a dark house has no idea how ' +
+            'many cameras are watching them.',
           practice: [],
         },
         {
@@ -1210,7 +1302,13 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'does this pattern most suggest?',
           teach: {
             concept:
-              'Command-and-control traffic -- an implant checking in with its operator for ' +
+              'Two pieces of vocabulary first. An IMPLANT is a small malicious program an attacker ' +
+              'plants on a compromised machine to keep working for them, the digital equivalent of a ' +
+              'spy leaving a hidden radio behind after breaking into a building. COMMAND-AND-CONTROL, ' +
+              'almost always shortened to C2, is the channel that implant uses to phone home: it ' +
+              'checks in with a server the attacker controls to receive fresh instructions and hand ' +
+              'back what it has found, the way that hidden radio checks in with its handler. C2 ' +
+              'traffic -- an implant checking in with its operator for ' +
               'instructions -- has a behavioural signature that often gives it away even when the ' +
               'content is hidden. The classic tell is beaconing: connecting to the same destination ' +
               'at regular intervals, in short bursts, with a machine-like regularity that human ' +
@@ -1255,7 +1353,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Timing is one of the strongest C2 signals. Attackers add jitter to hide it, but ' +
-            '"too regular to be human, and running when no human is" remains a powerful lead.',
+            '"too regular to be human, and running when no human is" remains a powerful lead -- a ' +
+            'hidden radio that checks in like clockwork is still, underneath the disguise, a radio ' +
+            'checking in like clockwork.',
           practice: [],
         },
         {
@@ -1272,7 +1372,11 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'C2, without ever seeing the contents.',
           teach: {
             concept:
-              'Attackers encrypt their command channels precisely so defenders cannot read them, and ' +
+              'A sealed envelope hides the letter inside, but it does not hide the envelope itself: ' +
+              'the postal service can still see who it is addressed to, who sent it, when it was ' +
+              'mailed, and roughly how heavy it is, all without ever opening it. That outer ' +
+              'information is what defenders call METADATA, data about the communication rather than ' +
+              'its contents. Attackers encrypt their command channels precisely so defenders cannot read them, and ' +
               'a great deal of legitimate traffic is encrypted too, so "it is encrypted" is not by ' +
               'itself suspicious. The mistake is to conclude that encryption defeats detection. It ' +
               'does not, because you do not need the contents -- you have the metadata, which ' +
@@ -1319,7 +1423,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Encryption protects content, not metadata. Modern network detection lives in that gap: ' +
-            'the who, when, how often, and how much that the attacker cannot hide.',
+            'the who, when, how often, and how much that the attacker cannot hide, no matter how ' +
+            'well they seal the envelope.',
           practice: [],
         },
       ],
@@ -1346,7 +1451,11 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'exists to answer quickly?',
           teach: {
             concept:
-              'Triage is the fast first pass over an alert, and it exists because a SOC cannot ' +
+              'The word TRIAGE comes from hospital emergency rooms, where a nurse quickly sorts ' +
+              'arriving patients by how urgent and how serious their condition is, before any doctor ' +
+              'has time to fully examine any one of them: someone must decide fast who gets seen ' +
+              'first, because there are more patients than doctors in any given minute. A SOC borrows ' +
+              'the same word for the same reason. Triage is the fast first pass over an alert, and it exists because a SOC cannot ' +
               'deeply investigate everything -- there are far more alerts than analyst-hours, so ' +
               'something has to decide, quickly, which few deserve real attention. The core question ' +
               'triage answers is not "what exactly happened" but "is this worth a human ' +
@@ -1390,7 +1499,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Triage is sorting under time pressure. Trying to fully solve every alert never clears ' +
-            'the queue; escalating every alert just overloads the specialists.',
+            'the queue; escalating every alert just overloads the specialists, exactly as it would ' +
+            'if an emergency room sent every patient straight to surgery.',
           practice: [],
         },
         {
@@ -1407,14 +1517,19 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'severity is appropriate?',
           teach: {
             concept:
-              'Severity turns a triage judgement into a decision about speed and resources. A ' +
+              'Carrying the hospital analogy forward: the emergency room does not just sort patients ' +
+              'into "seen" and "not seen", it assigns a severity level, because a chest pain and a ' +
+              'sprained ankle both deserve attention but not at the same speed. Severity turns a triage judgement into a decision about speed and resources. A ' +
               'common scale runs critical, high, medium, low, and each level implies a different ' +
               'response tempo: critical means minutes and all hands, high means hours, medium means ' +
               'the next business day, low means whenever there is time. Severity is driven by two ' +
               'things above all -- how likely the alert is to be a real, active attack, and how much ' +
               'damage it implies if it is. An alert that is both very likely real and potentially ' +
               'very damaging is critical.\n\n' +
-              'A connection to an address already known, from threat intelligence, to be a malware ' +
+              'THREAT INTELLIGENCE, met properly in a later module, just means knowledge collected ' +
+              'about known attackers and their known infrastructure, addresses and domains already ' +
+              'confirmed to belong to malicious activity, shared so that a match against them is a ' +
+              'near-certain red flag rather than a guess. A connection to an address already known, from threat intelligence, to be a malware ' +
               'command server is about as high-confidence as alerts get: it is not an anomaly that ' +
               'might have a benign explanation but a match against known-bad infrastructure, ' +
               'strongly suggesting an active compromise talking to its operator right now. That ' +
@@ -1453,7 +1568,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Severity allocates the team\'s scarce urgency. Call everything critical and nothing is; ' +
-            'miss a real critical and the response arrives too late to matter.',
+            'miss a real critical and the response arrives too late to matter, the emergency-room ' +
+            'equivalent of leaving a chest-pain patient in the waiting room.',
           practice: [],
         },
         {
@@ -1470,7 +1586,10 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'what a good escalation would include instead.',
           teach: {
             concept:
-              'Escalation is the hand-off of a serious alert from triage to someone who will ' +
+              'When an emergency-room nurse hands a patient to a doctor, they do not just say "this ' +
+              'one is bad, go look": they report vitals, symptoms, and what has already been ruled ' +
+              'out, so the doctor can act immediately instead of starting the exam from nothing. ' +
+              'ESCALATION is the hand-off of a serious alert from triage to someone who will ' +
               'investigate or respond, and its whole value is the context that travels with it. An ' +
               'escalation that says only "something weird happened" forces the specialist to start ' +
               'from zero -- to rediscover what the alert was, when it happened, what it touched, and ' +
@@ -1516,7 +1635,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'An escalation that drops the context gathered in triage throws away the work triage ' +
-            'exists to do. Hand over a case file, not a shrug.',
+            'exists to do. Hand over a case file, not a shrug, the way a good nurse hands a doctor ' +
+            'vitals and history, not just a pointed finger.',
           practice: [],
         },
         {
@@ -1534,7 +1654,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'does not operate in, with no maintenance scheduled. Which should you escalate?',
           teach: {
             concept:
-              'The everyday triage decision is escalate or close, and doing it well means reading ' +
+              'The everyday triage decision, worked here through a concrete pair of examples, is ' +
+              'escalate or close, and doing it well means reading ' +
               'each alert against context rather than reacting to its surface. Some alerts have an ' +
               'obvious benign explanation and can be closed with a note: a single failed login ' +
               'followed immediately by a success from the same internal user is the universal ' +
@@ -1582,7 +1703,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           debrief:
             'Close what context explains, escalate what context makes worse. Escalate the mistyped ' +
             'password and you burn a specialist; close the impossible admin login and you may miss a ' +
-            'breach.',
+            'breach. Learning to feel the difference, quickly and reliably, is most of what makes an ' +
+            'experienced triage analyst faster than a new one.',
           practice: [],
         },
       ],
@@ -1609,7 +1731,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'phases is correct?',
           teach: {
             concept:
-              'Incident response follows a lifecycle, and the order is not arbitrary -- each phase ' +
+              'An INCIDENT, in this vocabulary, is an alert that has been confirmed as a real, ' +
+              'ongoing attack rather than noise, which is the point where the whole team\'s posture ' +
+              'shifts from watching to actively fighting back. Incident response follows a lifecycle, and the order is not arbitrary -- each phase ' +
               'depends on the one before. After detection and analysis confirm what you are dealing ' +
               'with, the sequence is containment, then eradication, then recovery, then a ' +
               'post-incident review. Containment comes first because the priority once an attack is ' +
@@ -1654,7 +1778,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'The lifecycle order encodes hard-won lessons. Restore before you eradicate and you just ' +
-            'gift-wrap a clean system for the attacker still holding the keys.',
+            'gift-wrap a clean system for the attacker still holding the keys. This ordering, ' +
+            'contain-eradicate-recover-review, is worth memorising exactly, because the capstone ' +
+            'exercise at the end of this package asks you to lay out the whole thing from memory.',
           practice: [],
         },
         {
@@ -1671,7 +1797,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'trade-off?',
           teach: {
             concept:
-              'Containment is not a single action but a choice along a spectrum, and the ends pull ' +
+              'CONTAINMENT, the first phase after an incident is confirmed, simply means stopping the ' +
+              'attacker from doing further damage or spreading further, before you have necessarily ' +
+              'finished understanding everything. It is not a single action but a choice along a spectrum, and the ends pull ' +
               'against each other. Fast, hard containment -- pull the plug, shut it down now -- stops ' +
               'the attacker immediately and is the safe move when damage is actively mounting. But it ' +
               'is blunt: it destroys volatile evidence in memory, tips the attacker off that they ' +
@@ -1717,7 +1845,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Containment is a deliberate trade, not a reflex. Ransomware encrypting now means pull ' +
-            'the plug; a quiet explorer you need to understand may be worth watching, carefully.',
+            'the plug; a quiet explorer you need to understand may be worth watching, carefully. ' +
+            'Neither reflex, always yank the cable or always sit and watch, survives contact with a ' +
+            'real incident.',
           practice: [],
         },
         {
@@ -1734,7 +1864,12 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'matter enormously.',
           teach: {
             concept:
-              'Some of the most valuable evidence in an intrusion exists only while the machine is ' +
+              'A computer has two very different kinds of storage. The disk (or hard drive) is ' +
+              'durable: what is written there stays there through a reboot, the way ink on paper ' +
+              'stays put after you close the notebook. Memory, usually called RAM, is where the ' +
+              'computer keeps everything it is actively working with right now, and it is volatile: ' +
+              'the instant power is lost, everything in it is gone, the way a whiteboard is wiped ' +
+              'clean the moment someone erases it. Some of the most valuable evidence in an intrusion exists only while the machine is ' +
               'running. A computer\'s memory holds the live state of the attack: running malicious ' +
               'processes, decryption keys, network connections to the attacker\'s server, commands ' +
               'in flight, and code that exists only in memory and was never written to disk. All of ' +
@@ -1779,7 +1914,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Order of volatility: capture the most fragile evidence first. The reboot instinct is ' +
-            'understandable and sometimes exactly the move that erases the case.',
+            'understandable and sometimes exactly the move that erases the case, the whiteboard ' +
+            'wiped clean before anyone thought to photograph it.',
           practice: [],
         },
         {
@@ -1795,7 +1931,11 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'apply.',
           teach: {
             concept:
-              'The post-incident review is where an organisation converts a bad day into a better ' +
+              'Airlines investigate every crash and near-miss with a rule that no individual pilot or ' +
+              'controller will be punished for honestly reporting what happened, because the entire ' +
+              'system only gets safer if people tell the truth about mistakes instead of hiding them. ' +
+              'The post-incident review in security borrows the same logic: it is where an ' +
+              'organisation converts a bad day into a better ' +
               'defence, and whether it does depends entirely on how it is run. A useful review is ' +
               'blameless: it treats the incident as a failure of systems and processes rather than of ' +
               'individuals, because the moment people fear punishment they stop telling the truth, ' +
@@ -1841,7 +1981,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           debrief:
             'The test of a review is not its prose but whether, months later, the improvements it ' +
             'named actually happened. Blameless gets the truth; owned and tracked turns it into ' +
-            'change.',
+            'change, the same discipline that makes aviation safety improve year after year instead ' +
+            'of repeating the same crash.',
           practice: [],
         },
       ],
@@ -1869,7 +2010,7 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'easiest to overlook?',
           teach: {
             concept:
-              'Threat intelligence is knowledge about attackers -- who they are, what they target, ' +
+              'THREAT INTELLIGENCE is knowledge about attackers -- who they are, what they target, ' +
               'and how they operate -- and it comes from many sources of varying relevance. There is ' +
               'government intelligence, which is authoritative but often slow; commercial feeds, ' +
               'which are current and comprehensive but expensive; community research, which is ' +
@@ -1916,7 +2057,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Feeding your own incidents back into detection is the loop that makes a SOC improve. ' +
-            'External intel broadens the view; your own history is the sharpest teacher you have.',
+            'External intel broadens the view; your own history is the sharpest teacher you have, ' +
+            'because it is the only teacher describing your own house.',
           practice: [],
         },
         {
@@ -1931,7 +2073,11 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'What is the primary value of the MITRE ATT&CK framework to a defender?',
           teach: {
             concept:
-              'MITRE ATT&CK is a large, structured catalogue of the tactics and techniques that ' +
+              'Before any shared framework existed, imagine two hospitals each inventing their own ' +
+              'private names for the same diseases: neither could learn from the other\'s case notes, ' +
+              'because "condition seven" at one hospital might be "the shaking sickness" at another. ' +
+              'Medicine solved this with shared, standard names for conditions. Security has ' +
+              'MITRE ATT&CK for the same purpose: a large, structured catalogue of the tactics and techniques that ' +
               'attackers actually use, observed and documented so that everyone can refer to them ' +
               'the same way. A tactic is the attacker\'s goal at a stage -- initial access, ' +
               'persistence, exfiltration -- and a technique is a specific way to achieve it, each ' +
@@ -1976,7 +2122,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'A shared language turns detection from a heap of one-off rules into something you can ' +
-            'map, measure, and find the blind spots in.',
+            'map, measure, and find the blind spots in, the same way standard disease names let one ' +
+            'hospital\'s research actually help the next patient at a different hospital.',
           practice: [],
         },
         {
@@ -1995,7 +2142,12 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'indicators.',
           teach: {
             concept:
-              'There is a hierarchy of pain in detection, seen from the attacker\'s side. ' +
+              'A burglar can trivially swap the crowbar they carry for a different one after this ' +
+              'job, but they cannot as easily change the fact that breaking a window makes a ' +
+              'distinctive sound. Watching for "that specific crowbar" catches nothing next time; ' +
+              'watching for "the sound of a window breaking" catches every burglar who breaks a ' +
+              'window, regardless of tool. Detection has that same hierarchy of pain, seen from the ' +
+              'attacker\'s side. ' +
               'Indicators of compromise -- a file hash, an address, a domain -- are cheap for an ' +
               'attacker to change: a new build has a new hash, a new server is a few dollars, so a ' +
               'detection written against a specific indicator stops exactly one version of one ' +
@@ -2043,7 +2195,7 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           debrief:
             'This mirrors the red-team lesson about IOCs versus TTPs, seen from the defender\'s ' +
             'chair: write your detections against the expensive-to-change behaviour, not the ' +
-            'disposable artefact.',
+            'disposable artefact, the sound of the window breaking rather than the brand of crowbar.',
           practice: [],
         },
         {
@@ -2059,7 +2211,7 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'access." In the tactic / technique / procedure breakdown, which part is the TECHNIQUE?',
           teach: {
             concept:
-              'The shorthand TTP stands for tactic, technique, and procedure, and the three name ' +
+              'This exercise takes apart the shorthand introduced a moment ago. TTP stands for tactic, technique, and procedure, and the three name ' +
               'three levels of description from general to specific. The tactic is the attacker\'s ' +
               'goal at that stage -- what they are trying to accomplish, such as initial access. The ' +
               'technique is the general method used to accomplish it, such as phishing. The ' +
@@ -2105,7 +2257,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Detecting at the technique level catches the spreadsheet, the link, and the PDF at ' +
-            'once. Detecting only the procedure catches one variant and misses the next.',
+            'once. Detecting only the procedure catches one variant and misses the next -- the same ' +
+            'lesson as the crowbar, phrased with three named levels instead of two.',
           practice: [],
         },
       ],
@@ -2132,7 +2285,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'demanding payment for the key to decrypt them. What category of malware is this?',
           teach: {
             concept:
-              'Malware is software written to do harm, and it is grouped into families by what it ' +
+              'MALWARE is just a contraction of "malicious software": any program written to do harm ' +
+              'rather than something the user wanted. Like diseases, it is grouped into families by what it ' +
               'does and how it spreads. A virus infects other files and runs when they run; a worm ' +
               'spreads by itself across a network without user action; a trojan disguises itself as ' +
               'something desirable so the user runs it willingly; spyware quietly watches and steals ' +
@@ -2176,7 +2330,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'The category frames the response. Recognise ransomware and you are already thinking ' +
-            'about isolating the spread and the state of your offline backups.',
+            'about isolating the spread and the state of your offline backups, the way naming a ' +
+            'disease correctly tells a doctor which treatment to reach for first.',
           practice: [],
         },
         {
@@ -2192,7 +2347,11 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'EDR detection method has the best chance of catching it, and why?',
           teach: {
             concept:
-              'Endpoint detection uses a few complementary methods, and they differ sharply in what ' +
+              'A "wanted" poster with a criminal\'s exact photograph only catches that one person; a ' +
+              'security guard trained to notice suspicious behaviour, someone jiggling every door ' +
+              'handle down a hallway, can catch a stranger they have never seen a photo of. Endpoint ' +
+              'detection uses a few complementary methods built on that same distinction, and they ' +
+              'differ sharply in what ' +
               'they can catch. Signature detection matches files against a database of known-bad ' +
               'fingerprints -- hashes of malware seen before. It is fast and precise on known ' +
               'threats and produces few false positives, but by definition it cannot catch anything ' +
@@ -2241,7 +2400,7 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           debrief:
             'The method that catches the unseen is also the one that cries wolf. That is the ' +
             'false-positive trade-off again, and the reason behaviour-based alerts still need a ' +
-            'human.',
+            'human -- a guard watching for "suspicious" will flag some innocent people too.',
           practice: [],
         },
         {
@@ -2258,7 +2417,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'EDR, and state what EDR therefore needs alongside it.',
           teach: {
             concept:
-              'Endpoint detection and response is one of the strongest tools a defender has, but it ' +
+              'A guard who is very good at spotting jimmied locks is useless if the intruder simply ' +
+              'walks in through a door held open by a legitimate employee, wearing a legitimate ' +
+              'uniform. Endpoint detection and response is one of the strongest tools a defender has, but it ' +
               'is not magic, and a capable attacker has several ways around it. If they gain ' +
               'administrative rights, they may be able to disable or blind the EDR agent itself. They ' +
               'can use legitimate built-in tools for malicious ends -- so-called living off the land ' +
@@ -2305,7 +2466,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Defence in depth applies to your sensors too. An attacker who blinds the EDR on one ' +
-            'host has not blinded the network -- unless you were relying on the EDR alone.',
+            'host has not blinded the network -- unless you were relying on the EDR alone, the same ' +
+            'way one guard fooled by a fake uniform does not mean every other camera in the building ' +
+            'missed them too.',
           practice: [],
         },
         {
@@ -2321,7 +2484,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             're-launch it every time the machine boots. Which behaviour phase is this?',
           teach: {
             concept:
-              'Malware, once running, tends to move through recognisable behavioural phases, and ' +
+              'PERSISTENCE, the phase this exercise asks about, is the attacker\'s equivalent of a ' +
+              'burglar leaving a window unlatched on the way out, so they can climb back in later even ' +
+              'if the door gets locked again. Malware, once running, tends to move through recognisable behavioural phases, and ' +
               'reading them from endpoint telemetry is how an analyst turns raw EDR events into an ' +
               'understanding of the attack. After delivery and initial execution, malware commonly ' +
               'establishes persistence so it survives a reboot, takes steps at evasion to hide from ' +
@@ -2367,7 +2532,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Persistence mechanisms are what eradication must hunt down. Miss the scheduled task and ' +
-            'the attacker is back on the next reboot, no matter how clean the rest of the cleanup.',
+            'the attacker is back on the next reboot, no matter how clean the rest of the cleanup, ' +
+            'the unlatched window nobody thought to check.',
           practice: [],
         },
       ],
@@ -2395,7 +2561,12 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'What is the clearest lesson for defenders?',
           teach: {
             concept:
-              'The Target breach of 2013 saw around forty million payment card numbers stolen, and ' +
+              'LATERAL MOVEMENT is the term for what an attacker does after their first foothold: ' +
+              'stepping from the one machine they compromised to other machines nearby on the same ' +
+              'network, the way a burglar who gets into a garage then tries the door connecting the ' +
+              'garage to the house rather than stopping at the garage. This module studies five ' +
+              'real, well-documented breaches, not to relive the attacker\'s side of the story but to ' +
+              'extract the specific defensive lesson each one teaches. The Target breach of 2013 saw around forty million payment card numbers stolen, and ' +
               'the defensive lesson is not really about the entry point but about what happened ' +
               'after it. The attackers entered through a third-party heating-and-cooling contractor ' +
               'with network access, then moved laterally across the internal network to reach the ' +
@@ -2441,7 +2612,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Target is the cost of watching only the edge. Your advantage is total visibility ' +
-            'inside; monitor inter-segment traffic and movement becomes a signal, not a silence.',
+            'inside; monitor inter-segment traffic and movement becomes a signal, not a silence -- ' +
+            'the connecting door between the garage and the house is exactly where you would put a ' +
+            'sensor if you expected a burglar to get into the garage eventually.',
           practice: [],
         },
         {
@@ -2458,7 +2631,12 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'addresses this?',
           teach: {
             concept:
-              'The Equifax breach of 2017 exposed the data of around 147 million people, and its ' +
+              'A VULNERABILITY is simply a flaw in software that can be exploited to make it do ' +
+              'something it should not, and the industry catalogues known ones under public reference ' +
+              'numbers called CVEs (Common Vulnerabilities and Exposures), each rated for severity by ' +
+              'a CVSS (Common Vulnerability Scoring System) score, so that everyone can refer to the ' +
+              'same flaw and agree roughly how dangerous it is, the same way a recall notice on a car ' +
+              'part has a standard reference number. The Equifax breach of 2017 exposed the data of around 147 million people, and its ' +
               'cause was a known vulnerability in a web framework, with a patch available for ' +
               'months, that was never applied to the affected system. From the defender\'s chair the ' +
               'lesson has two parts. The first is the obvious one: patch management is a decisive ' +
@@ -2504,7 +2682,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'A CVE is only useful if the loop closes with a deployed fix and a detection covering ' +
-            'the gap until it lands. Equifax is what an open loop costs.',
+            'the gap until it lands. Equifax is what an open loop costs: a recall notice that sat on ' +
+            'a desk unread for months while the flaw it described was actively exploited.',
           practice: [],
         },
         {
@@ -2525,6 +2704,10 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
               'the eastern United States, and it teaches two defensive lessons at once. The first is ' +
               'about credentials: the entry point was a single VPN account, protected by only a ' +
               'password and reportedly no longer in active use, with no multi-factor authentication. ' +
+              'MULTI-FACTOR AUTHENTICATION (MFA) means requiring more than just a password to log in, ' +
+              'typically also a one-time code from a phone or an app, so that a stolen password alone ' +
+              'is not enough to get in, the way a bank vault needing both a key and a combination ' +
+              'means stealing the key alone gets a thief nowhere. ' +
               'Multi-factor authentication would have made the stolen password insufficient on its ' +
               'own, and disciplined management of dormant accounts would have removed the forgotten ' +
               'door entirely. Credentials are the favourite way in, and controls that make a stolen ' +
@@ -2567,7 +2750,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Colonial is the defender\'s reading of a red-team easy win: MFA and account hygiene at ' +
-            'the door, real segmentation inside, so one credential does not open the whole estate.',
+            'the door, real segmentation inside, so one credential does not open the whole estate -- ' +
+            'the vault that needs a key and a combination, sitting behind a second locked room.',
           practice: [],
         },
         {
@@ -2585,7 +2769,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'improvement that would have caught this sooner, and explain what signal it keys on.',
           teach: {
             concept:
-              'A breach modelled on the Uber incident of 2022 began with a compromised contractor ' +
+              'A valid ID badge stolen from a cleaner does not usually open the CEO\'s office, and if ' +
+              'it suddenly does, badge readers logging where each badge goes would show something ' +
+              'very wrong even though the badge itself was never reported stolen. A breach modelled on the Uber incident of 2022 began with a compromised contractor ' +
               'account and escalated when that account was used to reach internal administrative ' +
               'tools and cloud infrastructure far beyond anything the contractor normally touched. ' +
               'From the defender\'s side, the recurring pattern in these third-party breaches is a ' +
@@ -2635,7 +2821,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'The pattern across third-party breaches is a valid account acting outside its role. ' +
-            'Since the credential is real, you detect the behaviour, not the login.',
+            'Since the credential is real, you detect the behaviour, not the login -- the cleaner\'s ' +
+            'badge suddenly opening the executive suite, not whether the badge itself was reported ' +
+            'stolen.',
           practice: [],
         },
       ],
@@ -2663,7 +2851,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'ordering of the first steps is correct?',
           teach: {
             concept:
-              'Forensics is the disciplined examination of evidence to establish what happened, and ' +
+              'FORENSICS, borrowed from the same word used for crime-scene investigation, is the ' +
+              'disciplined examination of evidence to establish what happened, and ' +
               'its first rule is that evidence, once destroyed, cannot be recovered. That makes the ' +
               'order of preservation critical, and the guiding principle is the order of volatility: ' +
               'capture the most fragile evidence first, before it can vanish, then the more durable ' +
@@ -2709,7 +2898,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Order of volatility is a routine precisely so you can follow it under pressure, which ' +
-            'is when the urge to skip straight to poking at the system is strongest.',
+            'is when the urge to skip straight to poking at the system is strongest -- the same ' +
+            'discipline that keeps a crime-scene investigator from touching anything before it is ' +
+            'photographed.',
           practice: [],
         },
         {
@@ -2725,7 +2916,11 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'render otherwise damning evidence useless.',
           teach: {
             concept:
-              'Chain of custody is the documented history of a piece of evidence: who collected it, ' +
+              'A police evidence bag is sealed and labelled the moment it is collected, with every ' +
+              'person who later opens it required to sign and date it, precisely so that nobody can ' +
+              'later claim the contents were swapped or planted along the way. CHAIN OF CUSTODY is ' +
+              'the digital-evidence version of that sealed bag: the documented history of a piece of ' +
+              'evidence -- who collected it, ' +
               'when, how it was handled, where it has been stored, and everyone who has touched it ' +
               'since. It exists because evidence is only trustworthy if you can prove it was not ' +
               'altered, swapped, or contaminated between collection and presentation. In a legal ' +
@@ -2773,7 +2968,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'A perfect forensic finding collected sloppily can free a guilty party. Treat the chain ' +
-            'of custody as part of the evidence itself: document and secure everything.',
+            'of custody as part of the evidence itself: document and secure everything, the same ' +
+            'sealed-bag discipline a police evidence room runs on every single day.',
           practice: [],
         },
         {
@@ -2789,7 +2985,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'time is 1 September of the same year -- eight months later. Why is this a red flag?',
           teach: {
             concept:
-              'Files carry several timestamps -- typically when they were created, last modified, ' +
+              'A forged painting can fool the eye but rarely survives a chemist checking whether the ' +
+              'paint itself is old enough to match the claimed date. Files carry a similar kind of ' +
+              'checkable detail: several timestamps -- typically when they were created, last modified, ' +
               'and last accessed -- and forensic analysts read these together, because their ' +
               'relationships must make logical sense. Normally a file is created, then perhaps ' +
               'modified, then accessed, and the timestamps line up with that story. Attackers who ' +
@@ -2838,7 +3036,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           debrief:
             'Analysts cross-check timestamps against each other and the logs precisely because ' +
             'faking one is easy but making all of them agree on a false story is hard. The seams ' +
-            'show.',
+            'show, the same way a forger can copy a brushstroke but not the chemistry of decades-old ' +
+            'paint.',
           practice: [],
         },
         {
@@ -2855,7 +3054,11 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'trustworthy as a stand-in.',
           teach: {
             concept:
-              'Analysis changes things. Opening a file updates its access time; running a tool ' +
+              'A CRYPTOGRAPHIC HASH, met here for the first time, is a short string of characters ' +
+              'computed from a file\'s exact contents, acting like a fingerprint: change even a single ' +
+              'bit of the file and the hash comes out completely different, but feed it the exact ' +
+              'same data twice and you always get the exact same hash. That makes it a reliable way ' +
+              'to prove two files are identical without comparing them byte by byte. Analysis changes things. Opening a file updates its access time; running a tool ' +
               'writes to disk; simply exploring a live system leaves traces. If you do that work on ' +
               'the original evidence, you alter it, and you can no longer show the court or the ' +
               'investigation what the evidence looked like at the moment of collection. So the ' +
@@ -2902,7 +3105,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           debrief:
             'Image exactly, verify by hash, analyse the copy, preserve the original. Your analysis ' +
             'then never endangers the evidence, and your findings rest on something provably ' +
-            'faithful.',
+            'faithful, a fingerprint match standing in for a side-by-side comparison nobody has time ' +
+            'to do by hand.',
           practice: [],
         },
       ],
@@ -2930,7 +3134,11 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'directly produce?',
           teach: {
             concept:
-              'A great deal of security design flows from a single choice of assumption. If you ' +
+              'A city that assumes it will never flood builds nothing to handle water once the sea ' +
+              'wall fails; a city that assumes it eventually will floods builds drainage, elevated ' +
+              'roads, and evacuation routes too, so that a breach of the wall is a bad day rather ' +
+              'than a catastrophe. A great deal of security design flows from that same single choice ' +
+              'of assumption. If you ' +
               'assume prevention will succeed, you pour everything into the perimeter and treat the ' +
               'inside as safe. If you assume breach -- that a sufficiently determined attacker will ' +
               'eventually get in somewhere -- your priorities change completely. You still try to ' +
@@ -2977,7 +3185,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Assume-breach is the architectural form of the asymmetry lesson: design for the world ' +
-            'where the perimeter sometimes fails, because that is the world you live in.',
+            'where the perimeter sometimes fails, because that is the world you live in -- the city ' +
+            'that built drainage before the wall ever failed is the one that survives the flood.',
           practice: [],
         },
         {
@@ -2994,7 +3203,10 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'between them. What does this most directly achieve?',
           teach: {
             concept:
-              'A flat network -- one in which every system can freely reach every other -- is a gift ' +
+              'A DMZ (demilitarised zone, a term borrowed from military buffer areas) is a network ' +
+              'zone set aside for systems that must be reachable from the outside world, like a public ' +
+              'website, kept deliberately separate from the internal network so that a public-facing ' +
+              'system being compromised does not hand the attacker a direct route inward. A flat network -- one in which every system can freely reach every other -- is a gift ' +
               'to an attacker, because a single foothold anywhere grants reach everywhere. ' +
               'Segmentation divides the network into zones with controlled crossings between them, so ' +
               'that reaching one zone does not mean reaching the rest. The most sensitive systems -- ' +
@@ -3039,7 +3251,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Segmentation decides whether a breach is an incident in one zone or a catastrophe ' +
-            'across all of them. Its absence is what made Target and Colonial so much worse.',
+            'across all of them. Its absence is what made Target and Colonial so much worse -- one ' +
+            'flooded compartment, not a sunk ship.',
           practice: [],
         },
         {
@@ -3056,7 +3269,10 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'explain why defence has to be continuous and can never be simply "finished".',
           teach: {
             concept:
-              'It is tempting to imagine security as a project with an end: deploy the controls, ' +
+              'Physical fitness is not a state you reach once and keep forever: stop exercising and ' +
+              'the fitness fades, regardless of how hard you trained last year. It is tempting to ' +
+              'imagine security as a project with an end instead, the way it is tempting to imagine ' +
+              'fitness that way: deploy the controls, ' +
               'reach a target state, declare victory. But defence is not a state you achieve and ' +
               'keep; it is a loop you run forever, because the thing you are defending against never ' +
               'holds still. New vulnerabilities appear, attackers invent new techniques, the ' +
@@ -3102,7 +3318,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Defence is a loop, not a project. The teams that do it well are not the ones that ' +
-            'reached a final configuration but the ones that keep running the cycle.',
+            'reached a final configuration but the ones that keep running the cycle, the way an ' +
+            'athlete stays fit by continuing to train, not by having trained once.',
           practice: [],
         },
       ],
@@ -3129,7 +3346,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'blue-team response?',
           teach: {
             concept:
-              'The capstone skill of this pathway is holding the whole response in your head as one ' +
+              'This closing module asks you to pull the entire pathway together into a single, ' +
+              'ordered picture, the same way learning individual chords finally has to become playing ' +
+              'a whole song. The capstone skill of this pathway is holding the whole response in your head as one ' +
               'ordered flow, because each stage this package taught separately is really a link in a ' +
               'single chain. It begins with triage -- deciding fast whether the alert is real and ' +
               'how urgent -- then investigation to understand what actually happened, building the ' +
@@ -3176,7 +3395,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           ],
           debrief:
             'Being able to lay out the full sequence, and say why each stage precedes the next, is ' +
-            'the sign the separate lessons have fused into one competence.',
+            'the sign the separate lessons have fused into one competence, the chords finally playing ' +
+            'as a song rather than a list of separate shapes.',
           practice: [],
         },
         {
@@ -3195,7 +3415,9 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
             'core habit of thought that runs through all of it.',
           teach: {
             concept:
-              'Readiness for adversarial practice is not about memorising tools or alert names; this ' +
+              'This last exercise asks for the whole pathway in your own words, so treat it as a ' +
+              'chance to notice how far the ground has shifted since the very first exercise, which ' +
+              'started from "what is a blue team" and ends here. Readiness for adversarial practice is not about memorising tools or alert names; this ' +
               'pathway has taught judgement, not products. It means you can take an alert and reason ' +
               'through the whole arc -- triage whether it is real, investigate by building a timeline ' +
               'from logs and network evidence, recognise the attacker\'s behaviour and map it to ' +
@@ -3249,7 +3471,8 @@ export const BLUE_TEAM_FOUNDATIONS: LearningPackage = {
           debrief:
             'That is the pathway in one thought: assume breach, know your normal, detect behaviour, ' +
             'and never forget the asymmetry. The adversarial practice ahead is where you sharpen it ' +
-            'against a live opponent.',
+            'against a live opponent, and where a mindset you can now write down starts turning into ' +
+            'one you can act on instinctively under pressure.',
           practice: [],
         },
       ],
