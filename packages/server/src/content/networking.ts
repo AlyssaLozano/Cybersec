@@ -88,7 +88,10 @@ const MODULE_4_1: Exercise[] = [
       'Before you can judge whether a connection is coming from inside or outside the company, you need to know where you are. Show this host\'s network interfaces and their addresses.',
     teach: {
       concept:
-        'Every machine on a network has at least two interfaces: a loopback (lo, always 127.0.0.1, which only talks to itself) and one or more real ones. `ip addr show` lists them along with the addresses assigned to each. The line that matters is the one starting `inet` under a real interface, that is the address other machines use to reach you.',
+        'Start from what an address even is. Every device that talks on a network needs one, the same way every house needs a street address before mail can find it. On this kind of network (IPv4), that address is written as four numbers from 0 to 255, separated by dots, like 10.20.6.40. No two devices on the same network share one.\n\n' +
+        'A single machine is not always just one address, though. It has one or more INTERFACES, the doors it uses to reach a network, and each door gets its own address. A server usually has at least one real interface, commonly named eth0 (short for Ethernet), which is the one other machines actually use to reach it. Every Linux machine also has a second, special interface called LOOPBACK, named lo, fixed forever at the address 127.0.0.1. Loopback is a machine talking to itself: nothing sent to 127.0.0.1 ever leaves the box, which is why a database or a local tool can use it safely without exposing anything to the outside network.\n\n' +
+        '`ip addr show` lists every interface on a Linux machine, one after another, with whatever address is assigned to it. When you run it, look for lines starting with the word `inet`, short for "internet address": that label marks the actual IPv4 address of the interface just above it, written like `inet 10.20.6.40/24`. Ignore the `/24` for now, it describes the size of this address\'s network and you will learn to read it in a later exercise. For today, the number before the slash is the answer.\n\n' +
+        'This is the first thing this package teaches for a reason: almost every question you will ever ask about a connection, is it internal, is it external, does it belong here, starts from knowing your own machine\'s address first. You cannot recognise a stranger\'s car on your street if you do not know which street you live on.',
       syntax: 'ip addr show',
       examples: [
         { command: 'ip link show', explains: 'Interfaces only, without the addresses. Useful when you just want to know what hardware exists.' },
@@ -112,7 +115,7 @@ const MODULE_4_1: Exercise[] = [
       { type: 'output-contains', text: '127.0.0.1', hint: 'The loopback interface should be listed too.' },
     ],
     debrief:
-      `This host is ${HOST_IP}. Everything in 10.x.x.x is private address space, which means it is inside the company network and not directly reachable from the internet. Hold onto that: for the rest of this package, "does this address start with 10." is the fastest question you can ask about a connection.`,
+      `This host is ${HOST_IP}. Notice it starts with 10: that specific prefix is one of three address ranges (the others start 172.16 through 172.31, and 192.168) set aside by an internet-wide standard, RFC 1918, for PRIVATE use only. An address in one of those three ranges is guaranteed to be unreachable directly from the public internet, it only means something inside whatever private network it belongs to, the same way "Apartment 4B" only means something once you already know which building. Hold onto that: for the rest of this package, "does this address start with 10, 172.16 through 172.31, or 192.168" is the fastest question you can ask to tell an internal address from an external one.`,
     practice: NETWORKING_PRACTICE['net.1.1'] ?? [],
   },
   {
@@ -1111,7 +1114,7 @@ const MODULE_4_10: Exercise[] = [
         'addresses (2 to the power of 6). Those blocks always start on a multiple of 64 in the last ' +
         'octet: 0, 64, 128, 192. To find which block an address falls in, find the largest multiple of ' +
         'the block size that is less than or equal to the address\'s last octet. 130 falls between 128 ' +
-        'and 191, so the network address is 192.168.14.128, and everything from .128 to .191 belongs to ' +
+        'and 191, so the network address is 10.40.14.128, and everything from .128 to .191 belongs to ' +
         'the same subnet as .130.',
       syntax: 'network = address AND subnet mask',
       examples: [
