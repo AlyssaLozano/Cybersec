@@ -35,6 +35,7 @@ import { AuthScreen } from './components/AuthScreen';
 import { LearnPanel } from './components/LearnPanel';
 import { PracticePanel } from './components/PracticePanel';
 import { TrackPicker } from './components/TrackPicker';
+import { TrackHub } from './components/TrackHub';
 import { Assessment } from './components/Assessment';
 import { AssessmentReport } from './components/AssessmentReport';
 import { LaneDetail } from './components/LaneDetail';
@@ -103,6 +104,13 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
   const [certStudy, setCertStudy] = useState<CertStudyOffer | null>(null);
   /** Null until a track is chosen, which is what the picker screen keys off. */
   const [trackId, setTrackId] = useState<string | null>(null);
+  /**
+   * Set the moment a track is picked, cleared once the student actually enters
+   * it. The hub (Learn and Drill, plus one box per certification) sits between
+   * those two moments so choosing a career and committing to its curriculum
+   * are two different clicks, not one.
+   */
+  const [trackHubId, setTrackHubId] = useState<string | null>(null);
   /** The drill currently being graded, or null when working the exercise. */
   const [practiceId, setPracticeId] = useState<string | null>(null);
   /** The alert queue for a triage exercise, loaded alongside the exercise. */
@@ -235,9 +243,9 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
   }, []);
 
   /**
-   * Picking a lane records it on the profile and switches the trainer to the
-   * matching track. Lanes without a track yet fall back to the picker, rather
-   * than silently doing nothing.
+   * Picking a lane records it on the profile and opens that track's hub.
+   * Lanes without a track yet fall back to the picker, rather than silently
+   * doing nothing.
    */
   const chooseLaneTrack = useCallback(
     async (laneId: string) => {
@@ -245,7 +253,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
       const targetTrack = detailResult.track?.id ?? null;
       if (targetTrack) {
         await assessment.updateProfile({ chosenTrackId: targetTrack });
-        setTrackId(targetTrack);
+        setTrackHubId(targetTrack);
       } else {
         setTrackId(null);
       }
@@ -253,6 +261,12 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
     },
     [laneDetail],
   );
+
+  /** Enters the curriculum for the track the hub is currently showing. */
+  const enterTrackFromHub = useCallback(() => {
+    if (trackHubId) setTrackId(trackHubId);
+    setTrackHubId(null);
+  }, [trackHubId]);
 
   const refreshProgress = useCallback(async () => {
     setProgress(await learning.progress());
@@ -708,11 +722,32 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
   }
 
   if (floor) {
+    /*
+     * The bar wraps the whole floor rather than sitting inside the room list,
+     * so it is still there once somebody is three levels down inside a running
+     * room. Anybody on the floor can leave for the lobby or the home page from
+     * wherever they are standing, which is the difference between a room and a
+     * trap.
+     */
     return (
       <div className="floorshell">
-        <button type="button" className="linkish" onClick={() => { setFloor(false); setInLobby(true); }}>
-          ← Back to the lobby
-        </button>
+        <nav className="floornav">
+          <button type="button" className="linkish" onClick={() => { setFloor(false); setInLobby(true); }}>
+            ← Lobby
+          </button>
+          <button
+            type="button"
+            className="linkish"
+            onClick={() => {
+              setFloor(false);
+              setInLobby(false);
+              setLobbyHeading(null);
+              setLanding(true);
+            }}
+          >
+            Home
+          </button>
+        </nav>
         <RoomBoard />
       </div>
     );
@@ -745,6 +780,13 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
         onNetworking={() => setLanding(false)}
         onSoc={() => setLanding(false)}
         onBrowseTracks={() => setLanding(false)}
+        onWatchFloor={() => {
+          // Straight to the floor, skipping the lobby. The lobby is where you
+          // go to find people; somebody who already has people does not need
+          // to walk through it every time.
+          setLanding(false);
+          setFloor(true);
+        }}
         onLobby={(door) => {
           // Every war room tile lands here. The door somebody pressed rides
           // along so the lobby can show that intent to the other people in it,
@@ -814,6 +856,23 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
     );
   }
 
+  if (trackHubId !== null && tracks) {
+    const hubTrack = tracks.find((track) => track.id === trackHubId);
+    if (hubTrack) {
+      return (
+        <div className="app">
+          <CareerTopBar user={user} onSignOut={signOut} onExit={() => setTrackHubId(null)} />
+          <TrackHub
+            track={hubTrack}
+            certStudy={certStudy ?? undefined}
+            onEnter={enterTrackFromHub}
+            onBack={() => setTrackHubId(null)}
+          />
+        </div>
+      );
+    }
+  }
+
   // Choose a track before anything else. Skipped automatically on later visits,
   // because a student who has already started has already chosen.
   if (tracks && trackId === null && !autoSelectedTrack) {
@@ -848,7 +907,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
               tracks={tracks}
               activeTrackId={trackId}
               certStudy={certStudy ?? undefined}
-              onChoose={setTrackId}
+              onChoose={setTrackHubId}
               onViewLane={openLane}
             />
           </div>
@@ -893,6 +952,12 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
         <button className="btn link iconbtn" title="Lobby" aria-label="Lobby" onClick={() => setInLobby(true)}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z" />
+          </svg>
+        </button>
+        <button className="btn link iconbtn" title="Watch floor" aria-label="Watch floor" onClick={() => setFloor(true)}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="7" rx="1" />
+            <path d="M6 14h4M14 14h4M6 18h4M14 18h4" />
           </svg>
         </button>
         <span className="spacer" />

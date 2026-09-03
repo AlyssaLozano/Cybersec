@@ -25,6 +25,7 @@ import type { FloorIdentity } from '@soc/shared';
 import { AVATARS, checkCallSign } from '@soc/shared';
 
 import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import { requireRoomAccess } from './guards.js';
 import { matchBriefFor, matchScenarioList } from '../content/redblue/index.js';
 import { matchViewFor } from '../services/matchEngine.js';
 import {
@@ -97,6 +98,7 @@ matchesRouter.post(
   '/',
   asyncRoute(async (request, response) => {
     const userId = userIdOf(request);
+    await requireRoomAccess(userId);
     const body = openSchema.parse(request.body);
     const identity = identityFrom(userId, body.identity);
     const state = await guard(() =>
@@ -125,6 +127,7 @@ matchesRouter.post(
   '/queue',
   asyncRoute(async (request, response) => {
     const userId = userIdOf(request);
+    await requireRoomAccess(userId);
     const body = queueSchema.parse(request.body);
     const identity = identityFrom(userId, body.identity);
     const result = await guard(() => matchmake(body.scenarioId, body.difficulty, identity, body.side));
@@ -146,6 +149,7 @@ matchesRouter.post(
   '/join',
   asyncRoute(async (request, response) => {
     const userId = userIdOf(request);
+    await requireRoomAccess(userId);
     const body = joinSchema.parse(request.body);
     const identity = identityFrom(userId, body.identity);
     const state = await guard(() => joinByCode(body.code, identity));

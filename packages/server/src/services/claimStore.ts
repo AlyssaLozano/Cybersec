@@ -73,3 +73,30 @@ export async function claimsForRoom(roomId: string): Promise<Claim[]> {
     atSeconds: r.atSeconds,
   }));
 }
+
+/**
+ * The last few things one person did in one room, newest last.
+ *
+ * Written for conduct reports rather than for scoring, which is why it returns
+ * flat sentences rather than claims: a reviewer needs to read what somebody
+ * was doing without loading the scenario to make sense of an event id. In a
+ * SOC room a claim is the whole record of behaviour, since there is no chat on
+ * the floor.
+ */
+export async function recentActivityBy(
+  roomId: string,
+  userId: string,
+  limit: number,
+): Promise<string[]> {
+  const rows = await prisma.roomClaim.findMany({
+    where: { roomId, userId },
+    orderBy: { atSeconds: 'desc' },
+    take: limit,
+  });
+  return rows
+    .reverse()
+    .map(
+      (r) =>
+        `${r.atSeconds}s ${r.role} ${r.eventId}: ${r.disposition} (${r.confidence}%) -- ${r.reasoning}`,
+    );
+}

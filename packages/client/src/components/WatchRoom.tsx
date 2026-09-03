@@ -27,6 +27,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { SOC_ROLES } from '@soc/shared';
 import type { SocRoleId } from '@soc/shared';
 
 import { ApiCallError, rooms } from '../lib/api';
@@ -38,11 +39,18 @@ import type {
   SeatView,
 } from '../lib/api';
 import { WatchFloor } from './WatchFloor';
+import { ReportPanel } from './ReportPanel';
+import type { ReportablePerson } from './ReportPanel';
 
 interface Props {
   roomId: string;
   joinCode?: string | null;
   onLeave?: () => void;
+}
+
+/** The seat's proper title, so a picker says "Log Analyst" and not "log-analyst". */
+function roleLabel(role: SocRoleId): string {
+  return SOC_ROLES.find((r) => r.id === role)?.title ?? role;
 }
 
 export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
@@ -61,6 +69,7 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
   const [standIns, setStandIns] = useState<
     { eventId: string; role: SocRoleId; dueAtSeconds: number; text: string }[]
   >([]);
+  const [reporting, setReporting] = useState(false);
 
   const mine: SocRoleId | null = useMemo(
     () =>
@@ -68,6 +77,25 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
     [detail],
   );
   const running = detail?.room.status === 'running';
+
+  /*
+   * Everybody in a chair except the viewer.
+   *
+   * Built from the seating chart rather than from a roster, so it holds only
+   * people who are actually here: reporting somebody who has already left is a
+   * report about a room they are not in, and the server refuses it anyway.
+   */
+  const others: ReportablePerson[] = useMemo(
+    () =>
+      (detail?.seating ?? [])
+        .filter((s) => s.occupant && s.occupant.userId !== detail?.identity?.userId)
+        .map((s) => ({
+          userId: s.occupant!.userId,
+          callSign: s.occupant!.callSign,
+          where: roleLabel(s.role),
+        })),
+    [detail],
+  );
 
   const loadChart = useCallback(async () => {
     try {
@@ -253,10 +281,27 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
             ) : null}
             {onLeave ? (
               <button type="button" className="quiet" onClick={onLeave}>
-                Back to the lobby
+                Back to the rooms
               </button>
             ) : null}
+            {/*
+              Quiet, and last. Somebody who needs it will find it; a red flag
+              on every chair invites pressing, and a report control that looks
+              like a game mechanic gets used like one.
+            */}
+            <button type="button" className="quiet" onClick={() => setReporting(true)}>
+              Report somebody
+            </button>
           </div>
+
+          {reporting ? (
+            <ReportPanel
+              space="soc-floor"
+              roomId={roomId}
+              people={others}
+              onClose={() => setReporting(false)}
+            />
+          ) : null}
         </aside>
       </div>
     </section>
@@ -768,7 +813,7 @@ function ReviewPane({ roomId, onLeave }: { roomId: string; onLeave?: () => void 
 
       {onLeave ? (
         <button type="button" className="quiet" onClick={onLeave}>
-          Back to the lobby
+          Back to the rooms
         </button>
       ) : null}
     </section>

@@ -158,6 +158,15 @@ interface HomeProps {
    * ten minutes apart and concluded the whole thing was dead.
    */
   onLobby: (door: LobbyDoorId | null) => void;
+  /**
+   * Straight onto the SOC watch floor, skipping the lobby.
+   *
+   * The lobby is how strangers find each other, and it earns its place the
+   * first few times. Somebody who already has a group, or who is going back to
+   * a room they left, should not have to walk through a waiting area to reach a
+   * floor they can already see.
+   */
+  onWatchFloor: () => void;
   onBadges: () => void;
   onPortfolio: () => void;
   onInterviewSim: () => void;
@@ -198,6 +207,7 @@ export function Home({
   onSoc,
   onBrowseTracks,
   onLobby,
+  onWatchFloor,
   onBadges,
   onPortfolio,
   onInterviewSim,
@@ -407,6 +417,14 @@ export function Home({
                       rooms open
                     </span>
                   </span>
+                </button>
+                {/*
+                  A separate control rather than a second click target inside
+                  the tile: a button inside a button is invalid markup and does
+                  not survive a keyboard.
+                */}
+                <button className="roomtile__direct" onClick={onWatchFloor}>
+                  Skip the lobby, go straight to the watch floor &rsaquo;
                 </button>
               </div>
 

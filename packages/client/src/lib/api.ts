@@ -7,6 +7,10 @@
  */
 
 import type {
+  ReportReasonDefinition,
+  ReportReceipt,
+  ReportSpace,
+  RoomAccess,
   AlertQueue,
   ApiError,
   BadgeCase,
@@ -1071,3 +1075,30 @@ export interface AfterActionView {
   };
   summary: string;
 }
+
+/**
+ * Reporting somebody, and finding out where this account stands.
+ *
+ * The report carries who and why and nothing else. Every other field on the
+ * record -- the seats, how far into the shift it was, how many people were in
+ * the room, what the reported person had been doing -- is assembled by the
+ * server, because a client that could supply the occupant count could lower
+ * the threshold that removes somebody.
+ */
+export const conduct = {
+  reasons: () => request<{ reasons: ReportReasonDefinition[] }>('/conduct/reasons'),
+
+  me: () => request<{ access: RoomAccess; ejectedRoomIds: string[] }>('/conduct/me'),
+
+  report: (input: {
+    space: ReportSpace;
+    roomId: string;
+    subjectUserId: string;
+    reason: string;
+    note: string;
+  }) =>
+    request<ReportReceipt>('/conduct/report', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+};

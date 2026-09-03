@@ -35,6 +35,7 @@ import { SOC_ROLES } from '@soc/shared';
 
 import { SCENARIOS } from '../content/scenarios/index.js';
 import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import { requireCanEnter } from './guards.js';
 import {
   RoomError,
   canJoin,
@@ -263,6 +264,10 @@ roomsRouter.post(
     const body = seatBody.parse(request.body);
     const room = await getRoom(request.params.id!);
     if (!room) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such room.');
+
+    // Before the join code, before the seat chart: an account with war rooms
+    // closed, or removed from this specific room, gets no further.
+    await requireCanEnter(room.id, userId);
 
     const entry = canJoin(room, body.code ?? null, userId);
     if (!entry.ok) {

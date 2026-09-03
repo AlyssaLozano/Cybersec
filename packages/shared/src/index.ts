@@ -15,6 +15,7 @@ export * from './scenarios.js';
 export * from './live.js';
 export * from './reports.js';
 export * from './rooms.js';
+export * from './moderation.js';
 export * from './match.js';
 export * from './afterAction.js';
 export * from './badges.js';

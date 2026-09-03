@@ -13,6 +13,7 @@ import { authRouter } from './routes/auth.js';
 import { badgesRouter } from './routes/badges.js';
 import { eventsRouter } from './routes/events.js';
 import { lobbyRouter } from './routes/lobby.js';
+import { conductRouter } from './routes/conduct.js';
 import { assessmentRouter } from './routes/assessment.js';
 import { learningRouter } from './routes/learning.js';
 import { matchesRouter } from './routes/matches.js';
@@ -51,6 +52,7 @@ export function createApp() {
   app.use('/api/matches', matchesRouter);
   app.use('/api/rooms', roomsRouter);
   app.use('/api/lobby', lobbyRouter);
+  app.use('/api/conduct', conductRouter);
   app.use('/api/events', eventsRouter);
   app.use('/api/badges', badgesRouter);
 

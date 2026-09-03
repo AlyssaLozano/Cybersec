@@ -33,10 +33,18 @@ model User {
   /// it is chosen when somebody first takes a seat rather than at signup: the
   /// learning platform never needs it, and asking for one during registration
   /// is a question about a product the person has not seen yet.
-  callSign     String?   @unique
+  /// Set when war room access is suspended, and cleared when it lapses. Null
+  /// for almost every account. Deliberately separate from any learning-side
+  /// state: conduct in a room never costs somebody their coursework.
+  roomsSuspendedUntil DateTime?
+  /// Indefinite war room ban, pending a person reading the file. Still not
+  /// permanent and still not the learning platform.
+  roomsBanned         Boolean   @default(false)
+
+  callSign String? @unique
   /// See AVATARS in @soc/shared. Plain string, not an enum, for Postgres
   /// portability.
-  avatarId     String?
+  avatarId String?
 
   progress         ExerciseProgress[]
   practiceProgress PracticeProgress[]
@@ -281,7 +289,7 @@ model ScenarioAttempt {
   role       String
 
   /// Out of 100, across every event they claimed.
-  score Int
+  score          Int
   /// Whether this run reached the findings that decided the incident.
   /// Stored rather than derived because the answer key can be re-authored, and
   /// a student's history should not change when content does.
@@ -353,35 +361,35 @@ model Match {
 /// services/rooms.test.ts, which hold that for every scenario in the
 /// catalogue.
 model RoomSession {
-  id         String   @id @default(uuid())
-  scenarioId String
+  id              String   @id @default(uuid())
+  scenarioId      String
   /// "beginner" | "intermediate" | "advanced" | "expert" -- ScenarioDifficulty
   /// in @soc/shared. On the run, not the scenario: the same incident is worth
   /// playing at more than one tier.
-  difficulty String
-  startsAt   DateTime
+  difficulty      String
+  startsAt        DateTime
   /// "open" | "closed" -- RoomVisibility in @soc/shared.
-  visibility String
+  visibility      String
   /// Set for closed rooms and null for open ones. Stored rather than derived so
   /// a leaked code can be rotated without moving everybody to a new room.
-  joinCode   String?
+  joinCode        String?
   /// "scheduled" | "running" | "complete" | "cancelled" -- RoomStatus.
-  status     String   @default("scheduled")
-  hostUserId String
+  status          String   @default("scheduled")
+  hostUserId      String
   /// SeatAssignment[] as JSON. Seats are read and written as one unit and are
   /// never queried across rooms, so a table would buy nothing and cost a join
   /// on every seat change.
-  seatsJson  String
+  seatsJson       String
   /// LeadReadout as JSON, written once when the lead closes the shift. Null
   /// until then. Stored rather than rebuilt because it is what the lead said
   /// BEFORE seeing the answer key, and the whole value of the review is
   /// comparing those two things.
-  readoutJson String?
+  readoutJson     String?
   /// Seconds after startsAt that the lead closed it. Held explicitly rather
   /// than derived from updatedAt, which moves every time a seat changes.
   closedAtSeconds Int?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   host User @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
 
@@ -403,26 +411,26 @@ model RoomSession {
 /// Plain string ids rather than relations, same reasoning as `CommunityEvent`:
 /// this is scoped to one room's shift and is never queried across rooms.
 model RoomClaim {
-  id     String @id @default(uuid())
-  roomId String
+  id      String @id @default(uuid())
+  roomId  String
   eventId String
   /// SocRoleId. The seat this claim was made from, not necessarily the
   /// event's rightful first responder -- that is what scoring checks.
-  role String
-  userId String
+  role    String
+  userId  String
 
   /// TriageDecision -- "escalate" | "investigate" | "dismiss" | "tune".
-  disposition String
-  reasoning   String
+  disposition   String
+  reasoning     String
   /// string[] as JSON -- ScenarioAction ids chosen for this claim.
   actionIdsJson String
   /// SocRoleId, or null to mean "stops here".
-  escalateTo String?
+  escalateTo    String?
   /// 0 to 100.
-  confidence Int
+  confidence    Int
   /// Seconds after the room's startsAt that this claim was committed. Scoring
   /// reads this against the event's own atSeconds for the timing line.
-  atSeconds Int
+  atSeconds     Int
 
   createdAt DateTime @default(now())
 
@@ -515,7 +523,7 @@ model ChatMessage {
   callSign String
   avatarId String
 
-  body   String
+  body    String
   /// Set when an event was shared into the room, so the client draws the card
   /// rather than a line of text. A plain id: the event may be cancelled later
   /// and the message still happened.
@@ -523,8 +531,8 @@ model ChatMessage {
 
   /// Hidden by a reviewer rather than deleted, so moderation is auditable and
   /// a mistake is reversible. Hidden rows never leave the server.
-  hidden   Boolean  @default(false)
-  sentAt   DateTime @default(now())
+  hidden Boolean  @default(false)
+  sentAt DateTime @default(now())
 
   @@index([roomId, sentAt])
   @@map("chat_messages")
@@ -618,4 +626,73 @@ model EventRsvp {
   @@unique([eventId, userId])
   @@index([userId])
   @@map("event_rsvps")
+}
+
+/// One person reporting one other person in one shared room.
+///
+/// WHY THE UNIQUE KEY IS (ROOM, REPORTER, SUBJECT)
+///
+/// The threshold counts distinct reporters, so the database has to be the
+/// thing that makes a second click from the same person a no-op. Enforcing it
+/// in the service instead would leave two simultaneous posts both counting,
+/// which is exactly the case somebody trying to abuse this would find.
+///
+/// Plain string ids rather than relations to the room, because the room may be
+/// a SOC floor session, a red versus blue match or a chat room, and those are
+/// three different tables. `space` says which.
+model ConductReport {
+  id             String @id @default(uuid())
+  /// ReportSpace in @soc/shared.
+  space          String
+  roomId         String
+  reporterUserId String
+  subjectUserId  String
+  /// ReportReasonId in @soc/shared.
+  reason         String
+  note           String @default("")
+  /// ReportContext as JSON, captured by the server at the moment the button
+  /// was pressed. See the type for why it is stored rather than looked up.
+  contextJson    String
+
+  /// "open" | "upheld" | "dismissed" -- ReportOutcome. Automatic ejection
+  /// never writes this: a room being made usable is not a finding about a
+  /// person, and only a reviewer decides that.
+  outcome          String    @default("open")
+  reviewedByUserId String?
+  reviewedAt       DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@unique([roomId, reporterUserId, subjectUserId])
+  @@index([subjectUserId, createdAt])
+  @@index([outcome, createdAt])
+  @@map("conduct_reports")
+}
+
+/// Somebody removed from one room by the threshold.
+///
+/// Kept as its own row rather than inferred by re-counting reports, for two
+/// reasons. It is what stops them rejoining the room they were removed from,
+/// which has to be a cheap lookup on every seat request. And it is the unit
+/// account-level action counts, so it must not move when a reviewer later
+/// dismisses one report out of four.
+model RoomEjection {
+  id        String  @id @default(uuid())
+  /// ReportSpace in @soc/shared.
+  space     String
+  roomId    String
+  userId    String
+  /// The reason id that carried the most reports, for the queue to sort by.
+  reason    String
+  /// How many distinct people had reported them when this fired.
+  reporters Int
+  /// True once a reviewer has set this aside, which restores the account
+  /// count without rewriting history.
+  reversed  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@unique([roomId, userId])
+  @@index([userId, createdAt])
+  @@map("room_ejections")
 }

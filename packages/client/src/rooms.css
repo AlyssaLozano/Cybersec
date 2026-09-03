@@ -599,3 +599,91 @@
 .standins h4 { margin: 0 0 0.3rem; }
 .standin { font-size: 0.82rem; margin: 0 0 0.4rem; }
 .standin__at { font-variant-numeric: tabular-nums; color: var(--muted, #8299a3); margin-right: 0.4rem; }
+
+/* The way out, at every depth of the floor. */
+.floornav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* The report panel.
+
+   Plain, and deliberately not alarming. Somebody who opens this is already
+   dealing with something and does not need the interface to agree with them. */
+.reportpanel {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem 1rem;
+  border: 1px solid var(--rule, #2a3138);
+  border-radius: 8px;
+  background: var(--panel, #12171c);
+}
+
+.reportpanel h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+}
+
+.reportpanel__field {
+  display: block;
+  margin-top: 0.8rem;
+}
+
+.reportpanel__field > span {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.78rem;
+  color: var(--muted, #8b97a3);
+}
+
+.reportpanel__field select,
+.reportpanel__field textarea {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--rule, #2a3138);
+  border-radius: 6px;
+  background: var(--bg, #0d1117);
+  color: inherit;
+  font: inherit;
+}
+
+.reportpanel__reasons {
+  margin: 0.9rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.reportpanel__reasons legend {
+  padding: 0;
+  margin-bottom: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--muted, #8b97a3);
+}
+
+.reportpanel__reason {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.3rem 0;
+  cursor: pointer;
+}
+
+.reportpanel__reason strong {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.reportpanel__reason em {
+  display: block;
+  font-style: normal;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--muted, #8b97a3);
+}
+
+.reportpanel__controls {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}

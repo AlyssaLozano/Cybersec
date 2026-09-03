@@ -23,6 +23,7 @@ import type { LobbyDoorId, UserRole } from '@soc/shared';
 
 import { prisma } from '../db/client.js';
 import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import { requireRoomAccess } from './guards.js';
 import {
   LobbyError,
   canReview,
@@ -112,6 +113,9 @@ lobbyRouter.post(
   asyncRoute(async (request, response) => {
     const userId = userIdOf(request);
     const body = heartbeatBody.parse(request.body ?? {});
+    // The lobby is a shared space like any other, and is the first place
+    // somebody removed from a room goes looking for the next one.
+    await requireRoomAccess(userId);
     const identity = await requireIdentity(userId);
     const now = new Date();
 
@@ -173,6 +177,7 @@ lobbyRouter.post(
   asyncRoute(async (request, response) => {
     const userId = userIdOf(request);
     const body = postBody.parse(request.body);
+    await requireRoomAccess(userId);
     const identity = await requireIdentity(userId);
     try {
       const message = await postMessage(

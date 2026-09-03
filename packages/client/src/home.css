@@ -615,3 +615,30 @@
 .roomtile.badges .ri-ribbon {
   stroke: var(--amber);
 }
+
+/* Straight onto the floor, under the SOC tile.
+
+   Deliberately quiet: the lobby is still the recommended way in, because a
+   floor with nobody on it teaches nothing. This is the shortcut for people who
+   already know that. */
+.roomtile__direct {
+  display: block;
+  width: 100%;
+  margin-top: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px dashed var(--rule, #2a3138);
+  border-radius: 6px;
+  background: none;
+  color: var(--muted, #8b97a3);
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.roomtile__direct:hover,
+.roomtile__direct:focus-visible {
+  border-style: solid;
+  border-color: var(--accent, #57b894);
+  color: var(--text, #e6edf3);
+}
