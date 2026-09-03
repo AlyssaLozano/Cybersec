@@ -106,6 +106,30 @@ export interface Certification {
   url?: string;
 }
 
+/**
+ * The paid study aid that sits beside a track's certification list.
+ *
+ * Modelled rather than hardcoded in the UI because it is a price with a
+ * justification attached, and because it is not built yet: `status` is what
+ * stops the interface from implying a student can buy it today. See
+ * `content/pricing.ts` on the server for the values and the reasoning.
+ */
+export interface CertStudyOffer {
+  status: 'coming-soon' | 'available';
+  /** One line, shown at the end of a track. */
+  headline: string;
+  /** USD, per certification, for one access window. */
+  amountUsd: number;
+  /** Length of that window in days. */
+  windowDays: number;
+  /** What the window would buy. */
+  includes: string[];
+  /** What it would not, stated before anybody asks. */
+  excludes: string[];
+  /** Why it costs this, in the student's words rather than ours. */
+  rationale: string;
+}
+
 /** A certification recommendation, contextualised by the learner's profile. */
 export interface CertRecommendation {
   certId: string;
@@ -219,6 +243,14 @@ export interface Track {
 }
 
 export interface TrackSummary extends Track {
+  /**
+   * The track's certifications resolved to full records.
+   *
+   * Carried alongside the `certifications` id list so the end of a track can
+   * show cost and study time without a second request. The ids stay: they are
+   * the content's source of truth, and this is a convenience for the UI.
+   */
+  certificationDetail: Certification[];
   exerciseCount: number;
   passedCount: number;
   percentComplete: number;

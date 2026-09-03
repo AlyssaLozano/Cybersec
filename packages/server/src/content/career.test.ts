@@ -27,6 +27,7 @@ import { ITEMS, ITEM_BY_ID, itemsForDimension } from './assessment/items.js';
 import { buildReport, shareableSummary } from './assessment/report.js';
 import { score, scoreEnvironments, scoreTraits } from './assessment/scoring.js';
 import { CERTIFICATIONS, getCertification } from './certifications.js';
+import { CERT_STUDY_PLAN } from './pricing.js';
 import { foundationsWithDemand, trackFoundations, trackPackages, trackReadiness } from './curriculum.js';
 import { FOUNDATIONS, getFoundation } from './foundations.js';
 import { PACKAGES } from './index.js';
@@ -69,6 +70,23 @@ describe('catalogue integrity', () => {
       }
     }
     expect(broken).toEqual([]);
+  });
+
+  /*
+   * Every track ends with a certification section. A track that named none
+   * would end on an empty heading, which reads as an oversight rather than as
+   * "this role does not have one" -- and every role on this platform does.
+   */
+  it('ends every track with at least one certification it can show', () => {
+    const bare = TRACKS.filter((track) => track.certifications.length === 0).map((t) => t.id);
+    expect(bare).toEqual([]);
+  });
+
+  it('offers certification study at the advertised price, and does not offer to sell it yet', () => {
+    expect(CERT_STUDY_PLAN.amountUsd).toBe(15);
+    expect(CERT_STUDY_PLAN.windowDays).toBe(30);
+    // Load-bearing: the UI reads this to decide whether to show a purchase.
+    expect(CERT_STUDY_PLAN.status).toBe('coming-soon');
   });
 
   it('marks a track available only when something on it can actually be started', () => {

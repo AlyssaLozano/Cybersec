@@ -26,7 +26,7 @@ import { queueForStudent } from '../services/alerts.js';
 import { pointForStudent } from '../services/incidents.js';
 import { analysisFor } from '../services/copilot.js';
 import { consultedAlerts, recordConsultation } from '../services/copilotConsults.js';
-import { AI_PATH_NOTE, PLANS, PRICING_PHILOSOPHY } from '../content/pricing.js';
+import { AI_PATH_NOTE, CERT_STUDY_PLAN, PLANS, PRICING_PHILOSOPHY } from '../content/pricing.js';
 import { modelCard, postMortemFor, probe, suite } from '../services/modelLab.js';
 import { portfolioFor } from '../services/portfolio.js';
 import { submitAnswer } from '../services/submission.js';
@@ -66,6 +66,9 @@ learningRouter.get(
 
       return {
         ...track,
+        // Resolved here rather than in the client so the end of a track can
+        // show exam cost and study time without a request per track.
+        certificationDetail: resolveCertifications(track.certifications),
         exerciseCount,
         passedCount,
         percentComplete: exerciseCount === 0 ? 0 : Math.round((passedCount / exerciseCount) * 100),
@@ -76,7 +79,9 @@ learningRouter.get(
       };
     });
 
-    sendOk(response, { tracks });
+    // The study offer is one object for the whole list: it is the same deal on
+    // every track, and repeating it per track would invite it drifting apart.
+    sendOk(response, { tracks, certStudy: CERT_STUDY_PLAN });
   }),
 );
 
@@ -94,6 +99,7 @@ learningRouter.get(
       readiness: trackReadiness(track.id),
       certifications: resolveCertifications(track.certifications),
       certPhilosophy: CERT_PHILOSOPHY,
+      certStudy: CERT_STUDY_PLAN,
       packages: packageSummaries().filter((pkg) => trackPackages(track.id).includes(pkg.id)),
     });
   }),
@@ -106,7 +112,12 @@ learningRouter.get(
  * with the price. See content/pricing.ts.
  */
 learningRouter.get('/pricing', (_request, response) => {
-  sendOk(response, { plans: PLANS, philosophy: PRICING_PHILOSOPHY, aiPathNote: AI_PATH_NOTE });
+  sendOk(response, {
+    plans: PLANS,
+    philosophy: PRICING_PHILOSOPHY,
+    aiPathNote: AI_PATH_NOTE,
+    certStudy: CERT_STUDY_PLAN,
+  });
 });
 
 /**

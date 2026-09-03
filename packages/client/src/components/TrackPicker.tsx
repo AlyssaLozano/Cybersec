@@ -5,17 +5,26 @@
  * A student choosing a career direction deserves to see where each one leads,
  * and an honest "not written yet" badge is better than a track that looks
  * playable and then is not.
+ *
+ * Every track ends with the certifications that role is actually asked for, and
+ * with the exam fee attached. It sits after the curriculum on purpose: a
+ * certification is what happens after the learning, and putting it first would
+ * imply the exam is the point rather than the job.
  */
 
-import type { TrackSummary } from '@soc/shared';
+import type { CertStudyOffer, TrackSummary } from '@soc/shared';
+
+import { CertStudyNote } from './CertStudyNote';
 
 interface TrackPickerProps {
   tracks: TrackSummary[];
   activeTrackId: string | null;
+  /** Undefined until the track list has loaded; the section simply waits. */
+  certStudy?: CertStudyOffer;
   onChoose: (trackId: string) => void;
 }
 
-export function TrackPicker({ tracks, activeTrackId, onChoose }: TrackPickerProps) {
+export function TrackPicker({ tracks, activeTrackId, certStudy, onChoose }: TrackPickerProps) {
   return (
     <div className="track-picker">
       <header className="track-picker-head">
@@ -78,6 +87,34 @@ export function TrackPicker({ tracks, activeTrackId, onChoose }: TrackPickerProp
                   </li>
                 ))}
               </ol>
+
+              {/* The end of the track: what the industry asks for once the
+                  curriculum above is behind you. */}
+              {track.certificationDetail.length > 0 && (
+                <section className="track-certs">
+                  <h3>Industry certifications for this role</h3>
+                  <p className="muted small">
+                    These are the certifications employers hiring for this role ask for by name. The
+                    fee below is the exam only, paid to the issuer, and it is not part of your
+                    subscription.
+                  </p>
+                  <ul className="track-cert-list">
+                    {track.certificationDetail.map((cert) => (
+                      <li key={cert.id}>
+                        <span className="track-cert-name">{cert.name}</span>
+                        <span className="track-cert-issuer">{cert.issuer}</span>
+                        <span className="track-cert-cost">
+                          ${cert.approxCostUsd} exam · ~{cert.typicalStudyWeeks} weeks study
+                        </span>
+                        {cert.mandatedSomewhere && (
+                          <span className="track-cert-mandate">Mandatory in some sectors</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                  {certStudy ? <CertStudyNote offer={certStudy} compact /> : null}
+                </section>
+              )}
 
               {available && track.exerciseCount > 0 && (
                 <div className="track-progress">

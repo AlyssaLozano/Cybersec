@@ -10,7 +10,9 @@
  * useless advice without knowing it is $404 and eight weeks.
  */
 
-import type { Certification, Foundation, LaneProfile, Track } from '@soc/shared';
+import type { Certification, CertStudyOffer, Foundation, LaneProfile, Track } from '@soc/shared';
+
+import { CertStudyNote } from './CertStudyNote';
 
 const ENVIRONMENT_TITLES: Record<string, string> = {
   government: 'Government',
@@ -22,6 +24,7 @@ interface LaneDetailProps {
   lane: LaneProfile;
   certifications: Certification[];
   certPhilosophy: { headline: string; body: string[] };
+  certStudy?: CertStudyOffer;
   track?: Track;
   foundations?: Array<Foundation & { playable: boolean }>;
   readiness?: { foundationsTotal: number; foundationsPlayable: number };
@@ -33,6 +36,7 @@ export function LaneDetail({
   lane,
   certifications,
   certPhilosophy,
+  certStudy,
   track,
   foundations,
   readiness,
@@ -182,6 +186,7 @@ export function LaneDetail({
             <p key={paragraph}>{paragraph}</p>
           ))}
         </details>
+        {certStudy ? <CertStudyNote offer={certStudy} /> : null}
       </section>
 
       <section className="lane-section">

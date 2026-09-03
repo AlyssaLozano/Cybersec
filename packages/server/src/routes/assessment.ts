@@ -20,6 +20,7 @@ import { shareableSummary } from '../content/assessment/report.js';
 import { CERT_PHILOSOPHY, resolveCertifications } from '../content/certifications.js';
 import { trackFoundations, trackReadiness } from '../content/curriculum.js';
 import { getLaneProfile, LANE_PROFILES } from '../content/lanes.js';
+import { CERT_STUDY_PLAN } from '../content/pricing.js';
 import { getTrack } from '../content/tracks.js';
 import { TOOL_PHILOSOPHY } from '../content/tools.js';
 import { asyncRoute, HttpError, requireAuth, requirePaid, sendOk } from '../http.js';
@@ -174,6 +175,7 @@ assessmentRouter.get(
       lane,
       certifications: resolveCertifications(lane.certPathway),
       certPhilosophy: CERT_PHILOSOPHY,
+      certStudy: CERT_STUDY_PLAN,
       // When a learning track backs this lane, show what it would require.
       ...(track
         ? {

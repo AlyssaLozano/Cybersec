@@ -23,6 +23,8 @@
  * the product surfaces can show it accurately. Billing is not implemented.
  */
 
+import type { CertStudyOffer } from '@soc/shared';
+
 export interface PriceLine {
   id: string;
   label: string;
@@ -170,6 +172,44 @@ export const PRICING_PHILOSOPHY = {
     'What the higher tiers buy is scheduled time with other people, and in the instructor tiers, feedback from somebody who has done the work. That is genuinely valuable and genuinely scarce, and it is the only thing the price difference reflects.',
     'The AI Security specialisation costs more than the standard one. That is about how few people can credibly teach it, not about the subject being more important. If you are working through it alone, it costs you nothing extra, and the material is identical.',
   ],
+} as const;
+
+/**
+ * Certification study help, shown at the end of every career track.
+ *
+ * WHY IT IS PRICED SEPARATELY FROM THE SUBSCRIPTION
+ *
+ * Because it is a different thing. The subscription teaches the job. This buys
+ * a run at a specific exam: one certification, one window, question banks and
+ * objective-by-objective drilling against a published syllabus that somebody has
+ * to keep current every time the vendor revises it. Somebody studying for
+ * Security+ in March and CySA+ in August is buying two windows, not renting a
+ * library forever, and a per-certification window is the honest shape for that.
+ *
+ * WHY IT IS NOT BUILT YET
+ *
+ * It is not written. `status: 'coming-soon'` is load-bearing: the interface
+ * reads it and refuses to offer a purchase, for the same reason a track with no
+ * content says so rather than looking playable.
+ */
+export const CERT_STUDY_PLAN: CertStudyOffer = {
+  status: 'coming-soon',
+  headline: 'Certification study help is coming.',
+  amountUsd: 15,
+  windowDays: 30,
+  includes: [
+    'One certification at a time, for thirty days from the day you start it',
+    'The published exam objectives broken into study sessions, with practice questions per objective',
+    'Practice exams that report which objectives you are weak on rather than only a score',
+    'Guidance on when you are actually ready to book, which is the question most people get wrong',
+  ],
+  excludes: [
+    'The exam itself. You book and pay the vendor directly, and their fee is listed on each certification above',
+    'A pass. Nobody can sell you that either',
+    'Anything that would breach an exam NDA. Dumps are not study material and holding them can void your certification',
+  ],
+  rationale:
+    'Fifteen dollars for thirty days on one certification. It is priced per certification because keeping a question bank honest against a vendor syllabus is work that has to be redone every time the syllabus moves, and priced low because the exam fee is already the expensive part.',
 } as const;
 
 /** Prerequisite guidance shown before somebody buys into the AI path. */

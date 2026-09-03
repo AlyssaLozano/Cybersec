@@ -28,6 +28,7 @@ import type {
   StudentDecisionPoint,
   TrackSummary,
   TriageEntry,
+  CertStudyOffer,
 } from '@soc/shared';
 
 import { AuthScreen } from './components/AuthScreen';
@@ -97,6 +98,8 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
   /** Text pushed into the terminal input when a student clicks an example. */
   const [prefill, setPrefill] = useState<string | null>(null);
   const [tracks, setTracks] = useState<TrackSummary[] | null>(null);
+  /** The certification study offer shown at the end of every track. */
+  const [certStudy, setCertStudy] = useState<CertStudyOffer | null>(null);
   /** Null until a track is chosen, which is what the picker screen keys off. */
   const [trackId, setTrackId] = useState<string | null>(null);
   /** The drill currently being graded, or null when working the exercise. */
@@ -279,6 +282,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
         setPkg(detailResult);
         setProgress(progressResult);
         setTracks(trackResult.tracks);
+        setCertStudy(trackResult.certStudy);
         setExerciseId((current) => current ?? progressResult.resume?.exerciseId ?? 'linux.1.1');
       } catch (error) {
         if (!cancelled) {
@@ -763,6 +767,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
           lane={laneDetail.lane}
           certifications={laneDetail.certifications}
           certPhilosophy={laneDetail.certPhilosophy}
+          certStudy={laneDetail.certStudy}
           track={laneDetail.track}
           foundations={laneDetail.foundations}
           readiness={laneDetail.readiness}
@@ -803,7 +808,12 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
                 About 20 minutes. Your answers save as you go, so you can stop and come back.
               </p>
             </aside>
-            <TrackPicker tracks={tracks} activeTrackId={trackId} onChoose={setTrackId} />
+            <TrackPicker
+              tracks={tracks}
+              activeTrackId={trackId}
+              certStudy={certStudy ?? undefined}
+              onChoose={setTrackId}
+            />
           </div>
         </div>
       );

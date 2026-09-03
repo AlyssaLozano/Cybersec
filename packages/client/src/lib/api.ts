@@ -43,6 +43,7 @@ import type {
   TriageEntry,
   TriageScore,
   Certification,
+  CertStudyOffer,
   CollaborationScore,
   CopilotAnalysis,
   CopilotDebriefEntry,
@@ -257,7 +258,8 @@ export const learning = {
 
   exercise: (exerciseId: string) => request<ExerciseDetail>(`/learning/exercises/${exerciseId}`),
 
-  tracks: () => request<{ tracks: TrackSummary[] }>('/learning/tracks'),
+  tracks: () =>
+    request<{ tracks: TrackSummary[]; certStudy: CertStudyOffer }>('/learning/tracks'),
 
   run: (exerciseId: string, input: string, options: { practiceId?: string; regrade?: boolean } = {}) =>
     request<RunResult>(`/learning/exercises/${exerciseId}/run`, {
@@ -474,6 +476,7 @@ export interface LaneDetail {
   lane: LaneProfile;
   certifications: Certification[];
   certPhilosophy: { headline: string; body: string[] };
+  certStudy: CertStudyOffer;
   track?: Track;
   foundations?: Array<Foundation & { playable: boolean }>;
   readiness?: {
