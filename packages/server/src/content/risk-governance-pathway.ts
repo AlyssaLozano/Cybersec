@@ -55,34 +55,73 @@ import type { LearningPackage } from '@soc/shared';
 
 const VOCABULARY_TEACH = {
   concept:
-    'Five words carry the whole subject, and they are not interchangeable. An ASSET is the thing ' +
-    'worth protecting: customer records, the payment path, a trained model, the reputation. A ' +
-    'THREAT is an actor or event that could harm it: a ransomware crew, a failed disk, a careless ' +
-    'contractor. A VULNERABILITY is the weakness the threat needs: an unpatched host, a backup ' +
-    'nobody has restored from, a corpus anybody can write into. A RISK is the three of them ' +
-    'together with a consequence attached, which is why a risk is a sentence and not a noun. A ' +
-    'CONTROL is what you put in the way.\n\n' +
+    'Picture your own house for a moment, before any of the jargon. The house and everything in ' +
+    'it, the television, the jewellery, the photographs you could never replace, is what you ' +
+    'would call an ASSET: something that matters to you and would genuinely hurt to lose. A ' +
+    'THREAT is anything out there that might take it from you: a burglar working the street, a ' +
+    'fire, a pipe that bursts in winter. A threat exists whether or not you ever think about it, ' +
+    'because it does not depend on you at all. A VULNERABILITY is a weakness on your side that a ' +
+    'threat could actually use: a window that does not latch, a smoke alarm with a dead battery. ' +
+    'And a RISK is what you get once you connect a specific threat to a specific vulnerability and ' +
+    'ask what it would cost you: "a burglar could get in through the back window that does not ' +
+    'latch, and take the jewellery and the laptop, and that is a loss of several thousand pounds ' +
+    'and the peace of mind that follows." A CONTROL is anything you do about it: a better lock, a ' +
+    'dog, a monitored alarm, insurance on the contents.\n\n' +
+    'Security work runs on exactly the same five ideas, applied to a company instead of a house. ' +
+    'An ASSET is the thing worth protecting: customer records, the payment path, a trained model, ' +
+    'the reputation the company has spent years building. A THREAT is an actor or event that ' +
+    'could harm it: a ransomware crew, a failed disk, a careless contractor. A VULNERABILITY is ' +
+    'the weakness the threat needs: an unpatched host, a backup nobody has restored from, a ' +
+    'corpus anybody can write into. A RISK is the three of them together with a consequence ' +
+    'attached, which is why a risk is a sentence and not a noun. A CONTROL is what you put in the ' +
+    'way.\n\n' +
+    'The reason these five words are kept separate rather than used interchangeably is that each ' +
+    'one calls for a different kind of action, and mixing them up sends the work to the wrong ' +
+    'place. You cannot patch a threat, because who wants to attack you is not something you ' +
+    'control. You cannot usefully insure against a vulnerability on its own, because a weakness ' +
+    'nobody is trying to exploit costs nothing by itself. The only one of the five that has a ' +
+    'price and an owner attached, the only one you can actually decide something about, is the ' +
+    'risk: the specific combination of actor, weakness, and consequence.\n\n' +
     'The distinction earns its keep in the register. "Unpatched server" is not a risk, it is a ' +
     'vulnerability, and written that way it has no owner, no cost, and nothing to decide. ' +
     '"Ransomware reaches the file server through an unpatched edge host, and we cannot restore ' +
     'inside a week" is a risk: it names who, how, what it reaches, and what it costs. Registers ' +
-    'full of nouns are the reason risk work gets ignored.',
+    'full of nouns are the reason risk work gets ignored, because nobody can act on a noun. This ' +
+    'is the first vocabulary a risk analyst learns for a reason: every later step in the job, ' +
+    'sizing a finding, deciding whether to fix it, writing the line an executive will actually ' +
+    'read, depends on first knowing which of these five words you are even talking about.',
 } as const;
 
 const AI_RISK_TEACH = {
   concept:
-    'A model does not fail the way a program fails. A program does what somebody wrote, so its ' +
-    'defects are findable by reading and fixable by editing. A model does what it was fitted to ' +
-    'do, which nobody wrote down and nobody can read back, so its defects are found by measuring ' +
-    'and fixed by retraining, by changing the system around it, or by taking it out of the ' +
-    'decision.\n\n' +
-    'That has three consequences for a risk register. First, the evidence is empirical and ' +
-    'therefore partial: testing tells you about the inputs you tried. Second, the failure mode is ' +
-    'often quiet, because a model that has degraded still returns confident answers in the right ' +
-    'format. Third, the harm is frequently done to people outside the company, which puts it in ' +
-    'the regulatory and reputational columns rather than the availability one. None of that makes ' +
-    'AI risk special enough to need its own register. It makes it a risk category the existing ' +
-    'register has to be able to hold.',
+    'Imagine two ways of getting a new hire to approve loan applications. In the first, you hand ' +
+    'them a written rulebook: decline anyone with income below this figure, decline anyone with ' +
+    'these red flags on file, approve everyone else. If they make a bad call, you open the ' +
+    'rulebook, find the clause, and fix it. In the second, you never write a rulebook at all. ' +
+    'Instead you sit them next to a senior officer for a year and have them watch ten thousand ' +
+    'past decisions, until they develop a feel for which applications get approved. Ask them why ' +
+    'they declined a particular application and they can gesture at a reason, but there is no ' +
+    'clause to point to, because no clause was ever written. Their judgement is real, and it is ' +
+    'also not readable the way a rulebook is readable.\n\n' +
+    'A traditional computer program is the first hire: somebody wrote every rule it follows, so ' +
+    'its defects are findable by reading the code and fixable by editing a line. A model is the ' +
+    'second hire. It does what it was fitted to do by example, which nobody wrote down and nobody ' +
+    'can read back out of it afterwards, so its defects are found by measuring its behaviour ' +
+    'against known-good answers, and fixed not by editing a line but by retraining it, by changing ' +
+    'the system built around it, or by taking it out of the decision entirely.\n\n' +
+    'That difference has three consequences for a risk register, and each one is the kind of thing ' +
+    'a beginner does not expect. First, the evidence about a model is empirical and therefore ' +
+    'partial, the same way testing the apprentice on a hundred sample cases tells you about those ' +
+    'cases and not about the one they will see next week that looks nothing like them. Second, the ' +
+    'failure mode is often quiet: an apprentice whose judgement has quietly gone stale still ' +
+    'answers promptly and confidently, in exactly the same tone as when they were right, and a ' +
+    'degraded model does the same. Third, the harm is frequently done to people outside the ' +
+    'company, the applicants rather than the business, which puts it in the regulatory and ' +
+    'reputational columns rather than the plain availability one an outage would sit in. None of ' +
+    'that makes AI risk special enough to need its own register kept apart from everything else. ' +
+    'It makes it a risk category the existing register has to be able to hold, alongside the ' +
+    'unpatched appliance and the untested restore, so that whoever funds the fixes can weigh all ' +
+    'of them against each other.',
 } as const;
 
 export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
@@ -159,13 +198,17 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'Ask of each noun: could I assign an owner and a cost to this line? If not, it is a component of a risk rather than the risk.',
           ],
           solution:
-            'A, B, D, and E. The records are what is worth protecting. The unpatched appliance and ' +
-            'the untested restore are both weaknesses, and the second is the kind people forget to ' +
-            'write down because nothing is visibly broken. C is the common slip: a ransomware crew ' +
-            'is a threat actor, and calling the actor the risk leaves a register line with no ' +
-            'consequence in it and therefore nothing to decide. E is what the line should actually ' +
-            'say, because it names the actor, the path, the asset, and the harm, which is enough ' +
-            'for somebody to price a fix against.',
+            'A, B, D, and E. The records are what is worth protecting, the customer-data equivalent ' +
+            'of the jewellery in the house analogy. The unpatched appliance and the untested ' +
+            'restore are both weaknesses: the first is the window that does not latch, and the ' +
+            'second is the kind people forget to write down because nothing about it looks broken, ' +
+            'there is simply no evidence the lock would hold if anyone tried it. C is the common ' +
+            'slip, and it is worth seeing exactly why it fails: a ransomware crew is a threat ' +
+            'actor, the burglar rather than the burglary, and calling the actor the risk leaves a ' +
+            'register line with nothing to weigh, because an actor by itself carries no consequence ' +
+            'to price a fix against. E is what the line should actually say, because it names the ' +
+            'actor, the path, the asset, and the harm together, which is exactly enough for ' +
+            'somebody to compare the cost of fixing it against the cost of doing nothing.',
           expectedOutput: 'Options A, B, D, and E selected.',
           checks: [
             {
@@ -178,7 +221,11 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'This is the most boring page in the package and the one that changes your output the ' +
-            'most. Registers written in nouns get filed. Registers written in sentences get funded.',
+            'most. Every exercise after this one assumes you can tell these five words apart on ' +
+            'sight, the way a mechanic has to separate a symptom from a cause before any diagnosis ' +
+            'makes sense. Registers written in nouns get filed. Registers written in sentences, ' +
+            'ones that name an actor, a path, an asset, and a cost, get funded, because a sentence ' +
+            'is the only one of the two a budget committee can actually act on.',
           practice: [],
         },
         {
@@ -195,18 +242,40 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'of the following are accurate? Select all that apply.',
           teach: {
             concept:
-              'The three frameworks people name most often are not alternatives, because they were ' +
-              'written for different scopes. NIST RMF is a process for authorising a SYSTEM to ' +
-              'operate: categorise it, select and implement controls, assess them, have somebody ' +
-              'accountable authorise it, then monitor. It assumes a control catalogue behind it, ' +
-              'which is SP 800-53. ISO 31000 is a generic risk process for an ORGANISATION and is ' +
-              'deliberately domain-neutral: establish context, identify, analyse, evaluate, treat, ' +
-              'monitor, communicate. COSO ERM is written for the BOARD, tying risk to strategy, ' +
-              'objectives, and reporting.\n\n' +
-              'They share a spine: understand the context, find the risks, size them, decide what ' +
-              'to do, and keep watching. What differs is who the audience is and what the output ' +
-              'is meant to authorise. Choosing between them is mostly a question of who has to ' +
-              'sign, and it is normal for one organisation to use all three at different altitudes.',
+              'Imagine three different pieces of paperwork about the same house. A building ' +
+              'inspector\'s certificate says this specific house, as it was actually built, is ' +
+              'safe enough to occupy, and it is permanently tied to that one address. A general ' +
+              'home-safety checklist, the kind any homeowner could pick up, is not about your ' +
+              'house at all, it is a repeatable method for finding hazards in any house whatsoever. ' +
+              'And a letter your mortgage lender files with its own risk committee is not about ' +
+              'smoke alarms or window latches, it talks about the value of the loan and what the ' +
+              'lender stands to lose if something goes wrong with the property. All three documents ' +
+              'are honestly "about risk to the house," and none of them can stand in for either of ' +
+              'the others, because each was written for a different reader asking a different ' +
+              'question.\n\n' +
+              'NIST RMF, ISO 31000, and COSO ERM are the security-world equivalents, and the ' +
+              'mistake people make is treating them as three competing brands of the same product, ' +
+              'the way you might compare two rival checklists. They compete with nothing, because ' +
+              'they answer to different scopes. NIST RMF is a process for authorising a specific ' +
+              'SYSTEM to operate: categorise it, select and implement controls, assess them, have ' +
+              'somebody accountable formally authorise it, then monitor it going forward. It is the ' +
+              'building inspector\'s certificate, tied to one address, and it assumes a control ' +
+              'catalogue behind it, which is SP 800-53. ISO 31000 is the generic checklist: a risk ' +
+              'process for an ORGANISATION, deliberately written to work on any kind of risk in any ' +
+              'kind of company, not just security. It walks through establishing context, ' +
+              'identifying, analysing, evaluating, treating, monitoring, and communicating. COSO ' +
+              'ERM is the letter to the lender: written for the BOARD, tying risk to strategy, ' +
+              'objectives, and what gets reported upward.\n\n' +
+              'The reason it is worth knowing all three rather than picking a favourite is that a ' +
+              'question phrased as "which framework should we adopt" is usually really three ' +
+              'different questions wearing one sentence: are we allowed to run this particular ' +
+              'system, are we managing risk consistently as a company, and can the board explain ' +
+              'its risk posture to shareholders. Underneath the different vocabulary, all three run ' +
+              'the same spine: understand the context, find the risks, size them, decide what to ' +
+              'do, and keep watching. What differs is who the output is addressed to and what it is ' +
+              'meant to authorise, which is mostly a question of who has to sign, and it is normal ' +
+              'for one organisation to use all three at once, at different altitudes, without any ' +
+              'contradiction between them.',
           },
           options: [
             { id: 'a', label: 'NIST RMF ends in an accountable person authorising a system to operate, and continues into monitoring afterwards.' },
@@ -221,13 +290,16 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'If the flows are the same underneath, what is actually different between them?',
           ],
           solution:
-            'A, B, C, and E. RMF authorises a system and keeps monitoring it, ISO 31000 is ' +
-            'domain-neutral by design and is routinely used for supply chain and financial risk, ' +
-            'COSO speaks to the board, and all three run the same identify, analyse, respond, ' +
-            'monitor loop. D is wrong and worth naming out loud, because framework arguments ' +
-            'consume months: a company can authorise systems with RMF, run enterprise risk with ' +
-            'ISO 31000, and report to the board in COSO language without contradiction. What you ' +
-            'should not do is run two registers.',
+            'A, B, C, and E. RMF authorises a system and keeps monitoring it, exactly like the ' +
+            'building certificate tied to one address; ISO 31000 is domain-neutral by design and is ' +
+            'routinely used for supply chain and financial risk, not just security; COSO speaks to ' +
+            'the board, the way the lender\'s letter speaks to its own committee; and all three run ' +
+            'the same underlying identify, analyse, respond, monitor loop underneath their different ' +
+            'vocabularies. D is wrong and worth naming out loud, because framework arguments ' +
+            'consume months for no reason: a company can authorise systems with RMF, run enterprise ' +
+            'risk with ISO 31000, and report to the board in COSO language, all at once, without any ' +
+            'contradiction between them. What you should not do is run two separate registers, ' +
+            'because that is where the actual duplication of effort lives.',
           expectedOutput: 'Options A, B, C, and E selected.',
           checks: [
             {
@@ -239,8 +311,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'When somebody asks which framework to adopt, the useful reply is a question: what ' +
-            'decision are we trying to make, and who has to sign it.',
+            'When somebody asks which framework to adopt, the useful reply is a question, not an ' +
+            'opinion: what decision are we trying to make, and who has to sign it. Once you know ' +
+            'the answer to that, the framework mostly picks itself.',
           practice: [],
         },
         {
@@ -257,21 +330,34 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'sentences, say what that conclusion does and does not follow from.',
           teach: {
             concept:
-              'An audit measures conformance to a standard at a point in time, using sampled ' +
-              'evidence. That is a real and useful thing to know, and dismissing it makes you ' +
-              'sound like somebody who has never had to prove anything to anybody. What it does ' +
-              'not measure is whether the organisation would survive a competent attacker, because ' +
-              'the standard was written to be broadly applicable and is therefore not tuned to ' +
-              'this company, its crown jewels, or the parts of its estate that were out of scope.' +
-              '\n\n' +
-              'Three gaps do the damage. Scope: the systems assessed are rarely all the systems ' +
-              'that exist, and shadow IT and recent acquisitions are the classic omissions. Time: ' +
-              'a clean audit describes the month it was done, and the estate changed the week ' +
-              'after. Depth: a control can exist, be documented, and still be ineffective, which ' +
+              'Think about a car that has just passed its annual roadworthiness inspection. The ' +
+              'inspector checked the brakes, the lights, the tyres, and the emissions against a ' +
+              'fixed national checklist, on one day, using the tests that checklist specifies, and ' +
+              'the car passed. That certificate is real and worth having: it means the car met a ' +
+              'known standard on that day, on the items the checklist covers. What it does not mean ' +
+              'is that the car cannot break down next month, because the checklist was written to ' +
+              'apply to every car in the country and cannot know that this particular car\'s ' +
+              'gearbox has a slow leak the test never looks for, or that the driver is about to tow ' +
+              'a trailer for the first time.\n\n' +
+              'An audit is that inspection certificate, applied to a company instead of a car. It ' +
+              'measures conformance to a standard at a point in time, using sampled evidence. That ' +
+              'is a real and useful thing to know, and dismissing it makes you sound like somebody ' +
+              'who has never had to prove anything to anybody. What it does not measure is whether ' +
+              'the organisation would survive a competent attacker, because the standard, like the ' +
+              'national checklist, was written to be broadly applicable, and is therefore not tuned ' +
+              'to this company, its crown jewels, or the parts of its estate that fell outside the ' +
+              'inspection.\n\n' +
+              'Three gaps do the damage, and they are the same three that would worry you about the ' +
+              'car. Scope: the systems assessed are rarely all the systems that exist, the same way ' +
+              'the inspector never looked at the trailer hitch, and shadow IT and recent ' +
+              'acquisitions are the classic omissions. Time: a clean audit describes the month it ' +
+              'was done, and the estate, like the gearbox, keeps changing after the certificate is ' +
+              'issued. Depth: a control can exist, be documented, and still be ineffective, which ' +
               'is the difference between "backups are configured" and "we restored one on ' +
-              'Tuesday". A good answer says the audit is evidence about conformance and scope, and ' +
-              'names testing, coverage, or currency as the evidence that would support the risk ' +
-              'claim instead.',
+              'Tuesday," the same gap as between "the car has brakes" and "the brakes were tested ' +
+              'under load." A good answer says the audit is evidence about conformance and scope, ' +
+              'and names testing, coverage, or currency as the evidence that would actually support ' +
+              'a claim about risk.',
           },
           hints: [
             'Do not attack the audit. Say precisely what it measured, then say what the risk claim would need on top of that.',
@@ -280,13 +366,16 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           solution:
             'The certification is evidence that the controls in scope conformed to the standard on ' +
-            'the dates that were sampled, which is worth having and is not the same claim as being ' +
-            'low risk. It says nothing about the systems that were excluded, nothing about changes ' +
-            'made since the fieldwork, and nothing about whether a control that exists is actually ' +
-            'effective against the attackers who target us, because a documented backup and a ' +
-            'tested restore are different findings. To support the low-risk conclusion I would ' +
-            'want coverage of the estate the audit left out, evidence that key controls were ' +
-            'tested rather than merely present, and a current view rather than an annual one.',
+            'the dates that were sampled, the same way an MOT certificate is evidence the car met a ' +
+            'national checklist on the day it was tested, and that is worth having without being ' +
+            'the same claim as being low risk. It says nothing about the systems that were ' +
+            'excluded, nothing about changes made since the fieldwork, and nothing about whether a ' +
+            'control that exists is actually effective against the attackers who target us, because ' +
+            'a documented backup and a tested restore are different findings in exactly the way ' +
+            '"the car has brakes" and "the brakes were tested under load" are different findings. ' +
+            'To support the low-risk conclusion I would want coverage of the estate the audit left ' +
+            'out, evidence that key controls were tested rather than merely present, and a current ' +
+            'view rather than an annual one.',
           expectedOutput:
             'An answer that credits the audit for what it establishes about conformance, names the ' +
             'limits of scope, currency, or effectiveness, and says what evidence would actually ' +
@@ -305,8 +394,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Compliance is a floor somebody else drew. It is a decent floor. It is not a ceiling ' +
-            'and it is not a forecast.',
+            'Compliance is a floor somebody else drew, for every car or every company like yours, ' +
+            'not for yours specifically. It is a decent floor. It is not a ceiling and it is not a ' +
+            'forecast of what happens the next time you drive it hard.',
           practice: [],
         },
         {
@@ -335,13 +425,15 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'Ask who reads a second register, and when.',
           ],
           solution:
-            'A, B, C, and E. Learned behaviour has no reviewable logic, degradation is silent, the ' +
-            'harm falls on people the company does not employ, and drift changes performance with ' +
-            'no deployment to point at. D is the trap. A separate AI register owned by the team ' +
-            'that builds the models means the risk is reported by the people with the strongest ' +
+            'A, B, C, and E. Learned behaviour has no reviewable logic in the way the apprentice\'s ' +
+            'judgement has no clause to point to, degradation is silent because a stale judgement ' +
+            'still sounds confident, the harm falls on people the company does not employ, and ' +
+            'drift changes performance with no deployment to point at as the cause. D is the trap, ' +
+            'and it is worth seeing exactly why: a separate AI register owned by the team that ' +
+            'builds the models means the risk is reported by the people with the strongest ' +
             'incentive to discount it, and it never reaches the committee that funds anything. AI ' +
             'risk belongs in the same register, with the same scoring, sitting next to the ' +
-            'unpatched appliance so somebody can choose between them.',
+            'unpatched appliance so somebody with budget authority can actually choose between them.',
           expectedOutput: 'Options A, B, C, and E selected.',
           checks: [
             {
@@ -354,7 +446,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'Everything in the remaining eleven modules follows this rule: one register, one ' +
-            'scoring scheme, AI findings in the same queue as everything else.',
+            'scoring scheme, AI findings in the same queue as everything else, judged on what they ' +
+            'cost rather than on how new the technology feels.',
           practice: [],
         },
       ],
@@ -381,19 +474,30 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'something in the top tier? Select all that apply.',
           teach: {
             concept:
-              'Criticality is a statement about consequence, not about price. The question is not ' +
-              '"what did this cost" but "what happens to the business while this is gone, and how ' +
-              'long can we stand it". Four factors settle it in practice. Business impact: how ' +
-              'quickly the loss becomes intolerable, measured in minutes, hours, or days. ' +
-              'Dependency: how many other things stop when this stops, which is why a small, ' +
-              'cheap, shared component often outranks an expensive one. Data sensitivity: what is ' +
-              'inside it and who is harmed if it leaks. Regulatory standing: whether an obligation ' +
-              'attaches to it, because that removes your discretion about how fast to recover.\n\n' +
-              'Two things routinely mislead people. Replacement cost is a weak proxy, because a ' +
-              'cheap certificate authority can take down every service in the estate while an ' +
-              'expensive analytics cluster can be down for a week without a customer noticing. And ' +
-              'recency is not criticality: the newest system is the one most likely to be ' +
-              'over-tiered, because it is the one people are currently excited about.',
+              'Suppose a building has one master key that opens every office, and one painting in ' +
+              'the lobby worth a great deal of money. Lose the painting and you have a real, ' +
+              'expensive, embarrassing problem, and the building keeps running while you deal with ' +
+              'it. Lose the master key and nobody can get into anything until every lock in the ' +
+              'building is changed, even though the key itself cost a few pounds to cut. Criticality ' +
+              'is a statement about the second kind of loss, not the first: it asks what happens to ' +
+              'everything downstream while a thing is gone, not what a price tag says it was worth.\n\n' +
+              'So the question a risk analyst actually asks is never "what did this cost", it is ' +
+              '"what happens to the business while this is gone, and how long can we stand it". ' +
+              'Four factors settle it in practice. Business impact: how quickly the loss becomes ' +
+              'intolerable, measured in minutes, hours, or days. Dependency: how many other things ' +
+              'stop when this stops, which is why a small, cheap, shared component, the master key, ' +
+              'often outranks an expensive one that nothing else relies on. Data sensitivity: what ' +
+              'is inside it and who is harmed if it leaks. Regulatory standing: whether an ' +
+              'obligation attaches to it, because that removes your discretion about how fast to ' +
+              'recover, the way a fire code removes your discretion about whether to fix a blocked ' +
+              'exit.\n\n' +
+              'Two things routinely mislead people, and both are ways of mistaking the painting for ' +
+              'the key. Replacement cost is a weak proxy, because a cheap certificate authority or ' +
+              'internal DNS service can take down every application in the estate while an ' +
+              'expensive analytics cluster can be down for a week without a single customer ' +
+              'noticing. And recency is not criticality: the newest system is the one most likely to ' +
+              'be over-tiered, because it is the one people are currently excited about, which is a ' +
+              'mood rather than a measurement.',
           },
           options: [
             { id: 'a', label: 'The business can tolerate its loss for minutes rather than days.' },
@@ -409,12 +513,14 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           solution:
             'A, B, and C. Tolerable outage duration, dependency fan-out, and regulatory standing ' +
-            'all speak directly to what happens when the asset is gone. D and E are the two most ' +
-            'common substitutions. Capital cost measures what you paid a supplier and predicts ' +
-            'nothing about consequence; the classic counterexample is a certificate authority or ' +
-            'an internal DNS service, which cost almost nothing and take the estate with them. ' +
-            'Enthusiasm is worse, because it inflates the tier of the system with the least ' +
-            'operational history and therefore the least evidence about how it fails.',
+            'all speak directly to what happens when the asset is gone, which is the only question ' +
+            'criticality actually asks. D and E are the two most common substitutions, and both ' +
+            'confuse the painting for the key. Capital cost measures what you paid a supplier and ' +
+            'predicts nothing about consequence; the classic counterexample is a certificate ' +
+            'authority or an internal DNS service, which cost almost nothing and take the whole ' +
+            'estate down with them. Enthusiasm is worse, because it inflates the tier of the system ' +
+            'with the least operational history and therefore the least evidence about how it ' +
+            'actually fails.',
           expectedOutput: 'Options A, B, and C selected.',
           checks: [
             {
@@ -427,7 +533,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'The inventory is the least glamorous artefact in risk work and every later step is ' +
-            'wrong without it. You cannot score what you did not know you had.',
+            'wrong without it. You cannot score what you did not know you had, and you cannot tell ' +
+            'a master key from a painting until you have listed both.',
           practice: [],
         },
         {
@@ -446,18 +553,28 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'single points of failure? Select all that apply.',
           teach: {
             concept:
-              'A single point of failure is any component whose loss stops the whole service, and ' +
-              'the reason they survive review is that architecture diagrams are drawn to show ' +
-              'intent rather than dependency. The method that finds them is mechanical: take each ' +
-              'component in turn, assume it is gone, and ask what still serves a customer. ' +
-              'Redundancy only counts if it can actually take over, which means tested failover ' +
-              'and enough capacity to carry the load alone.\n\n' +
-              'Three categories get missed. Shared infrastructure underneath apparent redundancy: ' +
-              'three servers in one zone are one zone. Control-plane dependencies: identity, DNS, ' +
-              'and certificates are not on the data path in anybody\'s diagram and stop everything ' +
-              'when they fail. And people: one person who alone can deploy, or alone understands ' +
-              'the recovery, is a single point of failure with a holiday calendar. That last one is ' +
-              'the hardest to raise politely and the cheapest to fix.',
+              'Picture a building with three separate fire escapes, one on each side, which sounds ' +
+              'like real redundancy until you notice all three stairwells empty into the same ' +
+              'locked courtyard with one gate. Three escapes and one gate is not three ways out, it ' +
+              'is one way out with a longer walk to it. A single point of failure is exactly that ' +
+              'gate: any single component whose loss stops the whole building emptying, however ' +
+              'many stairwells feed into it. Architecture diagrams survive review with a gate like ' +
+              'this hidden in them because diagrams are usually drawn to show what the designer ' +
+              'intended, three escapes, rather than what actually depends on what.\n\n' +
+              'The method that finds the gate is mechanical: take each component in turn, imagine ' +
+              'it is simply gone, and ask what still serves a customer. Redundancy only counts if ' +
+              'the backup can actually take over, which means tested failover and enough capacity ' +
+              'to carry the whole load alone, not just a second copy that has never been asked to ' +
+              'do the job.\n\n' +
+              'Three categories of gate get missed most often. Shared infrastructure underneath ' +
+              'apparent redundancy: three servers in one availability zone are three stairwells into ' +
+              'one courtyard, because losing the zone loses all three at once. Control-plane ' +
+              'dependencies: identity, DNS, and certificates are rarely drawn on anybody\'s diagram ' +
+              'at all, and stop everything when they fail, the way a single main gate does even ' +
+              'though it never appears on the fire-escape plan. And people: one person who alone can ' +
+              'deploy, or alone understands the recovery, is a single point of failure with a ' +
+              'holiday calendar attached to it. That last one is the hardest to raise politely in a ' +
+              'meeting, and the cheapest of the three to actually fix.',
           },
           options: [
             { id: 'a', label: 'The single availability zone, because the three application servers share it.' },
@@ -472,14 +589,15 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'Two of the four are not on the diagram at all: one is infrastructure underneath it, one is a person.',
           ],
           solution:
-            'A, B, C, and D. The zone is shared by all three servers, so the redundancy is only ' +
-            'against a host failure and not against anything larger. The asynchronous replica is a ' +
-            'recovery option with data loss and a manual step, not a hot standby. Identity is a ' +
-            'control-plane dependency that stops everything and appears on no data-flow diagram. ' +
-            'And the single engineer is a real single point of failure, which is why cross-training ' +
-            'and a written runbook are risk controls rather than management niceties. E is not a ' +
-            'finding: three servers that can each carry the load is redundancy, and adding a fourth ' +
-            'changes nothing about the dependencies that actually bind them.',
+            'A, B, C, and D. The zone is shared by all three servers, so this is three stairwells ' +
+            'into one courtyard: the redundancy protects against a single host failing and nothing ' +
+            'larger. The asynchronous replica is a recovery option with data loss and a manual step, ' +
+            'not a hot standby that simply takes over. Identity is a control-plane dependency, the ' +
+            'gate that never appears on the diagram, and it stops everything when it fails. And the ' +
+            'single engineer is a real single point of failure, which is why cross-training and a ' +
+            'written runbook are risk controls rather than management niceties. E is not a finding: ' +
+            'three servers that can each carry the load is genuine redundancy, and adding a fourth ' +
+            'changes nothing about the shared dependencies that actually bind all of them together.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -492,7 +610,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'Write the people ones down. They are the finding most often left out of the report ' +
-            'because it feels like an accusation, and they are the cheapest ones to fix.',
+            'because naming a person feels like an accusation, and they are usually the cheapest of ' +
+            'all the gates to fix.',
           practice: [],
         },
         {
@@ -508,19 +627,32 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'following belong in the inventory as assets in their own right? Select all that apply.',
           teach: {
             concept:
-              'Written as one line, "the fraud model" hides most of what can be lost. The trained ' +
-              'artefact is only the visible part. The TRAINING CORPUS is usually the most sensitive ' +
-              'asset in the set, because it is customer data at rest with a long retention and a ' +
-              'weak access story. The FEATURE PIPELINE is the code and configuration that turns raw ' +
-              'input into what the model expects, and a model restored without the pipeline that ' +
-              'fed it is silently wrong rather than obviously broken. The MODEL REGISTRY is what ' +
-              'tells you which version is in production, which is the artefact every audit and ' +
-              'every incident asks for first. The SERVING DEPLOYMENT is the availability asset.\n\n' +
+              'Think about a restaurant\'s signature dish. What the customer sees is one plate, but ' +
+              'what got it there is a whole chain of separate, separately losable things: the ' +
+              'recipe, the specific suppliers the ingredients came from, the log book that says ' +
+              'which exact version of the recipe tonight\'s kitchen is actually cooking from, and ' +
+              'the kitchen itself. Lose the log book and two chefs quietly cook two different ' +
+              'versions of "the same" dish and nobody can say which one a complaining customer was ' +
+              'served. Swap in cheaper ingredients without telling anyone and the plate looks ' +
+              'identical and tastes wrong. An inventory that lists only "the dish" hides every one ' +
+              'of those separate risks.\n\n' +
+              'Written as one line, "the fraud model" makes the same mistake. The trained artefact, ' +
+              'the weights, is only the plate. The TRAINING CORPUS is the ingredients and their ' +
+              'suppliers, usually the most sensitive asset in the whole set, because it is customer ' +
+              'data at rest with a long retention and a weak access story. The FEATURE PIPELINE is ' +
+              'the recipe itself, the code and configuration that turns raw input into what the ' +
+              'model expects, and a model restored without the pipeline that fed it during training ' +
+              'is the equivalent of cooking the right dish from the wrong recipe: it comes out ' +
+              'looking fine and tasting wrong, silently, rather than obviously broken. The MODEL ' +
+              'REGISTRY is the log book, the record of which version is actually in production, ' +
+              'which is the first thing every audit and every incident asks for. The SERVING ' +
+              'DEPLOYMENT is the kitchen, the availability asset.\n\n' +
               'Two more are easy to miss. The EVALUATION SET, because without it you cannot ' +
-              'demonstrate the model still performs, and the labels themselves are often expensive ' +
-              'and irreplaceable. And the PROMPTS or configuration for a system built on a ' +
-              'third-party model, which is where the actual behaviour lives when you did not train ' +
-              'anything at all.',
+              'demonstrate the dish still tastes the way it did when it was approved, and the ' +
+              'labels themselves are often expensive and irreplaceable to recreate. And the PROMPTS ' +
+              'or configuration for a system built on a third-party model, which is where the ' +
+              'actual behaviour lives when you did not write the recipe at all, only chose how to ' +
+              'season somebody else\'s.',
           },
           options: [
             { id: 'a', label: 'The trained model artefact, meaning the weights that get loaded to serve.' },
@@ -537,12 +669,13 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           solution:
             'A, B, C, and D. The weights, the corpus, the pipeline, and the registry are each ' +
             'separately losable and each has a different owner, sensitivity, and recovery ' +
-            'requirement, which is exactly why they are separate lines. E is the framing to avoid: ' +
-            'the endpoint is the only piece with an obvious availability metric, so it is the only ' +
-            'piece that tends to get inventoried, which leaves the corpus with no retention owner ' +
-            'and the pipeline out of the backup scope. The pipeline in particular is the quiet one, ' +
-            'because restoring a model without its matching preprocessing gives you a service that ' +
-            'is up, fast, and wrong.',
+            'requirement, which is exactly why the plate, the ingredients, the recipe, and the log ' +
+            'book get separate lines rather than one entry called "the dish". E is the framing to ' +
+            'avoid: the endpoint is the only piece with an obvious availability metric, so it is the ' +
+            'only piece that tends to get inventoried, which leaves the corpus with no retention ' +
+            'owner and the pipeline out of the backup scope entirely. The pipeline in particular is ' +
+            'the quiet one, because restoring a model without its matching preprocessing gives you a ' +
+            'service that is up, fast, and wrong, the plate that looks right and tastes off.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -555,7 +688,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'Every AI finding you write for the rest of this package attaches to one of these ' +
-            'pieces. "The model is risky" is not a finding; "the corpus has no retention owner" is.',
+            'pieces: the plate, the ingredients, the recipe, or the log book. "The model is risky" ' +
+            'is not a finding; "the corpus has no retention owner" is.',
           practice: [],
         },
         {
@@ -573,20 +707,31 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'and what specifically drives the difference.',
           teach: {
             concept:
-              'Two AI systems can use the same architecture and belong in completely different ' +
-              'tiers, because tiering follows the consequence of a wrong output rather than the ' +
-              'technology producing it. Three factors do most of the work. AUTONOMY: does a human ' +
-              'review the output before anything happens, or does the system act? A human in the ' +
-              'loop is a real control and it lowers the tier, provided the human has the time and ' +
-              'the information to actually disagree. BLAST RADIUS: who is affected by an error, ' +
-              'how many of them, and can they appeal it? SEVERITY AND REVERSIBILITY: a bad product ' +
-              'suggestion is ignored in a second, while a declined loan affects somebody\'s ' +
-              'finances and may never be revisited.\n\n' +
-              'Regulatory standing usually tracks those three rather than adding a fourth: rules ' +
-              'attach to consequential automated decisions about people precisely because they are ' +
-              'autonomous, wide, and hard to reverse. A good answer names the loan model as the ' +
-              'higher tier and grounds it in the absence of human review and the severity or ' +
-              'irreversibility of the harm, rather than in anything about model complexity.',
+              'Compare a shop assistant who suggests a tie to go with the shirt you are buying, ' +
+              'with an automatic gate that scans a badge and decides, with nobody watching, whether ' +
+              'to let someone into a building. Both are making a small recommendation-shaped ' +
+              'decision, but they cannot be judged by the same standard. If the assistant suggests ' +
+              'a tie you hate, you ignore it and walk out with the shirt anyway, no harm done. If ' +
+              'the gate wrongly refuses someone, they are standing outside in the rain with no ' +
+              'human anywhere in the loop to overrule the machine, and if it wrongly admits someone, ' +
+              'a stranger is now inside the building. Same shape of decision, wildly different ' +
+              'stakes, because of what happens next rather than how clever the mechanism is.\n\n' +
+              'Two AI systems can use the same architecture and still belong in completely ' +
+              'different tiers, because tiering follows the consequence of a wrong output rather ' +
+              'than the technology producing it. Three factors do most of the work. AUTONOMY: does ' +
+              'a human review the output before anything happens, or does the system act on its ' +
+              'own, like the gate? A human in the loop is a real control and it lowers the tier, ' +
+              'provided the human actually has the time and the information to disagree rather than ' +
+              'rubber-stamping. BLAST RADIUS: who is affected by an error, how many of them, and can ' +
+              'they appeal it? SEVERITY AND REVERSIBILITY: a bad product suggestion is ignored in a ' +
+              'second, while a declined loan affects somebody\'s finances and may never be revisited ' +
+              'at all.\n\n' +
+              'Regulatory standing usually tracks those three factors rather than adding a fourth of ' +
+              'its own: rules attach to consequential automated decisions about people precisely ' +
+              'because they are autonomous, wide, and hard to reverse, the gate rather than the shop ' +
+              'assistant. A good answer names the loan model as the higher tier and grounds it in ' +
+              'the absence of human review and the severity or irreversibility of the harm, rather ' +
+              'than in anything about how sophisticated the model is.',
           },
           hints: [
             'Both are models. Stop looking at the models and look at what happens after each one emits a number.',
@@ -595,13 +740,15 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           solution:
             'The loan scoring model is the higher tier, and it is not because it is more ' +
-            'sophisticated. Its output is applied automatically with no human review, so an error ' +
-            'becomes a decision rather than a suggestion, and the person affected is an applicant ' +
-            'outside the company who may never learn why they were declined or get the chance to ' +
-            'appeal. The recommendation model is wrong constantly and the cost of each error is a ' +
-            'customer ignoring a tile, which is recoverable within seconds and harms nobody. That ' +
-            'difference in autonomy and in the severity of a single wrong output is what puts the ' +
-            'loan model in the top tier and the storefront model near the bottom.',
+            'sophisticated than the recommendation model, it may well be simpler. Its output is ' +
+            'applied automatically with no human review, so an error becomes a decision rather than ' +
+            'a suggestion, the gate rather than the shop assistant, and the person affected is an ' +
+            'applicant outside the company who may never learn why they were declined or get the ' +
+            'chance to appeal. The recommendation model is wrong constantly and the cost of each ' +
+            'error is a customer ignoring a tile, which is recoverable within seconds and harms ' +
+            'nobody. That difference in autonomy and in the severity of a single wrong output, not ' +
+            'the technology underneath either one, is what puts the loan model in the top tier and ' +
+            'the storefront model near the bottom.',
           expectedOutput:
             'An answer choosing the loan model, grounded in the automatic decision without human ' +
             'review and in the severity, irreversibility, or external harm of a wrong score, rather ' +
@@ -620,8 +767,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Keep this instinct. Through the rest of the package the question about any AI system ' +
-            'is the same: what does it decide on its own, for whom, and how hard is that to undo.',
+            'Keep this instinct: is it the shop assistant or the gate. Through the rest of the ' +
+            'package the question about any AI system is the same: what does it decide on its own, ' +
+            'for whom, and how hard is that to undo.',
           practice: [],
         },
       ],
@@ -649,21 +797,35 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'category? Select all that apply.',
           teach: {
             concept:
-              'STRIDE is a prompt list, not a taxonomy to be admired: six categories that stop you ' +
-              'from only writing down the attack you already had in mind. Spoofing is identity. ' +
-              'Tampering is unauthorised modification of data or code. Repudiation is being unable ' +
-              'to prove who did what. Information disclosure is confidentiality. Denial of service ' +
-              'is availability. Elevation of privilege is doing something you were not entitled to ' +
-              'do.\n\n' +
-              'Run over an AI system the categories land in unfamiliar places. Poisoning a training ' +
-              'corpus or an indexed document store is tampering, because attacker-controlled text ' +
-              'has modified what the system reasons from. Model extraction through repeated queries ' +
-              'is information disclosure, since the asset leaving is the model itself. Deploying a ' +
-              'model version without going through the approval gate is elevation of privilege. ' +
-              'And an assistant with no request log has a repudiation problem: when somebody claims ' +
-              'it told them to do something, nobody can establish what it actually said. Forcing ' +
-              'every threat into a category is a waste of time; the categories exist to make you ' +
-              'look in six directions.',
+              'Imagine a security consultant walking through an office building with a six-item ' +
+              'checklist, not because six is a magic number but because a checklist forces them to ' +
+              'look in six different directions instead of only picturing the one break-in they ' +
+              'already had in mind. Could somebody get in by pretending to be someone they are not, ' +
+              'a stolen badge? Could somebody alter something without permission, prop a fire door, ' +
+              'swap a delivery? If something goes missing, can staff prove who was and was not in ' +
+              'the room, or is there no visitor log at all? Could somebody read files on a desk they ' +
+              'were never meant to see? Could somebody block the loading bay so nothing gets in or ' +
+              'out? Could somebody with a legitimate badge walk into a room their role does not ' +
+              'actually entitle them to enter?\n\n' +
+              'STRIDE is that same checklist, applied to a computer system instead of a building, ' +
+              'and it is a prompt list rather than a taxonomy to be admired: six categories that ' +
+              'stop you writing down only the attack you already had in mind. Spoofing is identity, ' +
+              'the stolen badge. Tampering is unauthorised modification of data or code, the propped ' +
+              'door. Repudiation is being unable to prove who did what, the missing visitor log. ' +
+              'Information disclosure is confidentiality, the file left on the desk. Denial of ' +
+              'service is availability, the blocked loading bay. Elevation of privilege is doing ' +
+              'something you were not entitled to do, the badge that opens a door it should not.\n\n' +
+              'Run the same six questions over an AI system and they land in places a newcomer would ' +
+              'not expect. Poisoning a training corpus or an indexed document store is tampering, ' +
+              'because attacker-controlled text has modified what the system reasons from, the same ' +
+              'as swapping the delivery. Model extraction through repeated queries is information ' +
+              'disclosure, since the asset leaving the building this time is the model itself. ' +
+              'Deploying a model version without going through the approval gate is elevation of ' +
+              'privilege, a badge reaching a room it should not. And an assistant with no request ' +
+              'log has a repudiation problem: when somebody claims it told them to do something, ' +
+              'nobody can establish what it actually said, exactly like the building with no ' +
+              'visitor log. Forcing every threat into a category is a waste of time; the categories ' +
+              'exist to make you look in six directions, not to be filled in like a form.',
           },
           options: [
             { id: 'a', label: 'A partner submits an article containing instructions, which the assistant later follows: tampering.' },
@@ -679,12 +841,15 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           solution:
             'A, B, C, and D. Poisoned retrieval content is tampering with what the system reasons ' +
-            'from; extraction is disclosure of the model as an asset; bypassing the deployment gate ' +
-            'is elevation of privilege even when the engineer meant well; and missing logs are a ' +
-            'repudiation problem that only becomes visible during a dispute. E is the distractor ' +
-            'worth naming: a model that gives poor answers is a performance issue, and dressing it ' +
-            'up as spoofing wastes a threat model on something the product team already tracks. ' +
-            'STRIDE is there to widen your search, not to relabel every complaint as a threat.',
+            'from, the swapped delivery; extraction is disclosure of the model as an asset, ' +
+            'something walking out of the building; bypassing the deployment gate is elevation of ' +
+            'privilege even when the engineer meant well, a badge in a room it should not reach; ' +
+            'and missing logs are a repudiation problem that only becomes visible during a dispute, ' +
+            'the absent visitor log nobody misses until they need it. E is the distractor worth ' +
+            'naming: a model that gives poor answers is a performance issue, not an adversary doing ' +
+            'anything, and dressing it up as spoofing wastes a threat model on something the ' +
+            'product team already tracks. STRIDE is there to widen your search, not to relabel every ' +
+            'complaint as a threat.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -697,7 +862,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'The two that surprise people are extraction as disclosure and missing logs as ' +
-            'repudiation. Both become findings that a purely technical review never writes down.',
+            'repudiation, because neither looks like a break-in from the outside. Both become ' +
+            'findings that a purely technical review never writes down.',
           practice: [],
         },
         {
@@ -713,18 +879,30 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'the following statements about STRIDE and PASTA are accurate? Select all that apply.',
           teach: {
             concept:
-              'STRIDE starts from the system: draw the components and data flows, walk the trust ' +
-              'boundaries, and prompt yourself with six categories at each one. It is fast, it is ' +
-              'teachable in an afternoon, and its weakness is that it produces threats without ' +
-              'telling you which ones anybody would actually bother to carry out.\n\n' +
-              'PASTA starts from the business and the attacker. It runs seven stages, from defining ' +
-              'business objectives, through technical scope and decomposition, into threat and ' +
-              'vulnerability analysis, attack modelling, and finally risk and countermeasures. ' +
-              'Because it starts with objectives and ends with risk, its output is already framed ' +
-              'as business consequence, which is what a funding conversation needs. The cost is ' +
-              'real: it wants threat intelligence, attacker profiles, and time measured in weeks. ' +
-              'Neither is the right answer in the abstract. On a two-day budget, STRIDE finishes ' +
-              'and PASTA does not, and an unfinished PASTA is worth less than a completed STRIDE.',
+              'Compare the fire-escape walkthrough from the last exercise with hiring a private ' +
+              'investigator to study the actual burglars working your neighbourhood, their methods, ' +
+              'what they target, how they case a building, before writing a report to your ' +
+              'insurer about your specific risk. Both produce something real. The walkthrough with ' +
+              'a checklist takes an afternoon and tells you about your building\'s own layout. The ' +
+              'investigation takes weeks, needs information about actual criminals that a checklist ' +
+              'does not require, and produces something an insurer finds far more persuasive because ' +
+              'it is framed entirely in terms of what could actually happen to you and what it would ' +
+              'cost.\n\n' +
+              'STRIDE is the walkthrough: it starts from the system, draws the components and data ' +
+              'flows, walks the trust boundaries, and prompts you with six categories at each one. ' +
+              'It is fast, it is teachable in an afternoon, and its weakness is that it produces ' +
+              'threats without telling you which ones anybody would actually bother to carry out.\n\n' +
+              'PASTA is the investigation: it starts from the business and the attacker rather than ' +
+              'from the wiring diagram. It runs seven stages, from defining business objectives, ' +
+              'through technical scope and decomposition, into threat and vulnerability analysis, ' +
+              'attack modelling, and finally risk and countermeasures. Because it starts with ' +
+              'objectives and ends with risk, its output is already framed as business consequence, ' +
+              'which is exactly what a funding conversation needs. The cost is real too: it wants ' +
+              'threat intelligence, attacker profiles, and time measured in weeks, the same way the ' +
+              'investigator needs weeks of surveillance a checklist never asks for. Neither is the ' +
+              'right answer in the abstract. On a two-day budget, the walkthrough finishes and the ' +
+              'investigation does not, and an unfinished investigation is worth less than a ' +
+              'completed walkthrough.',
           },
           options: [
             { id: 'a', label: 'STRIDE is component-driven and can be completed quickly, which is why it fits a design review.' },
@@ -739,13 +917,15 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'A method you cannot finish produces nothing, however good its output would have been.',
           ],
           solution:
-            'A, B, C, and E. STRIDE is quick and structural, PASTA is business-first and ' +
-            'attacker-centric, and a raw threat list is a legitimate intermediate product because ' +
-            'the next module is where likelihood and impact get attached. D is the one to reject. ' +
-            'PASTA needs threat intelligence, attacker profiling, and weeks; started on a two-day ' +
-            'budget it delivers a half-finished decomposition and no threats at all, while STRIDE ' +
-            'delivers a reviewed list on Thursday. Method selection is a resource decision, and ' +
-            'saying so out loud is more useful than defending a favourite.',
+            'A, B, C, and E. STRIDE is quick and structural, like the walkthrough; PASTA is ' +
+            'business-first and attacker-centric, like the investigation; and a raw threat list is a ' +
+            'legitimate intermediate product because the next module is where likelihood and impact ' +
+            'get attached to it. D is the one to reject. PASTA needs threat intelligence, attacker ' +
+            'profiling, and weeks, the same way an investigator cannot profile a neighbourhood\'s ' +
+            'burglars overnight; started on a two-day budget it delivers a half-finished ' +
+            'decomposition and no threats at all, while STRIDE delivers a reviewed list on Thursday. ' +
+            'Method selection is a resource decision, and saying so out loud is more useful than ' +
+            'defending a favourite.',
           expectedOutput: 'Options A, B, C, and E selected.',
           checks: [
             {
@@ -758,8 +938,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'The honest version of this answer in a real meeting is: here is what I can produce by ' +
-            'the review, here is what it will not tell you, and here is what a longer engagement ' +
-            'would add.',
+            'the review, here is what it will not tell you, and here is what the full investigation ' +
+            'would add if we had the weeks for it.',
           practice: [],
         },
         {
@@ -775,20 +955,32 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'are correctly placed? Select all that apply.',
           teach: {
             concept:
-              'AI threats sort into four phases, and the phase matters because it decides who owns ' +
-              'the fix and how expensive it is. TRAINING covers everything that shaped the model: ' +
-              'poisoned or mislabelled data, an objective that rewards the wrong behaviour, a ' +
-              'compromised dependency in the training stack. These are the expensive ones, because ' +
-              'the remedy is retraining and the harm is already baked in. DEPLOYMENT is the ' +
-              'transition into production: unapproved versions, missing evaluation gates, a model ' +
-              'promoted without the pipeline it was validated with.\n\n' +
-              'OPERATION is everything that happens while it serves: drift, adversarial input, ' +
-              'extraction attempts, injected retrieval content, load. These are the ones you can ' +
-              'usually fix this week, because the system around the model is not frozen. ' +
-              'GOVERNANCE is the failure to have anybody watching: no owner, no monitoring, no ' +
-              'incident path, no documentation of what the model is for. Governance failures are ' +
-              'the reason the other three go undetected, which is why they belong in the register ' +
-              'as risks and not as a footnote about process maturity.',
+              'Think about everything that could go wrong with a bakery\'s bread, sorted by when it ' +
+              'happens. Somebody could buy flour from a supplier that has been quietly cutting it ' +
+              'with something else, before a single loaf is baked. A batch could skip the quality ' +
+              'check and go out to shops that were never approved to receive it. Bread that was ' +
+              'perfectly good on the day could go stale on a shelf nobody is rotating. And behind ' +
+              'all three, there could simply be no manager checking any of it, so none of the first ' +
+              'three problems gets caught before a customer complains. Each of those is a real ' +
+              'failure, and each needs a completely different person to fix it: the buyer, the ' +
+              'quality inspector, the shop floor staff, or whoever should have been managing the ' +
+              'shift.\n\n' +
+              'AI threats sort into the same four phases, and the phase matters for exactly the same ' +
+              'reason: it decides who owns the fix and how expensive it is. TRAINING covers ' +
+              'everything that shaped the model, the tainted flour: poisoned or mislabelled data, ' +
+              'an objective that rewards the wrong behaviour, a compromised dependency in the ' +
+              'training stack. These are the expensive ones, because the remedy is retraining and ' +
+              'the harm is already baked into every loaf. DEPLOYMENT is the transition into ' +
+              'production, the skipped quality check: unapproved versions, missing evaluation ' +
+              'gates, a model promoted without the pipeline it was validated with.\n\n' +
+              'OPERATION is everything that happens while it serves, the bread going stale on the ' +
+              'shelf: drift, adversarial input, extraction attempts, injected retrieval content, ' +
+              'load. These are the ones you can usually fix this week, because the system around the ' +
+              'model is not frozen the way the training data already is. GOVERNANCE is the missing ' +
+              'manager: no owner, no monitoring, no incident path, no documentation of what the ' +
+              'model is even for. Governance failures are the reason the other three go undetected, ' +
+              'which is why "nobody is watching" belongs in the register as a risk in its own right ' +
+              'rather than as a footnote about process maturity.',
           },
           options: [
             { id: 'a', label: 'Mislabelled records in the training set that skew the model against one group: training phase.' },
@@ -804,11 +996,12 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           solution:
             'A, B, C, and D. E is misplaced and the mistake is expensive: retrieved documents reach ' +
-            'the model at inference time, not during training, so the controls are on the retrieval ' +
-            'path and can be changed this week. Filing it as a training problem sends the finding ' +
-            'to the team that owns the corpus, who will correctly reply that they never trained on ' +
-            'those documents, and the finding dies in that exchange. Phase is not an academic ' +
-            'label; it routes the work.',
+            'the model at answer time, not during training, the equivalent of bread going stale on ' +
+            'the shelf rather than flour being tainted at purchase, so the controls belong on the ' +
+            'retrieval path and can be changed this week. Filing it as a training problem sends the ' +
+            'finding to the team that owns the corpus, who will correctly reply that they never ' +
+            'trained on those documents, and the finding dies in that exchange. Phase is not an ' +
+            'academic label; it routes the work to whoever can actually fix it.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -820,8 +1013,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Governance is a phase in its own right on purpose. "Nobody is watching" is a risk, and ' +
-            'it is usually the highest-scoring one in a young AI programme.',
+            'Governance is a phase in its own right on purpose, the missing manager rather than a ' +
+            'fourth kind of bread problem. "Nobody is watching" is a risk, and it is usually the ' +
+            'highest-scoring one in a young AI programme.',
           practice: [],
         },
         {
@@ -838,20 +1032,30 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'should own the line.',
           teach: {
             concept:
-              'A threat model produces notes. A register needs lines, and the gap between them is ' +
-              'where most threat modelling output is lost. A usable line carries five things: the ' +
-              'SOURCE (who or what acts), the PATH (how they reach the system), the ASSET (what is ' +
-              'affected), the CONSEQUENCE (what the business loses, in terms a non-specialist can ' +
-              'weigh), and the OWNER (the person accountable for the decision, who is never the ' +
-              'person who found it).\n\n' +
-              'Owner is the field people get wrong most often. Assigning a risk to the security ' +
-              'team means assigning it to the people with no budget for the fix and no authority ' +
-              'to accept it; the owner should be the person who owns the affected business ' +
-              'function, because they are the one who can either fund the control or sign that ' +
-              'they are living with the exposure. A good answer names the injection path through ' +
-              'partner-submitted content, says what the injected instruction reaches (the answer a ' +
-              'customer acts on, or any tool the assistant can call), and puts ownership with the ' +
-              'service or business owner rather than with the assessor.',
+              'There is a real difference between a neighbour saying "kids round here get up to no ' +
+              'good" and a police report that names a specific person, describes exactly how they ' +
+              'got into the shed, lists what was taken, and states who is now responsible for ' +
+              'following it up. The first is a vague impression nobody can act on. The second is ' +
+              'something an insurer can pay against and a locksmith can be booked over. A threat ' +
+              'model, left as raw notes, is the neighbour\'s complaint: true, useful as a starting ' +
+              'point, and completely unactionable on its own.\n\n' +
+              'A register needs the police-report version, and the gap between the two is where ' +
+              'most threat modelling output quietly gets lost. A usable line carries five things: ' +
+              'the SOURCE (who or what acts, the specific person rather than "kids"), the PATH (how ' +
+              'they reach the system, the exact route into the shed), the ASSET (what is affected), ' +
+              'the CONSEQUENCE (what the business loses, in terms a non-specialist can weigh, the ' +
+              'list of what was taken), and the OWNER (the person accountable for following it up, ' +
+              'who is never the person who happened to notice the shed was open).\n\n' +
+              'Owner is the field people get wrong most often. Assigning a risk to the security team ' +
+              'means assigning it to the people with no budget for the fix and no authority to ' +
+              'accept it, the equivalent of filing the police report with the neighbour who noticed ' +
+              'rather than with anyone who owns the shed; the owner should be the person who owns ' +
+              'the affected business function, because they are the one who can either fund the ' +
+              'control or sign that they are living with the exposure. A good answer names the ' +
+              'injection path through partner-submitted content, says what the injected instruction ' +
+              'reaches (the answer a customer acts on, or any tool the assistant can call), and puts ' +
+              'ownership with the service or business owner rather than with the assessor who found ' +
+              'it.',
           },
           hints: [
             'The note is a fact about the system. A register line is a sentence about what that fact costs.',
@@ -861,13 +1065,15 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           solution:
             'A partner with submission rights can place text written as an instruction into the ' +
             'article corpus, which is retrieved and concatenated into the assistant context at ' +
-            'answer time, so the injected instruction is not distinguishable from a legitimate one. ' +
-            'What it reaches is the answer a customer is given and acts on, and any tool or data ' +
-            'the assistant is wired to call on their behalf, which makes the consequence wrong ' +
-            'guidance to customers at minimum and unauthorised action at worst. None of the ' +
-            'controls on the chat box sit on the retrieval path, so the exposure is currently ' +
-            'unmitigated. The line belongs to the support service owner, who can fund submission ' +
-            'review or accept the exposure in writing, and not to the assessor who found it.',
+            'answer time, so the injected instruction is not distinguishable from a legitimate one, ' +
+            'the shed door that looks locked but is not. What it reaches is the answer a customer is ' +
+            'given and acts on, and any tool or data the assistant is wired to call on their behalf, ' +
+            'which makes the consequence wrong guidance to customers at minimum and unauthorised ' +
+            'action at worst. None of the controls on the chat box sit on the retrieval path, so the ' +
+            'exposure is currently unmitigated. The line belongs to the support service owner, who ' +
+            'can fund submission review or accept the exposure in writing, and not to the assessor ' +
+            'who found it, the same way the police report goes to whoever owns the shed rather than ' +
+            'the neighbour who noticed the door.',
           expectedOutput:
             'A register line naming the partner submission path into retrieved content, what the ' +
             'injected instruction reaches, the business consequence, and a business or service ' +
@@ -887,7 +1093,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'Notice how much of the risk write-up is unglamorous. The finding was already known ' +
-            'after the threat model. The value you added was making it ownable.',
+            'after the threat model, the same way the neighbour already knew something was wrong. ' +
+            'The value you added was turning it into something ownable.',
           practice: [],
         },
       ],
@@ -914,21 +1121,34 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'statements about assessment methods are accurate? Select all that apply.',
           teach: {
             concept:
-              'Four methods answer four different questions, and most disappointment in assessment ' +
-              'work comes from buying one and expecting another. A VULNERABILITY SCAN answers ' +
-              '"which known defects are present on the hosts I pointed at": broad, cheap, ' +
-              'repeatable, blind to logic flaws and to anything it could not reach, and generous ' +
-              'with false positives. A CONFIGURATION or FRAMEWORK REVIEW answers "which expected ' +
+              'Imagine four different ways somebody could check whether your house is safe. A phone ' +
+              'app could scan for known problems: a door sensor reporting low battery, a smart lock ' +
+              'that has not been updated. A safety inspector could walk through with a standard ' +
+              'checklist and note which items the checklist requires are simply missing, like no ' +
+              'smoke alarm on the landing. A professional could actually try to break in, using real ' +
+              'burglary techniques, and report what they managed to reach in an evening. Or a ' +
+              'sensible friend could just watch how your household actually lives for a week, and ' +
+              'notice that the back door is propped open all afternoon because the kids are in and ' +
+              'out, no matter how good the lock on it is. All four are legitimate ways to learn ' +
+              'something about your safety, and none of them answers the same question as the ' +
+              'others.\n\n' +
+              'Assessment methods in security work the same way, and most disappointment in this ' +
+              'work comes from buying one and expecting the answer that only another one gives. A ' +
+              'VULNERABILITY SCAN is the phone app: it answers "which known defects are present on ' +
+              'the hosts I pointed at". Broad, cheap, repeatable, blind to logic flaws and to ' +
+              'anything it could not reach, and generous with false positives. A CONFIGURATION or ' +
+              'FRAMEWORK REVIEW is the inspector with the checklist: it answers "which expected ' +
               'controls are missing", which is the gap analysis, and it is the only one of the four ' +
-              'that reliably finds absent controls rather than broken ones.\n\n' +
-              'A PENETRATION TEST answers "what could an attacker of this skill achieve in this ' +
-              'time, from this starting point". It proves exploitability, which no scanner can, and ' +
-              'its silence proves very little: a clean test means this tester did not get in this ' +
-              'time. A MANUAL REVIEW of process and people answers "how does this actually get ' +
-              'operated", and it is where the untested backup, the shared admin account, and the ' +
-              'change process nobody follows are found. Scanners cannot see any of those three, ' +
-              'which is why an assessment made only of scans reports a tidy estate right up until ' +
-              'the day it does not.',
+              'that reliably finds an absent control rather than a broken one.\n\n' +
+              'A PENETRATION TEST is the professional actually trying to get in: it answers "what ' +
+              'could an attacker of this skill achieve in this time, from this starting point". It ' +
+              'proves exploitability, which no scanner can, and its silence proves very little: a ' +
+              'clean test means this tester did not get in this time, not that nobody ever could. A ' +
+              'MANUAL REVIEW of process and people is the friend watching how the household actually ' +
+              'lives: it answers "how does this actually get operated", and it is where the ' +
+              'untested backup, the shared admin account, and the change process nobody follows are ' +
+              'found. The phone app cannot see any of those three, which is why an assessment made ' +
+              'only of scans reports a tidy estate right up until the day it does not.',
           },
           options: [
             { id: 'a', label: 'A scan establishes which known defects are present on the systems it could reach, and nothing about business logic.' },
@@ -944,12 +1164,12 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           solution:
             'A, B, C, and D. Each method supports one narrow claim, and stating that claim ' +
-            'precisely is most of the professionalism in this work. E is the assertion to refuse. ' +
-            'A scan covers known defects on reachable hosts, so a clean result is compatible with ' +
-            'an unauthenticated business logic flaw, a shared administrator credential, and a ' +
-            'backup nobody has ever restored. The useful reply to "are we secure" is a question ' +
-            'about which claim they need supported, followed by the method that supports it and ' +
-            'what it will still leave unknown.',
+            'precisely is most of the professionalism in this work. E is the assertion to refuse. A ' +
+            'scan is the phone app, and a clean result from it is entirely compatible with an ' +
+            'unauthenticated business logic flaw, a shared administrator credential, and a backup ' +
+            'nobody has ever restored, none of which the app was ever built to notice. The useful ' +
+            'reply to "are we secure" is a question about which claim they actually need supported, ' +
+            'followed by the method that supports it and what it will still leave unknown.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -961,7 +1181,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Write the limits of your method into the report, not into a footnote. It is the ' +
+            'Write the limits of your method into the report, not into a footnote, the same way ' +
+            'you would say plainly that the phone app never checked the back door. It is the ' +
             'difference between an assessment and a reassurance.',
           practice: [],
         },
@@ -980,20 +1201,31 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'Select all that apply.',
           teach: {
             concept:
-              'CVSS scores the intrinsic severity of a specific software vulnerability: how it is ' +
-              'reached, how hard it is to exploit, what privileges it needs, and what it does to ' +
-              'confidentiality, integrity, and availability. That is a genuinely useful common ' +
-              'language, and it is the reason two teams can discuss a defect without arguing about ' +
-              'adjectives.\n\n' +
-              'It is not a risk score, for three reasons. It has no notion of the asset: the same ' +
-              'defect scores the same on a public payment gateway and on a decommissioned test box. ' +
-              'The base score deliberately excludes your environment and the current state of ' +
-              'exploitation, which is what the temporal and environmental metrics and the exploit ' +
-              'prediction data are for, and almost nobody fills those in. And it has no vocabulary ' +
-              'for organisational weaknesses at all: there is no attack vector for "the runbook is ' +
-              'stale", so a number assigned to one is invented. Sorting remediation by base score ' +
-              'therefore reliably patches a 9.8 on a lab host before a 6.5 on the system that ' +
-              'processes every payment.',
+              'Think about how sharp a kitchen knife is. That is a real, measurable property of the ' +
+              'knife itself: you can test the edge and give it a number, and the number does not ' +
+              'change depending on where the knife happens to be sitting. But "how dangerous is this ' +
+              'knife" is a different question entirely, and it depends on where it is. The same ' +
+              'razor-sharp knife is close to harmless locked in a display case at a museum, and ' +
+              'genuinely dangerous left on a low counter in a kitchen with a toddler who can reach ' +
+              'it. Sharpness is a property of the knife. Danger is a property of the knife plus its ' +
+              'surroundings.\n\n' +
+              'CVSS measures sharpness. It scores the intrinsic severity of a specific software ' +
+              'vulnerability: how it is reached, how hard it is to exploit, what privileges it ' +
+              'needs, and what it does to confidentiality, integrity, and availability. That is a ' +
+              'genuinely useful common language, and it is the reason two teams can discuss a defect ' +
+              'without arguing about adjectives.\n\n' +
+              'It is not a risk score, for three reasons, and all three come back to the museum case ' +
+              'versus the kitchen counter. It has no notion of the asset: the same defect scores the ' +
+              'same on a public payment gateway and on a decommissioned test box, the same way the ' +
+              'sharpness number does not know which room the knife is in. The base score ' +
+              'deliberately excludes your environment and the current state of exploitation, which ' +
+              'is what the temporal and environmental metrics and the exploit prediction data are ' +
+              'for, and almost nobody fills those in. And it has no vocabulary for organisational ' +
+              'weaknesses at all: there is no attack vector for "the runbook is stale", so a number ' +
+              'assigned to one is simply invented. Sorting remediation by base score alone therefore ' +
+              'reliably patches a 9.8 on a lab host, the sharp knife in the museum case, before a 6.5 ' +
+              'on the system that processes every payment, the merely sharp knife on the counter ' +
+              'within reach.',
           },
           options: [
             { id: 'a', label: 'A base score describes the defect, not what it would cost this organisation, because it has no view of the asset.' },
@@ -1008,13 +1240,15 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'What would it even mean to give an attack vector to a document that is out of date?',
           ],
           solution:
-            'A, B, C, and D. Severity is a property of the defect; risk is a property of the defect ' +
-            'meeting your estate, and the base score is defined to exclude exactly the context that ' +
-            'turns one into the other. E is the error the spreadsheet is built on: identical scores ' +
-            'on the payment gateway and on a lab host are not identical risks, and the fix is to ' +
-            'carry asset criticality and exploitation status alongside severity rather than to ' +
-            'abandon CVSS. The invented scores on process gaps should simply come out; they belong ' +
-            'in the gap analysis, which has its own way of expressing consequence.',
+            'A, B, C, and D. Severity is sharpness, a property of the defect; risk is danger, a ' +
+            'property of the defect meeting your estate, and the base score is defined to exclude ' +
+            'exactly the context that turns one into the other. E is the error the spreadsheet is ' +
+            'built on: identical scores on the payment gateway and on a lab host are not identical ' +
+            'risks any more than the same knife is equally dangerous in a museum case and on a low ' +
+            'counter, and the fix is to carry asset criticality and exploitation status alongside ' +
+            'severity rather than to abandon CVSS. The invented scores on process gaps should simply ' +
+            'come out; they belong in the gap analysis, which has its own way of expressing ' +
+            'consequence.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -1027,7 +1261,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'This one comes up in your first month. The polite version is to add two columns, asset ' +
-            'tier and known exploitation, and let the sort order change by itself.',
+            'tier and known exploitation, the room the knife is in and whether anyone is reaching ' +
+            'for it, and let the sort order change by itself.',
           practice: [],
         },
         {
@@ -1043,20 +1278,33 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'with a claim it can actually support? Select all that apply.',
           teach: {
             concept:
-              'AI assessment is measurement, so each test buys one specific claim and no more. ' +
-              'Subgroup evaluation buys "performance differs between these populations by this ' +
-              'much on this data", which is the evidence behind a fairness finding. Adversarial ' +
-              'probing buys "inputs of this class produced this behaviour", which is a positive ' +
-              'result when it works and a weak negative when it does not. Reviewing the data ' +
-              'lineage and retention buys "we can or cannot say where this corpus came from and ' +
-              'what is in it", which is the finding regulators reach for first.\n\n' +
-              'A monitoring and governance review buys something different and often more ' +
-              'valuable: whether anybody would notice a failure. It answers "is there an owner, a ' +
-              'performance baseline, an alert, and a path to act", and its findings are usually the ' +
-              'highest scoring in a young programme because they multiply every other risk. What no ' +
-              'test buys is a general claim of safety. Every result is about the inputs that were ' +
-              'tried and the data that was held out, and a report that does not say so is selling ' +
-              'certainty that was never measured.',
+              'Imagine testing a new dish before it goes on the menu. You could serve it to a small ' +
+              'panel of diners drawn from different backgrounds and see whether one group ' +
+              'consistently rates it worse than another, which tells you about fairness across the ' +
+              'people who tried it, nothing more. You could hand it to a food critic who deliberately ' +
+              'orders it with strange substitutions and off-menu requests to see when it breaks, ' +
+              'which tells you it held up against what that critic tried, and if the critic could ' +
+              'not break it, that is a weak claim rather than a proof of robustness against everyone ' +
+              'who might try. You could check the supplier invoices to establish exactly where every ' +
+              'ingredient came from. Or you could ask a completely different question: if the ' +
+              'kitchen served a burnt dish tonight, would anybody notice before the next hundred went ' +
+              'out the same way?\n\n' +
+              'AI assessment is measurement of exactly this kind, so each test buys one specific ' +
+              'claim and no more. Subgroup evaluation, the diner panel, buys "performance differs ' +
+              'between these populations by this much on this data", which is the evidence behind a ' +
+              'fairness finding. Adversarial probing, the food critic, buys "inputs of this class ' +
+              'produced this behaviour", a positive result when it works and a weak negative when it ' +
+              'does not. Reviewing the data lineage and retention, the supplier invoices, buys "we ' +
+              'can or cannot say where this corpus came from and what is in it", which is the ' +
+              'finding regulators reach for first.\n\n' +
+              'A monitoring and governance review buys something different and often more valuable: ' +
+              'whether anybody would notice a failure at all. It answers "is there an owner, a ' +
+              'performance baseline, an alert, and a path to act", the kitchen question, and its ' +
+              'findings are usually the highest scoring in a young programme because they multiply ' +
+              'every other risk. What no test buys, however many of these you run, is a general ' +
+              'claim of safety. Every result is about the inputs that were tried and the data that ' +
+              'was held out, and a report that does not say so is selling certainty that was never ' +
+              'measured.',
           },
           options: [
             { id: 'a', label: 'Evaluation broken down by subgroup supports a claim about performance differences between populations on that data.' },
@@ -1072,12 +1320,13 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           solution:
             'A, B, C, and D. Each test supports a bounded, checkable claim, and B is worth dwelling ' +
-            'on because negative results get overstated constantly: "we tried and could not break ' +
-            'it" is worth something only when the report says how hard it tried. E is the sentence ' +
-            'to strike from any report you write. Safety is not a property a battery of tests can ' +
-            'establish about a system whose behaviour was learned; what you can establish is what ' +
-            'was measured, on what data, with what left unknown, plus whether anybody is watching ' +
-            'the parts you could not measure.',
+            'on because negative results get overstated constantly: "the critic tried and could not ' +
+            'break it" is worth something only when the report says how hard the critic actually ' +
+            'tried. E is the sentence to strike from any report you write. Safety is not a property ' +
+            'a battery of tests can establish about a system whose behaviour was learned, any more ' +
+            'than a diner panel and a supplier audit prove a kitchen is safe; what you can establish ' +
+            'is what was measured, on what data, with what left unknown, plus whether anybody is ' +
+            'watching the parts you could not measure.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -1089,8 +1338,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'If you want the deep version of these tests, they are the AI Security Pathway and the ' +
-            'Model Lab. Here the skill is scoping: knowing what to buy and what it will prove.',
+            'If you want the deep version of these tests, actually running the panel and playing ' +
+            'the critic, they are the AI Security Pathway and the Model Lab. Here the skill is ' +
+            'scoping: knowing what to buy and what it will prove.',
           practice: [],
         },
         {
@@ -1107,19 +1357,28 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'three or four sentences, write this as a gap finding.',
           teach: {
             concept:
-              'A gap finding has three parts and dies without any of them. CURRENT STATE: what is ' +
-              'true today, stated factually and without adjectives, because the team being assessed ' +
-              'will read it and an exaggeration costs you the whole report. REQUIRED STATE: what ' +
-              'should be true, and where that requirement comes from, whether a framework control, ' +
-              'a regulatory obligation, or an internal policy. CONSEQUENCE: what the gap makes ' +
-              'possible or prevents, in terms the reader can weigh.\n\n' +
+              'A good doctor\'s note about a health problem has a shape you would recognise ' +
+              'immediately: your blood pressure is currently this number, it should be under this ' +
+              'other number, and if it stays where it is, here is specifically what that raises your ' +
+              'risk of. Take away any one of those three sentences and the note stops being useful. ' +
+              '"Your blood pressure is high" with no target and no consequence is an adjective, not ' +
+              'a diagnosis you can act on.\n\n' +
+              'A gap finding has the same three parts and dies without any of them. CURRENT STATE: ' +
+              'what is true today, stated factually and without adjectives, because the team being ' +
+              'assessed will read it and an exaggeration costs you the whole report the moment they ' +
+              'notice it. REQUIRED STATE: what should be true, and where that requirement comes ' +
+              'from, whether a framework control, a regulatory obligation, or an internal policy, ' +
+              'the target number. CONSEQUENCE: what the gap makes possible or prevents, in terms the ' +
+              'reader can weigh, what it actually raises your risk of.\n\n' +
               'The third part is the one juniors leave out, and it is why findings get closed as ' +
-              '"noted". Nobody funds "we do not conform to control CM-3". They fund "we cannot ' +
-              'establish which version is serving, so during an incident we cannot tell whether ' +
-              'the fix has taken effect, and we cannot answer a regulator who asks what decided a ' +
-              'given case". A good answer states the missing gate and the missing version record, ' +
-              'names an expected practice or requirement, and says what the organisation is unable ' +
-              'to do because of it: investigate an incident, roll back, or evidence a decision.',
+              '"noted" rather than fixed. Nobody funds "we do not conform to control CM-3", any more ' +
+              'than a patient changes their diet because a chart says a number is outside a range. ' +
+              'They fund "we cannot establish which version is serving, so during an incident we ' +
+              'cannot tell whether the fix has taken effect, and we cannot answer a regulator who ' +
+              'asks what decided a given case". A good answer states the missing gate and the ' +
+              'missing version record, names an expected practice or requirement, and says what the ' +
+              'organisation is unable to do because of it: investigate an incident, roll back, or ' +
+              'evidence a decision.',
           },
           hints: [
             'Three parts: what is true now, what should be true, and what the difference costs.',
@@ -1128,14 +1387,15 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           solution:
             'Today, models reach production without a recorded evaluation result, and there is no ' +
-            'registry entry identifying which version is serving. The expected practice, and what ' +
-            'our own change management policy requires of any other production system, is an ' +
-            'approval gate with retained evidence of the evaluation and a version record for what ' +
-            'is running. Because neither exists, we cannot tell during an incident whether a ' +
-            'rollback took effect, we cannot reproduce or explain a decision a customer disputes, ' +
-            'and a degraded model could serve for months with no record of when it changed. Closing ' +
-            'the gap means a gate that stores the evaluation result and a registry entry updated ' +
-            'on every deployment.',
+            'registry entry identifying which version is serving, the current-state reading. The ' +
+            'expected practice, and what our own change management policy requires of any other ' +
+            'production system, is an approval gate with retained evidence of the evaluation and a ' +
+            'version record for what is running, the target number. Because neither exists, we ' +
+            'cannot tell during an incident whether a rollback took effect, we cannot reproduce or ' +
+            'explain a decision a customer disputes, and a degraded model could serve for months ' +
+            'with no record of when it changed, the specific harm the gap raises our risk of. ' +
+            'Closing the gap means a gate that stores the evaluation result and a registry entry ' +
+            'updated on every deployment.',
           expectedOutput:
             'A finding stating the current absence of an evaluation gate and version record, the ' +
             'required practice or policy, and a concrete consequence such as being unable to roll ' +
@@ -1155,7 +1415,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'Read your finding back and ask: could the team fix this without asking me a single ' +
-            'question? If not, it is not finished.',
+            'question, the way a patient can act on a doctor\'s note without calling back to ask ' +
+            'what the number means? If not, it is not finished.',
           practice: [],
         },
       ],
@@ -1185,19 +1446,32 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'all that apply.',
           teach: {
             concept:
-              'The quantitative vocabulary is small. Single loss expectancy is what one occurrence ' +
-              'costs. Annual rate of occurrence is how many times a year you expect it. Annualised ' +
-              'loss expectancy is the two multiplied, and it is the number that makes two unlike ' +
-              'risks comparable: a rare catastrophe and a frequent nuisance can be placed on the ' +
-              'same axis.\n\n' +
-              'The decision rule follows directly. Compute the ALE before the control, compute the ' +
-              'residual ALE with it, and compare the difference to the annual cost of the control. ' +
-              'What the arithmetic will not do is make the inputs true. The frequency is usually an ' +
-              'estimate with an enormous range, and the single loss figure is assembled from ' +
-              'guesses about downtime and legal cost. That is not a reason to refuse to quantify, ' +
-              'because "high" and "medium" are also guesses and they hide their own uncertainty. It ' +
-              'is a reason to publish the inputs next to the answer, so the argument is about the ' +
-              'frequency estimate rather than about your credibility.',
+              'This is exactly the arithmetic an insurance company does before it sets your car ' +
+              'premium, just done for a company instead of a driver. If writing off a car costs ' +
+              '20,000 and that happens to the average driver once every twenty years, the insurer\'s ' +
+              'rational annual charge for that risk is 1,000 a year, the cost divided by how rarely ' +
+              'it happens. Charge less than that and the insurer loses money over time. Charge more ' +
+              'and a competitor undercuts them. Nobody thinks this arithmetic promises you will pay ' +
+              'exactly 1,000 in claims every single year, some years are nothing and one year might ' +
+              'be the whole car, but averaged over enough drivers and enough years it is the honest ' +
+              'price of the risk.\n\n' +
+              'The quantitative vocabulary in risk work is the same three ideas, named formally. ' +
+              'SINGLE LOSS EXPECTANCY is what one occurrence costs, the price of the car. ANNUAL ' +
+              'RATE OF OCCURRENCE is how many times a year you expect it, once every twenty years ' +
+              'written as a rate. ANNUALISED LOSS EXPECTANCY is the two multiplied, and it is the ' +
+              'number that makes two unlike risks comparable on the same axis: a rare catastrophe ' +
+              'and a frequent nuisance can both be reduced to "what this costs us in an average ' +
+              'year", which is the only way to compare them honestly.\n\n' +
+              'The decision rule follows directly, the same one the insurer uses when deciding ' +
+              'whether to fund a discount for drivers who install a tracker. Compute the ALE before ' +
+              'the control, compute the residual ALE with it, and compare the difference to the ' +
+              'annual cost of the control. What the arithmetic will not do is make the inputs true. ' +
+              'The frequency is usually an estimate with an enormous range, and the single loss ' +
+              'figure is assembled from guesses about downtime and legal cost. That is not a reason ' +
+              'to refuse to quantify, because "high" and "medium" are also guesses, just guesses ' +
+              'that hide their own uncertainty instead of stating it. It is a reason to publish the ' +
+              'inputs next to the answer, so the argument is about the frequency estimate rather ' +
+              'than about your credibility.',
           },
           options: [
             { id: 'a', label: 'The annualised loss expectancy before the control is 50,000.' },
@@ -1212,14 +1486,16 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'One option promises something an expected value cannot promise about any single year.',
           ],
           solution:
-            'A, B, C, and D. Before the control, 500,000 multiplied by 0.1 is 50,000 a year. After ' +
-            'it, 500,000 multiplied by 0.02 is 10,000, so the control removes 40,000 of expected ' +
-            'annual loss for 20,000 of annual cost and is worth funding on these numbers. D matters ' +
-            'as much as the arithmetic: the frequencies are estimates and the argument should ' +
-            'happen where the uncertainty is. E is the misreading that discredits quantitative work ' +
-            'when the bad year arrives anyway. An expected value is an average over many years and ' +
-            'says nothing about next year, and a control that cuts frequency by four fifths still ' +
-            'leaves a real chance of a full loss.',
+            'A, B, C, and D. Before the control, 500,000 multiplied by 0.1 is 50,000 a year, the ' +
+            'insurer\'s honest annual price of the ransomware risk as it stands. After the control, ' +
+            '500,000 multiplied by 0.02 is 10,000, so the control removes 40,000 of expected annual ' +
+            'loss for 20,000 of annual cost and is worth funding on these numbers alone. D matters ' +
+            'as much as the arithmetic: the frequencies are estimates, and the argument should ' +
+            'happen where the uncertainty actually is rather than about whether quantification is ' +
+            'legitimate. E is the misreading that discredits quantitative work the moment a bad year ' +
+            'arrives anyway. An expected value is an average over many years, like the insurer\'s ' +
+            'premium, and says nothing about next year specifically, and a control that cuts ' +
+            'frequency by four fifths still leaves a real chance of a full loss in any given year.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -1231,7 +1507,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Say the last part out loud when you present numbers. The executive who hears ' +
+            'Say the last part out loud when you present numbers, the same way an honest insurer ' +
+            'would never claim the premium is a promise about this year. The executive who hears ' +
             '"expected annual loss" as "the most we can lose" will remember it against you.',
           practice: [],
         },
@@ -1251,21 +1528,33 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'that apply.',
           teach: {
             concept:
-              'This is the single most common way a quantitative model breaks, and it is worth ' +
-              'being able to name the fault rather than just sensing that the answer is silly. The ' +
-              'per-incident cost was drawn from a rare, escalated case: a lawsuit, a press cycle, a ' +
-              'regulatory letter. It was then applied to every occurrence of a much broader event, ' +
-              'a recommendation somebody would call inappropriate. The two are different events ' +
-              'wearing one label.\n\n' +
-              'Three faults compound. The cost of the tail case is applied to the whole ' +
-              'distribution. The events are not independent: a thousand bad recommendations in one ' +
-              'week produce one news story, not a thousand lawsuits. And the total exceeds any ' +
-              'plausible bound, since a figure larger than the company, the market, and in this ' +
-              'case most economies is arithmetic that has stopped describing the world. The repair ' +
-              'is to model the escalation path: how many harmful outputs are noticed, of those how ' +
-              'many are reported, of those how many escalate, and what each stage costs. Bounding ' +
-              'the answer by something real, such as the largest fine the regulator has issued, is ' +
-              'a sanity check, not a cheat.',
+              'Stay with the car insurer for a moment. Almost every claim an insurer pays out is a ' +
+              'fender-bender costing a few hundred pounds to fix. Once in a great while, a crash ' +
+              'ends in a catastrophic lawsuit costing millions. If an actuary took that rare ' +
+              'multi-million-pound lawsuit and applied its cost to every single fender-bender on the ' +
+              'books, multiplying it by the number of minor claims filed each year, the resulting ' +
+              'premium would be larger than the entire insurance industry. Everyone who saw the ' +
+              'number would immediately know something had gone wrong in the arithmetic, because a ' +
+              'fender-bender and a catastrophic lawsuit are two different kinds of event wearing the ' +
+              'same word, "claim".\n\n' +
+              'This is the single most common way a quantitative model breaks, and it is worth being ' +
+              'able to name the fault rather than just sensing the answer is silly. The per-incident ' +
+              'cost was drawn from a rare, escalated case: a lawsuit, a press cycle, a regulatory ' +
+              'letter. It was then applied to every occurrence of a much broader event, a ' +
+              'recommendation somebody would merely call inappropriate. The two are different events ' +
+              'wearing one label, exactly like the fender-bender and the catastrophic lawsuit both ' +
+              'being called "a claim".\n\n' +
+              'Three faults compound. The cost of the tail case gets applied to the whole ' +
+              'distribution. The events are treated as independent when they are not: a thousand ' +
+              'bad recommendations in one week produce one news story, not a thousand lawsuits, the ' +
+              'same way a thousand fender-benders in one city in one week do not produce a thousand ' +
+              'catastrophic settlements. And the total exceeds any plausible bound, since a figure ' +
+              'larger than the company, the market, and in this case most economies is arithmetic ' +
+              'that has stopped describing the world. The repair is to model the escalation path: ' +
+              'how many harmful outputs are noticed, of those how many are reported, of those how ' +
+              'many escalate, and what each stage actually costs. Bounding the answer by something ' +
+              'real, such as the largest fine the regulator has issued, is a sanity check, not a ' +
+              'cheat.',
           },
           options: [
             { id: 'a', label: 'A cost drawn from a rare escalated case has been applied to every occurrence of a much broader event.' },
@@ -1280,13 +1569,14 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'What happens when a thousand of these occur in the same week?',
           ],
           solution:
-            'A, B, C, and D. The tail cost has been applied to the whole distribution, independence ' +
-            'has been assumed where correlation is obvious, the answer breaks any plausible bound, ' +
-            'and the fix is a staged escalation model with per-stage costs. E is the overcorrection ' +
-            'to resist. Qualitative ratings are not more reliable, they are less inspectable: ' +
-            '"high" hides the same guess with none of the arithmetic exposed, so nobody can find ' +
-            'the error. A broken model that can be corrected in a meeting is more useful than a ' +
-            'colour that cannot be argued with.',
+            'A, B, C, and D. The tail cost, the catastrophic lawsuit, has been applied to the whole ' +
+            'distribution of ordinary fender-benders, independence has been assumed where ' +
+            'correlation is obvious, the answer breaks any plausible bound, and the fix is a staged ' +
+            'escalation model with per-stage costs. E is the overcorrection to resist. Qualitative ' +
+            'ratings are not more reliable, they are less inspectable: "high" hides the same guess ' +
+            'with none of the arithmetic exposed, so nobody can find the error the way you just ' +
+            'found this one. A broken model that can be corrected in a meeting is more useful than ' +
+            'a colour that cannot be argued with at all.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -1299,7 +1589,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'Keep the sanity check. Before you present any figure, ask what it is a fraction of, ' +
-            'and whether that fraction is believable.',
+            'and whether that fraction is believable, the same instinct that tells you instantly ' +
+            'something is wrong with an insurance premium bigger than the industry that sets it.',
           practice: [],
         },
         {
@@ -1316,19 +1607,30 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'frequent than rare. Which of the following are correct? Select all that apply.',
           teach: {
             concept:
-              'A matrix is a communication device. Its job is to let a room full of people who ' +
-              'will not read the register see which handful of risks are different from the rest, ' +
-              'and it does that job well. Two properties have to hold for it to mean anything. It ' +
-              'must be MONOTONIC: holding impact fixed, moving to a higher likelihood can never ' +
-              'lower the rating, and the same the other way round. And its bands must be DEFINED, ' +
-              'in numbers, somewhere a reader can find them, because "likely" means different ' +
-              'things to a lawyer and an engineer.\n\n' +
-              'What it cannot carry is arithmetic. The scales are ordinal: high, medium, and low ' +
-              'are an order, not quantities, so multiplying them and comparing the products is a ' +
-              'calculation on labels rather than on values. Two risks in the same cell can differ ' +
-              'by an order of magnitude in expected loss, which is why the cell is a starting point ' +
-              'for a conversation and not a ranking. Use the map to select what gets discussed, and ' +
-              'the underlying estimates to decide what gets funded.',
+              'Think of a weather service\'s storm warning colours: green, amber, red. Their whole ' +
+              'purpose is to let somebody who will never read the meteorologist\'s full report ' +
+              'glance at one word and know roughly how worried to be. For that to work, two things ' +
+              'have to be true. A more severe storm can never be coloured a calmer colour than a ' +
+              'milder one, or the system actively misleads people; and everybody watching has to ' +
+              'agree on what "amber" actually means in terms of wind speed and rainfall, or two ' +
+              'towns prepare completely differently for the same forecast.\n\n' +
+              'A risk matrix is that same colour system, applied to likelihood and impact instead of ' +
+              'wind and rain. Its job is to let a room full of people who will not read the register ' +
+              'see which handful of risks are different from the rest, and it does that job well ' +
+              'when built properly. Two properties have to hold for it to mean anything. It must be ' +
+              'MONOTONIC: holding impact fixed, moving to a higher likelihood can never lower the ' +
+              'rating, and the same the other way round, the same rule that says a worse storm ' +
+              'cannot get a calmer colour. And its bands must be DEFINED, in numbers, somewhere a ' +
+              'reader can find them, because "likely" means different things to a lawyer and an ' +
+              'engineer the same way "amber" would mean nothing if every forecaster set their own ' +
+              'threshold.\n\n' +
+              'What it cannot carry is arithmetic. The scales are ordinal: high, medium, and low are ' +
+              'an order, not quantities, so multiplying them and comparing the products is a ' +
+              'calculation performed on labels rather than on values, the equivalent of multiplying ' +
+              '"amber" by "red" and expecting a wind speed to fall out. Two risks in the same cell ' +
+              'can differ by an order of magnitude in expected loss, which is why the cell is a ' +
+              'starting point for a conversation and not a ranking. Use the map to select what gets ' +
+              'discussed, and the underlying estimates to decide what gets funded.',
           },
           options: [
             { id: 'a', label: 'The matrix is broken: a less likely risk cannot outrank a more likely one at the same impact.' },
@@ -1343,12 +1645,14 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'If high is 3 and medium is 2, is a high impact really one and a half times a medium one?',
           ],
           solution:
-            'A, B, C, and D. The described matrix is non-monotonic and would have to be redrawn, ' +
-            'and the fault is not cosmetic: a reader who spots it stops trusting every other cell. ' +
+            'A, B, C, and D. The described matrix is non-monotonic, a milder likelihood painted a ' +
+            'more alarming colour than a worse one, and would have to be redrawn; the fault is not ' +
+            'cosmetic, because a reader who spots it stops trusting every other cell on the page, ' +
+            'the same way one obviously wrong storm colour makes you distrust the whole forecast. ' +
             'Bands need numeric definitions, cells hide real differences in magnitude, and the map ' +
-            'should drive the agenda rather than the budget. E is the habit to break. Ordinal ' +
-            'labels have an order but no spacing, so multiplying them produces a number with no ' +
-            'units that nonetheless gets sorted, argued over, and eventually believed.',
+            'should drive the agenda rather than the budget. E is the habit to break. Ordinal labels ' +
+            'have an order but no spacing, so multiplying them produces a number with no units that ' +
+            'nonetheless gets sorted, argued over, and eventually believed.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -1360,7 +1664,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'When you inherit a heat map, check monotonicity first. It takes thirty seconds and it ' +
+            'When you inherit a heat map, check monotonicity first, the same way you would notice ' +
+            'instantly if a forecast painted a hurricane green. It takes thirty seconds and it ' +
             'tells you how much care went into everything else.',
           practice: [],
         },
@@ -1379,19 +1684,28 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'in twelve months.',
           teach: {
             concept:
-              'Accepting a risk is a legitimate and common outcome. Most risks are accepted, ' +
-              'because mitigating everything costs more than the organisation is worth. What ' +
-              'separates a decision from a drift is what gets written down.\n\n' +
-              'Four elements make an acceptance auditable. WHO accepted it, by name and role, and ' +
-              'it has to be somebody with the authority to carry the consequence, which is the ' +
-              'business owner rather than the security team. WHAT was accepted, stated as the ' +
-              'specific exposure and its estimated cost, so nobody can later claim they thought it ' +
-              'was smaller. FOR HOW LONG, because an acceptance with no expiry becomes permanent ' +
-              'by silence. And UNDER WHAT CONDITIONS it must be revisited: a review date, plus the ' +
+              'A doctor recommends a treatment, and a patient is entitled to decline it, but a ' +
+              'responsible clinic does not just shrug and move on. It documents informed consent: ' +
+              'the patient understood the specific risk of declining, understood it by name and ' +
+              'signed for it themselves rather than leaving it to be inferred, and the file carries ' +
+              'a date to revisit the conversation if circumstances change. That paperwork is not ' +
+              'bureaucracy for its own sake, it is the difference between a considered decision the ' +
+              'patient made and something that just happened because nobody followed up.\n\n' +
+              'Accepting a risk in a company works the same way and is a legitimate, common outcome. ' +
+              'Most risks are accepted, because mitigating everything costs more than the ' +
+              'organisation is worth. What separates a real decision from a drift is exactly what ' +
+              'gets written down.\n\n' +
+              'Four elements make an acceptance auditable. WHO accepted it, by name and role, and it ' +
+              'has to be somebody with the authority to carry the consequence, the patient rather ' +
+              'than a bystander, which in a company is the business owner rather than the security ' +
+              'team. WHAT was accepted, stated as the specific exposure and its estimated cost, so ' +
+              'nobody can later claim they thought it was smaller. FOR HOW LONG, because an ' +
+              'acceptance with no expiry becomes permanent by silence, a decision nobody actually ' +
+              'made twice. And UNDER WHAT CONDITIONS it must be revisited: a review date, plus the ' +
               'triggers that would invalidate the reasoning, such as the service becoming ' +
               'customer-facing, the outage estimate growing, or a regulator taking an interest. ' +
               'Interim measures belong in it too, because "we accepted it" reads very differently ' +
-              'from "we accepted it and put a manual review process behind it".',
+              'from "we accepted it and put a manual review process behind it in the meantime".',
           },
           hints: [
             'An acceptance is a decision with a name on it. Whose name, and for how long?',
@@ -1399,14 +1713,15 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'A good answer names an accountable owner rather than the security team, states the exposure being accepted, gives an expiry or review date, and names a trigger that would reopen it.',
           ],
           solution:
-            'The head of the fraud function accepts, as the accountable owner of the service, the ' +
-            'exposure of losing automated fraud scoring for up to one day in a regional outage, ' +
-            'estimated at the value of a day of manual review plus the fraud that gets through it. ' +
-            'The acceptance runs to the end of the financial year and expires then rather than ' +
-            'carrying over silently, and it is reviewed sooner if any of three triggers fires: the ' +
-            'estimated outage exceeds a day, transaction volume grows past the point where manual ' +
-            'review can cope, or a regulator asks about availability of the control. In the ' +
-            'meantime the manual review fallback is documented and tested once, so the accepted ' +
+            'The head of the fraud function accepts, as the accountable owner of the service and ' +
+            'the only one with standing to sign for this the way a patient signs their own consent ' +
+            'form, the exposure of losing automated fraud scoring for up to one day in a regional ' +
+            'outage, estimated at the value of a day of manual review plus the fraud that gets ' +
+            'through it. The acceptance runs to the end of the financial year and expires then ' +
+            'rather than carrying over silently, and it is reviewed sooner if any of three triggers ' +
+            'fires: the estimated outage exceeds a day, transaction volume grows past the point ' +
+            'where manual review can cope, or a regulator asks about availability of the control. In ' +
+            'the meantime the manual review fallback is documented and tested once, so the accepted ' +
             'outcome is degraded service rather than no fraud control at all.',
           expectedOutput:
             'An acceptance naming an accountable business owner, the specific exposure accepted, an ' +
@@ -1426,7 +1741,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'An acceptance with no expiry is how organisations end up living with an exposure ' +
-            'nobody in the building chose. The date is the whole control.',
+            'nobody in the building actually chose, the unsigned consent form nobody revisits. The ' +
+            'date is the whole control.',
           practice: [],
         },
       ],
@@ -1453,22 +1769,35 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'classifications are correct? Select all that apply.',
           teach: {
             concept:
-              'Controls are classified by what they do to the event. PREVENTIVE controls stop it ' +
-              'happening: patching, network segmentation, multi-factor authentication. DETECTIVE ' +
-              'controls tell you it is happening or has happened: alerting, logging, integrity ' +
-              'monitoring, the restore test that discovers the backup was broken. CORRECTIVE ' +
-              'controls reduce the damage afterwards: backups, failover, the incident response ' +
-              'plan. DETERRENT controls change somebody\'s decision to try: visible monitoring, ' +
-              'stated consequences, and the knowledge that actions are attributed, which mostly ' +
-              'matters for insiders. COMPENSATING controls are what you put in place when the ' +
-              'control you wanted is not available: a manual review because the automated check ' +
-              'cannot ship until next quarter.\n\n' +
-              'The classification is not bookkeeping. A design made only of preventive controls ' +
-              'assumes prevention works, and prevention eventually does not, which is how an ' +
-              'organisation finds out during the incident that nobody could see anything and there ' +
-              'was nothing to fall back to. Layering across the types is the whole idea behind ' +
-              'defence in depth, and the quickest review of any control set is to count how many ' +
-              'of the five it contains.',
+              'Think about everything a careful household does to protect itself from a burglary, ' +
+              'because it already uses all five kinds of control without naming them. A good lock ' +
+              'on the door stops the burglar getting in at all. A burglar alarm does not stop ' +
+              'anyone, it tells you somebody is in the house right now, or that somebody was, when ' +
+              'you get home and see it went off. Contents insurance and a spare set of keys with a ' +
+              'neighbour do not stop the burglary or tell you about it, they reduce the damage ' +
+              'afterwards, because you can replace what was taken and get back in. A visible camera ' +
+              'over the door and a sign saying the house is alarmed do not physically stop anyone ' +
+              'either, they change a burglar\'s decision to try this house rather than the one next ' +
+              'door with no camera. And if the lock breaks the week before you can get a locksmith, ' +
+              'wedging a chair against the door is not the control you wanted, it is a stand-in ' +
+              'until the real one is back.\n\n' +
+              'Controls in a company are classified by exactly the same five jobs. PREVENTIVE ' +
+              'controls stop the event happening: patching, network segmentation, multi-factor ' +
+              'authentication, the lock. DETECTIVE controls tell you it is happening or has ' +
+              'happened: alerting, logging, integrity monitoring, the restore test that discovers ' +
+              'the backup was broken, the alarm. CORRECTIVE controls reduce the damage afterwards: ' +
+              'backups, failover, the incident response plan, the insurance and the spare key. ' +
+              'DETERRENT controls change somebody\'s decision to try in the first place: visible ' +
+              'monitoring, stated consequences, and the knowledge that actions are attributed, which ' +
+              'mostly matters for insiders, the camera over the door. COMPENSATING controls are what ' +
+              'you put in place when the control you actually wanted is not available: a manual ' +
+              'review because the automated check cannot ship until next quarter, the wedged chair.\n\n' +
+              'The classification is not bookkeeping. A design made only of locks assumes the lock ' +
+              'never fails, and locks eventually do, which is how a household finds out during the ' +
+              'burglary that there was no alarm to hear and no insurance to fall back on. Layering ' +
+              'across the types is the whole idea behind defence in depth, and the quickest review ' +
+              'of any control set, in a house or a company, is to count how many of the five it ' +
+              'actually contains.',
           },
           options: [
             { id: 'a', label: 'Network segmentation that limits how far an infection spreads is preventive.' },
@@ -1483,13 +1812,13 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'What does the organisation with only preventive controls know on the morning the prevention failed?',
           ],
           solution:
-            'A, B, C, and D. Segmentation limits spread before the fact, alerting tells you, ' +
-            'backups reduce the damage after, and the manual review stands in for a control that ' +
-            'does not exist yet, which is exactly what compensating means. E is the design error ' +
-            'this taxonomy exists to catch. Prevention fails, and when it does an all-preventive ' +
-            'organisation has no detection to notice and no correction to fall back on, so a ' +
-            'containable incident becomes a recovery project. Counting the types in a control set ' +
-            'is the fastest review you can do.',
+            'A, B, C, and D. Segmentation limits spread before the fact, like the lock; alerting ' +
+            'tells you, like the alarm; backups reduce the damage after, like the insurance; and the ' +
+            'manual review stands in for a control that does not exist yet, exactly what ' +
+            'compensating means, the wedged chair. E is the design error this taxonomy exists to ' +
+            'catch. Prevention fails, and when it does an all-preventive organisation has no alarm ' +
+            'to notice and no insurance to fall back on, so a containable incident becomes a ' +
+            'recovery project. Counting the types in a control set is the fastest review you can do.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -1502,7 +1831,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'When you review somebody else\'s control set, count the types before you assess the ' +
-            'quality. The missing category tells you more than the weak control does.',
+            'quality, the same way you would notice a house with a great lock and no alarm at all. ' +
+            'The missing category tells you more than the weak control does.',
           practice: [],
         },
         {
@@ -1519,21 +1849,31 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'are accurate? Select all that apply.',
           teach: {
             concept:
-              'A control catalogue is a menu, not a target. SP 800-53 contains hundreds of ' +
-              'controls organised into families such as access control, audit and accountability, ' +
-              'contingency planning, and incident response, and its value is that somebody has ' +
-              'already thought of the control you would have forgotten. The selection is supposed ' +
-              'to be driven by the categorisation of the system: a higher impact system takes a ' +
-              'larger baseline, and the baseline is then tailored for what the system actually ' +
-              'does.\n\n' +
-              'Implementing everything fails for reasons that are practical rather than ' +
-              'philosophical. Controls have running costs measured in people, and an organisation ' +
-              'that implements two hundred controls badly is worse off than one that implements ' +
-              'thirty properly, because every one of them needs an owner, evidence, and review. ' +
-              'Controls also conflict: aggressive logging collects personal data that another ' +
-              'obligation says to minimise, and lockout thresholds trade an availability risk for ' +
-              'an access one. And a control that exists on paper and is never verified is worse ' +
-              'than no control, because it is counted in the design as though it worked.',
+              'Walk into the security aisle of a hardware store and you will find hundreds of ' +
+              'products: deadbolts, window alarms, motion lights, safes, camera systems, glass-break ' +
+              'sensors. The aisle is not a shopping list you are meant to clear, it is a menu ' +
+              'somebody stocked because a sensible person has already thought through most of the ' +
+              'ways a house gets broken into, and you pick the items that suit your specific house, ' +
+              'a ground-floor flat needs different things than a detached house with a long ' +
+              'driveway.\n\n' +
+              'A control catalogue is that aisle, not a target to empty the shelves of. SP 800-53 ' +
+              'contains hundreds of controls organised into families such as access control, audit ' +
+              'and accountability, contingency planning, and incident response, and its value is ' +
+              'that somebody has already thought of the control you would have forgotten. The ' +
+              'selection is supposed to be driven by the categorisation of the system: a higher ' +
+              'impact system, the detached house with valuables in it, takes a larger baseline, and ' +
+              'the baseline is then tailored for what the system actually does.\n\n' +
+              'Buying everything in the aisle fails for reasons that are practical rather than ' +
+              'philosophical. Controls have running costs measured in people, the same way every ' +
+              'alarm needs a battery changed and every camera needs someone to actually watch the ' +
+              'footage, and an organisation that implements two hundred controls badly is worse off ' +
+              'than one that implements thirty properly, because every one of them needs an owner, ' +
+              'evidence, and review. Controls also conflict: aggressive logging collects personal ' +
+              'data that another obligation says to minimise, and lockout thresholds trade an ' +
+              'availability risk for an access one, the way a motion light aimed wrong blinds you ' +
+              'every time you come home. And a control that exists on paper and is never verified is ' +
+              'worse than no control at all, because it is counted in the design as though it ' +
+              'worked, the alarm sign on a house with no actual alarm behind it.',
           },
           options: [
             { id: 'a', label: 'Selection should follow the system\'s categorisation, then be tailored to what it actually does.' },
@@ -1549,11 +1889,12 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           solution:
             'A, B, C, and D. Selection is driven by categorisation and tailored from there, every ' +
-            'control carries a running cost, some controls trade against each other, and an ' +
-            'unverified control is a false entry in your own design. E is the metric to refuse. ' +
-            'Counting controls rewards implementing cheap ones and never verifying any of them, ' +
-            'and it produces the board slide that says two hundred controls implemented over an ' +
-            'estate where nobody has restored a backup in a year.',
+            'control carries a running cost like the battery in every alarm, some controls trade ' +
+            'against each other like a motion light aimed the wrong way, and an unverified control ' +
+            'is a false entry in your own design, an alarm sign with nothing behind it. E is the ' +
+            'metric to refuse. Counting controls rewards implementing cheap ones and never verifying ' +
+            'any of them, and it produces the board slide that says two hundred controls implemented ' +
+            'over an estate where nobody has restored a backup in a year.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -1566,7 +1907,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'The question that reframes these conversations is simple: which risk does this control ' +
-            'reduce, and how much. A control with no risk behind it is somebody following a list.',
+            'reduce, and how much. A control with no risk behind it is somebody clearing a shelf ' +
+            'because it was there, not because their house needed it.',
           practice: [],
         },
         {
@@ -1582,21 +1924,29 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'control with a risk it genuinely reduces? Select all that apply.',
           teach: {
             concept:
-              'AI governance controls look bureaucratic until you attach each one to the failure it ' +
-              'prevents. A MODEL REGISTRY reduces the risk that nobody can say what is serving, ' +
-              'which is the finding that blocks every incident investigation and every regulatory ' +
-              'answer. An APPROVAL GATE with retained evaluation evidence reduces the risk of a ' +
-              'model reaching production without anybody establishing that it works. PERFORMANCE ' +
-              'AND DRIFT MONITORING reduces the risk that degradation goes unnoticed, which is the ' +
-              'characteristic AI failure because the service stays up and the outputs stay ' +
-              'plausible. SUBGROUP EVALUATION at the gate and on a schedule reduces the risk of ' +
-              'systematically worse treatment of one population.\n\n' +
+              'AI governance controls look bureaucratic until you go back to the bakery from ' +
+              'earlier and attach each one to the specific failure it prevents. A MODEL REGISTRY is ' +
+              'the log book that says which recipe version tonight\'s kitchen is actually cooking ' +
+              'from, and it reduces the risk that nobody can say what is serving, the finding that ' +
+              'blocks every incident investigation and every regulatory answer. An APPROVAL GATE ' +
+              'with retained evaluation evidence is the quality check before a batch ever leaves the ' +
+              'kitchen, and it reduces the risk of a model reaching production without anybody ' +
+              'establishing that it actually works. PERFORMANCE AND DRIFT MONITORING is somebody ' +
+              'tasting the bread regularly rather than assuming it still tastes like it did on day ' +
+              'one, and it reduces the risk that degradation goes unnoticed, the characteristic AI ' +
+              'failure, because the loaves still look fine on the shelf. SUBGROUP EVALUATION at the ' +
+              'gate and on a schedule is checking the dish does not consistently disappoint one ' +
+              'group of diners, and it reduces the risk of systematically worse treatment of one ' +
+              'population.\n\n' +
               'Two more are worth knowing. DOCUMENTATION of purpose and limits, often as a model ' +
-              'card, reduces the risk of a model being reused outside the conditions it was ' +
-              'validated for, which is a common way a reasonable model becomes an unreasonable ' +
-              'decision. And an INCIDENT PATH for AI failures reduces the risk that a discovered ' +
-              'problem has nowhere to go: an operator who notices the model behaving oddly and has ' +
-              'no route to escalate will do nothing, and the finding dies with them.',
+              'card, is the recipe card that says what the dish was actually designed for and what ' +
+              'it was never tested with, and it reduces the risk of a model being reused outside the ' +
+              'conditions it was validated for, a common way a reasonable model becomes an ' +
+              'unreasonable decision. And an INCIDENT PATH for AI failures is a way for kitchen ' +
+              'staff to actually flag a burnt batch to someone who can act on it, and it reduces the ' +
+              'risk that a discovered problem has nowhere to go: an operator who notices the model ' +
+              'behaving oddly and has no route to escalate will do nothing, and the finding dies ' +
+              'with them.',
           },
           options: [
             { id: 'a', label: 'A model registry reduces the risk that nobody can say which version is serving during an incident.' },
@@ -1611,12 +1961,14 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'A board can require a control. It cannot be a control on the request path.',
           ],
           solution:
-            'A, B, C, and D. Each reduces a specific and nameable failure. E is the pairing to ' +
-            'reject, and the reason matters: a governance board is a real control, but the risk it ' +
-            'reduces is that nobody decided, nobody owned it, and no requirement was set. It sits ' +
-            'nowhere near the request path, so claiming it defends against adversarial input is ' +
-            'the kind of overreach that gets governance dismissed as theatre by the engineers who ' +
-            'have to build the actual filter.',
+            'A, B, C, and D. Each reduces a specific and nameable failure, the way each item in the ' +
+            'kitchen prevents a specific way the bread goes wrong. E is the pairing to reject, and ' +
+            'the reason matters: a governance board is a real control, but the risk it reduces is ' +
+            'that nobody decided, nobody owned it, and no requirement was set. It sits nowhere near ' +
+            'the request path, no more than a restaurant\'s ownership meeting sits in the kitchen ' +
+            'during service, so claiming it defends against adversarial input is the kind of ' +
+            'overreach that gets governance dismissed as theatre by the engineers who have to build ' +
+            'the actual filter.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -1628,8 +1980,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Governance controls earn their place by naming the failure they prevent. Present them ' +
-            'that way and the engineering team stops treating them as paperwork.',
+            'Governance controls earn their place by naming the failure they prevent, the same way ' +
+            'the log book earns its place by naming which incident it would have prevented. Present ' +
+            'them that way and the engineering team stops treating them as paperwork.',
           practice: [],
         },
         {
@@ -1647,22 +2000,34 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'say how you would know each one is working.',
           teach: {
             concept:
-              'Silent degradation is the characteristic AI failure, and it needs layers rather ' +
-              'than one clever fix. The detective layer is a performance baseline and an alert on ' +
-              'movement away from it, measured against outcomes that arrive later, such as ' +
-              'confirmed fraud, rather than against the model\'s own confidence, which is precisely ' +
-              'the thing that stops being trustworthy. Input drift monitoring is the earlier ' +
-              'signal, because the population shifts before the outcomes come back.\n\n' +
+              'A smoke detector on the ceiling with a dead battery looks exactly like a working ' +
+              'smoke detector on the ceiling. Nobody finds out the difference by looking at it, only ' +
+              'by there being a fire, or by deliberately testing it beforehand. Silent degradation ' +
+              'in a model is the same shape of problem: the model is not lying, it genuinely does ' +
+              'not know it has gone stale, and it keeps confidently announcing scores in exactly the ' +
+              'tone it always used, so nothing about looking at the service tells you anything has ' +
+              'changed.\n\n' +
+              'This is why silent degradation needs layers rather than one clever fix, in a model or ' +
+              'in a house. The detective layer is a performance baseline and an alert on movement ' +
+              'away from it, measured against outcomes that arrive later, such as confirmed fraud, ' +
+              'rather than against the model\'s own confidence, which is precisely the thing that ' +
+              'stops being trustworthy, asking the smoke detector whether it thinks it still works. ' +
+              'Input drift monitoring is the earlier signal, because the population shifts before ' +
+              'the outcomes come back, the smell of smoke before the alarm itself would go off.\n\n' +
               'The corrective layer is a defined response: a retraining trigger, a rollback to a ' +
               'known version, and a fallback such as rules or a review queue for the period in ' +
-              'between. The preventive layer is scheduled revalidation, so a model cannot serve ' +
-              'indefinitely on evidence from the day it shipped.\n\n' +
-              'Then the part most designs omit. Every control needs a way to know it is working, ' +
-              'and for monitoring that means testing that the alert fires: replay a period of known ' +
+              'between, the fire extinguisher kept by the door. The preventive layer is scheduled ' +
+              'revalidation, so a model cannot serve indefinitely on evidence from the day it ' +
+              'shipped, the battery you swap on a calendar rather than waiting for a beep that may ' +
+              'never come.\n\n' +
+              'Then the part most designs omit, and it is the one that actually answers the smoke ' +
+              'detector question. Every control needs a way to know it is working, and for ' +
+              'monitoring that means testing that the alert fires: replay a period of known ' +
               'degradation, or inject shifted data, and confirm somebody was paged and knew what to ' +
-              'do. An alert nobody has ever seen fire is a hypothesis, and this failure mode is ' +
-              'exactly the one where an untested alert stays silent for a year and everybody reads ' +
-              'the silence as health.',
+              'do, the same as pressing the test button rather than trusting the detector is fine ' +
+              'because it has never gone off. An alert nobody has ever seen fire is a hypothesis, ' +
+              'and this failure mode is exactly the one where an untested alert stays silent for a ' +
+              'year and everybody reads the silence as health.',
           },
           hints: [
             'You need something that notices, something that responds, and something that stops the model serving forever on old evidence.',
@@ -1676,10 +2041,12 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'outcomes come back. Behind the alert I would define the response in advance: a ' +
             'retraining trigger, a rollback to the last validated version, and a rules-based or ' +
             'manual review fallback to carry the decision in the meantime. I would also require ' +
-            'scheduled revalidation, so the model cannot keep serving on evidence from the day it ' +
-            'shipped. To know the detection works I would replay a period of known degradation, ' +
-            'confirm the alert fires and reaches somebody who knows what to do, and treat an alert ' +
-            'that has never been tested as an assumption rather than a control.',
+            'scheduled revalidation, so the model cannot keep serving indefinitely on evidence from ' +
+            'the day it shipped, the same discipline as changing a smoke detector\'s battery on a ' +
+            'calendar rather than waiting for a beep. To know the detection actually works I would ' +
+            'replay a period of known degradation, confirm the alert fires and reaches somebody who ' +
+            'knows what to do, and treat an alert that has never been tested as an assumption rather ' +
+            'than a control.',
           expectedOutput:
             'A layered answer naming outcome-based or drift monitoring, a defined response such as ' +
             'retraining, rollback, or fallback, and a way of verifying the detection actually ' +
@@ -1698,8 +2065,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'The verification half is what separates a control design from a wish list. Ask it of ' +
-            'every control you ever propose, including the ones you inherit.',
+            'The verification half is what separates a control design from a wish list, the same as ' +
+            'the difference between owning a smoke detector and knowing it works. Ask it of every ' +
+            'control you ever propose, including the ones you inherit.',
           practice: [],
         },
       ],
@@ -1726,6 +2094,14 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'following are accurate? Select all that apply.',
           teach: {
             concept:
+              'Think about a word processor that autosaves your document every ten minutes, and ' +
+              'then your laptop crashes. Two completely separate questions matter now, and they are ' +
+              'often confused for one. How much of your work is actually gone: everything you typed ' +
+              'since the last autosave, which could be a sentence or could be a whole page, ' +
+              'depending only on how recently it last saved. And separately, how long until you are ' +
+              'writing again: restarting the laptop, reopening the file, finding your place. A ' +
+              'faster laptop gets you back to a blank cursor sooner. It does nothing at all for the ' +
+              'paragraph you never got to save.\n\n' +
               'A business impact analysis asks one question of each function: as the outage gets ' +
               'longer, at what point does the harm become unacceptable, and what does the harm ' +
               'consist of? From the answer come three numbers. MAXIMUM TOLERABLE DOWNTIME is the ' +
@@ -1734,14 +2110,16 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
               'be shorter than the maximum tolerable downtime, with the gap as the margin. ' +
               'RECOVERY POINT OBJECTIVE is how much data you are willing to lose, measured ' +
               'backwards from the failure.\n\n' +
-              'The two objectives are set by different questions and met by different investments. ' +
-              'RTO is about how fast you can stand the service back up, and it is bought with ' +
-              'standby capacity, automation, and rehearsal. RPO is about how recently your last ' +
-              'usable copy was taken, and it is bought with more frequent recovery points: ' +
+              'The two objectives are set by different questions and met by different investments, ' +
+              'exactly like the crashed laptop. RTO is about how fast you can stand the service back ' +
+              'up, the time to a blank cursor, and it is bought with standby capacity, automation, ' +
+              'and rehearsal. RPO is about how recently your last usable copy was taken, how far ' +
+              'back the autosave reaches, and it is bought with more frequent recovery points: ' +
               'replication, log shipping, snapshots. Buying a faster restore does nothing for RPO, ' +
-              'which is the confusion that shows up in almost every first continuity plan. And ' +
-              'both numbers are business decisions with a price attached, not technical preferences ' +
-              'for the infrastructure team to choose alone.',
+              'the same way a faster laptop does not recover the unsaved paragraph, which is the ' +
+              'confusion that shows up in almost every first continuity plan. And both numbers are ' +
+              'business decisions with a price attached, not technical preferences for the ' +
+              'infrastructure team to choose alone.',
           },
           options: [
             { id: 'a', label: 'RTO is a target for how long recovery takes; RPO is a target for how much data may be lost.' },
@@ -1758,7 +2136,7 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           solution:
             'A, B, C, and D. The two objectives answer different questions and are bought with ' +
             'different things, which is why C is the one worth remembering: no amount of restore ' +
-            'speed recovers data that was never captured. E is the failure mode of an ' +
+            'speed recovers a paragraph that was never saved. E is the failure mode of an ' +
             'enthusiastic first plan. Setting everything to an hour means either the numbers are ' +
             'fiction, which is worse than having none because people plan against them, or the ' +
             'company is paying for standby capacity on the internal wiki. Tiering exists so the ' +
@@ -1775,7 +2153,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'Bring the impact curve to the meeting, not the targets. When finance sees where the ' +
-            'harm accelerates, they set the numbers themselves and they own them.',
+            'harm accelerates, the same way anyone can see the difference between losing a sentence ' +
+            'and losing a chapter, they set the numbers themselves and they own them.',
           practice: [],
         },
         {
@@ -1793,20 +2172,23 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           teach: {
             concept:
               'Continuity plans are usually undone not by an unforeseen disaster but by arithmetic ' +
-              'nobody did. Two sums settle whether a plan meets its targets. The recovery point ' +
-              'you can actually achieve is bounded by the interval between recovery points: with ' +
-              'one nightly backup, a failure just before the next one loses almost a full day, so ' +
-              'the achievable RPO is close to twenty-four hours regardless of anything else. The ' +
-              'recovery time you can achieve is the whole path back to service, which includes ' +
-              'retrieving the copy, restoring it, validating it, and reconnecting whatever depends ' +
-              'on it, not just the copy operation.\n\n' +
+              'nobody did. Two sums settle whether a plan meets its targets, and both are the ' +
+              'autosave question from the last exercise done properly. The recovery point you can ' +
+              'actually achieve is bounded by the interval between recovery points: with one ' +
+              'nightly backup, the document only ever autosaving once a day, a failure just before ' +
+              'the next one loses almost a full day of work, so the achievable RPO is close to ' +
+              'twenty-four hours regardless of anything else you do. The recovery time you can ' +
+              'achieve is the whole path back to service, which includes retrieving the copy, ' +
+              'restoring it, validating it, and reconnecting whatever depends on it, not just the ' +
+              'moment the file itself is copied.\n\n' +
               'When a target is missed, the fix has to match which number is missed. A shorter RPO ' +
               'needs more frequent capture: log shipping, continuous replication, more frequent ' +
-              'snapshots. A shorter RTO needs a faster path back: warm standby, pre-staged ' +
-              'infrastructure, rehearsed procedure, automation. Buying hardware that restores twice ' +
-              'as fast improves the second number and leaves the first exactly where it was, and ' +
-              'presenting that purchase as a fix for both is how a plan passes review and fails in ' +
-              'practice.',
+              'snapshots, autosaving every thirty seconds instead of once a day. A shorter RTO needs ' +
+              'a faster path back: warm standby, pre-staged infrastructure, rehearsed procedure, ' +
+              'automation, a laptop that boots in seconds instead of minutes. Buying hardware that ' +
+              'restores twice as fast improves the second number and leaves the first exactly where ' +
+              'it was, the faster laptop that still only autosaved once a night, and presenting that ' +
+              'purchase as a fix for both is how a plan passes review and fails in practice.',
           },
           options: [
             { id: 'a', label: 'The achievable RPO is close to twenty-four hours, so the four-hour RPO is not met.' },
@@ -1822,12 +2204,13 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           solution:
             'A, B, C, and D. A single nightly copy means a failure late in the day loses almost ' +
-            'twenty-four hours of orders, and an eight-hour restore misses a four-hour RTO before ' +
-            'anybody has had a bad day on top of it. The two shortfalls need different investments, ' +
-            'which is the point of the exercise. E is the purchase that gets approved because it ' +
-            'sounds like an improvement: halving the restore helps the RTO and does absolutely ' +
-            'nothing for the RPO, because the data that was never captured cannot be restored ' +
-            'quickly or slowly.',
+            'twenty-four hours of orders, the document that only autosaved at 2am, and an ' +
+            'eight-hour restore misses a four-hour RTO before anybody has had a bad day on top of ' +
+            'it. The two shortfalls need different investments, which is the point of the exercise. ' +
+            'E is the purchase that gets approved because it sounds like an improvement: halving the ' +
+            'restore helps the RTO and does absolutely nothing for the RPO, because data that was ' +
+            'never captured cannot be restored quickly or slowly, only autosaved more often in the ' +
+            'first place.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -1840,7 +2223,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'Do this arithmetic on every plan you are handed. The gap between the stated target ' +
-            'and the achievable one is a finding, and it is usually the largest one in the document.',
+            'and the achievable one is a finding, and it is usually the largest one in the document, ' +
+            'hiding behind a backup schedule nobody worked through to its logical end.',
           practice: [],
         },
         {
@@ -1856,21 +2240,29 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'in its continuity plan? Select all that apply.',
           teach: {
             concept:
-              'A model in a decision path has an unusual continuity profile, because it has two ' +
-              'distinct bad days. The first is ordinary unavailability: the service is down and ' +
-              'every decision that depended on it is blocked. The plan needs a defined degraded ' +
-              'mode, which usually means falling back to rules, to a queue for manual review, or ' +
-              'to a documented default such as accepting below a value threshold and holding above ' +
-              'it. Somebody has to choose that default in advance, because a system that fails ' +
-              'open lets fraud through and a system that fails closed stops trading, and both are ' +
-              'business decisions rather than engineering ones.\n\n' +
-              'The second bad day is worse and is specific to learned systems: the service is up, ' +
-              'fast, and wrong, because a stale model or a mismatched feature pipeline is serving. ' +
-              'Continuity for that means being able to detect it and roll back to a known version, ' +
-              'which is why the registry and the pipeline are continuity assets and not just ' +
-              'governance ones. The plan also needs a capacity check on the fallback, since the ' +
-              'manual review queue that is fine for a quiet hour is not fine for a Friday, and a ' +
-              'rehearsal, because a fallback nobody has exercised is a paragraph rather than a plan.',
+              'Picture an automatic sprinkler system that waters the lawn on a timer, with no human ' +
+              'checking the weather first. It can fail in two completely different ways. It can ' +
+              'simply stop, a broken valve, and the lawn goes dry, an outage anyone would notice and ' +
+              'understand. Or it can keep running perfectly on schedule while it is pouring rain ' +
+              'outside, soaking a lawn that never needed it, and from the street everything looks ' +
+              'fine, the sprinkler is doing exactly what it always does, it is just doing the wrong ' +
+              'thing.\n\n' +
+              'A model in a decision path has that same unusual continuity profile, because it has ' +
+              'two distinct bad days. The first is ordinary unavailability, the broken valve: the ' +
+              'service is down and every decision that depended on it is blocked. The plan needs a ' +
+              'defined degraded mode, which usually means falling back to rules, to a queue for ' +
+              'manual review, or to a documented default such as accepting below a value threshold ' +
+              'and holding above it. Somebody has to choose that default in advance, because a ' +
+              'system that fails open lets fraud through and a system that fails closed stops ' +
+              'trading, and both are business decisions rather than engineering ones.\n\n' +
+              'The second bad day is worse and is specific to learned systems: the sprinkler ' +
+              'watering in the rain. The service is up, fast, and wrong, because a stale model or a ' +
+              'mismatched feature pipeline is serving. Continuity for that means being able to ' +
+              'detect it and roll back to a known version, which is why the registry and the ' +
+              'pipeline are continuity assets and not just governance ones. The plan also needs a ' +
+              'capacity check on the fallback, since the manual review queue that is fine for a ' +
+              'quiet hour is not fine for a Friday, and a rehearsal, because a fallback nobody has ' +
+              'exercised is a paragraph rather than a plan.',
           },
           options: [
             { id: 'a', label: 'A defined degraded mode, with the fail-open or fail-closed choice made by the business in advance.' },
@@ -1887,11 +2279,12 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           solution:
             'A, B, C, and D. The degraded mode and the fail-open or fail-closed choice are business ' +
             'decisions that must be made before the incident, rollback covers the failure mode ' +
-            'where the service is healthy and wrong, capacity determines whether the fallback ' +
-            'survives peak, and rehearsal is what turns the plan into a capability. E is the ' +
-            'assumption that produces a plan covering only half the failures: a model is not just ' +
-            'another API, because an API that is up is usually correct and a model that is up can ' +
-            'be quietly serving decisions nobody would sign off.',
+            'where the service is healthy and wrong, the sprinkler running in the rain, capacity ' +
+            'determines whether the fallback survives peak, and rehearsal is what turns the plan ' +
+            'into a capability. E is the assumption that produces a plan covering only half the ' +
+            'failures: a model is not just another API, because an API that is up is usually ' +
+            'correct and a model that is up can be quietly serving decisions nobody would sign off, ' +
+            'watering a lawn that is already flooded.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -1904,7 +2297,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'The fail-open or fail-closed question is the one to take to the business first. It is ' +
-            'the decision they will be asked about afterwards, so they should make it beforehand.',
+            'the decision they will be asked about afterwards, so they should make it beforehand, ' +
+            'not discover it the day the sprinkler is found running in a storm.',
           practice: [],
         },
         {
@@ -1921,19 +2315,27 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'finance director could put a number against.',
           teach: {
             concept:
-              'An impact statement about an AI outage fails when it describes the technology ' +
-              'instead of the day. "The scoring service is unavailable" tells a finance director ' +
-              'nothing they can price. What they can price is the decision that stops being made ' +
-              'automatically, the volume of those decisions, what happens to each one instead, and ' +
-              'what that substitute costs in money and in risk.\n\n' +
+              'If a supermarket\'s self-checkout machines all go down at once, telling the store ' +
+              'manager "the self-checkout system is unavailable" is true and useless. What the ' +
+              'manager actually needs to know is how many customers an hour normally use those ' +
+              'machines, what happens to each of them now, extra staffed tills, a longer queue, some ' +
+              'customers leaving, and what that substitute costs, in wages for the extra staff and ' +
+              'in the sales walking out the door. The broken machine is not the story. The queue ' +
+              'behind it is.\n\n' +
+              'An impact statement about an AI outage fails the same way when it describes the ' +
+              'technology instead of the day. "The scoring service is unavailable" tells a finance ' +
+              'director nothing they can price. What they can price is the decision that stops being ' +
+              'made automatically, the volume of those decisions, what happens to each one instead, ' +
+              'and what that substitute costs in money and in risk.\n\n' +
               'So the statement has three moving parts. VOLUME: how many decisions a day, and how ' +
-              'they are distributed, since a peak-hour outage is not an average one. SUBSTITUTE: ' +
-              'what carries the decision instead, whether a rules fallback, a manual queue, or a ' +
-              'blanket accept or decline, and what it costs to run. RESIDUAL HARM: what gets ' +
-              'through or gets wrongly stopped while the substitute is carrying the load, because ' +
-              'the fallback is worse than the model or you would not have built the model. Naming ' +
-              'the fail-open or fail-closed posture is what makes the number real: fraud losses if ' +
-              'you accept, lost trading and customer complaints if you decline.',
+              'they are distributed, since a peak-hour outage is not an average one, the machines ' +
+              'going down at lunchtime rather than at 3am. SUBSTITUTE: what carries the decision ' +
+              'instead, whether a rules fallback, a manual queue, or a blanket accept or decline, ' +
+              'and what it costs to run, the extra staffed tills. RESIDUAL HARM: what gets through or ' +
+              'gets wrongly stopped while the substitute is carrying the load, because the fallback ' +
+              'is worse than the model or you would not have built the model in the first place. ' +
+              'Naming the fail-open or fail-closed posture is what makes the number real: fraud ' +
+              'losses if you accept, lost trading and customer complaints if you decline.',
           },
           hints: [
             'A finance director cannot price "the service is down". What decision stops being made, and how many times a day?',
@@ -1941,7 +2343,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'A good answer names the decision volume, the fallback that carries it, and the residual loss, whether that is fraud getting through or good transactions being declined.',
           ],
           solution:
-            'For one working day, roughly the daily volume of card authorisations goes unscored, so ' +
+            'For one working day, like every checkout in the store going manual at once, roughly ' +
+            'the daily volume of card authorisations goes unscored, so ' +
             'each one is decided by the rules fallback and a manual review queue rather than by the ' +
             'model. The queue can absorb only a fraction of that volume, so the practical posture ' +
             'is to accept below a value threshold and hold above it, which means fraud that the ' +
@@ -1967,8 +2370,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Notice you never mentioned a model architecture. The impact statement is about the ' +
-            'decision, which is why finance can act on it.',
+            'Notice you never mentioned a model architecture, any more than a store manager\'s ' +
+            'report would mention what brand the self-checkout machines are. The impact statement ' +
+            'is about the decision, which is why finance can act on it.',
           practice: [],
         },
       ],
@@ -1995,21 +2399,33 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'following are accurate? Select all that apply.',
           teach: {
             concept:
-              'Recovery arrangements sit on a spectrum between money and time, and naming the ' +
-              'points on it keeps the conversation honest. A COLD arrangement is space, power, and ' +
-              'a procurement plan: cheap to hold, and recovery is measured in days to weeks because ' +
-              'everything has to be built. A WARM arrangement has the infrastructure standing and ' +
-              'the data arriving on a delay, so recovery is hours: somebody promotes it, checks it, ' +
-              'and redirects traffic. A HOT arrangement runs the service continuously with data ' +
-              'kept current, so recovery is minutes and can be automatic, and you pay for the ' +
-              'second copy every day whether you use it or not.\n\n' +
+              'Think about three ways to prepare for a flat tyre. You could have no spare at all ' +
+              'and a phone number for a breakdown service, cheap, and when it happens you are ' +
+              'waiting by the roadside for however long it takes them to arrive and fit a wheel. You ' +
+              'could carry a compact spare in the boot, already there, needing only to be fitted, so ' +
+              'you are moving again in twenty minutes rather than an hour. Or you could keep a ' +
+              'second complete car, taxed, insured, and running, parked in the driveway at all ' +
+              'times, so a flat tyre costs you the time it takes to walk to the other car and pull ' +
+              'out. All three solve the same problem. They cost wildly different amounts, whether or ' +
+              'not the tyre ever goes flat.\n\n' +
+              'Recovery arrangements sit on exactly that spectrum between money and time, and naming ' +
+              'the points on it keeps the conversation honest. A COLD arrangement is the breakdown ' +
+              'service call: space, power, and a procurement plan, cheap to hold, and recovery is ' +
+              'measured in days to weeks because everything has to be built. A WARM arrangement is ' +
+              'the spare in the boot: the infrastructure standing and the data arriving on a delay, ' +
+              'so recovery is hours, somebody promotes it, checks it, and redirects traffic. A HOT ' +
+              'arrangement is the second running car in the driveway: it runs the service ' +
+              'continuously with data kept current, so recovery is minutes and can be automatic, and ' +
+              'you pay for that second car every single day whether the tyre ever goes flat or not.\n\n' +
               'Two things get forgotten. Capacity: a standby sized for half the load meets its RTO ' +
-              'and then falls over, which is a discovery best made in a rehearsal. And ' +
-              'correlation: a second site that shares an identity provider, a certificate ' +
-              'authority, a pipeline, or a cloud region control plane is not independent, and the ' +
-              'event that takes the first will frequently take the second. What you are buying is ' +
-              'a shorter recovery time, so the choice should be driven by the RTO the business ' +
-              'agreed to pay for, not by a preference for the most impressive option.',
+              'and then falls over, the spare car that cannot actually carry the whole family and ' +
+              'the luggage, which is a discovery best made in a rehearsal rather than on the day. And ' +
+              'correlation: a second site that shares an identity provider, a certificate authority, ' +
+              'a pipeline, or a cloud region control plane is not independent, the equivalent of ' +
+              'parking both cars in the same garage that could flood, and the event that takes the ' +
+              'first will frequently take the second. What you are buying is a shorter recovery ' +
+              'time, so the choice should be driven by the RTO the business agreed to pay for, not ' +
+              'by a preference for the most impressive option on the lot.',
           },
           options: [
             { id: 'a', label: 'A cold arrangement is cheap to hold and recovers in days, because the environment has to be built.' },
@@ -2025,11 +2441,12 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           solution:
             'A, B, C, and D. The spectrum trades money for recovery time, capacity determines ' +
-            'whether the arrangement survives the first hour after failover, and shared ' +
-            'dependencies quietly undo the independence you thought you bought. E is the answer ' +
-            'that sounds responsible and is not: a hot arrangement for a system whose business ' +
-            'agreed to a two-day RTO is money that could have shortened the recovery of something ' +
-            'that actually matters. Buy the RTO the impact analysis justified.',
+            'whether the arrangement survives the first hour after failover, the spare car that ' +
+            'cannot actually take the whole load, and shared dependencies quietly undo the ' +
+            'independence you thought you bought, the two cars in one garage. E is the answer that ' +
+            'sounds responsible and is not: a hot arrangement, a second car running every day, for a ' +
+            'system whose business agreed to a two-day RTO is money that could have shortened the ' +
+            'recovery of something that actually matters. Buy the RTO the impact analysis justified.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -2042,7 +2459,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'The shared-dependency question is the one that catches experienced teams. Ask what the ' +
-            'two sites have in common before you ask how far apart they are.',
+            'two sites have in common, like the garage both cars share, before you ask how far ' +
+            'apart they are.',
           practice: [],
         },
         {
@@ -2058,22 +2476,31 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'of the following must be in the recovery scope? Select all that apply.',
           teach: {
             concept:
-              'Recovering a model is not recovering a file. The trained artefact is necessary and ' +
-              'nowhere near sufficient, and every item left out of scope becomes a silent defect ' +
-              'rather than a visible failure.\n\n' +
-              'Four things have to come back together. The WEIGHTS, obviously. The FEATURE ' +
-              'PIPELINE and its configuration, because the model expects inputs prepared exactly ' +
-              'the way they were during training, and a version mismatch produces plausible wrong ' +
-              'scores rather than an error anybody notices. The REGISTRY AND VERSION RECORD, so ' +
-              'you can establish which artefact was serving before the failure and therefore which ' +
-              'one to restore. And the EVALUATION SET with its labels, because otherwise you can ' +
-              'stand the service up but cannot demonstrate that what you restored performs as it ' +
-              'did, which is the actual definition of recovered for a system whose behaviour is ' +
-              'empirical.\n\n' +
-              'The training corpus is a separate decision with its own retention obligations: ' +
-              'keeping it lets you retrain from scratch, and keeping it forever is a privacy ' +
-              'finding waiting to happen. That tension is normal and it belongs in the plan ' +
-              'explicitly rather than being settled by whoever configured the bucket.',
+              'Go back to the bakery\'s signature dish. If a fire destroyed the kitchen and you ' +
+              'wanted the bread back exactly as customers remembered it, recovering just the plate ' +
+              'photograph would tell you almost nothing. You would need the recipe, so the flour is ' +
+              'measured the same way. You would need the log book, so you know which exact version ' +
+              'of the recipe was in use the day before the fire, since it had been tweaked twice ' +
+              'that year. And you would need last month\'s tasting notes, so you can actually confirm ' +
+              'the rebuilt bread tastes like the bread customers were buying, rather than just ' +
+              'assuming it does because it looks the same coming out of the oven.\n\n' +
+              'Recovering a model is not recovering a file, for the same reason. The trained ' +
+              'artefact is necessary and nowhere near sufficient, and every item left out of scope ' +
+              'becomes a silent defect rather than a visible failure.\n\n' +
+              'Four things have to come back together. The WEIGHTS, obviously, the plate. The ' +
+              'FEATURE PIPELINE and its configuration, the recipe, because the model expects inputs ' +
+              'prepared exactly the way they were during training, and a version mismatch produces ' +
+              'plausible wrong scores rather than an error anybody notices. The REGISTRY AND VERSION ' +
+              'RECORD, the log book, so you can establish which artefact was serving before the ' +
+              'failure and therefore which one to restore. And the EVALUATION SET with its labels, ' +
+              'the tasting notes, because otherwise you can stand the service up but cannot ' +
+              'demonstrate that what you restored performs as it did, which is the actual definition ' +
+              'of recovered for a system whose behaviour is empirical.\n\n' +
+              'The training corpus, the ingredient suppliers, is a separate decision with its own ' +
+              'retention obligations: keeping it lets you retrain from scratch, and keeping it ' +
+              'forever is a privacy finding waiting to happen. That tension is normal and it belongs ' +
+              'in the plan explicitly rather than being settled by whoever configured the storage ' +
+              'bucket.',
           },
           options: [
             { id: 'a', label: 'The trained model artefact itself.' },
@@ -2090,11 +2517,12 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           solution:
             'A, B, C, and D. The pipeline is the one people learn the hard way: a model restored ' +
             'with a slightly different preprocessing step does not fail, it scores, and the scores ' +
-            'are wrong in a way that takes weeks to notice. The registry tells you what to restore, ' +
-            'and the evaluation set is how you prove you restored it, which is what recovered has ' +
-            'to mean for a system whose behaviour is established by measurement. E is the shortcut ' +
-            'to reject: documentation of a pipeline is not the pipeline, and the gap between them ' +
-            'is exactly where the silent defect lives.',
+            'are wrong in a way that takes weeks to notice, bread that comes out of the oven looking ' +
+            'perfect and tasting faintly off. The registry tells you what to restore, and the ' +
+            'evaluation set is how you prove you restored it, which is what recovered has to mean ' +
+            'for a system whose behaviour is established by measurement rather than by appearance. ' +
+            'E is the shortcut to reject: documentation of a recipe is not the recipe, and the gap ' +
+            'between them is exactly where the silent defect lives.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -2107,7 +2535,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'Retaining the training corpus is a genuine trade-off between rebuildability and ' +
-            'privacy exposure. Put that decision in the plan with a name against it.',
+            'privacy exposure, keeping the supplier list forever versus being able to bake again ' +
+            'from scratch. Put that decision in the plan with a name against it.',
           practice: [],
         },
         {
@@ -2123,20 +2552,30 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'following are accurate? Select all that apply.',
           teach: {
             concept:
-              'A successful backup job proves that data was written somewhere. It does not prove ' +
-              'that the data is complete, that it is readable, that the encryption key still ' +
-              'exists, that the schema matches what the current application expects, or that ' +
-              'anybody knows the procedure. Each of those has taken an organisation down at the ' +
-              'worst possible moment, and the only thing that establishes them is a restore.\n\n' +
-              'A real test has three properties. It restores to a usable service, not just to ' +
-              'files, because reconnecting dependencies and validating the data is most of the ' +
-              'elapsed time. It is timed, because the whole point is a claim about RTO and an ' +
-              'untimed test supports no claim at all. And it is run by the people who would ' +
-              'actually be on shift, not by the one engineer who designed the system, since the ' +
-              'plan has to work at three in the morning when that person is unreachable. There is ' +
-              'also a specific ransomware requirement: copies that the production credentials can ' +
-              'reach are copies the attacker can delete, so at least one has to be offline or ' +
-              'immutable, and it needs testing too.',
+              'Cutting a spare key and handing it to a neighbour feels like a complete solution to ' +
+              'being locked out. But a spare key only actually solves the problem if it turns out to ' +
+              'fit the lock, the neighbour is actually home when you need it, and nobody changed the ' +
+              'lock since the key was cut. Nobody finds out which of those is true by looking at the ' +
+              'key sitting in a drawer. They find out by trying it. A key that has never been tried ' +
+              'is a hope, not a plan.\n\n' +
+              'A successful backup job is that key sitting untried in the drawer. It proves that ' +
+              'data was written somewhere. It does not prove that the data is complete, that it is ' +
+              'readable, that the encryption key still exists, that the schema matches what the ' +
+              'current application expects, or that anybody actually knows the procedure. Each of ' +
+              'those has taken an organisation down at the worst possible moment, and the only thing ' +
+              'that establishes them is trying the key in the lock: a real restore.\n\n' +
+              'A real test has three properties. It restores to a usable service, not just to files, ' +
+              'because reconnecting dependencies and validating the data is most of the elapsed ' +
+              'time, the same way getting into the house is more than just the key turning, it is ' +
+              'also disarming the alarm and finding the lights. It is timed, because the whole point ' +
+              'is a claim about RTO and an untimed test supports no claim at all. And it is run by ' +
+              'the people who would actually be on shift, not by the one engineer who designed the ' +
+              'system, since the plan has to work at three in the morning when that person is ' +
+              'unreachable, the same way the spare key is useless if only the person who cut it ' +
+              'knows which door it opens. There is also a specific ransomware requirement: copies ' +
+              'that the production credentials can reach are copies the attacker can delete, the ' +
+              'spare key hidden under the same mat as the front door key, so at least one has to be ' +
+              'offline or immutable, and it needs testing too.',
           },
           options: [
             { id: 'a', label: 'A completed backup job establishes that data was written, not that it can be restored.' },
@@ -2151,13 +2590,14 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'If the attacker has domain administrator, what can they reach?',
           ],
           solution:
-            'A, B, C, and D. Job success is a claim about writing, not about reading, and every ' +
-            'step between the file and a working service is untested until somebody performs it ' +
-            'under a clock. C matters more than it looks: a plan that only works when one named ' +
-            'person is available is a plan with a single point of failure in it. D is the ' +
-            'ransomware-specific requirement, since credentials that can write the backups can ' +
-            'usually delete them. E is the belief that produces the worst incident of somebody\'s ' +
-            'career, and it is extremely common because the dashboard really is green.',
+            'A, B, C, and D. Job success is a claim about writing, not about reading, the key cut ' +
+            'and filed away rather than tried in the lock, and every step between the file and a ' +
+            'working service is untested until somebody performs it under a clock. C matters more ' +
+            'than it looks: a plan that only works when one named person is available is a plan ' +
+            'with a single point of failure in it. D is the ransomware-specific requirement, since ' +
+            'credentials that can write the backups can usually delete them too, the spare key under ' +
+            'the same mat. E is the belief that produces the worst incident of somebody\'s career, ' +
+            'and it is extremely common because the dashboard really is green.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -2170,7 +2610,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'When did you last restore is the single most productive question in a continuity ' +
-            'review. Ask it early and let the silence do the work.',
+            'review, the equivalent of asking when anyone last actually tried the spare key. Ask it ' +
+            'early and let the silence do the work.',
           practice: [],
         },
         {
@@ -2188,22 +2629,29 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'enough.',
           teach: {
             concept:
+              'If the kitchen reopens after a fire and the oven lights, the extractor fan hums, and ' +
+              'the till accepts a card, a customer would reasonably say the restaurant is back. None ' +
+              'of that tells you whether the bread coming out of the rebuilt kitchen actually tastes ' +
+              'like the bread people used to queue for. The oven working is an availability claim. ' +
+              'The bread tasting right is a performance claim, and they are not the same question.\n\n' +
               'For an ordinary service, responding correctly to a health check is decent evidence ' +
-              'that it is back. For a learned system it is almost no evidence at all, because the ' +
-              'characteristic failure is a service that responds promptly with the wrong numbers. ' +
-              'Recovery therefore has to be defined as a performance claim rather than an ' +
-              'availability one.\n\n' +
+              'that it is back, the oven lighting. For a learned system it is almost no evidence at ' +
+              'all, because the characteristic failure is a service that responds promptly with the ' +
+              'wrong numbers, bread that comes out of a working oven tasting different. Recovery ' +
+              'therefore has to be defined as a performance claim rather than an availability one.\n\n' +
               'Three checks establish it. VERSION: confirm which artefact is actually loaded and ' +
               'that it is the one that was serving before the failure, or a deliberately chosen ' +
-              'alternative, which requires the registry to have survived. PIPELINE MATCH: confirm ' +
-              'the preprocessing in front of the model is the version it was validated with, ' +
-              'because this is the mismatch that produces plausible wrong output. PERFORMANCE: run ' +
-              'the retained evaluation set and compare against the recorded baseline, so the claim ' +
-              'is measured rather than assumed.\n\n' +
+              'alternative, which requires the registry, the log book, to have survived. PIPELINE ' +
+              'MATCH: confirm the preprocessing in front of the model is the version it was ' +
+              'validated with, the recipe, because this is the mismatch that produces plausible ' +
+              'wrong output. PERFORMANCE: run the retained evaluation set and compare against the ' +
+              'recorded baseline, the actual taste test, so the claim is measured rather than ' +
+              'assumed.\n\n' +
               'There is a fourth thing worth saying: what happened to the decisions made during the ' +
               'outage. Anything scored by the fallback, or not scored at all, may need review, and ' +
               'recovery of the service is not recovery of the business process until somebody has ' +
-              'decided what to do about that backlog.',
+              'decided what to do about that backlog, the customers who were served whatever the ' +
+              'kitchen could manage during the fire.',
           },
           hints: [
             'The failure mode you are worried about looks exactly like health from the outside.',
@@ -2211,9 +2659,10 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'A good answer checks the loaded version, checks the preprocessing matches, and runs the retained evaluation set against the recorded baseline rather than trusting the health check.',
           ],
           solution:
-            'A health check establishes that the service answers, and the failure I am worried ' +
-            'about is a service that answers quickly with wrong scores, so it is close to no ' +
-            'evidence. Before declaring recovery I would confirm which model version is actually ' +
+            'A health check establishes that the oven lights, and the failure I am worried about is ' +
+            'a service that answers quickly with wrong scores, bread that comes out looking right ' +
+            'and tasting off, so it is close to no evidence. Before declaring recovery I would ' +
+            'confirm which model version is actually ' +
             'loaded and that it matches the registry record for what was serving, confirm that the ' +
             'feature pipeline in front of it is the version the model was validated with, and then ' +
             'run the retained evaluation set and compare the result against the recorded baseline. ' +
@@ -2239,8 +2688,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Recovered means performing, not responding. Write that definition into the runbook, ' +
-            'because at four in the morning the green dashboard is very persuasive.',
+            'Recovered means performing, not responding, the bread tasting right rather than just ' +
+            'the oven lighting. Write that definition into the runbook, because at four in the ' +
+            'morning the green dashboard is very persuasive.',
           practice: [],
         },
       ],
@@ -2268,20 +2718,29 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'practice? Select all that apply.',
           teach: {
             concept:
+              'When you fill in a tax return, claiming a deduction is easy, you just write the ' +
+              'number in the box. Being able to survive an audit of that deduction is a different ' +
+              'thing entirely: it means having the actual receipt, dated, filed somewhere you can ' +
+              'find it, months or years later when someone asks. "I bought equipment for the ' +
+              'business" is the claim. The receipt in a labelled folder is what makes the claim ' +
+              'survive scrutiny. Most people who get caught out in an audit are not lying, they just ' +
+              'never kept the receipt.\n\n' +
               'A compliance mapping is a table with three columns, and organisations that skip the ' +
-              'third one fail audits while believing they are compliant. The first column is the ' +
-              'OBLIGATION: a specific clause, control, or requirement, cited precisely enough that ' +
-              'somebody can look it up. The second is the CONTROL: what the organisation does about ' +
-              'it. The third is the EVIDENCE: the artefact that demonstrates the control operated, ' +
-              'and where it is kept.\n\n' +
+              'third one fail audits while genuinely believing they are compliant, the way someone ' +
+              'can genuinely believe they bought the equipment while having no receipt to show for ' +
+              'it. The first column is the OBLIGATION: a specific clause, control, or requirement, ' +
+              'cited precisely enough that somebody can look it up. The second is the CONTROL: what ' +
+              'the organisation does about it, the claim. The third is the EVIDENCE: the artefact ' +
+              'that demonstrates the control operated, and where it is kept, the receipt.\n\n' +
               'The third column changes behaviour, because it forces the question of what would ' +
-              'actually be shown. "We review access quarterly" is a control; the evidence is the ' +
-              'dated review records for the last four quarters, with the removals that resulted. ' +
-              'Two other habits matter. One control usually satisfies several obligations across ' +
-              'different regimes, and mapping many-to-many stops the same work being done three ' +
-              'times for three frameworks. And an obligation with no named owner will be evidenced ' +
-              'by nobody, which is why the mapping carries an owner per line rather than a team ' +
-              'name at the top of the page.',
+              'actually be shown to the auditor. "We review access quarterly" is a control; the ' +
+              'evidence is the dated review records for the last four quarters, with the removals ' +
+              'that resulted, the actual receipts rather than the claim. Two other habits matter. ' +
+              'One control usually satisfies several obligations across different regimes, and ' +
+              'mapping many-to-many stops the same work being done three times for three ' +
+              'frameworks. And an obligation with no named owner will be evidenced by nobody, which ' +
+              'is why the mapping carries an owner per line rather than a team name at the top of ' +
+              'the page.',
           },
           options: [
             { id: 'a', label: 'Every obligation is mapped to a control and to the evidence that would demonstrate the control operated.' },
@@ -2298,10 +2757,11 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           solution:
             'A, B, C, and D. The evidence column is the one that changes behaviour, because it ' +
             'turns "we review access quarterly" into "here are four dated reviews and the removals ' +
-            'they produced". Many-to-many mapping stops three frameworks generating three copies ' +
-            'of the same work, and per-line ownership stops obligations evaporating between teams. ' +
-            'E is the trap: a policy says what should happen, and an auditor asks what did happen. ' +
-            'A policy with no operating evidence behind it is a finding rather than a defence.',
+            'they produced", the receipt rather than the claim. Many-to-many mapping stops three ' +
+            'frameworks generating three copies of the same work, and per-line ownership stops ' +
+            'obligations evaporating between teams. E is the trap: a policy says what should happen, ' +
+            'and an auditor asks what did happen. A policy with no operating evidence behind it is a ' +
+            'finding rather than a defence, the deduction with no receipt in the folder.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -2314,7 +2774,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'Build the mapping with the evidence column first if you can. It is the fastest way to ' +
-            'find out which controls exist only in the policy document.',
+            'find out which controls exist only in the policy document, the deductions nobody kept ' +
+            'a receipt for.',
           practice: [],
         },
         {
@@ -2330,9 +2791,15 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'are accurate? Select all that apply.',
           teach: {
             concept:
-              'Overstating a regulatory position is the fastest way to lose a room, because the ' +
-              'first person to check one claim stops believing the rest of the paper. Three points ' +
-              'are worth having exactly right.\n\n' +
+              'Regulatory numbers travel through an organisation the way a fact travels around a ' +
+              'dinner table: somebody read the original source once, told a colleague a rounded ' +
+              'version of it, that colleague told someone else, and by the time it reaches a board ' +
+              'paper it is confidently stated and quietly wrong, because nobody along the chain went ' +
+              'back to check the original document. Overstating a regulatory position is the ' +
+              'fastest way to lose a room, because the first person to check one claim against the ' +
+              'actual source stops believing the rest of the paper. Three points are worth having ' +
+              'exactly right, checked against the source rather than against what everybody seems ' +
+              'to say.\n\n' +
               'The EU AI Act is risk-tiered: some practices are prohibited, a defined set of ' +
               'high-risk uses carries substantial obligations around data governance, ' +
               'documentation, human oversight, and post-market monitoring, and lighter ' +
@@ -2344,9 +2811,10 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
               'gives people rights around decisions taken solely by automated means that have legal ' +
               'or similarly significant effects, subject to conditions and safeguards. And in the ' +
               'United States there is no dedicated SEC AI disclosure rule, despite how often one is ' +
-              'cited. What exists is the general materiality and risk-factor regime, plus ' +
-              'enforcement against companies that overstate their AI capabilities, which is a real ' +
-              'exposure and a different one.',
+              'cited around the table as though it exists. What actually exists is the general ' +
+              'materiality and risk-factor regime, plus enforcement against companies that overstate ' +
+              'their AI capabilities, which is a real exposure and a different one from the rumoured ' +
+              'rule.',
           },
           options: [
             { id: 'a', label: 'The EU AI Act is tiered, with prohibited practices, a defined high-risk category carrying substantial obligations, and lighter transparency duties elsewhere.' },
@@ -2365,9 +2833,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'is 7 per cent of worldwide annual turnover or 35 million euro for prohibited ' +
             'practices, the GDPR has covered solely automated decisions with significant effects ' +
             'since 2018, and the American exposure is materiality and misstatement rather than a ' +
-            'dedicated AI rule. E is the 2021 draft figure, still quoted constantly, and it is the ' +
-            'kind of error that costs you the room: if the number in your paper is from a ' +
-            'superseded draft, everything else in it is now suspect.',
+            'dedicated AI rule. E is the 2021 draft figure, still quoted constantly around the ' +
+            'dinner table, and it is the kind of error that costs you the room: if the number in ' +
+            'your paper is from a superseded draft, everything else in it is now suspect too.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -2378,8 +2846,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Cite the clause, not the summary you read. Regulatory claims are the part of your ' +
-            'report most likely to be checked by somebody who does this for a living.',
+            'Cite the clause, not the summary you read, and never the version that came round the ' +
+            'table third-hand. Regulatory claims are the part of your report most likely to be ' +
+            'checked by somebody who does this for a living.',
           practice: [],
         },
         {
@@ -2396,20 +2865,31 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'Select all that apply.',
           teach: {
             concept:
-              'Compliance and safety overlap and neither contains the other, which is why arguing ' +
-              'about which matters more is a waste of a meeting. Regulation is a floor negotiated ' +
-              'in public and written to be applicable across an industry, so it necessarily lags ' +
-              'the specific thing your company is doing this quarter and says nothing about the ' +
-              'risks unique to your deployment.\n\n' +
-              'The gap runs both ways. A system can be fully compliant and still cause harm the ' +
-              'regulation did not anticipate: nothing in a documentation requirement stops a model ' +
-              'from degrading. And a system can be genuinely safe and still be non-compliant, ' +
-              'because the obligation is often to be able to PROVE something rather than to be ' +
-              'something, and an organisation that never wrote down its evaluations cannot ' +
-              'demonstrate a thing that is nonetheless true. That second direction is worth ' +
-              'internalising early, because it explains why so much governance work looks like ' +
-              'paperwork: the evidence is the deliverable. Compliance is also the strongest lever ' +
-              'you have for funding safety work, and treating the two as opponents throws that away.',
+              'A driving test checks that you can parallel park, read road signs, and stop safely, ' +
+              'and passing it makes you legally entitled to drive. It does not make you a genuinely ' +
+              'safe driver in heavy rain on an unfamiliar motorway at night, because the test was ' +
+              'written to be a workable minimum for every new driver in the country, not a measure ' +
+              'of how you specifically handle the conditions you will actually face. Now flip it: a ' +
+              'driver with fifteen years of genuinely excellent, careful experience whose paper ' +
+              'licence quietly expired is, in every practical sense, a safe driver, and is also not ' +
+              'legally allowed to be on the road until the paperwork catches up. Passing the test ' +
+              'and actually being safe are related and neither one guarantees the other.\n\n' +
+              'Compliance and safety overlap the same way and neither contains the other, which is ' +
+              'why arguing about which matters more is a waste of a meeting. Regulation is a floor ' +
+              'negotiated in public and written to be applicable across an industry, so it ' +
+              'necessarily lags the specific thing your company is doing this quarter and says ' +
+              'nothing about the risks unique to your deployment.\n\n' +
+              'The gap runs both ways, like the two drivers. A system can be fully compliant and ' +
+              'still cause harm the regulation did not anticipate: nothing in a documentation ' +
+              'requirement stops a model from degrading, the same way passing the test does not ' +
+              'stop a new driver hydroplaning on their first wet motorway. And a system can be ' +
+              'genuinely safe and still be non-compliant, because the obligation is often to be able ' +
+              'to PROVE something rather than to be something, the expired licence, and an ' +
+              'organisation that never wrote down its evaluations cannot demonstrate a thing that is ' +
+              'nonetheless true. That second direction is worth internalising early, because it ' +
+              'explains why so much governance work looks like paperwork: the evidence is the ' +
+              'deliverable. Compliance is also the strongest lever you have for funding safety work, ' +
+              'and treating the two as opponents throws that away.',
           },
           options: [
             { id: 'a', label: 'Regulation is a floor written for an industry, so it does not cover risks specific to this deployment.' },
@@ -2424,12 +2904,14 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'Which argument actually gets a control funded in most organisations?',
           ],
           solution:
-            'A, B, C, and D. The floor is generic, compliance does not prevent unanticipated harm, ' +
-            'and the reverse gap is just as real because many obligations are evidentiary: you are ' +
-            'required to demonstrate, and an undocumented good practice demonstrates nothing. D is ' +
-            'the pragmatic point. In most organisations "the regulator expects this" moves a budget ' +
-            'that "this would be safer" does not, so E is both wrong and self-defeating. Deprioritise ' +
-            'compliance and you lose the argument that funds the technical controls you preferred.',
+            'A, B, C, and D. The floor is generic like the driving test, compliance does not prevent ' +
+            'unanticipated harm, and the reverse gap is just as real because many obligations are ' +
+            'evidentiary: you are required to demonstrate, the licence has to be current, and an ' +
+            'undocumented good practice demonstrates nothing, however good the driving actually is. ' +
+            'D is the pragmatic point. In most organisations "the regulator expects this" moves a ' +
+            'budget that "this would be safer" does not, so E is both wrong and self-defeating. ' +
+            'Deprioritise compliance and you lose the argument that funds the technical controls ' +
+            'you preferred.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -2441,8 +2923,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'The mature position is that the two are allies with different vocabularies. You will ' +
-            'spend more of your career translating between them than doing either.',
+            'The mature position is that the two are allies with different vocabularies, the test ' +
+            'and the actual skill behind the wheel. You will spend more of your career translating ' +
+            'between them than doing either.',
           practice: [],
         },
         {
@@ -2459,11 +2942,19 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'obligation this puts at risk and what the engineering team specifically has to build.',
           teach: {
             concept:
+              'When a pipe bursts and floods a kitchen, an insurance adjuster and a plumber need two ' +
+              'completely different write-ups of the same event. The adjuster needs to know what ' +
+              'was damaged, what the policy covers, and what the claim is worth. Handing the ' +
+              'adjuster a description of which valve needs replacing is useless to them. The plumber ' +
+              'needs to know exactly which valve, which pipe, which fitting, and handing the plumber ' +
+              'a paragraph about policy coverage is equally useless. One event, two write-ups, ' +
+              'because the two readers act on completely different things.\n\n' +
               'The same finding has to survive two very different readers, and juniors usually ' +
-              'write for one and lose the other. A regulator or a lawyer wants the obligation and ' +
-              'the exposure: which requirement is engaged, what the organisation would be unable to ' +
-              'demonstrate, and what follows from that. An engineer wants the artefact: what ' +
-              'specifically has to exist for this to be closed.\n\n' +
+              'write for one and lose the other. A regulator or a lawyer is the adjuster: they want ' +
+              'the obligation and the exposure, which requirement is engaged, what the organisation ' +
+              'would be unable to demonstrate, and what follows from that. An engineer is the ' +
+              'plumber: they want the artefact, what specifically has to exist for this to be ' +
+              'closed.\n\n' +
               'Here the obligation is around consequential automated decisions about people. If ' +
               'somebody exercises a right to an explanation or to contest a decision, or if a ' +
               'regulator asks how a particular case was decided, the company has to be able to ' +
@@ -2481,10 +2972,10 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'A good answer names the explanation or contest obligation for automated decisions, and specifies a retained decision record with inputs, model version, and score, with a retention period.',
           ],
           solution:
-            'The obligation at risk is the one attaching to consequential automated decisions about ' +
+            'For the adjuster: the obligation at risk is the one attaching to consequential automated decisions about ' +
             'individuals: if an applicant contests a decline or asks why, or a regulator asks how a ' +
             'particular case was decided, we currently have no answer, because nothing about the ' +
-            'decision was kept. What engineering has to build is a decision record written at ' +
+            'decision was kept. For the plumber: what engineering has to build is a decision record written at ' +
             'scoring time, containing the input features used, the model version identifier, the ' +
             'score and the threshold applied, and any human override, retained for a defined period ' +
             'and retrievable by application reference. That record is itself personal data, so it ' +
@@ -2509,8 +3000,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Findings that name the artefact get built. Findings that name only the clause get ' +
-            'forwarded to legal and come back in six months unchanged.',
+            'Findings that name the artefact get built, the same way the plumber only fixes what ' +
+            'the write-up actually names. Findings that name only the clause get forwarded to legal ' +
+            'and come back in six months unchanged.',
           practice: [],
         },
       ],
@@ -2537,16 +3029,30 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'statements about treatment options? Select all that apply.',
           teach: {
             concept:
-              'There are four treatments and no fifth. MITIGATE reduces likelihood or impact with ' +
-              'a control, and it is the one everybody reaches for first. ACCEPT means living with ' +
-              'the exposure deliberately, on the record, with an owner and an expiry. AVOID means ' +
-              'not doing the thing: dropping the feature, not collecting the data, declining the ' +
-              'market. Avoidance is genuinely available more often than security teams remember, ' +
-              'and it is the only treatment that takes the risk to zero. TRANSFER moves some of ' +
-              'the financial consequence to somebody else, through insurance or contract.\n\n' +
+              'Imagine you notice your roof has started leaking. You have exactly four honest ' +
+              'options and no others. You could fix the roof, spending money now to stop the leak. ' +
+              'You could put a bucket under the drip and decide, consciously, that you will live ' +
+              'with it this winter and revisit in spring. You could decide the house is not worth ' +
+              'keeping and move out entirely, which is the only option that makes the leak stop ' +
+              'mattering to you at all. Or you could check that your home insurance covers water ' +
+              'damage, so if the ceiling eventually comes down, at least some of the cost is paid by ' +
+              'someone else. Whatever you do, the roof is still leaking; these four options only ' +
+              'differ in what you do about that fact.\n\n' +
+              'There are four treatments in risk work and no fifth, and they map onto the roof ' +
+              'exactly. MITIGATE reduces likelihood or impact with a control, fixing the roof, and it ' +
+              'is the one everybody reaches for first. ACCEPT means living with the exposure ' +
+              'deliberately, on the record, with an owner and an expiry, the bucket under the drip ' +
+              'with a date to reconsider. AVOID means not doing the thing: dropping the feature, not ' +
+              'collecting the data, declining the market, moving out of the house. Avoidance is ' +
+              'genuinely available more often than security teams remember, and it is the only ' +
+              'treatment that takes the risk to zero. TRANSFER moves some of the financial ' +
+              'consequence to somebody else, through insurance or contract, the policy that pays out ' +
+              'for the water damage.\n\n' +
               'Transfer is the one that is misunderstood. Insurance pays some of the money and ' +
               'does not restore the service, undo the harm to customers, or move the regulatory ' +
-              'obligation, which usually stays with you whatever the contract says. Contractual ' +
+              'obligation, which usually stays with you whatever the contract says, the same way a ' +
+              'water-damage payout does not un-ruin the carpet, put the family back in their normal ' +
+              'routine, or stop the ceiling from still needing a builder. Contractual ' +
               'transfer to a supplier has the same limit: the customer whose data leaked is still ' +
               'your customer, and the regulator still writes to you. So transfer sits alongside ' +
               'mitigation rather than replacing it, and a plan whose only treatment for a critical ' +
@@ -2575,12 +3081,13 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           solution:
             'A, B, C, and D. Avoidance is the only route to zero and is under-considered, insurance ' +
-            'pays money rather than restoring service, documented acceptance is a real treatment, ' +
-            'and buying a model moves the work without moving the accountability while quietly ' +
-            'moving your evidence into somebody else\'s hands. E is the error to catch in ' +
-            'somebody else\'s plan: the policy pays out after a bad quarter in which the service ' +
-            'was down, the customers were harmed, and the regulator opened a file, and none of ' +
-            'those three are things a cheque fixes.',
+            'pays money rather than restoring service, exactly like the water-damage payout not ' +
+            'putting the ceiling back up, documented acceptance is a real treatment, and buying a ' +
+            'model moves the work without moving the accountability while quietly moving your ' +
+            'evidence into somebody else\'s hands. E is the error to catch in somebody else\'s ' +
+            'plan: the policy pays out after a bad quarter in which the service was down, the ' +
+            'customers were harmed, and the regulator opened a file, and none of those three are ' +
+            'things a cheque fixes, the same as a payout not un-ruining the carpet.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -2592,8 +3099,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Put avoidance on the table explicitly at least once per assessment. Occasionally the ' +
-            'answer is that the feature was never worth what it costs to secure.',
+            'Put avoidance on the table explicitly at least once per assessment, the equivalent of ' +
+            'asking whether the house is even worth keeping. Occasionally the answer is that the ' +
+            'feature was never worth what it costs to secure.',
           practice: [],
         },
         {
@@ -2609,15 +3117,25 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'all that apply.',
           teach: {
             concept:
-              'Control cases are usually built on the purchase price and are wrong by the second ' +
-              'year. Four things belong in the cost side. The one-off cost: licence, build, ' +
-              'migration. The RUNNING cost in people, which is the one that gets omitted and is ' +
-              'often the largest: somebody tunes it, reviews its output, and answers the auditor ' +
-              'about it, every year. The FRICTION cost imposed on the business, in latency, in ' +
-              'extra steps, in engineering time diverted, since a control that makes delivery ' +
-              'slower is paying for itself with somebody else\'s budget. And the RESIDUAL RISK ' +
-              'that remains after it, because the benefit is the reduction and never the whole ' +
-              'exposure.\n\n' +
+              'When you buy a home alarm system, the number on the box is never the real cost. ' +
+              'There is the monthly monitoring fee for as long as you own the house. There is the ' +
+              'time you spend disarming it every time you come home in a hurry, or the awkward ten ' +
+              'seconds explaining to a visitor how to get past it. And even with it installed, your ' +
+              'house is not risk-free, a determined burglar with enough time can still get in, the ' +
+              'alarm only makes it less likely and catches more of the cases where it happens. ' +
+              'Anyone who budgets only for the sticker price on the box is going to be surprised by ' +
+              'the bill in year two.\n\n' +
+              'Control cases in a company are built on the purchase price the same way and are wrong ' +
+              'by the second year for the same reason. Four things belong in the cost side. The ' +
+              'one-off cost: licence, build, migration, the sticker price. The RUNNING cost in ' +
+              'people, which is the one that gets omitted and is often the largest: somebody tunes ' +
+              'it, reviews its output, and answers the auditor about it, every year, the monthly ' +
+              'monitoring fee. The FRICTION cost imposed on the business, in latency, in extra ' +
+              'steps, in engineering time diverted, the ten seconds disarming it every time you come ' +
+              'in, since a control that makes delivery slower is paying for itself with somebody ' +
+              'else\'s budget. And the RESIDUAL RISK that remains after it, the determined burglar ' +
+              'who still gets in occasionally, because the benefit is the reduction and never the ' +
+              'whole exposure.\n\n' +
               'On the benefit side, the honest figure is the expected loss removed, not the worst ' +
               'case avoided. Quoting a catastrophic single loss as though the control prevents it ' +
               'every year is the same arithmetic error as the five hundred billion recommendation ' +
@@ -2639,12 +3157,14 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'What is left of the risk after the control? That part is not a benefit.',
           ],
           solution:
-            'A, B, C, and D. Running cost in people is the omission that sinks most cases, ' +
-            'friction is a real cost paid by another team, residual risk keeps the benefit honest, ' +
-            'and saying plainly that a control is obligation-driven is stronger than manufacturing ' +
-            'a financial justification for it. E is the arithmetic that gets a case rejected: ' +
-            'counting a once-in-a-decade loss as an annual benefit inflates the return by roughly ' +
-            'the factor of its rarity, and the finance reviewer will find it.',
+            'A, B, C, and D. Running cost in people is the omission that sinks most cases, the ' +
+            'monitoring fee nobody put in the original budget; friction is a real cost paid by ' +
+            'another team, the ten seconds every time somebody comes home; residual risk keeps the ' +
+            'benefit honest, the alarm that reduces burglaries without eliminating them; and saying ' +
+            'plainly that a control is obligation-driven is stronger than manufacturing a financial ' +
+            'justification for it. E is the arithmetic that gets a case rejected: counting a ' +
+            'once-in-a-decade loss as an annual benefit inflates the return by roughly the factor of ' +
+            'its rarity, and the finance reviewer will find it.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -2656,8 +3176,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'The credibility you build by declaring the running cost yourself is worth more than ' +
-            'the control you might have lost by hiding it.',
+            'The credibility you build by declaring the running cost yourself, the monitoring fee ' +
+            'up front rather than buried in year two, is worth more than the control you might have ' +
+            'lost by hiding it.',
           practice: [],
         },
         {
@@ -2673,16 +3194,28 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'Which of the following are sound sequencing decisions? Select all that apply.',
           teach: {
             concept:
-              'A roadmap sorted purely by risk score is a list, not a plan, and it fails on contact ' +
-              'with the team who has to build it. Three considerations reorder it.\n\n' +
-              'DEPENDENCY: some findings cannot be closed until something else exists. Asset ' +
-              'inventory, logging, and identity are the usual prerequisites, and half the register ' +
-              'depends on them, so they move early even when their own scores are unremarkable. ' +
-              'CAPACITY: a plan that consumes more of a team than exists is a plan that gets ' +
-              'abandoned in month three, taking the credibility of the whole assessment with it. ' +
-              'DURATION AND MOMENTUM: a few visible closures early buys the political room for the ' +
-              'long structural work, and there is nothing dishonest about that as long as the ' +
-              'sequence is stated and the big items keep their dates.\n\n' +
+              'Imagine renovating a house room by room, working from a list of everything wrong with ' +
+              'it, sorted purely by how bad each problem is. The worst problem might be the kitchen, ' +
+              'but you cannot re-tile a bathroom floor before the plumbing underneath it is ' +
+              'sorted, however low the plumbing scored on your list of complaints. If the whole crew ' +
+              'is booked for six months and you plan work that would need a year, the renovation ' +
+              'stalls in month three with half the house pulled apart and no money left. And if you ' +
+              'spend the first month exclusively on the single worst, most structural problem with ' +
+              'nothing visibly finished, the family living through the mess loses faith in the whole ' +
+              'project before the big win ever lands.\n\n' +
+              'A roadmap sorted purely by risk score has the same three blind spots, and it is a ' +
+              'list, not a plan, which fails on contact with the team who has to build it. Three ' +
+              'considerations reorder it.\n\n' +
+              'DEPENDENCY: some findings cannot be closed until something else exists, the plumbing ' +
+              'before the tiling. Asset inventory, logging, and identity are the usual ' +
+              'prerequisites, and half the register depends on them, so they move early even when ' +
+              'their own scores are unremarkable. CAPACITY: a plan that consumes more of a team than ' +
+              'exists is a plan that gets abandoned in month three, taking the credibility of the ' +
+              'whole assessment with it, the year of work booked against a six-month crew. DURATION ' +
+              'AND MOMENTUM: a few visible closures early buys the political room for the long ' +
+              'structural work, the small finished room that keeps the family\'s faith in the ' +
+              'renovation, and there is nothing dishonest about that as long as the sequence is ' +
+              'stated and the big items keep their dates.\n\n' +
               'What does not belong is silent reordering to suit convenience. If a top risk is ' +
               'scheduled late because of a dependency or a capacity constraint, say so on the ' +
               'roadmap with the reason, so the person accepting the interim exposure knows they are ' +
@@ -2701,8 +3234,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'What happens to the assessment when the plan runs out of team in month three?',
           ],
           solution:
-            'A, B, C, and D. Enabling work unblocks the rest of the register, capacity bounds what ' +
-            'is real, early closures buy political room, and stating the reason for any deferral ' +
+            'A, B, C, and D. Enabling work unblocks the rest of the register like plumbing before ' +
+            'tiling, capacity bounds what is real like a crew\'s actual hours, early closures buy ' +
+            'political room like the one finished bedroom, and stating the reason for any deferral ' +
             'keeps the deferral a decision rather than a drift. E sounds rigorous and produces a ' +
             'plan that stalls: the top finding may require an asset inventory that does not exist, ' +
             'and insisting on strict score order means six months of no closures at all while ' +
@@ -2718,8 +3252,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Take the draft roadmap to the engineering lead before the steering group sees it. A ' +
-            'plan they have already argued with is a plan they will deliver.',
+            'Take the draft roadmap to the engineering lead before the steering group sees it, the ' +
+            'way you would ask the builder before promising the family a date. A plan they have ' +
+            'already argued with is a plan they will deliver.',
           practice: [],
         },
         {
@@ -2737,14 +3272,24 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'sentences, write the ask you would put in front of the executive committee.',
           teach: {
             concept:
-              'Executives do not read to be informed, they read to decide, and a paragraph that ' +
-              'does not contain a decision gets noted rather than actioned. Four elements make one ' +
-              'that works. THE EXPOSURE in business terms: what stops, for how long, at what cost, ' +
-              'with the estimate attached rather than an adjective. THE ASK: the specific amount ' +
-              'and what it buys, expressed as an outcome such as a recovery time rather than a ' +
-              'shopping list. THE CONSEQUENCE OF NOT FUNDING IT: what the committee is choosing to ' +
-              'carry, stated plainly and without threat. THE DECISION REQUIRED: fund it, fund part ' +
-              'of it, or accept the exposure with a name and a date on it.\n\n' +
+              'Picture asking your household for money to fix a cracking foundation. "The house has ' +
+              'problems" gets nodded at and forgotten. What actually gets a decision is telling them ' +
+              'plainly: the crack is getting worse and could mean losing the back wall within two ' +
+              'years; fixing it now costs a specific amount and stops it getting worse; not fixing ' +
+              'it means living with that risk and revisiting the number every year it is not dealt ' +
+              'with; and here is the actual choice in front of us today, pay for it, pay for part of ' +
+              'it now, or agree in writing that we are living with the crack for another year. That ' +
+              'is a conversation the household can actually resolve in one sitting.\n\n' +
+              'Executives do not read to be informed, they read to decide, and a paragraph that does ' +
+              'not contain a decision gets noted rather than actioned, the same way "the house has ' +
+              'problems" changes nothing. Four elements make one that works. THE EXPOSURE in ' +
+              'business terms: what stops, for how long, at what cost, with the estimate attached ' +
+              'rather than an adjective, the cracking wall rather than "the house has problems". THE ' +
+              'ASK: the specific amount and what it buys, expressed as an outcome such as a recovery ' +
+              'time rather than a shopping list. THE CONSEQUENCE OF NOT FUNDING IT: what the ' +
+              'committee is choosing to carry, stated plainly and without threat. THE DECISION ' +
+              'REQUIRED: fund it, fund part of it, or accept the exposure with a name and a date on ' +
+              'it.\n\n' +
               'The tone matters as much as the content. No adjectives doing the work of evidence, ' +
               'no implied blame, and no attempt to make the decision for them. Offering the ' +
               'acceptance as a real option is what makes the ask credible rather than a demand, ' +
@@ -2784,8 +3329,10 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Whichever way they decide, you have done the job. A recorded acceptance is a ' +
-            'successful outcome of a risk conversation, not a failure of one.',
+            'Whichever way they decide, you have done the job, the same way the household has ' +
+            'genuinely decided something rather than just worried about the crack for another year. ' +
+            'A recorded acceptance is a successful outcome of a risk conversation, not a failure of ' +
+            'one.',
           practice: [],
         },
       ],
@@ -2813,21 +3360,33 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'all that apply.',
           teach: {
             concept:
-              'A tabletop is people in a room talking through a scenario, and what it tests is ' +
-              'decision-making rather than technology. It reliably establishes four things: whether ' +
-              'people know their role, whether the escalation and authority path is clear, whether ' +
-              'the plan is findable and current, and whether the assumptions the assessment rests ' +
-              'on survive contact with the people who would have to act on them.\n\n' +
+              'A fire drill gets everyone in a building to walk out to the assembly point and be ' +
+              'counted. It genuinely tells you something real: whether people know where the exits ' +
+              'are, whether the fire warden actually knows their role, whether the assembly point is ' +
+              'somewhere people can actually find in a hurry. What a fire drill does not tell you is ' +
+              'whether the sprinklers would actually put out a real fire, because nobody lit one. It ' +
+              'also does not tell you much about panic, because everyone walking out calmly on a ' +
+              'Tuesday morning with advance notice is a very different experience from smoke ' +
+              'actually filling a corridor.\n\n' +
+              'A tabletop is that fire drill, run with a scenario instead of a real alarm. It is ' +
+              'people in a room talking through a scenario, and what it tests is decision-making ' +
+              'rather than technology. It reliably establishes four things: whether people know ' +
+              'their role, whether the escalation and authority path is clear, whether the plan is ' +
+              'findable and current, and whether the assumptions the assessment rests on survive ' +
+              'contact with the people who would have to act on them.\n\n' +
               'That last one is the most valuable and the most often missed. Assessments are full ' +
               'of assumptions like "we would isolate the affected segment within the hour", and a ' +
               'tabletop is where you discover that isolating the segment requires a change approval ' +
-              'that takes four hours and that nobody in the room can waive.\n\n' +
+              'that takes four hours and that nobody in the room can waive, the equivalent of ' +
+              'discovering during the drill that the fire door everyone was told to use is actually ' +
+              'kept locked.\n\n' +
               'What it cannot establish is anything technical. It does not prove the backups ' +
-              'restore, that the failover works, or that the detection fires, because nobody ' +
-              'touched a system. It is also weak on time pressure: two hours of calm discussion is ' +
-              'not three in the morning on day four with a journalist calling. Both limits are ' +
-              'fine, as long as the report does not quietly convert "we discussed it" into "we ' +
-              'tested it".',
+              'restore, that the failover works, or that the detection fires, because nobody touched ' +
+              'a system, the same way the drill does not prove the sprinklers work. It is also weak ' +
+              'on time pressure: two hours of calm discussion is not three in the morning on day ' +
+              'four with a journalist calling, the same way a calm Tuesday walk to the assembly ' +
+              'point is not the same as smoke in the corridor. Both limits are fine, as long as the ' +
+              'report does not quietly convert "we discussed it" into "we tested it".',
           },
           options: [
             { id: 'a', label: 'It establishes whether people know their roles and whether the escalation path is clear.' },
@@ -2845,9 +3404,10 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'A, B, C, and D. Roles, authority, and plan quality all come out clearly, and the ' +
             'assumption testing in B is the highest-value part: the assessment says the segment is ' +
             'isolated within an hour, the tabletop reveals a four-hour change approval that nobody ' +
-            'present can waive, and that is a finding worth the whole exercise. E is the sentence ' +
-            'to keep out of the report. Nothing was touched and nobody was tired, so preparedness ' +
-            'is exactly what a tabletop cannot demonstrate.',
+            'present can waive, the fire door that turns out to be locked, and that is a finding ' +
+            'worth the whole exercise. E is the sentence to keep out of the report. Nothing was ' +
+            'touched and nobody was tired, so preparedness is exactly what a tabletop cannot ' +
+            'demonstrate, any more than a calm walk to the assembly point proves the sprinklers work.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -2859,8 +3419,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Write the limitation into the exercise report yourself. Otherwise somebody quotes the ' +
-            'tabletop as evidence of recovery capability in a board paper six months later.',
+            'Write the limitation into the exercise report yourself, the same as noting that the ' +
+            'sprinklers were never actually tested. Otherwise somebody quotes the tabletop as ' +
+            'evidence of recovery capability in a board paper six months later.',
           practice: [],
         },
         {
@@ -2876,22 +3437,29 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'of the following are sound design choices? Select all that apply.',
           teach: {
             concept:
-              'An inject is a piece of new information delivered mid-exercise, and its job is to ' +
-              'force a decision under uncertainty. Sound injects share four properties. They ' +
-              'ESCALATE: the situation gets worse or more ambiguous, so the group cannot settle ' +
-              'into one comfortable posture. They FORCE A CHOICE with a cost either way, because a ' +
-              'decision with an obvious right answer tests nothing. They are AMBIGUOUS in the way ' +
-              'real information is: partial, second-hand, and occasionally wrong, since half the ' +
-              'skill being tested is acting without confirmation. And they cross FUNCTIONS, ' +
-              'pulling in legal, communications, and the business, because coordination is where ' +
-              'real responses fail.\n\n' +
+              'A well-designed fire drill does not just have everyone calmly walk to the assembly ' +
+              'point on a dry, sunny morning. A good one throws in a complication partway through, a ' +
+              'stairwell marked as blocked, a warden who is announced as unreachable, so the ' +
+              'building actually has to improvise rather than executing a routine it has memorised. ' +
+              'A drill that never surprises anyone teaches nothing new after the first year.\n\n' +
+              'An inject is that complication, a piece of new information delivered mid-exercise, ' +
+              'and its job is to force a decision under uncertainty. Sound injects share four ' +
+              'properties. They ESCALATE: the situation gets worse or more ambiguous, so the group ' +
+              'cannot settle into one comfortable posture. They FORCE A CHOICE with a cost either ' +
+              'way, because a decision with an obvious right answer, like an unblocked stairwell, ' +
+              'tests nothing. They are AMBIGUOUS in the way real information is: partial, ' +
+              'second-hand, and occasionally wrong, since half the skill being tested is acting ' +
+              'without confirmation. And they cross FUNCTIONS, pulling in legal, communications, and ' +
+              'the business, because coordination is where real responses fail, not just where the ' +
+              'nearest fire warden stands.\n\n' +
               'Two design failures are common. The gotcha inject, invented so the facilitator can ' +
-              'reveal that the group missed something unknowable, teaches people that the exercise ' +
-              'is a trap and they stop engaging. And the technically implausible inject destroys ' +
-              'the credibility of the whole scenario the moment an engineer in the room says that ' +
-              'cannot happen. The exercise is also not the place to appraise individuals: findings ' +
-              'are about the plan and the process, and the moment participants think otherwise, ' +
-              'they perform instead of deciding.',
+              'reveal that the group missed something unknowable, is the drill designer hiding a ' +
+              'trapdoor nobody could have anticipated: it teaches people that the exercise is a trap ' +
+              'and they stop engaging honestly. And the technically implausible inject destroys the ' +
+              'credibility of the whole scenario the moment an engineer in the room says that cannot ' +
+              'happen. The exercise is also not the place to appraise individuals: findings are ' +
+              'about the plan and the process, and the moment participants think otherwise, they ' +
+              'perform instead of deciding.',
           },
           options: [
             { id: 'a', label: 'Each inject escalates or adds ambiguity, so the group cannot settle into one posture.' },
@@ -2907,11 +3475,11 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           solution:
             'A, B, C, and D. Escalation, costly choices, realistic ambiguity, and cross-functional ' +
-            'pressure are what turn a discussion into a test. E is the design that ruins ' +
-            'exercises: the gotcha produces one moment of facilitator satisfaction and teaches ' +
-            'every participant that the exercise is a trap, after which they answer defensively ' +
-            'and you learn nothing about how they would really decide. Keep the findings pointed at ' +
-            'the plan, not at the people in the room.',
+            'pressure are what turn a discussion into a test, the blocked stairwell rather than the ' +
+            'dry Tuesday walkthrough. E is the design that ruins exercises: the gotcha produces one ' +
+            'moment of facilitator satisfaction and teaches every participant that the exercise is a ' +
+            'trap, after which they answer defensively and you learn nothing about how they would ' +
+            'really decide. Keep the findings pointed at the plan, not at the people in the room.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -2923,8 +3491,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Say at the start that the plan is on trial and the people are not. You will get ' +
-            'honest answers, which is the only kind worth having.',
+            'Say at the start that the plan is on trial and the people are not, the fire door and ' +
+            'not the warden. You will get honest answers, which is the only kind worth having.',
           practice: [],
         },
         {
@@ -2940,10 +3508,15 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'writing up? Select all that apply.',
           teach: {
             concept:
-              'The value of an exercise is in the write-up, and the write-up is only as good as the ' +
-              'observer\'s filter. A finding is something about the plan, the process, or the ' +
-              'assessment that would change the outcome of a real incident, and it has to be ' +
-              'stated so it can be fixed by somebody who was not in the room.\n\n' +
+              'After a fire drill, the person who ran it could write down "the new receptionist ' +
+              'looked nervous" or they could write down "the fire door on the second floor was ' +
+              'found locked". Only one of those is something the building can act on before the ' +
+              'next drill; the other is a comment about a person having a bad day. The value of an ' +
+              'exercise is in the write-up, and the write-up is only as good as the observer\'s ' +
+              'filter for telling those two kinds of observation apart. A finding is something about ' +
+              'the plan, the process, or the assessment that would change the outcome of a real ' +
+              'incident, and it has to be stated so it can be fixed by somebody who was not in the ' +
+              'room.\n\n' +
               'Strong findings tend to be of four kinds. Authority gaps: nobody present could make ' +
               'a decision the scenario required. Information gaps: a decision needed information ' +
               'that does not exist or could not be retrieved in time. Assumption failures: the ' +
@@ -2970,11 +3543,11 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           solution:
             'A, B, C, and D. An authority gap, a missing information source, an assessment ' +
             'assumption that did not survive, and a coordination gap between two functions are all ' +
-            'fixable by somebody who was not present, which is the test. E is a training ' +
-            'observation about one person, and it is worth acting on quietly and not worth writing ' +
-            'into a report that names them. Note also that C feeds straight back into the risk ' +
-            'assessment, since a rollback that takes a day rather than an hour changes the impact ' +
-            'estimate for every risk that depended on it.',
+            'fixable by somebody who was not present, which is the test, the locked fire door rather ' +
+            'than the nervous receptionist. E is a training observation about one person, and it is ' +
+            'worth acting on quietly and not worth writing into a report that names them. Note also ' +
+            'that C feeds straight back into the risk assessment, since a rollback that takes a day ' +
+            'rather than an hour changes the impact estimate for every risk that depended on it.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -2986,8 +3559,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'The finding that changes an impact estimate is the one to chase. That is the exercise ' +
-            'improving the assessment, which is the whole reason for running it.',
+            'The finding that changes an impact estimate is the one to chase, the locked door rather ' +
+            'than the nervous face. That is the exercise improving the assessment, which is the ' +
+            'whole reason for running it.',
           practice: [],
         },
         {
@@ -3004,6 +3578,13 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'In three or four sentences, write this up and say what it changes in the assessment.',
           teach: {
             concept:
+              'If a fire drill discovers the fire door was locked, and the report simply says "fire ' +
+              'door found locked" and gets filed away, next year\'s drill finds the same locked ' +
+              'door. The report only does its job once somebody gets a new set of keys made and, ' +
+              'just as importantly, once the building\'s evacuation-time estimate on file gets ' +
+              'updated to reflect that the door was unusable for the last year of incidents that ' +
+              'were assumed safe. Both things have to change: the physical fact on the ground, and ' +
+              'the number written down about it.\n\n' +
               'Exercise reports get read once. Register entries get funded, so a finding that stops ' +
               'at the report has done half its job. The write-up needs three parts: what was ' +
               'observed, what it means for a real incident, and what specifically changes as a ' +
@@ -3023,7 +3604,7 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'A good answer proposes a delegated authority or pre-approved action for an on-call role, and says the exposure window and the impact estimate must be revised.',
           ],
           solution:
-            'The exercise showed that disabling the model requires sign-off from an executive who ' +
+            'Both the lock and the number on file need to change. The exercise showed that disabling the model requires sign-off from an executive who ' +
             'was unreachable for more than three hours, so in a real event the model would keep ' +
             'making decisions throughout that window with nobody empowered to stop it. The control ' +
             'change is a standing delegation: a named on-call role is pre-authorised to take the ' +
@@ -3051,8 +3632,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             },
           ],
           debrief:
-            'Track your exercises by how many register entries they changed. It is a better measure ' +
-            'of the programme than how smoothly the room performed.',
+            'Track your exercises by how many register entries they changed, not just how many ' +
+            'locks got fixed. It is a better measure of the programme than how smoothly the room ' +
+            'performed.',
           practice: [],
         },
       ],
@@ -3079,16 +3661,25 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'decisions about what goes where? Select all that apply.',
           teach: {
             concept:
-              'An assessment produces three artefacts with three different lifetimes and readers, ' +
-              'and collapsing them into one document is why so much of this work goes unread.\n\n' +
-              'The REGISTER is the living record: one line per risk, with the scenario, the score ' +
-              'and its inputs, the owner, the treatment, and the review date. It outlives the ' +
-              'engagement and is the thing that gets reviewed quarterly. The REPORT is the ' +
-              'evidence: scope, method, what was and was not examined, the findings with enough ' +
-              'detail to be reproduced or argued with, and the limitations. It exists so a reader ' +
-              'in a year can tell what was actually done, and the limitations section is what makes ' +
-              'it honest. The EXECUTIVE SUMMARY is a page: the handful of risks that matter, what ' +
-              'is being asked for, and the decisions required.\n\n' +
+              'Think about how a patient with an ongoing health condition is tracked. There is the ' +
+              'full medical chart at the hospital, dense and detailed, kept for years, that a new ' +
+              'specialist reads to understand exactly what has been tried and why. There is the ' +
+              'medication list on the fridge at home, one line per condition, updated whenever ' +
+              'something changes, that any family member or paramedic can read in ten seconds in an ' +
+              'emergency. And there is the one sentence the patient actually says when a friend asks ' +
+              'how they are doing. All three are honest, all three are about the same person, and ' +
+              'nobody would ever hand a friend the full hospital chart in answer to "how are you".\n\n' +
+              'An assessment produces three artefacts with exactly that same shape, three different ' +
+              'lifetimes and readers, and collapsing them into one document is why so much of this ' +
+              'work goes unread.\n\n' +
+              'The REGISTER is the fridge list: one line per risk, with the scenario, the score and ' +
+              'its inputs, the owner, the treatment, and the review date. It outlives the engagement ' +
+              'and is the thing that gets reviewed quarterly. The REPORT is the hospital chart: ' +
+              'scope, method, what was and was not examined, the findings with enough detail to be ' +
+              'reproduced or argued with, and the limitations. It exists so a reader in a year can ' +
+              'tell what was actually done, and the limitations section is what makes it honest. The ' +
+              'EXECUTIVE SUMMARY is the one sentence to the friend: the handful of risks that ' +
+              'matter, what is being asked for, and the decisions required.\n\n' +
               'The most common failure is a summary that summarises the report instead of asking ' +
               'for a decision. The second most common is a register with no owners, which turns ' +
               'the whole exercise into a document nobody is accountable for.',
@@ -3106,12 +3697,14 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'What happens to your credibility when somebody discovers a limitation you did not declare?',
           ],
           solution:
-            'A, B, C, and D. Owners and dates make the register a live control, method and scope ' +
-            'make the report reproducible, a summary that opens with the decision gets a decision, ' +
-            'and one register for all risk types is what lets AI findings compete for budget. E ' +
-            'inverts the truth. A declared limitation is what makes the rest of the report ' +
-            'credible, and an undeclared one that somebody discovers later invalidates every claim ' +
-            'you made, including the ones that were sound.',
+            'A, B, C, and D. Owners and dates make the register a live control, the current fridge ' +
+            'list rather than a stale one; method and scope make the report reproducible, the full ' +
+            'chart a new specialist can actually trust; a summary that opens with the decision gets a ' +
+            'decision, the honest one-sentence answer rather than a deflection; and one register for ' +
+            'all risk types is what lets AI findings compete for budget. E inverts the truth. A ' +
+            'declared limitation is what makes the rest of the report credible, and an undeclared ' +
+            'one that somebody discovers later invalidates every claim you made, including the ones ' +
+            'that were sound.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -3124,7 +3717,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'Write the limitations section first, while you still remember everything you could not ' +
-            'get to. It is much harder to write honestly at the end.',
+            'get to, the same way a chart is more honest when the gaps in testing are noted at the ' +
+            'time rather than reconstructed later. It is much harder to write honestly at the end.',
           practice: [],
         },
         {
@@ -3143,9 +3737,14 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'judgements? Select all that apply.',
           teach: {
             concept:
-              'A mixed portfolio is where the discipline of one register pays off, because the ' +
-              'question stops being "how worrying is AI" and becomes "which of these four costs ' +
-              'the most and how likely is each".\n\n' +
+              'A hospital triage nurse sorting a busy waiting room does not rank patients by how ' +
+              'unusual or medically interesting their condition sounds. A rare, exotic-sounding ' +
+              'diagnosis that is stable goes behind an ordinary chest pain that could be a heart ' +
+              'attack in the next ten minutes. Novelty is not the sorting criterion; how bad it is ' +
+              'and how fast it is getting worse is.\n\n' +
+              'A mixed portfolio is where the discipline of one register pays off the same way, ' +
+              'because the question stops being "how worrying is AI, the exotic new diagnosis" and ' +
+              'becomes "which of these four costs the most and how likely is each".\n\n' +
               'Three principles do the work. Known exploitation moves a finding to the top ' +
               'regardless of its base severity, because likelihood has stopped being an estimate. ' +
               'Governance gaps score higher than they look, because they multiply everything else: ' +
@@ -3171,13 +3770,14 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'What does known exploitation do to a likelihood estimate?',
           ],
           solution:
-            'A, B, C, and D. Observed exploitation beats estimated likelihood, the governance gap ' +
-            'multiplies every other failure in that system and is cheap to close, untested backups ' +
-            'set the impact of several other risks including the appliance one, and the chatbot is ' +
-            'a genuine but smaller reputational exposure. E is the distortion to resist in both ' +
-            'directions: novelty is not severity, and a register that ranks by how new a technology ' +
-            'is will leave an actively exploited appliance below a chatbot that says something ' +
-            'awkward.',
+            'A, B, C, and D. Observed exploitation beats estimated likelihood, the chest pain rather ' +
+            'than the stable rare condition; the governance gap multiplies every other failure in ' +
+            'that system and is cheap to close; untested backups set the impact of several other ' +
+            'risks including the appliance one; and the chatbot is a genuine but smaller ' +
+            'reputational exposure. E is the distortion to resist in both directions: novelty is not ' +
+            'severity, and a register that ranks by how new a technology is will leave an actively ' +
+            'exploited appliance below a chatbot that says something awkward, the exotic diagnosis ' +
+            'seen before the heart attack.',
           expectedOutput: 'Options A, B, C, and D selected.',
           checks: [
             {
@@ -3190,7 +3790,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'The findings that set the impact of other findings, backups and monitoring, are ' +
-            'chronically under-ranked. Look for them first in any register you inherit.',
+            'chronically under-ranked, the vitals check that decides how urgent everything else in ' +
+            'the room is. Look for them first in any register you inherit.',
           practice: [],
         },
         {
@@ -3207,13 +3808,20 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'will read nothing else.',
           teach: {
             concept:
+              'A nurse handing over to the next shift does not walk through every patient in the ' +
+              'order they were admitted. They lead with whoever is sickest right now, they mention ' +
+              'that three patients on the ward all came in from the same incident so the next shift ' +
+              'understands why the ward is full, and they end by saying exactly what they need the ' +
+              'incoming doctor to do first. Nobody hands over by reading the whole chart aloud.\n\n' +
               'This is the most re-read paragraph you will write and the one most often wasted on ' +
-              'describing the engagement. It has three jobs. Say what the organisation is carrying ' +
-              'right now, in business terms and led by the largest item rather than by category. ' +
+              'describing the engagement. It has three jobs, the same three as a good handover. Say ' +
+              'what the organisation is carrying right now, in business terms and led by the ' +
+              'largest item rather than by category. ' +
               'Say what the concentration is, meaning the common cause underneath several ' +
-              'findings, because that is what makes a portfolio comprehensible rather than a list. ' +
-              'And ask for the decision, naming the money or the authority and the alternative if ' +
-              'it is refused.\n\n' +
+              'findings, the reason three patients are on the ward from the same incident, because ' +
+              'that is what makes a portfolio comprehensible rather than a list. And ask for the ' +
+              'decision, naming the money or the authority and the alternative if it is refused, ' +
+              'exactly what the next shift needs to do first.\n\n' +
               'Three habits keep it credible. Attach an estimate to any claim of size, because ' +
               '"significant" is not a quantity. Do not lead with the AI findings for novelty or ' +
               'bury them for unfamiliarity; put them where their consequence puts them. And state ' +
@@ -3226,7 +3834,7 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'A good answer leads with the most consequential exposure, groups the findings around the absence of detection or recovery, and closes with the decision or funding being requested.',
           ],
           solution:
-            'Northwind is currently carrying two exposures that would each stop trading for around ' +
+            'The handover, sickest patient first: Northwind is currently carrying two exposures that would each stop trading for around ' +
             'a week: an internet-facing appliance being actively exploited elsewhere, and an order ' +
             'platform whose backups have never been restored, which means an incident on either ' +
             'becomes a recovery project rather than an outage. Underneath three of the four ' +
@@ -3256,7 +3864,8 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'Read it back and count the sentences that describe your work rather than their ' +
-            'exposure. Cut every one of them.',
+            'exposure, the equivalent of a handover that spends five minutes on how the shift went. ' +
+            'Cut every one of them.',
           practice: [],
         },
         {
@@ -3275,10 +3884,18 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'would justify it afterwards.',
           teach: {
             concept:
-              'Everything so far has been deliberate work with time to think. Real risk decisions ' +
-              'are frequently made in minutes on partial information, and the standard is not that ' +
-              'you were right. It is that the decision was defensible on what was knowable at the ' +
-              'time, that it was reversible where possible, and that it was recorded.\n\n' +
+              'An emergency room doctor with a patient whose vitals are dropping and no clear ' +
+              'diagnosis yet does not get to wait for every test result before acting. They pick the ' +
+              'intervention that buys time and does the least additional harm if they turn out to be ' +
+              'wrong, they say out loud what they are trading off, and they set a point in the next ' +
+              'few minutes to look again with whatever new information has arrived. Nobody judges ' +
+              'that doctor afterwards by whether the very first guess was the final diagnosis. They ' +
+              'are judged by whether the decision was reasonable given what was known at the time.\n\n' +
+              'Everything so far in this package has been deliberate work with time to think. Real ' +
+              'risk decisions are frequently made in minutes on partial information, exactly like ' +
+              'that emergency room call, and the standard is not that you were right. It is that the ' +
+              'decision was defensible on what was knowable at the time, that it was reversible ' +
+              'where possible, and that it was recorded.\n\n' +
               'Three habits make a fast decision defensible. Pick the option that preserves ' +
               'optionality: a reversible action taken early beats an irreversible one taken ' +
               'correctly later, which usually means partial measures over total ones. Name the ' +
@@ -3298,7 +3915,7 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
             'A good answer commits to an action, names the trade-off it accepts, and sets a checkpoint or reversal condition rather than waiting silently for more information.',
           ],
           solution:
-            'I would not turn the model off outright, because the manual queue can absorb only ' +
+            'The emergency-room call: I would not turn the model off outright, because the manual queue can absorb only ' +
             'about a fifth of the volume and a full fallback converts an accuracy problem into a ' +
             'trading outage. Instead I would keep the model in the path but stop acting on its ' +
             'declines below a value threshold, sending only high-value declines to the manual ' +
@@ -3327,8 +3944,9 @@ export const RISK_GOVERNANCE_PATHWAY: LearningPackage = {
           ],
           debrief:
             'That is the shape of the work in the risk exercise venue, where a small team takes ' +
-            'cascading decisions in real time against a scenario that keeps moving. The habits ' +
-            'transfer: reversible first, name the trade, set the checkpoint, write it down.',
+            'cascading decisions in real time against a scenario that keeps moving, the same ' +
+            'discipline as the emergency room. The habits transfer: reversible first, name the ' +
+            'trade, set the checkpoint, write it down.',
           practice: [],
         },
       ],
