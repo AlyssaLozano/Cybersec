@@ -191,11 +191,28 @@ if (NIGHT_FABRICATED.length === 0) {
 
 const SEVERITY_TEACH: Teach = {
   concept:
+    'Start with what an alert even is. Somewhere behind every security platform sits a piece of ' +
+    'software called a RULE: a small, narrow watcher that looks at one stream of activity, such as ' +
+    'logins or network connections, for one specific pattern. The instant it sees that pattern, it ' +
+    'writes an ALERT: a short record that says, in effect, "I just saw this happen, at this time, ' +
+    'involving this account or address." A QUEUE is simply the list of those alerts waiting for a ' +
+    'person to look at them, the same way a hospital corridor is a queue of patients waiting to be ' +
+    'seen. Nothing in that list has been judged yet: the software only reports, it does not decide.\n\n' +
+    'Two labels ride along with every alert the moment it is created. SEVERITY is a word, critical, ' +
+    'high, medium, or low, describing how bad the person who WROTE the rule thought this class of ' +
+    'event would be, in general, if it turned out to be real. CONFIDENCE is a percentage describing ' +
+    'how sure the software is that the pattern it was watching for actually matched, not how sure ' +
+    'it is that anything bad happened. Both numbers are set once, in advance, by a rule author who ' +
+    'has never seen your network and cannot see this specific alert any better than you can.\n\n' +
     'Severity and confidence are claims made by the rule that fired, not facts about the world. ' +
     'A rule author guessed at them months ago, before this alert existed. An antivirus signature ' +
     'match on a harmless test file is critical with 99% confidence; a successful login by an ' +
     'attacker who just brute-forced their way in is medium with 60%. Reading the queue by ' +
-    'severity is the fastest way to miss the intrusion.',
+    'severity is the fastest way to miss the intrusion.\n\n' +
+    'This matters because a new operator, without being told otherwise, naturally works a queue ' +
+    'top to bottom by the biggest, reddest label first. That instinct is exactly backwards here, ' +
+    'and learning to distrust the label enough to read the actual alert underneath it is the first ' +
+    'skill this whole package is built around.',
   examples: [
     {
       command: 'Sort by severity, work top-down',
@@ -213,10 +230,22 @@ const SEVERITY_TEACH: Teach = {
 
 const ENRICHMENT_TEACH: Teach = {
   concept:
+    'Alerts do not arrive bare. Most detection platforms attach an ENRICHMENT block underneath each ' +
+    'one: extra facts the software looked up automatically, the way a caller ID display adds a ' +
+    'name and location to a phone number before you decide whether to answer. One of the most ' +
+    'useful things in that block is a running count kept for the rule itself, not for this single ' +
+    'alert: how many times has this exact rule fired before, anywhere on the network, and of those, ' +
+    'how many turned out, once a person looked, to be worth acting on.\n\n' +
     'Two numbers on every alert change the decision more than severity does: how many times this ' +
     'rule has fired before, and how many of those were worth acting on. A rule that has fired ' +
     '8,412 times and been right 14 times is telling you something about itself, not about the ' +
-    'traffic. A rule firing for the third time ever deserves your attention even at low severity.',
+    'traffic. A rule firing for the third time ever deserves your attention even at low severity.\n\n' +
+    'The reason this beats severity is that severity is a one-time guess written before the rule ' +
+    'ever ran, while the firing history is built from what this exact rule has actually done on ' +
+    'this exact network, alert after alert, for as long as it has existed. It updates itself. A ' +
+    'rule that is wrong almost every time is telling you, honestly, that most of its future firings ' +
+    'will probably also be wrong, which is a far more grounded piece of information than a label ' +
+    'somebody typed in a form a year ago.',
   examples: [
     {
       command: 'priorFirings 8412 / priorFalsePositives 8398',
@@ -250,10 +279,22 @@ const MODULE_3_1: Exercise[] = [
       'tuning. Escalate only what genuinely needs a second analyst.',
     teach: {
       concept:
-        'Triage is deciding, quickly and correctly, which alerts deserve a human. The queue is not ' +
-        'sorted by importance and cannot be: the tooling does not know which of its own alerts ' +
-        'matter. Your first pass is about disposal: most of these will be closed, and closing them ' +
-        'correctly is the job, not a preliminary to it.',
+        'TRIAGE is a word borrowed from emergency medicine: sorting a group of cases quickly by how ' +
+        'urgently each one needs attention, before you have time to fully examine any of them. In a ' +
+        'security operations centre, or SOC, the same word describes the job of looking at a list of ' +
+        'automated alerts and deciding, one by one, what each one deserves. Triage is deciding, ' +
+        'quickly and correctly, which alerts deserve a human. The queue is not sorted by importance ' +
+        'and cannot be: the tooling does not know which of its own alerts matter. Your first pass is ' +
+        'about disposal: most of these will be closed, and closing them correctly is the job, not a ' +
+        'preliminary to it.\n\n' +
+        'Every alert you look at gets one of three outcomes, and it helps to know all three before ' +
+        'you look at your first one. You can ESCALATE it, meaning you hand it to a second, more ' +
+        'senior analyst because it genuinely might be an active attack. You can DISMISS it, meaning ' +
+        'you close it because it was correct but harmless, or because nothing about it needs further ' +
+        'action. Or you can flag it for TUNING, meaning you close it but also mark the underlying ' +
+        'rule as needing to be adjusted, because it is going to keep producing alerts just like this ' +
+        'one until somebody changes it. Almost every alert in a real queue ends in one of the last ' +
+        'two: escalation is the exception, not the default.',
       examples: [
         {
           command: 'escalate',
@@ -306,7 +347,14 @@ const MODULE_3_1: Exercise[] = [
       'You escalated one alert out of twelve. That ratio is roughly right, and it will feel wrong ' +
       'for a while: closing an alert you are not certain about is uncomfortable, and doing it ' +
       'eighty times a shift is the job. The discomfort is why new operators escalate too much, and ' +
-      'why tier-two queues stop being read.',
+      'why tier-two queues stop being read.\n\n' +
+      'The reasoning behind that discomfort is worth naming, because it does not go away on its ' +
+      'own. Escalating feels safe because the cost is invisible to you: somebody else spends the ' +
+      'time, and if you were wrong, nobody usually tells you. Dismissing correctly feels risky ' +
+      'because if you are wrong, it is your name on it. That asymmetry pushes every new operator ' +
+      'toward escalating too much, and the fix is not willpower, it is understanding that a queue ' +
+      'nobody actually reads because it is flooded with routine escalations protects nobody. A queue ' +
+      'kept small and accurate is the thing that actually catches the real intrusion.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.1.1'] ?? [],
   },
   {
@@ -360,7 +408,16 @@ const MODULE_3_1: Exercise[] = [
       'with near-perfect confidence. Meanwhile the alert describing an actual compromise was rated ' +
       'medium at 60%. This inversion is not a flaw in the simulation: severity is assigned by ' +
       'whoever wrote the rule, in advance, without knowing anything about the event that would ' +
-      'eventually trigger it.',
+      'eventually trigger it.\n\n' +
+      'It happens because the two ratings are answering completely different questions. "How bad ' +
+      'would malware on an endpoint be, in general?" is a question you can answer sitting at a desk ' +
+      'writing rules, and the honest answer is: very bad, so mark it critical. "How bad would this ' +
+      'specific successful login after a run of failures be?" cannot be answered in general at all, ' +
+      'because it depends on facts the rule author never has, like whether the account was disabled ' +
+      'or stale, or whether the source address had already been trying and failing all morning. The ' +
+      'rule author picks a cautious, unremarkable-sounding rating for that kind of alert because ' +
+      'most instances of it really are unremarkable. Your job is to be the one exception that reads ' +
+      'the specific case instead of trusting the general guess.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.1.2'] ?? [],
   },
   {
@@ -405,7 +462,14 @@ const MODULE_3_1: Exercise[] = [
     debrief:
       'This is the reasoning that decides whether you catch the intrusion in this package. The ' +
       'brute-force rule in the full night shift has been wrong 44 times out of 61, and the 62nd ' +
-      'firing is real. Base rates tell you how much scrutiny to spend, never whether to look.',
+      'firing is real. Base rates tell you how much scrutiny to spend, never whether to look.\n\n' +
+      'The word for this kind of statistic is a BASE RATE: how often something has been true across ' +
+      'many past cases. A base rate is genuinely useful for deciding how much time to spend and how ' +
+      'worried to be walking in, the way knowing that most late-night phone calls are wrong numbers ' +
+      'lets you answer calmly instead of in a panic. What it cannot do is tell you about the one ' +
+      'call actually happening right now. Treating a base rate as a verdict on the specific case in ' +
+      'front of you is the single reasoning error this whole package keeps testing for, because it ' +
+      'is the one that lets a real intrusion hide inside a rule that is usually noise.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.1.3'] ?? [],
   },
   {
@@ -424,11 +488,22 @@ const MODULE_3_1: Exercise[] = [
       'what you do next.',
     teach: {
       concept:
+        'When you close an alert, you are not just filing it away, you are also writing down a ' +
+        'judgement about the RULE that raised it, and that judgement gets counted. Two very ' +
+        'different judgements sound alike unless you separate them on purpose. A POSITIVE, in this ' +
+        'context, simply means the rule fired: it saw a match and produced an alert. A TRUE positive ' +
+        'means the event it described genuinely happened. A FALSE positive means it did not, the ' +
+        'rule was wrong about the world.\n\n' +
         'Both of these get closed, so it is tempting to call them both false positives. They are ' +
         'not. The overnight login genuinely happened and the rule described it accurately: it is a ' +
         'benign true positive, and the rule is working. The SQL injection alert describes something ' +
         'that did not occur: the rule is broken. Conflating them is how a SOC ends up deleting ' +
-        'rules that work, because "false positive rate" gets measured and someone acts on it.',
+        'rules that work, because "false positive rate" gets measured and someone acts on it.\n\n' +
+        'A BENIGN true positive is the specific case where the rule was completely right and the ' +
+        'thing it found simply does not matter: it happened, it was authorised, and there is nothing ' +
+        'to fix. That third category is what most new operators are missing, because "closed" feels ' +
+        'like it should mean one thing, and here it can mean two very different verdicts about the ' +
+        'health of the detection itself.',
       examples: [
         {
           command: 'Benign true positive',
@@ -475,7 +550,14 @@ const MODULE_3_1: Exercise[] = [
     debrief:
       'Most SOC metrics dashboards get this wrong, and it has consequences: a team that reports a ' +
       '96% false positive rate will be told to disable rules, and the rules disabled will be the ' +
-      'ones firing correctly on activity nobody bothered to allowlist.',
+      'ones firing correctly on activity nobody bothered to allowlist.\n\n' +
+      'Follow the chain to see why the mislabelling is dangerous rather than just untidy. Somebody, ' +
+      'usually a manager who never reads individual alerts, watches a dashboard that adds up how ' +
+      'many closures were marked "false positive" per rule. If benign true positives get folded ' +
+      'into that count because the distinction was never made, a perfectly working rule looks like a ' +
+      'broken one on the dashboard, and the next reasonable-sounding decision is to switch it off to ' +
+      'save everyone the trouble. Getting this one word right at the moment you close the alert is ' +
+      'the only thing standing between a working detection and it quietly disappearing.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.1.4'] ?? [],
   },
   {
@@ -493,11 +575,19 @@ const MODULE_3_1: Exercise[] = [
       'Decide every alert.',
     teach: {
       concept:
-        'Escalation is not free. Every alert you send up consumes an analyst who is not then ' +
-        'reading the queue behind you, and a tier-two queue that receives forty escalations a shift ' +
-        'is functionally the same as no escalation process at all. Capping escalations is artificial ' +
-        'here and entirely real in practice: the cap is just usually implicit, and discovered the ' +
-        'hard way.',
+        'A real SOC is usually organised in tiers: tier one is the first set of eyes on the queue, ' +
+        'often newer analysts working through a high volume of alerts quickly, and tier two is a ' +
+        'smaller, more experienced group who take the harder cases tier one escalates to them. That ' +
+        'structure only works if the handoff between the tiers stays small. Escalation is not free. ' +
+        'Every alert you send up consumes an analyst who is not then reading the queue behind you, ' +
+        'and a tier-two queue that receives forty escalations a shift is functionally the same as no ' +
+        'escalation process at all. Capping escalations is artificial here and entirely real in ' +
+        'practice: the cap is just usually implicit, and discovered the hard way.\n\n' +
+        'Think of it like a hospital again: if the triage nurse sent every patient straight to the ' +
+        'trauma surgeon, the surgeon would drown and the genuinely critical cases would wait behind ' +
+        'sprained ankles. A cap forces the same discipline here, and it teaches you to ask the ' +
+        'question that matters before you send anything up: what would the next person actually DO ' +
+        'with this that I have not already done myself?',
       examples: [
         {
           command: 'Escalate 8 of 12',
@@ -539,7 +629,11 @@ const MODULE_3_1: Exercise[] = [
     debrief:
       'Note what the budget did to your thinking: it forced you to ask what escalation is FOR. That ' +
       'question (what would the next person actually do with this) is the most useful one in ' +
-      'triage, and a cap is just a way of making you ask it every time.',
+      'triage, and a cap is just a way of making you ask it every time.\n\n' +
+      'Without a hard limit, it is easy to escalate anything you feel even slightly unsure about, ' +
+      'because escalating never feels like the wrong choice in the moment: it feels like caution. ' +
+      'The budget removes that comfortable option and forces you to actually decide, which is ' +
+      'uncomfortable at first and is, in fact, the entire skill this exercise is teaching.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.1.5'] ?? [],
   },
 ];
@@ -562,10 +656,19 @@ const MODULE_3_2: Exercise[] = [
       'rest of the queue as well.',
     teach: {
       concept:
-        'A rule can be completely correct and completely unusable. The monitoring collector on this ' +
-        'network has a stale password in its config and fails SSH authentication every five minutes, ' +
-        'all day, forever: 288 times a day. Each alert is accurate. Dismissing them one at a time ' +
-        'is not triage, it is data entry, and it is how operators stop reading the queue.',
+        'A NOISY rule is one that fires far more often than it needs to, drowning out everything ' +
+        'else in the queue around it, the way a single car alarm that never actually means a theft ' +
+        'trains an entire street to ignore it. A rule can be completely correct and completely ' +
+        'unusable. The monitoring collector on this network has a stale password in its config and ' +
+        'fails SSH authentication every five minutes, all day, forever: 288 times a day. Each alert ' +
+        'is accurate. Dismissing them one at a time is not triage, it is data entry, and it is how ' +
+        'operators stop reading the queue.\n\n' +
+        'This matters because attention is a limited resource, not an infinite one. Every minute ' +
+        'spent clicking dismiss on the 200th identical alert of the day is a minute not spent reading ' +
+        'the one alert in the queue that is actually different, and after enough repetitions, the eye ' +
+        'stops distinguishing them at all. Recognising that a whole rule, not just this one alert, ' +
+        'is the problem is what lets you deal with 288 near-identical alerts in one decision instead ' +
+        'of 288 separate ones.',
         examples: [
         {
           command: 'dismiss × 36',
@@ -604,7 +707,12 @@ const MODULE_3_2: Exercise[] = [
     debrief:
       'One misconfigured host produced more failed-authentication alerts in three hours than the ' +
       'attacker produced all day. That is not a contrived ratio: it is the normal state of an ' +
-      'untuned SOC, and it is why "we had an alert for that" appears in so many breach reports.',
+      'untuned SOC, and it is why "we had an alert for that" appears in so many breach reports.\n\n' +
+      'When investigators later ask why nobody caught an intrusion that, in hindsight, was sitting ' +
+      'right there in the logs, the honest answer in a lot of real breaches is that the alert was ' +
+      'buried under thousands of correct-but-worthless ones, and by the time anyone reached it the ' +
+      'damage was done. Tuning the noisy rule away is not paperwork, it is the single change most ' +
+      'likely to make the next real alert visible.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.2.1'] ?? [],
   },
   {
@@ -621,11 +729,18 @@ const MODULE_3_2: Exercise[] = [
       'progress. Escalate it. Escalate nothing else.',
     teach: {
       concept:
-        'This is what alert fatigue actually costs. The noisy rule is not dangerous because it is ' +
-        'annoying: it is dangerous because it trains you to skim, and the real alert looks ' +
-        'superficially similar to the noise. Both are about failed authentication. One is a ' +
-        'monitoring box with a bad password; the other is four external addresses working a shared ' +
-        'account list.',
+        'ALERT FATIGUE is the name for what happens to a person, not a machine, after they have ' +
+        'read enough near-identical alerts: attention quietly degrades, and everything starts ' +
+        'looking like everything else, the same way a sound you hear constantly eventually stops ' +
+        'registering at all. This is what alert fatigue actually costs. The noisy rule is not ' +
+        'dangerous because it is annoying: it is dangerous because it trains you to skim, and the ' +
+        'real alert looks superficially similar to the noise. Both are about failed authentication. ' +
+        'One is a monitoring box with a bad password; the other is four external addresses working a ' +
+        'shared account list.\n\n' +
+        'The two alerts share a rule name and a rough shape, which is exactly why fatigue is ' +
+        'dangerous here: it is not that the real alert is hidden behind unrelated noise, it is that ' +
+        'it is disguised as MORE of the same noise. Catching it means deliberately fighting the skim ' +
+        'reflex and reading each one for what actually happened, not just which rule fired.',
       examples: [
         {
           command: 'Same rule, same severity, different meaning',
@@ -661,7 +776,11 @@ const MODULE_3_2: Exercise[] = [
       'You found it because you deliberately set the noise aside first. That is the technique: ' +
       'dispose of the known-noisy rule as a group, then triage what remains. Working the queue ' +
       'strictly top-to-bottom means arriving at the real alert having already read thirty-six ' +
-      'near-identical ones, which is exactly when people stop reading.',
+      'near-identical ones, which is exactly when people stop reading.\n\n' +
+      'Order matters more than most new operators expect. If you read the queue in the order it ' +
+      'arrived, the thirty-sixth monitoring alert and the one brute-force alert sitting among them ' +
+      'get exactly the same amount of tired attention. Clearing the known-noisy group first is not ' +
+      'just tidier, it changes what your remaining attention is spent on.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.2.2'] ?? [],
   },
   {
@@ -678,11 +797,18 @@ const MODULE_3_2: Exercise[] = [
       'still fire, and say what else needs to happen besides the rule change.',
     teach: {
       concept:
-        'Tuning is where operators do lasting damage. "Suppress failed-authentication alerts" would ' +
-        'silence the noise and also blind you to every brute force forever. A good tuning change is ' +
-        'the narrowest exclusion that removes the known-benign case and leaves everything else ' +
-        'intact, and it is always paired with fixing the underlying cause, or the exclusion becomes ' +
-        'permanent.',
+        'TUNING means changing the rule itself, not just closing the alerts it produces, so that it ' +
+        'stops firing on a specific, known-harmless situation while continuing to fire on everything ' +
+        'else. Tuning is where operators do lasting damage. "Suppress failed-authentication alerts" ' +
+        'would silence the noise and also blind you to every brute force forever. A good tuning ' +
+        'change is the narrowest exclusion that removes the known-benign case and leaves everything ' +
+        'else intact, and it is always paired with fixing the underlying cause, or the exclusion ' +
+        'becomes permanent.\n\n' +
+        'Think of it like disabling a single smoke alarm because it keeps going off from steam near ' +
+        'the shower, versus ripping out the wiring for every smoke alarm in the house because one of ' +
+        'them is annoying. The first is a narrow, deliberate fix; the second removes protection you ' +
+        'still needed. The width of the exclusion, how narrowly it is aimed at the exact benign ' +
+        'case and nothing more, is what separates a safe tuning change from a dangerous one.',
       examples: [
         {
           command: 'Suppress rule auth-failed-password',
@@ -727,7 +853,12 @@ const MODULE_3_2: Exercise[] = [
     debrief:
       'The pairing matters more than the exclusion. Exclusions that are not paired with a fix ' +
       'accumulate, nobody remembers why they exist, and three years later a genuine attack from a ' +
-      'decommissioned monitoring range is invisible. Give every exclusion an owner and an expiry.',
+      'decommissioned monitoring range is invisible. Give every exclusion an owner and an expiry.\n\n' +
+      'An exclusion with no expiry is a promise nobody is keeping. It gets added under time pressure ' +
+      'by whoever was on shift, and unless it is written down with a reason and a date, it simply ' +
+      'sits there indefinitely, quietly widening the blind spot in the rule long after the reason for ' +
+      'it stopped being true. Attaching an owner and an expiry is what turns a one-off fix into ' +
+      'something the SOC can actually be trusted to review.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.2.3'] ?? [],
   },
   {
@@ -745,10 +876,17 @@ const MODULE_3_2: Exercise[] = [
       'only your note should be able to act without opening the alert.',
     teach: {
       concept:
-        'The note you leave is the entire durable output of triage. An alert closed with no reason ' +
-        'is indistinguishable from an alert nobody read, and in a breach review that distinction ' +
-        'matters enormously. A good disposition note answers: what was it, why is it not an ' +
-        'incident, and what should happen next.',
+        'Every time you close or tune an alert on this platform, you can attach a short piece of ' +
+        'text called a JUSTIFICATION or disposition note, explaining in your own words why you made ' +
+        'the decision you made. The note you leave is the entire durable output of triage. An alert ' +
+        'closed with no reason is indistinguishable from an alert nobody read, and in a breach ' +
+        'review that distinction matters enormously. A good disposition note answers: what was it, ' +
+        'why is it not an incident, and what should happen next.\n\n' +
+        'The click that closes an alert vanishes the moment you make it: nothing about it is visible ' +
+        'to anyone else unless you write it down. Six months from now, when somebody is trying to ' +
+        'reconstruct what actually happened during a security incident, the click tells them nothing ' +
+        'and the note tells them everything. Writing one well is not extra work bolted onto triage, ' +
+        'it is the part of triage that actually survives past the moment you did it.',
       examples: [
         {
           command: 'Closed - noise',
@@ -795,7 +933,11 @@ const MODULE_3_2: Exercise[] = [
     ],
     debrief:
       'This is the habit that separates operators who get promoted from ones who do not. The ' +
-      'analysis is the same; the difference is whether it survives you closing the tab.',
+      'analysis is the same; the difference is whether it survives you closing the tab.\n\n' +
+      'Managers and reviewers cannot see the thinking you did in your head, only what you wrote ' +
+      'down, so an operator who reasons carefully but writes "closed, noise" looks, on paper, exactly ' +
+      'like one who did not think about it at all. The note is the only evidence anyone else will ever ' +
+      'have of the judgement you actually exercised.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.2.4'] ?? [],
   },
   {
@@ -813,11 +955,24 @@ const MODULE_3_2: Exercise[] = [
       'different kind of problem from the monitoring noise: decide which.',
     teach: {
       concept:
+        'A web request carries a web address, and often a PARAMETER, a piece of extra data tacked ' +
+        'onto that address, such as ?patient=selected_labs, telling the server which page or record ' +
+        'to load. A SQL INJECTION attack tries to smuggle database commands inside a parameter value ' +
+        'so the server accidentally runs them, which is a genuinely serious attack. A rule built to ' +
+        'catch it here was written carelessly: it flags any request containing the letters s-e-l-e-c-' +
+        't anywhere at all, with no regard for whether those letters form the SQL command SELECT or ' +
+        'are simply part of an ordinary word.\n\n' +
         'The monitoring alerts are correct detections of real events. This one is not: the rule ' +
         'matched the letters "select" inside the ordinary parameter value "selected_labs". No ' +
         'injection was attempted. That is a defective rule, and the remedy is different: an ' +
         'exclusion would paper over logic that will misfire on the next parameter containing a SQL ' +
-        'keyword, and there are many.',
+        'keyword, and there are many.\n\n' +
+        'This is a different flavour of problem from the noisy-but-correct monitoring rule you just ' +
+        'handled. That rule was telling the truth every single time; this one is not telling the ' +
+        'truth at all, it is pattern-matching on the wrong thing. Recognising which kind of problem ' +
+        'you are looking at determines the fix: excluding a known-benign source works for a correct ' +
+        'rule firing too often, but a rule that is simply wrong needs its logic rewritten, not an ' +
+        'exception carved out of it.',
       examples: [
         {
           command: 'Match "select" anywhere in the query string',
@@ -853,7 +1008,12 @@ const MODULE_3_2: Exercise[] = [
     debrief:
       'Note that this alert is rated HIGH severity, and that a queue containing it also contains a ' +
       'genuine intrusion rated MEDIUM. A student sorting by severity meets this one first and the ' +
-      'compromise considerably later.',
+      'compromise considerably later.\n\n' +
+      'This is the exact inversion from the very first exercise in this package, showing up again in ' +
+      'a new shape: a loud, high-severity alert that is completely empty of substance, sitting in the ' +
+      'same queue as a quiet, medium-severity alert that is the whole story. The lesson is not "SQL ' +
+      'injection alerts are usually fake," it is that severity keeps failing to track what actually ' +
+      'happened, and reading the underlying request is the only thing that reliably does.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.2.5'] ?? [],
   },
 ];
@@ -876,10 +1036,18 @@ const MODULE_3_3: Exercise[] = [
       'belong to the same actor and escalate exactly those.',
     teach: {
       concept:
-        'Single events are almost never conclusive. A successful login is normal. Creating an ' +
-        'account is normal. Adding an account to a privileged group is normal. The same user doing ' +
-        'all three within seventeen minutes, from an external address, is not normal at all. ' +
-        'Correlation is what turns three shrugs into an incident.',
+        'CORRELATION means looking at several separate alerts together and noticing that they share ' +
+        'something, an account, a source address, a tight window of time, that turns them into one ' +
+        'connected story rather than several unrelated events. Single events are almost never ' +
+        'conclusive. A successful login is normal. Creating an account is normal. Adding an account ' +
+        'to a privileged group is normal. The same user doing all three within seventeen minutes, ' +
+        'from an external address, is not normal at all. Correlation is what turns three shrugs into ' +
+        'an incident.\n\n' +
+        'It works the way a detective reads a set of small, individually unremarkable clues, one ' +
+        'muddy footprint, a lock left unlocked, a light on that is normally off, and realises that ' +
+        'together they only make sense as one sequence of events. No single alert here would earn an ' +
+        'escalation on its own. What earns it is asking a question none of the individual alerts can ' +
+        'answer by itself: did the same actor do more than one of these things, close together?',
       examples: [
         {
           command: 'Group by user, then by time window',
@@ -920,7 +1088,12 @@ const MODULE_3_3: Exercise[] = [
     debrief:
       'You have just done the thing correlation rules exist to automate, and you did it better, ' +
       'because you could see that "account created" and "account added to sudo" involved an account ' +
-      'that did not exist an hour ago. Most correlation rules cannot express that.',
+      'that did not exist an hour ago. Most correlation rules cannot express that.\n\n' +
+      'Automated correlation is usually built from fixed patterns somebody thought of in advance, ' +
+      '"alert A followed by alert B within N minutes." A human reading the same alerts can notice a ' +
+      'connection nobody wrote a rule for, like a brand-new account being the one that gets escalated ' +
+      'privileges, which is exactly the kind of reasoning that is hardest to encode as a rule and ' +
+      'easiest for an attentive person to spot.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.3.1'] ?? [],
   },
   {
@@ -938,10 +1111,18 @@ const MODULE_3_3: Exercise[] = [
       'authentication succeeded and that it followed earlier failures from the same source.',
     teach: {
       concept:
-        'Every intrusion has a moment where the story changes, and everything after it is different ' +
-        'in kind. A brute force that fails ten thousand times is noise. The same brute force ' +
-        'succeeding once is an incident, and every subsequent action by that account, however ' +
-        'ordinary it looks, has to be re-read as possible attacker activity.',
+        'A BRUTE FORCE is an attack where somebody, or more often a piece of automated software, ' +
+        'simply tries password after password against an account until one happens to work, the way ' +
+        'trying every key on a ring against a locked door eventually finds the right one. Every ' +
+        'intrusion has a moment where the story changes, and everything after it is different in ' +
+        'kind. A brute force that fails ten thousand times is noise. The same brute force succeeding ' +
+        'once is an incident, and every subsequent action by that account, however ordinary it ' +
+        'looks, has to be re-read as possible attacker activity.\n\n' +
+        'This is called the PIVOT: the specific moment where an attempt turns into actual access. ' +
+        'Before it, the attacker is locked outside and everything they do is contained to failed ' +
+        'attempts. After it, they are logged in as a real, valid account, and anything that account ' +
+        'does from then on, however mundane it looks on its own, is worth re-examining, because you ' +
+        'can no longer assume it was done by the person who is supposed to hold that account.',
       examples: [
         {
           command: 'Failed password × 62',
@@ -987,7 +1168,13 @@ const MODULE_3_3: Exercise[] = [
     debrief:
       'In the real Ridgeline timeline this alert sat unread for six days. Not because anybody was ' +
       'negligent, because it was rated medium, on a rule with a mediocre history, in a queue ' +
-      'containing 288 daily alerts from a monitoring box with a bad password.',
+      'containing 288 daily alerts from a monitoring box with a bad password.\n\n' +
+      'Every individual factor working against this alert was reasonable on its own: medium severity ' +
+      'is not unreasonable for a login rule, a mediocre history is not unreasonable for a rule that ' +
+      'is often triggered by legitimate retries, and a busy queue is simply what an unturned SOC ' +
+      'looks like. Stacked together, those reasonable factors buried the single most important alert ' +
+      'in the entire dataset, which is exactly why pivots need to be actively hunted for rather than ' +
+      'trusted to surface on their own.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.3.2'] ?? [],
   },
   {
@@ -1005,10 +1192,18 @@ const MODULE_3_3: Exercise[] = [
       'reading?',
     teach: {
       concept:
+        'Correlation, the useful kind you practised in the previous exercise, is about showing that ' +
+        'a real MECHANISM connects two events, not just that they happened close together in time. ' +
         'Correlation by timestamp is the most seductive and least reliable technique in triage. On ' +
         'a busy host, dozens of unrelated things happen every minute, and if you go looking for ' +
         'events that share a timestamp with something you already believe, you will always find ' +
-        'them. A shared clock is not a shared cause.',
+        'them. A shared clock is not a shared cause.\n\n' +
+        'This is the same trap as a familiar saying outside security: correlation is not causation, ' +
+        'just because two things happened at the same time does not mean one caused the other. Ice ' +
+        'cream sales and drowning deaths both rise in summer, but nobody thinks selling ice cream ' +
+        'causes drowning; hot weather causes both, independently. A busy server produces dozens of ' +
+        'events every minute, and two of them lining up on a clock is nowhere near enough evidence to ' +
+        'claim they are the same story.',
       examples: [
         {
           command: 'Same minute, therefore related',
@@ -1055,7 +1250,12 @@ const MODULE_3_3: Exercise[] = [
     debrief:
       'Incident reports are full of this error, and it is expensive: a coincidence written up as ' +
       'causation sends a networking team hunting a non-existent attack technique for a week, while ' +
-      'the real capacity bug stays unfixed.',
+      'the real capacity bug stays unfixed.\n\n' +
+      'Once an incorrect cause gets written down and repeated, it is extremely hard to walk back: ' +
+      'people start investigating around the assumption instead of testing it. Recording an honest ' +
+      '"these happened at the same time and I do not yet know why" costs nothing and keeps the door ' +
+      'open. Recording a confident but unsupported cause sends real effort down a path that leads ' +
+      'nowhere, while the actual problem sits untouched.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.3.3'] ?? [],
   },
   {
@@ -1072,11 +1272,17 @@ const MODULE_3_3: Exercise[] = [
       'what the alerts support.',
     teach: {
       concept:
-        'An escalation is only as useful as the story attached to it. "Three suspicious alerts, ' +
-        'please review" makes tier two start from nothing. A short ordered narrative: this, then ' +
-        'this, therefore that: lets them begin at containment instead of at reconstruction. Stay ' +
-        'inside the evidence: what you cannot support belongs in a separate sentence marked as ' +
-        'inference.',
+        'A NARRATIVE, in triage, is simply putting what happened into plain, ordered sentences: this ' +
+        'happened, then this, and because of that, this followed. An escalation is only as useful as ' +
+        'the story attached to it. "Three suspicious alerts, please review" makes tier two start ' +
+        'from nothing. A short ordered narrative: this, then this, therefore that: lets them begin ' +
+        'at containment instead of at reconstruction. Stay inside the evidence: what you cannot ' +
+        'support belongs in a separate sentence marked as inference.\n\n' +
+        'Think about the difference between handing someone a stack of unsorted photographs and ' +
+        'handing them a short paragraph explaining what the photographs show, in order. The raw ' +
+        'material is the same either way, but only one version lets the reader act immediately ' +
+        'instead of having to do your reconstruction work over again themselves, under time ' +
+        'pressure, during an active incident.',
       examples: [
         {
           command: 'Three alerts on user testuser, escalating',
@@ -1122,7 +1328,12 @@ const MODULE_3_3: Exercise[] = [
     debrief:
       'What you just wrote is the top of an incident report. In most SOCs the operator\'s escalation ' +
       'note becomes the first paragraph of the eventual write-up almost verbatim, which is a good ' +
-      'reason to write it as though it will be read by someone senior. It usually is.',
+      'reason to write it as though it will be read by someone senior. It usually is.\n\n' +
+      'Very few people rewrite an escalation note from scratch once the incident is underway: there ' +
+      'is rarely time. The version written in the first few minutes, by whoever noticed it first, is ' +
+      'usually the version that survives into the final report, which means the habits you are ' +
+      'practising in this exercise are the ones that end up in front of executives and, sometimes, ' +
+      'regulators.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.3.4'] ?? [],
   },
   {
@@ -1138,11 +1349,19 @@ const MODULE_3_3: Exercise[] = [
       'would ask that these alerts cannot answer, and say what evidence would settle them.',
     teach: {
       concept:
-        'The most valuable sentence in an escalation is often the one about uncertainty. An ' +
-        'operator who says "the attacker has root on this host and I cannot yet tell whether they ' +
-        'reached others" gets the right response. One who omits the second half gets a containment ' +
-        'decision made on a false assumption of scope. Being precise about the edge of your ' +
-        'knowledge is a skill, and it is rarer than technical ability.',
+        'SCOPE, in an investigation, means how far an intrusion actually reaches: which hosts, which ' +
+        'accounts, which data. It is one of the most important things a decision-maker needs to know ' +
+        'and one of the easiest things to get quietly wrong, because a set of alerts telling a story ' +
+        'about one host can feel like it tells you about the whole network even when it says nothing ' +
+        'of the sort. The most valuable sentence in an escalation is often the one about ' +
+        'uncertainty. An operator who says "the attacker has root on this host and I cannot yet tell ' +
+        'whether they reached others" gets the right response. One who omits the second half gets a ' +
+        'containment decision made on a false assumption of scope. Being precise about the edge of ' +
+        'your knowledge is a skill, and it is rarer than technical ability.\n\n' +
+        'It helps to think of what you know as sitting inside a circle, and everything outside that ' +
+        'circle as unknown, not "probably fine." Naming the edge of the circle out loud, saying ' +
+        'exactly where your evidence stops, is what stops a decision-maker from silently assuming the ' +
+        'circle is bigger than it actually is.',
       examples: [
         {
           command: 'Known: the sysmon account exists and has sudo.',
@@ -1187,7 +1406,12 @@ const MODULE_3_3: Exercise[] = [
       'You were right to say nothing about data impact: in this window there is no evidence of it. ' +
       'The staging of patient records happens at 11:06, thirty-one minutes after the last alert you ' +
       'saw here. An operator who assumed "no data alerts, so no data impact" would have been ' +
-      'confidently wrong within the hour.',
+      'confidently wrong within the hour.\n\n' +
+      'Notice the shape of that mistake: it is not that the operator saw evidence of safety, it is ' +
+      'that they mistook the absence of evidence for evidence of absence. Nothing in this window said ' +
+      'data was safe; the window simply had not reached the part of the timeline where data was ' +
+      'touched yet. "I have not seen it happen" and "it did not happen" are different claims, and ' +
+      'collapsing them into one is how confident, wrong assumptions about scope get made.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.3.5'] ?? [],
   },
 ];
@@ -1209,10 +1433,17 @@ const MODULE_3_4: Exercise[] = [
       'data. Find every alert that belongs to it and escalate them. Dispose of everything else.',
     teach: {
       concept:
-        'Everything so far has been a slice. This is the whole shift, and the intrusion is spread ' +
-        'across eight alerts, five rules, and three hours: mixed into a queue where one rule fires ' +
-        'every five minutes and the loudest alert is a harmless test file. Work it in passes: ' +
-        'dispose of the known-noisy rule as a group, then read what remains properly.',
+        'A SHIFT is a working period, typically eight or twelve hours, during which one operator is ' +
+        'responsible for the queue. Everything so far has been a slice, a deliberately narrowed ' +
+        'window handed to you to practise one skill at a time. This is the whole shift, and the ' +
+        'intrusion is spread across eight alerts, five rules, and three hours: mixed into a queue ' +
+        'where one rule fires every five minutes and the loudest alert is a harmless test file. Work ' +
+        'it in passes: dispose of the known-noisy rule as a group, then read what remains properly.\n\n' +
+        'Every technique from the exercises before this one, reading past severity, disposing of ' +
+        'noisy rules as a group, correlating alerts that share an actor, applies here at once, on a ' +
+        'much bigger and much noisier queue, exactly the way a real shift actually feels. Working in ' +
+        'deliberate passes rather than reading top to bottom is what keeps that combination ' +
+        'manageable instead of overwhelming.',
       examples: [
         {
           command: 'Pass 1: group and dispose of the noisy rule',
@@ -1259,7 +1490,12 @@ const MODULE_3_4: Exercise[] = [
     debrief:
       'Eight alerts out of eighty-two, spread over three hours and five different rules, with the ' +
       'two most important ones rated medium and low. Every one of them fired at the time. The ' +
-      'detection stack did its job; the queue is what failed.',
+      'detection stack did its job; the queue is what failed.\n\n' +
+      'That distinction is worth sitting with, because it is a common one in real breach post-' +
+      'mortems: the tools did exactly what they were built to do, alert on the right thing at the ' +
+      'right time. The failure was downstream of the tools, in whether a human reading the queue was ' +
+      'ever going to reach those eight alerts before the intrusion did its damage. This package puts ' +
+      'you in the seat where that failure either happens again or does not.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.4.1'] ?? [],
   },
   {
@@ -1276,10 +1512,18 @@ const MODULE_3_4: Exercise[] = [
       'every alert belonging to the intrusion. Precision and recall at the same time.',
     teach: {
       concept:
-        'This is the actual job. Recall alone is easy: escalate everything. Precision alone is easy: ' +
-        'escalate nothing. Doing both is what separates an operator from a forwarding rule, and ' +
-        'it is why the two are reported separately here rather than averaged into one score that ' +
-        'would hide which one you failed.',
+        'Two words describe the two ways a triage decision can be graded, and they come up ' +
+        'constantly in this field. RECALL asks: of everything that genuinely belonged to the ' +
+        'intrusion, how much of it did you find? PRECISION asks: of everything you flagged as the ' +
+        'intrusion, how much of it actually was? This is the actual job. Recall alone is easy: ' +
+        'escalate everything. Precision alone is easy: escalate nothing. Doing both is what ' +
+        'separates an operator from a forwarding rule, and it is why the two are reported separately ' +
+        'here rather than averaged into one score that would hide which one you failed.\n\n' +
+        'Picture a fisherman who catches every fish in the lake by draining it entirely: perfect ' +
+        'recall, since nothing escaped, but almost none of what is in the net was worth keeping. ' +
+        'Compare that to one who throws back everything and keeps nothing: perfect precision, ' +
+        'trivially, and also useless. The actual skill is catching the fish that were worth catching ' +
+        'and only those, which is exactly what an escalation budget forces you to practise.',
       examples: [
         {
           command: 'Escalate 40 of 82',
@@ -1320,7 +1564,12 @@ const MODULE_3_4: Exercise[] = [
     debrief:
       'Precision and recall are reported separately for a reason you have now felt: they fail in ' +
       'opposite directions, and a single blended score would have let you pass this by escalating ' +
-      'half the queue. No real SOC scores triage that way either.',
+      'half the queue. No real SOC scores triage that way either.\n\n' +
+      'A single averaged number is easy to game without meaning to: escalate generously and your ' +
+      'recall covers for your poor precision, or dismiss generously and the reverse happens. Grading ' +
+      'the two separately, and requiring both to clear a bar, is what stops either failure from ' +
+      'hiding behind the other, which is exactly why performance reviews in real SOCs tend to track ' +
+      'them the same way.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.4.2'] ?? [],
   },
   {
@@ -1338,11 +1587,23 @@ const MODULE_3_4: Exercise[] = [
       'the severity is wrong: say what the scheduled task actually does and why it matters.',
     teach: {
       concept:
-        'Persistence is what makes an intrusion expensive. Without it, containment is a password ' +
-        'reset; with it, the attacker returns after you have declared the incident closed. Cron ' +
-        'changes are rated low because they are usually configuration management: 331 of the last ' +
-        '340 firings were. This one downloads a remote script every fifteen minutes and pipes it ' +
-        'into a shell, under an account created twenty minutes earlier.',
+        'PERSISTENCE is any technique an attacker uses to keep their access even after the door they ' +
+        'originally walked through gets shut, the way a burglar who cuts a spare key before leaving ' +
+        'can still get back in after you change the front lock. CRON is a built-in Linux feature that ' +
+        'runs a command automatically on a repeating schedule, such as every fifteen minutes, and it ' +
+        'is a common, completely legitimate way for administrators to automate routine tasks, which ' +
+        'is exactly what makes it useful cover for an attacker too. Persistence is what makes an ' +
+        'intrusion expensive. Without it, containment is a password reset; with it, the attacker ' +
+        'returns after you have declared the incident closed. Cron changes are rated low because ' +
+        'they are usually configuration management: 331 of the last 340 firings were. This one ' +
+        'downloads a remote script every fifteen minutes and pipes it into a shell, under an account ' +
+        'created twenty minutes earlier.\n\n' +
+        'The mechanism matters because it changes what "fixing" the problem actually requires. ' +
+        'Resetting the password on the account the attacker first logged in with feels like closing ' +
+        'the incident, but if a scheduled task somewhere else on the system is still quietly fetching ' +
+        'and running the attacker\'s instructions every fifteen minutes, the door was never actually ' +
+        'shut. Finding every mechanism like this one is what separates a real containment from one ' +
+        'that only looks finished.',
       examples: [
         {
           command: 'Reset the compromised password, close the incident',
@@ -1390,7 +1651,12 @@ const MODULE_3_4: Exercise[] = [
     debrief:
       'Missed persistence is the most common reason incidents reopen. Ridgeline would have reset ' +
       'the testuser password, congratulated themselves, and been re-compromised within fifteen ' +
-      'minutes by a cron job nobody looked for, because the alert about it was rated low.',
+      'minutes by a cron job nobody looked for, because the alert about it was rated low.\n\n' +
+      'This is the same pattern from earlier in the package, a low-severity label masking the alert ' +
+      'that mattered most, and it keeps appearing on purpose. Severity is set by what a rule author ' +
+      'guessed a category of change usually means, and "somebody edited a cron job" usually does mean ' +
+      'nothing. Reading past that guess, every single time, is what finds the fifteen percent of ' +
+      'cases where it does not.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.4.3'] ?? [],
   },
   {
@@ -1408,11 +1674,19 @@ const MODULE_3_4: Exercise[] = [
       'Do not flag rules that are working correctly on activity that merely happens to be dull.',
     teach: {
       concept:
-        'Tuning is the only part of triage that compounds. Every other decision you make tonight ' +
-        'evaporates; a tuning flag reduces tomorrow\'s queue permanently. The discipline is not ' +
-        'flagging everything you closed: the backup service account alert has fired 730 times and ' +
-        'been correct 730 times, and it should keep firing, because the day it fires at an unusual ' +
-        'hour you want to see it.',
+        'COMPOUNDING means an effect that keeps paying off, or keeps costing you, on every future ' +
+        'day, rather than a one-off that happens once and is done. Tuning is the only part of triage ' +
+        'that compounds. Every other decision you make tonight evaporates; a tuning flag reduces ' +
+        'tomorrow\'s queue permanently. The discipline is not flagging everything you closed: the ' +
+        'backup service account alert has fired 730 times and been correct 730 times, and it should ' +
+        'keep firing, because the day it fires at an unusual hour you want to see it.\n\n' +
+        'A dismissal only ever affects the one alert you clicked on; tomorrow the queue is exactly ' +
+        'as noisy as it was before you started. A tuning flag, once acted on, changes the rule ' +
+        'itself, which means it changes every single future firing of that rule, for as long as the ' +
+        'exclusion lasts. That is why the discipline here is not "flag anything that annoyed me": a ' +
+        'rule that has fired 730 times and been right every single one of those times is not noise, ' +
+        'it is a rule waiting for the one time it will not be, and tuning it away would remove that ' +
+        'protection along with the annoyance.',
       examples: [
         {
           command: 'Flag: fires 288 times daily for one misconfigured host',
@@ -1454,7 +1728,12 @@ const MODULE_3_4: Exercise[] = [
       'If Ridgeline had acted on the monitoring exclusion alone, the night-shift queue would have ' +
       'been forty alerts instead of eighty-two, and the eight that mattered would have been a ' +
       'fifth of it rather than a tenth. Tuning is not housekeeping: it is the highest-leverage ' +
-      'thing an operator does.',
+      'thing an operator does.\n\n' +
+      'LEVERAGE here means getting an outsized result from a small, well-placed action. Reading and ' +
+      'closing one more alert helps only that one alert. Flagging the one rule responsible for half ' +
+      'the queue\'s volume helps every operator on every future shift, which is why an experienced ' +
+      'analyst spends real effort chasing tuning opportunities instead of just working through the ' +
+      'pile in front of them.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.4.4'] ?? [],
   },
   {
@@ -1471,10 +1750,19 @@ const MODULE_3_4: Exercise[] = [
       'finish. Six sentences at most.',
     teach: {
       concept:
-        'Handover is where incidents get dropped. The outgoing operator knows the shape of the ' +
-        'night; the incoming one sees a queue with some things already closed and no idea why. A ' +
-        'good handover is three things: what is live, what you are unsure about, and what is ' +
-        'outstanding. The uncertainty section is the one people omit and the one that matters most.',
+        'A HANDOVER is the short briefing one shift gives to the next, so that the incoming operator ' +
+        'does not have to start from zero, the way one nurse briefs the next at a shift change so the ' +
+        'patients are not left to explain their own charts. Handover is where incidents get dropped. ' +
+        'The outgoing operator knows the shape of the night; the incoming one sees a queue with some ' +
+        'things already closed and no idea why. A good handover is three things: what is live, what ' +
+        'you are unsure about, and what is outstanding. The uncertainty section is the one people ' +
+        'omit and the one that matters most.\n\n' +
+        'Everything you decided during the shift lived in your head while you were making it: which ' +
+        'alerts you connected, which ones you are not fully confident about, which loose ends you ' +
+        'ran out of time to chase. None of that is visible in the queue itself, where an alert simply ' +
+        'looks closed whether it was closed after careful thought or in the last five minutes before ' +
+        'you clocked off. The handover is the only place that reasoning gets transferred to the next ' +
+        'person at all.',
       examples: [
         {
           command: 'Quiet night, nothing major.',
@@ -1519,7 +1807,12 @@ const MODULE_3_4: Exercise[] = [
     debrief:
       'Note how much of this is about what you did not finish. Handover notes that only report ' +
       'completed work are how a live intrusion goes quiet for a shift: the incoming analyst sees ' +
-      'closed alerts and assumes resolution.',
+      'closed alerts and assumes resolution.\n\n' +
+      'A closed alert and a solved problem look identical from the outside unless somebody says ' +
+      'otherwise, so if the note only lists what went well, the reader has every reason to assume ' +
+      'nothing is left to do. Naming the unfinished work out loud, even when it feels like admitting ' +
+      'you did not get everything done, is what keeps an active intrusion from going quiet simply ' +
+      'because the shift ended.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.4.5'] ?? [],
   },
   {
@@ -1536,10 +1829,17 @@ const MODULE_3_4: Exercise[] = [
       'somebody who has been awake for ninety seconds.',
     teach: {
       concept:
-        'Judgement degrades badly at 02:00, and the answer is not to try harder: it is to decide ' +
-        'in advance. A procedure written while rested is worth more than analysis performed while ' +
-        'exhausted. The good ones start by establishing whether the thing is real at all, because ' +
-        'the most common 02:00 outcome is a rule misfiring on a batch job.',
+        'A PROCEDURE, here, is simply a fixed sequence of steps written down in advance, so that in ' +
+        'the moment you do not have to invent a plan from scratch, you just follow the one you ' +
+        'already trust. Judgement degrades badly at 02:00, and the answer is not to try harder: it is ' +
+        'to decide in advance. A procedure written while rested is worth more than analysis performed ' +
+        'while exhausted. The good ones start by establishing whether the thing is real at all, ' +
+        'because the most common 02:00 outcome is a rule misfiring on a batch job.\n\n' +
+        'This is the same idea behind an emergency evacuation plan practised while calm rather than ' +
+        'invented mid-fire: thinking clearly is much easier before adrenaline and exhaustion are ' +
+        'involved than during them. Writing the checklist now, while you can reason carefully about ' +
+        'each step, means that at 02:00 you only have to remember the first step, and the checklist ' +
+        'carries you the rest of the way.',
       examples: [
         {
           command: 'Step 1: Is it real?',
@@ -1589,7 +1889,11 @@ const MODULE_3_4: Exercise[] = [
     debrief:
       'You have just written the artefact that turns a good night into a survivable one, and the ' +
       'first genuinely portfolio-worthy thing in this package. An on-call procedure in your own ' +
-      'words, defensible in an interview, is worth more to a hiring manager than a certificate.',
+      'words, defensible in an interview, is worth more to a hiring manager than a certificate.\n\n' +
+      'A certificate says you sat through material. A procedure you wrote and can explain shows that ' +
+      'you thought through, in your own words, what actually has to happen when the pressure is on. ' +
+      'That is a far more convincing thing to bring to an interview, because it demonstrates ' +
+      'judgement rather than attendance.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.4.6'] ?? [],
   },
 ];
@@ -1618,11 +1922,21 @@ const MODULE_3_4: Exercise[] = [
 
 const COPILOT_TEACH: Teach = {
   concept:
+    'A COPILOT here is an AI assistant built into the platform that can read a single alert and ' +
+    'write out an analysis of it in plain English: what it thinks is concerning, what it thinks is ' +
+    'reassuring, and what it recommends you do. It works the way a junior colleague sitting next to ' +
+    'you might: you can ask it to look at something and tell you what it thinks, and it answers in ' +
+    'seconds, but the final decision, and the responsibility for that decision, stays with you.\n\n' +
     'The copilot reads one alert and tells you what it thinks. It is right most of the time, which ' +
     'is what makes it worth having and also what makes it dangerous: an assistant that was wrong ' +
     'half the time would be easy to ignore. Every analysis comes in four parts -- what it reads as ' +
     'risk, what it reads as mitigating, what it recommends, and what it could not see. The last ' +
-    'part is the one operators skip, and it explains nearly every mistake it makes.',
+    'part is the one operators skip, and it explains nearly every mistake it makes.\n\n' +
+    'Being right most of the time is exactly what makes an assistant worth building a habit around, ' +
+    'and exactly what makes that habit risky. A tool that is obviously unreliable gets checked every ' +
+    'time out of instinct. A tool that is right ninety-five times out of a hundred earns your trust, ' +
+    'and trust is precisely what makes the other five times dangerous: you stop reading closely ' +
+    'right around when reading closely would have mattered most.',
   examples: [
     {
       command: 'Basis: observed',
@@ -1700,7 +2014,12 @@ const MODULE_3_5: Exercise[] = [
       'the absence of evidence it cannot observe is reporting nothing at all -- but the sentence ' +
       'reads exactly like a finding, and it is the sentence that turns a routine sudo alert into an ' +
       'escalation. You will meet this exact claim again in the next exercise, attached to an alert ' +
-      'the copilot wants you to escalate.',
+      'the copilot wants you to escalate.\n\n' +
+      'The reason this sentence is so easy to miss is that it is grammatically identical to a real ' +
+      'finding. "I see no approved change record" reads the same whether it means "I checked the ' +
+      'change records and there genuinely is not one" or "I was never given access to change records ' +
+      'in the first place." Only the limits section tells you which. Making a habit of reading that ' +
+      'section first is what stops the second kind of sentence from being mistaken for the first.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.5.1'] ?? [],
   },
   {
@@ -1763,7 +2082,12 @@ const MODULE_3_5: Exercise[] = [
       'You were told in advance that two suggestions were wrong and you still had to find which. ' +
       'That is the easy version. Nobody tells you the number in a real shift, and the recommendation ' +
       'reads identically whether it is sound or not -- which is why the habit has to be reading the ' +
-      'reasoning rather than sampling the verdicts.',
+      'reasoning rather than sampling the verdicts.\n\n' +
+      'Knowing the count in advance made this exercise a search problem: find the two. In a real ' +
+      'shift there is no count, no hint that anything is wrong at all, and a confidently written ' +
+      'wrong recommendation looks exactly like a confidently written right one from the outside. The ' +
+      'only defence that works in both settings is reading why the copilot reached its conclusion, ' +
+      'not just what the conclusion was.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.5.2'] ?? [],
   },
   {
@@ -1782,10 +2106,18 @@ const MODULE_3_5: Exercise[] = [
       'the queue on what they have in common -- which is a thing none of those analyses mention.',
     teach: {
       concept:
-        'The copilot is given one alert. Not the queue, not the shift, not the other three alerts ' +
-        'that share a source address with this one. Its limits section says so on every single ' +
-        'analysis: "I have not read the other alerts in this queue." Correlation is the thing you ' +
-        'have that it does not, and on this queue correlation is the entire answer.',
+        'Remember correlation from Module 3.3: connecting several alerts together because they share ' +
+        'an actor, an address, or a tight window of time. This exercise exists to show you where an ' +
+        'AI assistant structurally cannot do that. The copilot is given one alert. Not the queue, ' +
+        'not the shift, not the other three alerts that share a source address with this one. Its ' +
+        'limits section says so on every single analysis: "I have not read the other alerts in this ' +
+        'queue." Correlation is the thing you have that it does not, and on this queue correlation ' +
+        'is the entire answer.\n\n' +
+        'It helps to picture how the copilot actually receives its work: each alert is handed to it ' +
+        'on its own, like a single page torn out of a much longer report, with no way to see the ' +
+        'pages before or after it. It can reason brilliantly about that one page. It cannot notice a ' +
+        'pattern that only exists across several pages, because it was never shown them together, and ' +
+        'no amount of clever wording in the alert would change that.',
       examples: [
         {
           command: 'One alert on its own: a failed login',
@@ -1848,7 +2180,12 @@ const MODULE_3_5: Exercise[] = [
       'This is the limit worth remembering, because prompting does not fix it and a better model does ' +
       'not either: it is a question of what the assistant was handed. Anything that needs reading ' +
       'across alerts, across a shift, or across a change record is yours. That is most of what makes ' +
-      'triage difficult, and it is the reason the job still exists.',
+      'triage difficult, and it is the reason the job still exists.\n\n' +
+      'It is tempting to assume this gap closes as AI assistants get more capable, but notice what is ' +
+      'actually missing here: it is not intelligence, it is access. A smarter assistant given the ' +
+      'same single alert and nothing else would hit the identical wall. The fix is architectural, ' +
+      'giving it the rest of the queue, not a better model, and until a platform does that, reading ' +
+      'across alerts stays a human responsibility.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.5.3'] ?? [],
   },
   {
@@ -1868,11 +2205,18 @@ const MODULE_3_5: Exercise[] = [
       'something that matters. The number will be true.',
     teach: {
       concept:
-        'The most dangerous thing an assistant can say to you is a correct fact deployed as the ' +
-        'wrong argument. "This rule has been wrong 331 times out of 340, so close it" is sound ' +
-        'reasoning about a population and worthless reasoning about an instance. Base rates tell you ' +
-        'where to look first. They never tell you what a particular alert is, and specific evidence ' +
-        'on the alert in front of you outranks them every time.',
+        'Recall the base-rate reasoning from Module 3.1: a statistic about how a rule has behaved in ' +
+        'the past is a legitimate starting expectation, but it is not a verdict on the one alert in ' +
+        'front of you. The most dangerous thing an assistant can say to you is a correct fact ' +
+        'deployed as the wrong argument. "This rule has been wrong 331 times out of 340, so close ' +
+        'it" is sound reasoning about a population and worthless reasoning about an instance. Base ' +
+        'rates tell you where to look first. They never tell you what a particular alert is, and ' +
+        'specific evidence on the alert in front of you outranks them every time.\n\n' +
+        'What makes this harder to catch than an outright fabrication is that every word of it is ' +
+        'true. The copilot is not lying about the number, 331 out of 340 really is the rule\'s ' +
+        'history. The mistake is entirely in what that true number is being used to prove, and ' +
+        'catching that kind of error means checking the argument\'s logic, not just fact-checking its ' +
+        'numbers.',
       examples: [
         {
           command: 'Correct use of a base rate',
@@ -1950,7 +2294,12 @@ const MODULE_3_5: Exercise[] = [
       'to turn it off -- it read eighty-two alerts with you and was right about most of them. It is ' +
       'the reason the operator is still accountable for the disposition. Asked in an interview how ' +
       'you use AI in triage, this is the answer worth giving: it drafts, you decide, and you can name ' +
-      'the case where you overruled it.',
+      'the case where you overruled it.\n\n' +
+      'Notice the shape of the trade you just made: the assistant saved you a great deal of reading ' +
+      'across the eighty other alerts, and cost you two moments where confident, factually accurate ' +
+      'advice pointed the wrong way. That trade is worth making, but only if you stay the one who ' +
+      'checks the two moments, which is exactly why "it drafts, you decide" is a genuine skill and ' +
+      'not just a slogan.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.5.4'] ?? [],
   },
   {
@@ -1971,10 +2320,20 @@ const MODULE_3_5: Exercise[] = [
       'it do if you escalate with it attached?',
     teach: {
       concept:
-        'A recommendation can be correct and its justification worthless, and you cannot tell the ' +
-        'difference from the recommendation. This is the failure mode that survives every check in ' +
-        'this module, because no disposition catches it: agree with the copilot and you get the alert ' +
-        'right. The damage happens downstream, in what you wrote in the handover.',
+        'ATTRIBUTION means naming who is behind an attack, a specific group or individual, rather ' +
+        'than just describing what they did. It is one of the hardest things to establish honestly in ' +
+        'this field, because it usually requires evidence, like known infrastructure or tooling, ' +
+        'that most SOCs simply do not have access to. A recommendation can be correct and its ' +
+        'justification worthless, and you cannot tell the difference from the recommendation. This ' +
+        'is the failure mode that survives every check in this module, because no disposition ' +
+        'catches it: agree with the copilot and you get the alert right. The damage happens ' +
+        'downstream, in what you wrote in the handover.\n\n' +
+        'This is worth sitting with because it breaks the pattern every previous exercise in this ' +
+        'module trained you to expect: usually a wrong copilot claim leads you toward a wrong ' +
+        'disposition, and getting the disposition right proves you caught it. Here the disposition is ' +
+        'right regardless, so there is no automatic feedback telling you anything went wrong at all. ' +
+        'The only way to catch this one is to actually read and evaluate the reasoning, not just the ' +
+        'conclusion.',
       examples: [
         {
           command: 'What the next analyst inherits',
@@ -2068,7 +2427,12 @@ const MODULE_3_5: Exercise[] = [
       'Every other mistake in this module changed a disposition, so a check could catch it. This one ' +
       'did not -- the copilot was right -- and it is still the mistake that does the most damage, ' +
       'because a fabricated attribution repeated once becomes a fact the whole incident is scoped ' +
-      'around. Read the recommendation, then read why. They fail independently.',
+      'around. Read the recommendation, then read why. They fail independently.\n\n' +
+      'That last sentence is the whole module in miniature. Whether a recommendation is right and ' +
+      'whether its reasoning is sound are two separate questions with two separate answers, and this ' +
+      'exercise is the one built specifically to show they do not always move together. A tool that ' +
+      'is right for the wrong reasons will keep being useful right up until the one time its wrong ' +
+      'reasoning happens to point somewhere the right answer does not.',
     practice: INCIDENT_TRIAGE_PRACTICE['triage.5.5'] ?? [],
   },
 ];
@@ -2096,10 +2460,11 @@ const MODULE_3_6: Exercise[] = [
     prompt: `An alert carries an enrichment block showing it has fired ${EGRESS_FIRINGS} times before and been a false positive on ${EGRESS_FALSE} of them. Which of the following are correct readings? Select all that apply.`,
     teach: {
       concept:
-        'Prior firing counts are the most useful field in an enrichment block and the easiest to ' +
-        'misuse. What they genuinely tell you is a prior probability: a rule that has been wrong ' +
-        'nine times out of ten is probably wrong again, and that is a legitimate input to a ' +
-        'decision made in ninety seconds.\n\n' +
+        'Recall from Module 3.1 what an enrichment block is: extra facts, like this rule\'s history, ' +
+        'attached automatically underneath an alert. Prior firing counts are the most useful field ' +
+        'in an enrichment block and the easiest to misuse. What they genuinely tell you is a prior ' +
+        'probability: a rule that has been wrong nine times out of ten is probably wrong again, and ' +
+        'that is a legitimate input to a decision made in ninety seconds.\n\n' +
         'What they do not tell you is anything about THIS firing. The history is a property of the ' +
         'rule, and the alert in front of you is a specific event with its own details, and the whole ' +
         'reason an operator exists rather than a threshold is that the two can disagree. Every rule ' +
@@ -2142,7 +2507,12 @@ const MODULE_3_6: Exercise[] = [
     debrief:
       'Hold both halves. Ignoring the history makes you slow; obeying it makes you blind. The ' +
       'operators who are good at this read the counter, form an expectation, and then genuinely ' +
-      'look.',
+      'look.\n\n' +
+      'This tension does not fully resolve, and that is the honest answer, not a gap in the ' +
+      'teaching. Reading every alert as if it had no history wastes time you do not have; treating ' +
+      'the history as the answer misses the rare alert that matters. Good operators live inside that ' +
+      'tension rather than picking a side of it permanently, adjusting how hard they look based on ' +
+      'the number, but never skipping the look entirely.',
     practice: [],
   },
   {
@@ -2156,7 +2526,10 @@ const MODULE_3_6: Exercise[] = [
     prompt: `The EICAR alert in your queue is severity critical with confidence ${num(EICAR_ENR.priorFirings) > 0 ? '99' : '99'}, and its enrichment shows ${EICAR_FALSE} false positives out of ${EICAR_FIRINGS} firings. Which of the following are accurate? Select all that apply.`,
     teach: {
       concept:
-        'Three numbers arrive with most alerts and they answer three different questions. SEVERITY ' +
+        'You have now met severity (Module 3.1) and prior firing history (earlier in this module) ' +
+        'separately. This exercise puts a third number, confidence, alongside them and asks what ' +
+        'happens when all three genuinely disagree at once. Three numbers arrive with most alerts ' +
+        'and they answer three different questions. SEVERITY ' +
         'is what the rule author thought this class of event would mean if it were real: it is a ' +
         'statement about a category, decided in advance by somebody who has never seen your ' +
         'estate. CONFIDENCE is how sure the detection is that the pattern actually matched, which is ' +
@@ -2202,7 +2575,12 @@ const MODULE_3_6: Exercise[] = [
     debrief:
       'When you write the closure, name which number you overruled and why. "Critical severity, but ' +
       'EICAR test string, benign true positive" is a sentence that survives review; "closed, false ' +
-      'positive" is not even accurate.',
+      'positive" is not even accurate.\n\n' +
+      'Naming the number you overruled does two things at once: it proves to a reviewer that you saw ' +
+      'the alarming number and consciously decided it did not apply here, rather than missing it, ' +
+      'and it gives the next person who reads this rule\'s history a real example of exactly the kind ' +
+      'of firing that should not raise alarm, which is useful input the next time somebody considers ' +
+      'tuning the rule.',
     practice: [],
   },
   {
@@ -2218,10 +2596,14 @@ const MODULE_3_6: Exercise[] = [
       'the following are accurate? Select all that apply.',
     teach: {
       concept:
-        'Reputation is somebody else opinion about an address, domain or file, usually a vendor ' +
-        'feed. It is genuinely useful and it is a lagging indicator: infrastructure gets a bad ' +
-        'reputation after it has been used and reported, so freshly registered or freshly rented ' +
-        'infrastructure reads as unknown rather than as bad.\n\n' +
+        'A REPUTATION FEED is a service, usually run by a security vendor, that keeps a running list ' +
+        'of internet addresses, domains and files other people have already reported as malicious, ' +
+        'the way a neighbourhood watch list tracks cars that have already been seen casing houses. An ' +
+        'ALLOWLIST is a separate, internal list your own organisation keeps of things it has decided ' +
+        'to treat as expected and safe. Reputation is somebody else opinion about an address, domain ' +
+        'or file, usually a vendor feed. It is genuinely useful and it is a lagging indicator: ' +
+        'infrastructure gets a bad reputation after it has been used and reported, so freshly ' +
+        'registered or freshly rented infrastructure reads as unknown rather than as bad.\n\n' +
         'That makes UNKNOWN the interesting value, and the one most often read as a synonym for ' +
         'fine. It is not. It means nobody has an opinion, which for a destination your estate has ' +
         'never contacted before is a reason to look harder rather than a reason to relax.\n\n' +
@@ -2262,7 +2644,11 @@ const MODULE_3_6: Exercise[] = [
     ],
     debrief:
       'The allowlist question is worth asking out loud once a quarter. Most SOCs have entries ' +
-      'nobody living can explain, and each one is a rule somebody turned off with no expiry.',
+      'nobody living can explain, and each one is a rule somebody turned off with no expiry.\n\n' +
+      'This is the same lesson from tuning exclusions in Module 3.2, showing up in a different form: ' +
+      'a decision made once, under time pressure, quietly outlives the person and the reason behind ' +
+      'it. An allowlist without an owner and a reason attached is not a safeguard any more, it is a ' +
+      'blind spot with a reassuring name.',
     practice: [],
   },
   {
@@ -2276,9 +2662,13 @@ const MODULE_3_6: Exercise[] = [
     prompt: `An egress alert has fired ${EGRESS_FIRINGS} times before and been a false positive ${EGRESS_FALSE} times. Its enrichment adds one line: the destination has no category, and first contact from Ridgeline infrastructure was 10:45 today. In three or four sentences, say how you would weigh those against each other.`,
     teach: {
       concept:
-        'This is the judgement the whole module exists for. The counter says the rule is usually ' +
-        'wrong. One line of context says something about THIS firing that has never been true of ' +
-        'the previous ones.\n\n' +
+        'EGRESS is the general term for traffic leaving your network heading outward to the internet, ' +
+        'as opposed to traffic arriving. An egress alert fires when a machine inside your network ' +
+        'talks to somewhere outside it that the rule considers worth flagging, which is exactly the ' +
+        'kind of alert that matters most when data is being taken off a compromised host. This is ' +
+        'the judgement the whole module exists for. The counter says the rule is usually wrong. One ' +
+        'line of context says something about THIS firing that has never been true of the previous ' +
+        'ones.\n\n' +
         'The prior is a statement about the rule across all its firings, most of which were routine ' +
         'traffic to destinations the estate talks to constantly. A destination contacted for the ' +
         'first time today is not a member of that population. The history is evidence about a ' +
@@ -2323,7 +2713,13 @@ const MODULE_3_6: Exercise[] = [
     ],
     debrief:
       'That destination is the exfiltration channel the rest of the platform finds from four other ' +
-      'directions. The counter said ignore it, and one line of context said otherwise.',
+      'directions. The counter said ignore it, and one line of context said otherwise.\n\n' +
+      'EXFILTRATION is the term for an attacker actually moving stolen data out of your network, ' +
+      'which is usually the final and most damaging stage of an intrusion. It is worth noticing that ' +
+      'the same egress rule that fires constantly on harmless traffic is also the rule that would ' +
+      'catch exfiltration, which is exactly why a rule with a poor track record still cannot simply ' +
+      'be dismissed on that record alone: the harmless firings and the one that matters can share the ' +
+      'same detection.',
     practice: [],
   },
   {
@@ -2340,9 +2736,10 @@ const MODULE_3_6: Exercise[] = [
       'that apply.',
     teach: {
       concept:
-        'An enrichment block is what the detection platform could look up automatically. It is ' +
-        'almost never the context that decides the disposition, and knowing what is missing is what ' +
-        'stops an operator from deciding on the half of the picture they were handed.\n\n' +
+        'This exercise closes out the enrichment module by naming its limits directly. An ' +
+        'enrichment block is what the detection platform could look up automatically. It is almost ' +
+        'never the context that decides the disposition, and knowing what is missing is what stops ' +
+        'an operator from deciding on the half of the picture they were handed.\n\n' +
         'Four things are usually absent. HOW IMPORTANT THE ASSET IS: the same alert on a test box ' +
         'and on the payment gateway are different alerts, and the enrichment rarely knows which is ' +
         'which. WHO THE USER IS: a failed login for a departing contractor and one for the finance ' +
@@ -2385,7 +2782,11 @@ const MODULE_3_6: Exercise[] = [
     debrief:
       'Ask for a change calendar in your first week. Knowing that the anomaly at 02:00 was a ' +
       'scheduled migration turns a twenty-minute investigation into a ten-second one, several times ' +
-      'a shift.',
+      'a shift.\n\n' +
+      'The pattern across all four missing pieces here is the same: none of them live inside the ' +
+      'detection platform at all, they live in an asset inventory, an HR system, a change calendar, ' +
+      'or simply in what else is on your screen right now. Good triage means knowing which systems ' +
+      'to go and check, not just knowing how to read the alert that is already in front of you.',
     practice: [],
   },
 ];
@@ -2406,9 +2807,11 @@ const MODULE_3_7: Exercise[] = [
       'of the following are correct? Select all that apply.',
     teach: {
       concept:
-        'EICAR is a short, deliberately harmless string that every antivirus product is required to ' +
-        'detect, so that people can test whether their scanner works without handling real ' +
-        'malware. Finding it means the scanner worked, which is the opposite of bad news.\n\n' +
+        'This module moves through several kinds of alert that are not about logins at all, starting ' +
+        'with malware, and each one turns out to need its own reading. EICAR is a short, ' +
+        'deliberately harmless string that every antivirus product is required to detect, so that ' +
+        'people can test whether their scanner works without handling real malware. Finding it means ' +
+        'the scanner worked, which is the opposite of bad news.\n\n' +
         'Dispose of it as a BENIGN TRUE POSITIVE rather than a false positive, and the distinction ' +
         'is not pedantry. A false positive means the detection was wrong and points at tuning. A ' +
         'benign true positive means the detection was right and the activity was harmless, which ' +
@@ -2449,7 +2852,12 @@ const MODULE_3_7: Exercise[] = [
     ],
     debrief:
       'Every wrong disposition is a small lie told to whoever reads the triage data later. This one ' +
-      'would show up as a noisy antivirus rule, and somebody would eventually act on it.',
+      'would show up as a noisy antivirus rule, and somebody would eventually act on it.\n\n' +
+      'None of this is unique to antivirus alerts specifically. It is the same benign-true-positive ' +
+      'reasoning from Module 3.1, applied again in a new setting, which is worth noticing: once you ' +
+      'have the concept, it keeps reapplying itself to alert types you have never seen before, ' +
+      'because the underlying question, did the detection work, and was the thing it found actually ' +
+      'harmful, never changes.',
     practice: [],
   },
   {
@@ -2463,9 +2871,11 @@ const MODULE_3_7: Exercise[] = [
     prompt: `A data loss rule has fired ${DLP_FIRINGS} times, been a false positive on all ${DLP_FIRINGS} of them, is allowlisted, and has just fired again on the nightly appointment reminder batch. Which of the following are correct? Select all that apply.`,
     teach: {
       concept:
-        'A rule with a perfect false positive record is not a detection, it is a scheduled ' +
-        'interruption. Every firing costs an operator attention that is then unavailable for ' +
-        'something real, and the cost is invisible because it is spread thinly across every shift.\n\n' +
+        'A DATA LOSS PREVENTION, or DLP, rule watches for information leaving the organisation that ' +
+        'should not, such as a spreadsheet of customer records attached to an outbound email. A rule ' +
+        'with a perfect false positive record is not a detection, it is a scheduled interruption. ' +
+        'Every firing costs an operator attention that is then unavailable for something real, and ' +
+        'the cost is invisible because it is spread thinly across every shift.\n\n' +
         'The right disposition for this firing is quick and the right ACTION is not about this ' +
         'firing at all. A rule that has never once been right in over a thousand attempts needs ' +
         'either a tuning change that excludes the known batch, or removal, and either way that is a ' +
@@ -2508,7 +2918,11 @@ const MODULE_3_7: Exercise[] = [
     ],
     debrief:
       'The residual risk sentence in D is what makes a tuning request credible. An operator who ' +
-      'says what the change would cost as well as what it saves gets their tuning requests actioned.',
+      'says what the change would cost as well as what it saves gets their tuning requests actioned.\n\n' +
+      'A request that only lists benefits reads as sales pitch, and experienced reviewers discount ' +
+      'it accordingly. A request that also names the honest cost, what would slip through unnoticed ' +
+      'if the change were made, reads as somebody who actually thought it through, and that is the ' +
+      'request that gets approved without a lot of back and forth.',
     practice: [],
   },
   {
@@ -2525,6 +2939,10 @@ const MODULE_3_7: Exercise[] = [
       'Select all that apply.',
     teach: {
       concept:
+        'On a cloud platform, the ROOT PRINCIPAL is the single most powerful account that exists, ' +
+        'the one with permission to do absolutely anything, comparable to a master key that opens ' +
+        'every door in a building. Ordinary staff normally use narrower, ROLE-scoped accounts that ' +
+        'can only do the specific job they need, so root even being used at all is unusual by design. ' +
         'Root and administrator accounts are watched closely, and rightly: any use of them is ' +
         'unusual by design, because well-run environments do routine work with scoped roles. That ' +
         'is why the severity is critical before anybody looks at what happened.\n\n' +
@@ -2566,7 +2984,11 @@ const MODULE_3_7: Exercise[] = [
     ],
     debrief:
       'Make "who and from where" your reflex on any privileged-account alert. The action is often ' +
-      'boring and the source is where the answer is.',
+      'boring and the source is where the answer is.\n\n' +
+      'An allowlist tells you a specific action is expected, and says nothing about who is taking ' +
+      'it. A stolen credential performing an allowlisted action from a location that credential has ' +
+      'never used before is invisible if you only check the flag, which is precisely why that ' +
+      'question, who and from where, has to become automatic rather than optional.',
     practice: [],
   },
   {
@@ -2583,10 +3005,13 @@ const MODULE_3_7: Exercise[] = [
       'that apply.',
     teach: {
       concept:
-        'Anything with a public address is scanned continuously by automated tools looking for ' +
-        'common software. Requests for WordPress login pages on a server that does not run ' +
-        'WordPress, or for environment files, are the ambient weather of the internet rather than ' +
-        'evidence of interest in you.\n\n' +
+        'Any server reachable from the public internet is being probed constantly by automated ' +
+        'tools called SCANNERS, which methodically try thousands of known web addresses and common ' +
+        'software weaknesses against every reachable machine they can find, the way junk mail arrives ' +
+        'whether or not anyone at that address wants it. Anything with a public address is scanned ' +
+        'continuously by automated tools looking for common software. Requests for WordPress login ' +
+        'pages on a server that does not run WordPress, or for environment files, are the ambient ' +
+        'weather of the internet rather than evidence of interest in you.\n\n' +
         'What separates noise from attention is not the payload, it is the SHAPE. Untargeted ' +
         'scanning sprays a standard list of paths, gets 404s, and moves on within seconds. Somebody ' +
         'interested in you specifically probes paths that exist on YOUR application, adapts to the ' +
@@ -2628,7 +3053,12 @@ const MODULE_3_7: Exercise[] = [
     ],
     debrief:
       'The response code habit is the cheapest upgrade to web alert triage there is. Filter your ' +
-      'scanning alerts to the ones that got a 200 and the queue shrinks to the ones worth reading.',
+      'scanning alerts to the ones that got a 200 and the queue shrinks to the ones worth reading.\n\n' +
+      'A RESPONSE CODE is the short number a web server sends back with every reply, such as 404 ' +
+      'meaning "nothing here" or 200 meaning "here is what you asked for." Filtering on that one ' +
+      'number turns a queue of thousands of scanning attempts, almost all of which found nothing, ' +
+      'into a much smaller list of the handful that actually got somewhere, which is the difference ' +
+      'between reading everything and reading what matters.',
     practice: [],
   },
   {
@@ -2645,7 +3075,9 @@ const MODULE_3_7: Exercise[] = [
       'alert is not about a login.',
     teach: {
       concept:
-        'Operators trained on a queue that is mostly authentication develop a single habit: check ' +
+        'This exercise ties together everything the module just walked through: malware, data loss, ' +
+        'privileged accounts, and web scanning, into one general principle. Operators trained on a ' +
+        'queue that is mostly authentication develop a single habit: check ' +
         'the source, check the account, check whether it succeeded. It works on logins and ' +
         'transfers badly, because each alert class turns on a different question.\n\n' +
         'For authentication the question is did it work, and from where. For MALWARE it is what the ' +
@@ -2691,7 +3123,12 @@ const MODULE_3_7: Exercise[] = [
     ],
     debrief:
       'Write these down as a card for your first months. Four sentences, one per alert class, saved ' +
-      'somewhere you can see them, is worth more than any amount of memorising rule names.',
+      'somewhere you can see them, is worth more than any amount of memorising rule names.\n\n' +
+      'The reason a short card of "what question does this alert class turn on" beats memorising ' +
+      'individual rule names is that new alert types appear constantly, faster than anyone can learn ' +
+      'them all by name. Knowing how to ask "what is this class of alert actually a proxy for" is a ' +
+      'transferable skill that works on a rule you have never seen before; memorised rule names are ' +
+      'not.',
     practice: [],
   },
 ];
@@ -2712,9 +3149,10 @@ const MODULE_3_8: Exercise[] = [
       'following are reasons that matters? Select all that apply.',
     teach: {
       concept:
-        'A closure category is a message to the future. It is read by detection engineering ' +
-        'deciding what to tune, by whoever reports on the SOC, and by the next operator meeting the ' +
-        'same rule at 03:00.\n\n' +
+        'This final module is about the last step of triage: closing the alert well, in a way that ' +
+        'is useful to everyone who comes after you. A closure category is a message to the future. ' +
+        'It is read by detection engineering deciding what to tune, by whoever reports on the SOC, ' +
+        'and by the next operator meeting the same rule at 03:00.\n\n' +
         'Three categories carry most of the weight and they are routinely confused. FALSE POSITIVE ' +
         'means the detection was wrong: the thing it claimed to see did not happen. BENIGN TRUE ' +
         'POSITIVE means the detection was right and the activity was harmless, which is a ' +
@@ -2757,7 +3195,11 @@ const MODULE_3_8: Exercise[] = [
     debrief:
       'If your platform does not distinguish these, say so. Working without a benign true positive ' +
       'category means every correct detection of harmless activity is being recorded as a broken ' +
-      'rule.',
+      'rule.\n\n' +
+      'This is worth raising even when it feels like a small process complaint, because the harm it ' +
+      'causes compounds silently: every wrongly-labelled closure nudges the reported false positive ' +
+      'rate up a little, and eventually somebody who never read a single alert makes a decision to ' +
+      'weaken a rule based on a number that was never accurate in the first place.',
     practice: [],
   },
   {
@@ -2773,8 +3215,10 @@ const MODULE_3_8: Exercise[] = [
       'comment.',
     teach: {
       concept:
-        'A closure comment is read by somebody who was not there, usually months later, and usually ' +
-        'because something else has gone wrong. It has to stand alone.\n\n' +
+        'A CLOSURE COMMENT is the short written note you attach when you close an alert, the actual ' +
+        'sentence or two, not just the category dropdown, explaining what you found. A closure ' +
+        'comment is read by somebody who was not there, usually months later, and usually because ' +
+        'something else has gone wrong. It has to stand alone.\n\n' +
         'Three things make it stand alone. WHAT YOU ESTABLISHED, specifically: the file, the host, ' +
         'the account, whatever the concrete facts were. WHAT YOU CHECKED to establish it, so the ' +
         'reader knows how far the conclusion is supported and does not have to redo it. And THE ' +
@@ -2816,7 +3260,11 @@ const MODULE_3_8: Exercise[] = [
     ],
     debrief:
       'The last sentence, admitting what you did not establish, is what makes the rest credible. ' +
-      'Closures that only contain conclusions read as guesses.',
+      'Closures that only contain conclusions read as guesses.\n\n' +
+      'This is the written form of the same discipline from Module 3.3\'s lesson on scope: naming the ' +
+      'edge of what you actually know. A closure that states its conclusions but never says what was ' +
+      'checked to reach them gives the next reader no way to tell a careful analysis from a hunch, ' +
+      'and both look identical on the page.',
     practice: [],
   },
   {
@@ -2832,9 +3280,12 @@ const MODULE_3_8: Exercise[] = [
       'would genuinely help them? Select all that apply.',
     teach: {
       concept:
-        'The improvement loop in a SOC runs on triage output, and it starves when the output is ' +
-        'thin. Detection engineering cannot see the queue the way an operator does; what they can ' +
-        'see is what operators recorded.\n\n' +
+        'DETECTION ENGINEERING is the separate team, or sometimes the separate hat the same person ' +
+        'wears, responsible for writing and improving the rules that produce alerts in the first ' +
+        'place, as opposed to triage, which works the alerts those rules already produced. The ' +
+        'improvement loop in a SOC runs on triage output, and it starves when the output is thin. ' +
+        'Detection engineering cannot see the queue the way an operator does; what they can see is ' +
+        'what operators recorded.\n\n' +
         'Four kinds of record are actually usable. Accurate categories, so the false positive rate ' +
         'per rule is real. A stated REASON for benign closures, because "this fires on the nightly ' +
         'batch" is a tuning specification and "false positive" is not. The specific field or ' +
@@ -2877,7 +3328,11 @@ const MODULE_3_8: Exercise[] = [
     debrief:
       'Option C is the one that will get you noticed. An operator who writes "excluding source ' +
       '10.20.9.40 would remove 80% of these without affecting external sources" has done detection ' +
-      'engineering work from the triage seat.',
+      'engineering work from the triage seat.\n\n' +
+      'The reason it stands out is that it hands detection engineering a finished, testable proposal ' +
+      'instead of a complaint. Anyone can say a rule is noisy. Very few operators say exactly which ' +
+      'field to exclude, and what proportion of the noise that single change would remove, and that ' +
+      'specificity is what turns a triage note into work somebody else can act on the same day.',
     practice: [],
   },
   {
@@ -2893,9 +3348,10 @@ const MODULE_3_8: Exercise[] = [
       'about the two ways of getting it wrong? Select all that apply.',
     teach: {
       concept:
-        'Closing something real is a missed detection. Escalating something benign is a wasted ' +
-        'investigation. Both are errors and they are not symmetrical, which is worth being explicit ' +
-        'about rather than absorbing as anxiety.\n\n' +
+        'This is the last exercise in the package, and it steps back to name the two ways every ' +
+        'triage decision in this entire package can go wrong. Closing something real is a missed ' +
+        'detection. Escalating something benign is a wasted investigation. Both are errors and they ' +
+        'are not symmetrical, which is worth being explicit about rather than absorbing as anxiety.\n\n' +
         'The costs differ. A wasted escalation costs an analyst an hour and is discovered ' +
         'immediately, because somebody looks and finds nothing. A missed detection costs whatever ' +
         'the attacker does with the time and is discovered late or never, because nothing looks for ' +
@@ -2936,7 +3392,11 @@ const MODULE_3_8: Exercise[] = [
     ],
     debrief:
       'Spend twenty minutes of a quiet shift rereading alerts you closed a fortnight ago. It is the ' +
-      'only feedback loop on the half of your work nobody else checks.',
+      'only feedback loop on the half of your work nobody else checks.\n\n' +
+      'That habit is a fitting place to end this package, because it is the same discipline every ' +
+      'exercise before it has been building toward: not trusting a single signal, whether it is a ' +
+      'severity label, a base rate, an AI assistant, or your own sense of how the shift went, without ' +
+      'occasionally going back and checking it against what actually happened.',
     practice: [],
   },
 ];
