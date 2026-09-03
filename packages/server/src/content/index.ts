@@ -40,6 +40,10 @@ import { OT_SECURITY_FOUNDATIONS } from './ot-security-foundations.js';
 import { IDENTITY_FOUNDATIONS } from './identity-foundations.js';
 import { HUMAN_RISK_FOUNDATIONS } from './human-risk-foundations.js';
 import { MALWARE_ANALYSIS } from './malware-analysis.js';
+import { THREAT_HUNTER_FOUNDATIONS } from './threat-hunter-foundations.js';
+import { FORENSICS_FOUNDATIONS } from './forensics-foundations.js';
+import { DETECTION_ENGINEERING_FOUNDATIONS } from './detection-engineering-foundations.js';
+import { THREAT_INTEL_FOUNDATIONS } from './threat-intel-foundations.js';
 
 /**
  * NAMING: every package id is a NAME, never a number.
@@ -69,6 +73,10 @@ export const PACKAGES: LearningPackage[] = [
   OT_SECURITY_FOUNDATIONS,
   IDENTITY_FOUNDATIONS,
   HUMAN_RISK_FOUNDATIONS,
+  THREAT_HUNTER_FOUNDATIONS,
+  FORENSICS_FOUNDATIONS,
+  DETECTION_ENGINEERING_FOUNDATIONS,
+  THREAT_INTEL_FOUNDATIONS,
 ];
 
 /** Every exercise across every package, in curriculum order. */

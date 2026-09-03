@@ -137,6 +137,30 @@ const PACKAGE_ART: Record<string, PackageBadgeArt> = {
     emblem: 'scales',
     accent: 'amber',
   },
+  'threat-hunter-foundations': {
+    title: 'The Hunter',
+    citation: 'Went looking without waiting for an alert, and built a hypothesis that could be tested.',
+    emblem: 'scope',
+    accent: 'gold',
+  },
+  'forensics-foundations': {
+    title: 'Chain of Custody',
+    citation: 'Captured evidence in the right order and kept it defensible.',
+    emblem: 'key',
+    accent: 'sky',
+  },
+  'detection-engineering-foundations': {
+    title: 'Rule Writer',
+    citation: 'Turned an incident into a detection, then tuned it without going blind.',
+    emblem: 'chip',
+    accent: 'green',
+  },
+  'threat-intel-foundations': {
+    title: 'The Long View',
+    citation: 'Told a durable behaviour from a disposable indicator, and attributed only as far as the evidence reached.',
+    emblem: 'beacon',
+    accent: 'violet',
+  },
 };
 
 /**
