@@ -56,8 +56,11 @@ import {
   startShift,
 } from '../services/shift.js';
 import { recordClaim, claimsForRoom, claimedEventIds } from '../services/claimStore.js';
-import { scoreClaim } from '../services/scenarios.js';
+import { scoreClaim, standInsFor, truthFor } from '../services/scenarios.js';
 import { buildAfterAction, reviewIsAvailable } from '../services/afterAction.js';
+import { qualifiesAsAttempt } from '../services/attempts.js';
+import { attemptsFor, recordAttempt } from '../services/attemptStore.js';
+import { historyFor, pickerLabel } from '../services/attempts.js';
 import {
   createRoom,
   getIdentity,
@@ -117,10 +120,17 @@ async function requireIdentity(userId: string) {
 /** The scenarios somebody can schedule, with the seat count for each. */
 roomsRouter.get(
   '/scenarios',
-  asyncRoute(async (_request, response) => {
+  asyncRoute(async (request, response) => {
+    const priorAttempts = await attemptsFor(userIdOf(request));
     sendOk(
       response,
       SCENARIOS.map((scenario) => ({
+        /*
+         * Which tiers this person has already cleared, as a letter each.
+         * Nothing is blocked by it: running one again is the point, and the
+         * badge exists so somebody choosing knows what they have already seen.
+         */
+        history: pickerLabel(historyFor(scenario.id, priorAttempts)),
         id: scenario.id,
         title: scenario.title,
         situation: scenario.situation,
@@ -376,9 +386,27 @@ roomsRouter.get(
     const role = seatOf(room, userId);
     const now = new Date();
     const claimed = await claimedEventIds(room.id, role);
+    const board = boardFor(room, role, now, claimed);
+
+    /*
+     * Stand-ins go to the lead alone, and only for chairs nobody took.
+     *
+     * This is what makes a short floor work rather than a diminished one: the
+     * incident still hangs together because the lead reads out what the empty
+     * seat would have found, on the schedule it would have found it. Sending
+     * them to every seat would hand each analyst the other surfaces, which is
+     * the one thing the projection exists to prevent.
+     */
+    const filled = room.seats.filter((s) => s.occupant).map((s) => s.role);
+    const standIns =
+      role === 'ir-lead' && room.status === 'running'
+        ? standInsFor(room.scenarioId, filled, board.elapsedSeconds)
+        : [];
+
     sendOk(response, {
       room: toClientRoom(room, userId, titleOf(room.scenarioId)),
-      board: boardFor(room, role, now, claimed),
+      board,
+      standIns,
       canStart: canStart(room, userId, now),
       canClose: canClose(room, userId),
     });
@@ -483,6 +511,40 @@ roomsRouter.post(
     try {
       const readout = buildReadout(room, body);
       const done = await persistRoom(closeShift(room, userId, readout, new Date()));
+
+      /*
+       * One attempt row per seat, not one per room.
+       *
+       * Five people in one room had five different exercises, because each only
+       * ever saw their own surfaces. A single row against the room would say
+       * the operator who worked the queue and the forensics seat who imaged a
+       * host did the same thing.
+       */
+      const claims = await claimsForRoom(done.id);
+      const truth = truthFor(done.scenarioId);
+      const criticalIds = new Set(
+        (truth?.events ?? []).filter((e) => e.critical).map((e) => e.eventId),
+      );
+      for (const seat of done.seats) {
+        if (!seat.occupant) continue;
+        const own = claims.filter((c) => c.role === seat.role);
+        if (!qualifiesAsAttempt({ claimsCommitted: own.length, wasPresentAtClose: true })) continue;
+        const scores = own.map((c) => scoreClaim(done.scenarioId, c)).filter(Boolean);
+        const total = scores.reduce((sum, sc) => sum + (sc?.total ?? 0), 0);
+        const outOf = scores.reduce((sum, sc) => sum + (sc?.outOf ?? 0), 0);
+        await recordAttempt({
+          userId: seat.occupant.userId,
+          scenarioId: done.scenarioId,
+          difficulty: done.difficulty,
+          role: seat.role,
+          score: outOf > 0 ? Math.round((total / outOf) * 100) : 0,
+          // Never averaged into the score. Catching nine of ten and missing the
+          // one that decided it is not ninety per cent of a response.
+          caughtCritical: own.some((c) => criticalIds.has(c.eventId)),
+          roomId: done.id,
+        });
+      }
+
       sendOk(response, {
         room: toClientRoom(done, userId, titleOf(done.scenarioId)),
         readout,

@@ -591,6 +591,8 @@ export interface RoomDetail {
 export interface RoomScenarioSummary {
   id: string;
   title: string;
+  /** "Completed B I" and so on. Null when they have never run it. */
+  history: string | null;
   situation: string;
   defaultDifficulty: ScenarioDifficulty;
   durationMinutes: number;
@@ -638,6 +640,8 @@ export const rooms = {
     request<{
       room: ClientRoom;
       board: SeatBoard;
+      /** Only ever populated for the lead, and only for chairs nobody took. */
+      standIns: { eventId: string; role: SocRoleId; dueAtSeconds: number; text: string }[];
       canStart: { ok: boolean; reason?: string };
       canClose: { ok: boolean; reason?: string };
     }>(`/rooms/${id}/board`),
@@ -1005,6 +1009,10 @@ export interface SeatBoard {
     watchFor: string[];
   } | null;
   claimed: string[];
+  /** Every action the scenario declares, including out-of-lane ones. */
+  actions: { id: string; label: string; forRoles: SocRoleId[] }[];
+  /** Other chairs on this floor a finding can be handed to. */
+  escalateTo: SocRoleId[];
 }
 
 export interface ClaimSubmission {

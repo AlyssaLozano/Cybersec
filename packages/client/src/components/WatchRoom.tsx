@@ -58,6 +58,9 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [readingOut, setReadingOut] = useState(false);
+  const [standIns, setStandIns] = useState<
+    { eventId: string; role: SocRoleId; dueAtSeconds: number; text: string }[]
+  >([]);
 
   const mine: SocRoleId | null = useMemo(
     () =>
@@ -81,6 +84,7 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
     try {
       const next = await rooms.board(roomId);
       setBoard(next.board);
+      setStandIns(next.standIns ?? []);
       setGates({
         canStart: next.canStart.ok,
         canClose: next.canClose.ok,
@@ -216,6 +220,7 @@ export function WatchRoom({ roomId, joinCode = null, onLeave }: Props) {
               openEvent={openEvent}
               onOpen={setOpenEvent}
               onClaimed={(next) => setBoard(next)}
+              standIns={standIns}
             />
           ) : (
             <div className="screen screen--empty">
@@ -273,6 +278,7 @@ function SeatScreen({
   openEvent,
   onOpen,
   onClaimed,
+  standIns,
 }: {
   roomId: string;
   seat: SeatView;
@@ -281,6 +287,7 @@ function SeatScreen({
   openEvent: string | null;
   onOpen: (id: string | null) => void;
   onClaimed: (board: SeatBoard) => void;
+  standIns: { eventId: string; role: SocRoleId; dueAtSeconds: number; text: string }[];
 }) {
   const brief = board?.briefing;
   const claimed = new Set(board?.claimed ?? []);
@@ -307,6 +314,21 @@ function SeatScreen({
           <p className="seat-note">The board fills once the lead starts the shift.</p>
         </>
       ) : (
+        <>
+          {/* The lead reads these out. It is what makes a short floor whole
+              rather than diminished: the empty chair's finding still lands, on
+              the schedule it would have landed. */}
+          {standIns.length > 0 ? (
+            <div className="standins">
+              <h4>Read these out</h4>
+              {standIns.map((s) => (
+                <p key={s.eventId} className="standin">
+                  <span className="standin__at">{mmss(s.dueAtSeconds)}</span>
+                  <strong>{s.role}</strong> {s.text}
+                </p>
+              ))}
+            </div>
+          ) : null}
         <ul className="screen__events">
           {(board?.events ?? []).map((event) => (
             <li
@@ -329,7 +351,14 @@ function SeatScreen({
                   {claimed.has(event.id) ? (
                     <p className="seat-note">You have claimed this. A claim is final.</p>
                   ) : (
-                    <ClaimForm roomId={roomId} eventId={event.id} onClaimed={onClaimed} />
+                    <ClaimForm
+                      roomId={roomId}
+                      eventId={event.id}
+                      role={seat.role}
+                      actions={board?.actions ?? []}
+                      escalateTo={board?.escalateTo ?? []}
+                      onClaimed={onClaimed}
+                    />
                   )}
                 </div>
               ) : null}
@@ -339,6 +368,7 @@ function SeatScreen({
             <li className="seat-note">Nothing on your surfaces yet. It will come.</li>
           ) : null}
         </ul>
+        </>
       )}
     </div>
   );
@@ -348,10 +378,16 @@ function SeatScreen({
 function ClaimForm({
   roomId,
   eventId,
+  role,
+  actions,
+  escalateTo,
   onClaimed,
 }: {
   roomId: string;
   eventId: string;
+  role: SocRoleId;
+  actions: { id: string; label: string; forRoles: SocRoleId[] }[];
+  escalateTo: SocRoleId[];
   onClaimed: (board: SeatBoard) => void;
 }) {
   const [disposition, setDisposition] = useState<'escalate' | 'investigate' | 'dismiss' | 'tune'>(
@@ -359,9 +395,35 @@ function ClaimForm({
   );
   const [reasoning, setReasoning] = useState('');
   const [confidence, setConfidence] = useState(60);
+  const [chosen, setChosen] = useState<string[]>([]);
+  const [handTo, setHandTo] = useState<string>('');
+  const [aid, setAid] = useState<{ options: { command: string }[]; nudge: string | null } | null>(
+    null,
+  );
   const [score, setScore] = useState<ClaimScoreView | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  /*
+   * The terminal aid, which is the whole of what makes one tier easier than
+   * another. At beginner it is a list of commands to choose between; higher up
+   * it thins to a nudge and then to nothing. Fetched per event because that is
+   * the granularity the server decides it at.
+   */
+  useEffect(() => {
+    let live = true;
+    void rooms
+      .aid(roomId, eventId)
+      .then((r) => {
+        if (live) setAid({ options: r.aid?.options ?? [], nudge: r.nudge ?? r.aid?.nudge ?? null });
+      })
+      .catch(() => {
+        // No aid at this tier is the normal case, not a failure.
+      });
+    return () => {
+      live = false;
+    };
+  }, [roomId, eventId]);
 
   if (score) {
     return (
@@ -398,8 +460,8 @@ function ClaimForm({
             eventId,
             disposition,
             reasoning,
-            actionIds: [],
-            escalateTo: null,
+            actionIds: chosen,
+            escalateTo: handTo || null,
             confidence,
           })
           .then((res) => {
@@ -427,12 +489,64 @@ function ClaimForm({
           </label>
         ))}
       </div>
+      {aid && aid.options.length > 0 ? (
+        <div className="claimform__aid">
+          <span className="claimform__aidhead">How would you check this?</span>
+          {/* More than one of these can be right. The scoring says so, and a
+              menu that implies one answer teaches guessing the author's
+              syntax rather than investigating. */}
+          {aid.options.map((o) => (
+            <code key={o.command}>{o.command}</code>
+          ))}
+        </div>
+      ) : null}
+      {aid?.nudge ? <p className="claimform__nudge">{aid.nudge}</p> : null}
+
       <textarea
         value={reasoning}
         onChange={(e) => setReasoning(e.target.value)}
         placeholder="Why. The review reads this back to you."
         rows={3}
       />
+
+      <fieldset className="claimform__actions">
+        <legend>What do you do about it?</legend>
+        {actions.map((a) => {
+          const inLane = a.forRoles.length === 0 || a.forRoles.includes(role);
+          return (
+            <label
+              key={a.id}
+              className={`chip${chosen.includes(a.id) ? ' chip--on' : ''}${inLane ? '' : ' chip--outlane'}`}
+              title={inLane ? undefined : 'Out of lane for this seat. You can still take it.'}
+            >
+              <input
+                type="checkbox"
+                checked={chosen.includes(a.id)}
+                onChange={() =>
+                  setChosen((prev) =>
+                    prev.includes(a.id) ? prev.filter((x) => x !== a.id) : [...prev, a.id],
+                  )
+                }
+              />
+              {a.label}
+            </label>
+          );
+        })}
+      </fieldset>
+
+      <label className="claimform__hand">
+        Hand it to
+        <select value={handTo} onChange={(e) => setHandTo(e.target.value)}>
+          {/* Stopping here is a real answer and is sometimes the right one, so
+              it is the default rather than a thing you have to find. */}
+          <option value="">Nobody. This stops with me.</option>
+          {escalateTo.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
+      </label>
       <label className="claimform__conf">
         Confidence {confidence}%
         <input

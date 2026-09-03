@@ -578,3 +578,24 @@
 .ideal__got--not-shown { color: var(--muted, #8299a3); }
 .ideal--missed strong, .ideal--misread strong { color: #d1685f; }
 .review__forroles { color: var(--muted, #8299a3); }
+
+/* Terminal aid. Present at beginner as a list of commands to choose between,
+   thinning to a nudge and then to nothing as the tier rises. More than one of
+   these usually works, which is why they are shown as a set rather than as a
+   question with an answer. */
+.claimform__aid { display: grid; gap: 0.2rem; margin: 0.3rem 0; }
+.claimform__aidhead { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted, #8299a3); }
+.claimform__aid code { font-size: 0.75rem; padding: 0.2rem 0.35rem; background: #0f1519; border-radius: 3px; overflow-x: auto; }
+.claimform__nudge { font-size: 0.8rem; color: var(--muted, #8299a3); margin: 0.2rem 0; }
+
+.claimform__actions { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.claimform__actions legend { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted, #8299a3); margin-bottom: 0.25rem; }
+/* Out-of-lane actions are offered, not hidden. A floor is taught what
+   isolating a host costs by being able to isolate it and being told. */
+.chip--outlane { border-style: dashed; opacity: 0.75; }
+.claimform__hand { font-size: 0.75rem; display: grid; gap: 0.2rem; }
+
+.standins { border-left: 2px solid #c9a227; padding-left: 0.6rem; margin-bottom: 0.7rem; }
+.standins h4 { margin: 0 0 0.3rem; }
+.standin { font-size: 0.82rem; margin: 0 0 0.4rem; }
+.standin__at { font-variant-numeric: tabular-nums; color: var(--muted, #8299a3); margin-right: 0.4rem; }

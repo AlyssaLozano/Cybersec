@@ -212,6 +212,10 @@ function CreateForm({
           {scenarios.map((s) => (
             <option key={s.id} value={s.id}>
               {s.title} ({s.roles.length} seats)
+              {/* A letter per tier already cleared. Nothing is blocked by it:
+                  running one again is the point, and somebody choosing should
+                  know what they have already seen. */}
+              {s.history ? ` · ${s.history}` : ''}
             </option>
           ))}
         </select>

@@ -197,6 +197,54 @@ describe('closing a shift', () => {
   });
 });
 
+describe('what a claim can be built from', () => {
+  const running = () => startShift(seatedRoom(), LEAD.userId, RUNNING);
+
+  /*
+   * Twenty of the hundred points on a claim are the escalation line, and the
+   * out-of-lane teaching depends entirely on the seat being able to choose a
+   * wrong action. The board shipped neither for a while, so both were
+   * unearnable and untestable from the product. These pin them.
+   */
+  it('offers every action the scenario declares, not only the ones in lane', () => {
+    const board = boardFor(running(), 'soc-operator', RUNNING);
+    expect(board.actions.length).toBeGreaterThan(0);
+    const outOfLane = board.actions.filter(
+      (a) => a.forRoles.length > 0 && !a.forRoles.includes('soc-operator'),
+    );
+    // A menu that offers only correct choices cannot be got wrong, and being
+    // told what isolating a host costs requires being able to isolate it.
+    expect(outOfLane.length).toBeGreaterThan(0);
+  });
+
+  it('offers the other chairs to hand a finding to, and never itself', () => {
+    const board = boardFor(running(), 'soc-operator', RUNNING);
+    expect(board.escalateTo.length).toBeGreaterThan(0);
+    expect(board.escalateTo).not.toContain('soc-operator');
+    expect(board.escalateTo).toContain('ir-lead');
+  });
+
+  it('carries an action set every scenario can actually use', () => {
+    for (const scenario of SCENARIOS) {
+      const room = startShift(
+        scheduleRoom({
+          scenarioId: scenario.id,
+          difficulty: scenario.difficulty,
+          startsAt: START,
+          visibility: 'open',
+          host: LEAD,
+          now: NOW,
+        }),
+        LEAD.userId,
+        RUNNING,
+      );
+      const board = boardFor(room, 'ir-lead', RUNNING);
+      expect(board.actions.length, `${scenario.id} offers no actions`).toBeGreaterThan(0);
+      expect(board.escalateTo.length, `${scenario.id} has nobody to escalate to`).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe('the readout', () => {
   const running = () => startShift(seatedRoom(), LEAD.userId, RUNNING);
 

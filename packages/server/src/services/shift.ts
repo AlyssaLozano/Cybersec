@@ -30,6 +30,7 @@ import type {
   Claim,
   LeadReadout,
   RoomSession,
+  ScenarioAction,
   ScenarioEvent,
   SocRoleId,
   TriageDecision,
@@ -121,6 +122,17 @@ export interface SeatBoard {
   briefing: SeatBriefing | null;
   /** Event ids this seat has already claimed. */
   claimed: string[];
+  /**
+   * Actions this seat may attach to a claim.
+   *
+   * Every action the scenario declares, not only the ones in this seat's lane.
+   * The out-of-lane ones are the point: a floor is taught what isolating a host
+   * costs by being able to isolate it and being told, and a menu that offers
+   * only correct choices teaches nothing and cannot be got wrong.
+   */
+  actions: ScenarioAction[];
+  /** Seats on this floor a finding can be handed to. */
+  escalateTo: SocRoleId[];
 }
 
 export function boardFor(
@@ -138,6 +150,10 @@ export function boardFor(
     events: room.status === 'running' ? eventsFor(room.scenarioId, role, elapsed, room.difficulty) : [],
     briefing: briefingFor(room.scenarioId, role),
     claimed: claimedEventIds,
+    actions: getScenario(room.scenarioId)?.actions ?? [],
+    // Every other chair on this floor. Escalating to yourself is not a thing,
+    // and a seat this scenario does not run cannot receive anything.
+    escalateTo: room.seats.map((s) => s.role).filter((r) => r !== role),
   };
 }
 
