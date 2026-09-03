@@ -45,6 +45,18 @@ import {
 } from '../services/rooms.js';
 import { takeSeat } from '../services/rooms.js';
 import {
+  aidFor,
+  boardFor,
+  buildClaim,
+  canClose,
+  canStart,
+  closeShift,
+  nudgeFor,
+  startShift,
+} from '../services/shift.js';
+import { recordClaim, claimsForRoom, claimedEventIds } from '../services/claimStore.js';
+import { scoreClaim } from '../services/scenarios.js';
+import {
   createRoom,
   getIdentity,
   getRoom,
@@ -295,6 +307,163 @@ roomsRouter.post(
         room: toClientRoom(moved, userId, titleOf(moved.scenarioId)),
         seating: seatingFor(moved, userId, now),
         readiness: readiness(moved),
+      });
+    } catch (error) {
+      asHttp(error);
+    }
+  }),
+);
+
+
+/* ── running the shift ────────────────────────────────────────────────────
+ *
+ * Everything above gets people into chairs. Everything below is the exercise
+ * actually happening: the clock starting, each seat's own screen, a claim
+ * being committed, and the lead closing it.
+ */
+
+/** The seat this user is in, or a refusal. Every run-loop route needs it. */
+function seatOf(room: { seats: { role: string; occupant: { userId: string } | null }[] }, userId: string): SocRoleId {
+  const seat = room.seats.find((s) => s.occupant?.userId === userId);
+  if (!seat) {
+    throw new HttpError(403, API_ERROR_CODES.forbidden, 'You are not in a seat on this floor.');
+  }
+  return seat.role as SocRoleId;
+}
+
+/** The incident lead starts the shift, and the clock is the room's. */
+roomsRouter.post(
+  '/:id/start',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const room = await getRoom(request.params.id!);
+    if (!room) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such room.');
+
+    const now = new Date();
+    try {
+      const running = await persistRoom(startShift(room, userId, now));
+      sendOk(response, {
+        room: toClientRoom(running, userId, titleOf(running.scenarioId)),
+        board: boardFor(running, seatOf(running, userId), now),
+      });
+    } catch (error) {
+      asHttp(error);
+    }
+  }),
+);
+
+/**
+ * This seat's screen.
+ *
+ * Polled rather than pushed, because the events are on a fixed schedule and
+ * the server can compute the whole board from elapsed time alone. A socket
+ * would buy a few seconds of latency on a scenario measured in minutes.
+ */
+roomsRouter.get(
+  '/:id/board',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const room = await getRoom(request.params.id!);
+    if (!room) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such room.');
+
+    const role = seatOf(room, userId);
+    const now = new Date();
+    const claimed = await claimedEventIds(room.id, role);
+    sendOk(response, {
+      room: toClientRoom(room, userId, titleOf(room.scenarioId)),
+      board: boardFor(room, role, now, claimed),
+      canStart: canStart(room, userId, now),
+      canClose: canClose(room, userId),
+    });
+  }),
+);
+
+/** What the terminal offers on one event, and the nudge if the tier gives one. */
+roomsRouter.get(
+  '/:id/event/:eventId/aid',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const room = await getRoom(request.params.id!);
+    if (!room) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such room.');
+
+    const role = seatOf(room, userId);
+    const eventId = request.params.eventId!;
+    // Refuse aid on an event this seat cannot see, for the same reason the
+    // claim refuses it: otherwise the hint leaks a board somebody else holds.
+    const board = boardFor(room, role, new Date());
+    if (!board.events.some((e) => e.id === eventId)) {
+      throw new HttpError(404, API_ERROR_CODES.notFound, 'That event is not on your board.');
+    }
+    sendOk(response, {
+      aid: aidFor(room, role, eventId),
+      nudge: nudgeFor(room, role, eventId),
+    });
+  }),
+);
+
+const claimBody = z.object({
+  eventId: z.string().min(1),
+  disposition: z.enum(['escalate', 'investigate', 'dismiss', 'tune']),
+  reasoning: z.string().min(1).max(4000),
+  actionIds: z.array(z.string()).max(8),
+  escalateTo: z.string().nullable(),
+  confidence: z.number().int().min(0).max(100),
+});
+
+/**
+ * Commit a claim.
+ *
+ * The score comes back in the response and not before, which is the whole
+ * point of committing: `why` is on the truth, and releasing it earlier would
+ * turn every event into a lookup.
+ */
+roomsRouter.post(
+  '/:id/claim',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const body = claimBody.parse(request.body);
+    const room = await getRoom(request.params.id!);
+    if (!room) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such room.');
+
+    const role = seatOf(room, userId);
+    const now = new Date();
+    try {
+      const claim = buildClaim(
+        room,
+        role,
+        userId,
+        { ...body, escalateTo: (body.escalateTo as SocRoleId | null) ?? null },
+        now,
+      );
+      await recordClaim(room.id, userId, claim);
+      sendOk(
+        response,
+        {
+          claim,
+          score: scoreClaim(room.scenarioId, claim),
+          board: boardFor(room, role, now, await claimedEventIds(room.id, role)),
+        },
+        201,
+      );
+    } catch (error) {
+      asHttp(error);
+    }
+  }),
+);
+
+/** The lead closes the shift. After this the review is available. */
+roomsRouter.post(
+  '/:id/close',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const room = await getRoom(request.params.id!);
+    if (!room) throw new HttpError(404, API_ERROR_CODES.notFound, 'No such room.');
+
+    try {
+      const done = await persistRoom(closeShift(room, userId));
+      sendOk(response, {
+        room: toClientRoom(done, userId, titleOf(done.scenarioId)),
+        claims: await claimsForRoom(done.id),
       });
     } catch (error) {
       asHttp(error);

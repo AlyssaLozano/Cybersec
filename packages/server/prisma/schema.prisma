@@ -353,6 +353,48 @@ model RoomSession {
   @@map("room_sessions")
 }
 
+/// One seat's claim on one event during a live shift.
+///
+/// WHY ONE PER (ROOM, EVENT, ROLE) AND IMMUTABLE
+///
+/// A claim is scored against how long the seat took and what they said, and a
+/// row that could be silently rewritten would let a late or wrong claim be
+/// quietly corrected after the fact -- the same reason a terminal session
+/// cannot be edited after the check runs. Two different seats may still claim
+/// one event two different ways; see `contestedEvents` in services/scenarios.ts,
+/// which is what that disagreement is for.
+///
+/// Plain string ids rather than relations, same reasoning as `CommunityEvent`:
+/// this is scoped to one room's shift and is never queried across rooms.
+model RoomClaim {
+  id     String @id @default(uuid())
+  roomId String
+  eventId String
+  /// SocRoleId. The seat this claim was made from, not necessarily the
+  /// event's rightful first responder -- that is what scoring checks.
+  role String
+  userId String
+
+  /// TriageDecision -- "escalate" | "investigate" | "dismiss" | "tune".
+  disposition String
+  reasoning   String
+  /// string[] as JSON -- ScenarioAction ids chosen for this claim.
+  actionIdsJson String
+  /// SocRoleId, or null to mean "stops here".
+  escalateTo String?
+  /// 0 to 100.
+  confidence Int
+  /// Seconds after the room's startsAt that this claim was committed. Scoring
+  /// reads this against the event's own atSeconds for the timing line.
+  atSeconds Int
+
+  createdAt DateTime @default(now())
+
+  @@unique([roomId, eventId, role])
+  @@index([roomId])
+  @@map("room_claims")
+}
+
 /// A badge somebody has earned.
 ///
 /// WHY THIS IS A ROW AND NOT A QUERY
