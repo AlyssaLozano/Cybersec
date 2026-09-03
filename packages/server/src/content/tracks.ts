@@ -351,6 +351,12 @@ export const TRACKS: Track[] = [
       { title: 'Authentication Flows in Practice', summary: 'What SAML and OIDC actually do on the wire, using Keycloak.', plannedExercises: 18 },
       { title: 'Lifecycle and Governance', summary: 'Joiner-mover-leaver, access reviews, and why orphaned accounts cause breaches.', plannedExercises: 16 },
       { title: 'Privileged Access', summary: 'Standing privilege is the problem; just-in-time access is the answer.', plannedExercises: 14 },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real project on your own infrastructure and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['sec-plus', 'sc-300', 'az-500'],
     sectorNotes: [
