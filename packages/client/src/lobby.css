@@ -258,7 +258,18 @@
    * what keeps them from ever colliding at any size.
    */
   container-type: size;
-  --u: max(0.62rem, 2.35cqh);
+
+  /*
+   * The scale of the room, taken from BOTH dimensions.
+   *
+   * It used to be height only, which is wrong in a narrow window: a tall thin
+   * pane gave a large unit, the doorways came out as wide as if there were a
+   * whole monitor to put them in, and they walked straight through the ring in
+   * the middle. Taking the smaller of the two means a narrow window gets a
+   * smaller room rather than a broken one, which is what lets the corridor run
+   * in a side panel at all.
+   */
+  --u: max(0.62rem, min(2.35cqh, 1.5cqw));
 
   /*
    * Band heights, and the offsets stacked off them.
@@ -291,14 +302,17 @@
  * is the thing this is not.
  *
  * The condition is a floor on BOTH dimensions, and it is set LOW on purpose:
- * 56rem across and 34rem down, which is roughly a half-screen window. It used
- * to be 72rem, and that was wrong in a way that is easy to miss on a big
- * monitor: browser zoom and display scaling both shrink the CSS viewport, so a
- * perfectly ordinary maximised window at 125% or 150% landed under the
- * threshold and got the stack. The corridor is what people asked for, so it
- * should be what they get unless the window genuinely cannot hold it.
+ * 40rem across and 30rem down, which is a side panel.
+ *
+ * It was 72rem, then 56rem, and both were wrong for the same reason, which is
+ * worth writing down because it is easy to repeat. A 1504px screen at 150%
+ * display scaling is 1003 CSS pixels, and a browser panel inside that is around
+ * 650 CSS pixels wide. Nobody looking at a large monitor would guess it, and
+ * every "it is still stacked" report came from exactly there. Measure the
+ * viewport before touching this number; do not raise it to make the geometry
+ * easier.
  */
-@media (min-width: 56rem) and (min-height: 34rem) {
+@media (min-width: 40rem) and (min-height: 30rem) {
   .lobby--hall {
     max-width: none;
     margin: 0;
@@ -1131,7 +1145,7 @@
  * Anything narrower than the lobby's own max width gets the same six doors,
  * stacked.
  *
- * The corridor needs 56rem across and 34rem down. Below either it does not run
+ * The corridor needs 40rem across and 30rem down. Below either it does not run
  * at all, rather than running badly: the alcoves are blocks of text stacked in
  * rem from the floor, and on a screen too small to hold three of them they walk
  * into each other. Chasing that with a dozen breakpoints would be a worse trade
@@ -1140,7 +1154,7 @@
  * The corridor is the nice version, never the only version: a portal somebody
  * cannot reach on a laptop is a war room they cannot join.
  */
-@media (max-width: 55.99rem), (max-height: 33.99rem) {
+@media (max-width: 39.99rem), (max-height: 29.99rem) {
   .hall__scene {
     container-type: normal;
     aspect-ratio: auto;
