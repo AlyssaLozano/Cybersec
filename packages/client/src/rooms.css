@@ -564,3 +564,17 @@
 .review__at { font-variant-numeric: tabular-nums; color: var(--muted, #8299a3); margin-right: 0.4rem; }
 .review__move { display: block; color: var(--muted, #8299a3); font-size: 0.82rem; }
 .review__ideal p { margin: 0.25rem 0 0; }
+
+/* Whether this run got each step, shown per step rather than summed. A single
+   score would let a floor that missed the one finding that mattered read a
+   respectable number and stop thinking about it. */
+.ideal__got {
+  display: inline-block; margin-left: 0.45rem;
+  font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.ideal__got--caught { color: #57b894; }
+.ideal__got--late { color: #c9a227; }
+.ideal__got--misread, .ideal__got--missed { color: #d1685f; }
+.ideal__got--not-shown { color: var(--muted, #8299a3); }
+.ideal--missed strong, .ideal--misread strong { color: #d1685f; }
+.review__forroles { color: var(--muted, #8299a3); }
