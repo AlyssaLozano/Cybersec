@@ -8,7 +8,7 @@
         "run",
         "dev:client"
       ],
-      "port": 5173
+      "autoPort": true
     },
     {
       "name": "soc-server",
