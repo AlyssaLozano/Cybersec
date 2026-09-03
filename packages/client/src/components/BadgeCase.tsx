@@ -31,7 +31,7 @@ import { ApiCallError, badges as badgesApi } from '../lib/api';
  * moderation queue behind it. The shape carries meaning, so a case is readable
  * before any of the labels are: a shield is defensive work, a blade offensive.
  */
-function Emblem({ emblem }: { emblem: string }) {
+export function Emblem({ emblem }: { emblem: string }) {
   switch (emblem) {
     case 'blade':
       return (

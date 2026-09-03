@@ -39,7 +39,7 @@ import { IdentityForm } from './IdentityForm';
 import { LobbyChat } from './LobbyChat';
 import { EventCenter } from './EventCenter';
 import { RoomReview } from './RoomReview';
-import { BadgePip } from './BadgeCase';
+import { Emblem } from './BadgeCase';
 
 interface LobbyProps {
   /**
@@ -91,13 +91,31 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
   /** True for the first few seconds, which is when you watch yourself walk in. */
   const [entering, setEntering] = useState(true);
 
+  /*
+   * "You have no call sign" and "I could not ask" are different answers.
+   *
+   * This used to treat them the same, so a single failed request put the
+   * choose-a-name form in front of somebody who already had one. That is not a
+   * cosmetic slip: the form is the only thing standing between them and the
+   * lobby, and the name they would type is already taken by themselves. The
+   * dev server restarts whenever a file changes, so the race is routine.
+   *
+   * One retry absorbs a restart; a second failure says so plainly rather than
+   * pretending to know the answer.
+   */
   useEffect(() => {
     void (async () => {
-      try {
-        setIdentity((await rooms.identity()).identity);
-      } finally {
-        setIdentityKnown(true);
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          setIdentity((await rooms.identity()).identity);
+          setIdentityKnown(true);
+          return;
+        } catch {
+          if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 600));
+        }
       }
+      setError('Could not reach the lobby. Reload to try again.');
+      setIdentityKnown(true);
     })();
   }, []);
 
@@ -179,6 +197,19 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
   );
 
   if (!identityKnown) return <p className="seat-note">Loading…</p>;
+
+  // We asked and could not get an answer. Say so, rather than showing the
+  // choose-a-name form to somebody who may already have a name.
+  if (!identity && error) {
+    return (
+      <div className="lobby lobby--gate">
+        <button type="button" className="linkish" onClick={onExit}>
+          &larr; Back
+        </button>
+        <p className="seat-note seat-note--bad">{error}</p>
+      </div>
+    );
+  }
 
   // The same gate the war rooms use. Nothing in a shared room works without a
   // name people can say out loud.
@@ -619,18 +650,23 @@ function Drifters({ occupants, meId }: { occupants: LobbyOccupant[]; meId: strin
               animationDuration: `${spot.duration}s`,
             } as React.CSSProperties}
           >
+            {/*
+              A person is their badge, not a disc.
+              A round token in a room whose doorways are all rings reads as one
+              more portal, which is the confusion this removes. The marker is a
+              hexagon carrying the emblem of the best badge they hold, so what
+              somebody is shows before their name does. It keeps their avatar
+              colour, because that is what tells two SOC Analysts apart, and
+              somebody with nothing yet gets the same hexagon empty rather than
+              a different kind of marker: a newcomer is a person here too.
+            */}
             <span
-              className={`avatar avatar--${occupant.identity.avatarId} drifter__face`}
+              className={`drifter__mark avatar avatar--${occupant.identity.avatarId}`}
               aria-hidden="true"
-            />
+            >
+              {occupant.badges[0] ? <Emblem emblem={occupant.badges[0].emblem} /> : null}
+            </span>
             <span className="drifter__name">{occupant.identity.callSign}</span>
-            {occupant.badges.length > 0 ? (
-              <span className="drifter__badges">
-                {occupant.badges.slice(0, 2).map((badge) => (
-                  <BadgePip key={badge.id} badge={badge} />
-                ))}
-              </span>
-            ) : null}
           </div>
         );
       })}
@@ -658,7 +694,9 @@ function placeOf(userId: string): Spot {
   const c = (hash >>> 20) % 1000;
   const depth = b / 1000;
   return {
-    x: 8 + (a / 1000) * 84,
+    // Kept off both edges of the band. A name label is wider than the marker
+    // above it, so somebody standing hard against the edge sticks out past it.
+    x: 14 + (a / 1000) * 72,
     // Further up the hallway is further away, so y and scale move together.
     y: 8 + depth * 74,
     scale: 0.74 + (1 - depth) * 0.46,

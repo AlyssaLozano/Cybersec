@@ -70,6 +70,14 @@ import {
 import { ATC_SKYWARD, BEDSIDE_ELLORY, DAM_GLENMARK, REFINERY_REDWATER } from './boards-safety.js';
 import { CABLE_FARHAVEN, CHARGE_VOLTMARK, TRAFFIC_VERHOLT } from './boards-connected.js';
 import { CLUSTER_KELVIN, PROTOCOL_ARCLINE, WAREHOUSE_PALETREE } from './boards-modern.js';
+import {
+  BORDER_SABLE,
+  DISPATCH_RAVENSCOURT,
+  DNS_DOMINION,
+  REACTOR_CALDERPOINT,
+} from './boards-national.js';
+import { CORE_CENDANT, DEPOSITORY_STERLING, MODEL_CORVID } from './boards-frontier.js';
+import { ACQUIRER_MAREX, CASINO_GOLDSTREAM, VENUE_HIGHFIELD } from './boards-commerce.js';
 
 const SCENARIOS = new Map<string, RedBlueScenario>([
   [RECON_NORTHWIND.id, RECON_NORTHWIND],
@@ -142,6 +150,16 @@ const POSITIONAL_LIST: PositionalScenario[] = [
   PROTOCOL_ARCLINE,
   CLUSTER_KELVIN,
   WAREHOUSE_PALETREE,
+  REACTOR_CALDERPOINT,
+  BORDER_SABLE,
+  DISPATCH_RAVENSCOURT,
+  DNS_DOMINION,
+  CORE_CENDANT,
+  MODEL_CORVID,
+  DEPOSITORY_STERLING,
+  ACQUIRER_MAREX,
+  CASINO_GOLDSTREAM,
+  VENUE_HIGHFIELD,
 ];
 
 const POSITIONAL = new Map<string, PositionalScenario>(POSITIONAL_LIST.map((s) => [s.id, s]));

@@ -273,17 +273,39 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
     let cancelled = false;
     (async () => {
       try {
-        const [detailResult, progressResult, trackResult] = await Promise.all([
-          learning.packageDetail('1'),
+        /*
+         * Progress and tracks load together and the package detail follows,
+         * because the package to open is not knowable until progress says
+         * where this student is.
+         *
+         * This used to be one Promise.all that asked for package "1", a
+         * legacy id the rename migration retired in August. That request had
+         * been 404ing ever since, and because a rejected promise in a
+         * Promise.all discards its siblings, it was silently taking the whole
+         * catalogue down with it: no tracks, no progress, no resume point.
+         * One dead id should never be able to empty the screen.
+         */
+        const [progressResult, trackResult] = await Promise.all([
           learning.progress(),
           learning.tracks(),
         ]);
         if (cancelled) return;
-        setPkg(detailResult);
         setProgress(progressResult);
         setTracks(trackResult.tracks);
         setCertStudy(trackResult.certStudy);
         setExerciseId((current) => current ?? progressResult.resume?.exerciseId ?? 'linux.1.1');
+
+        // Where the student actually is, falling back to the first package in
+        // the catalogue rather than to a hardcoded id that can go stale again.
+        const openAt = progressResult.resume?.packageId ?? progressResult.packages[0]?.packageId;
+        if (!openAt) return;
+        try {
+          const detailResult = await learning.packageDetail(openAt);
+          if (!cancelled) setPkg(detailResult);
+        } catch {
+          // The sidebar loses its module list; the tracks and the progress the
+          // rest of the app runs on are already in hand and stay there.
+        }
       } catch (error) {
         if (!cancelled) {
           setLoadError(error instanceof ApiCallError ? error.error.message : 'Could not load the course.');

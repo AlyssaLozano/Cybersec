@@ -287,6 +287,17 @@
   --h2: max(6rem, calc(var(--u) * 9));
   --hev: max(5rem, calc(var(--u) * 6));
   --band-gap: calc(var(--u) * 0.6);
+
+  /*
+   * Where the event center stands, and therefore where the crowd stops.
+   *
+   * It wants to sit just right of the ring, but in a narrow window that walks
+   * it into the near doorway on the right wall, so it is clamped to stay well
+   * clear of where that doorway begins. The crowd's right edge is then derived
+   * from this rather than guessed, which is what keeps all three apart at every
+   * width instead of only at the ones somebody measured.
+   */
+  --ev-left: min(calc(50% + var(--u) * 8.5), calc(94% - var(--u) * 20));
 }
 
 /* --- the corridor takes the whole page ----------------------------------- */
@@ -302,7 +313,7 @@
  * is the thing this is not.
  *
  * The condition is a floor on BOTH dimensions, and it is set LOW on purpose:
- * 40rem across and 30rem down, which is a side panel.
+ * 36rem across and 28rem down, which is a narrow side panel.
  *
  * It was 72rem, then 56rem, and both were wrong for the same reason, which is
  * worth writing down because it is easy to repeat. A 1504px screen at 150%
@@ -311,8 +322,14 @@
  * every "it is still stacked" report came from exactly there. Measure the
  * viewport before touching this number; do not raise it to make the geometry
  * easier.
+ *
+ * It is deliberately well BELOW that 650, and not just under it. A page
+ * scrollbar takes about fifteen pixels off the viewport, so a threshold sitting
+ * a few pixels under somebody's width is a trap: anything that makes the page
+ * scroll flips them to the stack, the stack is tall, the scrollbar stays, and
+ * they never get back. The margin is the fix, not the exact number.
  */
-@media (min-width: 40rem) and (min-height: 30rem) {
+@media (min-width: 36rem) and (min-height: 28rem) {
   .lobby--hall {
     max-width: none;
     margin: 0;
@@ -650,10 +667,24 @@
 
 /* --- the alcoves --------------------------------------------------------- */
 
+/*
+ * The doorways sit in a layer that covers the whole scene, so the layer itself
+ * must not be clickable.
+ *
+ * It is transparent, which makes it invisible and does NOT make it intangible:
+ * spanning the full scene at the same stacking level as the ring, and coming
+ * after it in the document, it was quietly swallowing every click aimed at the
+ * chat rooms. Only the doorways in it take a pointer.
+ */
 .hall__bays {
   position: absolute;
   inset: 0;
   z-index: 3;
+  pointer-events: none;
+}
+
+.bay {
+  pointer-events: auto;
 }
 
 /*
@@ -744,7 +775,7 @@
   --ring: calc(var(--u) * 3.4);
   --bay-h: var(--hev);
   width: calc(var(--u) * 8);
-  left: calc(50% + var(--u) * 8.5);
+  left: var(--ev-left);
   bottom: calc(var(--u) * 7);
 }
 
@@ -1039,7 +1070,14 @@
    * left edge mirrors that.
    */
   left: calc(50% - var(--u) * 8.5);
-  right: calc(50% - var(--u) * 8);
+  /*
+   * Half a person, not half a unit.
+   *
+   * People are centred on their point and carry a name label wider than the
+   * marker above it, so the band has to stop well short of the event center
+   * rather than just short of it.
+   */
+  right: calc(100% - var(--ev-left) + max(2.2rem, var(--u) * 2));
   /*
    * The ring's own radius, the gap its label hangs at, and the label's own
    * height, so nobody ever stands on the words "Chat rooms".
@@ -1074,14 +1112,40 @@
   animation-direction: alternate;
 }
 
-.drifter__face {
-  width: max(1.7rem, calc(var(--u) * 1.35));
-  height: max(1.7rem, calc(var(--u) * 1.35));
-  box-shadow: 0 0 0 2px rgba(4, 7, 12, 0.9), 0 8px 18px -6px #000;
+/*
+ * A person, drawn as a badge rather than a disc.
+ *
+ * Every doorway in this room is a ring, so a round token standing among them
+ * reads as one more portal. A hexagon does not, and it carries the emblem of
+ * the best badge somebody holds, so what a stranger IS shows before their name
+ * does. The fill stays their own avatar colour, because that is the thing that
+ * tells two SOC Analysts apart, and the light wash over it means a dark emblem
+ * reads on the dark avatars as well as the bright ones.
+ */
+.drifter__mark {
+  width: max(1.8rem, calc(var(--u) * 1.45));
+  height: max(1.8rem, calc(var(--u) * 1.45));
+  border: none;
+  border-radius: 0;
+  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.04));
+  display: grid;
+  place-items: center;
+  color: #06090e;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.8));
 }
 
-.drifter--me .drifter__face {
-  box-shadow: 0 0 0 2px #fff, 0 0 20px 2px rgba(126, 232, 255, 0.8);
+.drifter__mark .emblem {
+  width: 56%;
+  height: 56%;
+  stroke-width: 2.4;
+  fill-opacity: 0.2;
+}
+
+/* You, so you can find yourself in a crowd at a glance. */
+.drifter--me .drifter__mark {
+  filter: drop-shadow(0 0 10px rgba(126, 232, 255, 0.95))
+    drop-shadow(0 6px 14px rgba(0, 0, 0, 0.8));
 }
 
 .drifter__name {
@@ -1102,20 +1166,7 @@
 }
 
 /* Badges are one gesture away, so the corridor stays a place and not a table. */
-/*
- * What somebody has earned, under their name.
- *
- * Shown rather than hidden behind a hover, because the floor no longer takes a
- * pointer and because "SOC Analyst" is the one fact worth knowing about a
- * stranger you are deciding whether to talk to.
- */
-.drifter__badges {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.1rem;
-  opacity: 0.9;
-}
+
 
 @keyframes drift {
   from {
@@ -1168,7 +1219,7 @@
  * Anything narrower than the lobby's own max width gets the same six doors,
  * stacked.
  *
- * The corridor needs 40rem across and 30rem down. Below either it does not run
+ * The corridor needs 36rem across and 28rem down. Below either it does not run
  * at all, rather than running badly: the alcoves are blocks of text stacked in
  * rem from the floor, and on a screen too small to hold three of them they walk
  * into each other. Chasing that with a dozen breakpoints would be a worse trade
@@ -1177,7 +1228,7 @@
  * The corridor is the nice version, never the only version: a portal somebody
  * cannot reach on a laptop is a war room they cannot join.
  */
-@media (max-width: 39.99rem), (max-height: 29.99rem) {
+@media (max-width: 35.99rem), (max-height: 27.99rem) {
   .hall__scene {
     container-type: normal;
     aspect-ratio: auto;
