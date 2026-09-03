@@ -47,6 +47,7 @@ import { MatchConsole } from './components/MatchConsole';
 import { RoomBoard } from './components/RoomBoard';
 import { Lobby } from './components/Lobby';
 import { BadgeCase, BadgeToast } from './components/BadgeCase';
+import { Portfolio } from './components/Portfolio';
 import { Home } from './components/Home';
 import {
   ApiCallError,
@@ -195,6 +196,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
   const [inLobby, setInLobby] = useState(false);
   const [lobbyHeading, setLobbyHeading] = useState<LobbyDoorId | null>(null);
   const [badgeCase, setBadgeCase] = useState(false);
+  const [portfolioView, setPortfolioView] = useState(false);
   /**
    * Badges a pass just earned, waiting to be shown.
    *
@@ -671,6 +673,14 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
     );
   }
 
+  if (portfolioView) {
+    return (
+      <div className="floorshell">
+        <Portfolio onBack={() => setPortfolioView(false)} />
+      </div>
+    );
+  }
+
   /*
    * The lobby sits in front of every war room, so leaving one goes back to it
    * rather than to the landing map: somebody who has just finished a session is
@@ -746,7 +756,10 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
           setLanding(false);
           setBadgeCase(true);
         }}
-        onPortfolio={() => setLanding(false)}
+        onPortfolio={() => {
+          setLanding(false);
+          setPortfolioView(true);
+        }}
         onInterviewSim={() => setLanding(false)}
         onInterviewPeer={() => setLanding(false)}
       />
@@ -867,6 +880,12 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="9" r="6" />
             <path d="M8.5 14.5L7 22l5-2.5L17 22l-1.5-7.5" />
+          </svg>
+        </button>
+        <button className="btn link iconbtn" title="Portfolio" aria-label="Portfolio" onClick={() => setPortfolioView(true)}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="7" width="18" height="13" rx="2" />
+            <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
           </svg>
         </button>
         <button className="btn link iconbtn" title="Lobby" aria-label="Lobby" onClick={() => setInLobby(true)}>

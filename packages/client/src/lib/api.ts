@@ -63,6 +63,11 @@ import type {
   Teach,
   TrackSummary,
   TerminalSessionState,
+  AiSecurityPortfolio,
+  CapstoneOption,
+  CapstoneState,
+  CapstoneSubmissionView,
+  CapstoneWalkthroughStep,
 } from '@soc/shared';
 
 export class ApiCallError extends Error {
@@ -619,6 +624,41 @@ export const rooms = {
   leaveSeat: (id: string) =>
     request<Omit<RoomDetail, 'identity'>>(`/rooms/${id}/seat`, { method: 'DELETE' }),
 
+  /* ── running the shift ─────────────────────────────────────────────── */
+
+  /** The lead starts it. Every seat's board then fills from the same clock. */
+  start: (id: string) =>
+    request<{ room: ClientRoom; board: SeatBoard }>(`/rooms/${id}/start`, { method: 'POST' }),
+
+  /**
+   * This seat's screen. Polled, because the events run on a fixed schedule and
+   * the server computes the whole board from elapsed time alone.
+   */
+  board: (id: string) =>
+    request<{
+      room: ClientRoom;
+      board: SeatBoard;
+      canStart: { ok: boolean; reason?: string };
+      canClose: { ok: boolean; reason?: string };
+    }>(`/rooms/${id}/board`),
+
+  /** What the terminal offers on one event, and the nudge if the tier gives one. */
+  aid: (id: string, eventId: string) =>
+    request<{ aid: { options: { command: string }[]; nudge: string | null } | null; nudge: string | null }>(
+      `/rooms/${id}/event/${encodeURIComponent(eventId)}/aid`,
+    ),
+
+  /** Commit a claim. The score comes back with it, and not before. */
+  claim: (id: string, body: ClaimSubmission) =>
+    request<{ score: ClaimScoreView | null; board: SeatBoard }>(`/rooms/${id}/claim`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  /** The lead closes it, and the review becomes available. */
+  close: (id: string) =>
+    request<{ room: ClientRoom }>(`/rooms/${id}/close`, { method: 'POST' }),
+
   handOver: (id: string, toUserId: string) =>
     request<Omit<RoomDetail, 'identity'>>(`/rooms/${id}/handover`, {
       method: 'POST',
@@ -897,3 +937,79 @@ export const events = {
 export const badges = {
   case: () => request<BadgeCase>('/badges'),
 };
+
+// --- the portfolio and the GitHub Lab ----------------------------------------
+
+export const portfolio = {
+  aiSecurity: () => request<AiSecurityPortfolio>('/learning/portfolio/ai-security'),
+  capstones: () =>
+    request<{ submissions: CapstoneSubmissionView[]; tracks: { id: string; title: string }[] }>(
+      '/learning/portfolio/capstones',
+    ),
+};
+
+export const capstones = {
+  forTrack: (trackId: string) =>
+    request<{
+      trackId: string;
+      options: CapstoneOption[];
+      walkthrough: CapstoneWalkthroughStep[];
+      unlocked: boolean;
+      state: CapstoneState;
+    }>(`/learning/capstones/${encodeURIComponent(trackId)}`),
+
+  select: (trackId: string, optionId: string) =>
+    request<CapstoneState>(`/learning/capstones/${encodeURIComponent(trackId)}/select`, {
+      method: 'POST',
+      body: JSON.stringify({ optionId }),
+    }),
+
+  submit: (trackId: string, repoUrl: string, summary?: string) =>
+    request<CapstoneState>(`/learning/capstones/${encodeURIComponent(trackId)}/submit`, {
+      method: 'POST',
+      body: JSON.stringify({ repoUrl, summary }),
+    }),
+};
+
+/** One seat's screen during a live shift. Mirrors SeatBoard on the server. */
+export interface SeatBoard {
+  role: SocRoleId;
+  elapsedSeconds: number;
+  events: {
+    id: string;
+    atSeconds: number;
+    surface: string;
+    summary: string;
+    detail: string;
+    source?: string;
+    target?: string;
+    claimedSeverity: string | null;
+  }[];
+  briefing: {
+    role: SocRoleId;
+    title: string;
+    remit: string;
+    sees: string[];
+    watchFor: string[];
+  } | null;
+  claimed: string[];
+}
+
+export interface ClaimSubmission {
+  eventId: string;
+  disposition: 'escalate' | 'investigate' | 'dismiss' | 'tune';
+  reasoning: string;
+  actionIds: string[];
+  escalateTo: string | null;
+  confidence: number;
+}
+
+export interface ClaimScoreView {
+  eventId: string;
+  role: SocRoleId;
+  lines: { label: string; points: number; outOf: number; notes: string[] }[];
+  total: number;
+  outOf: number;
+  laneViolation: SocRoleId | null;
+  why: string;
+}

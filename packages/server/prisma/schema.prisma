@@ -46,6 +46,7 @@ model User {
   scenarioAttempts ScenarioAttempt[]
   assessment       AssessmentSession?
   hostedRooms      RoomSession[]
+  capstones        CapstoneSubmission[]
 
   @@map("users")
 }
@@ -230,6 +231,33 @@ model CopilotConsult {
   @@unique([userId, exerciseId, alertId])
   @@index([userId, exerciseId])
   @@map("copilot_consults")
+}
+
+/// The GitHub Lab: a student's self-attested progress on one track's capstone
+/// project. Never auto-verified -- see content/capstones.ts for why the server
+/// must not reach out and check a student-supplied repo itself.
+model CapstoneSubmission {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Not a foreign key: track and option content live in code, same
+  /// convention as ExerciseProgress.exerciseId.
+  trackId  String
+  optionId String
+
+  /// "selected" | "submitted" -- see CapstoneSubmissionStatus in @soc/shared
+  status      String    @default("selected")
+  repoUrl     String?
+  summary     String?
+  selectedAt  DateTime  @default(now())
+  submittedAt DateTime?
+
+  /// One active capstone per student per track: picking a new option
+  /// overwrites the row rather than stacking up abandoned selections.
+  @@unique([userId, trackId])
+  @@index([userId])
+  @@map("capstone_submissions")
 }
 
 /// One completed run of one scenario, at one tier, from one seat.

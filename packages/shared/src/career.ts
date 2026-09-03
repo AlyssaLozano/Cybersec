@@ -205,6 +205,65 @@ export interface TrackStage {
   /** Set only when the package exists and is playable. */
   packageId?: string;
   plannedExercises?: number;
+  /**
+   * Marks this stage as the track's capstone: a self-directed real-world
+   * project, specced in content/capstones.ts and keyed by track id, rather
+   * than a graded package. Never set alongside packageId.
+   */
+  capstoneTrack?: boolean;
+}
+
+// --- capstone (the GitHub Lab) ------------------------------------------------
+
+export const CAPSTONE_DIFFICULTIES = ['accessible', 'moderate', 'hard'] as const;
+export type CapstoneDifficulty = (typeof CAPSTONE_DIFFICULTIES)[number];
+
+/**
+ * One project option in a track's capstone menu.
+ *
+ * This is guidance for real work on infrastructure the student controls, not
+ * a graded exercise -- there is no `checks` array because nothing here can be
+ * verified server-side without reaching into a real network, which the
+ * simulated engine exists specifically to avoid doing.
+ */
+export interface CapstoneOption {
+  id: string;
+  title: string;
+  /** One line: why an employer looking at this repo would care. */
+  pitch: string;
+  /** What a good writeup/repo includes, shown as a checklist. */
+  deliverables: string[];
+  /** Honest range, e.g. "6 to 10 hours". */
+  estimatedHours: string;
+  difficulty: CapstoneDifficulty;
+}
+
+/** One step in the "connect your GitHub" walkthrough shown before the picker. */
+export interface CapstoneWalkthroughStep {
+  title: string;
+  detail: string;
+  /** A command to show verbatim, when the step has one. */
+  command?: string;
+}
+
+export const CAPSTONE_SUBMISSION_STATUSES = ['selected', 'submitted'] as const;
+export type CapstoneSubmissionStatus = (typeof CAPSTONE_SUBMISSION_STATUSES)[number];
+
+/** A student's progress against one track's capstone. Self-attested throughout. */
+export interface CapstoneState {
+  trackId: string;
+  optionId: string | null;
+  status: CapstoneSubmissionStatus | null;
+  repoUrl: string | null;
+  summary: string | null;
+  selectedAt: string | null;
+  submittedAt: string | null;
+}
+
+/** One track's capstone submission, resolved with its option and track titles. */
+export interface CapstoneSubmissionView extends CapstoneState {
+  trackTitle: string;
+  optionTitle: string | null;
 }
 
 /** How relevant a track is in a given sector, used to tailor the results page. */

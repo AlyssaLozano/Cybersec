@@ -1,0 +1,220 @@
+/*
+ * The portfolio: AI Security findings and the GitHub Lab.
+ *
+ * Deliberately plain next to the badge shelf. A badge is a trophy; this page
+ * is a work sample, and a work sample reads better as a document than as a
+ * grid of shiny tiles.
+ */
+
+.portfolio {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 4rem;
+}
+
+.portfolio__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.85rem;
+}
+
+.portfolio__head h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.portfolio__meta {
+  margin: 0.15rem 0 0;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  max-width: 60ch;
+}
+
+.portfolio__h {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-faint);
+  margin: 2rem 0 0.4rem;
+}
+
+.portfolio__caveat {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  max-width: 68ch;
+  border-left: 2px solid var(--border-strong);
+  padding-left: 0.7rem;
+}
+
+.portfolio__findings {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 0.75rem;
+}
+
+.findingcard {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  padding: 0.85rem 0.9rem;
+}
+
+.findingcard h3 {
+  margin: 0 0 0.15rem;
+  font-size: 0.95rem;
+}
+
+.findingcard p {
+  margin: 0.2rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.findingcard__verdict {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+}
+
+.findingcard--hold .findingcard__verdict {
+  color: var(--fail);
+}
+
+.findingcard--approved .findingcard__verdict,
+.findingcard--approved-with-monitoring .findingcard__verdict {
+  color: var(--pass);
+}
+
+/* --- the GitHub Lab ------------------------------------------------------ */
+
+.capstonecard {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  padding: 1rem 1.1rem;
+  margin-bottom: 0.9rem;
+}
+
+.capstonecard--locked {
+  opacity: 0.65;
+}
+
+.capstonecard h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.02rem;
+}
+
+.capstonecard h4 {
+  margin: 0.6rem 0 0.15rem;
+  font-size: 0.92rem;
+}
+
+.capstonecard__walkthrough {
+  margin: 0.6rem 0 0.4rem;
+  padding-left: 1.1rem;
+  font-size: 0.84rem;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.capstonecard__command {
+  margin: 0.3rem 0 0;
+  padding: 0.45rem 0.6rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  white-space: pre-wrap;
+  color: var(--text);
+}
+
+.capstonecard__options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+.capstoneoption {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-input);
+  padding: 0.7rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.capstoneoption h4 {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.capstoneoption p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.capstoneoption__meta {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.capstonecard__deliverables {
+  margin: 0.3rem 0 0.6rem;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
+.capstonecard__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 0.6rem;
+}
+
+.capstonecard__input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 0.4rem 0.55rem;
+  font-size: 0.85rem;
+  font-family: var(--sans);
+}
+
+.capstonecard__input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.capstonecard__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.capstonecard__submitted {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.capstonecard__submitted a {
+  color: var(--accent);
+  font-size: 0.85rem;
+}

@@ -68,6 +68,12 @@ export const TRACKS: Track[] = [
         summary: 'Handle a full shift of alerts under time pressure, most of which are nothing.',
         plannedExercises: 18,
       },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real project on your own infrastructure and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
+      },
     ],
     certifications: ['sec-plus', 'cysa-plus', 'btl1', 'sc-200'],
     sectorNotes: [
@@ -557,6 +563,12 @@ export const TRACKS: Track[] = [
         summary:
           'Detect injection attempts, extraction patterns, and behaviour drift in a live query log: the defensive half of the job.',
         plannedExercises: 14,
+      },
+      {
+        title: 'GitHub Lab',
+        summary:
+          'Build one real project against a model you actually run, and put it on your own GitHub: something an employer can actually open.',
+        capstoneTrack: true,
       },
     ],
     certifications: ['sec-plus', 'aigp'],

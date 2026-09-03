@@ -29,6 +29,18 @@ import { consultedAlerts, recordConsultation } from '../services/copilotConsults
 import { AI_PATH_NOTE, CERT_STUDY_PLAN, PLANS, PRICING_PHILOSOPHY } from '../content/pricing.js';
 import { modelCard, postMortemFor, probe, suite } from '../services/modelLab.js';
 import { portfolioFor } from '../services/portfolio.js';
+import {
+  capstoneStateFor,
+  capstoneSubmissionsFor,
+  capstoneTrackIds,
+  capstoneUnlocked,
+  CapstoneNotSelectedError,
+  CapstoneOptionNotFoundError,
+  hasCapstone,
+  selectCapstone,
+  submitCapstone,
+} from '../services/capstone.js';
+import { capstoneOptions, GITHUB_WALKTHROUGH } from '../content/capstones.js';
 import { submitAnswer } from '../services/submission.js';
 import { prisma } from '../db/client.js';
 
@@ -131,6 +143,97 @@ learningRouter.get(
   '/portfolio/ai-security',
   asyncRoute(async (request, response) => {
     sendOk(response, await portfolioFor(userIdOf(request)));
+  }),
+);
+
+/**
+ * Every GitHub Lab submission a student has, across every track. See
+ * services/capstone.ts.
+ */
+learningRouter.get(
+  '/portfolio/capstones',
+  asyncRoute(async (request, response) => {
+    sendOk(response, {
+      submissions: await capstoneSubmissionsFor(userIdOf(request)),
+      tracks: capstoneTrackIds()
+        .map((trackId) => getTrack(trackId))
+        .filter((track): track is NonNullable<typeof track> => track !== null)
+        .map((track) => ({ id: track.id, title: track.title })),
+    });
+  }),
+);
+
+/**
+ * The GitHub Lab: a track's project menu, the walkthrough, and this
+ * student's current state, whether or not the stage is unlocked yet -- the
+ * client decides what to show; access to the WRITE routes below is what the
+ * server actually gates.
+ */
+learningRouter.get(
+  '/capstones/:trackId',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const trackId = request.params.trackId!;
+    if (!hasCapstone(trackId)) throw new HttpError(404, API_ERROR_CODES.notFound, 'No GitHub Lab for that track.');
+
+    sendOk(response, {
+      trackId,
+      options: capstoneOptions(trackId),
+      walkthrough: GITHUB_WALKTHROUGH,
+      unlocked: await capstoneUnlocked(userId, trackId),
+      state: await capstoneStateFor(userId, trackId),
+    });
+  }),
+);
+
+const capstoneSelectSchema = z.object({ optionId: z.string().max(128) });
+
+learningRouter.post(
+  '/capstones/:trackId/select',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const trackId = request.params.trackId!;
+    if (!hasCapstone(trackId)) throw new HttpError(404, API_ERROR_CODES.notFound, 'No GitHub Lab for that track.');
+    if (!(await capstoneUnlocked(userId, trackId))) {
+      throw new HttpError(403, API_ERROR_CODES.exerciseLocked, 'The GitHub Lab is not unlocked yet.');
+    }
+
+    const { optionId } = capstoneSelectSchema.parse(request.body);
+    try {
+      sendOk(response, await selectCapstone(userId, trackId, optionId));
+    } catch (error) {
+      if (error instanceof CapstoneOptionNotFoundError) {
+        throw new HttpError(404, API_ERROR_CODES.notFound, 'No such project option.');
+      }
+      throw error;
+    }
+  }),
+);
+
+const capstoneSubmitSchema = z.object({
+  repoUrl: z.string().url('That does not look like a URL.').max(2_000),
+  summary: z.string().max(4_000).optional(),
+});
+
+learningRouter.post(
+  '/capstones/:trackId/submit',
+  asyncRoute(async (request, response) => {
+    const userId = userIdOf(request);
+    const trackId = request.params.trackId!;
+    if (!hasCapstone(trackId)) throw new HttpError(404, API_ERROR_CODES.notFound, 'No GitHub Lab for that track.');
+    if (!(await capstoneUnlocked(userId, trackId))) {
+      throw new HttpError(403, API_ERROR_CODES.exerciseLocked, 'The GitHub Lab is not unlocked yet.');
+    }
+
+    const { repoUrl, summary } = capstoneSubmitSchema.parse(request.body);
+    try {
+      sendOk(response, await submitCapstone(userId, trackId, repoUrl, summary ?? null));
+    } catch (error) {
+      if (error instanceof CapstoneNotSelectedError) {
+        throw new HttpError(400, API_ERROR_CODES.validationFailed, 'Pick a project before submitting a link.');
+      }
+      throw error;
+    }
   }),
 );
 
