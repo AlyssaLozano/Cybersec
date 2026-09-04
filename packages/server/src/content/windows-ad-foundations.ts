@@ -44,15 +44,28 @@ const MODULE_WIN_1: Exercise[] = [
       'following actually happen as a result? Select all that apply.',
     teach: {
       concept:
-        'A member server and a Domain Controller are not the same machine with a different label. ' +
-        'Promotion installs Active Directory Domain Services and turns the box into the thing that ' +
-        'holds the domain database (NTDS.dit), replicates it to any other DC in the domain, and ' +
-        'answers Kerberos authentication requests for every account and computer that joins. It also ' +
-        'almost always becomes a DNS server for the domain, because clients locate a DC by querying ' +
-        'DNS for SRV records, not by any address you type in by hand.\n\n' +
-        'None of that is true of an ordinary joined server. A file server that has been domain-joined ' +
-        'for years holds no copy of the directory and issues no tickets, it just trusts the DC to ' +
-        'vouch for whoever shows up.',
+        'Picture a small office before anything like Active Directory exists. Every computer keeps its ' +
+        'own private list of who is allowed to log in and what their password is. That works fine for ' +
+        'one or two machines, but the moment you have ten computers, it falls apart: a new employee ' +
+        'needs an account created ten separate times, and when someone leaves, somebody has to remember ' +
+        'to delete their account from every single machine or their access never actually goes away.\n\n' +
+        'Active Directory fixes this by picking one machine to be the single, trusted source of truth ' +
+        'for every account in the whole office. That machine is called a DOMAIN CONTROLLER, and the ' +
+        'act of turning an ordinary Windows Server into one is called PROMOTION. Once a server is ' +
+        'promoted, it is not just relabeled, it starts doing real, new work: it holds a database of ' +
+        'every user and computer (a file called NTDS.dit), it copies that database to any other domain ' +
+        'controller so there is a backup, and it becomes the machine other computers check with, in a ' +
+        'process called Kerberos authentication, whenever someone tries to log in anywhere in the ' +
+        'office. It also almost always takes on the job of DNS server for the office, because a computer ' +
+        'that wants to log in does not know the domain controller\'s address by heart, it looks it up ' +
+        'the same way your phone looks up a website\'s address, and that lookup only works if something ' +
+        'is running DNS for the domain.\n\n' +
+        'None of this is true of a computer that has simply joined the domain as a regular member. A ' +
+        'file server that has sat on the network for years, letting people log into it, holds none of ' +
+        'that master account list itself and issues no logins on its own, it just trusts the domain ' +
+        'controller to vouch for whoever shows up. Knowing that difference matters on the job because ' +
+        'when authentication breaks anywhere in a real company, the domain controller is almost always ' +
+        'where the actual problem, and the actual fix, lives.',
     },
     options: [
       { id: 'a', label: 'The server starts holding a writable copy of the Active Directory database.' },
@@ -80,9 +93,12 @@ const MODULE_WIN_1: Exercise[] = [
       },
     ],
     debrief:
-      'Hold onto the DNS point specifically. A huge share of "the domain is broken" tickets turn ' +
-      'out to be a DNS problem wearing an Active Directory costume, because nothing about ' +
-      'authentication works if a client cannot find the DC in the first place.',
+      'Hold onto the DNS point specifically. Think of DNS as an address book: your phone does not ' +
+      'memorize the numeric address of every website you visit, it looks the name up in an address ' +
+      'book first. A domain controller works the same way, computers do not have its address ' +
+      'memorized, they look it up. So a huge share of "the domain is broken" tickets turn out to be a ' +
+      'DNS problem wearing an Active Directory costume, because nothing about logging in works if a ' +
+      'computer cannot look up where the domain controller even is in the first place.',
     practice: [],
   },
   {
@@ -98,12 +114,25 @@ const MODULE_WIN_1: Exercise[] = [
       'has an IP address. Which of the following are accurate reasons? Select all that apply.',
     teach: {
       concept:
-        'Active Directory does not locate services by IP address, it locates them by querying DNS ' +
-        'for specific SRV records: `_ldap._tcp.dc._msdcs.<domain>` finds a DC, `_kerberos._tcp` finds ' +
-        'a ticket-granting server, and so on. A client that cannot resolve those records cannot find ' +
-        'a domain controller at all, no matter how reachable that DC actually is on the network. This ' +
-        'is why "can this host ping the DC" is the wrong first question during a join failure, and ' +
-        '"is this host using the right DNS server" is the right one.',
+        'Start from what DNS actually is: a directory that turns a name into an address, the same way ' +
+        'a phone book turns a person\'s name into a phone number. Every time you type a website name ' +
+        'into a browser, something behind the scenes is asking a DNS server "what address does this ' +
+        'name point to" before your browser can connect to anything.\n\n' +
+        'Active Directory leans on that same lookup system, but it is not looking up a website, it is ' +
+        'looking up a SERVICE. When a computer needs to find a domain controller, it does not have that ' +
+        'address memorized and it does not ask a person, it asks DNS a very specific question, in the ' +
+        'form of what is called an SRV record: something like `_ldap._tcp.dc._msdcs.<domain>` to find a ' +
+        'domain controller, or `_kerberos._tcp` to find the machine that hands out login tickets. If a ' +
+        'computer cannot get an answer to that question, it has no way to find a domain controller at ' +
+        'all, even if that domain controller is sitting right there on the network and would happily ' +
+        'answer if only the computer knew where to ask.\n\n' +
+        'This is why, when a computer cannot join or use the domain, "can this computer reach the ' +
+        'domain controller by pinging it" is the wrong first question. A computer can ping a machine ' +
+        'successfully and still have no idea it is a domain controller, because ping only tests whether ' +
+        'a signal gets there, not whether the computer knows where to send that signal in the first ' +
+        'place. The right first question is "is this computer even asking the right address book," ' +
+        'meaning is it configured to use the domain\'s own DNS server. Getting comfortable with that ' +
+        'distinction is one of the most useful troubleshooting habits you can build in this whole field.',
     },
     options: [
       { id: 'a', label: 'Clients locate a domain controller by querying DNS for SRV records, not by a hardcoded address.' },
@@ -129,9 +158,11 @@ const MODULE_WIN_1: Exercise[] = [
       },
     ],
     debrief:
-      'Keep this exact distinction for module win.4: "cannot reach the DC" and "cannot find the DC" ' +
-      'are different failures with different fixes, and telling them apart starts with checking DNS ' +
-      'settings before anything else.',
+      'Keep this exact distinction in mind for module win.4, where you will use it directly: "the ' +
+      'computer cannot reach the domain controller" and "the computer cannot find the domain ' +
+      'controller" are two completely different problems with two completely different fixes, and ' +
+      'telling them apart starts with checking which DNS server a computer is configured to use before ' +
+      'you check anything else.',
     practice: [],
   },
   {
@@ -148,18 +179,32 @@ const MODULE_WIN_1: Exercise[] = [
       'or set before running the promotion, and why each matters.',
     teach: {
       concept:
-        'A promotion that half-works is harder to fix than one that fails outright, so the checklist ' +
-        'is worth doing in order rather than discovering gaps afterward.\n\n' +
-        'A STATIC IP is first: a DC that changes address breaks every client pointed at it, and DHCP ' +
-        'assumes a DC exists to hand out leases from, which is circular on a DC itself.\n\n' +
-        'The server\'s DNS setting should point AT ITSELF (or another DC once one exists), because the ' +
-        'promotion wizard creates the domain\'s DNS zone and the server needs to be able to query it ' +
-        'immediately.\n\n' +
-        'Time matters more than it looks: Kerberos rejects any ticket exchange where the two clocks ' +
-        'differ by more than five minutes by default, so a server with a wildly wrong clock will let ' +
-        'you promote it and then fail every authentication afterward in a way that looks unrelated.\n\n' +
-        'And enough disk space for the database and SYSVOL, plus a hostname that will not need to ' +
-        'change, since renaming a DC after promotion is its own separate headache.',
+        'Before you promote a server, it helps to understand why each prerequisite exists rather than ' +
+        'just memorizing a checklist, because a promotion that half-works is much harder to diagnose ' +
+        'afterward than one that fails outright and tells you immediately.\n\n' +
+        'A STATIC IP ADDRESS means an address that never changes. Normally, computers on a network are ' +
+        'handed a temporary address automatically by a service called DHCP, the same way a hotel might ' +
+        'assign you a room number when you check in rather than you owning that room permanently. A ' +
+        'domain controller cannot work that way: every other computer will be configured to look for it ' +
+        'at one specific address, so if that address changes, every one of those computers loses track ' +
+        'of it. And ironically, DHCP itself is often a service the domain controller provides, so ' +
+        'relying on DHCP to give the domain controller its own address is circular.\n\n' +
+        'The server\'s OWN DNS SETTING, meaning which DNS server it asks when it needs to look something ' +
+        'up, should point at itself (or at another domain controller once a second one exists), because ' +
+        'promotion is the moment the domain\'s own DNS records get created, and the server needs to be ' +
+        'able to find those brand new records immediately, not ask some outside DNS server that has ' +
+        'never heard of this domain.\n\n' +
+        'TIME matters more than it looks like it should. Computers prove who they are to each other ' +
+        'using a system called Kerberos, and Kerberos includes a safety check: if two computers\' clocks ' +
+        'disagree by more than about five minutes, it assumes something suspicious is going on and ' +
+        'refuses the login. A server with a wrong clock will promote just fine, since promotion itself ' +
+        'does not check the time, and then quietly fail every single login afterward in a way that looks ' +
+        'completely unrelated to time at all.\n\n' +
+        'And finally, there needs to be enough DISK SPACE for the account database and a related folder ' +
+        'called SYSVOL, plus a HOSTNAME (the computer\'s name) that will not need to change later, ' +
+        'because renaming a domain controller after promotion is its own separate, messy project. ' +
+        'Getting all four right before you start is the difference between a promotion that just works ' +
+        'and one that leaves you debugging mystery failures days later.',
     },
     hints: [
       'Four things: an address that will not move, a DNS setting, a clock, and disk/name stability.',
@@ -187,9 +232,11 @@ const MODULE_WIN_1: Exercise[] = [
       },
     ],
     debrief:
-      'The clock requirement is the one people skip and regret. A lab built on a VM whose clock drifts ' +
-      'every time the host sleeps will promote successfully and then fail authentication days later, ' +
-      'and nothing about that failure will mention time unless you already know to suspect it.',
+      'The clock requirement is the one people skip and regret. Picture a lab built on a virtual machine ' +
+      'whose clock quietly drifts every time the physical computer it runs on goes to sleep. That lab ' +
+      'will promote successfully, because promotion does not check the clock, and then start failing ' +
+      'logins days later for a reason that has nothing to do with anything you actually changed, unless ' +
+      'you already know to suspect the clock.',
     practice: [],
   },
   {
@@ -205,13 +252,24 @@ const MODULE_WIN_1: Exercise[] = [
       'is considered a serious design flaw. Which of the following describe why? Select all that apply.',
     teach: {
       concept:
-        'Losing the only DC does not just take down one server, it takes down authentication for ' +
-        'every joined machine, because there is nowhere left to issue a Kerberos ticket from. Certain ' +
-        'operations master roles (the FSMO roles: things like the schema master and the PDC emulator) ' +
-        'exist on exactly one DC at a time by design, and if that DC is gone permanently, seizing those ' +
-        'roles onto a surviving DC is a deliberate recovery procedure, not something that happens on ' +
-        'its own. A second DC also means AD replication has somewhere to send changes, which is itself ' +
-        'a form of backup: a change made on one DC exists on another within minutes.',
+        'A "single point of failure" is a phrase worth unpacking plainly: it means one piece of a system ' +
+        'that, if it breaks, takes the whole system down with it, the way a house with only one entrance ' +
+        'becomes completely inaccessible the moment that one door is blocked, no matter how sound the ' +
+        'rest of the house is.\n\n' +
+        'A domain with only one domain controller is exactly that kind of single point of failure. ' +
+        'Losing that one machine does not just take down one server, it takes down the ability to log in ' +
+        'anywhere in the entire company, because there is nowhere left that can issue a login ticket. ' +
+        'Making it worse, certain administrative jobs, called FSMO roles (things like the schema master ' +
+        'and the PDC emulator), are designed to live on exactly one domain controller at a time, on ' +
+        'purpose, so if that specific domain controller is gone for good, moving those jobs onto a ' +
+        'surviving domain controller is a deliberate, manual recovery procedure that someone has to ' +
+        'choose to do, not something that happens automatically. A second domain controller also gives ' +
+        'the directory\'s changes somewhere to copy themselves to as they happen, which acts as a form of ' +
+        'built-in backup: a change made on one domain controller shows up on another within minutes, so ' +
+        'losing one does not mean losing the data.\n\n' +
+        'On the job, this is exactly the kind of design flaw a real IT team gets asked to explain and ' +
+        'defend, because "what happens if this one server dies" is one of the first questions any ' +
+        'competent reviewer or auditor asks about any system.',
     },
     options: [
       { id: 'a', label: 'If the only DC is unreachable, no client can authenticate anywhere in the domain.' },
@@ -236,9 +294,10 @@ const MODULE_WIN_1: Exercise[] = [
       },
     ],
     debrief:
-      'A one-DC lab is still the right way to learn this material, just say so honestly in a portfolio ' +
-      'write-up rather than presenting it as production-ready. Naming the limitation is worth more to ' +
-      'a reviewer than pretending it does not exist.',
+      'A one-domain-controller lab is still the right way to learn this material, the point is not to ' +
+      'avoid it, it is to describe it honestly in a portfolio write-up rather than presenting it as ' +
+      'something production-ready. Naming a limitation you understand is worth more to a reviewer than ' +
+      'pretending it does not exist.',
     practice: [],
   },
   {
@@ -255,14 +314,22 @@ const MODULE_WIN_1: Exercise[] = [
       'what an attacker actually gains.',
     teach: {
       concept:
-        'A workstation compromise usually gives an attacker one user\'s access. A domain controller ' +
-        'holds the database that every other machine trusts to say who everyone is and what they are ' +
-        'allowed to do, so compromising it gives an attacker the ability to impersonate, or directly ' +
-        'control, any account in the domain, including the administrators. In practice that means ' +
-        'creating new accounts, changing group membership, resetting any password, and extracting ' +
-        'password hashes for every user that has ever authenticated, which is why "the DC was ' +
-        'compromised" and "we have to assume every credential in the domain is burned" are treated as ' +
-        'the same sentence.',
+        'Think about what a single stolen house key gets a burglar: access to one house. Now think about ' +
+        'what a stolen master key from a building superintendent gets them: access to every apartment in ' +
+        'the building, because that one key was never meant to open just one door, it was built to open ' +
+        'all of them.\n\n' +
+        'A compromised workstation is the stolen house key: an attacker who breaks into one employee\'s ' +
+        'laptop typically gets that one employee\'s access and nothing more. A compromised domain ' +
+        'controller is the master key, because it holds the single database that every other machine in ' +
+        'the company already trusts to answer the question "who is this, and what are they allowed to ' +
+        'do." An attacker who controls that database is not limited to one account, they can create ' +
+        'brand new accounts, add themselves to any group including administrators, reset any password in ' +
+        'the company, and pull out the stored credential material for every single person who has ever ' +
+        'logged in anywhere in the domain.\n\n' +
+        'That is exactly why "the domain controller was compromised" and "we have to assume every ' +
+        'credential in the company is burned" get treated as the same sentence in a real incident, and ' +
+        'why a domain controller gets locked down, patched, and watched far more carefully than any ' +
+        'ordinary server.',
     },
     hints: [
       'A workstation compromise is one user\'s access. A DC compromise is a different order of magnitude, say why.',
@@ -288,9 +355,10 @@ const MODULE_WIN_1: Exercise[] = [
       },
     ],
     debrief:
-      'This is the sentence that justifies every other control in this module: patching a DC harder ' +
-      'than a normal server, restricting who can log onto it, and never treating "one DC" as production ' +
-      'ready are all downstream of this single fact.',
+      'This is the sentence that justifies every other control in this module: patching a domain ' +
+      'controller harder than a normal server, tightly restricting who is even allowed to log onto it, ' +
+      'and never treating a single domain controller as good enough for production are all downstream ' +
+      'of this one fact about what that machine actually holds.',
     practice: [],
   },
 ];
@@ -309,13 +377,25 @@ const MODULE_WIN_2: Exercise[] = [
     prompt: 'Which of the following correctly describe the three main account types in Active Directory? Select all that apply.',
     teach: {
       concept:
-        'A USER ACCOUNT represents a person and is what someone signs in with. A COMPUTER ACCOUNT ' +
-        'represents a joined machine itself, created automatically at join time, with its own password ' +
-        'that Windows rotates on a schedule, and it is what makes the machine (not any particular user ' +
-        'on it) a trusted member of the domain. A SERVICE ACCOUNT represents a piece of software rather ' +
-        'than a person, used to run something like a scheduled task or an application pool under an ' +
-        'identity that is not tied to any one employee, and it is a common target because it is often ' +
-        'over-privileged and its password is rarely changed.',
+        'Active Directory tracks more than just people. It needs an entry for anything that has to ' +
+        'prove who it is before it is trusted to do something, and three different kinds of "who" show ' +
+        'up constantly in a real company.\n\n' +
+        'A USER ACCOUNT represents an actual person and is what someone types their username and ' +
+        'password into. A COMPUTER ACCOUNT represents the machine itself, not any person sitting at it, ' +
+        'and it gets created automatically the moment a computer joins the domain, before anyone has ' +
+        'even logged into it. That computer account has its own password, one that Windows changes on a ' +
+        'schedule behind the scenes without a person doing anything, and it is what makes the machine ' +
+        'itself, independent of whoever happens to be using it, a trusted member of the domain. A ' +
+        'SERVICE ACCOUNT represents a piece of software rather than a person, used to run something like ' +
+        'a scheduled task or a background application under an identity that is not tied to any one ' +
+        'employee\'s name, since that software needs to keep running even after the employee who set it ' +
+        'up goes on vacation or leaves the company. Service accounts are a common target for attackers ' +
+        'specifically because they are often given more access than they need and their passwords are ' +
+        'rarely, if ever, changed.\n\n' +
+        'Knowing these three apart matters because a lot of confusing AD behavior only makes sense once ' +
+        'you remember which kind of account is actually involved: a login problem, a machine trust ' +
+        'problem, and a scheduled task failing are three different categories of issue, even though all ' +
+        'three ultimately trace back to some kind of account.',
     },
     options: [
       { id: 'a', label: 'A user account represents a person and is what someone authenticates with.' },
@@ -340,9 +420,10 @@ const MODULE_WIN_2: Exercise[] = [
       },
     ],
     debrief:
-      'Keep the computer account in mind for module win.4: "the trust relationship between this ' +
-      'workstation and the domain has failed" is almost always the computer account\'s password going ' +
-      'out of sync, nothing to do with the user at all.',
+      'Keep the computer account in mind for module win.4. The error "the trust relationship between ' +
+      'this workstation and the domain has failed" sounds like it is about a person, but it is almost ' +
+      'always the computer account\'s own password going out of sync with what the domain controller has ' +
+      'on record, and has nothing to do with any user at all.',
     practice: [],
   },
   {
@@ -358,13 +439,22 @@ const MODULE_WIN_2: Exercise[] = [
       'choosing a security group versus a distribution group for this? Select all that apply.',
     teach: {
       concept:
-        'A SECURITY GROUP can be granted permissions on a resource (a file share, an application, a ' +
-        'GPO via security filtering) and can also receive email if mail-enabled. A DISTRIBUTION GROUP ' +
-        'can only receive email, it has no security identifier that a permissions system can reference, ' +
-        'so it cannot be put on an access control list at all. Using a distribution group for folder ' +
-        'access is not a smaller version of the right answer, it silently does nothing: the group ' +
-        'simply will not appear as an option to grant permissions to, or worse, an administrator ' +
-        'creates a security group with the same name and the two get confused over time.',
+        'A GROUP in Active Directory is just a named bucket of accounts, useful for treating many ' +
+        'people as one unit instead of handling each of them individually. But not every group does the ' +
+        'same job, and mixing up which kind you have is a genuinely easy mistake to make.\n\n' +
+        'A SECURITY GROUP can be handed permission to something, like being allowed into a shared ' +
+        'folder, being allowed to run an application, or being targeted by a Group Policy. It can also ' +
+        'receive email if someone turns that feature on for it. A DISTRIBUTION GROUP can only ever ' +
+        'receive email, the way a mailing list works, because it was never built with the kind of ' +
+        'underlying identifier (called a security identifier) that a permissions system can actually ' +
+        'check against. That means a distribution group cannot be placed on an access list at all, not ' +
+        'as a lesser option, but literally not at all.\n\n' +
+        'Using a distribution group where a security group was needed does not give you a smaller or ' +
+        'weaker version of what you wanted, it silently does nothing: the group will not even show up ' +
+        'as something you can grant folder access to. Worse, it is common for someone to notice the ' +
+        'problem, create a brand new security group with a nearly identical name to work around it, and ' +
+        'now there are two similarly named groups in the directory that get confused with each other for ' +
+        'years afterward. Picking the right group type on day one avoids that entire mess.',
     },
     options: [
       { id: 'a', label: 'A security group can be granted permissions on resources like a file share.' },
@@ -389,9 +479,10 @@ const MODULE_WIN_2: Exercise[] = [
       },
     ],
     debrief:
-      'This is a genuinely common home-lab mistake: creating a distribution group, adding people to it, ' +
-      'and then being unable to find it when granting NTFS permissions. If a group is not showing up ' +
-      'where you expect, check its type first.',
+      'This is a genuinely common home-lab mistake: creating a distribution group, carefully adding ' +
+      'people to it, and then being unable to find it anywhere when trying to grant NTFS folder ' +
+      'permissions. If a group you expect to see is not showing up where it should, check its type ' +
+      'before you assume anything else is wrong.',
     practice: [],
   },
   {
@@ -405,13 +496,22 @@ const MODULE_WIN_2: Exercise[] = [
     prompt: 'Which of the following correctly describe what an Organisational Unit (OU) does? Select all that apply.',
     teach: {
       concept:
-        'An OU is a container used to organise objects and scope two specific things: which Group ' +
-        'Policy Objects apply to what is inside it, and which administrative rights can be delegated ' +
-        'over it, for example letting a help desk group reset passwords only for users in one OU. What ' +
-        'an OU is NOT is a permissions boundary in the file-share sense: putting a user in an OU grants ' +
-        'them no access to anything by itself, and does not restrict what they can see or do on ' +
-        'resources. That job belongs to security groups and access control lists, not the container an ' +
-        'account happens to live in.',
+        'An OU, short for Organisational Unit, is a folder-like container inside Active Directory used ' +
+        'to organize accounts and computers, the same basic idea as folders you use to organize files on ' +
+        'your own computer. But it is easy to assume a folder-like container also controls who can ' +
+        'access what, the way a locked physical filing cabinet controls who can see the papers inside ' +
+        'it, and that assumption is wrong here.\n\n' +
+        'An OU genuinely controls two specific things. First, which Group Policy settings apply to ' +
+        'whatever is inside it, meaning you can point a specific set of rules at just the accounts and ' +
+        'computers in one OU. Second, which administrative rights can be handed off, or delegated, over ' +
+        'the objects inside it, for example letting a help desk team reset passwords only for the users ' +
+        'sitting in one particular OU, without giving them any power over the rest of the company.\n\n' +
+        'What an OU does NOT do is grant or restrict access to anything, in the way a locked cabinet ' +
+        'would. Putting a user into an OU gives them no new access to any file, folder, or application ' +
+        'by itself, and it does not take any access away either. That job belongs entirely to security ' +
+        'groups and access control lists, which are a separate mechanism from where an account happens ' +
+        'to sit in the OU structure. Confusing the two is one of the most common misunderstandings ' +
+        'people carry out of their first exposure to Active Directory.',
     },
     options: [
       { id: 'a', label: 'An OU scopes which Group Policy Objects apply to the objects inside it.' },
@@ -436,9 +536,10 @@ const MODULE_WIN_2: Exercise[] = [
       },
     ],
     debrief:
-      'This distinction is worth stating explicitly in a portfolio write-up: "I used OUs to scope GPOs ' +
-      'and security groups to grant access" shows you understand the two mechanisms are separate, which ' +
-      'is exactly what a reviewer is checking for.',
+      'This distinction is worth stating explicitly in a portfolio write-up: saying "I used OUs to scope ' +
+      'Group Policy and security groups to grant access" in so many words shows a reviewer you ' +
+      'understand these are two separate mechanisms doing two separate jobs, which is exactly the kind ' +
+      'of thing they are checking for.',
     practice: [],
   },
   {
@@ -455,15 +556,23 @@ const MODULE_WIN_2: Exercise[] = [
       'you would script rather than do by hand in Active Directory Users and Computers, and why.',
     teach: {
       concept:
-        'Two hundred accounts through a GUI, one dialog at a time, is not just slow, it is a two ' +
-        'hundred-times repeated opportunity to fat-finger a department code or forget a group. ' +
-        'Scripting the creation, typically reading from a CSV with each new hire\'s details and looping ' +
-        'a creation command over it (PowerShell\'s New-ADUser is the standard tool for this), makes the ' +
-        'output consistent by construction: every account gets the same attribute format, lands in the ' +
-        'correct OU, and picks up the correct starting groups, because the same code ran for all two ' +
-        'hundred rather than a person doing it slightly differently each time. It is also the difference ' +
-        'between an afternoon and a week, and between a mistake that is easy to grep for in a script and ' +
-        'one that is invisible until someone notices the wrong person has file access.',
+        'Creating one user account by clicking through a series of dialog boxes is easy. Creating two ' +
+        'hundred of them the same way is not just two hundred times slower, it is two hundred separate ' +
+        'chances to mistype a department code, forget to add someone to a group, or place one person in ' +
+        'the wrong OU, and every one of those small mistakes is invisible the moment you make it.\n\n' +
+        'The alternative is SCRIPTING: writing a set of instructions that a computer carries out ' +
+        'automatically instead of a person clicking through the same steps by hand. In this case, that ' +
+        'typically means starting from a spreadsheet-style file (a CSV) listing each new hire\'s ' +
+        'details, and looping a single account-creation command over every row of it, PowerShell\'s ' +
+        '`New-ADUser` being the standard tool for exactly this. The value is not really about saving ' +
+        'time, although it does that too, it is that the exact same code runs for all two hundred ' +
+        'accounts, so every single one comes out with the same attribute format, lands in the correct ' +
+        'OU, and gets the correct starting group memberships, because a computer does not get tired or ' +
+        'distracted on account number 147 the way a person does.\n\n' +
+        'This matters on the job because the mistakes manual entry produces are exactly the kind that ' +
+        'stay hidden until someone notices, months later, that a former contractor still has file access ' +
+        'they should never have kept, or that a whole department\'s accounts were set up slightly wrong ' +
+        'from day one.',
     },
     hints: [
       'The core argument is consistency at scale, not just speed.',
@@ -489,9 +598,10 @@ const MODULE_WIN_2: Exercise[] = [
       },
     ],
     debrief:
-      'This is a genuinely good portfolio talking point: "I scripted bulk account creation from a CSV" ' +
-      'demonstrates PowerShell competency and operational judgement in one sentence, which is exactly ' +
-      'what the entry-level ticket says a hiring manager is looking for.',
+      'This is a genuinely good portfolio talking point. Saying "I scripted bulk account creation from a ' +
+      'CSV" demonstrates both a real, useful technical skill (PowerShell) and the operational judgement ' +
+      'to know when a repetitive manual task is actually a liability, which is exactly the combination ' +
+      'an entry-level hiring manager is looking for.',
     practice: [],
   },
   {
@@ -508,12 +618,23 @@ const MODULE_WIN_2: Exercise[] = [
       'reasons? Select all that apply.',
     teach: {
       concept:
-        'Granting permission directly to twelve individual users means twelve separate access control ' +
-        'entries to audit, and a new hire who needs the same access requires editing the resource\'s ' +
-        'permissions itself. Granting permission once to a group, and managing membership instead, ' +
-        'means the resource\'s permissions never change: onboarding and offboarding become a single ' +
-        'group-membership edit, and an access review only has to answer "who is in this group" rather ' +
-        'than reading permissions off every resource in the company one at a time.',
+        'Imagine granting building access by handing a physical key to each of twelve employees ' +
+        'individually, rather than giving all twelve of them a single type of keycard that a security ' +
+        'system recognizes as one group. The moment one of those twelve leaves the company, someone has ' +
+        'to remember exactly which physical key that person had and go get it back. The moment a ' +
+        'thirteenth person joins the team, someone has to cut them a whole new key.\n\n' +
+        'Granting folder access directly to twelve individual people works exactly like the ' +
+        'individual-keys approach: it means twelve separate entries to keep track of and audit, and ' +
+        'adding a new team member means going back into that specific folder\'s permission settings and ' +
+        'editing them by hand, one more time, forever. Granting access once to a security GROUP, and ' +
+        'then managing who belongs to that group instead, works like the keycard system: the folder\'s ' +
+        'own permissions never have to change again. Adding someone to the team becomes a single ' +
+        'group-membership edit rather than an edit to the resource itself, removing someone becomes the ' +
+        'same single edit in reverse, and answering "who currently has access to this" later becomes as ' +
+        'simple as looking at one group\'s member list instead of checking every resource in the company ' +
+        'one at a time.\n\n' +
+        'This is exactly the kind of habit that separates a setup that stays manageable as a company ' +
+        'grows from one that quietly turns into a mess nobody can fully account for a year later.',
     },
     options: [
       { id: 'a', label: 'Onboarding a new person becomes a group-membership change instead of an edit to the resource itself.' },
@@ -539,8 +660,9 @@ const MODULE_WIN_2: Exercise[] = [
     ],
     debrief:
       'This is the same principle the Identity and Access Foundations package builds an entire module ' +
-      'around: group-based access is what makes joiner-mover-leaver manageable at any real scale, and it ' +
-      'starts here, with how you set up a share in a home lab.',
+      'around: group-based access is what keeps onboarding, role changes, and offboarding manageable at ' +
+      'any real scale, and it starts here, with a basic decision about how you set up a single shared ' +
+      'folder in a home lab.',
     practice: [],
   },
 ];
@@ -559,12 +681,23 @@ const MODULE_WIN_3: Exercise[] = [
     prompt: 'Group Policy applies in a specific order, commonly remembered as LSDOU. Which of the following correctly describe that order and its consequence? Select all that apply.',
     teach: {
       concept:
-        'LSDOU is Local policy, then Site, then Domain, then OU, applied in that sequence, with each ' +
-        'later one able to override the ones before it. Because OU-linked policy applies last, of the ' +
-        'built-in scopes it wins any direct conflict, and if an object sits in a nested OU, the closest ' +
-        'OU to the object applies last of all and therefore wins over a GPO linked further up the ' +
-        'chain. This is why "I set the domain password policy to require 14 characters, but this one OU ' +
-        'still allows 8" is not a bug: something closer to those accounts is overriding it.',
+        'GROUP POLICY is Active Directory\'s way of pushing a setting out to many computers or users at ' +
+        'once, things like "require a screen lock after five minutes" or "map this network drive ' +
+        'automatically," rather than someone configuring each machine by hand. A single bundle of these ' +
+        'settings is called a Group Policy Object, or GPO for short.\n\n' +
+        'The tricky part is that more than one GPO can apply to the same computer at the same time, from ' +
+        'different places, and they do not always agree with each other. Windows resolves that by ' +
+        'applying them in a strict, fixed order, commonly remembered by the acronym LSDOU: Local policy ' +
+        'first, then Site, then Domain, then Organisational Unit, with each one applied after the last ' +
+        'able to override whatever came before it, the same way a more specific instruction given later ' +
+        'overrides a more general one given earlier. Because OU-linked policy is applied last of these ' +
+        'four, it wins any direct disagreement with a Domain-linked or Site-linked policy. And if an ' +
+        'account sits inside a nested OU, meaning an OU inside another OU, the OU closest to that account ' +
+        'applies last of all and wins over anything linked further up the chain.\n\n' +
+        'This is why "I set the whole domain\'s password policy to require 14 characters, but this one ' +
+        'specific OU still only requires 8" is not evidence of a bug. It means some GPO linked closer to ' +
+        'those particular accounts is deliberately, or accidentally, overriding the domain-wide setting, ' +
+        'and tracing that chain is exactly the kind of troubleshooting this module builds toward.',
     },
     options: [
       { id: 'a', label: 'Local policy applies first and Organisational Unit policy applies last.' },
@@ -589,9 +722,10 @@ const MODULE_WIN_3: Exercise[] = [
       },
     ],
     debrief:
-      'Keep LSDOU in your head for the troubleshooting exercise later in this module: "policy is not ' +
-      'applying the way I expect" is very often "something closer in the chain is overriding it", not a ' +
-      'broken GPO at all.',
+      'Keep LSDOU in your head for the troubleshooting exercise later in this module. "Policy is not ' +
+      'applying the way I expect" is very often "something closer in the chain is overriding it," not a ' +
+      'broken GPO at all, and knowing the order lets you go find that closer setting instead of ' +
+      'guessing.',
     practice: [],
   },
   {
@@ -608,13 +742,21 @@ const MODULE_WIN_3: Exercise[] = [
       'sentences, explain why, and what you would use instead.',
     teach: {
       concept:
-        'This is one of the most common surprises in a first AD lab. The Default Domain Policy\'s ' +
-        'password and account lockout settings apply to domain user accounts at the domain level only, ' +
-        'regardless of what OU a GPO enforcing different values is linked to, because Windows applies ' +
-        'those particular settings from whichever GPO is linked at the domain root, not the closest one ' +
-        'in the OU chain the way most other settings work. Getting different password requirements for ' +
-        'a subset of users means using a FINE-GRAINED PASSWORD POLICY (a Password Settings Object) ' +
-        'targeted at a specific security group instead of relying on GPO linking at all.',
+        'Most Group Policy settings follow the LSDOU order from the previous exercise: whichever GPO is ' +
+        'linked closest to an account wins. Password and account lockout settings for domain accounts ' +
+        'are the one major exception to that rule, and it catches almost everyone the first time they ' +
+        'run into it.\n\n' +
+        'No matter what GPO you link to a specific OU, and no matter how directly it conflicts with the ' +
+        'domain-wide setting, Windows only looks at the password and lockout policy from whichever GPO ' +
+        'is linked at the very root of the domain, full stop. It ignores anything linked closer to the ' +
+        'account for this one category of setting specifically. So a GPO requiring 14-character ' +
+        'passwords, linked to a "Finance" OU, is not overruled or ignored by accident, Windows was never ' +
+        'designed to check it for this particular setting in the first place.\n\n' +
+        'Getting a genuinely different password requirement for one subset of users means reaching for a ' +
+        'different tool entirely: a FINE-GRAINED PASSWORD POLICY, technically an object called a ' +
+        'Password Settings Object, which is targeted directly at a security group of accounts rather ' +
+        'than linked to a place in the OU structure at all. It is a completely separate mechanism from ' +
+        'ordinary GPO linking, built specifically to work around this exception.',
     },
     hints: [
       'Password and lockout policy is the one exception to the normal LSDOU precedence rule for domain accounts.',
@@ -640,9 +782,9 @@ const MODULE_WIN_3: Exercise[] = [
       },
     ],
     debrief:
-      'This is exactly the kind of thing a portfolio write-up should mention explicitly, since it shows ' +
-      'you debugged a genuinely non-obvious default rather than just following a tutorial that happened ' +
-      'to avoid it.',
+      'This is exactly the kind of thing a portfolio write-up should mention explicitly, since running ' +
+      'into it and figuring out why shows you actually debugged a genuinely non-obvious default, rather ' +
+      'than just following a tutorial that happened to route around it without explaining why.',
     practice: [],
   },
   {
@@ -656,14 +798,22 @@ const MODULE_WIN_3: Exercise[] = [
     prompt: 'A GPO can be scoped down using several different mechanisms. Which of the following are genuine ways to narrow what a GPO applies to? Select all that apply.',
     teach: {
       concept:
-        'OU LINKING sets the broadest scope: which container the policy applies within. SECURITY ' +
-        'FILTERING narrows it further by requiring the target to be a member of a specific security ' +
-        'group (by default a GPO applies to Authenticated Users within its linked OU, and changing the ' +
-        'security filtering to a specific group restricts it to just that group even though the link ' +
-        'covers a wider OU). WMI FILTERING narrows by a query against the target machine\'s properties, ' +
-        'commonly used to apply a policy only to a specific operating system version. All three can be ' +
-        'combined on the same GPO to reach exactly the population you mean, rather than restructuring ' +
-        'your entire OU layout every time a new targeting requirement shows up.',
+        'Sometimes you do not want a Group Policy to apply to everyone in an OU, only to some of them, ' +
+        'and Active Directory gives you three separate tools for narrowing that down, each working at a ' +
+        'different level.\n\n' +
+        'OU LINKING is the broadest of the three: it decides which container the policy applies within ' +
+        'in the first place, and everything from here on narrows that starting point further. SECURITY ' +
+        'FILTERING narrows it by requiring whoever the policy would apply to also be a member of a ' +
+        'specific security group. By default, a GPO applies to everyone described as "Authenticated ' +
+        'Users" within its linked OU, and changing that filtering to a specific group restricts the ' +
+        'policy to just that group, even though the OU it is linked to might contain plenty of other ' +
+        'accounts. WMI FILTERING narrows it a third way, by running a small query against a target ' +
+        'computer\'s own properties, commonly used to apply a setting only to machines running a specific ' +
+        'version of Windows.\n\n' +
+        'All three of these can be combined on a single GPO at the same time, which means you can reach ' +
+        'exactly the specific population you actually mean, a particular group of people, on a ' +
+        'particular OS version, inside a particular OU, without having to redesign your whole OU ' +
+        'structure every time a new, more specific targeting need shows up.',
     },
     options: [
       { id: 'a', label: 'Security filtering restricts a linked GPO to members of a specific security group.' },
@@ -686,8 +836,9 @@ const MODULE_WIN_3: Exercise[] = [
       },
     ],
     debrief:
-      'Security filtering is the one worth knowing cold: it is the answer to "how do I apply this GPO to ' +
-      'only some of the objects in this OU" without redesigning your OU structure around it.',
+      'Security filtering is the one worth knowing cold: it is the direct answer to "how do I apply this ' +
+      'GPO to only some of the objects in this OU" without tearing apart and redesigning your OU ' +
+      'structure around every new requirement that comes up.',
     practice: [],
   },
   {
@@ -701,15 +852,22 @@ const MODULE_WIN_3: Exercise[] = [
     prompt: 'You use Group Policy Preferences to map a network drive for one department only. Which of the following are true? Select all that apply.',
     teach: {
       concept:
-        'Group Policy PREFERENCES (drive maps, printer connections, and similar) differ from Group ' +
-        'Policy SETTINGS in one important way: preferences are not strictly enforced, a user can change ' +
-        'or remove them, whereas a true policy setting is reapplied and cannot be overridden by the ' +
-        'user. Item-level targeting lets a single GPO apply a preference conditionally, for example ' +
-        'mapping a drive only for members of a specific security group, without needing a separate GPO ' +
-        'per department. And policy does not apply instantly: clients refresh on an interval (roughly ' +
-        'every 90 minutes by default, with some randomised offset to avoid every machine hammering the ' +
-        'DC at once), which is why forcing an immediate refresh with `gpupdate /force` is the standard ' +
-        'move when testing a change rather than waiting.',
+        'Group Policy actually comes in two different flavors that look similar but behave very ' +
+        'differently. A Group Policy SETTING, the kind covered so far, is enforced: it gets reapplied ' +
+        'automatically and a user cannot get around it by changing it themselves. A Group Policy ' +
+        'PREFERENCE, things like a mapped network drive or a configured printer connection, is not ' +
+        'enforced the same way, a user is free to change or remove it themselves, Windows just sets it ' +
+        'up as a starting point rather than locking it in place.\n\n' +
+        'ITEM-LEVEL TARGETING lets a single GPO apply a preference conditionally, for instance mapping a ' +
+        'network drive only for members of one specific security group, so you do not need a separate ' +
+        'GPO for every single department that needs a different drive mapped.\n\n' +
+        'And policy of either kind does not take effect the instant you save it. A client computer only ' +
+        'checks in for updated policy on a recurring interval, roughly every 90 minutes by default, with ' +
+        'a bit of randomness added to each machine\'s timing so that not every computer in the company ' +
+        'hammers the domain controller with a request at exactly the same moment. That delay is exactly ' +
+        'why the command `gpupdate /force`, which tells a single computer to check for updated policy ' +
+        'right now instead of waiting, is the standard move when you are testing a change and do not ' +
+        'want to sit around for up to an hour and a half to see if it worked.',
     },
     options: [
       { id: 'a', label: 'A Group Policy Preference like a drive map can be changed or removed by the user, unlike an enforced policy setting.' },
@@ -735,8 +893,8 @@ const MODULE_WIN_3: Exercise[] = [
     ],
     debrief:
       'In a home lab, testing a GPO change and seeing nothing happen is very often just the refresh ' +
-      'interval, not a broken policy. Run gpupdate /force on the client and check again before you ' +
-      'start troubleshooting the GPO itself.',
+      'interval, not a broken policy. Run `gpupdate /force` on the client and check again before you ' +
+      'start assuming there is something wrong with the GPO itself.',
     practice: [],
   },
   {
@@ -752,15 +910,22 @@ const MODULE_WIN_3: Exercise[] = [
       'three or four sentences, describe the order you would check things in to find out why.',
     teach: {
       concept:
-        'This is one of the most common real tickets in an AD environment, and it rewards a checklist ' +
-        'rather than guessing. First, confirm the GPO is actually LINKED and ENABLED, an unlinked GPO or ' +
-        'one with its link disabled applies to nothing. Second, check for BLOCKED INHERITANCE somewhere ' +
-        'in the OU chain between the link and the object, which stops policy from a higher level flowing ' +
-        'down. Third, check SECURITY FILTERING, the object might not be in the group the GPO is scoped ' +
-        'to even though it sits in the right OU. Fourth, remember the REFRESH INTERVAL and run `gpupdate ' +
-        '/force` before assuming anything is broken. And finally, `gpresult /r` (or the fuller `/h` ' +
-        'report) run on the target machine tells you directly which GPOs actually applied and, crucially, ' +
-        'which were filtered out and why, which turns guessing into reading an answer.',
+        'A GPO that does not seem to be taking effect on a computer is one of the most common real ' +
+        'support tickets in any company using Active Directory, and it genuinely rewards working through ' +
+        'a checklist in order rather than guessing at a single cause.\n\n' +
+        'First, confirm the GPO is actually LINKED to that OU and that the link is ENABLED, since a GPO ' +
+        'that was never linked anywhere, or one whose link was switched off, applies to nothing at all, ' +
+        'no matter how correctly it is configured internally. Second, check for BLOCKED INHERITANCE ' +
+        'somewhere between where the GPO is linked and the actual object, a setting that deliberately ' +
+        'stops policy from a higher level flowing down any further, the same way a locked door on one ' +
+        'floor of a building stops something from an upper floor reaching the floors below it. Third, ' +
+        'check SECURITY FILTERING from the previous exercises, since the object might sit in exactly the ' +
+        'right OU but simply not be a member of the group the GPO is scoped to. Fourth, remember the ' +
+        'refresh interval from the last exercise and run `gpupdate /force` before assuming anything is ' +
+        'actually broken. And finally, run `gpresult /r` (or the fuller `/h` report) directly on the ' +
+        'target machine, which does not make you guess at all, it tells you plainly which GPOs actually ' +
+        'applied to that machine and, just as importantly, which ones were filtered out and the specific ' +
+        'reason why.',
     },
     hints: [
       'A checklist, not a single cause: link/enabled state, blocked inheritance, security filtering, refresh timing.',
@@ -787,9 +952,10 @@ const MODULE_WIN_3: Exercise[] = [
       },
     ],
     debrief:
-      'gpresult /r is worth memorising specifically: it is the single command that turns "I think this ' +
-      'GPO should be applying" into a direct list of what did and did not, and why, which is the entire ' +
-      'difference between troubleshooting and guessing.',
+      '`gpresult /r` is worth memorizing specifically. It is the single command that turns "I think ' +
+      'this GPO should be applying" into a direct, factual list of what did and did not apply, and why, ' +
+      'which is the entire difference between troubleshooting with evidence and troubleshooting by ' +
+      'guessing.',
     practice: [],
   },
 ];
@@ -808,14 +974,24 @@ const MODULE_WIN_4: Exercise[] = [
     prompt: 'Which of the following need to be true for a Windows client to successfully join a domain? Select all that apply.',
     teach: {
       concept:
-        'The client\'s DNS server setting has to be able to resolve the domain\'s SRV records, which in ' +
-        'practice almost always means pointing it at the DC itself rather than a public or ISP resolver. ' +
-        'The client\'s clock has to be within Kerberos\'s tolerance of the DC\'s clock, by default around ' +
-        'five minutes, or authentication will fail even once the join technically completes. The account ' +
-        'performing the join needs rights to create a computer object, either full domain admin or a ' +
-        'delegated right scoped to just that. And the machine name has to be unique in the domain, ' +
-        'joining with a name that collides with an existing computer account fails or silently reuses ' +
-        'the wrong object depending on how it is configured.',
+        'Joining a domain means telling a Windows computer "stop trusting only your own local list of ' +
+        'accounts, and start trusting the domain controller\'s list instead." For that handoff to ' +
+        'succeed, a handful of things have to already be true, most of which trace back to ideas covered ' +
+        'earlier in this package.\n\n' +
+        'The client\'s DNS setting has to be able to resolve the domain\'s SRV records, the same lookup ' +
+        'covered back in win.1.2, which in practice almost always means the computer needs to be pointed ' +
+        'at the domain controller itself for DNS, not at a router or an outside internet resolver that ' +
+        'has never heard of this domain. The client\'s clock has to be close enough to the domain ' +
+        'controller\'s clock, within Kerberos\'s tolerance, by default around five minutes, the same ' +
+        'requirement covered in win.1.3, or logins will fail even after the join technically finishes. ' +
+        'The account actually performing the join needs permission to create a new computer object in ' +
+        'the domain, either full domain administrator rights or a narrower, delegated right scoped to ' +
+        'just that task. And the computer\'s own name has to be unique within the domain, since joining ' +
+        'with a name that collides with an existing computer account either fails outright or, depending ' +
+        'on configuration, silently takes over the wrong existing object.\n\n' +
+        'Notice that this is largely the same short list from win.1.3, applied to a client machine ' +
+        'instead of to the domain controller itself. That repetition is not an accident, the same few ' +
+        'things (DNS, time, and permissions) turn out to matter constantly throughout real AD work.',
     },
     options: [
       { id: 'a', label: 'The client must be able to resolve the domain\'s DNS records, which usually means pointing DNS at the DC.' },
@@ -841,9 +1017,10 @@ const MODULE_WIN_4: Exercise[] = [
       },
     ],
     debrief:
-      'Notice that three of the four real prerequisites (DNS, time, and account rights) are exactly the ' +
-      'same things you checked before promoting the DC in win.1.3. The same short checklist shows up ' +
-      'again and again in AD work, which is worth noticing rather than treating each failure as new.',
+      'Notice that three of the four real prerequisites here (DNS, time, and account rights) are ' +
+      'exactly the same things you checked before promoting the domain controller back in win.1.3. The ' +
+      'same short checklist keeps showing up across AD work, which is worth noticing and reusing rather ' +
+      'than treating every new failure as something completely unfamiliar.',
     practice: [],
   },
   {
@@ -860,13 +1037,20 @@ const MODULE_WIN_4: Exercise[] = [
       'three sentences, say what you would check first, and why pinging the DC did not rule it out.',
     teach: {
       concept:
-        'Pinging an IP address only proves basic network reachability, it says nothing about whether the ' +
-        'client can resolve the DNS records the join process actually depends on. The first thing to ' +
-        'check is the client\'s DNS server setting: if it is pointed at a router, an ISP resolver, or ' +
-        'anything other than the domain\'s own DNS server, it has no way to find the SRV records that ' +
-        'locate a domain controller, and the join fails with exactly this kind of error even though the ' +
-        'network path to the DC is fine. This is the same distinction from win.1.2, reachability and ' +
-        'name resolution are not the same thing, showing up as a concrete troubleshooting step.',
+        'A successful ping only proves one narrow thing: that a signal sent to an address got a response ' +
+        'back. It says absolutely nothing about whether the sending computer can look up the right DNS ' +
+        'records, the ones covered back in win.1.2, that the domain-join process actually depends on to ' +
+        'find a domain controller in the first place.\n\n' +
+        'So when a client fails to join with a "domain could not be found" error despite pinging the ' +
+        'domain controller\'s IP address successfully, the first thing worth checking is not the network ' +
+        'at all, it is the client\'s own DNS server setting, meaning which DNS server that computer is ' +
+        'configured to actually ask. If it is pointed at a home router, an ISP\'s resolver, or anything ' +
+        'other than the domain\'s own DNS server, it has no way to find the SRV records that locate a ' +
+        'domain controller, and the join fails with exactly this kind of error even though the raw ' +
+        'network path to that domain controller works completely fine.\n\n' +
+        'This is the same distinction from win.1.2, that reachability and name resolution are two ' +
+        'entirely separate things, showing up here as a concrete, practical troubleshooting step instead ' +
+        'of an abstract idea.',
     },
     hints: [
       'What does a successful ping actually prove, and what does it not prove?',
@@ -891,9 +1075,10 @@ const MODULE_WIN_4: Exercise[] = [
       },
     ],
     debrief:
-      'This exact scenario, a working ping and a failed join, is the single most common "gotcha" people ' +
-      'hit building their first AD home lab, usually because their client is still using the router\'s ' +
-      'default DHCP-assigned DNS server instead of the domain controller.',
+      'This exact scenario, a working ping paired with a failed join, is the single most common ' +
+      '"gotcha" people run into building their first AD home lab, usually because their client machine ' +
+      'is still quietly using the router\'s own default DHCP-assigned DNS server instead of being ' +
+      'pointed at the domain controller.',
     practice: [],
   },
   {
@@ -1009,14 +1194,36 @@ const MODULE_WIN_4: Exercise[] = [
       'wizard succeeded.',
     teach: {
       concept:
-        'A single success dialog proves one moment worked. A reviewer looking at a portfolio project is ' +
-        'really asking "do they understand what this system does", and the strongest way to show that is ' +
-        'demonstrating the whole chain: log in as a domain user rather than a local account, show a ' +
-        'linked GPO actually taking effect on the client (a mapped drive appearing, or `gpresult /r` ' +
-        'listing the applied policy), and access a domain resource such as a shared folder that only ' +
-        'works because of group membership granted through Active Directory. That sequence proves ' +
-        'authentication, policy, and authorisation are all genuinely working together, not just that a ' +
-        'join button was clicked once.',
+        'Think about the difference between telling someone you did a job and actually showing them it ' +
+        'works. Saying "I built a house" proves nothing on its own, but a working front door lock, water ' +
+        'that runs when you turn the tap, and lights that come on when you flip a switch prove the house ' +
+        'genuinely functions as a house, not just that it has walls and a roof. A domain login deserves ' +
+        'the same skepticism, because what looks like one moment, typing a password and getting in, is ' +
+        'actually three separate systems working correctly in sequence, and any one of them can be broken ' +
+        'while the other two still work fine.\n\n' +
+        'The first of those three is AUTHENTICATION: the domain controller confirming this really is who ' +
+        'they claim to be, using Kerberos tickets instead of each machine keeping its own private ' +
+        'password list, the mechanism covered back in win.1.1. The second is GROUP POLICY, covered in ' +
+        'win.3.1, settings that get pushed down and applied automatically once that login succeeds, ' +
+        'things like a network drive mapping itself or a screen lock timer being enforced, without anyone ' +
+        'touching that machine by hand. The third is AUTHORISATION: whether that now-logged-in person can ' +
+        'actually open a specific shared folder or run a specific application, which depends entirely on ' +
+        'which security groups they belong to, covered in win.2.3, and has nothing to do with whether the ' +
+        'login itself succeeded. A person can authenticate perfectly and still be authorised for almost ' +
+        'nothing, those are genuinely separate questions with separate answers.\n\n' +
+        'A join wizard\'s "welcome to the domain" dialog only proves the join request itself completed. ' +
+        'It says nothing about whether authentication, policy, and authorisation are actually working for ' +
+        'a real person doing real work afterward, which is exactly why it is not convincing on its own. A ' +
+        'screenshot of a domain user logging in demonstrates authentication is working. A screenshot of ' +
+        '`gpresult /r`, or a mapped drive appearing without anyone configuring it by hand, demonstrates ' +
+        'policy is actually reaching that machine. And a screenshot of that same user opening a shared ' +
+        'folder that only a specific security group can reach demonstrates authorisation is wired up ' +
+        'correctly too, three independent pieces of evidence instead of one.\n\n' +
+        'This matters on the job because a hiring manager reading a portfolio write-up is not checking ' +
+        'whether you clicked "Join" successfully, plenty of tutorials get that far without the person ' +
+        'following them understanding anything. They are checking whether you understand that a working ' +
+        'domain is three separate, cooperating systems, and whether you can prove each one is genuinely ' +
+        'doing its job rather than just describing the finished result in a sentence.',
     },
     hints: [
       'A single screenshot proves a moment, not a working system. What sequence proves the whole chain?',
@@ -1042,9 +1249,11 @@ const MODULE_WIN_4: Exercise[] = [
       },
     ],
     debrief:
-      'This closes the loop on the whole lab: promotion, users and groups, Group Policy, and joining a ' +
-      'client are not four separate demonstrations, they are one system, and proving that they work ' +
-      'together is worth far more in a portfolio than proving each one worked in isolation.',
+      'This closes the loop on the whole lab. Promotion, users and groups, Group Policy, and joining a ' +
+      'client are not four separate demonstrations, they are one system, and authentication, policy, and ' +
+      'authorisation are the three threads that tie them together. Proving all three work is worth far ' +
+      'more in a portfolio than proving any one of them worked in isolation, because it is the difference ' +
+      'between "I followed the steps" and "I understand what the steps actually did."',
     practice: [],
   },
 ];
