@@ -44,40 +44,68 @@ import type { Exercise, LearningPackage } from '@soc/shared';
 
 const RESPONSIBILITY_TEACH = {
   concept:
-    'Every cloud contract splits security into two halves, and the split is called the shared ' +
-    'responsibility model. The provider is responsible for security OF the cloud: the physical data ' +
-    'centres, the racks and cabling, the hypervisor that carves one physical machine into many ' +
-    'virtual ones, and the network between regions. You never see any of it, and you cannot fix it ' +
-    'if it is wrong. The customer is responsible for security IN the cloud: the operating system you ' +
-    'chose to run, the identities and permissions you configured, the data you put there and how you ' +
-    'protected it, and the code you deployed on top of all of it.\n\n' +
-    'Where the line sits depends on how much of the stack the provider is running for you. Rent a ' +
-    'virtual machine, infrastructure as a service, and the line sits low: you patch the guest ' +
-    'operating system, you configure the firewall rules, you manage the application. Rent a managed ' +
-    'database or a container platform, platform as a service, and the line moves up: the provider now ' +
-    'patches the engine or the orchestration layer, and your job narrows to configuration, access, ' +
-    'and data. Rent a finished application, software as a service, and the line moves higher still, ' +
-    'but it never reaches the top: you still decide who has an account, what they can see, and what ' +
-    'leaves the system.\n\n' +
-    'This is the single most-tested concept in every cloud certification, and also the easiest one to ' +
-    'get backwards under pressure. Moving a system to the cloud sounds like it should mean somebody ' +
-    'else now worries about this, and for a narrow slice of the problem it does. For the slice that ' +
-    'causes almost every real cloud breach, misconfigured access and exposed data sitting behind ' +
-    'identities with too much reach, it means the opposite: the responsibility moved into an ' +
-    'environment where a single wrong setting is reachable from the entire internet by default.',
+    'Start with what "the cloud" actually is, because the word makes it sound vaguer than it is. It is ' +
+    'somebody else\'s computer: a physical machine sitting in a warehouse-sized building you will never ' +
+    'see, owned by a company such as Amazon, Microsoft, or Google, that you pay to use over the ' +
+    'internet instead of buying and running the machine yourself.\n\n' +
+    'Renting an apartment is a useful comparison for how the security work splits between you and that ' +
+    'company. The landlord is responsible for the building itself: the foundation, the roof, the wiring ' +
+    'behind the walls, the locks on the main entrance. You are responsible for what happens inside your ' +
+    'own unit: locking your own door, not leaving a window open, deciding who gets a spare key. Nobody ' +
+    'confuses whose job is whose, because the building and the apartment are visibly two different ' +
+    'things.\n\n' +
+    'Cloud computing splits the same way, and the split has a name, the SHARED RESPONSIBILITY MODEL. ' +
+    'The provider is responsible for security OF the cloud: the physical building, the racks of ' +
+    'machines, and a layer of software called the HYPERVISOR, which slices one physical machine into ' +
+    'many separate virtual ones so it can be rented out to many customers at once without any of them ' +
+    'seeing into each other\'s piece. You never see any of that, and you cannot fix it if it breaks, the ' +
+    'same way a tenant cannot personally rewire a building. You, the customer, are responsible for ' +
+    'security IN the cloud: which software you install, which coworkers can log in and what they can ' +
+    'do once they are in, what data you store there and how you protect it, and any code you write and ' +
+    'run on top of it all. That is your apartment, and the landlord will never come lock your door for ' +
+    'you.\n\n' +
+    'Exactly where that line sits shifts depending on how much of the work the provider is doing for ' +
+    'you, which is usually described as three levels of rental. Rent a bare virtual machine, called ' +
+    'infrastructure as a service, and the line sits low, close to your side: you install and patch the ' +
+    'operating system yourself, you set the firewall-style rules, you run the application, roughly like ' +
+    'renting an empty apartment with nothing but walls and plumbing. Rent a ready-made database or a ' +
+    'platform that runs your application for you, platform as a service, and the line moves toward the ' +
+    'provider: they now patch the underlying engine, and your job narrows to who can connect to it and ' +
+    'what data lives inside, closer to renting a furnished apartment where somebody else fixes the ' +
+    'appliances. Rent a finished, ready-to-use application, software as a service, an email system is a ' +
+    'common example, and the line moves furthest toward the provider of all three, but it never reaches ' +
+    'the top: you still decide who has an account, what each of them is allowed to see, and what leaves ' +
+    'the system, the way a hotel handles the building and the cleaning but you still decide who you ' +
+    'hand your room key to.\n\n' +
+    'This is the single most-tested idea in every cloud security certification, and also the easiest ' +
+    'one to get backwards under pressure. "We moved to the cloud" sounds like it should mean somebody ' +
+    'else now worries about all of this, and for a narrow slice of the problem it genuinely does. For ' +
+    'the slice that causes almost every real cloud breach, a permission set too broadly and data left ' +
+    'reachable by people who should never have had a path to it, it means the opposite: that ' +
+    'responsibility moved into an environment where a single wrong setting can be reached by anyone on ' +
+    'the internet by default, not just by someone standing inside the building.',
 } as const;
 
 const IAM_POLICY_TEACH = {
   concept:
-    'On a traditional network, the perimeter was a place: a firewall at the edge, and anything ' +
-    'behind it was more trusted than anything in front. Cloud infrastructure has no equivalent edge. ' +
-    'Every resource is reachable through an API from anywhere on the internet, and what stands ' +
-    'between an anonymous request and a running database is not a network boundary, it is whether the ' +
-    'request carries credentials with permission to act. That is why identity and access management, ' +
-    'IAM, is described as the new perimeter: it is doing the job the firewall used to do, and it ' +
-    'fails in the same direction a firewall does when it is misconfigured, silently and completely ' +
-    'open.\n\n' +
-    'A policy is the document that grants that permission, and here is a real shape one takes:\n\n' +
+    'Imagine an office building with one locked front door and a security guard checking badges as ' +
+    'people walk in. Once you are past that door, you can wander into any room, because the building ' +
+    'was designed around a single checkpoint: get past the front door, and you are trusted. That is ' +
+    'roughly how a traditional company network used to work. There was one edge, a piece of hardware ' +
+    'called a FIREWALL sitting at the boundary between "outside" and "inside", and once a device was ' +
+    'inside that boundary, it was treated as more trustworthy than anything still outside.\n\n' +
+    'Cloud infrastructure has no equivalent front door. Every single piece of it, a database, a file ' +
+    'store, a virtual machine, is reachable directly over the internet through its own address the ' +
+    'moment it exists, whether or not anyone ever built a "building" around it at all. So what actually ' +
+    'stops a random stranger\'s request from reaching in and doing something to it? Not a location, not ' +
+    'a network boundary, but a question asked of every single request individually: does whoever sent ' +
+    'this have permission to do what they are asking to do? That question, and the system that answers ' +
+    'it, is called IDENTITY AND ACCESS MANAGEMENT, usually shortened to IAM. It is why people call IAM ' +
+    'the new perimeter: it is doing the job the front door used to do, one request at a time instead of ' +
+    'one building at a time, and when it is set up wrong it fails the exact same way a broken front ' +
+    'door lock does, silently letting anyone walk straight in.\n\n' +
+    'A POLICY is the actual document that grants somebody permission to do something, written in a ' +
+    'structured, computer-readable format rather than English. Here is what a real one looks like:\n\n' +
     '{\n' +
     '  "Version": "2012-10-17",\n' +
     '  "Statement": [\n' +
@@ -88,101 +116,152 @@ const IAM_POLICY_TEACH = {
     '    }\n' +
     '  ]\n' +
     '}\n\n' +
-    'Read it the way you would read a firewall rule that allows anything from anywhere: EFFECT is the ' +
-    'verdict, ACTION is what the identity may do, and RESOURCE is what it may do it to. This policy ' +
-    'grants every action against every resource, which is sometimes written deliberately for a ' +
-    'break-glass account and far more often left behind by somebody who could not get a narrower ' +
-    'policy working before a deadline and meant to come back to it.',
+    'Do not be put off by the punctuation, it is simpler than it looks once you know what each line ' +
+    'means. EFFECT is the verdict, allow or deny. ACTION is what the identity holding this policy is ' +
+    'permitted to do. RESOURCE is what it is permitted to do that thing to. The asterisk, "*", is a ' +
+    'wildcard meaning "anything, no matter what it is", the same symbol you have probably seen used to ' +
+    'mean "all files" in other contexts. Put together, this policy says: allow this identity to do ' +
+    'anything, to anything. That is sometimes written on purpose, for a special emergency-only account ' +
+    'meant to have unrestricted reach, and far more often it is left behind by someone who could not get ' +
+    'a narrower, more careful policy working before a deadline, told themselves they would come back and ' +
+    'tighten it later, and never did.',
 } as const;
 
 const BUCKET_TEACH = {
   concept:
-    'Object storage is the single most consistently breached class of cloud resource, and the reason ' +
-    'is not exotic. A bucket needs to be readable by something outside the account almost as often as ' +
-    'it needs to be private, a static website, a public dataset, a report shared with a client, and ' +
-    'the setting that makes a bucket public is one checkbox or one policy statement away from the ' +
-    'setting that keeps it private. Every provider has changed defaults and added warnings over the ' +
-    'years precisely because this keeps happening.\n\n' +
-    'One classic misconfiguration is worth being able to recognise on sight: a grant to ' +
-    '"authenticated users". It sounds like it means people who have logged into our organisation, and ' +
-    'it does not. On most providers it means any authenticated identity on the entire platform, which ' +
-    'is to say anyone with an account on that cloud, a population in the hundreds of millions. A ' +
-    'permission fragment granting read access to authenticated users looks, at a glance, like an ' +
-    'internal control:\n\n' +
+    'Cloud providers sell a kind of storage usually called a BUCKET: a container you can drop files ' +
+    'into, that lives on the provider\'s servers rather than on any computer you own, and that has an ' +
+    'address on the internet the same way a website does. Think of it as a storage unit you rent, ' +
+    'except this storage unit can optionally have a sign on it saying "anyone may open this and take a ' +
+    'look inside", and whether that sign is up or not is controlled by a single setting.\n\n' +
+    'Object storage of this kind is the single most consistently breached type of cloud resource there ' +
+    'is, and the reason is not exotic. A bucket genuinely does need to be openly readable almost as ' +
+    'often as it needs to be locked down, a website\'s images, a public dataset a research team wants ' +
+    'anyone to download, a report shared with an outside client, and the setting that makes a bucket ' +
+    'public sits right next to, sometimes one checkbox away from, the setting that keeps it private. ' +
+    'Every major provider has changed its defaults and added warning banners over the years precisely ' +
+    'because this keeps happening anyway.\n\n' +
+    'One specific version of the mistake is worth being able to recognise the moment you see it: a ' +
+    'grant to "authenticated users". Read in plain English, that sounds like it means people who have ' +
+    'logged into your company\'s own systems. It does not. On most providers, "authenticated" only ' +
+    'means the person has some account on that cloud platform at all, anyone who has ever signed up for ' +
+    'that provider\'s service for any reason, a population in the hundreds of millions, not the handful ' +
+    'of people on your own team. A permission fragment granting read access to authenticated users ' +
+    'looks, at a glance, like a sensible internal control:\n\n' +
     '{\n' +
     '  "Grantee": "AuthenticatedUsers",\n' +
     '  "Permission": "READ"\n' +
     '}\n\n' +
-    'and functions, in practice, as public.',
+    'and functions, in practice, as public: the label sounds like a locked door with a badge reader, ' +
+    'and it behaves like an unlocked door on a public street.',
 } as const;
 
 const SG_NACL_TEACH = {
   concept:
-    'A perimeter firewall protects a network by sitting at its one entrance. Cloud networking has no ' +
-    'single entrance: a virtual network is built from many small boundaries attached to individual ' +
-    'resources, and two of them look similar enough to be confused constantly, security groups and ' +
-    'network access control lists.\n\n' +
-    'A SECURITY GROUP is attached to an individual resource, such as a virtual machine, and it is ' +
-    'STATEFUL: allow an inbound connection, and the matching return traffic is automatically permitted ' +
-    'without a separate rule. A NETWORK ACCESS CONTROL LIST sits at the subnet boundary and is ' +
-    'STATELESS: it evaluates inbound and outbound traffic as entirely separate rule sets, so an ' +
-    'inbound allow rule does nothing for the return path, which needs its own outbound rule or the ' +
-    'connection simply hangs.\n\n' +
-    'Here is a security group rule table for a web server:\n\n' +
+    'A computer network is, underneath the jargon, just a way for machines to send each other small ' +
+    'packages of data, and a network can be filtered the same way mail can: rules that say what is ' +
+    'allowed in, and what is allowed out. A traditional office network usually has one gate for this, a ' +
+    'FIREWALL sitting at the single entrance to the building. Cloud networking has no single entrance ' +
+    'like that. A cloud network is built out of many small boundaries, each one attached to a different ' +
+    'piece of infrastructure, and two of them look similar enough on paper to be confused constantly: ' +
+    'security groups and network access control lists.\n\n' +
+    'A SECURITY GROUP is a set of filtering rules attached to one specific resource, such as a single ' +
+    'virtual machine, the way a lock is attached to one specific door rather than to the whole ' +
+    'building. It is STATEFUL, meaning it remembers a conversation once it has started: allow a ' +
+    'connection in, and the reply going back out is automatically permitted too, with no separate rule ' +
+    'needed, the same way a receptionist who waved you in does not need to separately approve you ' +
+    'leaving again. A NETWORK ACCESS CONTROL LIST sits one level up, at the boundary of a whole ' +
+    'neighborhood of resources called a subnet, and it is STATELESS, meaning it has no memory of any ' +
+    'conversation at all: it checks traffic going in and traffic going out as two completely unrelated ' +
+    'questions, so allowing a connection in does nothing for the reply going back out, that reply needs ' +
+    'its own separate outbound rule, or the whole conversation just hangs with no response.\n\n' +
+    'Rules like these are usually written down as a table, one row per rule. Here is one attached to a ' +
+    'web server:\n\n' +
     'Type      Protocol  Port   Source\n' +
     'HTTPS     TCP       443    0.0.0.0/0\n' +
     'SSH       TCP       22     0.0.0.0/0\n' +
     'Custom    TCP       5432   10.0.1.0/24\n\n' +
-    'Read it the way you would read a firewall rule: a source of 0.0.0.0/0 means from anywhere on the ' +
-    'internet, and a narrower source such as 10.0.1.0/24 means only from that private range.',
+    'Read each row left to right as one sentence: this TYPE of traffic, over this PROTOCOL, aimed at ' +
+    'this PORT (a numbered channel a service listens on), is allowed if it comes from this SOURCE. A ' +
+    'source written as 0.0.0.0/0 is a way of saying "any address at all", so it means from anywhere on ' +
+    'the entire internet, while a narrower source such as 10.0.1.0/24 describes one small, specific ' +
+    'range of addresses, the network equivalent of "only visitors from this one street".',
 } as const;
 
 const CLOUDTRAIL_TEACH = {
   concept:
-    'An activity log in the cloud, the pattern popularised by CloudTrail and matched by every other ' +
-    'major provider under a different name, records the MANAGEMENT PLANE: every API call made ' +
-    'against the account, who made it, from where, and what it targeted. Creating a user, changing a ' +
-    'permission, launching or terminating an instance, reading account settings, all of it is a ' +
-    'recorded event, whether it came from the console, a command line tool, or an automated script.\n\n' +
-    'What it typically does not record by default is the DATA PLANE, the actual contents moving ' +
-    'through a resource: the rows read from a database, the bytes served from a bucket. Data plane ' +
-    'logging usually has to be turned on separately, per resource, and often carries its own cost, ' +
-    'which is one reason it is frequently missing exactly where it would matter most.\n\n' +
-    'Here is a short excerpt of the kind of event this log records, rendered in plain terms:\n\n' +
+    'Picture a building with a logbook at the front desk that automatically writes down every time ' +
+    'anyone badges through a door: who, which door, and when, with no human needed to record it. A ' +
+    'cloud account can have the equivalent of that logbook, usually called an activity log (CloudTrail ' +
+    'is the name one major provider gave its version, and every other provider has its own equivalent ' +
+    'under a different name). Nearly everything you can do to a cloud account is done by sending a ' +
+    'small, structured request over the internet called an API CALL, whether that request came from ' +
+    'someone clicking around a web dashboard, someone typing a command, or a script running on its own ' +
+    'with nobody watching. The activity log automatically writes down every one of those calls, which ' +
+    'together are called the MANAGEMENT PLANE: creating a user, changing what somebody is allowed to ' +
+    'do, starting or stopping a machine, reading a setting. All of it gets recorded, who did it, from ' +
+    'where, and what it touched.\n\n' +
+    'What this logbook typically does not write down by default is what is sometimes called the DATA ' +
+    'PLANE: the actual contents that flow through a resource once someone is already allowed to use it, ' +
+    'the actual rows read out of a database, the actual bytes of a file downloaded from storage. Recording ' +
+    'that level of detail usually has to be switched on separately, one resource at a time, and it often ' +
+    'costs extra money to keep, which is exactly why it tends to be missing on precisely the resources ' +
+    'where it would have mattered most.\n\n' +
+    'Here is a short excerpt of what an entry in this logbook actually looks like, written out in plain ' +
+    'terms:\n\n' +
     '12:03:01  ListBuckets        user=svc-report      source=203.0.113.9\n' +
     '12:03:04  ListUsers          user=svc-report      source=203.0.113.9\n' +
     '12:03:11  CreateAccessKey    user=svc-report      source=203.0.113.9  target=admin-role\n' +
     '12:03:19  AttachRolePolicy   user=svc-report      source=203.0.113.9  target=admin-role  policy=AdministratorAccess\n\n' +
-    'Read it left to right: a timestamp, the action, who performed it, where the request came from, ' +
-    'and what it targeted.',
+    'Read each line left to right, the same way you would read a sign-in sheet: a timestamp, the action ' +
+    'taken, who took it, the address the request came from, and what it was aimed at.',
 } as const;
 
 const SECRETS_TEACH = {
   concept:
-    'A hardcoded credential, a database password or an API key typed directly into source code or a ' +
-    'configuration file, is one of the most consistently recurring causes of real breaches, and it ' +
-    'keeps recurring for a boring reason: it is the fastest way to make something work during ' +
-    'development, and removing it afterward requires a step nobody is forced to take.\n\n' +
-    'Here is the pattern in its most common shape:\n\n' +
+    'A password is a secret that proves you are allowed to open something, a database, an account, a ' +
+    'service, without anyone having to recognise your face. Software needs to prove that same thing to ' +
+    'other software constantly: an application connecting to a database has to hand over a username and ' +
+    'password just like a person logging into a website does. The question is simply where that ' +
+    'password lives while the application is not actively using it.\n\n' +
+    'A HARDCODED CREDENTIAL means that password, or an equivalent secret key, was typed directly into ' +
+    'the application\'s own source code or a configuration file that travels alongside it, instead of ' +
+    'being kept somewhere separate and more protected. It is one of the most consistently recurring ' +
+    'causes of real security breaches, and it keeps recurring for a boring reason: typing the password ' +
+    'straight into the file is by far the fastest way to get something working while you are building ' +
+    'it, and going back afterward to move it somewhere safer is a step nobody is ever forced to take, so ' +
+    'it frequently just does not happen.\n\n' +
+    'Here is the pattern in its most common shape, a short snippet from a configuration file:\n\n' +
     'DATABASE_HOST = "db.internal.example"\n' +
     'DATABASE_USER = "app"\n' +
     'DATABASE_PASSWORD = "Summer2024!"\n\n' +
-    'sitting in a file that then gets committed to a source repository, baked into a container image, ' +
-    'or copied onto a test machine used by somebody else on the team. Once it exists in any of those ' +
-    'places, it has effectively left your control: a repository keeps history that a later deletion ' +
-    'does not erase, an image can be pulled by anyone with registry access, and a copy sitting on ' +
-    'another machine now depends on the security posture of that machine, not yours.',
+    'The problem is not that this file exists, every application needs its settings written down ' +
+    'somewhere. The problem is what tends to happen to that file next: it gets saved into a shared, ' +
+    'version-tracked project history called a source repository, or it gets baked directly into a ' +
+    'packaged, reusable copy of the application called a container image, or it simply gets copied onto ' +
+    'a colleague\'s test machine to save time. Once the password exists in any of those places, it has ' +
+    'effectively left your control: a repository keeps a full history that deleting the file later does ' +
+    'not erase, a container image can be downloaded by anyone with access to where images are stored, ' +
+    'and a copy sitting on somebody else\'s machine is now only as safe as that machine is, which you do ' +
+    'not control either.',
 } as const;
 
 const IAC_TEACH = {
   concept:
-    'Infrastructure as code means the shape of a cloud environment, the networks, the permissions, ' +
-    'the resources, is written as a file rather than clicked together by hand, and that file is ' +
-    'version controlled and reused the way application code is. The advantage is consistency: the ' +
-    'same definition can build a hundred identical environments. That advantage has a matching cost: ' +
-    'a single mistake in the definition is reproduced everywhere it is used, at the moment it is used, ' +
-    'rather than staying confined to one resource a human happened to misclick.\n\n' +
-    'Here is a short fragment defining a security group:\n\n' +
+    'There are two ways to set up a piece of cloud infrastructure. One is to click through a web ' +
+    'dashboard by hand, the way you might set up a new phone by tapping through menus. The other is to ' +
+    'write down, in a plain text file, exactly what you want to exist, a network, a set of permissions, ' +
+    'a server, and hand that file to a tool that builds it for you automatically. That second approach ' +
+    'is called INFRASTRUCTURE AS CODE, and the file behaves like a recipe: anyone who runs it gets the ' +
+    'same dish, and the recipe itself can be saved, copied, and reused the same way a written recipe ' +
+    'can, or the same way programmers already save and reuse their application code.\n\n' +
+    'The advantage of a recipe over clicking by hand is consistency: the exact same file can build a ' +
+    'hundred identical environments, with no chance of one of them being clicked together slightly ' +
+    'differently by mistake. That advantage carries a matching cost, though. If the recipe itself has a ' +
+    'mistake baked into it, that mistake is reproduced in every single environment built from it, all at ' +
+    'once, the moment the recipe is used, rather than staying confined to the one dish a person happened ' +
+    'to get wrong by hand.\n\n' +
+    'Here is a short fragment of this kind of file, defining a set of network rules:\n\n' +
     'resource "security_group" "app" {\n' +
     '  ingress {\n' +
     '    from_port   = 22\n' +
@@ -191,26 +270,38 @@ const IAC_TEACH = {
     '    cidr_blocks = ["0.0.0.0/0"]\n' +
     '  }\n' +
     '}\n\n' +
-    'If this module is reused to stand up fifty application servers, all fifty inherit an SSH rule ' +
-    'open to the entire internet the moment they are created, with no separate review step for any of ' +
-    'them.',
+    'You do not need to know this particular file format to read the danger in it: port 22 is the ' +
+    'channel commonly used for remote administrative access to a machine, and "0.0.0.0/0" means "from ' +
+    'any address at all". If this recipe is reused to stand up fifty separate application servers, all ' +
+    'fifty are built with administrative access open to the entire internet the instant they are ' +
+    'created, with nobody reviewing any one of them individually before it happens.',
 } as const;
 
 const EPHEMERAL_TEACH = {
   concept:
-    'On-premises incident response assumes the evidence holds still: a physical server keeps running, ' +
-    'or at worst gets powered off, and either way it is still there to examine tomorrow. Cloud ' +
-    'infrastructure breaks that assumption directly. An autoscaling group can terminate an instance ' +
-    'the moment load drops, a container can be replaced by an orchestrator the moment a health check ' +
-    'fails, and a serverless function has no persistent instance to examine at all between ' +
-    'invocations. By the time an alert is triaged and an investigator opens a ticket, the exact ' +
-    'machine involved may no longer exist anywhere.\n\n' +
-    'This changes the order of operations rather than the underlying goals of incident response. The ' +
-    'evidence has to be preserved before the infrastructure has a chance to disappear on its own, ' +
-    'which usually means taking a SNAPSHOT of the storage volume and capturing relevant logs ' +
-    'immediately, rather than after a decision to terminate has already been made. Only once that ' +
-    'evidence is secured does it become safe to let the resource go, whether that means letting an ' +
-    'orchestrator replace it or terminating it directly.',
+    'If a break-in happens in a physical office building, the room where it happened is still going to ' +
+    'be there the next morning: the desk, the filing cabinet, the broken window, all still sitting ' +
+    'exactly where they were, waiting for someone to come examine them. Investigating a security ' +
+    'incident on a traditional, physical server used to work the same way: the machine kept running, or ' +
+    'at worst somebody turned it off, and either way it was still physically sitting in a rack, ready to ' +
+    'be examined whenever an investigator got around to it.\n\n' +
+    'Cloud infrastructure breaks that assumption completely, because a lot of it is deliberately ' +
+    'designed to be temporary. A system that automatically adds and removes virtual machines to match ' +
+    'demand can shut one down the moment traffic drops, with nobody asking permission first. A ' +
+    'management system that automatically replaces unhealthy pieces of an application can swap one out ' +
+    'the moment it looks even slightly broken. And a kind of cloud service called SERVERLESS, where your ' +
+    'code only runs for the brief moment it is actually needed and no machine sits there in between, has ' +
+    'no persistent computer to go examine at all once that moment has passed. By the time a human ' +
+    'notices something suspicious and actually opens an investigation, the exact machine or process ' +
+    'involved may already be gone, permanently, with nothing left standing in its place.\n\n' +
+    'This changes the order investigators have to work in, not the underlying goal, which is still to ' +
+    'preserve evidence and figure out what happened. The evidence now has to be captured before the ' +
+    'infrastructure gets a chance to vanish on its own, which usually means taking a SNAPSHOT, a frozen, ' +
+    'saved copy of the machine\'s storage at that exact moment, and pulling any relevant logs ' +
+    'immediately, rather than waiting until after a decision has already been made to shut the thing ' +
+    'down. Only once that evidence is safely copied elsewhere is it actually safe to let the original ' +
+    'resource disappear, whether that means letting the automated system replace it or shutting it down ' +
+    'directly.',
 } as const;
 
 // --- Module csf.1: the shared responsibility model ---------------------------
@@ -258,8 +349,9 @@ const MODULE_CSF_1: Exercise[] = [
     ],
     debrief:
       'This is the version of the shared responsibility model most people learn first, because a ' +
-      'virtual machine looks the most like a server they already know how to secure. The harder ' +
-      'version comes when the service stops looking like a server at all.',
+      'rented virtual machine still looks and behaves like a server, so it is the easiest one to map ' +
+      'onto the apartment picture. The harder version comes in the next exercise, once the service ' +
+      'stops looking like a server you can point at at all.',
     practice: [],
   },
   {
@@ -275,18 +367,28 @@ const MODULE_CSF_1: Exercise[] = [
       'infrastructure-as-a-service toward software-as-a-service? Select all that apply.',
     teach: {
       concept:
-        'As a provider takes over more of the stack, the boundary does not vanish, it moves and ' +
-        'narrows. A platform-as-a-service database is a good example: the provider now patches the ' +
-        'engine, handles clustering, and takes the backups, so an entire category of your old work ' +
-        'disappears. What remains is smaller but does not shrink to nothing: who can connect, what ' +
-        'they can do once connected, and how the data inside is classified and protected are still ' +
-        'choices only you can make, because only you know what the data is and who should see it.\n\n' +
-        'Software-as-a-service pushes the line highest of all, and this is where the boundary gets ' +
-        'misread most often. A finished email or CRM platform looks complete, and it is tempting to ' +
-        'conclude that security is now entirely a matter for the vendor. It is not. Account takeover, ' +
-        'an over-shared document, a departing employee whose access was never removed: none of these ' +
-        'are platform failures, they are configuration and governance failures that happen to run on ' +
-        'a platform somebody else built.',
+        'Go back to the apartment picture from the last exercise. Renting a bare, unfurnished apartment ' +
+        '(a plain virtual machine) means you handle almost everything inside it yourself. Now imagine ' +
+        'renting a furnished apartment instead, where the landlord also maintains the appliances: the ' +
+        'fridge, the stove, the washing machine are the landlord\'s problem if they break, not yours. In ' +
+        'cloud terms, this level is called PLATFORM AS A SERVICE, and a managed database is a good ' +
+        'example of it: the company running it now handles the equivalent of the appliances, keeping ' +
+        'the underlying software patched and working, backing the data up on a schedule, spreading the ' +
+        'load across multiple machines automatically. A whole category of your old work simply ' +
+        'disappears. What is left over does not shrink to nothing, though: who is handed a key to that ' +
+        'furnished apartment, what they are allowed to do once inside, and how sensitive the things kept ' +
+        'inside actually are, stay entirely your decisions, because only you know what is actually in ' +
+        'there and who should be trusted with it.\n\n' +
+        'SOFTWARE AS A SERVICE pushes this even further, to something more like checking into a full-' +
+        'service hotel room: the building, the furniture, the cleaning, all handled for you, you show up ' +
+        'and use the room. A finished, ready-to-use application, an email system or a customer database ' +
+        'platform is a common example, looks complete in exactly this way, and it is tempting to ' +
+        'conclude that security has become entirely somebody else\'s problem. It has not. Somebody\'s ' +
+        'account getting broken into because they reused a weak password, a document accidentally shared ' +
+        'with the wrong person, a former employee whose access was never switched off after they left, ' +
+        'none of these are failures of the hotel. They are the guest leaving the room key on the table in ' +
+        'the lobby, and they keep happening on platforms that are, from a technical standpoint, extremely ' +
+        'well built.',
     },
     options: [
       { id: 'a', label: 'In platform-as-a-service, the provider manages the runtime and engine patching, but you still choose who can access the service and how the data inside it is protected.' },
@@ -315,8 +417,10 @@ const MODULE_CSF_1: Exercise[] = [
       },
     ],
     debrief:
-      'Keep this exercise in mind every time a vendor advertises being fully managed. Managed ' +
-      'describes the infrastructure. It rarely describes your identity, sharing, and data decisions.',
+      'Keep this exercise in mind every time a vendor advertises being "fully managed". Managed ' +
+      'describes who looks after the building and the appliances. It almost never describes who has a ' +
+      'key, what they can do with it, and how carefully the data inside is being handled, and those are ' +
+      'still yours to decide.',
     practice: [],
   },
   {
@@ -333,15 +437,20 @@ const MODULE_CSF_1: Exercise[] = [
       'lies? Select all that apply.',
     teach: {
       concept:
-        'This is the shared responsibility model applied to the incident that happens most often in ' +
-        'real cloud breach reporting. The infrastructure worked exactly as designed: the provider ' +
-        'offered a setting, the customer chose it, and the setting did what it said it would do. ' +
-        'Nothing failed at the platform layer.\n\n' +
-        'The instinct to blame the platform is understandable and almost always wrong. A provider ' +
-        'that made it impossible to ever create a public bucket would also break every legitimate use ' +
-        'of one, static websites, public downloads, open datasets, so the capability has to exist. ' +
-        'What the provider owes you is a sane default and clear warnings, which most providers now ' +
-        'give. What it cannot owe you is the decision itself.',
+        'This exercise applies the apartment picture from earlier to the incident that shows up most ' +
+        'often in real breach reports: a storage bucket, the internet-connected container of files ' +
+        'covered in the next module, that was set to be readable by anyone and quietly scraped by a ' +
+        'stranger. Nothing broke at the provider level here. The landlord\'s building worked exactly as ' +
+        'built: there is a lock on that storage unit\'s door, the tenant chose not to use it, and the ' +
+        'door did precisely what an unlocked door does. That is a decision made inside the apartment, ' +
+        'not a fault in the building.\n\n' +
+        'The instinct to blame the provider anyway is understandable, and almost always wrong. Making it ' +
+        'physically impossible to ever set a bucket to public would also break every legitimate reason ' +
+        'to do so: a public website\'s images, a dataset a research team wants the world to be able to ' +
+        'download, a report shared openly with a client, so the option has to exist. What the provider ' +
+        'genuinely owes you is a sensible starting setting and a clear warning when you turn it off, ' +
+        'which most providers now give. What it cannot owe you is having actually read the warning and ' +
+        'made the right call.',
     },
     options: [
       { id: 'a', label: 'The bucket was left public by a configuration choice made on the customer side of the boundary.' },
@@ -371,7 +480,8 @@ const MODULE_CSF_1: Exercise[] = [
     ],
     debrief:
       'You will read a version of this incident in almost every breach report you ever review in this ' +
-      'field. The pattern is always the same: a working setting, chosen wrong, left unreviewed.',
+      'field. The pattern is always the same: a setting that worked exactly as designed, chosen wrong ' +
+      'by a person, and never looked at again afterward.',
     practice: [],
   },
   {
@@ -388,17 +498,24 @@ const MODULE_CSF_1: Exercise[] = [
       'apply.',
     teach: {
       concept:
-        'Removing the server removes an entire category of work, patch cycles, capacity planning, ' +
-        'operating system hardening, and it is tempting to assume the remaining work shrank by the ' +
-        'same proportion. It did not. It concentrated. What is left is almost entirely identity and ' +
-        'code: the permissions the function runs with, and what the code inside it actually does with ' +
-        'data it can reach.\n\n' +
-        'The permissions question is the one that gets missed. A function needs to read from one ' +
-        'queue and write to one table, and it is common practice, and a real mistake, to attach a ' +
-        'broad role because writing a narrow one takes longer. That role travels with the function for ' +
-        'its entire life. If the code is ever compromised, through a dependency, an injection, or a ' +
-        'bad input, an attacker inherits exactly the permissions attached to it, not the permissions ' +
-        'the function actually needed.',
+        'A FUNCTION-AS-A-SERVICE platform, usually called serverless, is the extreme end of "somebody ' +
+        'else runs the machine for you". You write a small piece of code, hand it to the provider, and ' +
+        'the provider runs it for the few seconds it is actually needed, then throws that running copy ' +
+        'away, with no permanent computer of yours sitting there in between. There genuinely is no ' +
+        'server for you to see, patch, or worry about breaking into.\n\n' +
+        'It is tempting to assume that removing the server removes most of the security work along with ' +
+        'it. It removes an entire category of work, yes, keeping software patched, planning how much ' +
+        'computing capacity you need, locking down an operating system, but the work that remains does ' +
+        'not shrink by the same amount. It concentrates into two things: what permissions the running ' +
+        'code is allowed to use, and what the code itself actually does with whatever it can reach.\n\n' +
+        'The permissions question is the one that gets missed most often. Suppose a function only needs ' +
+        'to read messages off one queue and write results into one table. Writing a permission that ' +
+        'narrow, allowed to touch exactly those two things and nothing else, takes real thought and real ' +
+        'time. Attaching a broad, ready-made permission set instead is faster, and it is a genuine ' +
+        'mistake, because that permission set travels with the function for as long as it exists. If the ' +
+        'code inside it is ever compromised, through a flawed piece of code it depends on, a malicious ' +
+        'input, or any other route in, whoever compromised it inherits exactly what that permission set ' +
+        'allows, not merely what the function was actually written to do.',
     },
     options: [
       { id: 'a', label: 'A managed database engine is patched by the provider, but who can query it and how backups are protected remain decisions for the customer.' },
@@ -427,8 +544,10 @@ const MODULE_CSF_1: Exercise[] = [
       },
     ],
     debrief:
-      'Hold onto this distinction, sandboxing versus scoping. It reappears under a different name in ' +
-      'the next module, and it is the single idea most over-permissioned cloud accounts are missing.',
+      'Hold onto this distinction, sandboxing versus scoping. A sandbox is the walls of the room the ' +
+      'function runs in; scoping is what the function is handed the keys to while it is in there. It ' +
+      'reappears under a different name in the next module, and it is the single idea most ' +
+      'over-permissioned cloud accounts are missing.',
     practice: [],
   },
   {
@@ -444,15 +563,19 @@ const MODULE_CSF_1: Exercise[] = [
       'the provider." In three or four sentences, explain what this misses.',
     teach: {
       concept:
-        'This sentence is worth being able to correct cleanly, because a version of it will be said ' +
-        'to you by somebody with budget authority. The provider genuinely does take over a great deal, ' +
-        'physical security, the hypervisor, and depending on the service, patching and platform ' +
-        'operation. None of that is in dispute.\n\n' +
-        'What it does not take over is anything that depends on knowing your own data and your own ' +
-        'people: who has an account, what they can reach, how data is classified, and whether access ' +
-        'is removed when somebody leaves. Nearly every publicly reported cloud breach traces back to ' +
-        'that second list, not the first, which is the fact a good answer should lead with rather than ' +
-        'bury.',
+        'This exact sentence is worth being able to correct cleanly and politely, because a version of ' +
+        'it will genuinely be said to you one day, often by somebody with the authority to approve or ' +
+        'cut your budget. The provider does take over a great deal, and none of that is in dispute: the ' +
+        'physical building, the layer of software that isolates one customer\'s machines from another\'s, ' +
+        'and depending on how much of the stack you are renting, keeping the underlying software patched ' +
+        'and running.\n\n' +
+        'What moving to the cloud does not take off your plate is anything that depends on knowing your ' +
+        'own data and your own people, the way a landlord will never know which of your guests should ' +
+        'be handed a key: who has an account, what each of them can actually reach, how sensitive the ' +
+        'information in your care is, and whether somebody\'s access gets switched off the day they stop ' +
+        'needing it. Nearly every publicly reported cloud breach traces back to that second list, not the ' +
+        'first, and a good answer should lead with that fact rather than bury it under the parts that ' +
+        'genuinely did improve.',
     },
     hints: [
       'Name what genuinely did move to the provider before you correct the rest, or the answer reads as a denial rather than a correction.',
@@ -483,8 +606,9 @@ const MODULE_CSF_1: Exercise[] = [
     ],
     debrief:
       'You will give a version of this answer many times in this career, usually to somebody who ' +
-      'controls whether your project gets funded. Lead with what genuinely changed before you correct ' +
-      'what did not; it reads as agreement rather than argument.',
+      'controls whether your project gets funded. Lead with what genuinely changed for the better ' +
+      'before you correct what did not; agreeing first and correcting second reads as a colleague ' +
+      'helping, not as an argument.',
     practice: [],
   },
 ];
@@ -532,8 +656,9 @@ const MODULE_CSF_2: Exercise[] = [
       },
     ],
     debrief:
-      'Every module after this one comes back to this idea. A network diagram will tell you what can ' +
-      'reach what. It will not tell you what a compromised identity is allowed to do once it is there.',
+      'Every module after this one comes back to this idea. A map of a network will tell you what can ' +
+      'physically reach what. It will not tell you what somebody holding a stolen set of credentials is ' +
+      'actually allowed to do once they get there, and that second question is the one IAM answers.',
     practice: [],
   },
   {
@@ -576,8 +701,9 @@ const MODULE_CSF_2: Exercise[] = [
       },
     ],
     debrief:
-      'This is the exercise to repeat on every policy review you ever do: read the grant, not the ' +
-      'intent, because the grant is what travels with the credentials if they are ever misused.',
+      'This is the exercise to repeat on every policy review you ever do: read what the document ' +
+      'actually grants, not what the person who wrote it says they meant, because the grant is what ' +
+      'travels with the credentials if they are ever stolen or misused.',
     practice: [],
   },
   {
@@ -593,16 +719,23 @@ const MODULE_CSF_2: Exercise[] = [
       'all that apply.',
     teach: {
       concept:
-        'A policy can be attached to either side of a request, and the two shapes answer different ' +
-        'questions. An IDENTITY-BASED policy is attached to a user, a group, or a role, and it answers ' +
-        'the question "what is this identity allowed to do". A RESOURCE-BASED policy is attached to ' +
-        'the resource itself, a storage bucket or a queue, and it answers the question "who is allowed ' +
-        'to act on this specific thing, including identities from outside this account".\n\n' +
-        'The distinction matters most at the point where access crosses an account boundary. Granting ' +
-        'another organisation access to your data usually means writing a resource-based policy that ' +
-        'names them, because you have no identity to attach a policy to on their side. It also means a ' +
-        'resource can end up reachable through a grant nobody remembered to review, because the access ' +
-        'lives on the resource rather than on any of the identities anyone routinely audits.',
+        'A permission can be written down on either side of a request, and it helps to think of it like ' +
+        'a key versus a lock. You could hand a specific person a key that opens many doors, or you could ' +
+        'put a list on one specific door saying exactly who is allowed to open it. Both approaches answer ' +
+        'the same underlying question, who can get in, from opposite directions.\n\n' +
+        'An IDENTITY-BASED policy is the key: it is attached to a user, a group of users, or a role (a ' +
+        'reusable set of permissions something can temporarily take on), and it lists what that identity ' +
+        'is allowed to do across the account. A RESOURCE-BASED policy is the list on the door: it is ' +
+        'attached to one specific resource, a storage bucket or a queue, say, and it lists who is allowed ' +
+        'to act on that one thing, including people or systems that belong to a completely different ' +
+        'organisation than yours.\n\n' +
+        'That second kind matters most exactly at the point where access needs to cross an organisational ' +
+        'boundary. If you want to let a completely separate company read something from your account, you ' +
+        'usually cannot hand them an identity-based key, because you have no identity of theirs to attach ' +
+        'one to. Instead you write their name onto the door itself, a resource-based policy. That also ' +
+        'means a resource can end up reachable through a grant that nobody remembers is there, because it ' +
+        'lives on the door, not on any of the identities somebody routinely checks when reviewing who has ' +
+        'access to what.',
     },
     options: [
       { id: 'a', label: 'An identity-based policy is attached to a user, group, or role, and describes what that identity may do.' },
@@ -632,9 +765,10 @@ const MODULE_CSF_2: Exercise[] = [
       },
     ],
     debrief:
-      'When you next review an account, check both sides: the identities and what they can do, and ' +
-      'the resources and who they have been shared with. The second list is the one that tends to be ' +
-      'stale.',
+      'When you next review an account, check both sides: the identities and what they can do, the ' +
+      'same way you would check who has keys, and the resources and who has been named on each of ' +
+      'their doors. The second list is the one that tends to be stale, because nobody thinks to check a ' +
+      'door once it has been left unlocked and forgotten.',
     practice: [],
   },
   {
@@ -650,17 +784,23 @@ const MODULE_CSF_2: Exercise[] = [
       'Select all that apply.',
     teach: {
       concept:
-        'Least privilege is the principle, and in practice it comes down to two habits more than any ' +
-        'other. The first is scope: grant the narrowest action against the narrowest resource that the ' +
-        'job requires, which is the fix from the previous exercise applied everywhere. The second is ' +
-        'lifetime: prefer credentials that expire on their own over credentials that live forever.\n\n' +
-        'A long-lived access key, generated once and stored in a configuration file, is a permanent ' +
-        'liability: it works for anyone who obtains it until somebody notices and revokes it, which in ' +
-        'a real breach is often months. A role that a workload assumes for a short session issues ' +
-        'temporary credentials that expire on their own, usually within an hour, so a leaked credential ' +
-        'from that path is only useful for a narrow window rather than indefinitely. Preferring ' +
-        'assumed roles over long-lived keys is one of the few changes that reduces risk without costing ' +
-        'the workload anything it needs.',
+        'LEAST PRIVILEGE is the guiding rule behind almost everything in this module: give something ' +
+        'only the exact permission it needs to do its job, and nothing more, the same instinct as giving ' +
+        'a house sitter a key to your front door and not a copy of every key you own. In practice it ' +
+        'comes down to two separate habits. The first is scope, covered in the earlier exercises: grant ' +
+        'the narrowest action against the narrowest resource the job actually requires. The second, ' +
+        'which is just as important and easier to overlook, is lifetime: prefer a credential that ' +
+        'expires on its own over one that works forever until somebody remembers to take it away.\n\n' +
+        'A CREDENTIAL here just means whatever piece of information proves you are allowed in, a ' +
+        'password or a secret key. A long-lived ACCESS KEY, generated once and saved into a ' +
+        'configuration file, is a permanent liability once it exists: it keeps working for anyone who ' +
+        'gets hold of it until a human notices and manually cancels it, and in a real breach that can ' +
+        'take months. Compare that to a ROLE, a temporary permission an application or a person can ' +
+        '"put on" for a short session, the way a visitor badge only works for the day it is issued. A ' +
+        'role like this hands out credentials that expire on their own, often within an hour, so a copy ' +
+        'that leaks out is only useful for a short window rather than indefinitely. Preferring these ' +
+        'short-lived, assumable roles over permanent keys is one of the few changes that genuinely ' +
+        'reduces risk without taking anything away that the work actually needed.',
     },
     options: [
       { id: 'a', label: 'Temporary credentials issued by an assumed role expire on their own, which limits how long a leaked credential remains useful.' },
@@ -690,8 +830,9 @@ const MODULE_CSF_2: Exercise[] = [
       },
     ],
     debrief:
-      'The next module is about exactly this file, the one holding a long-lived key, and what happens ' +
-      'once it leaves the place it was supposed to stay.',
+      'The next module is about exactly this file, the one holding a long-lived key that never ' +
+      'expires on its own, and what happens once a copy of it leaves the place it was supposed to ' +
+      'stay.',
     practice: [],
   },
   {
@@ -708,15 +849,20 @@ const MODULE_CSF_2: Exercise[] = [
       'that reasoning does not hold.',
     teach: {
       concept:
-        'This is the argument you will hear defending almost every over-permissioned identity you ' +
-        'ever find, and it sounds reasonable because it is describing something true: nothing bad has, ' +
-        'in fact, happened yet. What it mistakes is the source of the risk. The policy is not risky ' +
-        'because it is currently being misused, it is risky because of what becomes possible the ' +
-        'moment the credentials are exposed, through a leaked key, a compromised dependency, or a ' +
-        'phished engineer, and none of those events announce themselves in advance.\n\n' +
-        'A good answer separates the two ideas explicitly: absence of an incident is not evidence of ' +
-        'low risk, it is evidence that the moment of compromise has not happened yet, and the size of ' +
-        'the blast radius when it does is exactly what the policy scope determines.',
+        'You will hear this exact argument defending almost every overly broad permission you ever ' +
+        'find, and it sounds reasonable because part of it is true: nothing bad has, in fact, happened ' +
+        'yet. Where it goes wrong is in what it thinks that proves. Think of a wildcard policy, the ' +
+        '"allow anything to anything" kind from earlier in this module, as an unlocked door on a street ' +
+        'nobody has walked down yet. The door not having been opened by a stranger so far does not mean ' +
+        'the door is somehow safe, it means nobody has tried it yet. The policy is not risky because it ' +
+        'is currently being misused, it is risky because of what becomes possible the moment those ' +
+        'credentials fall into the wrong hands, through a leaked key, a compromised piece of software the ' +
+        'service depends on, or an employee tricked into handing them over, and none of those moments ' +
+        'send a warning in advance.\n\n' +
+        'A good answer keeps two ideas clearly separate: a year without an incident is not evidence that ' +
+        'the risk is low, it is only evidence that the moment of compromise has not happened yet, and how ' +
+        'bad things get once it does happen, how much of the account an attacker can reach, is exactly ' +
+        'what the policy\'s scope determines.',
     },
     hints: [
       'Absence of an incident and absence of risk are different claims. Say which one a year of quiet actually proves.',
@@ -747,7 +893,8 @@ const MODULE_CSF_2: Exercise[] = [
     ],
     debrief:
       'Keep this argument ready. It is the single most common objection you will hear when you ' +
-      'propose narrowing a permission, and it is wrong for the same reason every time.',
+      'propose narrowing a permission, and it is wrong for the same reason every time: quiet so far is ' +
+      'not the same thing as safe.',
     practice: [],
   },
 ];
@@ -796,8 +943,8 @@ const MODULE_CSF_3: Exercise[] = [
     ],
     debrief:
       'Whenever you review storage permissions, treat any grant naming "all users", "any ' +
-      'authenticated user", or "public" the same way regardless of how internal the wording sounds. ' +
-      'Read the grant, not the label.',
+      'authenticated user", or "public" exactly the same way regardless of how official or internal ' +
+      'the wording sounds. Read what the grant actually does, not the label somebody chose for it.',
     practice: [],
   },
   {
@@ -813,15 +960,19 @@ const MODULE_CSF_3: Exercise[] = [
       'of the following are genuine, recurring causes? Select all that apply.',
     teach: {
       concept:
-        'Warnings about public buckets have existed for years and the incidents have not stopped, ' +
-        'which tells you the cause is not ignorance, it is process. A handful of patterns explain most ' +
-        'of it. Legacy defaults: buckets created years ago, before a provider tightened its default ' +
-        'settings, keep whatever was default at creation time unless somebody goes back and changes ' +
-        'it. Convenience during testing: a developer makes a bucket public to unblock a demo or a ' +
-        'quick integration test and the setting outlives the reason for it. Orphaned resources: a ' +
-        'bucket created for a project that ended has nobody left who considers it their responsibility ' +
-        'to review. And third-party sharing: a grant added to give a partner or contractor access is ' +
-        'scoped too broadly and never revisited once the engagement ends.',
+        'Warning banners about public buckets have existed for years, and the incidents have not ' +
+        'stopped, which is itself a clue. If the cause were simply that people did not know the risk, ' +
+        'the warnings would have fixed it by now. The real cause is not ignorance, it is that a handful ' +
+        'of ordinary workplace habits keep quietly recreating the same problem.\n\n' +
+        'Old defaults left in place: a bucket created years ago, before a provider tightened what "public" ' +
+        'meant by default, keeps whatever setting was standard back then unless somebody actively goes ' +
+        'back and updates it, the way an old lock nobody replaced still opens with an old key. ' +
+        'Convenience during testing: a developer flips a bucket to public just to get a demo working or ' +
+        'to quickly test something, meaning only to leave it that way for an afternoon, and the setting ' +
+        'quietly outlives the reason it was ever turned on. Orphaned resources: a bucket built for a ' +
+        'project that has since ended has nobody left on the team who thinks of it as theirs to check on. ' +
+        'And outside sharing: access granted to a partner company or a contractor is set too broadly to ' +
+        'begin with, and nobody goes back to narrow or remove it once that engagement is over.',
     },
     options: [
       { id: 'a', label: 'A bucket created before a provider tightened its default settings can remain public simply because nobody went back and changed it.' },
@@ -851,9 +1002,10 @@ const MODULE_CSF_3: Exercise[] = [
       },
     ],
     debrief:
-      'Notice that none of these four causes is a technical failure. They are all a review that never ' +
-      'happened. That is why continuous scanning of storage settings, not one-off warnings, is the ' +
-      'standard answer.',
+      'Notice that none of these four causes is a technical failure. Every single one of them is a ' +
+      'review that simply never happened. That is why continuously and automatically scanning storage ' +
+      'settings, rather than relying on a one-time warning that only helps whoever happens to be ' +
+      'looking at that moment, is the standard answer to this problem.',
     practice: [],
   },
   {
@@ -875,15 +1027,19 @@ const MODULE_CSF_3: Exercise[] = [
       'Which of the following are accurate about this statement? Select all that apply.',
     teach: {
       concept:
-        'A Principal of "*" is broader again than a grant to authenticated users: it means literally ' +
-        'anyone, with no account of any kind required, since the check for who is asking has been ' +
-        'removed entirely rather than merely widened. Paired with an Action of GetObject, it means ' +
-        'anyone on the internet can download any object under the given path with no authentication ' +
-        'step at all.\n\n' +
-        'This exact shape is legitimate for one thing: hosting genuinely public content, a static ' +
-        'website, a public dataset meant to be downloaded by anyone. It is a misconfiguration for ' +
-        'anything else, and the policy itself gives no indication which case you are looking at. That ' +
-        'judgement has to come from knowing what is actually stored at that path.',
+        'The word PRINCIPAL in a permission statement just means "whoever is making the request", the ' +
+        'same way "principal" can mean the main party to an agreement. A Principal of "*" is a step ' +
+        'further even than the "authenticated users" grant from the last exercise: it means literally ' +
+        'anyone, with no account of any kind required at all, because the check for who is asking has ' +
+        'been removed entirely rather than merely widened to include more people. Paired with an Action ' +
+        'of GetObject, which just means "download this file", it means anyone on the internet can ' +
+        'download any file under the given path, with no login step of any kind standing in the way.\n\n' +
+        'This exact combination is the correct, intended setup for exactly one purpose: hosting content ' +
+        'that is genuinely meant to be public, a static website\'s images, a dataset released for anyone ' +
+        'to download. For anything else, it is a misconfiguration, and the policy statement itself gives ' +
+        'you no way to tell which situation you are looking at just by reading it. That judgement can ' +
+        'only come from knowing what is actually stored at that path, which is a question about the data, ' +
+        'not about the syntax.',
     },
     options: [
       { id: 'a', label: 'Principal of "*" means the request does not need to come from any authenticated identity at all.' },
@@ -913,9 +1069,9 @@ const MODULE_CSF_3: Exercise[] = [
       },
     ],
     debrief:
-      'Notice that the fix here is never in the policy syntax, which is doing exactly what it says. It ' +
-      'is in knowing what sits at the path, which is a question only someone who understands the data ' +
-      'can answer.',
+      'Notice that the fix here is never found in the wording of the policy, which is doing exactly ' +
+      'what it says it does. It is found in knowing what sits at that path, and that is a question only ' +
+      'someone who actually understands the data can answer.',
     practice: [],
   },
   {
@@ -959,9 +1115,9 @@ const MODULE_CSF_3: Exercise[] = [
       },
     ],
     debrief:
-      'The habit worth building here is the fourth option: one misconfigured bucket is a finding, the ' +
-      'same pattern on ten buckets is a process problem, and only one of those two gets fixed by ' +
-      'closing the first bucket.',
+      'The habit worth building here is the fourth option: one misconfigured bucket is a single ' +
+      'finding, the same pattern repeated on ten buckets is a process problem, and only one of those ' +
+      'two actually gets fixed by closing the first bucket.',
     practice: [],
   },
   {
@@ -977,13 +1133,14 @@ const MODULE_CSF_3: Exercise[] = [
       'people who are logged in." In three or four sentences, correct them.',
     teach: {
       concept:
-        'This correction comes up constantly because the phrase reads naturally as internal, logged ' +
-        'into our systems, and the actual scope, anyone with an account anywhere on the platform, ' +
-        'requires knowing a fact about the specific provider that is not visible in the words ' +
-        'themselves.\n\n' +
-        'A strong correction states the actual scope plainly, says why it is easy to misread, and says ' +
-        'what it functions as in practice, which is effectively public given how easy an account on a ' +
-        'major cloud platform is to obtain.',
+        'This exact correction comes up constantly, because the phrase "authenticated users" reads ' +
+        'naturally as "people who have logged into our own systems", and the actual scope, anyone with ' +
+        'an account anywhere on that entire cloud platform, depends on knowing a fact about that specific ' +
+        'provider that is nowhere visible in the words themselves.\n\n' +
+        'A strong correction does three things in order: states the actual scope of the grant plainly, ' +
+        'says why the phrase is so easy to misread, and says what it amounts to in practice, which is ' +
+        'effectively public, given how trivial it is for anyone to sign up for an account on a major cloud ' +
+        'platform.',
     },
     hints: [
       'State plainly what "authenticated" actually refers to on most providers: an account anywhere on the platform, not inside your organisation.',
@@ -1013,8 +1170,9 @@ const MODULE_CSF_3: Exercise[] = [
       },
     ],
     debrief:
-      'You will correct this exact misconception more than once in a real review. Having a clean ' +
-      'three-sentence version ready is worth more than it sounds.',
+      'You will correct this exact misconception more than once in a real review. Having a clean, ' +
+      'ready-to-go three-sentence version of it is worth more than it sounds, because you will not ' +
+      'always have time to compose one on the spot.',
     practice: [],
   },
 ];
@@ -1062,9 +1220,10 @@ const MODULE_CSF_4: Exercise[] = [
       },
     ],
     debrief:
-      'The stateful and stateless distinction is the one people arriving from on-premises firewalls ' +
-      'get backwards most often, because most perimeter firewalls they have configured were stateful ' +
-      'by default.',
+      'The stateful versus stateless distinction is the one people arriving from traditional office ' +
+      'firewalls get backwards most often, precisely because most perimeter firewalls they are already ' +
+      'used to configuring remember conversations by default, the way a security group does, so it is ' +
+      'easy to assume every filtering control works that way.',
     practice: [],
   },
   {
@@ -1080,17 +1239,22 @@ const MODULE_CSF_4: Exercise[] = [
       'compared with a traditional perimeter design? Select all that apply.',
     teach: {
       concept:
-        'It is tempting to treat a security group as simply a cloud word for a firewall rule, and the ' +
-        'mapping holds well enough to get started, then breaks in a way that causes real incidents. A ' +
-        'perimeter firewall assumes a trusted inside and an untrusted outside, and its job is to ' +
-        'police the one boundary between them. Cloud networking has no inside in that sense: every ' +
-        'resource with a public address is directly reachable from the internet the moment its own ' +
-        'rules allow it, regardless of what network it notionally sits inside.\n\n' +
-        'The practical consequence is that a single overly broad rule on one resource is not mitigated ' +
-        'by anything upstream, because there is no upstream choke point left to catch it. Segmentation ' +
-        'in the cloud is achieved by many small boundaries working together, security groups, network ' +
-        'access control lists, subnet design, rather than by one large boundary at the edge of a ' +
-        'trusted zone.',
+        'It is tempting to treat a security group as simply the cloud\'s word for "firewall rule", and ' +
+        'that mental shortcut holds well enough to get you started, then breaks in a way that causes ' +
+        'real incidents. Picture a traditional office building again: one guarded front entrance, and ' +
+        'once you are past it, you are inside a space that is treated as more trustworthy than the ' +
+        'street outside. A perimeter firewall assumes exactly that kind of trusted inside and untrusted ' +
+        'outside, and its whole job is to police the one boundary between them.\n\n' +
+        'Cloud networking has no "inside" in that sense at all. Every single resource that has a public ' +
+        'address, meaning it has a spot on the open internet, is directly reachable from anywhere the ' +
+        'moment its own rules allow it, completely regardless of which network it is notionally grouped ' +
+        'into on a diagram somewhere. There is no single guarded entrance for the whole building, because ' +
+        'in a real sense there is no single building.\n\n' +
+        'The practical consequence is that one overly broad rule on one resource is not caught or ' +
+        'softened by anything sitting upstream of it, because there is no upstream checkpoint left to ' +
+        'catch it. Keeping things separated in the cloud is instead achieved by many small boundaries ' +
+        'working together, security groups on individual resources, access control lists on subnets, ' +
+        'careful network design, rather than by one large boundary guarding the edge of a trusted zone.',
     },
     options: [
       { id: 'a', label: 'A cloud network has no single trusted inside in the way a traditional perimeter design assumed.' },
@@ -1120,8 +1284,9 @@ const MODULE_CSF_4: Exercise[] = [
       },
     ],
     debrief:
-      'A naming convention is documentation, not enforcement. Verify segmentation by checking ' +
-      'addressing and rules, never by reading subnet names.',
+      'A naming convention is documentation, a note somebody wrote to themselves, not enforcement. ' +
+      'Verify that resources are actually separated by checking their addressing and their rules, ' +
+      'never by reading what a subnet happens to be named.',
     practice: [],
   },
   {
@@ -1137,19 +1302,24 @@ const MODULE_CSF_4: Exercise[] = [
       'that apply.',
     teach: {
       concept:
-        'A virtual network is divided into subnets, and the most common design puts internet-facing ' +
-        'resources in a PUBLIC subnet and everything else, application servers, databases, in one or ' +
-        'more PRIVATE subnets that have no direct route to the internet. Traffic between subnets in ' +
-        'the same virtual network is allowed by default unless a rule says otherwise, which is a very ' +
-        'different starting point from traffic entering from the internet, which is denied by ' +
-        'default.\n\n' +
-        'PEERING connects two separate virtual networks so resources in each can reach the other ' +
-        'directly. It is a routing decision, not a trust decision: peering two networks does not ' +
-        'automatically restrict what crosses the connection, and a security group or access control ' +
-        'list still has to do that work on either side. Assuming peering implies trust boundaries that ' +
-        'were never configured is a real source of unintended reachability between environments that ' +
-        'were meant to stay separate, such as a test network peered for convenience into one holding ' +
-        'production data.',
+        'A cloud network can be thought of as a large neighborhood, divided up into smaller streets ' +
+        'called SUBNETS, each holding a handful of resources. The most common layout puts anything meant ' +
+        'to face the internet, like a web server, on a PUBLIC subnet, a street that connects directly to ' +
+        'the outside world, and puts everything else, application servers, databases, on one or more ' +
+        'PRIVATE subnets, streets with no direct road out to the internet at all. Traffic moving between ' +
+        'subnets that belong to the same neighborhood is generally allowed by default unless a rule says ' +
+        'otherwise, which is a genuinely different starting point from traffic trying to enter from the ' +
+        'internet, which is denied by default until a rule specifically opens a path for it.\n\n' +
+        'PEERING connects two entirely separate neighborhoods, letting resources in each one reach the ' +
+        'other directly, the way building a bridge between two towns lets traffic cross between them. It ' +
+        'is a routing decision, meaning it builds the road, not a trust decision, meaning it says nothing ' +
+        'about who is allowed to drive on it: peering two networks together does not, by itself, restrict ' +
+        'anything about what crosses that new connection, a security group or access control list still ' +
+        'has to do that filtering work on either side of the bridge. Assuming that peering also quietly ' +
+        'implies trust boundaries that nobody actually configured is a real, recurring source of ' +
+        'unintended reachability between environments that were supposed to stay apart, such as a test ' +
+        'network peered in for convenience that ends up able to reach a network holding real production ' +
+        'data.',
     },
     options: [
       { id: 'a', label: 'Placing internet-facing resources in a public subnet and everything else in a private subnet is a common baseline design.' },
@@ -1180,8 +1350,8 @@ const MODULE_CSF_4: Exercise[] = [
     ],
     debrief:
       'Treat every peering connection as a request for a new filtering review, not as a finished piece ' +
-      'of network design. The route being possible and the route being intended are two separate ' +
-      'facts.',
+      'of network design on its own. A route being possible and a route being intended are two entirely ' +
+      'separate facts, and only rules on either side settle which one is actually true.',
     practice: [],
   },
   {
@@ -1229,9 +1399,10 @@ const MODULE_CSF_4: Exercise[] = [
       },
     ],
     debrief:
-      'A copied template is one of the most common real sources of this exact mismatch. Whenever a ' +
-      'rule table looks generic, ask whether it was actually written for the resource it is attached ' +
-      'to.',
+      'A copied template is one of the most common real sources of exactly this mismatch. Whenever a ' +
+      'rule table looks generic, stop and ask whether it was actually written for the specific resource ' +
+      'it is now attached to, or whether it simply arrived there along with everything else in a copied ' +
+      'starting point.',
     practice: [],
   },
   {
@@ -1248,16 +1419,19 @@ const MODULE_CSF_4: Exercise[] = [
       'allow it. In three or four sentences, explain the likely cause.',
     teach: {
       concept:
-        'This is one of the most common support tickets in a team newly working with cloud ' +
-        'networking, and it has a specific, mechanical cause almost every time. A network access ' +
-        'control list is stateless, so an inbound allow rule and the matching outbound reply are two ' +
-        'entirely separate rules that both have to be written. A colleague used to stateful firewalls ' +
-        'has spent years not needing to think about the return path at all, because it was handled ' +
-        'automatically, so the natural instinct is to write the one rule that describes the connection ' +
-        'they care about and assume the rest follows.\n\n' +
-        'A good answer names the actual mechanism, statelessness, rather than simply saying to add ' +
-        'another rule, because the colleague will hit the same issue again on the next access control ' +
-        'list if they do not understand why the fix worked.',
+        'This is one of the most common support questions in a team that is newly working with cloud ' +
+        'networking, and it has a specific, mechanical cause almost every time. A network access control ' +
+        'list has no memory of a conversation at all, so an inbound rule allowing a connection in and the ' +
+        'matching outbound rule allowing the reply back out are two entirely separate rules that both ' +
+        'have to be written by hand. A colleague who has spent years configuring traditional firewalls, ' +
+        'which do remember a conversation once it starts, has never had to think about the return path ' +
+        'at all, because it was always handled automatically. Their instinct, understandably, is to write ' +
+        'the one rule that describes the connection they care about and assume the rest simply follows, ' +
+        'the way it always has before.\n\n' +
+        'A good answer names the actual mechanism at work, that this control has no memory of a ' +
+        'connection, rather than just saying "add another rule" and leaving it there, because without ' +
+        'understanding why the fix worked, the colleague will run straight into the same confusion again ' +
+        'on the very next access control list they touch.',
     },
     hints: [
       'Name the mechanism, not just the fix: say why the return path needs its own rule here.',
@@ -1288,8 +1462,8 @@ const MODULE_CSF_4: Exercise[] = [
     ],
     debrief:
       'You will explain this exact confusion more than once to somebody arriving from traditional ' +
-      'networking. It is not a knowledge gap, it is a correct instinct meeting a control that behaves ' +
-      'differently.',
+      'networking. It is not really a knowledge gap on their part, it is a perfectly correct instinct ' +
+      'meeting a control that simply behaves differently from the one they already trust.',
     practice: [],
   },
 ];
@@ -1337,9 +1511,10 @@ const MODULE_CSF_5: Exercise[] = [
       },
     ],
     debrief:
-      'When an incident involves data exposure rather than account activity, check early whether data ' +
-      'plane logging was even enabled. If it was not, the activity log will show you the account ' +
-      'actions and nothing about what was actually read.',
+      'When an incident involves the exposure of actual data rather than suspicious account activity, ' +
+      'check early whether data plane logging was ever switched on for the resource in question. If it ' +
+      'was not, the activity log will happily show you the account actions that happened and tell you ' +
+      'nothing at all about what was actually read.',
     practice: [],
   },
   {
@@ -1355,16 +1530,19 @@ const MODULE_CSF_5: Exercise[] = [
       'logging? Select all that apply.',
     teach: {
       concept:
-        'Disabling or failing to ship this log is one of the more useful single facts you can learn ' +
-        'about an account, and it points in two directions that both matter. An attacker who gains ' +
-        'administrative reach often disables or deletes logging early, precisely because it is the ' +
-        'record of everything they do next, so a gap in the log around the time of an incident is ' +
-        'itself evidence worth investigating rather than dismissing as a coincidence.\n\n' +
-        'The more common cause, by far, is not an attacker at all. Logging is frequently left off by ' +
-        'an account that was never fully set up, a cost-cutting decision that trimmed retention or ' +
-        'scope, or a default that was never revisited. The practical lesson is the same either way: an ' +
-        'account with no usable log is an account you cannot investigate, regardless of which of the ' +
-        'two causes explains the gap, and that is the finding that should be raised.',
+        'Think of this activity log as a building\'s security camera system. Finding that the cameras ' +
+        'were switched off during a certain window is, on its own, a fact worth investigating, and it ' +
+        'can mean one of two very different things. Somebody who broke in and knew what they were doing ' +
+        'might have switched the cameras off first, precisely because the footage would have recorded ' +
+        'everything they did next, so a gap in the recording around the time something suspicious ' +
+        'happened is itself a lead worth chasing, not a coincidence to shrug off.\n\n' +
+        'The far more common explanation, though, has nothing to do with an intruder at all. Logging is ' +
+        'frequently left off simply because an account was never fully set up in the first place, ' +
+        'because somebody trimmed how much was recorded or kept to save money, or because a default ' +
+        'setting from years ago was never revisited. Either way, the practical consequence is identical: ' +
+        'an account with no usable recording to look back through is an account nobody can properly ' +
+        'investigate, no matter which of the two explanations turns out to be true, and that gap itself ' +
+        'is the finding worth raising.',
     },
     options: [
       { id: 'a', label: 'An attacker who gains administrative access will sometimes disable or delete logging specifically to hide subsequent actions.' },
@@ -1394,9 +1572,9 @@ const MODULE_CSF_5: Exercise[] = [
       },
     ],
     debrief:
-      'Check that logging exists and is retained before you need it, not during an incident. ' +
-      'Discovering the gap while trying to investigate is the worst possible time to learn the account ' +
-      'was never configured for it.',
+      'Check that logging actually exists and is being kept before you need it, not in the middle of ' +
+      'an incident. Discovering the gap while you are trying to investigate is the worst possible ' +
+      'moment to learn that the account was never set up to record anything.',
     practice: [],
   },
   {
@@ -1412,18 +1590,23 @@ const MODULE_CSF_5: Exercise[] = [
       'compromise, as they would appear in an activity log? Select all that apply.',
     teach: {
       concept:
-        'An account compromise rarely opens with something dramatic. It opens with a short sequence ' +
-        'of ordinary-looking API calls that, read individually, could each belong to a legitimate ' +
-        'administrator having an unremarkable day. Read together, in sequence, the pattern is ' +
-        'recognisable: ENUMERATION calls that list users, roles, and resources, mapping out what is ' +
-        'actually in the account; a NEW ACCESS KEY or credential created, often for an existing ' +
-        'identity rather than a new one, so it does not stand out in a list of accounts; and a ' +
-        'PERMISSION CHANGE, a broad policy attached to that identity or an existing one, that turns ' +
-        'modest initial access into administrative reach.\n\n' +
-        'None of these three actions is inherently malicious. An administrator legitimately lists ' +
-        'users, creates keys, and changes permissions constantly. What makes the sequence worth ' +
-        'flagging is the combination and the order, arriving close together, from an identity or a ' +
-        'source that does not usually perform this kind of activity.',
+        'An account takeover almost never opens with something dramatic and obvious. It opens with a ' +
+        'short sequence of ordinary-looking actions that, read one at a time, could each belong to a ' +
+        'legitimate administrator having a completely unremarkable day. Read together, in order, the ' +
+        'pattern becomes recognisable, the same way three separate, innocent-looking actions by a ' +
+        'stranger in a store, walking every aisle, asking where the cameras are, then heading straight ' +
+        'to the register, add up to something worth watching once you see them together.\n\n' +
+        'The pattern here has three parts. First, ENUMERATION: calls that simply list what exists, ' +
+        'users, roles, resources, the digital version of walking the aisles to see what is there. ' +
+        'Second, a NEW ACCESS KEY or credential created, often for an identity that already existed ' +
+        'rather than a brand new one, precisely because a new key on an old, familiar account does not ' +
+        'stand out the way a whole new account would. Third, a PERMISSION CHANGE: a broad set of ' +
+        'permissions attached to that identity, turning what started as modest, limited access into full ' +
+        'administrative reach.\n\n' +
+        'None of these three actions is inherently suspicious on its own. A real administrator lists ' +
+        'users, creates keys, and changes permissions all the time as part of ordinary work. What makes ' +
+        'the sequence worth flagging is the combination and the timing, all three arriving close ' +
+        'together, from an identity or a location that does not usually do any of this.',
     },
     options: [
       { id: 'a', label: 'Enumeration calls that list users, roles, and resources are a common early step, used to map out what access is available.' },
@@ -1454,9 +1637,10 @@ const MODULE_CSF_5: Exercise[] = [
       },
     ],
     debrief:
-      'This is why detections in this space are built around sequences and baselines rather than ' +
-      'single events. A rule that fires on ListUsers alone will drown you in noise before it ever ' +
-      'catches the pattern that mattered.',
+      'This is why real detection systems in this space are built around sequences and known patterns ' +
+      'of normal behaviour, rather than single events on their own. An alert that fires every single ' +
+      'time somebody calls ListUsers would drown a team in false alarms long before it ever caught the ' +
+      'pattern that actually mattered.',
     practice: [],
   },
   {
@@ -1505,9 +1689,9 @@ const MODULE_CSF_5: Exercise[] = [
       },
     ],
     debrief:
-      'This is close to the exact shape you should build an alert around: not any single API call, but ' +
-      'a low-privilege identity suddenly touching credentials and permissions it has never touched ' +
-      'before.',
+      'This is close to the exact shape you should build an alert around: not any single action taken ' +
+      'on its own, but a normally low-privilege identity suddenly touching credentials and permissions ' +
+      'it has never touched before in its history.',
     practice: [],
   },
   {
@@ -1525,13 +1709,15 @@ const MODULE_CSF_5: Exercise[] = [
     teach: {
       concept:
         'This is a distinction worth being precise about, because the two statements sound almost ' +
-        'identical and lead to opposite conclusions. "We reviewed the log and found nothing ' +
-        'suspicious" is a finding about the activity that occurred. "There is no log to review" is a ' +
-        'finding about the absence of evidence, and it supports no conclusion about what did or did ' +
-        'not happen during that window.\n\n' +
-        'A good answer names the specific error, treating absence of evidence as evidence of absence, ' +
-        'and says what the correct next step is: establishing when logging actually started, and ' +
-        'treating the period before that as unknown rather than clean.',
+        'identical out loud and lead to opposite conclusions. Think again of a building\'s security ' +
+        'cameras. "We watched the footage from that hour and saw nothing suspicious" tells you something ' +
+        'real about what happened during that hour. "There is no footage from that hour" tells you ' +
+        'nothing about what happened, only that nobody was recording, and it supports no conclusion ' +
+        'either way about whether something occurred.\n\n' +
+        'A good answer names the specific reasoning mistake being made here, treating "we have no ' +
+        'record" as if it meant "nothing happened", and says what the correct next step actually is: ' +
+        'pin down exactly when logging started being recorded again, and treat everything before that ' +
+        'point as unknown rather than as clean.',
     },
     hints: [
       'Name the specific reasoning error: treating no log as the same thing as a clean log.',
@@ -1561,8 +1747,8 @@ const MODULE_CSF_5: Exercise[] = [
       },
     ],
     debrief:
-      'This confusion appears in almost every incident that involves a logging gap. Catching it early ' +
-      'saves the review from closing on a conclusion the evidence never supported.',
+      'This confusion appears in almost every incident that involves a gap in the logs. Catching it ' +
+      'early saves the review from closing out on a conclusion the evidence never actually supported.',
     practice: [],
   },
 ];
@@ -1611,8 +1797,9 @@ const MODULE_CSF_6: Exercise[] = [
       },
     ],
     debrief:
-      'Hold onto the gap between deleting a line and removing an exposure. The next two exercises are ' +
-      'entirely about that gap.',
+      'Hold onto the gap between deleting a line from a file and actually removing an exposure. Those ' +
+      'sound like the same action and are not, and the next two exercises are entirely about that ' +
+      'difference.',
     practice: [],
   },
   {
@@ -1628,17 +1815,22 @@ const MODULE_CSF_6: Exercise[] = [
       'sitting in a configuration file? Select all that apply.',
     teach: {
       concept:
-        'A managed key service centralises the thing hardcoding scatters everywhere: the actual key ' +
-        'material. Instead of a password or key sitting in a configuration file that every service and ' +
-        'every developer machine has its own copy of, the application asks the key service to perform ' +
-        'the encryption or decryption operation and the raw key material never leaves the service at ' +
-        'all, a pattern generally called envelope encryption.\n\n' +
-        'Three benefits follow directly from that centralisation. Access to the key is governed by the ' +
-        'same identity and access controls covered earlier, so granting and revoking the ability to ' +
-        'use a key is a permissions change rather than a redeployment. Every use of the key is logged, ' +
-        'the same way an API call is logged, giving an audit trail hardcoding never produces. And ' +
-        'rotating a key becomes an operation the service performs, rather than a hunt through every ' +
-        'file and image that might contain the old value.',
+        'ENCRYPTION is the process of scrambling data using a secret KEY, so that anyone without that ' +
+        'key sees only meaningless noise, and only someone holding the right key can turn it back into ' +
+        'something readable. A managed key service is a specialised, provider-run vault built ' +
+        'specifically to hold keys like that. Instead of that secret key sitting in a configuration file ' +
+        'copied onto every server and every developer\'s laptop, which is exactly the hardcoding problem ' +
+        'from the earlier exercise, the application instead sends its data to the key service and asks it ' +
+        'to do the scrambling or unscrambling itself. The actual key material never leaves the vault at ' +
+        'all, a pattern usually called envelope encryption.\n\n' +
+        'Three real benefits follow directly from keeping the key in one central place like this. Access ' +
+        'to use the key is governed by the same identity and access controls covered in the earlier ' +
+        'module, so granting or taking away the ability to use it becomes a permissions change, not a ' +
+        'matter of hunting down and rebuilding every copy of a file. Every single use of the key gets ' +
+        'logged, the same way any other action in the account gets logged, producing an audit trail that a ' +
+        'password sitting quietly in a file never could. And rotating the key, replacing it with a new ' +
+        'one, becomes an operation the vault performs on request, rather than a manual hunt through every ' +
+        'file and every built image that might still contain the old value.',
     },
     options: [
       { id: 'a', label: 'The raw key material stays inside the managed service and is never copied into application configuration files.' },
@@ -1668,8 +1860,9 @@ const MODULE_CSF_6: Exercise[] = [
       },
     ],
     debrief:
-      'A managed key service is a control, not a guarantee. It removes several ways a credential used ' +
-      'to leak, and it still needs the identity work from module two applied to it.',
+      'A managed key service is a control, not a guarantee that solves the problem by existing. It ' +
+      'closes off several of the ways a credential used to leak, and it still needs the same identity ' +
+      'and access work from module two applied on top of it.',
     practice: [],
   },
   {
@@ -1685,17 +1878,22 @@ const MODULE_CSF_6: Exercise[] = [
       'or embedded in an image? Select all that apply.',
     teach: {
       concept:
-        'Once a credential has been committed to a repository, even briefly, or embedded in an image ' +
-        'that has ever left a controlled environment, the only safe assumption is that it is already ' +
-        'known to somebody you did not intend, whether or not there is any current evidence of misuse. ' +
-        'This is not paranoia, it is a recognition that you cannot prove a negative: you cannot show ' +
-        'that nobody has cloned that repository, pulled that image, or copied that history in the ' +
-        'window before you noticed.\n\n' +
-        'The only action that actually resolves the exposure is ROTATION: issuing a new credential and ' +
-        'invalidating the old one, so that whatever copy of the old value exists anywhere, in history, ' +
-        'in an image layer, on a machine belonging to a former colleague, stops working. Removing the ' +
-        'credential from the current file, closing the pull request, apologising in the commit ' +
-        'message, none of these actions touch the old value at all.',
+        'A REPOSITORY is a shared project folder that keeps a permanent history of every past version of ' +
+        'every file in it, the way a document with "track changes" turned on never really loses what you ' +
+        'deleted, it just hides it from the current view. Once a credential has been saved into a ' +
+        'repository, even briefly and even if it was quickly removed again, or baked into a packaged, ' +
+        'reusable copy of an application called an image that has ever left a tightly controlled ' +
+        'environment, the only safe assumption is that it is already known to somebody it was never meant ' +
+        'for, whether or not there is any current sign of it being misused. This is not being overly ' +
+        'cautious, it is a recognition that you cannot prove a negative: you have no way to show that ' +
+        'nobody cloned a copy of that repository, downloaded that image, or saved that history before you ' +
+        'ever noticed the mistake.\n\n' +
+        'The only action that actually resolves this kind of exposure is ROTATION: issuing a brand new ' +
+        'credential and disabling the old one, so that whatever copy of the old value exists anywhere, in ' +
+        'the history, inside a built image, on a former colleague\'s machine, simply stops working. ' +
+        'Removing the credential from the file as it stands today, closing the request that introduced ' +
+        'it, apologising for it in a follow-up note, none of these actions touch the old value itself in ' +
+        'any way.',
     },
     options: [
       { id: 'a', label: 'A credential that was ever committed or embedded in an image should be treated as known to somebody outside your control, regardless of whether misuse has been observed.' },
@@ -1725,9 +1923,10 @@ const MODULE_CSF_6: Exercise[] = [
       },
     ],
     debrief:
-      'This is the one habit in this module worth making automatic: the moment a secret is found ' +
-      'anywhere it should not be, rotate it first and investigate second. Investigation takes time, ' +
-      'and every minute spent on it is a minute the old value still works.',
+      'This is the one habit in this module worth making completely automatic: the moment a secret is ' +
+      'found anywhere it should not be, rotate it first and investigate second. Investigating takes ' +
+      'time, and every minute spent on it is another minute the old value still works for whoever has ' +
+      'it.',
     practice: [],
   },
   {
@@ -1776,8 +1975,9 @@ const MODULE_CSF_6: Exercise[] = [
       },
     ],
     debrief:
-      'Notice how much of this response is about the two years of history, not the present moment. ' +
-      'Secrets exposure is almost always a question about the past, not the current configuration.',
+      'Notice how much of this response is about the two years of history, not about the present ' +
+      'moment. A leaked secret is almost always a question about the past, about who could have seen ' +
+      'it and when, not a question about how the configuration looks right now.',
     practice: [],
   },
   {
@@ -1794,12 +1994,15 @@ const MODULE_CSF_6: Exercise[] = [
     teach: {
       concept:
         'This is the single most common half-measure in this whole module, and it happens because the ' +
-        'visible symptom, the password sitting in the current file, really has disappeared. What has ' +
-        'not disappeared is the value itself, which still exists in the commit history, in any image ' +
-        'already built from an earlier commit, and in any clone anybody made before the fix. The ' +
-        'current file being clean says nothing about any of those copies.\n\n' +
-        'A strong answer names where the old value still lives and states plainly that only rotation, ' +
-        'not deletion, changes whether that old value still works.',
+        'visible symptom really has gone away, the password no longer shows up when you open the current ' +
+        'version of the file. What has not gone away is the value itself, which still sits inside the ' +
+        'repository\'s saved history the way a deleted paragraph still exists in a document\'s "track ' +
+        'changes" history, inside any packaged image already built from an earlier version, and inside ' +
+        'any copy anybody made of the repository before the fix. The current file looking clean says ' +
+        'absolutely nothing about any of those other copies.\n\n' +
+        'A strong answer names specifically where the old value still lives and states plainly that only ' +
+        'rotation, replacing the credential with a new one, not simply deleting a line, changes whether ' +
+        'that old value is still usable.',
     },
     hints: [
       'Say specifically where the old value still exists even though the current file no longer shows it.',
@@ -1828,8 +2031,9 @@ const MODULE_CSF_6: Exercise[] = [
       },
     ],
     debrief:
-      'You will see this exact half-measure again. Treat "removed from the latest commit" and ' +
-      '"rotated" as two entirely different claims, and ask which one actually happened.',
+      'You will see this exact half-measure again. Treat "removed from the latest version of the ' +
+      'file" and "rotated" as two entirely different claims, and always ask which one actually ' +
+      'happened.',
     practice: [],
   },
 ];
@@ -1877,9 +2081,9 @@ const MODULE_CSF_7: Exercise[] = [
       },
     ],
     debrief:
-      'This is the trade at the heart of infrastructure as code: the same leverage that fixes fifty ' +
-      'resources with one correction is what broke fifty resources with one mistake in the first ' +
-      'place.',
+      'This is the trade at the heart of writing infrastructure as a reusable recipe: the same ' +
+      'leverage that fixes fifty resources with one single correction is exactly what broke fifty ' +
+      'resources with one single mistake in the first place.',
     practice: [],
   },
   {
@@ -1895,17 +2099,20 @@ const MODULE_CSF_7: Exercise[] = [
       'it is deployed? Select all that apply.',
     teach: {
       concept:
-        'An infrastructure-as-code scanner reads the definition file before it is ever applied and ' +
-        'checks it against a set of known bad patterns: a security group open to the entire internet, ' +
-        'a storage resource defined without encryption, a database defined without backups enabled. ' +
-        'This catches an entire class of misconfiguration before a single real resource is ever ' +
-        'created, which is far cheaper than finding it afterward.\n\n' +
-        'What a scanner reading the definition cannot see is what actually happens after deployment. ' +
-        'It cannot see a permission added later through the console rather than through code, a ' +
-        'resource that started compliant and was manually changed, or the runtime behaviour of the ' +
-        'workload once it is live. Those require checking the running environment itself, not the ' +
-        'file that was used to build it, which is a separate and ongoing activity rather than a ' +
-        'one-time gate before deployment.',
+        'Think of this the way a proofreader checks a manuscript before it goes to print rather than ' +
+        'after the books are already bound. A SCANNER for this kind of recipe file reads the plain text ' +
+        'definition before it is ever actually used to build anything, and checks it against a list of ' +
+        'known bad patterns: a network rule left open to the entire internet, a storage resource defined ' +
+        'without encryption turned on, a database defined without backups enabled. This catches an entire ' +
+        'category of mistake before a single real resource is ever built from it, which is far cheaper ' +
+        'and far less risky than discovering the mistake afterward.\n\n' +
+        'What a scanner reading only the definition file cannot see is what happens once the real ' +
+        'environment is actually up and running. It cannot see a permission added later by hand through ' +
+        'a web dashboard rather than through the file, a resource that started out fine and was then ' +
+        'manually changed, or how the running workload actually behaves once it is live. Checking for ' +
+        'those requires looking at the running environment itself, not the recipe that was originally ' +
+        'used to build it, which means it has to be a separate, ongoing activity rather than a one-time ' +
+        'check that happens before deployment and never again.',
     },
     options: [
       { id: 'a', label: 'A scanner reading an infrastructure-as-code definition can catch a known bad pattern, such as an unrestricted ingress rule, before any resource is created.' },
@@ -1935,9 +2142,9 @@ const MODULE_CSF_7: Exercise[] = [
       },
     ],
     debrief:
-      'Pre-deployment scanning and ongoing checking of the live environment are two different controls ' +
-      'doing two different jobs. Treating the first as covering the second is the gap the next ' +
-      'exercise names directly.',
+      'Pre-deployment scanning and ongoing checking of the live, running environment are two ' +
+      'different controls doing two different jobs. Assuming the first one covers the second is exactly ' +
+      'the gap the next exercise names directly.',
     practice: [],
   },
   {
@@ -1952,15 +2159,19 @@ const MODULE_CSF_7: Exercise[] = [
       'Which of the following are accurate about configuration drift? Select all that apply.',
     teach: {
       concept:
-        'DRIFT is the gap between what the code says the environment should look like and what the ' +
-        'environment actually looks like. It happens constantly, and rarely maliciously: an engineer ' +
-        'makes an urgent manual change through the console during an incident and never backports it ' +
-        'into the code, a setting is changed by an automated process outside the deployment pipeline, ' +
-        'or two separate teams both manage resources that a single piece of code was meant to own.\n\n' +
-        'The danger is not the manual change itself, which is sometimes genuinely the fastest correct ' +
-        'response in the moment. The danger is that the code now describes a fiction: the next time ' +
-        'somebody reapplies it, the manual fix can be silently overwritten, or the definition file, ' +
-        'still passing every scan, no longer describes the environment anyone is actually defending.',
+        'DRIFT is the gap that opens up between what the recipe file says the environment should look ' +
+        'like and what is actually running out there in reality, the same way a recipe card can say ' +
+        '"two eggs" while the dish sitting on the counter, adjusted on the fly by whoever was cooking, ' +
+        'actually has three. It happens constantly, and it is rarely anybody being careless on purpose: ' +
+        'an engineer makes an urgent manual change through a web dashboard in the middle of an incident ' +
+        'and never goes back to update the recipe file to match, a setting gets changed by some automated ' +
+        'process running entirely outside the normal deployment process, or two separate teams end up ' +
+        'both managing resources that one piece of code was only ever meant to own alone.\n\n' +
+        'The danger is not really the manual change itself, which is sometimes genuinely the fastest, ' +
+        'correct thing to do in the moment. The danger is that the recipe file now describes a fiction. ' +
+        'The next time somebody reapplies it, it can silently overwrite and undo the manual fix, or the ' +
+        'file can keep passing every scan run against it while no longer describing the actual ' +
+        'environment anyone out there is trying to defend.',
     },
     options: [
       { id: 'a', label: 'Drift is the gap between what the infrastructure code defines and what is actually running.' },
@@ -1990,9 +2201,9 @@ const MODULE_CSF_7: Exercise[] = [
       },
     ],
     debrief:
-      'A mature setup checks for drift on a schedule, comparing the running environment against the ' +
-      'code, rather than assuming the code is still an accurate description simply because nobody ' +
-      'meant to change anything.',
+      'A mature setup checks for drift on a regular schedule, comparing what is actually running ' +
+      'against what the code describes, rather than assuming the code is still an accurate description ' +
+      'simply because nobody intended to change anything.',
     practice: [],
   },
   {
@@ -2035,9 +2246,9 @@ const MODULE_CSF_7: Exercise[] = [
       },
     ],
     debrief:
-      'Fixing the module is the easy half. Verifying it actually propagated, and that nothing else ' +
-      'shares the mistake, is the half that is easy to skip under time pressure and expensive to skip ' +
-      'for real.',
+      'Fixing the module is the easy half of this job. Verifying it actually propagated everywhere it ' +
+      'should have, and that nothing else in the codebase shares the same mistake, is the half that is ' +
+      'easy to skip under time pressure and genuinely expensive to skip for real.',
     practice: [],
   },
   {
@@ -2054,15 +2265,17 @@ const MODULE_CSF_7: Exercise[] = [
       'necessarily true.',
     teach: {
       concept:
-        'This belief is common precisely because it describes the intention behind infrastructure as ' +
-        'code correctly, and mistakes that intention for a guarantee. The code accurately describes ' +
-        'what was applied the last time it was applied. Nothing about the code itself prevents the ' +
-        'environment from moving away from that description afterward, through a manual console ' +
-        'change, an automated process running outside the deployment pipeline, or another team ' +
-        'managing an overlapping resource.\n\n' +
-        'A good answer names at least one concrete way drift actually happens, and says what would be ' +
-        'needed to know the two are still in sync, which is an ongoing check against the running ' +
-        'environment, not a fact that follows from having code at all.',
+        'This belief is common precisely because it correctly describes the intention behind writing ' +
+        'infrastructure as a reusable recipe, and then quietly mistakes that intention for a guarantee. ' +
+        'The recipe file accurately describes what was actually built the last time it was used to build ' +
+        'something. Nothing about the file itself, on its own, stops the real environment from drifting ' +
+        'away from that description afterward, whether through a manual change made through a web ' +
+        'dashboard, an automated process running entirely outside the normal deployment process, or ' +
+        'another team managing an overlapping resource.\n\n' +
+        'A good answer names at least one concrete, believable way drift actually happens in practice, ' +
+        'and says what would actually be needed to confirm the two still match, which is an ongoing check ' +
+        'against the real, running environment, not a fact that follows automatically just from the ' +
+        'infrastructure having started out as code.',
     },
     hints: [
       'Say what the code actually guarantees, which is the state at the last time it was applied, not the state forever after.',
@@ -2093,8 +2306,9 @@ const MODULE_CSF_7: Exercise[] = [
       },
     ],
     debrief:
-      'This is the same trust-the-artefact mistake as assuming a passed scan stays true forever. Treat ' +
-      'both the code and the scan as a snapshot of a moment, not a standing guarantee.',
+      'This is the same trust-the-artefact mistake from the earlier exercise, assuming that a passed ' +
+      'scan stays true forever. Treat both the code and the scan result as a snapshot of one particular ' +
+      'moment, not as a standing guarantee about every moment after it.',
     practice: [],
   },
 ];
@@ -2143,9 +2357,9 @@ const MODULE_CSF_8: Exercise[] = [
       },
     ],
     debrief:
-      'Every remaining exercise in this module is really this one idea applied to a specific decision: ' +
-      'capture first, act second, because the resource in front of you may not still exist by the time ' +
-      'you decide what to do with it.',
+      'Every remaining exercise in this module is really this one idea, applied to a specific ' +
+      'decision: capture first, act second, because the exact resource in front of you may not still ' +
+      'exist by the time you finish deciding what to do with it.',
     practice: [],
   },
   {
@@ -2161,17 +2375,21 @@ const MODULE_CSF_8: Exercise[] = [
       'before terminating it? Select all that apply.',
     teach: {
       concept:
-        'Terminating a compromised instance feels like the responsible move, and it is, once the ' +
-        'evidence it holds has been preserved. Terminating it first destroys the volume, the memory ' +
-        'state, and the running processes at the exact moment they would have been most informative, ' +
-        'which trades a slightly longer containment window for the permanent loss of everything that ' +
-        'would have explained what actually happened.\n\n' +
-        'The standard sequence is to take a SNAPSHOT of the storage volume, which preserves the disk ' +
-        'state for later analysis without needing to keep the live instance running, and where ' +
-        'possible to capture memory before shutdown, since memory holds the running processes and ' +
-        'network connections that a disk snapshot alone will not. Only after that capture is complete ' +
-        'does removing the instance from the network, or terminating it outright, stop being a trade ' +
-        'against the evidence you still needed.',
+        'An INSTANCE is just a running virtual machine rented from the cloud provider, the equivalent ' +
+        'of one physical computer, except it lives entirely as software and can be started, stopped, or ' +
+        'deleted with a single command. Shutting down a compromised instance feels like the responsible ' +
+        'thing to do, and it is, once whatever evidence it holds has actually been preserved somewhere ' +
+        'else first. Shutting it down immediately instead destroys its storage, its running memory, and ' +
+        'its active processes at the exact moment they would have been the most useful for figuring out ' +
+        'what happened, trading a slightly longer containment window for the permanent, irreversible ' +
+        'loss of the evidence that would have explained the whole story.\n\n' +
+        'The standard order of operations is to first take a SNAPSHOT, a frozen, saved copy of the ' +
+        'instance\'s storage at that exact moment, which preserves what was on disk for later analysis ' +
+        'without needing to keep the live instance running at all, and, where possible, to also capture ' +
+        'what is currently held in the instance\'s memory before shutting it down, since memory holds the ' +
+        'running processes and active network connections that a disk snapshot alone will not show you. ' +
+        'Only once that capture is genuinely complete does disconnecting the instance from the network, ' +
+        'or shutting it down outright, stop being a trade against evidence you still needed.',
     },
     options: [
       { id: 'a', label: 'Terminating a compromised instance before capturing its state destroys evidence that a slightly slower, ordered response would have preserved.' },
@@ -2202,8 +2420,9 @@ const MODULE_CSF_8: Exercise[] = [
       },
     ],
     debrief:
-      'The order here is the whole lesson: capture, then contain. Reversing it is understandable under ' +
-      'pressure and it is the single most common way a cloud incident loses its own evidence.',
+      'The order here is the whole lesson: capture, then contain. Reversing it is completely ' +
+      'understandable when you are under pressure, and it is still the single most common way a cloud ' +
+      'incident ends up losing its own evidence.',
     practice: [],
   },
   {
@@ -2219,17 +2438,21 @@ const MODULE_CSF_8: Exercise[] = [
       'incident? Select all that apply.',
     teach: {
       concept:
-        'Revoking and rotating a credential are related and not identical, and the difference matters ' +
-        'most in the middle of an incident. REVOKING disables the credential immediately: it stops ' +
-        'working the moment the action is taken, which is exactly what you want for a credential you ' +
-        'believe is compromised right now. ROTATING issues a new, working credential to replace the ' +
-        'one that was revoked or is being retired, which is what restores the legitimate service or ' +
-        'user that depended on it.\n\n' +
-        'Revoking without rotating stops the attacker and also stops whatever legitimate process ' +
-        'depended on that credential, which is sometimes exactly the right trade in the first minute ' +
-        'of an incident, and is rarely acceptable as the final state. The two actions are usually ' +
-        'sequenced together, revoke first to contain, rotate immediately after to restore service, ' +
-        'rather than treated as alternatives to choose between.',
+        'Imagine a lost house key. There are two separate things you could do about it: change the lock ' +
+        'so the lost key no longer opens the door, and cut a new key so the people who actually live ' +
+        'there can still get in. Revoking and rotating a credential are exactly this pair, related and ' +
+        'not identical, and the difference matters most in the middle of a real incident. REVOKING is ' +
+        'changing the lock: it disables the credential immediately, so it stops working the instant the ' +
+        'action is taken, which is exactly what you want for a credential you believe is in the wrong ' +
+        'hands right now. ROTATING is cutting the new key: it issues a fresh, working credential to ' +
+        'replace the one that was revoked or is being retired, which is what actually lets the ' +
+        'legitimate service or person who depended on it get back to work.\n\n' +
+        'Revoking without rotating changes the lock and hands nobody a new key: it stops whoever is ' +
+        'misusing the credential, and it also stops whatever legitimate process depended on that exact ' +
+        'same credential, which is sometimes genuinely the right trade to make in the first minute of an ' +
+        'incident, and is rarely acceptable as the state you leave things in afterward. The two actions ' +
+        'are normally sequenced together, revoke first to contain the damage, rotate immediately after to ' +
+        'restore service, rather than treated as two alternatives to pick one of.',
     },
     options: [
       { id: 'a', label: 'Revoking a credential disables it immediately, which is the appropriate first action against one believed to be compromised right now.' },
@@ -2260,8 +2483,8 @@ const MODULE_CSF_8: Exercise[] = [
     ],
     debrief:
       'If you only remember one distinction from this exercise, make it this one: rotation without ' +
-      'revocation leaves the attacker exactly where they were, with an unrelated new credential now ' +
-      'also in play.',
+      'revocation leaves the attacker exactly where they were before, with an unrelated brand new ' +
+      'credential simply now also existing alongside the one they still hold.',
     practice: [],
   },
   {
@@ -2277,18 +2500,21 @@ const MODULE_CSF_8: Exercise[] = [
       'faster than traditional on-premises response? Select all that apply.',
     teach: {
       concept:
-        'Two forces push the pace of cloud incident response well past what most on-premises response ' +
-        'was built around. The first is that the same automation that makes cloud infrastructure ' +
-        'convenient, everything reachable through an API, everything scriptable, is equally available ' +
-        'to an attacker: a compromised credential can be used to enumerate, create, and destroy ' +
-        'resources across an entire account in minutes through the same API a legitimate administrator ' +
-        'uses. The second is the ephemeral infrastructure covered earlier in this module: waiting to ' +
-        'respond risks the evidence disappearing on its own, regardless of what the attacker does ' +
-        'next.\n\n' +
-        'Together these mean a response measured in hours, which was often acceptable for a contained ' +
-        'on-premises incident, can be too slow to matter in the cloud: by the time a human has ' +
-        'approved a containment step through a slow change process, an automated attacker may already ' +
-        'have finished, and the resource that would have proven it may already be gone.',
+        'Two separate forces push the pace of cloud incident response well past what most traditional, ' +
+        'on-premises response was ever built around. The first is that the same automation that makes ' +
+        'cloud infrastructure convenient for a legitimate administrator, everything reachable through a ' +
+        'small, structured request called an API, everything able to be scripted and run automatically, ' +
+        'is equally available to whoever holds a stolen credential: a compromised credential can be used ' +
+        'to list, create, and destroy resources across an entire account within minutes, through the ' +
+        'exact same channel a legitimate administrator would use. The second is the ephemeral, short-' +
+        'lived nature of cloud infrastructure covered earlier in this module: waiting too long to respond ' +
+        'risks the evidence disappearing entirely on its own, regardless of anything the attacker does or ' +
+        'does not do next.\n\n' +
+        'Together, these mean a response measured in hours, which was often perfectly acceptable for a ' +
+        'contained, physical, on-premises incident, can simply be too slow to matter here: by the time a ' +
+        'human has worked through a slow, manual approval process for a single containment step, an ' +
+        'automated attacker may already have finished everything they came to do, and the resource that ' +
+        'would have proven what happened may already be gone.',
     },
     options: [
       { id: 'a', label: 'The same API automation that makes cloud infrastructure convenient for administrators is equally available to an attacker who holds valid credentials.' },
@@ -2317,8 +2543,9 @@ const MODULE_CSF_8: Exercise[] = [
       },
     ],
     debrief:
-      'Fast and careless are not the same requirement. The teams that do this well built the ability ' +
-      'to verify and act quickly, they did not simply decide to skip the verifying.',
+      'Fast and careless are not the same requirement, even though they can look similar from the ' +
+      'outside under pressure. The teams that handle this well built the ability to verify and act ' +
+      'quickly at the same time, they did not simply decide to skip the verifying altogether.',
     practice: [],
   },
   {
@@ -2335,16 +2562,22 @@ const MODULE_CSF_8: Exercise[] = [
       'instinct needs to change in a cloud environment.',
     teach: {
       concept:
-        'The instinct behind pull the plug is sound: stop the compromised system from doing further ' +
-        'damage. What does not translate is the assumption that the system will still be there to ' +
-        'examine afterward, and the assumption that disconnecting power is even the mechanism ' +
-        'available. There is no physical plug: the equivalent action is usually terminating or ' +
-        'isolating a virtual resource through an API, and depending on how the workload is managed, ' +
-        'that resource may be automatically replaced within seconds, or may simply cease to exist with ' +
-        'nothing left to examine.\n\n' +
-        'A good answer keeps the sound part of the instinct, stop the damage, and corrects the ' +
-        'sequencing: capture the evidence, a volume snapshot, relevant logs, before taking the action ' +
-        'that makes the resource disappear, rather than after.',
+        '"Pull the plug" is exactly what it sounds like: physically yanking the power cable out of a ' +
+        'compromised computer so it cannot do anything further. The instinct behind it is completely ' +
+        'sound, stop the compromised system before it causes more damage, and that goal has not changed ' +
+        'at all just because the infrastructure moved to the cloud. What does not translate is the ' +
+        'assumption baked into the phrase: that the machine will physically still be sitting there to ' +
+        'examine afterward, and that yanking power is even a thing you can do to it.\n\n' +
+        'There is no physical plug in a cloud environment, there is no cable, no box, nothing to walk ' +
+        'over and touch. The equivalent action is sending a small, structured request called an API call ' +
+        'that tells the provider to shut down or isolate a virtual resource, and depending on how that ' +
+        'workload is set up, the resource may be automatically replaced by an orchestrating system within ' +
+        'seconds, or it may simply cease to exist altogether, with nothing physical left behind to ever ' +
+        'go examine.\n\n' +
+        'A good answer keeps the sound part of the instinct, stop the damage, and corrects the order of ' +
+        'operations around it: capture the evidence first, a storage snapshot, the relevant logs, before ' +
+        'taking the action that makes the resource vanish, rather than only afterward, once there is ' +
+        'nothing left to capture.',
     },
     hints: [
       'Say what part of the instinct is still correct, since the goal has not actually changed.',
@@ -2377,7 +2610,8 @@ const MODULE_CSF_8: Exercise[] = [
     ],
     debrief:
       'This colleague is not wrong to want to stop the bleeding quickly. The fix is not to slow them ' +
-      'down, it is to move the evidence capture ahead of the action they already want to take.',
+      'down, it is to move the evidence capture to just ahead of the action they already, correctly, ' +
+      'want to take.',
     practice: [],
   },
 ];
