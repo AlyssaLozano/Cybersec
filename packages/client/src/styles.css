@@ -1278,12 +1278,53 @@ aside.cert-study h3 {
   font-size: 14px;
 }
 
-.track-hub-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
+/*
+ * The curriculum and the certifications used to sit in one continuous grid,
+ * with only a heading inside the curriculum box telling them apart. They are
+ * different kinds of thing (the track itself, versus a shopping list of
+ * exams a track's employer might ask for by name), so each gets its own
+ * enclosed, titled section with a real gap between them -- the same pattern
+ * used to split "what you'd learn" from "certifications" on the lane detail
+ * page (see .lane-section.boxed in career.css).
+ */
+.hub-section {
   max-width: 900px;
   margin: 0 auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  padding: 20px 22px 24px;
+}
+
+.hub-section--curriculum {
+  border-color: var(--accent);
+}
+
+.hub-section-head {
+  margin-bottom: 14px;
+}
+
+.hub-section-head h2 {
+  margin: 4px 0 8px;
+  font-size: 18px;
+}
+
+.hub-section-intro {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 62ch;
+}
+
+.hub-section-gap {
+  height: 28px;
+}
+
+.track-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
   align-items: stretch;
 }
 
@@ -1308,7 +1349,6 @@ button.hub-box:hover {
 }
 
 .hub-box--primary {
-  grid-column: 1 / -1;
   border-color: var(--accent);
   background: linear-gradient(160deg, var(--bg-raised), var(--bg-panel));
 }
