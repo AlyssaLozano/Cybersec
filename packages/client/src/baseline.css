@@ -1,0 +1,177 @@
+/*
+ * Capability baseline styles.
+ *
+ * Layered on top of career.css rather than duplicating it: the quiz and the
+ * report section both share career.css's single-column reading layout,
+ * progress bar, question-card, and confidence-panel rules. Only what is
+ * genuinely new here lives in this file -- the per-probe correct/incorrect
+ * reveal, and the report's foundation-grouped capability list. The quiz is
+ * entered automatically for the person's top match (see BaselineQuiz.tsx),
+ * so there is no lane-picker UI to style.
+ */
+
+/* --- quiz: the probe card --------------------------------------------------- */
+
+.probe-artifact {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 0 0 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.probe-option.probe-correct {
+  border-color: var(--pass);
+  background: rgba(70, 201, 139, 0.12);
+}
+
+.probe-option.probe-incorrect {
+  border-color: var(--fail);
+  background: rgba(240, 113, 78, 0.12);
+}
+
+.probe-option.probe-correct-unpicked {
+  border-color: var(--pass);
+}
+
+.probe-feedback {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.probe-feedback.correct {
+  background: rgba(70, 201, 139, 0.1);
+  color: var(--text);
+}
+
+.probe-feedback.incorrect {
+  background: rgba(240, 113, 78, 0.1);
+  color: var(--text);
+}
+
+.probe-feedback strong {
+  color: var(--text);
+}
+
+/* --- report: capability results by foundation ------------------------------- */
+
+.baseline-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.baseline-group h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.baseline-capability-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.baseline-capability-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  font-size: 13px;
+}
+
+.baseline-capability-list li.demonstrated {
+  border-left: 3px solid var(--pass);
+}
+
+.baseline-capability-list li.not-demonstrated {
+  border-left: 3px solid var(--border-strong);
+}
+
+.baseline-cap-mark {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+  width: 14px;
+  text-align: center;
+}
+
+.baseline-capability-list li.demonstrated .baseline-cap-mark {
+  color: var(--pass);
+}
+
+.baseline-cap-title {
+  flex: 1;
+}
+
+.baseline-cap-importance {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.baseline-cap-importance.core {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.baseline-steps {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.baseline-steps li {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.baseline-step-after {
+  margin-left: 8px;
+  font-variant-numeric: tabular-nums;
+  color: var(--pass);
+}
+
+/* --- the embedded report section -------------------------------------------- */
+
+.baseline-section {
+  margin: 8px 0 32px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-left-color: var(--accent);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+}
+
+.baseline-section .confidence-panel {
+  background: var(--bg-panel);
+}
+
+.baseline-subhead {
+  font-size: 14px;
+  margin: 20px 0 10px;
+}

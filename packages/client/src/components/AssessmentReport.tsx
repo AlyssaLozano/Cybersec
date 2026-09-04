@@ -37,6 +37,12 @@ interface ReportProps {
   onOpenLane: (laneId: string) => void;
   onChooseTrack: (laneId: string) => void;
   dimensions: Array<{ dimension: Dimension; label: string }>;
+  /**
+   * Rendered directly under the top-lanes section when present: the skill
+   * baseline for the top match, taken automatically as part of the same
+   * pass through the assessment. See BaselineReport in the caller.
+   */
+  baselineSection?: React.ReactNode;
 }
 
 export function AssessmentReport({
@@ -46,6 +52,7 @@ export function AssessmentReport({
   onOpenLane,
   onChooseTrack,
   dimensions,
+  baselineSection,
 }: ReportProps) {
   const [shareable, setShareable] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -111,6 +118,8 @@ export function AssessmentReport({
           ))}
         </div>
       </section>
+
+      {baselineSection}
 
       {report.alternatives.length > 0 ? (
         <section>

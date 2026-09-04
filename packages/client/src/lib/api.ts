@@ -79,6 +79,11 @@ import type {
   ProposeStageTalkRequest,
   UserRole,
   UserTier,
+  ProbeOption,
+  Capability,
+  ProbeResponse,
+  ReadinessReport,
+  LaneId,
 } from '@soc/shared';
 
 export class ApiCallError extends Error {
@@ -540,6 +545,60 @@ export const assessment = {
       method: 'PATCH',
       body: JSON.stringify(patch),
     }),
+};
+
+// --- the capability baseline --------------------------------------------------
+
+/** A probe as the browser sees it before answering: no answer, no explanation. */
+export interface ClientProbe {
+  id: string;
+  capabilityId: string;
+  prompt: string;
+  artifact?: string;
+  options: ProbeOption[];
+  level: 'recall' | 'apply' | 'analyse';
+}
+
+export interface BaselineState {
+  laneId: LaneId | null;
+  answered: number;
+  total: number;
+  responses: ProbeResponse[];
+  nextProbeId: string | null;
+  report: ReadinessReport | null;
+}
+
+export interface ProbeFeedback {
+  probeId: string;
+  correct: boolean;
+  answerId: string;
+  explanation: string;
+}
+
+export const baseline = {
+  /** Every probe for one lane, gently increasing in difficulty. Answer-stripped. */
+  probes: (laneId: string) =>
+    request<{ laneId: string; probes: ClientProbe[]; capabilities: Capability[] }>(
+      `/assessment/baseline/probes/${laneId}`,
+    ),
+
+  state: () => request<BaselineState>('/assessment/baseline'),
+
+  /** Switching lanes keeps whatever was already answered for other lanes. */
+  start: (laneId: string) =>
+    request<BaselineState>('/assessment/baseline/start', {
+      method: 'POST',
+      body: JSON.stringify({ laneId }),
+    }),
+
+  /** The correct answer and explanation only come back once a probe is answered. */
+  respond: (responses: ProbeResponse[]) =>
+    request<BaselineState & { feedback: ProbeFeedback[] }>('/assessment/baseline/responses', {
+      method: 'POST',
+      body: JSON.stringify({ responses }),
+    }),
+
+  reset: () => request<BaselineState>('/assessment/baseline/reset', { method: 'POST' }),
 };
 
 // --- war rooms ---------------------------------------------------------------

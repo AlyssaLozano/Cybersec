@@ -31,10 +31,19 @@ function parseProbes(json: string): ProbeMap {
   return {};
 }
 
+/**
+ * An upsert, not a find-then-create: two requests landing back to back on a
+ * brand new account (this file's own `startBaseline` alongside `probes`,
+ * fired together from one page load) would otherwise both see nothing and
+ * both try to create, and the loser gets a unique constraint violation
+ * instead of the row it asked for.
+ */
 async function loadOrCreate(userId: string) {
-  const existing = await prisma.assessmentSession.findUnique({ where: { userId } });
-  if (existing) return existing;
-  return prisma.assessmentSession.create({ data: { userId } });
+  return prisma.assessmentSession.upsert({
+    where: { userId },
+    create: { userId },
+    update: {},
+  });
 }
 
 export interface BaselineState {

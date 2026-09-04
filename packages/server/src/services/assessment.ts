@@ -52,11 +52,21 @@ function toResponseList(map: ResponseMap): ItemResponse[] {
     .map(([itemId, response]) => ({ itemId, ...response }));
 }
 
-/** Load, creating an empty session on first visit. */
+/**
+ * Load, creating an empty session on first visit.
+ *
+ * An upsert, not a find-then-create: two requests landing back to back on a
+ * brand new account (a page that fires more than one of these calls at
+ * once, which both this file and baseline.ts's callers do) would otherwise
+ * both see nothing and both try to create, and the loser gets a unique
+ * constraint violation instead of the row it asked for.
+ */
 async function loadOrCreate(userId: string) {
-  const existing = await prisma.assessmentSession.findUnique({ where: { userId } });
-  if (existing) return existing;
-  return prisma.assessmentSession.create({ data: { userId } });
+  return prisma.assessmentSession.upsert({
+    where: { userId },
+    create: { userId },
+    update: {},
+  });
 }
 
 export interface AssessmentState {

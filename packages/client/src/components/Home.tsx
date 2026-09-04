@@ -293,8 +293,9 @@ export function Home({
                 <span className="tb-desc">
                   Cybersecurity is vast, and its jobs would suit completely different people. This
                   reads your interests, your strengths, and the way you actually think, then hands
-                  you the paths that fit, and the ones that would wear you down. Stop guessing where
-                  to start.
+                  you the paths that fit, and the ones that would wear you down. Then it checks your
+                  actual skill against your best match, real logs and all, so the report is not just
+                  preference. Stop guessing where to start.
                 </span>
                 <span className="tb-enter">Career Fit Analyzer &rsaquo;&rsaquo;</span>
               </button>

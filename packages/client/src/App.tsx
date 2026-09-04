@@ -29,6 +29,7 @@ import type {
   TrackSummary,
   TriageEntry,
   CertStudyOffer,
+  ReadinessReport,
 } from '@soc/shared';
 
 import { AuthScreen } from './components/AuthScreen';
@@ -38,6 +39,8 @@ import { TrackPicker } from './components/TrackPicker';
 import { TrackHub } from './components/TrackHub';
 import { Assessment } from './components/Assessment';
 import { AssessmentReport } from './components/AssessmentReport';
+import { BaselineQuiz } from './components/BaselineQuiz';
+import { BaselineReport } from './components/BaselineReport';
 import { LaneDetail } from './components/LaneDetail';
 import { Terminal } from './components/Terminal';
 import { AlertQueue } from './components/AlertQueue';
@@ -55,6 +58,7 @@ import {
   ApiCallError,
   assessment,
   auth,
+  baseline,
   learning,
   type ExerciseDetail,
   type LaneDetail as LaneDetailData,
@@ -185,7 +189,14 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
    * 'none' means the normal trainer. The analyzer is a distinct mode rather than
    * a modal, because it is a twenty-minute activity and deserves the whole screen.
    */
-  const [careerView, setCareerView] = useState<'none' | 'quiz' | 'report' | 'lane'>('none');
+  /**
+   * 'baseline-quiz' is a continuation of the SAME pass through the analyzer,
+   * entered automatically once preference items are scored -- never a
+   * separately chosen destination. See openReport.
+   */
+  const [careerView, setCareerView] = useState<'none' | 'quiz' | 'report' | 'lane' | 'baseline-quiz'>(
+    'none',
+  );
   const [warRoom, setWarRoom] = useState(false);
   /*
    * The multi-seat SOC floor, which is a different product from the red versus
@@ -220,6 +231,15 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
   const [lanes, setLanes] = useState<LaneProfile[] | null>(null);
   const [laneDetail, setLaneDetail] = useState<LaneDetailData | null>(null);
   const [careerDimensions, setCareerDimensions] = useState<Array<{ dimension: Dimension; label: string }>>([]);
+  /** Which lane the baseline quiz is currently running against. */
+  const [baselineLaneId, setBaselineLaneId] = useState<string | null>(null);
+  /**
+   * Carried alongside the id rather than looked up from `laneTitles`, which
+   * is only populated after taking the Career Fit Analyzer -- the baseline
+   * is reachable without ever having done that.
+   */
+  const [baselineLaneTitle, setBaselineLaneTitle] = useState<string>('');
+  const [baselineReport, setBaselineReport] = useState<ReadinessReport | null>(null);
 
   /** Lane id -> title, so the report can name lanes without refetching each. */
   const laneTitles = useMemo(() => {
@@ -228,6 +248,12 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
     return map;
   }, [lanes]);
 
+  /**
+   * Finish the preference half, then, in the same pass, continue straight
+   * into a skill check for the top match -- no separate menu, no picking a
+   * lane. Only skipped when there IS no top match: too few answers can
+   * leave `topLanes` empty, and there is nothing to check readiness against.
+   */
   const openReport = useCallback(async () => {
     const [{ report: generated }, laneResult, stateResult] = await Promise.all([
       assessment.submit(),
@@ -237,13 +263,35 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
     setReport(generated);
     setLanes(laneResult.lanes);
     setCareerDimensions(stateResult.dimensions.map((d) => ({ dimension: d.dimension, label: d.label })));
-    setCareerView('report');
+    setBaselineReport(null);
+
+    const top = generated.topLanes[0];
+    if (top) {
+      setBaselineLaneId(top.laneId);
+      setBaselineLaneTitle(laneResult.lanes.find((lane) => lane.id === top.laneId)?.title ?? top.laneId);
+      setCareerView('baseline-quiz');
+    } else {
+      setCareerView('report');
+    }
   }, []);
 
   const openLane = useCallback(async (laneId: string) => {
     setLaneDetail(await assessment.lane(laneId));
     setCareerView('lane');
   }, []);
+
+  /** The skill-check step is done (or skipped): land on the one combined report. */
+  const finishBaseline = useCallback(async () => {
+    const state = await baseline.state();
+    setBaselineReport(state.report);
+    setCareerView('report');
+  }, []);
+
+  const retakeBaseline = useCallback(async () => {
+    if (!baselineLaneId) return;
+    await baseline.reset();
+    setCareerView('baseline-quiz');
+  }, [baselineLaneId]);
 
   /**
    * Picking a lane records it on the profile and opens that track's hub.
@@ -845,6 +893,9 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
             await assessment.retake(dimension);
             setCareerView('quiz');
           }}
+          baselineSection={
+            baselineReport ? <BaselineReport report={baselineReport} onRetake={retakeBaseline} /> : null
+          }
         />
       </div>
     );
@@ -864,6 +915,25 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
           readiness={laneDetail.readiness}
           onBack={() => setCareerView(report ? 'report' : 'none')}
           onChoose={() => chooseLaneTrack(laneDetail.lane.id)}
+        />
+      </div>
+    );
+  }
+
+  if (careerView === 'baseline-quiz' && baselineLaneId) {
+    return (
+      <div className="app">
+        {/*
+          Both exits land on the one combined report rather than dropping to
+          Home: the fit half is already computed by the time this screen is
+          reached, and leaving now should not throw that away.
+        */}
+        <CareerTopBar user={user} onSignOut={signOut} onExit={() => void finishBaseline()} />
+        <BaselineQuiz
+          laneId={baselineLaneId}
+          laneTitle={baselineLaneTitle || baselineLaneId}
+          onComplete={finishBaseline}
+          onExit={finishBaseline}
         />
       </div>
     );
