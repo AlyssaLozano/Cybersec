@@ -614,6 +614,22 @@ export const PROBES: Probe[] = [
       'That is the setuid bit. passwd needs it legitimately, because changing your password means writing to a root-owned file. A setuid binary somewhere unexpected is worth investigating, but finding one is the START of an investigation, not proof of anything.',
     level: 'analyse',
   },
+  {
+    id: 'pr-perm-3',
+    capabilityId: 'cap-permissions',
+    prompt:
+      "You are auditing a shared server and find a small, unfamiliar binary with the setuid bit set, owned by root, sitting in a user's home directory where nobody remembers putting it there. What is the right first move?",
+    options: [
+      { id: 'a', label: 'Ignore it: setuid binaries are normal and safe' },
+      { id: 'b', label: 'Delete it immediately so nobody can run it' },
+      { id: 'c', label: 'Treat it as a lead: find out who created it, when, and what it actually does, before touching it' },
+      { id: 'd', label: "Change its owner to match the user whose home directory it is in" },
+    ],
+    answerId: 'c',
+    explanation:
+      'A setuid binary in an unexpected place is exactly what a privilege-escalation backdoor looks like, but it could also be a forgotten admin tool. Deleting it destroys the evidence of how it got there and what it does; ignoring it risks leaving a live escalation path in place. Find out its story before you decide anything else.',
+    level: 'analyse',
+  },
 
   // --- cap-log-format ------------------------------------------------------
   {
@@ -717,6 +733,26 @@ export const PROBES: Probe[] = [
       'Two things are needed. -o prints only the matched text rather than the whole line, turning grep into an extraction tool. `sort -u` then collapses thousands of hits into the handful of distinct addresses behind them.',
     level: 'analyse',
   },
+  {
+    id: 'pr-extract-2',
+    capabilityId: 'cap-extract-fields',
+    prompt:
+      "It is day two of an investigation. You need one clean list of every distinct username that attempted a login today, to hand to HR so they can check it against who is actually still employed. Why does it matter that the list has no duplicates?",
+    options: [
+      { id: 'a', label: 'It does not matter: HR can remove duplicates themselves' },
+      {
+        id: 'b',
+        label:
+          'A list with the same names repeated hundreds of times hides the handful of distinct names HR actually needs to check, and wastes their time verifying the same one over and over',
+      },
+      { id: 'c', label: 'Duplicate entries make the file too large to email' },
+      { id: 'd', label: 'It matters only for legal reasons, not for the investigation itself' },
+    ],
+    answerId: 'b',
+    explanation:
+      'A login log can show one username hundreds of times in a single day. Handing that over unreduced just moves the work: HR now has to read past the noise to find the signal themselves. Collapsing it to distinct values is what turns a raw extraction into something someone else can actually act on, which is the point of pulling the field out in the first place.',
+    level: 'apply',
+  },
 
   // --- cap-correlate -------------------------------------------------------
   {
@@ -767,6 +803,23 @@ export const PROBES: Probe[] = [
     answerId: 'c',
     explanation:
       'The ? makes the preceding group optional. sshd writes "Failed password for root" for real accounts and "Failed password for invalid user oracle" for ones that do not exist, so one pattern with an optional group catches both.',
+    level: 'apply',
+  },
+  {
+    id: 'pr-regex-3',
+    capabilityId: 'cap-regex-basics',
+    artifact: 'Rule as written:  10.20.6.40\nIt also matches:  10a20a6a40',
+    prompt:
+      'Your detection rule is meant to match only the exact internal address 10.20.6.40. In testing, it is also matching lines like "10a20a6a40 connected". What went wrong?',
+    options: [
+      { id: 'a', label: 'The rule is fine; those lines are false alarms from the log source' },
+      { id: 'b', label: 'The dot (.) was left unescaped, so it means "any single character" instead of a literal period' },
+      { id: 'c', label: 'The rule is missing a {1,3} quantifier' },
+      { id: 'd', label: 'IP addresses cannot be matched with a regular expression' },
+    ],
+    answerId: 'b',
+    explanation:
+      'In a regular expression, an unescaped `.` matches ANY single character, not just a literal dot. `10.20.6.40` therefore also matches `10a20a6a40`, `10x20x6x40`, and anything else with the same shape. Writing `10\\.20\\.6\\.40`, with each dot escaped, is what makes the rule match the address and only the address.',
     level: 'apply',
   },
 
@@ -837,6 +890,22 @@ export const PROBES: Probe[] = [
       '445 is SMB (Windows file sharing) and 3389 is RDP (remote desktop). Both are heavily scanned because both have had serious remote vulnerabilities. Seeing these blocked at the firewall is normal background noise, not an incident.',
     level: 'apply',
   },
+  {
+    id: 'pr-port-2',
+    capabilityId: 'cap-ports-services',
+    prompt:
+      "Your team just stood up a new internal service that needs to reach GitHub over the internet to pull updates. A colleague says: \"just open port 22 outbound, that's what it'll need.\" Is that the right port?",
+    options: [
+      { id: 'a', label: 'Yes: port 22 is for general outbound internet access' },
+      { id: 'b', label: 'No: fetching from GitHub over HTTPS needs port 443 outbound, not 22, which is for SSH' },
+      { id: 'c', label: 'No: it needs port 80, since GitHub does not support encrypted connections' },
+      { id: 'd', label: 'It does not matter which port, as long as it is outbound' },
+    ],
+    answerId: 'b',
+    explanation:
+      '22 is SSH: remote shell access, not web traffic. Pulling from GitHub over HTTPS (the default for both git and a browser) needs 443 outbound. Opening the wrong port either fails to fix the actual problem, or opens access nobody meant to grant.',
+    level: 'apply',
+  },
 
   // --- cap-process-tree ----------------------------------------------------
   {
@@ -873,6 +942,26 @@ export const PROBES: Probe[] = [
       'Scheduled tasks are the classic. They run automatically, they look mundane in a process listing, and they survive reboots. Checking crontabs and systemd timers is a routine early step in any Linux investigation.',
     level: 'apply',
   },
+  {
+    id: 'pr-persist-2',
+    capabilityId: 'cap-persistence',
+    prompt:
+      "You find nothing unusual in the process list, and the user's own crontab is empty. Every time the box reboots, though, the attacker's connection comes back within a minute. Where do you actually look next?",
+    options: [
+      { id: 'a', label: 'Recheck the same crontab again, more carefully' },
+      {
+        id: 'b',
+        label:
+          "System-wide persistence: /etc/cron.d, systemd services and timers, and startup scripts, none of which live in one user's crontab",
+      },
+      { id: 'c', label: "The user's shell history, since that shows what they typed" },
+      { id: 'd', label: 'Nothing further: if the crontab and process list are clean, the box is clean' },
+    ],
+    answerId: 'b',
+    explanation:
+      "A user's own crontab is only one of several places a scheduled task can live. /etc/cron.d, systemd service and timer units, and boot-time startup scripts all run automatically and none of them show up when you check one account's crontab. Checking the obvious place is not the same as checking the places that matter.",
+    level: 'analyse',
+  },
 
   // --- cap-windows-events --------------------------------------------------
   {
@@ -889,6 +978,28 @@ export const PROBES: Probe[] = [
     explanation:
       '4624 is a successful logon and 4625 is a failed one: the Windows equivalent of "Accepted password" and "Failed password". 4688 is process creation and 7045 is service installation, both of which matter a lot during an intrusion.',
     level: 'recall',
+  },
+  {
+    id: 'pr-win-2',
+    capabilityId: 'cap-windows-events',
+    artifact:
+      '02:14:07  Event 4624  Logon Type 10 (RemoteInteractive), account: dcaldwell\n' +
+      '02:14:19  Event 4688  New process: powershell.exe, command line encoded (-enc ...)',
+    prompt: 'Nobody on the team was scheduled to be working at 2am. What does this pair of events suggest, and why?',
+    options: [
+      { id: 'a', label: 'Nothing unusual: scheduled tasks commonly run overnight' },
+      {
+        id: 'b',
+        label:
+          'A remote interactive logon at an unusual hour, immediately followed by an encoded PowerShell command, is worth escalating: encoding is a common way to hide what a command actually does',
+      },
+      { id: 'c', label: 'This is normal Windows Update behaviour' },
+      { id: 'd', label: 'PowerShell always encodes its commands, so this is not meaningful on its own' },
+    ],
+    answerId: 'b',
+    explanation:
+      'Logon Type 10 means an interactive remote desktop session, not a scheduled task (those do not authenticate as Type 10 at all). Pairing an off-hours, human-style logon with an ENCODED PowerShell command immediately after is a well-known pattern for hiding what a script does from casual review. Neither fact alone is much; together they are worth escalating.',
+    level: 'analyse',
   },
 
   // --- cap-detection-logic -------------------------------------------------
@@ -926,6 +1037,26 @@ export const PROBES: Probe[] = [
       'Tuning means removing the KNOWN benign cause while keeping the detection. Deleting loses the coverage; lowering severity hides it without fixing it; telling people to work faster is how alert fatigue starts and how the 400th alert gets closed unread.',
     level: 'analyse',
   },
+  {
+    id: 'pr-fp-2',
+    capabilityId: 'cap-false-positives',
+    prompt:
+      "One of your detection rules has fired exactly zero times in six months. A teammate suggests deleting it, since it 'clearly does not work.' What is the more careful read?",
+    options: [
+      { id: 'a', label: 'Delete it: zero firings over six months proves it is broken' },
+      {
+        id: 'b',
+        label:
+          'Zero firings could mean the behaviour it looks for simply has not happened, OR that the logic never matches anything at all: test it against a known event before deciding which',
+      },
+      { id: 'c', label: 'Leave it exactly as is, since a quiet rule cannot be causing any harm' },
+      { id: 'd', label: 'Increase its severity, since it must be looking for something serious' },
+    ],
+    answerId: 'b',
+    explanation:
+      'A rule that never fires is consistent with two very different situations: the behaviour it targets genuinely has not occurred (fine), or a logic bug makes it unmatchable against anything (not fine). Firing a synthetic, known-good test event through it is what tells the two apart. Deleting it on the assumption that quiet means broken can remove real coverage without anyone noticing until it was needed.',
+    level: 'analyse',
+  },
 
   // --- cap-triage ----------------------------------------------------------
   {
@@ -959,6 +1090,22 @@ export const PROBES: Probe[] = [
     answerId: 'a',
     explanation:
       'Read the timestamps: 09:12 brute force, 10:14 successful login, 10:22 backdoor account created, 10:40 persistence installed, 11:16 data leaving. That is a complete intrusion in five lines: access, escalation, persistence, exfiltration.',
+    level: 'analyse',
+  },
+  {
+    id: 'pr-chain-2',
+    capabilityId: 'cap-kill-chain',
+    prompt:
+      "Reconstructing a timeline across two servers, you notice their logs disagree on the order of two events by about ninety seconds. What should you do before concluding which one actually happened first?",
+    options: [
+      { id: 'a', label: 'Trust whichever server has the more detailed log entry' },
+      { id: 'b', label: "Check whether the two hosts' clocks are actually synchronised before trusting either timestamp to establish order" },
+      { id: 'c', label: 'Average the two timestamps and use that' },
+      { id: 'd', label: 'Trust the server that was compromised first, since it is closer to the source' },
+    ],
+    answerId: 'b',
+    explanation:
+      "A cross-host timeline is only as reliable as the clocks that produced it. Two servers ninety seconds apart is well within the range ordinary clock drift or a failed NTP sync could produce, and treating that gap as real causation can put an entire kill chain in the wrong order. Confirm time sync first; only then does 'ninety seconds apart' mean anything.",
     level: 'analyse',
   },
 
@@ -996,6 +1143,26 @@ export const PROBES: Probe[] = [
       'Quarantine-and-delete removes the single artefact you most needed to analyse, and it updates file timestamps on the way. The instinct to clean up is strong and it is usually wrong: preserve first, then remediate.',
     level: 'analyse',
   },
+  {
+    id: 'pr-evid-2',
+    capabilityId: 'cap-evidence',
+    prompt:
+      'You need to pull a suspicious file off a live compromised server for analysis elsewhere. Which order of operations preserves the most evidence?',
+    options: [
+      { id: 'a', label: 'Copy the file, open it to confirm it is the right one, then move on' },
+      {
+        id: 'b',
+        label:
+          'Compute a cryptographic hash of the file first, then copy it in a way that preserves its original timestamps, without opening it',
+      },
+      { id: 'c', label: 'Rename the file to something you will remember, then copy it' },
+      { id: 'd', label: 'Delete the original once the copy exists, so it can no longer do anything on the live server' },
+    ],
+    answerId: 'b',
+    explanation:
+      'Hashing before touching anything else gives you proof the copy matches the original. Opening the file can update its access time and, for some file types, trigger the very thing you are investigating; deleting the original breaks the chain of custody back to where it was found. Preserve the artefact exactly as it was, then work from the copy.',
+    level: 'analyse',
+  },
 
   // --- cap-model-mechanics -------------------------------------------------
   {
@@ -1026,6 +1193,26 @@ export const PROBES: Probe[] = [
     answerId: 'c',
     explanation:
       'Sub-word tokenisation means an unfamiliar word becomes several known pieces rather than an unknown. It matters for security because the token boundary is not where you expect: an attacker can move it, and a filter matching on words will not see what the model sees.',
+    level: 'apply',
+  },
+  {
+    id: 'pr-model-3',
+    capabilityId: 'cap-model-mechanics',
+    prompt:
+      "A colleague says the model must 'remember' the conversation, since it correctly referenced something said twenty messages ago. What is actually happening?",
+    options: [
+      { id: 'a', label: 'The model has persistent memory of the conversation, stored between requests' },
+      {
+        id: 'b',
+        label:
+          'The entire conversation so far is resent as input on every single request, so the model is not recalling anything: it is reading the whole thing again each time',
+      },
+      { id: 'c', label: 'It silently queried a log of past conversations' },
+      { id: 'd', label: 'It guessed correctly by chance' },
+    ],
+    answerId: 'b',
+    explanation:
+      "There is no memory between requests by default: the model is stateless. What looks like recall is the full conversation being included in the input every time, up to whatever length limit applies. That distinction matters for security, because anything earlier in that resent context, including something slipped in many messages ago, is still there for the model to act on.",
     level: 'apply',
   },
 
@@ -1130,6 +1317,26 @@ export const PROBES: Probe[] = [
     answerId: 'c',
     explanation:
       'Normalisation alone blocks nothing: it only decides what the next layer sees. A filter alone is blind to anything it does not canonicalise. The durable control is the third clause: limiting what the model is able to do, so a successful injection still reaches nothing worth having.',
+    level: 'analyse',
+  },
+  {
+    id: 'pr-encode-3',
+    capabilityId: 'cap-encoding-defeats-filters',
+    prompt:
+      "A filter blocks the exact phrase 'ignore previous instructions.' In testing, the same effect is achieved by asking the model to 'disregard the system rules stated above' instead. What does this tell you about the filter?",
+    options: [
+      { id: 'a', label: 'Nothing: the filter just needs that specific new phrase added to its list' },
+      {
+        id: 'b',
+        label:
+          'A blocklist of specific phrasing cannot cover paraphrase, because the attack surface is the whole of natural language, not a fixed set of strings',
+      },
+      { id: 'c', label: 'The model must be retrained to fix this' },
+      { id: 'd', label: 'Adding input normalisation would have caught this on its own' },
+    ],
+    answerId: 'b',
+    explanation:
+      'Blocking exact strings only ever covers the strings somebody thought to block. Different phrasing that means the same thing to the model keeps the meaning intact while dodging the list, endlessly, because language has no fixed vocabulary of "the bad phrases". Normalisation fixes encoding carriers, not meaning: this is a different gap, and it is why phrase blocklists are a weak control on their own.',
     level: 'analyse',
   },
 
