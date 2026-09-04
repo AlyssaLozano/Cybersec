@@ -363,7 +363,6 @@ export function Home({
                 <button className={`roletile ${role.color}`} key={role.name} onClick={onBrowseTracks}>
                   <span className="rl-name">{role.name}</span>
                   <span className="rl-blurb">{role.blurb}</span>
-                  <span className="rl-soon">soon</span>
                 </button>
               ))}
             </div>
