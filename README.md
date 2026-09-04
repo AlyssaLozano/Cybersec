@@ -80,6 +80,11 @@ npm run gen:world --workspace @soc/server
 The last one regenerates the simulated host's log files. The output is committed
 on purpose (see below).
 
+`npm test` never touches `prisma/dev.db`. Each test file is handed a private
+copy of a freshly migrated database (`packages/server/test/database.ts`), so the
+suite runs fully in parallel, needs no `.env`, and cannot be disturbed by a dev
+server or a second test run holding the SQLite file.
+
 ## How it is put together
 
 ```
