@@ -1,5 +1,5 @@
 /**
- * The item bank: 84 questions across six dimensions.
+ * The item bank: 90 questions across six dimensions.
  *
  * A NOTE ON COUNT
  *
@@ -26,7 +26,7 @@ import type { AssessmentItem } from '@soc/shared';
 
 export const ITEMS: AssessmentItem[] = [
   // =========================================================================
-  // 1. WORK PACE AND PRESSURE (11 items)
+  // 1. WORK PACE AND PRESSURE (12 items)
   // =========================================================================
   {
     id: 'p1',
@@ -147,9 +147,42 @@ export const ITEMS: AssessmentItem[] = [
       },
     ],
   },
+  {
+    id: 'p12',
+    kind: 'choice',
+    dimension: 'pace_pressure',
+    prompt:
+      'Without warning, your manager tells you to drop everything for something that just became the top priority. What is your honest first reaction?',
+    options: [
+      {
+        id: 'snap-to',
+        label: 'Good: I like it when priorities suddenly become obvious',
+        lanes: { 'incident-response': 3, 'soc-ops': 2, pentest: 1 },
+        traitValue: { trait: 'pressure_tolerance', value: 2 },
+      },
+      {
+        id: 'annoyed',
+        label: 'Irritated: I had real momentum on what I was already doing',
+        lanes: { forensics: 2, 'security-architecture': 2, appsec: 1, 'incident-response': -2 },
+        traitValue: { trait: 'interrupt_tolerance', value: -2 },
+      },
+      {
+        id: 'ask-why',
+        label: 'I would want to understand why before I actually switch',
+        lanes: { 'risk-compliance': 2, 'security-architecture': 1, iam: 1 },
+        traitValue: { trait: 'structure_need', value: 1 },
+      },
+      {
+        id: 'relief',
+        label: 'Relieved, honestly: it forces me to stop overthinking and just act',
+        lanes: { 'soc-ops': 2, pentest: 2, 'red-team': 1 },
+        traitValue: { trait: 'pressure_tolerance', value: 1 },
+      },
+    ],
+  },
 
   // =========================================================================
-  // 2. PROBLEM-SOLVING STYLE (15 items)
+  // 2. PROBLEM-SOLVING STYLE (22 items)
   // =========================================================================
   {
     id: 's1',
@@ -356,9 +389,41 @@ export const ITEMS: AssessmentItem[] = [
       },
     ],
   },
+  {
+    id: 's22',
+    kind: 'choice',
+    dimension: 'problem_solving',
+    prompt: 'A bug report comes in that just says "it is broken", with nothing else. What is your actual first move?',
+    options: [
+      {
+        id: 'reproduce',
+        label: 'Try to reproduce it myself, step by step, until I see what they saw',
+        lanes: { appsec: 3, 'security-engineering': 2, 'network-security': 1 },
+        traitValue: { trait: 'detail_orientation', value: 2 },
+      },
+      {
+        id: 'ask-affected',
+        label: 'Go find whoever is affected and ask exactly what they were doing',
+        lanes: { 'risk-compliance': 2, iam: 2, 'soc-ops': 1 },
+        traitValue: { trait: 'people_orientation', value: 1 },
+      },
+      {
+        id: 'recent-changes',
+        label: 'Check what changed most recently and work backward from there',
+        lanes: { forensics: 3, 'detection-engineering': 2, 'incident-response': 2 },
+        traitValue: { trait: 'research_orientation', value: 1 },
+      },
+      {
+        id: 'existing-tools',
+        label: 'Look for a dashboard or log that should already show me the answer',
+        lanes: { 'security-engineering': 2, 'cloud-security': 2, 'detection-engineering': 1 },
+        traitValue: { trait: 'building_drive', value: 1 },
+      },
+    ],
+  },
 
   // =========================================================================
-  // 3. WORKING WITH PEOPLE (11 items)
+  // 3. WORKING WITH PEOPLE (12 items)
   // =========================================================================
   {
     id: 'i1',
@@ -476,9 +541,41 @@ export const ITEMS: AssessmentItem[] = [
       },
     ],
   },
+  {
+    id: 'i12',
+    kind: 'choice',
+    dimension: 'interpersonal',
+    prompt: 'You just finished a piece of work you are genuinely proud of. Which part would you enjoy most?',
+    options: [
+      {
+        id: 'present',
+        label: 'Presenting it to the team and fielding their questions',
+        lanes: { 'risk-compliance': 3, 'security-architecture': 2, pentest: 1 },
+        traitValue: { trait: 'people_orientation', value: 2 },
+      },
+      {
+        id: 'write-up',
+        label: 'Writing it up clearly enough that nobody ever has to ask me about it',
+        lanes: { 'threat-intel': 2, forensics: 2, 'risk-compliance': 1 },
+        traitValue: { trait: 'people_orientation', value: -1 },
+      },
+      {
+        id: 'quiet-move-on',
+        label: 'Quietly moving on to the next thing, no fanfare needed',
+        lanes: { 'security-engineering': 2, 'detection-engineering': 2, iam: 1 },
+        traitValue: { trait: 'people_orientation', value: -2 },
+      },
+      {
+        id: 'teach-it',
+        label: 'Teaching someone else how it works so they could do it too',
+        lanes: { 'security-architecture': 2, 'risk-compliance': 1, 'soc-ops': 1 },
+        traitValue: { trait: 'people_orientation', value: 1 },
+      },
+    ],
+  },
 
   // =========================================================================
-  // 4. DETAIL AND BIG PICTURE (11 items)
+  // 4. DETAIL AND BIG PICTURE (12 items)
   // =========================================================================
   {
     id: 'd1',
@@ -577,9 +674,43 @@ export const ITEMS: AssessmentItem[] = [
     trait: 'detail_orientation',
     lanes: { 'detection-engineering': 3, 'security-engineering': 2, 'vuln-management': 1, 'risk-compliance': 1 },
   },
+  {
+    id: 'd12',
+    kind: 'choice',
+    dimension: 'detail_bigpicture',
+    prompt:
+      'You inherit a control that mostly works but has had the same rough edges for two years. What is your honest instinct?',
+    options: [
+      {
+        id: 'fix-now',
+        label: 'Fix it properly right now, even though nobody asked',
+        lanes: { forensics: 2, appsec: 2, iam: 1 },
+        traitValue: { trait: 'detail_orientation', value: 2 },
+      },
+      {
+        id: 'log-it',
+        label: 'Write down exactly what is wrong and get it tracked, even if I do not fix it today',
+        lanes: { 'risk-compliance': 3, 'vuln-management': 2 },
+        traitValue: { trait: 'detail_orientation', value: 1 },
+      },
+      {
+        id: 'rethink',
+        label:
+          'Wonder why it still has rough edges after two years, and whether the whole approach needs rethinking',
+        lanes: { 'security-architecture': 4, 'security-engineering': 2 },
+        traitValue: { trait: 'building_drive', value: 2 },
+      },
+      {
+        id: 'leave-it',
+        label: 'Leave it. There are bigger problems elsewhere that deserve the time',
+        lanes: { 'soc-ops': 1, 'vuln-management': 1, 'security-architecture': -1 },
+        traitValue: { trait: 'detail_orientation', value: -2 },
+      },
+    ],
+  },
 
   // =========================================================================
-  // 5. INTERESTS AND ENERGY (20 items)
+  // 5. INTERESTS AND ENERGY (21 items)
   // =========================================================================
   {
     id: 'e1',
@@ -812,9 +943,41 @@ export const ITEMS: AssessmentItem[] = [
     reverse: true,
     lanes: { 'ai-security': 3, appsec: 2, 'threat-intel': 2, pentest: 1 },
   },
+  {
+    id: 'e21',
+    kind: 'choice',
+    dimension: 'interests_energy',
+    prompt: 'If you could only keep one of these in your job, which would you choose?',
+    options: [
+      {
+        id: 'trace-it',
+        label: 'Tracing exactly where an attacker got in and what they touched',
+        lanes: { 'incident-response': 3, forensics: 2, 'threat-intel': 1 },
+        traitValue: { trait: 'research_orientation', value: 2 },
+      },
+      {
+        id: 'find-flaw',
+        label: 'Finding a flaw in something before anyone else does',
+        lanes: { pentest: 3, 'red-team': 3, appsec: 1 },
+        traitValue: { trait: 'adversarial_pull', value: 2 },
+      },
+      {
+        id: 'build-guardrail',
+        label: 'Designing a guardrail that quietly stops a whole category of mistake',
+        lanes: { 'security-engineering': 3, 'detection-engineering': 2, 'cloud-security': 2 },
+        traitValue: { trait: 'building_drive', value: 2 },
+      },
+      {
+        id: 'size-the-risk',
+        label: 'Working out how much risk the organisation is actually carrying, and what to do about it',
+        lanes: { 'risk-compliance': 4, 'security-architecture': 1 },
+        traitValue: { trait: 'structure_need', value: 1 },
+      },
+    ],
+  },
 
   // =========================================================================
-  // 6. LIFE AND WORK BALANCE (10 items)
+  // 6. LIFE AND WORK BALANCE (11 items)
   // =========================================================================
   {
     id: 'l1',
@@ -920,6 +1083,40 @@ export const ITEMS: AssessmentItem[] = [
         label: 'Chaotic and varied, a new client every few weeks, with travel and billable hours',
         detail: 'You learn extremely fast. You are also always selling and always counting hours.',
         factors: { stability: -2, rules: -2, pace: 2, autonomy: 2 },
+      },
+    ],
+  },
+  {
+    id: 'l11',
+    kind: 'choice',
+    dimension: 'life_balance',
+    prompt: 'Picture an ordinary Tuesday, five years from now. Which is closest to what you actually want?',
+    options: [
+      {
+        id: 'deep-quiet',
+        label: 'Deep, focused work with almost no meetings, home on time, phone off after',
+        lanes: { forensics: 2, appsec: 1, iam: 1 },
+        traitValue: { trait: 'stability_need', value: 2 },
+        factors: { stability: 2, pace: -1 },
+      },
+      {
+        id: 'mixed-day',
+        label: 'A mix of meetings and hands-on work, staying late sometimes when it actually matters',
+        lanes: { 'security-architecture': 1, 'security-engineering': 1 },
+      },
+      {
+        id: 'never-same',
+        label: 'Different every day: a new client or system, real variety, real travel',
+        lanes: { pentest: 2, 'red-team': 1 },
+        traitValue: { trait: 'novelty_seeking', value: 2 },
+        factors: { stability: -2, pace: 1, autonomy: 1 },
+      },
+      {
+        id: 'on-the-rota',
+        label: 'On a rota where I might get paged, because I want to be the one who fixes the real emergency',
+        lanes: { 'incident-response': 3, 'soc-ops': 1 },
+        traitValue: { trait: 'pressure_tolerance', value: 1 },
+        factors: { stability: -1, pace: 1 },
       },
     ],
   },
