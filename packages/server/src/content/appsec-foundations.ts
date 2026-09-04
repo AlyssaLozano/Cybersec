@@ -33,35 +33,59 @@ import type { Exercise, LearningPackage } from '@soc/shared';
 
 const SDLC_TEACH = {
   concept:
-    'Application security is a set of activities spread across the whole development lifecycle, ' +
-    'not a single gate near the end. In REQUIREMENTS and DESIGN it is threat modelling and choosing ' +
-    'safe defaults before a line of code exists. In BUILD it is secure coding practice and review of ' +
-    'a diff as it is written. In TEST it is scanning and targeted abuse cases run alongside the ' +
-    'functional ones. In DEPLOY it is configuration: secrets handling, minimal permissions, pinned ' +
-    'dependencies. In OPERATE it is watching for the flaw that only shows up under real traffic, and ' +
-    'feeding what is learned back into the next design.\n\n' +
-    'Two comparisons place the seat precisely. A PENETRATION TEST is a snapshot: an outside team ' +
-    'attacks a system as it stands today, on a fixed schedule, usually once or twice a year. ' +
-    'Application security is continuous and internal, embedded with the team that writes the code ' +
-    'rather than visiting for one assessment window. A CODE STYLE AUDIT checks a different question: ' +
-    'is this code readable and consistent, naming, formatting, structure. A security review asks what ' +
-    'happens when a value crosses a trust boundary. Code can be beautifully styled and completely ' +
-    'exploitable, and the reverse is just as common.',
+    'Picture how a house gets built. First someone draws up plans: where the front door goes, how ' +
+    'thick the walls are, where the wiring runs. Then a crew builds it: foundation, frames, wiring, ' +
+    'roof. Then an inspector checks the work before anyone moves in. Then a family lives there for ' +
+    'years, and things occasionally need fixing. A safe house is not one where somebody bolts a lock ' +
+    'onto the front door on move-in day and calls it done. It is one where safety was considered at ' +
+    'every stage: a window placed somewhere a burglar cannot work at unseen, wiring that will not start ' +
+    'a fire, a foundation solid enough that doors keep latching properly for years.\n\n' +
+    'Software gets built in stages too, and the whole sequence, from an idea for a feature through to ' +
+    'real people using it, is what this package calls the DEVELOPMENT LIFECYCLE. It runs roughly: ' +
+    'REQUIREMENTS AND DESIGN, deciding what to build and how, before a line of code exists; BUILD, ' +
+    'programmers actually writing that code; TEST, checking the finished piece works; DEPLOY, making it ' +
+    'available to real users; and OPERATE, running it day after day once it is live. Application ' +
+    'security is not one inspection bolted near the end of that list. It is something that happens ' +
+    'inside every stage: thinking through what could go wrong with a design before any code exists, ' +
+    'reviewing new code for how it could be misused rather than just whether it runs, checking for ' +
+    'exploitable holes during testing alongside the ordinary checks that the feature works, locking ' +
+    'down passwords and access carefully when a feature goes live, and watching for the flaw that only ' +
+    'shows up once real people, some of them dishonest, are actually using the thing.\n\n' +
+    'Two comparisons place this job precisely. A PENETRATION TEST is like hiring someone to try to ' +
+    'break into a specific house on one specific day: an outside team attacks a system as it stands ' +
+    'right now, usually once or twice a year, and reports what they found. Application security is not ' +
+    'that one-day visit, it is somebody on the inside, part of the team building the house, thinking ' +
+    'about the locks the whole way through. A CODE STYLE AUDIT asks an entirely different question: is ' +
+    'the code readable, are things named sensibly, is the formatting consistent. That is closer to ' +
+    'checking whether the paint job is neat and the trim lines up. It says nothing about whether a ' +
+    'window was left unlocked. Code can be beautifully tidy and completely exploitable, and the reverse ' +
+    'is just as common: messy code nobody can break into.',
 } as const;
 
 const SHIFT_LEFT_TEACH = {
   concept:
-    'Shift left means moving a security activity earlier in the lifecycle, to the point where the ' +
-    'same defect costs less to fix, not moving the responsibility for security earlier so somebody ' +
-    'else can be blamed for it later. A flaw caught at design review costs a conversation. The same ' +
-    'flaw caught in code review costs a changed diff before it merges. Caught in production it costs ' +
-    'an incident, a patch under pressure, and sometimes a disclosure. The finding is identical in all ' +
-    'three cases. Only the cost of fixing it has moved.\n\n' +
-    'In practice, shift left is concrete work rather than a slogan. It looks like a threat model ' +
-    'attached to a design document before it is approved, a static analysis tool wired into the pull ' +
-    'request instead of run once a quarter, and security acceptance criteria written into a ticket ' +
-    'alongside the functional ones. None of that removes the need for testing later. It reduces how ' +
-    'much testing later has to find.',
+    'Imagine a blueprint has a water pipe running directly behind an electrical panel. Catching that ' +
+    'on paper costs a pencil and an eraser: move the pipe on the drawing. Catching it once the walls ' +
+    'are half built costs tearing out drywall that is already up. Catching it after a family has moved ' +
+    'in, when the pipe finally leaks onto the panel, costs an electrician, a plumber, water damage, and ' +
+    'maybe somebody getting hurt. It is the exact same mistake every time. The only thing that changed ' +
+    'is how late it was caught, and that lateness is almost the entire cost.\n\n' +
+    'SHIFT LEFT means catching that same kind of mistake earlier in the process, not handing the job of ' +
+    'catching mistakes to somebody else so nobody has to think about it until later. The stages of ' +
+    'building software (design, then build, then test, then release) are usually drawn on a chart left ' +
+    'to right in that order, so moving a check earlier literally means moving it left on the chart, ' +
+    'which is where the name comes from. A flaw caught while a design is still a conversation and a ' +
+    'sketch costs a conversation. The same flaw caught while a developer is writing the code costs a ' +
+    'changed line before it ever ships. Caught after the software is already running for real users, it ' +
+    'costs an emergency fix made under pressure, sometimes after something has already gone wrong.\n\n' +
+    'In practice, shift left is ordinary, concrete work, not a slogan somebody repeats in a meeting. It ' +
+    'looks like: somebody writes down what could go wrong with a new feature before the design is ' +
+    'signed off, rather than after. A tool automatically checks a programmer code for known-dangerous ' +
+    'patterns the moment they try to submit it, instead of a person reviewing it by hand once a ' +
+    'quarter. And a line like "handles a wrong password safely" gets added to the checklist right next ' +
+    'to "shows the right screen after login", instead of being an afterthought nobody assigned to ' +
+    'anyone. None of that removes the need to test the finished software later. It just means there is ' +
+    'far less left for that later testing to find.',
 } as const;
 
 const MODULE_ASF_1: Exercise[] = [
@@ -109,8 +133,10 @@ const MODULE_ASF_1: Exercise[] = [
       },
     ],
     debrief:
-      'The penetration test still earns its place. An outside team finds what an inside team has ' +
-      'stopped seeing. It is a complement to this seat, not a substitute for it.',
+      'The penetration test still earns its place: a fresh pair of eyes from outside often notices ' +
+      'something a person who stares at the same system every day has stopped seeing, the same way a ' +
+      'friend catches a typo in your essay that you have read past ten times. Think of it as one more ' +
+      'check layered on top of continuous, everyday attention, not a replacement for it.',
     practice: [],
   },
   {
@@ -153,8 +179,10 @@ const MODULE_ASF_1: Exercise[] = [
       },
     ],
     debrief:
-      'Say "shift left" in an interview and be ready to name one of the four concrete practices above. ' +
-      'An interviewer who has been sold the slogan version will ask, and will notice if you cannot.',
+      'If you ever say the words shift left out loud, whether in a meeting or an interview, be ready to ' +
+      'name one of the four concrete practices above as a real example. Plenty of people repeat the ' +
+      'phrase without knowing what it actually looks like day to day, and it shows the moment somebody ' +
+      'asks for an example and there is not one ready.',
     practice: [],
   },
   {
@@ -170,18 +198,29 @@ const MODULE_ASF_1: Exercise[] = [
       'release. Which of the following placements are correct? Select all that apply.',
     teach: {
       concept:
-        'Placing an activity at the right stage is not pedantry, it decides who owns doing it and when ' +
-        'it becomes too late to be cheap. Design-stage work is done by whoever is drafting the system, ' +
-        'often before a security specialist is even in the room. Build-stage work belongs to the ' +
-        'developer writing the diff and to whoever reviews it. Test-stage work belongs to quality ' +
-        'engineering working alongside functional tests, not instead of them. Deploy-stage work is ' +
-        'infrastructure and configuration, often owned by a platform team rather than the application ' +
-        'team.\n\n' +
-        'A design review is not a substitute for reviewing the code that implements the design. A ' +
-        'threat model describes what SHOULD happen; the diff is what actually got written, on a ' +
-        'Friday afternoon, by somebody who had to make a judgement call the design document did not ' +
-        'cover. Both stages need their own attention, and skipping either one on the assumption the ' +
-        'other already handled it is how a sound design ships with an unsound implementation.',
+        'Think about planning a road trip. Deciding the route on a map the night before is one task. ' +
+        'Actually driving the car the next day, reacting to the traffic and the weather and the ' +
+        'detour that was not on the map, is a completely different task, done at a different time, by ' +
+        'somebody who has to make calls the map never anticipated. Checking the route beforehand does ' +
+        'not mean you can skip paying attention while driving, and being a careful driver does not ' +
+        'make a badly chosen route safe either. Both matter, at their own point in the trip.\n\n' +
+        'Building software works the same way, and knowing which stage an activity belongs to matters ' +
+        'because it decides who is responsible for it and how expensive it is to fix if it is missed. ' +
+        'Design-stage work, thinking through what could go wrong and picking a safer approach, is done ' +
+        'by whoever is sketching out the system, often before anyone whose job title has the word ' +
+        '"security" in it is even in the room. Build-stage work belongs to the programmer actually ' +
+        'writing the code, and to whoever double-checks it afterward, called a REVIEW: reading a piece ' +
+        'of code somebody else wrote to check it for exactly this kind of problem before it goes live. ' +
+        'Test-stage work belongs to whoever is checking the finished feature, alongside the ordinary ' +
+        'checks that it works at all, not instead of them. Deploy-stage work is about the settings the ' +
+        'software runs with once it is live: how passwords and secret keys are stored, how much access ' +
+        'it is given, which is often owned by a separate team that runs the servers rather than the ' +
+        'team that wrote the feature.\n\n' +
+        'A plan for the route is not the same thing as the drive itself. A document describing what a ' +
+        'system SHOULD do is not the same thing as the code that a programmer actually wrote on a ' +
+        'Friday afternoon, under a deadline, making a judgement call the plan never covered. Both stages ' +
+        'need their own attention, and skipping either one because you assume the other already handled ' +
+        'it is exactly how a carefully planned system ends up with a badly built implementation.',
     },
     options: [
       { id: 'a', label: 'Choosing a safe default and modelling threats before a design is approved is design-stage work.' },
@@ -209,8 +248,10 @@ const MODULE_ASF_1: Exercise[] = [
       },
     ],
     debrief:
-      'When you inherit a finding, the first useful question is which stage let it through, because ' +
-      'that tells you whether the fix is a control, a checklist item, or a conversation with one team.',
+      'When a problem lands in your lap, the first useful question is which stage let it slip through: ' +
+      'a missing conversation at the planning stage, a line of code nobody caught, or a setting nobody ' +
+      'checked when the feature went live. That answer tells you whether the fix is a new checklist ' +
+      'item, a changed line of code, or a conversation with one particular team.',
     practice: [],
   },
   {
@@ -226,16 +267,25 @@ const MODULE_ASF_1: Exercise[] = [
       'the following are meaningful things to report? Select all that apply.',
     teach: {
       concept:
-        'A vulnerability count is the easiest number to produce and the least useful one on its own, ' +
-        'because it goes up when you scan more and it goes up when the code gets worse, and a report ' +
-        'that cannot tell those apart is not measuring anything.\n\n' +
-        'Better signals track direction and behaviour rather than a raw total. A falling rate of the ' +
-        'SAME recurring bug class across releases says the underlying cause is being fixed rather than ' +
-        'the symptom. TIME TO FIX, from a finding being raised to it landing in production, says ' +
-        'whether the process around a finding works. Developers bringing a design to review VOLUNTARILY, ' +
-        'before being asked, is a sign of a working relationship rather than an enforced one. And a bug ' +
-        'a linter or a habit caught before it was ever written up is still a result, even though no ' +
-        'ticket exists to point at, because the goal was never to generate tickets.',
+        'Suppose a doctor is judged purely by how many diagnoses they write down in a year. That number ' +
+        'goes up if patients are genuinely getting sicker, but it also goes up if the doctor simply ' +
+        'starts running more tests, or starts writing down things that used to go unrecorded. A rising ' +
+        'number on its own does not tell you whether the patients are worse off or the doctor just got ' +
+        'more thorough. You need a smarter measurement.\n\n' +
+        'The same trap applies to counting VULNERABILITIES, the security weaknesses found in a piece of ' +
+        'software. A raw count is the easiest number to produce and the least useful one by itself, ' +
+        'because it goes up when the tools looking for problems get better, and it also goes up when the ' +
+        'software genuinely gets worse, and a report that cannot tell those two apart is not really ' +
+        'measuring anything.\n\n' +
+        'Better signals track direction and behaviour instead of a raw total. If the SAME kind of mistake ' +
+        'keeps showing up release after release, and that rate is falling, it means the actual root cause ' +
+        'is being fixed rather than just each individual symptom. TIME TO FIX, meaning how long it takes ' +
+        'from a problem being flagged to it actually being corrected in the live software, says whether ' +
+        'the process around fixing things works at all. Programmers bringing their own designs to be ' +
+        'checked BEFORE being asked to is a sign people trust the process rather than merely tolerating ' +
+        'it. And a bug that a simple automated checking tool, or just a habit, caught before it was ever ' +
+        'formally written up anywhere is still a real win, even with no paperwork to point to, because the ' +
+        'actual goal was never to generate paperwork.',
     },
     options: [
       { id: 'a', label: 'A falling rate of the same recurring bug class across releases is a better signal than a rising vulnerability count.' },
@@ -264,8 +314,9 @@ const MODULE_ASF_1: Exercise[] = [
       },
     ],
     debrief:
-      'If you only ever report the count, expect to be judged by it, including in the quarter you ' +
-      'finally fix the thing that was generating most of it.',
+      'If you only ever report the raw count, expect to be judged by it later, including in the one ' +
+      'quarter you finally fix the underlying cause that had been generating most of it, and the number ' +
+      'suddenly drops in a way that looks like nothing happened rather than like a win.',
     practice: [],
   },
   {
@@ -282,16 +333,24 @@ const MODULE_ASF_1: Exercise[] = [
       'changes about the job.',
     teach: {
       concept:
-        'The transfer is real and it is incomplete, and saying which part is missing is the useful ' +
-        'answer here. QA asks whether the system does what the specification says, across the inputs a ' +
-        'real user is likely to produce, including the awkward ones found by being thorough. That ' +
-        'thoroughness is genuinely valuable groundwork.\n\n' +
-        'Security asks a different question: what can be made to happen that the specification never ' +
-        'considered at all, by somebody who is not trying to use the system, they are trying to make ' +
-        'it do something else entirely, and who will deliberately reach for the input a normal user ' +
-        'would never think to try. That is an ADVERSARIAL mindset rather than a thorough one, and it ' +
-        'means paying particular attention to TRUST BOUNDARIES, the points where a value arrives from ' +
-        'outside the system and the code has to decide how much to believe it.',
+        'QUALITY ASSURANCE, QA for short, is the job of checking that a piece of software actually does ' +
+        'what it is supposed to do. Think of a QA tester like a very thorough restaurant health ' +
+        'inspector: they check that the kitchen works the way it is meant to, that the oven reaches the ' +
+        'right temperature, that the fridge keeps things cold, including checking the odd edge cases, ' +
+        'what happens on the busiest night of the year. That thoroughness is real, valuable work, and it ' +
+        'transfers into security more than most other skills do.\n\n' +
+        'But it is incomplete on its own, and naming what is missing is the point of this exercise. A ' +
+        'security reviewer is not asking "does the kitchen work the way it is supposed to". They are ' +
+        'asking a different question entirely: "what could someone do here who is not trying to eat ' +
+        'dinner at all, who is trying to start a fire, or walk out with the cash register, or poison the ' +
+        'food, using an entrance nobody thought to lock." That is an ADVERSARIAL mindset: not thorough ' +
+        'about the intended use, but imaginative about the unintended one, actively hostile rather than ' +
+        'merely careful.\n\n' +
+        'That shift means paying close attention to TRUST BOUNDARIES: the exact points where something ' +
+        'from outside, a delivery at the back door, a customer walking in, a value a user typed into a ' +
+        'form, arrives and the people running the place have to decide how much to believe it before ' +
+        'acting on it. QA checks the front door works the way it is supposed to. Security checks whether ' +
+        'anyone bothered to lock the back one.',
     },
     hints: [
       'QA checks the system against its specification. What is being checked against here instead?',
@@ -323,8 +382,8 @@ const MODULE_ASF_1: Exercise[] = [
       },
     ],
     debrief:
-      'Every module after this one is really an elaboration of this one distinction, applied to a ' +
-      'different piece of code each time.',
+      'Every module after this one is really the same distinction, tested against a different piece of ' +
+      'code each time: not "does this work", but "what else could this be made to do".',
     practice: [],
   },
 ];
@@ -333,42 +392,66 @@ const MODULE_ASF_1: Exercise[] = [
 
 const SQLI_TEACH = {
   concept:
-    'SQL injection happens when user-controlled text is concatenated directly into a query string, so ' +
-    'the database cannot tell the difference between the query the developer wrote and text an ' +
-    'attacker added to it. This snippet builds a login check by concatenation:\n\n' +
+    'Most applications, from a shopping site to a login page, need somewhere to permanently store ' +
+    'information: usernames, passwords, orders, messages. That storage system is called a DATABASE, and ' +
+    'it is organized into tables, the same shape as a spreadsheet: rows and columns. To ask the database ' +
+    'a question, such as "find the user named alice", a program sends it an instruction written in a ' +
+    'specific language called SQL (Structured Query Language). One instruction, like "find the row where ' +
+    'the name column equals alice", is called a QUERY.\n\n' +
+    'Programs often need to build a query out of a value the user just typed, for example checking a ' +
+    'username and password somebody entered into a login box. The laziest way to do that is CONCATENATION: ' +
+    'gluing pieces of text together into one string, the way you might tape strips of paper end to end. ' +
+    'This snippet builds a login check that way:\n\n' +
     "  query = \"SELECT * FROM users WHERE name = '\" + username + \"' AND pass = '\" + password + \"'\"\n\n" +
-    "If username arrives as  ' OR '1'='1  the completed string becomes a WHERE clause that is always " +
-    'true, and the query returns every row in the table rather than the one matching a real user. ' +
-    'Nothing here required a clever password, only a value the developer never expected to be treated ' +
-    'as anything other than plain text.\n\n' +
-    'The fix is a PARAMETERISED QUERY, also called a prepared statement. The query text is sent to the ' +
-    'database with placeholders, and the values are sent separately as data:\n\n' +
+    'The problem: the database has no way to see where the developer intent ends and the user typed text ' +
+    'begins. It just receives one long string and reads all of it as instructions. If username arrives ' +
+    "as  ' OR '1'='1  then once it is glued into the string, the finished instruction stops meaning " +
+    '"find the row named alice" and starts meaning something closer to "find every row, because this ' +
+    'condition is always true". The query returns every row in the table instead of one matching real ' +
+    'user, letting an attacker log in as anyone without knowing a single real password. This particular ' +
+    'attack, sneaking extra database instructions into a value that was only supposed to be data, is ' +
+    'called SQL INJECTION, and it needed no cleverness beyond typing a value nobody expected.\n\n' +
+    'The fix is called a PARAMETERISED QUERY, or a prepared statement. Instead of gluing the value ' +
+    'straight into the instruction text, the query is sent to the database with blank placeholders, and ' +
+    'the actual values are sent separately, clearly labelled as data rather than instructions:\n\n' +
     "  query = \"SELECT * FROM users WHERE name = ? AND pass = ?\"\n" +
     '  execute(query, [username, password])\n\n' +
-    'The database now knows, structurally, which part is code and which part is data, so nothing the ' +
-    'value contains can change the shape of the query. This is not an escaping trick that catches one ' +
-    'more special character. It removes the category of bug entirely, because the two channels never ' +
-    'get mixed back together.',
+    'The database now knows, structurally, which part is the instruction and which part is a piece of ' +
+    'data being slotted in, the same way a mail-merge template knows "Dear [name]" only ever fills the ' +
+    'name into that one blank, whatever the name happens to contain, rather than letting the name rewrite ' +
+    'the rest of the letter. Nothing the value contains can change the shape of the instruction anymore. ' +
+    'This is not a trick that filters out one more dangerous character. It removes the entire bug, ' +
+    'because instructions and data never get glued back into the same string at all.',
 } as const;
 
 const COMMAND_INJECTION_TEACH = {
   concept:
-    'Command injection is the same failure in a different interpreter: user-controlled text reaches a ' +
-    'shell, and the shell treats part of it as a new command rather than as an argument. This snippet ' +
-    'builds a ping command from a hostname a user submitted:\n\n' +
+    'A SHELL is the program a computer uses to run typed commands: the kind of black window where ' +
+    'somebody types a word like "ping" and the computer goes and does it. Software often needs to run one ' +
+    'of these commands itself, behind the scenes, as part of a feature, for example checking whether a ' +
+    'website a user typed in is actually reachable.\n\n' +
+    'The exact same failure as SQL injection shows up here, just in a different place: user-typed text ' +
+    'gets glued directly into a command, and the shell cannot tell where the developer intended command ' +
+    'ends and the attacker text begins. This snippet builds a ping command out of a hostname somebody ' +
+    'typed into a box:\n\n' +
     '  os.system("ping -c 1 " + hostname)\n\n' +
-    'If hostname arrives as  example.com; rm -rf /var/data  the shell runs the ping and then runs the ' +
-    'second command, because a semicolon ends one shell command and starts the next. The developer ' +
-    'wrote one command; the shell sees two.\n\n' +
-    'Parameterised queries do not apply here, there is no database and no query, so the fix takes a ' +
-    'different shape. The strongest option is avoiding the shell entirely, calling the program directly ' +
-    'with its arguments passed as a list rather than a string the shell has to parse:\n\n' +
+    'A semicolon is one of several characters that tell a shell "stop, that command is finished, here is ' +
+    'a brand new one". If hostname arrives as  example.com; rm -rf /var/data  the shell runs the ping, ' +
+    'sees the semicolon, and then runs the second command too, one that deletes files. The developer ' +
+    'wrote one instruction. The shell reads two. This particular version of the bug is called COMMAND ' +
+    'INJECTION.\n\n' +
+    'The database fix from the previous exercise, a parameterised query, does not apply here, there is no ' +
+    'database and no query involved at all, so the fix takes a different shape. The strongest option is ' +
+    'avoiding the shell entirely: calling the ping program directly and handing it its pieces as a clearly ' +
+    'separated list, rather than as one string the shell has to read and reinterpret:\n\n' +
     '  subprocess.run(["ping", "-c", "1", hostname])\n\n' +
-    'Passed this way, hostname is one argument regardless of what characters it contains, because no ' +
-    'shell ever reinterprets it. Where a shell genuinely cannot be avoided, the input needs strict ' +
-    'ALLOWLISTING, accepting only the narrow shape a hostname or filename can legitimately take, rather ' +
-    'than trying to blocklist the punctuation an attacker might use, because a blocklist only ever ' +
-    'covers the characters somebody remembered to list.',
+    'Passed this way, hostname is treated as exactly one item on that list no matter what characters it ' +
+    'contains, the way handing someone a single sealed envelope keeps its contents from being read as a ' +
+    'separate instruction, because no shell ever gets the chance to reinterpret it. Where a shell genuinely ' +
+    'cannot be avoided, the input needs strict ALLOWLISTING: only accepting the narrow shape a real ' +
+    'hostname can legitimately take (letters, digits, dots) rather than trying to list every dangerous ' +
+    'character and reject those, called a blocklist, because a blocklist only ever covers the characters ' +
+    'somebody happened to remember when writing it.',
 } as const;
 
 const MODULE_ASF_2: Exercise[] = [
@@ -413,8 +496,10 @@ const MODULE_ASF_2: Exercise[] = [
       },
     ],
     debrief:
-      'If you can complete the sentence "the database could not tell X from Y" about a piece of code, ' +
-      'you have found an injection flaw whatever language or query engine it happens to be written in.',
+      'If you can fill in the sentence "the database could not tell X from Y" about a piece of code, you ' +
+      'have found an injection flaw, whatever programming language or database it happens to be written ' +
+      'in. Keep that sentence in your head as a test to run over any code that builds a query out of a ' +
+      'value someone typed.',
     practice: [],
   },
   {
@@ -457,9 +542,10 @@ const MODULE_ASF_2: Exercise[] = [
       },
     ],
     debrief:
-      'The pattern repeats across every interpreter you will ever review against: a query language, a ' +
-      'shell, a template engine, an XML parser. Find where data and instructions travel down the same ' +
-      'channel, and you have found the injection class before you have even named it.',
+      'This exact pattern repeats across every tool that reads text as instructions: a database language, ' +
+      'a shell, and others you will meet later in this field. Find a place where a user-typed value and a ' +
+      'set of real instructions travel down the same string, and you have found this bug class before you ' +
+      'have even bothered to name it.',
     practice: [],
   },
   {
@@ -475,19 +561,28 @@ const MODULE_ASF_2: Exercise[] = [
       'following statements about them are true? Select all that apply.',
     teach: {
       concept:
-        'Several fixes for injection get proposed in most reviews, and only one of them changes the ' +
-        'actual mechanism. ESCAPING quote characters before concatenation reduces the attack surface for ' +
-        'the specific characters somebody thought to escape, but a database with a different quoting ' +
-        'rule, a different encoding, or a second injection point the developer missed will still be ' +
-        'exposed. An ORM, an object-relational mapper, is commonly assumed to be automatically safe, and ' +
-        'most of the time its default methods are, because they parameterise underneath. But almost ' +
-        'every ORM also offers a raw or literal query method for the cases its abstraction cannot ' +
-        'express, and building that raw query by concatenation is exactly the original bug wearing a ' +
-        'different library.\n\n' +
-        'A STORED PROCEDURE is not automatically safe either: it is safe only if the procedure itself ' +
-        'uses parameters internally rather than building a dynamic string from its own arguments. What ' +
-        'actually closes the hole is keeping the query text and the values on two separate channels all ' +
-        'the way down, regardless of which library sits on top of that mechanism.',
+        'Imagine trying to childproof a house by just moving the one sharp knife a toddler grabbed last ' +
+        'week to a higher shelf. That fixes the exact incident that already happened, but it does nothing ' +
+        'about the other knives in the drawer, or the outlet across the room, because it never addressed ' +
+        'the real underlying problem, which is that anything dangerous is within reach at all.\n\n' +
+        'Several proposed fixes for injection have the same flavor, patching one incident rather than the ' +
+        'underlying problem. ESCAPING means adding a special marker character in front of anything that ' +
+        'could be misread as an instruction, such as a quote mark, before gluing a value into a query. It ' +
+        'reduces exposure to the specific characters somebody remembered to escape, but a database with ' +
+        'different rules, a different way of encoding text, or a second spot in the code the developer ' +
+        'simply forgot about, is still wide open. An ORM (object-relational mapper) is a tool that lets a ' +
+        'programmer talk to a database using ordinary code instead of writing query text directly, and its ' +
+        'everyday, default way of doing that is genuinely safe, because underneath it already keeps ' +
+        'instructions and data on separate channels. But almost every ORM also offers an escape hatch, a ' +
+        'raw or literal query method, for the rare thing its ordinary method cannot express, and building ' +
+        'that raw query by gluing text together is exactly the original bug, just wearing a different ' +
+        'tool.\n\n' +
+        'A STORED PROCEDURE, a saved set of database instructions that can be called by name instead of ' +
+        'sent as text each time, is not automatically safe either: it is only safe if the procedure itself ' +
+        'was written using placeholders internally, rather than building a fresh instruction string out of ' +
+        'its own inputs. What actually closes the hole, in every one of these cases, is the same thing ' +
+        'from the previous exercise: keeping the instruction text and the values on two separate channels, ' +
+        'all the way down, no matter which tool happens to be sitting on top.',
     },
     options: [
       { id: 'a', label: 'Escaping quote characters before concatenation reduces exposure to the specific characters somebody thought to escape, rather than removing the category of bug.' },
@@ -517,7 +612,8 @@ const MODULE_ASF_2: Exercise[] = [
     ],
     debrief:
       'When you review a codebase that uses an ORM, search specifically for its raw or literal query ' +
-      'method. That is where injection findings in supposedly safe codebases actually live.',
+      'method by name. That escape hatch is where injection bugs in supposedly safe, ORM-protected ' +
+      'codebases actually turn up.',
     practice: [],
   },
   {
@@ -534,15 +630,25 @@ const MODULE_ASF_2: Exercise[] = [
       'all that apply.',
     teach: {
       concept:
-        'Client-side validation, code that runs in the browser before a request is sent, exists to give ' +
-        'a fast, friendly error message. It is not a security control, because an attacker does not use ' +
-        'the browser as intended: a request can be built and sent directly, with any tool that speaks ' +
-        'HTTP, bypassing the form and its JavaScript entirely. The server never learns that a check was ' +
-        'skipped, it just receives whatever arrived.\n\n' +
-        'The only validation that matters for security is SERVER-SIDE, because the server is the only ' +
-        'point the attacker cannot route around. Client-side checks are still worth having, for the ' +
-        'experience of the honest user who mistyped a field, but they defend nothing, because removing ' +
-        'or ignoring them costs an attacker nothing.',
+        'When you fill out a form on a website and it instantly says "that email address looks wrong" ' +
+        'before you even click submit, that check ran on your own computer, inside your web browser, ' +
+        'using a small program the website sent you. This is CLIENT-SIDE validation: "client" meaning your ' +
+        'browser, the customer at the counter, as opposed to the "server", the business back office ' +
+        'somewhere else that actually stores the data and makes the real decisions.\n\n' +
+        'Client-side validation exists to give a fast, friendly error message so an honest user does not ' +
+        'have to wait for a slow trip to the server just to be told they mistyped their email. It is not a ' +
+        'security control, because nothing forces anyone to use a website through the normal browser at ' +
+        'all. Think of the browser like a customer-facing storefront with a friendly greeter who checks IDs ' +
+        'at the door: someone who wants to skip that greeter entirely can walk in through the loading dock ' +
+        'instead. A request to a website can be built and sent directly, with ordinary, freely available ' +
+        'tools, completely bypassing the web form and any checks written into it. The server that actually ' +
+        'receives that request never learns a check was supposed to run first, it just gets whatever ' +
+        'shows up at the loading dock.\n\n' +
+        'The only validation that actually functions as a security control is SERVER-SIDE, meaning the ' +
+        'check happens on the business back-office computer itself, because that is the one place an ' +
+        'attacker genuinely cannot walk around. Client-side checks are still worth having, purely for the ' +
+        'experience of an honest customer who fat-fingered a field, but they stop nobody determined, ' +
+        'because ignoring the greeter at the front door costs an attacker absolutely nothing.',
     },
     options: [
       { id: 'a', label: 'An attacker can send a request directly, bypassing the browser form and any JavaScript validation entirely.' },
@@ -570,8 +676,9 @@ const MODULE_ASF_2: Exercise[] = [
       },
     ],
     debrief:
-      'Whenever a finding gets pushed back with "the form already validates that", the next question is ' +
-      'always the same: does the server enforce it too, or only the browser.',
+      'Whenever a concern gets waved off with "the form already checks that", the next question is ' +
+      'always the same: does the server, the back office, enforce it too, or does that check only exist ' +
+      'in the customer-facing browser where an attacker never has to see it at all.',
     practice: [],
   },
   {
@@ -588,14 +695,20 @@ const MODULE_ASF_2: Exercise[] = [
       'In three or four sentences, write the comment: what is wrong, and what change you want made.',
     teach: {
       concept:
-        'A good finding names the mechanism, not just the label. Writing "this is SQL injection" without ' +
-        'saying why leaves the developer to take it on faith, or to fix the wrong thing. Naming the ' +
-        'mechanism, that customerId is concatenated directly into the query text so the database cannot ' +
-        'distinguish code from data, gives them enough to see it themselves in the next file too.\n\n' +
-        'A good finding also names the fix precisely rather than vaguely: not "sanitise the input" but ' +
-        '"use a parameterised query, passing customerId as a bound value rather than concatenating it ' +
-        'into the string". The second version is something a developer can act on immediately; the first ' +
-        'invites a guess at what sanitise is supposed to mean here.',
+        'Telling a mechanic "the car is broken" is technically true and completely useless. Telling them ' +
+        '"the car makes a grinding noise when I brake, and it started after I drove through the flooded ' +
+        'road last week" gives them something to actually act on. The same difference separates a weak ' +
+        'code review comment from a strong one.\n\n' +
+        'A good finding names the mechanism, not just a label. Writing "this is SQL injection" without ' +
+        'explaining why leaves the programmer to either take it on faith or guess, and possibly fix the ' +
+        'wrong thing. Naming the mechanism, meaning that a specific value is glued directly into a database ' +
+        'instruction so the database cannot tell the code apart from the data, gives them enough to spot ' +
+        'the same shape of problem themselves next time, in a completely different file.\n\n' +
+        'A good finding also names the fix precisely rather than vaguely. Not "clean up the input" (which ' +
+        'invites a guess at what "clean up" is even supposed to mean here) but "use a parameterised query, ' +
+        'passing this value in as a separate piece of data rather than gluing it into the instruction ' +
+        'text". The second version is something a programmer can act on immediately, with no follow-up ' +
+        'question needed.',
     },
     hints: [
       'Name the specific variable and say what happens to it, rather than just naming the vulnerability class.',
@@ -624,8 +737,9 @@ const MODULE_ASF_2: Exercise[] = [
       },
     ],
     debrief:
-      'This exact comment, adjusted for the variable name, is one you will write dozens of times in a ' +
-      'real review queue. Getting the phrasing efficient now saves real time later.',
+      'This exact comment, adjusted for whatever the variable happens to be called, is one you will end ' +
+      'up writing dozens of times once you are actually reviewing real code. Getting the phrasing tight ' +
+      'and efficient now saves real time later.',
     practice: [],
   },
 ];
@@ -634,34 +748,54 @@ const MODULE_ASF_2: Exercise[] = [
 
 const XSS_TYPES_TEACH = {
   concept:
-    'Cross-site scripting, XSS, happens when attacker-controlled text ends up running as script in ' +
-    'somebody elses browser. The three variants differ in where the attacker text lives before it runs.\n\n' +
-    'STORED XSS is saved on the server, in a comment field or a profile name, and served back to every ' +
-    'visitor who views that page, which makes it the most dangerous variant: one submission, many ' +
-    'victims, no interaction needed from any of them beyond loading the page. REFLECTED XSS travels in ' +
-    'the request itself, typically a query parameter, and the server echoes it straight back into the ' +
-    'response; it needs the victim to click a crafted link, which is why it usually arrives by email or ' +
-    'message rather than by browsing normally. DOM-BASED XSS never touches the server at all: ' +
-    'JavaScript already running in the page reads something like the URL fragment and writes it into ' +
-    'the page unsafely, so the vulnerability lives entirely in client-side code and a server-side scan ' +
-    'that only inspects responses can miss it completely.',
+    'A webpage is written mostly in HTML, plain text with markup that tells the browser what to display, ' +
+    'like a headline or a box for a comment. Alongside that, a webpage can also contain a SCRIPT: a small ' +
+    'program, usually written in a language called JavaScript, that the browser actually runs, able to do ' +
+    'things like read what a logged-in visitor is looking at, or send their information somewhere else ' +
+    'entirely.\n\n' +
+    'CROSS-SITE SCRIPTING, XSS for short, happens when text an attacker controls ends up being treated as ' +
+    'one of those runnable scripts inside somebody elses browser, rather than as plain text. Imagine a ' +
+    'community noticeboard where anyone can pin up a note, and imagine the board is faulty: if a note ' +
+    'happens to be phrased a certain way, instead of everyone just reading it, it makes everyone who walks ' +
+    'past instantly do whatever it says, hand over their wallet, say something on their behalf. That is ' +
+    'roughly what XSS lets happen inside a browser: a "note" that turns into a command.\n\n' +
+    'There are three variants, and they differ in where the attacker text lives before it runs. STORED ' +
+    'XSS is saved permanently somewhere on the server, for instance inside a comment or a profile name, ' +
+    'and then served back to every single visitor who later views that page. This makes it the most ' +
+    'dangerous variant: one bad note pinned to the board reaches everyone who ever walks past it, with no ' +
+    'further action needed from any of them beyond looking at the page. REFLECTED XSS instead travels ' +
+    'inside the web address itself, in the part after the question mark, and the server simply echoes ' +
+    'that text straight back into what it sends the browser. It needs the victim to click one specific, ' +
+    'crafted link, which is why it usually arrives by email or a chat message rather than by ordinary ' +
+    'browsing. DOM-BASED XSS never touches the server at all: a script already running in the page reads ' +
+    'something like part of the current web address and writes it back into the page carelessly, so the ' +
+    'whole bug lives entirely inside the browser, in code the server never even sees, meaning a check that ' +
+    'only inspects what the server sends out can miss it completely.',
 } as const;
 
 const CONTEXT_ENCODING_TEACH = {
   concept:
-    'Output encoding has to match the CONTEXT a value is written into, because each context has its own ' +
-    'rules for which characters are special, and using the wrong rule leaves a gap.\n\n' +
-    'In an HTML BODY, encoding < and > and & stops a value from being read as a new tag. But the same ' +
-    'value placed inside an HTML ATTRIBUTE, say a quoted value inside an onclick or a href, is broken ' +
-    'out of not by < but by a matching quote character, so attribute context needs quotes encoded and ' +
-    'HTML-body encoding alone does not cover it. A value written into a JAVASCRIPT STRING inside a ' +
-    '<script> block is broken out of by a quote or a backslash, neither of which HTML encoding touches ' +
-    'at all, so a value that is perfectly safe in the HTML body can still end a JavaScript string early ' +
-    'and let the rest of it execute as code. A value placed into a URL needs its own percent-encoding, ' +
-    'for a different set of reserved characters again.\n\n' +
-    'The practical result: there is no single "encode this" function that is correct everywhere. A ' +
-    'review has to ask which context a value lands in, and check that the encoding actually applied ' +
-    'matches that context rather than a different one that happened to be available.',
+    'The general defence against XSS is called ENCODING (also called escaping): rewriting a piece of ' +
+    'text so that any character with special meaning gets replaced by a harmless stand-in, the way a menu ' +
+    'might print "and/or" as "and or" to avoid a slash being misread by an old printer. Done correctly, a ' +
+    'value that came from a user always displays as the plain text it is, and never gets treated as a new ' +
+    'instruction.\n\n' +
+    'The catch is that encoding has to match the exact CONTEXT a value gets written into, because ' +
+    'different spots on a webpage have different special characters, the same way different card games ' +
+    'played with the same deck treat different cards as "wild". In the ordinary HTML BODY, the plain ' +
+    'visible text of a page, the characters < and > are what open and close a tag, so encoding those stops ' +
+    'a value from being read as a brand new element. But the same value, placed instead inside an HTML ' +
+    'ATTRIBUTE, a labelled setting on a tag such as a quoted value inside href, is broken out of not by < ' +
+    'but by a matching quote character, so this context needs quotes encoded, and HTML-body encoding alone ' +
+    'does not cover it. A value written into a JAVASCRIPT STRING inside a script (a chunk of quoted text ' +
+    'sitting inside a runnable program) is broken out of by a quote mark or a backslash, neither of which ' +
+    'HTML encoding touches at all, so a value that is perfectly safe sitting in the plain page can still ' +
+    'end that quoted string early and let the rest of it run as a real instruction. A value placed inside a ' +
+    'web address needs its own, different style of encoding again, for yet another set of special ' +
+    'characters.\n\n' +
+    'The practical result: there is no single "make this safe" function that works everywhere on a page. A ' +
+    'review has to ask exactly where a value lands, and check that whatever encoding was actually applied ' +
+    'matches that specific spot, rather than a different one that merely happened to be available.',
 } as const;
 
 const MODULE_ASF_3: Exercise[] = [
@@ -704,9 +838,9 @@ const MODULE_ASF_3: Exercise[] = [
       },
     ],
     debrief:
-      'When triaging a new XSS report, the first question is which of these three it is, because it ' +
-      'decides where the fix actually goes: server-side output encoding for the first two, client-side ' +
-      'code review for the third.',
+      'When you first look at a new XSS report, the first question is which of these three it is, because ' +
+      'it decides where the fix actually needs to go: encoding the output on the server for the first ' +
+      'two, and reviewing the browser-side script itself for the third.',
     practice: [],
   },
   {
@@ -750,8 +884,8 @@ const MODULE_ASF_3: Exercise[] = [
       },
     ],
     debrief:
-      'This is the single most common way a real codebase passes an automated XSS scanner and still ' +
-      'ships a vulnerability: encoding is present, just aimed at the wrong context.',
+      'This is the single most common way a real piece of software passes an automated security scan and ' +
+      'still ships a vulnerability: encoding is present, it is just aimed at the wrong spot on the page.',
     practice: [],
   },
   {
@@ -770,17 +904,22 @@ const MODULE_ASF_3: Exercise[] = [
       'Which of the following are true about it? Select all that apply.',
     teach: {
       concept:
-        'INNERHTML parses whatever string it is given as HTML and inserts the result into the page, ' +
-        'tags and all. It has no idea where the string came from, so a value containing a script tag or ' +
-        'an event handler attribute is parsed and can execute exactly as if a developer had written it ' +
-        'by hand.\n\n' +
-        'TEXTCONTENT is the safer default for exactly this case: it inserts the string as literal text, ' +
-        'never parsed as markup, so a name containing angle brackets is displayed as visible text rather ' +
-        'than interpreted as a tag. Where actual HTML genuinely needs to be inserted, from a source that ' +
-        'is not fully trusted, a sanitisation library that strips dangerous tags and attributes is the ' +
-        'tool, not a hand-rolled filter. And a CONTENT SECURITY POLICY can reduce the damage a successful ' +
-        'injection does, for instance by blocking inline scripts, but it is a second layer of defence, ' +
-        'not a reason to skip fixing the innerHTML call.',
+        'A webpage, once loaded, is represented in the browser memory as a structure called the DOM ' +
+        '(Document Object Model), roughly a tree of every element on the page, which running scripts can ' +
+        'read and change. INNERHTML is a command that says "take this string and read it as if it were ' +
+        'HTML markup, then insert the result here". It has no idea where that string came from. If the ' +
+        'string happens to contain something that looks like a script tag, it gets parsed and run exactly ' +
+        'as if a developer had typed it there themselves on purpose.\n\n' +
+        'TEXTCONTENT is a different, safer command for the same everyday job: it inserts a string as plain, ' +
+        'literal text, never read as markup at all, so a name containing angle brackets shows up on screen ' +
+        'looking like angle brackets rather than being treated as a new tag. Where actual HTML genuinely ' +
+        'does need to be inserted, coming from a source that is not fully trusted, the right tool is a ' +
+        'SANITISATION library: a pre-built tool that strips out anything dangerous, such as scripts, while ' +
+        'leaving safe formatting alone, rather than a homemade filter someone wrote in an afternoon. And a ' +
+        'CONTENT SECURITY POLICY, a setting a website can turn on that tells the browser which kinds of ' +
+        'scripts it is even allowed to run at all, can reduce the damage a successful injection does. But ' +
+        'that is a second layer of defence sitting on top, not an excuse to skip fixing the actual ' +
+        'innerHTML call underneath it.',
     },
     options: [
       { id: 'a', label: 'This is DOM-based XSS, because attacker-controlled text from the URL is written unsafely into the page by client-side code alone.' },
@@ -808,8 +947,9 @@ const MODULE_ASF_3: Exercise[] = [
       },
     ],
     debrief:
-      'A rule of thumb worth keeping: if you see innerHTML built from anything other than a fixed ' +
-      'string literal, stop and check where the other half came from.',
+      'A rule of thumb worth keeping in your head permanently: if you ever see innerHTML being fed ' +
+      'anything other than a piece of text that was typed directly into the code by a developer, stop ' +
+      'and check exactly where the rest of that value came from.',
     practice: [],
   },
   {
@@ -826,18 +966,21 @@ const MODULE_ASF_3: Exercise[] = [
       'are true? Select all that apply.',
     teach: {
       concept:
-        'A Content Security Policy tells the browser which sources of script, style and other content it ' +
-        'is allowed to load and run, and a strict policy genuinely blocks large classes of injected ' +
-        'script, particularly inline script and script from an attacker-controlled domain. That makes it ' +
-        'a real and valuable control.\n\n' +
-        'It is still a NET rather than a WALL. A policy that allows inline scripts for legacy reasons, or ' +
-        'that allows script from a wide set of trusted-looking domains, leaves gaps a specific payload ' +
-        'can fit through. A policy also does nothing about the underlying encoding bug: the value is ' +
-        'still written into the page unsafely, the policy is only trying to stop what happens next. And a ' +
-        'policy can be weakened by a single unsafe-inline exception added later to fix an unrelated ' +
-        'problem, silently reopening everything it was protecting. The fix for an encoding bug is correct ' +
-        'encoding; the policy sits alongside that as a second line of defence, not a replacement for the ' +
-        'first.',
+        'A CONTENT SECURITY POLICY is a setting a website sends along with its pages that tells the ' +
+        'browser, in effect, "only run scripts that come from these specific, approved places, and ignore ' +
+        'anything else, even if it appears directly inside the page". A strict policy genuinely blocks ' +
+        'large categories of injected script, which makes it a real, valuable control, comparable to a ' +
+        'building only unlocking its doors for badges it has already issued, rather than trusting anyone ' +
+        'who walks up.\n\n' +
+        'But it is a NET, something that catches most things that fall, rather than a WALL, something ' +
+        'nothing gets through at all. A policy that still allows certain older, less strict exceptions for ' +
+        'compatibility reasons, or that trusts a wide list of outside domains, leaves gaps a specific, ' +
+        'carefully aimed attack can still fit through. A policy also does nothing about the actual ' +
+        'underlying bug: the vulnerable value is still being written into the page unsafely, the policy is ' +
+        'only trying to stop what happens after that. And a policy can be quietly weakened later by a ' +
+        'single exception added to fix some unrelated problem, reopening everything it used to block ' +
+        'without anyone noticing. The real fix for an encoding bug is correct encoding. The policy sits ' +
+        'alongside that as a second line of defence, not a replacement for the first.',
     },
     options: [
       { id: 'a', label: 'A strict Content Security Policy can block large classes of injected script, including inline script, and is a genuinely valuable control.' },
@@ -866,8 +1009,8 @@ const MODULE_ASF_3: Exercise[] = [
       },
     ],
     debrief:
-      'Recommend a Content Security Policy freely, it is worth having. Never accept it as the reason an ' +
-      'encoding finding gets closed without a code change.',
+      'Recommend a Content Security Policy freely, it is genuinely worth having. Just never accept it as ' +
+      'the reason an encoding problem gets marked resolved without an actual code change behind it.',
     practice: [],
   },
   {
@@ -885,14 +1028,19 @@ const MODULE_ASF_3: Exercise[] = [
       'HTML encoding did not cover this case.',
     teach: {
       concept:
-        'The developer is reasoning from one true fact, that HTML encoding is applied, to a false ' +
-        'conclusion, that it applies everywhere. The missing idea is that encoding rules are tied to a ' +
-        'CONTEXT: HTML-body encoding neutralises the characters that matter for breaking out of HTML, ' +
-        'primarily angle brackets and ampersands, and does nothing to a quote or a backslash, which are ' +
-        'exactly the characters that matter for breaking out of a JavaScript string.\n\n' +
-        'A good answer names the specific context mismatch: the value sits inside a JavaScript string, not ' +
-        'the HTML body, so it needs JavaScript-string encoding, or better, needs to be passed as data ' +
-        'through a safe API rather than concatenated into a script block as text at all.',
+        'The developer is reasoning from one true fact, that HTML encoding was applied somewhere, to a ' +
+        'false conclusion, that it therefore applies everywhere on the page. It is a bit like assuming that ' +
+        'because your front door has a good lock, every window in the house must be locked too, just ' +
+        'because they are all part of the same house.\n\n' +
+        'The missing idea is that encoding rules are tied to a specific CONTEXT, the exact spot on the page ' +
+        'a value ends up in. HTML-body encoding neutralises the characters that matter for breaking out of ' +
+        'ordinary page text, mainly angle brackets, and does nothing at all to a quote mark or a backslash, ' +
+        'which are exactly the characters that matter for breaking out of a quoted string inside a running ' +
+        'script.\n\n' +
+        'A good answer names the specific mismatch: this value sits inside a script quoted string, not the ' +
+        'ordinary page text, so it needs its own kind of encoding meant for that spot, or better still, it ' +
+        'should be handed to the script as a genuinely separate piece of data through a safe method, rather ' +
+        'than glued into the script text as if it were part of the program itself.',
     },
     hints: [
       'Name the specific context the value is actually written into, and the character that context cares about.',
@@ -924,8 +1072,9 @@ const MODULE_ASF_3: Exercise[] = [
       },
     ],
     debrief:
-      'Keep this exercise in mind whenever a developer says a value is "already encoded". Encoded where, ' +
-      'and for what, is always the next question.',
+      'Keep this exercise in mind whenever a developer says a value is "already encoded". Encoded for ' +
+      'which exact spot on the page, and against which characters, is always the next question worth ' +
+      'asking.',
     practice: [],
   },
 ];
@@ -934,33 +1083,51 @@ const MODULE_ASF_3: Exercise[] = [
 
 const BROKEN_AUTH_TEACH = {
   concept:
-    'Authentication is where an attacker gets the most value for the least effort, because a single ' +
-    'working credential often unlocks everything a legitimate user could reach, so it is worth naming ' +
-    'the patterns that keep showing up.\n\n' +
-    'CREDENTIAL STUFFING is trying username and password pairs leaked from an unrelated breach, on the ' +
-    'assumption that people reuse passwords, which they do, at scale. It is defeated not by password ' +
-    'complexity rules but by rate limiting, multi-factor authentication, and checking new credentials ' +
-    'against known breach lists. A missing or generous LOCKOUT lets an attacker try thousands of ' +
-    'passwords against one account with no consequence; a lockout that is too aggressive, on the other ' +
-    'hand, becomes a denial-of-service tool an attacker uses against a legitimate user by deliberately ' +
-    'failing their login. VERBOSE ERROR MESSAGES that say "wrong password" versus "no such user" let an ' +
-    'attacker enumerate which usernames exist, which sounds minor until you notice it turns a random ' +
-    'guessing attack into a targeted one.',
+    'AUTHENTICATION is the general term for proving who you are before a system lets you in, most ' +
+    'commonly with a username and a password. It is where an attacker gets the most value for the least ' +
+    'effort, because one working password often unlocks everything a legitimate user could reach, the ' +
+    'same way one working house key opens the front door regardless of which specific room somebody ' +
+    'wanted to get into. A handful of specific patterns keep showing up around login pages, and they are ' +
+    'worth knowing by name.\n\n' +
+    'CREDENTIAL STUFFING means taking a list of real username and password pairs that leaked from some ' +
+    'other, unrelated website that already got broken into, and trying that exact same list against a ' +
+    'different website, betting that people reuse the same password in more than one place. They do, ' +
+    'constantly, at huge scale. This is not defeated by demanding a more complicated password, because the ' +
+    'attacker already has a real, working password, it is defeated by RATE LIMITING (slowing down or ' +
+    'blocking repeated attempts), MULTI-FACTOR AUTHENTICATION (requiring a second proof of identity beyond ' +
+    'just the password, like a code sent to a phone), and checking new signups or logins against lists of ' +
+    'passwords already known to have leaked.\n\n' +
+    'A LOCKOUT is a rule that locks an account after too many wrong password attempts in a row. A missing ' +
+    'or overly generous lockout lets an attacker try thousands of guesses against one account with no ' +
+    'consequence. But a lockout that is too aggressive becomes its own weapon: an attacker who does not ' +
+    'even want in can lock a real, legitimate user out of their own account on purpose, just by ' +
+    'deliberately failing the login enough times, which is itself a kind of attack called denial of ' +
+    'service. And a login page that gives a different error message for "wrong password" versus "no such ' +
+    'account exists" quietly tells an attacker which usernames are even real, which sounds minor until you ' +
+    'realize it turns a blind guessing attack into a targeted one aimed at accounts that are confirmed to ' +
+    'exist.',
 } as const;
 
 const SESSION_TEACH = {
   concept:
-    'A session token is what proves, after login, that a request belongs to an already-authenticated ' +
-    'user, and the handling of that token is where a lot of authentication work actually lives, ' +
-    'separate from the login form itself.\n\n' +
-    'SESSION FIXATION is an attacker setting a victim session identifier before they log in, often by ' +
-    'sending them a link containing one, and then using that same identifier themselves once the victim ' +
-    'authenticates, because the application never issued a fresh token at login. The fix is simple and ' +
-    'absolute: REGENERATE the session identifier at the moment of authentication, every time, so any ' +
-    'identifier an attacker planted beforehand becomes worthless the instant a real login happens. ' +
-    'Session tokens also need the same handling as any other credential: unpredictable, long enough to ' +
-    'resist guessing, invalidated on logout, and expired after a reasonable period of inactivity, ' +
-    'because a token that never expires is a password that can never be forced to change.',
+    'Logging in once, then staying logged in as you click around a website, works because the website ' +
+    'hands your browser a SESSION TOKEN right after you log in, a long, random string that acts like a ' +
+    'coat-check ticket. Every later request your browser makes includes that ticket, and the server ' +
+    'checks it instead of asking you to type your password again on every single page. Whoever holds a ' +
+    'valid ticket is treated as that logged-in person, so how that ticket gets handed out and looked ' +
+    'after matters as much as the login form itself.\n\n' +
+    'SESSION FIXATION is an attack where the attacker plants a specific ticket on the victim before they ' +
+    'even log in, often by sending them a link that already has one baked in, then simply uses that exact ' +
+    'same ticket themselves once the victim logs in, because the website never bothered handing out a ' +
+    'fresh ticket at the moment of login. It is like sneaking your own coat-check number onto someone ' +
+    'else coat before they hand it to the attendant, then presenting that same number yourself later to ' +
+    'claim it. The fix is simple and absolute: hand out a brand new ticket at the exact moment somebody ' +
+    'logs in, every single time, so any ticket an attacker planted beforehand becomes worthless the ' +
+    'instant a real login happens.\n\n' +
+    'Session tokens need the same careful handling as a password: unpredictable enough that nobody can ' +
+    'simply guess one, thrown away the moment somebody logs out, and set to expire on its own after a ' +
+    'while of inactivity, because a ticket that works forever is really just a password that can never be ' +
+    'changed.',
 } as const;
 
 const MODULE_ASF_4: Exercise[] = [
@@ -1003,8 +1170,9 @@ const MODULE_ASF_4: Exercise[] = [
       },
     ],
     debrief:
-      'When a breach report says "credential stuffing", the fix conversation should go straight to rate ' +
-      'limiting and multi-factor authentication, not to the password policy.',
+      'When a breach report uses the words "credential stuffing", the fix conversation should go ' +
+      'straight to slowing down repeated attempts and requiring a second proof of identity, not to making ' +
+      'people choose more complicated passwords.',
     practice: [],
   },
   {
@@ -1046,8 +1214,9 @@ const MODULE_ASF_4: Exercise[] = [
       },
     ],
     debrief:
-      'Check for this specifically in a review: search for where the session identifier is set, and ' +
-      'confirm it happens again, freshly, at the exact point login succeeds.',
+      'Check for this specifically whenever you review a login flow: find every place the session ' +
+      'ticket gets set, and confirm a fresh one is handed out again, right at the exact moment a login ' +
+      'actually succeeds.',
     practice: [],
   },
   {
@@ -1064,18 +1233,21 @@ const MODULE_ASF_4: Exercise[] = [
       'Select all that apply.',
     teach: {
       concept:
-        'A password reset flow is a second, informal login mechanism, and it is worth exactly as much ' +
-        'scrutiny as the primary one, because it is often built later, under less review, and treated as ' +
-        'a convenience feature rather than an authentication path.\n\n' +
-        'A short numeric code is only as strong as the number of GUESSES an attacker gets before it ' +
-        'expires or locks; a six-digit code with no rate limiting on the submission endpoint is guessable ' +
-        'in a practical number of attempts. A code, or a reset link containing a token, that never EXPIRES ' +
-        'stays valid long after the user has forgotten requesting it, including in an old email an ' +
-        'attacker might later access. The reset flow can also leak whether an email address has an ' +
-        'account at all, through a different response for "email sent" versus "no account found", the ' +
-        'same enumeration problem as the login form. And the final step, actually changing the password, ' +
-        'needs to invalidate every existing session for that account, or an attacker who already had a ' +
-        'foothold keeps it even after the legitimate owner "secures" the account.',
+        'A password reset flow, the "forgot your password" link, is really a second, informal way to log ' +
+        'in, and it deserves exactly as much scrutiny as the main login form, because it is very often ' +
+        'built later, reviewed less carefully, and thought of as a small convenience feature rather than ' +
+        'as another door into the account.\n\n' +
+        'A short numeric code is only as strong as the number of GUESSES an attacker actually gets before ' +
+        'it stops working. A six-digit code has a million possible values, which sounds like a lot, but if ' +
+        'nothing on the server slows down or limits repeated guesses, a computer can work through a ' +
+        'practical fraction of a million guesses quickly. A code, or a reset link containing one, that ' +
+        'never EXPIRES stays usable long after the person has forgotten they even requested it, including ' +
+        'inside an old email an attacker might dig up much later. The reset flow can also leak whether a ' +
+        'given email address even has an account at all, through a different response for "email sent" ' +
+        'versus "no account found", the exact same problem as the login form giving away which usernames ' +
+        'are real. And the final step, actually setting the new password, needs to throw away every ' +
+        'existing session ticket for that account, or an attacker who already had one keeps using it, even ' +
+        'after the real owner thinks they have just secured the account.',
     },
     options: [
       { id: 'a', label: 'A six-digit code with no rate limiting on the verification endpoint can be brute-forced in a practical number of attempts.' },
@@ -1103,8 +1275,8 @@ const MODULE_ASF_4: Exercise[] = [
       },
     ],
     debrief:
-      'Reset flows are one of the most productive places to spend review time, because they are built as ' +
-      'an afterthought far more often than the login form is.',
+      'Password reset flows are one of the most productive places to spend your review time, because ' +
+      'they get built as an afterthought far more often than the main login form does.',
     practice: [],
   },
   {
@@ -1120,16 +1292,22 @@ const MODULE_ASF_4: Exercise[] = [
       'of the following are true about what that actually covers? Select all that apply.',
     teach: {
       concept:
-        'HTTPS protects the CHANNEL a request travels across: it stops somebody on the network path from ' +
-        'reading the credentials in transit, and it stops the traffic being tampered with in flight. That ' +
-        'is real and necessary, and there is no good reason to run authentication without it.\n\n' +
-        'What it says nothing about is what happens once the request arrives. Session fixation, a missing ' +
-        'lockout, an unexpiring reset code, a reset flow that never invalidates old sessions, none of ' +
-        'those are transport problems, and encrypting the channel does not touch any of them. HTTPS also ' +
-        'does nothing about a client that is itself compromised, or a user who is phished into typing ' +
-        'their password into a site that also happens to be served over a valid, encrypted connection: ' +
-        'the padlock icon confirms the channel to that site is private, not that the site or the request ' +
-        'travelling through it is trustworthy.',
+        'When your browser talks to a website, the data travels across a network, through other people ' +
+        'computers and routers along the way, the way a letter passes through several sorting facilities ' +
+        'before reaching its destination. HTTPS is what seals that letter in a locked, tamper-evident ' +
+        'envelope for the whole trip: it stops anyone sitting along that path from reading what is inside, ' +
+        'and it stops them from secretly altering it in transit. That padlock icon in a browser address ' +
+        'bar means this particular envelope is sealed. This protection is real, necessary, and there is no ' +
+        'good reason to ever send a password without it.\n\n' +
+        'What HTTPS says absolutely nothing about is what happens once the sealed envelope is opened at ' +
+        'its destination. Session fixation, a missing lockout, a reset code that never expires, a reset ' +
+        'flow that forgets to throw away old session tickets, none of those are problems with the envelope ' +
+        'or the trip it took. They are problems with what the recipient does after opening it, and sealing ' +
+        'the envelope more tightly changes nothing about that. HTTPS also does nothing to protect against a ' +
+        'user own computer being compromised, or against being tricked into typing a password into a fake ' +
+        'site that also happens to have a perfectly valid, sealed envelope of its own: the padlock icon ' +
+        'only confirms the trip to that particular site is private, not that the site on the other end, or ' +
+        'what it does with what arrives, deserves to be trusted.',
     },
     options: [
       { id: 'a', label: 'HTTPS prevents somebody on the network path from reading credentials in transit, and from tampering with the request.' },
@@ -1157,8 +1335,9 @@ const MODULE_ASF_4: Exercise[] = [
       },
     ],
     debrief:
-      '"It is over HTTPS" answers exactly one question in a review. Have the next four questions ready, ' +
-      'because that answer will get offered as if it answered all of them.',
+      '"It is over HTTPS" answers exactly one question in a review, whether the trip across the network ' +
+      'is sealed. Have the next four questions ready anyway, because that one answer tends to get offered ' +
+      'up as if it had answered all of them.',
     practice: [],
   },
   {
@@ -1175,15 +1354,16 @@ const MODULE_ASF_4: Exercise[] = [
       'or the reset flow as your example.',
     teach: {
       concept:
-        'A precise answer separates two different guarantees rather than treating security as one binary ' +
-        'thing. HTTPS guarantees the channel: nobody on the network path can read or tamper with the ' +
-        'request in transit. It says nothing about the application logic layered on top of that channel, ' +
-        'which is where session fixation, a missing session invalidation, or an unexpiring reset code ' +
+        'A precise answer separates two different guarantees, rather than treating "is it secure" as one ' +
+        'single yes-or-no question. HTTPS guarantees the trip across the network: nobody along the way can ' +
+        'read or secretly alter the request while it travels. It says nothing at all about the actual ' +
+        'decision-making logic running on the website itself once that request arrives, which is exactly ' +
+        'where session fixation, a forgotten session invalidation, or a reset code that never expires ' +
         'actually live.\n\n' +
-        'The strongest version of the answer picks one concrete flaw and shows that encrypting the ' +
-        'channel does not touch it at all: a fixed session identifier is exactly as reusable by an ' +
-        'attacker whether the traffic carrying it was encrypted or not, because the vulnerability is in ' +
-        'which identifier gets reused, not in who could have read it along the way.',
+        'The strongest version of the answer picks one concrete flaw and shows that sealing the network ' +
+        'trip does not touch it at all. A fixed session ticket is exactly as reusable by an attacker ' +
+        'whether the traffic carrying it was sealed or not, because the actual problem is which ticket the ' +
+        'server chooses to trust, not who might have peeked at it in transit.',
     },
     hints: [
       'Name what HTTPS actually protects before saying what it misses.',
@@ -1214,8 +1394,8 @@ const MODULE_ASF_4: Exercise[] = [
       },
     ],
     debrief:
-      'Every authentication review you do will eventually meet this sentence in some form. Having the ' +
-      'precise, three-part answer ready is worth more than the general instinct that it is wrong.',
+      'Every authentication review you ever do will eventually run into this sentence in some form. ' +
+      'Having the precise, three-part answer ready beats a vague gut feeling that the sentence is wrong.',
     practice: [],
   },
 ];
@@ -1224,31 +1404,44 @@ const MODULE_ASF_4: Exercise[] = [
 
 const AUTHZ_TEACH = {
   concept:
-    'AUTHENTICATION answers who you are; AUTHORISATION answers what you, specifically, are allowed to do ' +
-    'right now. A system can get the first one perfectly right and still fail completely, because it ' +
-    'never asked the second question at all: it verified the request came from a genuine, logged-in ' +
-    'user, and then served whatever that user asked for without checking whether it belonged to them.\n\n' +
-    'That gap has a name, BROKEN ACCESS CONTROL, and it is consistently one of the most common serious ' +
-    'findings in real applications, precisely because it is invisible to every tool that only tests ' +
-    'authentication. A login form can be flawless, multi-factor can be enforced everywhere, and the ' +
-    'application can still let any authenticated user read or modify any other users data, because ' +
-    'authentication and authorisation are two separate checks and only one of them was ever implemented.',
+    'Think about a hotel. Checking a guest ID at the front desk answers one question: are you actually a ' +
+    'guest of this hotel. That is AUTHENTICATION, proving who somebody is. It is a completely different ' +
+    'question from asking: does this particular guest key open this particular room. That second ' +
+    'question, what a specific, already-identified person is allowed to actually do or reach, is called ' +
+    'AUTHORISATION.\n\n' +
+    'A hotel can get the ID check at the front desk perfectly right and still fail badly if every ' +
+    'guest key happens to open every room in the building. A system can do the exact same thing: it can ' +
+    'be excellent at confirming somebody is a real, logged-in user, and then hand over whatever that user ' +
+    'asks for without ever checking whether it was actually theirs to see.\n\n' +
+    'That gap has a name, BROKEN ACCESS CONTROL, and it shows up constantly in real software, precisely ' +
+    'because it is invisible to anything that only checks whether the login itself works. A login page can ' +
+    'be flawless, a second proof of identity can be required on every visit, and the application can still ' +
+    'let any logged-in user read or change any other user data, because "who are you" and "what are you ' +
+    'allowed to touch" are two separate questions, and only one of them ever got asked.',
 } as const;
 
 const IDOR_TEACH = {
   concept:
-    'INSECURE DIRECT OBJECT REFERENCE, IDOR, is what broken access control looks like at the code level: ' +
-    'an endpoint takes an identifier straight from the request and uses it to fetch a record, without ' +
-    'checking that the record belongs to the requester.\n\n' +
+    'An ENDPOINT is a specific web address a program listens on to handle one kind of request, like a ' +
+    'specific desk at a government office that only handles one form. Every record stored in a database, ' +
+    'such as an invoice, is usually given an ID, a unique number or code so it can be looked up again ' +
+    'later.\n\n' +
+    'INSECURE DIRECT OBJECT REFERENCE, usually shortened to IDOR, is what broken access control looks ' +
+    'like once you actually read the code. It is an endpoint that takes an ID straight out of the request ' +
+    'a visitor sent, and uses it to fetch a record, with nobody ever checking whether that record actually ' +
+    'belongs to the person asking for it:\n\n' +
     '  app.get("/invoices/:id", (req, res) => {\n' +
     '    const invoice = db.getInvoice(req.params.id);\n' +
     '    res.json(invoice);\n' +
     '  });\n\n' +
-    'Any authenticated user can change the id in the URL and read any invoice in the system, because ' +
-    'nothing here checks whose invoice it is. This is sometimes called BOLA, broken object-level ' +
-    'authorisation, in API-focused terminology, and it is the same gap. The fix is an OWNERSHIP CHECK, ' +
-    'comparing the record actual owner against the identity of the currently authenticated requester, ' +
-    'taken from the session rather than from anything the client supplied:\n\n' +
+    'This is like a coat-check clerk who hands you whatever coat matches whatever number you show them, ' +
+    'without ever checking that it was your coat to begin with. Any logged-in user here can simply change ' +
+    'the id in the web address and read anyone invoice in the whole system, because nothing checks whose ' +
+    'invoice it actually is. In API-focused terminology this same gap is sometimes called BOLA, broken ' +
+    'object-level authorisation, but it is the identical problem under a different name. The fix is an ' +
+    'OWNERSHIP CHECK: compare the record actual owner against the identity of whoever is currently logged ' +
+    'in, taken from the server own record of who that is (the session), never from anything the visitor ' +
+    'browser itself claims:\n\n' +
     '  const invoice = db.getInvoice(req.params.id);\n' +
     '  if (invoice.ownerId !== req.session.userId) return res.status(403).end();\n' +
     '  res.json(invoice);',
@@ -1295,8 +1488,9 @@ const MODULE_ASF_5: Exercise[] = [
       },
     ],
     debrief:
-      'When a finding sounds like "any user can see any other user data", assume it is an authorisation ' +
-      'gap before you even open the code, and go looking for the missing ownership check.',
+      'Whenever a report sounds like "any user can see any other user data", assume it is an ' +
+      'authorisation gap before you even open the code, and go straight to looking for the missing ' +
+      'ownership check.',
     practice: [],
   },
   {
@@ -1342,9 +1536,9 @@ const MODULE_ASF_5: Exercise[] = [
       },
     ],
     debrief:
-      'This exact code shape, fetch by id, return, no ownership check, is the single most common finding ' +
-      'in this whole field. Learning to spot it in half a second is worth more than any other pattern in ' +
-      'this package.',
+      'This exact shape of code, fetch a record by an id, return it, no ownership check, is the single ' +
+      'most common finding in this entire field. Learning to spot it on sight is worth more than any ' +
+      'other pattern in this package.',
     practice: [],
   },
   {
@@ -1361,16 +1555,20 @@ const MODULE_ASF_5: Exercise[] = [
       'user account. Which of the following are true? Select all that apply.',
     teach: {
       concept:
-        'Broken access control splits into two shapes that need different checks. HORIZONTAL is the IDOR ' +
-        'shape: two accounts at the same privilege level, and one reaches data that belongs to the other. ' +
-        'The check needed is an ownership comparison, exactly as in the invoice example.\n\n' +
-        'VERTICAL is a different failure: an account reaches functionality meant for a higher privilege ' +
-        'level entirely, an ordinary user calling an admin endpoint, regardless of whose data is involved. ' +
-        'The check needed here is a ROLE check on the action itself, verified on the server for every ' +
-        'request, not inferred from whether an admin link happens to be hidden in the interface for that ' +
-        'user. The two findings in this scenario need two different fixes: an ownership check for the ' +
-        'first, and a server-side role check on the delete endpoint for the second, and fixing one does ' +
-        'nothing for the other.',
+        'Broken access control splits into two shapes, and picturing an office building helps tell them ' +
+        'apart. HORIZONTAL is the IDOR shape from the previous exercise: two employees at the exact same ' +
+        'rank, and one of them wanders into a coworker desk drawer and reads their private files. Nobody ' +
+        'gained extra power here, one person at a given level just reached something belonging to another ' +
+        'person at that same level. The check needed is an ownership comparison, exactly like the invoice ' +
+        'example.\n\n' +
+        'VERTICAL is a different failure entirely: a regular employee walks into the manager-only office ' +
+        'and uses the manager equipment, regardless of whose specific files are involved. The problem is ' +
+        'not "whose desk is this", it is "this floor was never meant for you at all". The check needed here ' +
+        'is a ROLE check on the action itself (does this specific account actually hold the "admin" role), ' +
+        'verified by the server on every single request, never just assumed because the admin door happens ' +
+        'to be hidden from that user in the interface they see. The two findings in this scenario need two ' +
+        'different fixes: an ownership check for the first, and a server-side role check on the delete ' +
+        'endpoint for the second, and fixing one does absolutely nothing for the other.',
     },
     options: [
       { id: 'a', label: 'The order-viewing finding is horizontal access control: two accounts at the same privilege level, one reaching the others data.' },
@@ -1398,8 +1596,8 @@ const MODULE_ASF_5: Exercise[] = [
       },
     ],
     debrief:
-      'When a finding report groups "access control issues" as one bucket with one recommended fix, split ' +
-      'it into horizontal and vertical before you accept the remediation plan.',
+      'When a report lumps "access control issues" together into one bucket with one recommended fix, ' +
+      'split it into horizontal and vertical yourself before accepting the plan to fix it.',
     practice: [],
   },
   {
@@ -1416,16 +1614,20 @@ const MODULE_ASF_5: Exercise[] = [
       'of the following are true? Select all that apply.',
     teach: {
       concept:
-        'Hiding a link, or a button, in the interface changes what a normal user is shown, and changes ' +
-        'nothing about what the server will accept if the underlying request is made directly, with the ' +
-        'URL typed in, an old bookmark, or a request built by any tool other than clicking through the ' +
-        'application as intended. This is SECURITY THROUGH OBSCURITY applied to authorisation, and it ' +
-        'fails the moment anyone looks past the interface, which takes no special skill.\n\n' +
-        'The same failure shows up in a subtler form: relying on an identifier being hard to guess, as in ' +
-        'the earlier invoice exercise, or relying on a feature flag or a client-side role check that the ' +
-        'server never re-verifies. In every version, the actual authorisation decision has to be enforced ' +
-        'at the server, on every request, because that is the only point neither the interface nor the ' +
-        'client can be relied on to protect.',
+        'Removing the "employees only" sign from a door does not lock the door. It just means fewer ' +
+        'honest people notice it before walking through. Hiding a link or a button in a website interface ' +
+        'works the same way: it changes what an ordinary, well-behaved user happens to see, and changes ' +
+        'absolutely nothing about what the server will actually accept if that same request is made ' +
+        'directly, by typing the address in by hand, reusing an old bookmark, or using any of the ' +
+        'ordinary, freely available tools that send a web request without ever touching the visible page ' +
+        'at all. This approach is called SECURITY THROUGH OBSCURITY, relying on something being hidden ' +
+        'rather than actually locked, and it fails the moment anyone looks past the interface, which takes ' +
+        'no special skill whatsoever.\n\n' +
+        'The same mistake shows up in subtler forms too: relying on an ID being hard to guess, as in the ' +
+        'earlier invoice exercise, or relying on a setting in the browser-side code that the server itself ' +
+        'never double-checks. In every version, the real authorisation decision has to actually be made by ' +
+        'the server, on every single request, because that is the one point neither the interface nor the ' +
+        'visitor own browser can ever be trusted to enforce honestly.',
     },
     options: [
       { id: 'a', label: 'Removing a link from the interface does not change whether the server accepts the underlying request when made directly.' },
@@ -1454,9 +1656,9 @@ const MODULE_ASF_5: Exercise[] = [
       },
     ],
     debrief:
-      'A useful review habit: for any access control fix proposed, ask specifically what the server does ' +
-      'differently now, not what the interface looks like differently. If the answer is only the ' +
-      'interface, the finding is still open.',
+      'A useful habit to build: whenever a fix for an access control problem is proposed, ask exactly ' +
+      'what the server itself does differently now, not what the visible interface looks like ' +
+      'differently. If the honest answer is only the interface changed, the problem is still wide open.',
     practice: [],
   },
   {
@@ -1477,15 +1679,19 @@ const MODULE_ASF_5: Exercise[] = [
       'including where each side of the comparison should come from.',
     teach: {
       concept:
-        'A precise fix description names both sides of the comparison, not just that a check is missing. ' +
-        'One side is the record actual owner, read from the database alongside the document itself. The ' +
-        'other side is the current requester identity, and it has to come from the SERVER-SIDE session or ' +
-        'authentication context, never from a field the client supplied in the request, because a client ' +
-        'field can simply be changed to any value the attacker wants.\n\n' +
-        'A vague answer says "add an authorisation check". A precise one says compare doc.ownerId, read ' +
-        'from the database, against req.session.userId, taken from the servers own record of who is ' +
-        'logged in, and reject the request if they do not match. That level of precision is what makes a ' +
-        'finding actionable rather than aspirational.',
+        'A precise fix description names both sides of a comparison, not just the vague fact that a check ' +
+        'is missing, the same way "check the coat number against the ticket number" is a real instruction ' +
+        'and "be more careful with the coats" is not. One side of this comparison is the record actual ' +
+        'owner, read straight out of the database alongside the document itself. The other side is the ' +
+        'identity of whoever is currently making the request, and it has to come from the server own ' +
+        'record of who is logged in (the session), never from any field the visitor own browser handed ' +
+        'over in the request, because a value supplied by the visitor can simply be changed to anything an ' +
+        'attacker wants.\n\n' +
+        'A vague answer just says "add an authorisation check". A precise one says: compare doc.ownerId, ' +
+        'read from the database, against req.session.userId, taken from the server own record of who is ' +
+        'logged in, and reject the request outright if the two do not match. That level of precision is ' +
+        'what turns a finding into something someone can actually fix, rather than something they have to ' +
+        'guess at.',
     },
     hints: [
       'Name the two specific values being compared, not just "add a check".',
@@ -1517,7 +1723,8 @@ const MODULE_ASF_5: Exercise[] = [
     ],
     debrief:
       'This is the pattern that recurs across every access control finding in this module. Practise ' +
-      'writing it this precisely until it is automatic.',
+      'writing it this precisely, naming both sides of the comparison every time, until it becomes ' +
+      'automatic.',
     practice: [],
   },
 ];
@@ -1526,53 +1733,74 @@ const MODULE_ASF_5: Exercise[] = [
 
 const DESERIALISATION_TEACH = {
   concept:
-    'Serialisation turns an in-memory object into bytes to store or send; deserialisation turns those ' +
-    'bytes back into an object. The danger appears when the bytes come from somewhere untrusted, because ' +
-    'several common serialisation formats let the byte stream specify not just data but which CLASS to ' +
-    'instantiate and how to construct it, and an attacker who controls that stream can name a class the ' +
-    'application never intended to be built from outside input.\n\n' +
-    'Chained together, a sequence of otherwise-unremarkable classes already present on the system can be ' +
-    'made to perform an unintended action as a side effect of being constructed and combined, a GADGET ' +
-    'CHAIN, and in the worst cases this reaches arbitrary code execution without the attacker ever ' +
-    'uploading a file that looks like code at all. The general rule: never deserialise data from an ' +
-    'untrustworthy source into a native object format that supports arbitrary type resolution. Where the ' +
-    'data has to cross that boundary, use a restrictive format such as JSON with a fixed, validated ' +
-    'schema, which has no notion of "construct this class" built into it at all.',
+    'While a program is running, the information it is working with lives in memory as OBJECTS: ' +
+    'structured chunks of data, roughly like a filled-out form with several fields. To save that ' +
+    'information to disk, or send it to another computer, the program needs to flatten it into a plain ' +
+    'sequence of bytes first, a process called SERIALISATION, like folding a piece of furniture flat to ' +
+    'ship it. DESERIALISATION is the reverse: taking that flattened sequence of bytes and rebuilding it ' +
+    'back into a real, usable object again, unfolding the furniture back into its full shape.\n\n' +
+    'The danger appears when those bytes come from somewhere the program cannot fully trust, because ' +
+    'several common ways of doing this let the byte stream specify not just the data inside the object, ' +
+    'but which exact kind of object, its CLASS, to build in the first place, and how to build it. An ' +
+    'attacker who controls that byte stream can name a completely different kind of object than the ' +
+    'application ever meant to build from outside data.\n\n' +
+    'Chained together, several ordinary, harmless-looking classes that are already sitting on the system ' +
+    'can be made to perform something unintended, purely as a side effect of being constructed and ' +
+    'combined in a particular order, a GADGET CHAIN. In the worst cases this lets an attacker run their ' +
+    'own commands on the server, without ever uploading anything that looks like a program at all. The ' +
+    'general rule: never rebuild an object straight from untrustworthy bytes using a method that lets the ' +
+    'byte stream choose which class to build. Where data genuinely has to cross that boundary, use a ' +
+    'restrictive format instead, such as JSON, plain structured text with a fixed, checked shape, which ' +
+    'has no built-in notion of "go build this particular class" at all.',
 } as const;
 
 const SSRF_TEACH = {
   concept:
-    'SERVER-SIDE REQUEST FORGERY happens when an application takes a URL, or a piece of one such as a ' +
-    'hostname, from a user, and then makes a request to it from the server itself. The danger is not the ' +
-    'request the developer had in mind, fetching a profile picture or checking a webhook, it is every ' +
-    'OTHER request the server is capable of making that the developer never considered.\n\n' +
-    'A server usually sits inside a network with reach an outside attacker does not have on their own: ' +
-    'internal admin panels with no separate authentication because they were never meant to be reachable ' +
-    'from outside, internal-only APIs, and on cloud infrastructure, an internal metadata service that ' +
-    'many providers expose only to the instance itself, which can hand back credentials the running ' +
-    'application uses. An attacker who can make the server request a URL of their choosing can point it ' +
-    'at any of these, using the servers own network position as a proxy into places the attacker could ' +
-    'never have reached directly. The fix combines an ALLOWLIST of destinations the feature actually ' +
-    'needs, blocking requests to internal address ranges, and refusing to follow a redirect to a ' +
-    'destination that was not itself validated.',
+    'A SERVER is simply the computer, somewhere else, that runs a website or an application and answers ' +
+    'requests from users. Many features need the server itself to go fetch something from a web address, ' +
+    'for example downloading a profile picture from a link a user pasted in.\n\n' +
+    'SERVER-SIDE REQUEST FORGERY, SSRF for short, happens when an application lets a user supply that web ' +
+    'address, or a piece of one, and then has the server itself make a request to it. The danger is not ' +
+    'the one request the developer had in mind, like fetching a picture. It is every OTHER request the ' +
+    'server is technically capable of making that the developer never thought about.\n\n' +
+    'A server usually sits inside a private network that has reach an outsider does not have from their ' +
+    'own computer, the way an employee badge opens doors inside a building that a visitor standing on the ' +
+    'sidewalk cannot even see. That includes internal admin control panels that were never given their own ' +
+    'password because nobody expected them to be reachable from outside at all, other internal-only tools, ' +
+    'and, on cloud computing platforms, a special internal address that many providers expose only to the ' +
+    'server itself, which can hand back genuine credentials the running application uses. An attacker who ' +
+    'can make the server fetch a web address of their own choosing can point it at any of these, using the ' +
+    'server own position inside that private network as a proxy into places the attacker could never have ' +
+    'walked into directly. The fix combines an ALLOWLIST, a fixed list of destinations the feature ' +
+    'genuinely needs and nothing else, blocking requests aimed at internal network addresses, and refusing ' +
+    'to blindly follow a redirect to some other destination that was never itself checked.',
 } as const;
 
 const SUPPLY_CHAIN_TEACH = {
   concept:
-    'Almost no application is written entirely by the team that ships it. It depends on other packages, ' +
-    'which depend on further packages, and a vulnerability or a deliberately malicious change anywhere ' +
-    'in that TRANSITIVE tree becomes part of the application the moment it is installed, whether anybody ' +
-    'on the team ever reads that code or not.\n\n' +
-    'TYPOSQUATTING is publishing a malicious package under a name one character away from a popular one, ' +
-    'hoping for a mistyped install command. A MAINTAINER TAKEOVER is an attacker gaining control of a ' +
-    'legitimate, widely used package, through a compromised account or a maintainer handing off ' +
-    'ownership without vetting who they handed it to, and shipping a malicious update to everyone who ' +
-    'already depends on it, which is more dangerous than typosquatting because it reaches people who did ' +
-    'nothing wrong. A LOCKFILE pins exact versions so a routine install cannot silently pull in a ' +
-    'compromised update, and a SOFTWARE BILL OF MATERIALS, an SBOM, is an inventory of exactly what is in ' +
-    'a build, which is what makes it possible to answer "are we affected" quickly when a dependency is ' +
-    'disclosed as compromised, rather than needing to reconstruct the dependency tree from scratch under ' +
-    'pressure.',
+    'Almost nobody builds furniture entirely from raw lumber they cut themselves. They buy pre-made ' +
+    'screws, hinges, and drawer slides from other manufacturers, who in turn bought their raw materials ' +
+    'from somewhere else again. If one of those hinge manufacturers, three suppliers back, starts using a ' +
+    'cheap metal that snaps, every piece of furniture built with that hinge inherits the flaw, whether the ' +
+    'furniture maker ever personally inspected that hinge or not.\n\n' +
+    'Software works the same way. Almost no application is written entirely by the team that ships it. It ' +
+    'is built out of PACKAGES, pre-written pieces of code other people published for anyone to reuse, and ' +
+    'those packages depend on further packages of their own. A security weakness, or a deliberately ' +
+    'malicious change, anywhere in that whole chain of borrowed code becomes part of the final application ' +
+    'the moment it gets installed, whether anyone on the team ever actually read that particular piece of ' +
+    'borrowed code or not.\n\n' +
+    'TYPOSQUATTING is publishing a malicious package under a name that is one typo away from a genuinely ' +
+    'popular one, betting that somebody will mistype the name when installing it. A MAINTAINER TAKEOVER is ' +
+    'an attacker gaining control of a real, already widely-used package, whether by breaking into the ' +
+    'original author account or by the original author handing off ownership to someone without checking ' +
+    'who they really were, and then shipping a malicious update to everyone who already, legitimately, ' +
+    'depends on it. This is more dangerous than typosquatting because it reaches people who did absolutely ' +
+    'nothing wrong. A LOCKFILE is a file that pins the exact version of every package in use, so a routine ' +
+    'install cannot silently pull in a newly compromised update without anyone noticing. A SOFTWARE BILL ' +
+    'OF MATERIALS, an SBOM, is a complete inventory listing exactly what pieces of borrowed code went into ' +
+    'a given build, the way a food label lists every ingredient, which is what makes it possible to answer ' +
+    '"are we affected" quickly when one of those ingredients is announced as contaminated, instead of ' +
+    'having to reconstruct the entire ingredient list from scratch under pressure.',
 } as const;
 
 const MODULE_ASF_6: Exercise[] = [
@@ -1616,9 +1844,9 @@ const MODULE_ASF_6: Exercise[] = [
       },
     ],
     debrief:
-      'If a finding involves the words "deserialise" and "untrusted" in the same sentence, treat it as ' +
-      'high severity by default. This bug class has produced remote code execution in production systems ' +
-      'repeatedly, across many languages.',
+      'If a report puts the words "deserialise" and "untrusted" in the same sentence, treat it as high ' +
+      'severity by default. This particular bug class has repeatedly let attackers run their own commands ' +
+      'on real, live systems, across many different programming languages.',
     practice: [],
   },
   {
@@ -1660,8 +1888,8 @@ const MODULE_ASF_6: Exercise[] = [
       },
     ],
     debrief:
-      'Any feature that fetches a user-supplied URL server-side deserves the same scrutiny as this one, ' +
-      'regardless of how small or cosmetic the feature seems.',
+      'Any feature where the server itself fetches a web address a user typed in deserves the same close ' +
+      'look as this one, no matter how small or purely cosmetic the feature seems on the surface.',
     practice: [],
   },
   {
@@ -1704,8 +1932,9 @@ const MODULE_ASF_6: Exercise[] = [
       },
     ],
     debrief:
-      'Dependency risk is not solved by picking better libraries once. It is a standing process: ' +
-      'lockfiles, scanning, and an SBOM you can actually query on the day a disclosure lands.',
+      'Dependency risk is not something you solve once by picking better packages. It is an ongoing ' +
+      'process: lockfiles, regular scanning, and an ingredient list you can actually check on the exact ' +
+      'day some borrowed piece of code is announced as compromised.',
     practice: [],
   },
   {
@@ -1721,17 +1950,21 @@ const MODULE_ASF_6: Exercise[] = [
       'following pairings are correct? Select all that apply.',
     teach: {
       concept:
-        'Each of these three risks has a mitigation shaped around its actual mechanism, and mixing them up ' +
-        'produces advice that sounds reasonable and protects nothing. Deserialisation is closed by ' +
-        'avoiding a format with arbitrary type resolution for untrusted data, using a restrictive, ' +
-        'schema-validated format such as JSON instead. SSRF is closed by an allowlist of legitimate ' +
-        'destinations, blocking internal address ranges, and refusing to follow unvalidated redirects. ' +
-        'Supply chain risk is managed by pinning dependencies with a lockfile, scanning for known ' +
-        'vulnerabilities, and keeping an SBOM current enough to answer a disclosure quickly.\n\n' +
+        'A fire extinguisher, a smoke detector, and a first-aid kit all belong on a kitchen wall, and all ' +
+        'three matter, but each one addresses a completely different kind of emergency. Reaching for the ' +
+        'fire extinguisher when someone has cut their finger helps nobody.\n\n' +
+        'Each of the three risks in this module has a mitigation shaped around its own specific mechanism, ' +
+        'and mixing them up produces advice that sounds reasonable while protecting nothing. Deserialising ' +
+        'untrusted data safely means avoiding formats that let the incoming bytes choose which class to ' +
+        'build, using a restrictive, checked format such as JSON instead. SSRF is closed by a fixed list of ' +
+        'legitimate destinations, blocking requests aimed at internal network addresses, and refusing to ' +
+        'blindly follow redirects. Supply chain risk is managed by pinning exact dependency versions, ' +
+        'scanning regularly for known weaknesses, and keeping an ingredient list current enough to answer ' +
+        'a disclosure quickly.\n\n' +
         'None of these three mitigations substitutes for either of the others, because the three risks do ' +
-        'not share a mechanism: one is about what a byte stream is allowed to construct, one is about ' +
-        'where a server is allowed to send a request, and one is about what code ends up in the build at ' +
-        'all.',
+        'not share a mechanism at all: one is about what a stream of bytes is allowed to build, one is ' +
+        'about where a server is allowed to send a request, and one is about what borrowed code ends up in ' +
+        'the finished build in the first place.',
     },
     options: [
       { id: 'a', label: 'Deserialisation risk is reduced by using a restrictive, schema-validated format such as JSON for untrusted data, rather than a native format with arbitrary type resolution.' },
@@ -1759,8 +1992,8 @@ const MODULE_ASF_6: Exercise[] = [
       },
     ],
     debrief:
-      'When a remediation plan proposes one tool to cover several unrelated findings, check the mechanism ' +
-      'of each finding against what that tool actually inspects before accepting it.',
+      'When a plan proposes one single tool to cover several unrelated findings, check exactly what each ' +
+      'finding involves against what that tool actually looks at, before accepting the plan.',
     practice: [],
   },
   {
@@ -1781,15 +2014,16 @@ const MODULE_ASF_6: Exercise[] = [
       'In three or four sentences, explain the risk and what change you would ask for.',
     teach: {
       concept:
-        'A good SSRF finding names what the server would be tricked into reaching, not just that a URL is ' +
-        'user-supplied. Here, whatever address req.body.url contains is a destination the server will ' +
-        'later make a real network request to, on the servers own network position, with no restriction ' +
-        'on what that address can be.\n\n' +
-        'A good fix names a concrete control rather than a vague instruction to validate the URL: block ' +
-        'requests to internal and link-local address ranges, resolve the hostname and check the resulting ' +
-        'address rather than trusting the string alone, since a hostname can resolve to an internal ' +
-        'address, and either allowlist expected destinations or explicitly refuse to follow redirects to ' +
-        'an address that was not itself checked.',
+        'A good SSRF finding names exactly what the server would be tricked into reaching, not just the ' +
+        'general fact that a web address came from a user. Here, whatever address req.body.url contains is ' +
+        'somewhere the server will later make a real request to, using the server own position inside its ' +
+        'private network, with nothing at all restricting what that address is allowed to be.\n\n' +
+        'A good fix names a concrete control rather than a vague instruction to "validate the URL". Block ' +
+        'requests aimed at internal network addresses. Look up where the address actually points before ' +
+        'trusting it, rather than trusting the typed text alone, since an ordinary-looking hostname can ' +
+        'resolve to an internal address behind the scenes. And either keep a fixed list of destinations the ' +
+        'feature genuinely needs, or explicitly refuse to follow a redirect to some other address that was ' +
+        'never itself checked.',
     },
     hints: [
       'Name what the server will actually do with this value later, not just that it is user input.',
@@ -1821,8 +2055,9 @@ const MODULE_ASF_6: Exercise[] = [
       },
     ],
     debrief:
-      'Webhook registration endpoints are one of the most common places SSRF findings turn up in real ' +
-      'products, because the feature genuinely needs the server to fetch a user-chosen URL.',
+      'Webhook registration endpoints (features that ask a user for a web address the server should call ' +
+      'later) are one of the most common places SSRF findings turn up in real products, precisely because ' +
+      'the feature genuinely needs the server to fetch a user-chosen address.',
     practice: [],
   },
 ];
@@ -1831,44 +2066,61 @@ const MODULE_ASF_6: Exercise[] = [
 
 const REVIEW_METHOD_TEACH = {
   concept:
-    'A large diff reviewed top to bottom, line by line, in the order it happens to appear, is a slow way ' +
-    'to find the finding that matters and a fast way to run out of attention before you reach it. An ' +
-    'efficient review reads the diff for SHAPE first: what changed at a structural level, which files ' +
-    'touch authentication, data access, or external input, and which are mechanical, a rename, a ' +
-    'formatting pass, a version bump, that can be skimmed rather than studied.\n\n' +
-    'From there, review works outward from TRUST BOUNDARIES: find every place a value arrives from ' +
-    'outside the code, a request parameter, a file upload, a message from a queue, a response from a ' +
-    'third-party API, and trace what happens to it. Static analysis and linters earn their keep here by ' +
-    'pre-filtering the mechanical patterns, string concatenation into a query, an unencoded write into ' +
-    'a template, so a reviewer human attention goes to the judgement calls a tool cannot make: whether ' +
-    'this particular authorisation check is actually correct for this particular endpoint.',
+    'A DIFF is the set of changes somebody made to a piece of code, shown as lines removed and lines ' +
+    'added, so a reviewer can see exactly what changed without rereading the entire file. Reading a large ' +
+    'diff top to bottom, line by line, in whatever order it happens to appear in, is a bit like proofing a ' +
+    'whole novel one word at a time without ever skimming the table of contents first: slow, exhausting, ' +
+    'and the important twist near the end gets the tired, distracted read instead of the careful one.\n\n' +
+    'An efficient review reads a diff for SHAPE first: what changed at a big-picture level, which files ' +
+    'touch logins, stored data, or anything coming in from outside the program, and which changes are ' +
+    'purely mechanical, a rename, a formatting cleanup, a version number bump, that can be skimmed rather ' +
+    'than studied word by word.\n\n' +
+    'From there, review works outward from TRUST BOUNDARIES: every place a value arrives from outside the ' +
+    'code itself, something typed into a form, an uploaded file, a message from another system, a reply ' +
+    'from an outside service, and traces what happens to it from there. Automated tools that scan code for ' +
+    'known-dangerous patterns earn their keep here by pre-filtering the mechanical stuff, so a human ' +
+    'reviewer attention goes toward the judgement calls a tool genuinely cannot make on its own, such as ' +
+    'whether this particular permission check actually makes sense for this particular feature.',
 } as const;
 
 const PRIORITY_UNDER_PRESSURE_TEACH = {
   concept:
-    'Under a real deadline, not everything in a diff gets equal attention, and knowing the order to work ' +
-    'in is most of the skill. Highest priority: any change to AUTHENTICATION or AUTHORISATION logic, ' +
-    'because a mistake there tends to be broad and silent. Next: any new place EXTERNAL INPUT is ' +
-    'accepted and used, a new endpoint, a new file upload, a new integration, because that is where the ' +
-    'injection and SSRF classes live. Next: anything touching SECRETS or CRYPTOGRAPHY, a hardcoded key, ' +
-    'a weakened algorithm, a certificate check disabled for a test that never got removed. Lowest, not ' +
-    'because it never matters but because it rarely costs much to fix later: naming, formatting, and ' +
-    'structural preferences that do not change behaviour.\n\n' +
+    'A paramedic arriving at an accident scene with several injured people does not treat them in the ' +
+    'order they happen to be standing in. They check who is bleeding out first and who has a scraped knee ' +
+    'last, because the order of attention is itself a life-or-death decision, not just a formality. A code ' +
+    'review under a real deadline needs the same discipline: not everything in a diff gets equal ' +
+    'attention, and knowing what order to work in is most of the actual skill.\n\n' +
+    'Highest priority: any change to login or permission-checking logic, because a mistake there tends to ' +
+    'be broad, affecting everyone, and silent, giving no obvious symptom that anything is wrong. Next: any ' +
+    'new place that accepts information from outside the program, a new web address the server responds ' +
+    'to, a new file upload feature, a new connection to an outside service, because that is exactly where ' +
+    'the injection and SSRF bugs from earlier modules tend to live. Next: anything touching passwords, ' +
+    'secret keys, or encryption, a key typed directly into the code, a security check quietly disabled for ' +
+    'a test and never turned back on. Lowest priority, not because it never matters but because it rarely ' +
+    'costs much to fix later: naming, formatting, and other preferences that do not change what the code ' +
+    'actually does.\n\n' +
     'A reviewer working against a clock who spends the first ten minutes on formatting has already lost ' +
-    'the review, whatever they find in the remaining time.',
+    'the review, no matter what they manage to find in whatever time is left.',
 } as const;
 
 const FINDING_VS_NITPICK_TEACH = {
   concept:
-    'A FINDING has three properties: a concrete way it can be triggered, a consequence if it is, and a ' +
-    'reason it was not supposed to be possible. "An attacker who controls this field can read another ' +
-    'user data, because there is no ownership check" is a finding, whatever tone it is delivered in.\n\n' +
-    'A NITPICK is a preference: naming, a different but equally correct approach, a style the reviewer ' +
-    'would have chosen differently. Both are worth raising, but conflating them wastes a developer time ' +
-    'and dilutes the findings that actually matter, because a review comment stream where every third ' +
-    'item is a naming preference trains the reader to skim all of it, including the one comment they ' +
-    'needed to stop and read carefully. Labelling comments explicitly, this is a finding versus this is a ' +
-    'preference, costs nothing and fixes the problem directly.',
+    'Imagine a restaurant health inspector report. "There is no thermometer in the fridge, so nobody can ' +
+    'tell whether food is being kept at a safe temperature, and that risks food poisoning" is a real ' +
+    'finding: something concrete is wrong, something bad follows from it, and there is a clear reason it ' +
+    'should not be that way. "I would have hung the calendar on the other wall" is not that. It is a ' +
+    'preference.\n\n' +
+    'In a code review, a FINDING has those same three properties: a concrete way the problem can actually ' +
+    'be triggered, a real consequence if it is, and a reason it was never supposed to be possible in the ' +
+    'first place. "An attacker who controls this field can read another user data, because there is no ' +
+    'ownership check" is a finding, however politely or bluntly it happens to be phrased.\n\n' +
+    'A NITPICK is a preference: a naming choice, a different but equally valid way of writing the same ' +
+    'thing, a style the reviewer personally would have picked differently. Both kinds of comments are ' +
+    'worth raising, but mixing them together without distinction wastes a programmer time and buries the ' +
+    'comments that actually matter, because a list of comments where every third one is a naming ' +
+    'preference trains the reader to skim the whole list, including the one comment they genuinely needed ' +
+    'to stop and read carefully. Labelling comments explicitly, saying outright "this is a finding" versus ' +
+    '"this is just a preference", costs nothing to write and fixes the whole problem directly.',
 } as const;
 
 const MODULE_ASF_7: Exercise[] = [
@@ -1910,8 +2162,8 @@ const MODULE_ASF_7: Exercise[] = [
       },
     ],
     debrief:
-      'This is a skill you can practise deliberately: before reading a single line of a real diff, spend ' +
-      'thirty seconds classifying every changed file by what kind of change it is.',
+      'This is a skill you can practise on purpose: before reading a single line of a real diff, spend ' +
+      'thirty seconds sorting every changed file into what kind of change it actually is.',
     practice: [],
   },
   {
@@ -1954,8 +2206,9 @@ const MODULE_ASF_7: Exercise[] = [
       },
     ],
     debrief:
-      'A twenty-minute review that covers the login change and the upload feature thoroughly and skips ' +
-      'the renaming entirely is a better review than one that skims all four equally.',
+      'A twenty-minute review that covers the login change and the upload feature thoroughly, and skips ' +
+      'the variable renaming entirely, is a genuinely better review than one that skims all four equally ' +
+      'and truly studies none of them.',
     practice: [],
   },
   {
@@ -1997,8 +2250,9 @@ const MODULE_ASF_7: Exercise[] = [
       },
     ],
     debrief:
-      'Adopt the habit of labelling your own comments this way. It costs one word and it is the single ' +
-      'cheapest thing you can do to make a review queue easier to triage.',
+      'Adopt the habit of labelling your own comments this way from the start. It costs one extra word ' +
+      'and it is the single cheapest thing you can do to make a whole list of review comments easier to ' +
+      'sort through.',
     practice: [],
   },
   {
@@ -2015,16 +2269,21 @@ const MODULE_ASF_7: Exercise[] = [
       'long list of theoretical issues. Which of the following are true? Select all that apply.',
     teach: {
       concept:
-        'A finding that names an exploitable path is actionable: it says how the flaw is triggered and ' +
-        'what happens as a result. A finding that names every place a pattern appears, regardless of ' +
-        'whether it is actually reachable by an attacker, produces volume without triage, and a developer ' +
-        'facing forty flagged lines, most of which are already protected upstream, learns to discount the ' +
+        'A smoke alarm that only goes off when there is an actual fire is useful. A smoke alarm that goes ' +
+        'off every time somebody makes toast eventually gets its battery pulled out, and then it fails to ' +
+        'warn anyone the one time there really is a fire. Crying wolf too often has a real cost, even when ' +
+        'every individual warning was technically true.\n\n' +
+        'A finding that names an exploitable path is actionable: it says exactly how the problem gets ' +
+        'triggered and what happens as a result. A finding that instead flags every single place a risky ' +
+        'pattern of code happens to appear, whether or not it is actually reachable by an attacker, ' +
+        'produces volume without any actual sorting done, and a programmer facing forty flagged lines, most ' +
+        'of which turn out to already be protected by an earlier check elsewhere, learns to ignore the ' +
         'whole list rather than work through it.\n\n' +
-        'A good write-up does the triage the reader would otherwise have to redo: it distinguishes a place ' +
-        'genuinely reachable by untrusted input from a place already covered by an earlier check, and ' +
-        'says so explicitly rather than flagging both identically. This is not about lowering the bar for ' +
-        'what gets reported, it is about reporting what is actually true of each instance rather than ' +
-        'applying one label to all of them.',
+        'A good write-up does the sorting the reader would otherwise have to redo themselves: it tells ' +
+        'apart a spot genuinely reachable by untrusted input from a spot already covered by an earlier ' +
+        'check, and says so explicitly, rather than flagging both identically. This is not about lowering ' +
+        'the bar for what counts as worth reporting, it is about reporting what is actually true of each ' +
+        'individual case rather than slapping one label on all of them at once.',
     },
     options: [
       { id: 'a', label: 'A finding that specifies whether a flagged instance is actually reachable by untrusted input is more useful than one that flags the pattern everywhere it appears.' },
@@ -2053,8 +2312,8 @@ const MODULE_ASF_7: Exercise[] = [
       },
     ],
     debrief:
-      'A shorter list of triaged, exploitable findings gets fixed faster than a longer list of theoretical ' +
-      'ones, because the developer reading it can tell where to start.',
+      'A shorter list of sorted, genuinely exploitable findings gets fixed faster than a longer list of ' +
+      'theoretical ones, simply because the programmer reading it can actually tell where to start.',
     practice: [],
   },
   {
@@ -2071,13 +2330,18 @@ const MODULE_ASF_7: Exercise[] = [
       'three or four sentences, write the comment you would leave.',
     teach: {
       concept:
-        'A finding written under time pressure still needs its three properties: trigger, consequence, and ' +
-        'fix. What changes under time pressure is not rigour, it is length: the same three ideas expressed ' +
-        'as compactly as possible, because a reviewer with four minutes left does not have time to write, ' +
-        'or the developer to read, a paragraph of preamble.\n\n' +
-        'A strong compressed comment states the trigger in one clause, the consequence in one clause, and ' +
-        'the fix in one clause, in that order, with nothing else. That is the same finding as the fuller ' +
-        'write-up from module five, deliberately shortened rather than deliberately weakened.',
+        'A doctor calling in a diagnosis over a crackly radio during an emergency does not stop being ' +
+        'rigorous just because there is no time for a full explanation. They still say what is wrong, what ' +
+        'it means, and what to do about it, just as few words as the situation allows. A finding written ' +
+        'under real time pressure needs that same discipline: it still needs its three parts, the trigger, ' +
+        'the consequence, and the fix. What changes under time pressure is not how careful the thinking is, ' +
+        'it is the length: the exact same three ideas, said as compactly as possible, because a reviewer ' +
+        'with four minutes left has no time to write a paragraph of preamble, and the programmer reading it ' +
+        'has no time to wade through one either.\n\n' +
+        'A strong, compressed comment states the trigger in one sentence, the consequence in one sentence, ' +
+        'and the fix in one sentence, in that order, with nothing else added. That is the exact same ' +
+        'finding as the fuller write-up from earlier in this package, deliberately made shorter rather than ' +
+        'deliberately made weaker.',
     },
     hints: [
       'Keep the three parts, trigger, consequence, fix, and cut everything else rather than cutting one of the three.',
@@ -2106,8 +2370,9 @@ const MODULE_ASF_7: Exercise[] = [
       },
     ],
     debrief:
-      'Compression under pressure is the actual skill this module has been building toward. A finding is ' +
-      'no less rigorous for being three sentences instead of a paragraph.',
+      'Compressing a finding under pressure without losing its substance is the actual skill this module ' +
+      'has been building toward. A finding is no less rigorous for being three sentences instead of a ' +
+      'paragraph.',
     practice: [],
   },
 ];
@@ -2116,33 +2381,46 @@ const MODULE_ASF_7: Exercise[] = [
 
 const STRIDE_TEACH = {
   concept:
-    'STRIDE is a checklist for asking, at the whiteboard stage, what could go wrong with a design, one ' +
-    'letter at a time. SPOOFING: can something pretend to be a different user or a different system than ' +
-    'it actually is? TAMPERING: can data be modified somewhere it should not be, in transit or at rest? ' +
-    'REPUDIATION: could someone deny having done something the system needs to hold them accountable ' +
-    'for, because no record of it exists? INFORMATION DISCLOSURE: can data reach someone who should not ' +
-    'see it? DENIAL OF SERVICE: can the system, or a part of it, be made unavailable to legitimate users? ' +
-    'ELEVATION OF PRIVILEGE: can an actor end up with more access than they were granted?\n\n' +
-    'STRIDE is not a formula that produces a fixed list of findings from a diagram. It is a set of ' +
-    'prompts to walk through against each component and each data flow in a design, catching questions a ' +
-    'team would otherwise only ask by accident. Not every letter applies to every design with equal ' +
-    'force, and that is expected. The value is in deliberately asking all six rather than only the ones ' +
-    'that happen to occur to whoever is in the room.',
+    'Before ground is ever broken on a new building, an architect sometimes walks the plans with a fixed ' +
+    'checklist of dangers: could a fire spread through this stairwell too fast, could this wall collapse ' +
+    'under snow load, could a flood reach the electrical room. Not because a fire or a flood is guaranteed ' +
+    'to happen, but because deliberately asking each question on paper, when it costs nothing but time, is ' +
+    'far cheaper than discovering the answer once the building is standing.\n\n' +
+    'THREAT MODELLING is the same habit applied to software: sitting down with a design, often just a ' +
+    'sketch on a whiteboard, before any code is written, and deliberately asking what could go wrong with ' +
+    'it. STRIDE is a specific checklist for doing that, one letter at a time. SPOOFING: could something ' +
+    'successfully pretend to be a different user, or a different system, than it actually is? TAMPERING: ' +
+    'could data be changed somewhere it should not be, while travelling between two points or while sitting ' +
+    'in storage? REPUDIATION: could someone later deny having done something, because no record of it was ' +
+    'ever kept? INFORMATION DISCLOSURE: could data reach somebody who was never supposed to see it? DENIAL ' +
+    'OF SERVICE: could the system, or some part of it, be made unavailable to the people who legitimately ' +
+    'need it? ELEVATION OF PRIVILEGE: could someone end up with more access than they were ever actually ' +
+    'granted?\n\n' +
+    'STRIDE is not a formula that spits out a guaranteed, complete list of problems just from looking at a ' +
+    'diagram. It is a set of prompts to walk through against each piece of a design, catching questions a ' +
+    'team would otherwise only stumble onto by accident. Not every letter applies to every design with ' +
+    'equal force, and that is expected. The value is in deliberately asking all six, every time, rather ' +
+    'than only the ones that happen to occur naturally to whoever is in the room that day.',
 } as const;
 
 const DEPT_OF_NO_TEACH = {
   concept:
-    'A finding that only ever says no, without naming a path forward, teaches a team to route around ' +
-    'security rather than through it, which is a worse outcome than the original finding shipping, ' +
-    'because it costs the relationship as well. Landing a finding well means being specific about the ' +
-    'risk, honest about its actual severity rather than inflating it for effect, and, wherever possible, ' +
-    'offering an alternative that gets the team most of what they wanted with the risk removed or ' +
-    'reduced.\n\n' +
-    'Sometimes a release genuinely has to wait, and saying so plainly, with the specific reason, is not ' +
-    'being the department of no, it is doing the job. What earns that label is blocking by reflex, ' +
-    'treating every finding as equally severe, or never proposing a way forward, so that every ' +
-    'interaction with the function feels like an obstacle rather than a collaborator with a different set ' +
-    'of concerns than the roadmap.',
+    'Imagine a friend who, every single time you suggest a plan, just says "no, bad idea" and nothing ' +
+    'else, never explaining why or offering an alternative. Eventually you stop telling them your plans at ' +
+    'all, and start making decisions behind their back instead, which leaves them with even less influence ' +
+    'over the outcome than if they had engaged in the first place. A finding that only ever says no, ' +
+    'without naming any path forward, does the exact same thing to a development team: it teaches them to ' +
+    'route around security instead of through it, which ends up worse than the original problem shipping, ' +
+    'because it costs the relationship too.\n\n' +
+    'Delivering a finding well means being specific about the actual risk, honest about how severe it ' +
+    'really is instead of exaggerating it for effect, and, wherever possible, offering an alternative that ' +
+    'gets the team most of what they wanted with the risk removed or at least reduced.\n\n' +
+    'Sometimes a release genuinely does have to wait, and saying so plainly, with the specific reason ' +
+    'attached, is not being obstructive, it is doing the job properly. What actually earns a security ' +
+    'reviewer the reputation of being "the department of no" is blocking by reflex, treating every finding ' +
+    'as equally severe regardless of what it actually is, or never once proposing a way forward, so that ' +
+    'every conversation with that person feels like hitting a wall rather than talking to a colleague with ' +
+    'a different, legitimate set of concerns than the release date.',
 } as const;
 
 const MODULE_ASF_8: Exercise[] = [
@@ -2184,9 +2462,9 @@ const MODULE_ASF_8: Exercise[] = [
       },
     ],
     debrief:
-      'In a real session, walk the design component by component and ask all six letters against each ' +
-      'one, even the ones that feel obviously fine. The value is in the discipline of asking, not just ' +
-      'the answer you expect.',
+      'In a real session, walk through the design piece by piece and ask all six STRIDE letters against ' +
+      'each one, even the parts that feel obviously fine at a glance. The value is in the discipline of ' +
+      'actually asking, not in already knowing the answer you expect to get.',
     practice: [],
   },
   {
@@ -2202,15 +2480,20 @@ const MODULE_ASF_8: Exercise[] = [
       'exercise. Which of the following are true? Select all that apply.',
     teach: {
       concept:
-        'A small design decided in a thirty-minute conversation still creates trust boundaries and data ' +
-        'flows, and a five-minute pass through STRIDE against a whiteboard sketch costs almost nothing ' +
-        'compared to finding the same gap after the feature ships. Waiting for an annual, formal exercise ' +
-        'means most designs never get modelled at all, because most designs happen between the annual ' +
-        'events, in ordinary sprint planning, not in a scheduled review.\n\n' +
-        'A lightweight pass done every time a new data flow or trust boundary is introduced, even for a ' +
-        'small feature, catches far more in practice than an infrequent, heavyweight one applied only to ' +
-        'the largest systems, because the largest systems are also the ones most likely to already have ' +
-        'other scrutiny, while the small feature slips through unreviewed by anyone.',
+        'A smoke detector does not only get installed in mansions with a dozen rooms. A small studio ' +
+        'apartment still has wiring, still has a stove, still has a real fire risk, just a smaller one, and ' +
+        'skipping the detector because the space is small is exactly backwards, because a small space with ' +
+        'no detector at all is more dangerous than a huge one that at least has some protection.\n\n' +
+        'A small software design, decided in a thirty-minute conversation, still has places where outside ' +
+        'data comes in, and a five-minute run through the STRIDE checklist against a rough whiteboard ' +
+        'sketch costs almost nothing compared to finding the same gap after the feature has already shipped ' +
+        'to real users. Waiting for one big, formal, annual review session means most designs never get ' +
+        'checked at all, because most actual design decisions happen in ordinary day-to-day planning ' +
+        'meetings, not inside a scheduled once-a-year event.\n\n' +
+        'A quick, lightweight pass done every single time a new feature is designed, even a small one, ' +
+        'catches far more in practice than a rare, heavyweight review reserved only for the biggest ' +
+        'systems, because the biggest systems are usually the ones already getting other scrutiny anyway, ' +
+        'while the small, everyday feature slips through completely unreviewed by anyone at all.',
     },
     options: [
       { id: 'a', label: 'A small design decided quickly still creates trust boundaries worth a brief threat modelling pass.' },
@@ -2239,8 +2522,8 @@ const MODULE_ASF_8: Exercise[] = [
     ],
     debrief:
       'The most useful threat modelling habit to build is not the big annual session, it is the five ' +
-      'minute version you can run in any sprint planning meeting without anybody having to schedule ' +
-      'anything.',
+      'minute version you can run in the middle of any ordinary planning meeting, without anyone having ' +
+      'to schedule a thing.',
     practice: [],
   },
   {
@@ -2282,7 +2565,7 @@ const MODULE_ASF_8: Exercise[] = [
     ],
     debrief:
       'The teams that keep bringing you their designs early are the ones who learned that talking to you ' +
-      'produces a decision, not an automatic no. That reputation is worth protecting deliberately.',
+      'leads to a real decision, not an automatic no. That reputation is worth protecting on purpose.',
     practice: [],
   },
   {
@@ -2298,15 +2581,21 @@ const MODULE_ASF_8: Exercise[] = [
       'are sound approaches? Select all that apply.',
     teach: {
       concept:
-        'The developers who designed a system know details a security reviewer working alone will miss: ' +
-        'which assumption is load-bearing, which part of the design is likely to change next quarter, and ' +
-        'which trust boundary looks solid on the diagram but is actually enforced nowhere in the code yet. ' +
-        'Running the session with them, asking the STRIDE questions together rather than delivering a ' +
-        'finished list afterward, surfaces those details while the design is still cheap to change.\n\n' +
-        'It also builds a skill that outlasts the one session: a team that has walked through STRIDE ' +
-        'themselves starts noticing some of these questions on their own, on the next design, before ' +
-        'anyone from security is even in the room, which is a better outcome for coverage than any single ' +
-        'reviewer being thorough alone could produce.',
+        'A building inspector who only ever reads the blueprints, and never talks to the contractor who is ' +
+        'actually pouring the concrete, misses things: which wall was already quietly changed on site last ' +
+        'week, which measurement on the drawing does not match reality, which shortcut got taken because a ' +
+        'delivery was late. The people doing the actual work know details an outside reviewer working alone ' +
+        'will never see.\n\n' +
+        'The programmers who designed a piece of software know exactly the same kind of thing: which ' +
+        'assumption the whole design secretly rests on, which part is likely to be rebuilt again next ' +
+        'quarter anyway, and which trust boundary looks solid on the diagram but is not actually enforced ' +
+        'anywhere in the real code yet. Running the STRIDE session together with them, asking the questions ' +
+        'as a group rather than handing them a finished list afterward, surfaces those details while the ' +
+        'design is still cheap and easy to change.\n\n' +
+        'It also builds a skill that outlasts that one meeting: a team that has walked through STRIDE ' +
+        'together once starts noticing some of these same questions on their own, on their very next ' +
+        'design, before anyone from security is even in the room, which produces better overall coverage ' +
+        'than any single outside reviewer being thorough alone ever could.',
     },
     options: [
       { id: 'a', label: 'The developers who designed the system know which assumptions are load-bearing in a way a reviewer working alone typically does not.' },
@@ -2335,8 +2624,9 @@ const MODULE_ASF_8: Exercise[] = [
       },
     ],
     debrief:
-      'The best sign a threat modelling programme is working is not a growing list of findings, it is a ' +
-      'team that starts raising the STRIDE questions themselves before you ask.',
+      'The best sign a threat modelling habit is actually working is not a growing list of findings, it ' +
+      'is a team that starts raising the STRIDE questions themselves, on their own, before you even have ' +
+      'to ask.',
     practice: [],
   },
   {
@@ -2353,16 +2643,22 @@ const MODULE_ASF_8: Exercise[] = [
       'sign off anyway. In three or four sentences, write your response.',
     teach: {
       concept:
-        'A response that only says no protects nothing and costs the relationship. A response that signs ' +
-        'off silently protects nothing either, and puts the finding entirely on you if it is exploited ' +
-        'later. The useful response does three things: states the actual risk plainly, so the decision is ' +
-        'made with real information rather than optimism, offers a narrower option if one genuinely ' +
-        'exists, such as a scoped mitigation that reduces the risk even if it cannot eliminate it before ' +
-        'the date, and makes clear who is accepting what risk if the date holds regardless, so the ' +
-        'decision is visible rather than quietly absorbed.\n\n' +
-        'This is not refusing to compromise. It is refusing to let the compromise happen silently, which ' +
-        'is the difference between being a partner in the decision and being either an obstacle to it or ' +
-        'invisible in it.',
+        'Picture a co-pilot who notices the weather ahead looks dangerous. Simply refusing to fly protects ' +
+        'nothing if the captain just overrules them and takes off anyway, having heard nothing useful. ' +
+        'Quietly saying nothing and going along with it protects nothing either, and leaves the co-pilot ' +
+        'holding the blame if something goes wrong, having never actually said what they saw. What ' +
+        'actually helps is telling the captain plainly what the risk is, suggesting a safer alternate route ' +
+        'if one exists, and making sure it is written down, out loud, who chose to fly anyway if the ' +
+        'captain decides to go regardless.\n\n' +
+        'A response to pressure over a real security finding needs the same three things. State the actual ' +
+        'risk plainly, so whoever makes the final call is deciding based on real information rather than ' +
+        'wishful thinking. Offer a narrower option if one genuinely exists, such as a smaller, partial fix ' +
+        'that reduces the risk even if it cannot remove it entirely before the deadline. And make clear, ' +
+        'explicitly, who is accepting what risk if the deadline holds regardless, so the decision is out in ' +
+        'the open rather than quietly swallowed by whoever raised the concern.\n\n' +
+        'This is not refusing to compromise. It is refusing to let the compromise happen silently, which is ' +
+        'the real difference between being a genuine partner in the decision and being either an obstacle ' +
+        'to it or invisible inside it.',
     },
     hints: [
       'State the actual risk plainly rather than either softening it or maximising it for effect.',
@@ -2392,8 +2688,9 @@ const MODULE_ASF_8: Exercise[] = [
       },
     ],
     debrief:
-      'Notice this response never says no. It also never pretends the risk is not there. That combination ' +
-      'is what keeps you in the room for the next decision instead of routed around for it.',
+      'Notice this response never actually says no. It also never pretends the risk is not real. That ' +
+      'combination is exactly what keeps you in the room for the next decision, instead of getting routed ' +
+      'around for it.',
     practice: [],
   },
 ];
