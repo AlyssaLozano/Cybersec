@@ -62,6 +62,12 @@ export type Check =
   /** A free-text answer must mention these concepts. Each entry is a group of
    *  synonyms; the answer must hit at least one synonym from every group. */
   | { type: 'answer-mentions'; conceptGroups: string[][]; hint: string }
+  /** A free-text answer must parse to a number matching this target. Currency
+   *  symbols, thousands separators, and surrounding whitespace are all ignored
+   *  before comparing, so "410", "$410", and "$410.00" are the same answer.
+   *  `equals` is exact once parsed (to floating-point tolerance); `min`/`max`
+   *  accept a range instead. */
+  | { type: 'answer-numeric'; equals?: number; min?: number; max?: number; hint: string }
   /* --- alert triage ------------------------------------------------------
    *
    * Triage checks grade a set of decisions against ground truth rather than a

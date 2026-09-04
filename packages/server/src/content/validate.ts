@@ -114,6 +114,20 @@ function contains(haystack: string, needle: string, caseSensitive: boolean): boo
 }
 
 /**
+ * Parse a free-text answer as a number, tolerant of how someone actually
+ * types a figure: a leading currency symbol, thousands separators, and
+ * surrounding whitespace are all stripped before parsing, so "410", "$410",
+ * and "$410.00" all parse to the same value. Returns null when nothing
+ * numeric is left to parse.
+ */
+function parseNumericAnswer(text: string): number | null {
+  const cleaned = text.trim().replace(/[$,\s]/g, '');
+  if (cleaned === '') return null;
+  const value = Number(cleaned);
+  return Number.isFinite(value) ? value : null;
+}
+
+/**
  * Whether a command line uses a given short flag.
  *
  * Flags may be grouped, so `-la` satisfies a requirement for `-l`. Only the
@@ -204,6 +218,15 @@ function runCheck(check: Check, attempt: Attempt): FailedCheck | null {
         synonyms.some((word) => text.includes(word.toLowerCase())),
       );
       return hitsEveryGroup ? null : failed();
+    }
+
+    case 'answer-numeric': {
+      const value = parseNumericAnswer(attempt.answerText ?? '');
+      if (value === null) return failed();
+      if (check.equals !== undefined && Math.abs(value - check.equals) > 1e-9) return failed();
+      if (check.min !== undefined && value < check.min) return failed();
+      if (check.max !== undefined && value > check.max) return failed();
+      return null;
     }
 
     case 'triage-selection': {
@@ -455,6 +478,14 @@ function describeCheck(check: Check): string {
       return 'Selected the correct option';
     case 'answer-mentions':
       return `Answer covered all ${check.conceptGroups.length} required ideas`;
+    case 'answer-numeric': {
+      if (check.equals !== undefined) return `Answered with the number ${check.equals}`;
+      const bounds = [
+        check.min !== undefined ? `at least ${check.min}` : null,
+        check.max !== undefined ? `at most ${check.max}` : null,
+      ].filter(Boolean);
+      return `Answered with a number ${bounds.join(' and ')}`;
+    }
     case 'triage-selection':
       return `Gave ${check.alertIds.length} specific alert(s) the disposition "${check.decision}"${
         check.forbidExtra ? ', and gave it to nothing else' : ''

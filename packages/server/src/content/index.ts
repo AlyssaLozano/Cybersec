@@ -395,7 +395,7 @@ export function packageSummaries(): PackageSummary[] {
 export function practiceKindOf(drill: PracticeItem, exercise: Exercise): ExerciseKind {
   const types = new Set(drill.checks.map((check) => check.type));
 
-  if (types.has('answer-mentions')) return 'short-answer';
+  if (types.has('answer-mentions') || types.has('answer-numeric')) return 'short-answer';
   if (types.has('choice-equals')) return 'multiple-choice';
   if (drill.modelId !== undefined) return 'model-probe';
   for (const type of types) {
@@ -422,7 +422,19 @@ export function answerFormatFor(exercise: Exercise): AnswerFormat | undefined {
       ? check.conceptGroups
       : [],
   );
-  if (groups.length === 0) return undefined;
+  if (groups.length === 0) {
+    // A purely numeric answer has no concept groups to size a paragraph
+    // around, but it still deserves a shape hint: without one, a student has
+    // no way to know that formatting is forgiving before they submit.
+    if (exercise.checks.some((check) => check.type === 'answer-numeric')) {
+      return {
+        maxChars: 40,
+        minChars: 1,
+        shape: 'A number. Currency symbols, commas, and decimal places are all fine to include.',
+      };
+    }
+    return undefined;
+  }
 
   const ideas = groups.length;
   return {
