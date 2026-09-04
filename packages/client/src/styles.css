@@ -1318,6 +1318,10 @@ button.hub-box:hover {
 .hub-box-title {
   font-size: 17px;
   font-weight: 700;
+  /* .hub-box--primary is a <button>, which does not inherit the page's text
+     color the way the cert boxes' <div> does -- it falls back to the
+     browser's default (black) button text without this. */
+  color: var(--text);
 }
 
 .hub-box-desc {

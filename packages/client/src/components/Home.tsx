@@ -149,6 +149,10 @@ interface HomeProps {
   onNetworking: () => void;
   onSoc: () => void;
   onBrowseTracks: () => void;
+  /** A role tile was clicked: go straight to that role's track hub, rather
+   *  than dropping the student into the full, unfiltered track list they
+   *  just told us they don't need by picking a specific role. */
+  onSelectTrack: (trackId: string) => void;
   /**
    * Every war room tile goes through here.
    *
@@ -192,24 +196,33 @@ function ProfileIcon() {
   );
 }
 
-const SOC_ROLES: Array<{ name: string; color: string; blurb: string }> = [
-  { name: 'Log Analyst', color: 'green', blurb: 'Builds the timeline everyone argues from.' },
-  { name: 'Network Analyst', color: 'blue', blurb: 'Tells a beacon from a backup job.' },
-  { name: 'Threat Hunter', color: 'amber', blurb: 'Hunts what never raised an alert.' },
-  { name: 'Threat Intelligence Analyst', color: 'cyan', blurb: 'Works out who is behind it, and what is next.' },
-  { name: 'Forensics Analyst', color: 'violet', blurb: 'Preserves evidence to a courtroom standard.' },
-  { name: 'Incident Response Analyst', color: 'red', blurb: 'Decides what the team does next.' },
-  { name: 'Detection Engineer', color: 'green', blurb: 'Turns an incident into a rule.' },
-  { name: 'Malware Analyst', color: 'violet', blurb: 'Works out what a file actually does.' },
-  { name: 'Vulnerability Analyst', color: 'amber', blurb: 'Decides what gets patched first.' },
-  { name: 'Cloud Security Analyst', color: 'cyan', blurb: 'Every attack is an API call and an identity.' },
-  { name: 'AI Security Analyst', color: 'blue', blurb: 'Tests the models before they ship.' },
-  { name: 'Red Team Operator', color: 'red', blurb: 'Breaks in, on purpose and with permission.' },
-  { name: 'Blue Team Analyst', color: 'blue', blurb: 'Defends the floor in real time.' },
-  { name: 'Purple Team Analyst', color: 'violet', blurb: 'Runs both sides to close the gaps.' },
-  { name: 'Mitigation Analyst', color: 'amber', blurb: 'Weighs what a fix will break.' },
-  { name: 'Mitigation Engineer', color: 'green', blurb: 'Builds the control that holds the line.' },
-  { name: 'Security Engineer', color: 'cyan', blurb: 'Builds security into the systems themselves.' },
+/**
+ * Which track's hub each role tile opens.
+ *
+ * Not every role here has its own dedicated track yet (there is no standalone
+ * "Blue Team Analyst" or "Malware Analyst" track, for instance) -- those route
+ * to the closest track whose curriculum and role list actually cover the job,
+ * rather than to a generic, unfiltered list the student already told us they
+ * don't need by picking a specific role.
+ */
+const SOC_ROLES: Array<{ name: string; color: string; blurb: string; trackId: string }> = [
+  { name: 'Log Analyst', color: 'green', blurb: 'Correlates log data across systems to reconstruct what happened.', trackId: 'soc' },
+  { name: 'Network Analyst', color: 'blue', blurb: 'Distinguishes malicious network traffic from normal activity.', trackId: 'soc' },
+  { name: 'Threat Hunter', color: 'amber', blurb: 'Proactively searches for threats that automated alerts missed.', trackId: 'incident-response' },
+  { name: 'Threat Intelligence Analyst', color: 'cyan', blurb: 'Researches threat actors and turns findings into action.', trackId: 'threat-intel' },
+  { name: 'Forensics Analyst', color: 'violet', blurb: 'Collects and analyzes digital evidence to standards that hold up.', trackId: 'incident-response' },
+  { name: 'Incident Response Analyst', color: 'red', blurb: 'Leads the response to active incidents and coordinates recovery.', trackId: 'incident-response' },
+  { name: 'Detection Engineer', color: 'green', blurb: 'Builds and tunes detection rules from real incident findings.', trackId: 'detection-engineering' },
+  { name: 'Malware Analyst', color: 'violet', blurb: 'Reverse engineers malicious software to assess its capabilities.', trackId: 'incident-response' },
+  { name: 'Vulnerability Analyst', color: 'amber', blurb: "Assesses and prioritizes an organization's security weaknesses.", trackId: 'vuln-management' },
+  { name: 'Cloud Security Analyst', color: 'cyan', blurb: 'Secures cloud infrastructure, identities, and APIs.', trackId: 'cloud-security' },
+  { name: 'AI Security Analyst', color: 'blue', blurb: 'Evaluates AI systems for security risk before deployment.', trackId: 'ai-security' },
+  { name: 'Red Team Operator', color: 'red', blurb: "Simulates real attacks, with authorization, to test defenses.", trackId: 'pentest' },
+  { name: 'Blue Team Analyst', color: 'blue', blurb: 'Monitors and defends live systems against active threats.', trackId: 'soc' },
+  { name: 'Purple Team Analyst', color: 'violet', blurb: 'Coordinates offense and defense to close security gaps.', trackId: 'soc' },
+  { name: 'Mitigation Analyst', color: 'amber', blurb: 'Evaluates the operational impact of proposed security fixes.', trackId: 'vuln-management' },
+  { name: 'Mitigation Engineer', color: 'green', blurb: 'Implements and maintains the controls that stop attacks.', trackId: 'security-engineering' },
+  { name: 'Security Engineer', color: 'cyan', blurb: "Builds security into an organization's systems and infrastructure.", trackId: 'security-engineering' },
 ];
 
 export function Home({
@@ -221,6 +234,7 @@ export function Home({
   onNetworking,
   onSoc,
   onBrowseTracks,
+  onSelectTrack,
   onLobby,
   onWatchFloor,
   onBadges,
@@ -360,7 +374,7 @@ export function Home({
             <div className="stage-label">Learn the skills, and practice them on the roles</div>
             <div className="role-grid">
               {SOC_ROLES.map((role) => (
-                <button className={`roletile ${role.color}`} key={role.name} onClick={onBrowseTracks}>
+                <button className={`roletile ${role.color}`} key={role.name} onClick={() => onSelectTrack(role.trackId)}>
                   <span className="rl-name">{role.name}</span>
                   <span className="rl-blurb">{role.blurb}</span>
                 </button>

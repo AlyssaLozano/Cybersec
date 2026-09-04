@@ -840,6 +840,10 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
         onNetworking={() => setLanding(false)}
         onSoc={() => setLanding(false)}
         onBrowseTracks={() => setLanding(false)}
+        onSelectTrack={(id) => {
+          setLanding(false);
+          setTrackHubId(id);
+        }}
         onWatchFloor={() => {
           // Straight to the floor, skipping the lobby. The lobby is where you
           // go to find people; somebody who already has people does not need
@@ -1184,7 +1188,14 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
                   </div>
                 )}
 
-                {(alreadyPassed || evaluation?.passed) && (
+                {!alreadyPassed && !practiceId && evaluation && !evaluation.passed && detail.practice.length > 0 && (
+                  <div className="feedback fail practice-offer">
+                    Didn't land? Try a related question below instead. It's graded separately and
+                    never counts against this exercise, so a miss here costs nothing.
+                  </div>
+                )}
+
+                {(alreadyPassed || evaluation) && (
                   <PracticePanel
                     practice={detail.practice}
                     state={detail.practiceState}
