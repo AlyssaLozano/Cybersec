@@ -20,7 +20,7 @@ import { TRACKS, getTrack } from '../content/tracks.js';
 import { trackFoundations, trackPackages, trackReadiness } from '../content/curriculum.js';
 import { CERT_PHILOSOPHY, resolveCertifications } from '../content/certifications.js';
 import { laneIdForTrack } from '../content/lanes.js';
-import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import { asyncRoute, HttpError, requireActiveAccount, requireAuth, sendOk } from '../http.js';
 import { canAccess, getOverview, getPracticeState } from '../services/progress.js';
 import { openSession, resetSession, runCommand } from '../services/terminalSession.js';
 import { queueForStudent } from '../services/alerts.js';
@@ -47,7 +47,7 @@ import { prisma } from '../db/client.js';
 
 export const learningRouter = Router();
 
-learningRouter.use(requireAuth);
+learningRouter.use(requireAuth, requireActiveAccount);
 
 /** Every route below needs the signed-in user's id. */
 function userIdOf(request: { session?: { sub: string } }): string {

@@ -19,6 +19,8 @@ import { assessmentRouter } from './routes/assessment.js';
 import { learningRouter } from './routes/learning.js';
 import { matchesRouter } from './routes/matches.js';
 import { roomsRouter } from './routes/rooms.js';
+import { stageRouter } from './routes/stage.js';
+import { superadminRouter } from './routes/superadmin.js';
 
 export function createApp() {
   const app = express();
@@ -57,6 +59,8 @@ export function createApp() {
   app.use('/api/profile', profileRouter);
   app.use('/api/events', eventsRouter);
   app.use('/api/badges', badgesRouter);
+  app.use('/api/stage', stageRouter);
+  app.use('/api/superadmin', superadminRouter);
 
   app.use((_request, response) => {
     sendError(response, 404, { code: 'not_found', message: 'No such endpoint.' });

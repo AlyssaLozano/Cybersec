@@ -23,7 +23,7 @@ import { getLaneProfile, LANE_PROFILES } from '../content/lanes.js';
 import { CERT_STUDY_PLAN } from '../content/pricing.js';
 import { getTrack } from '../content/tracks.js';
 import { TOOL_PHILOSOPHY } from '../content/tools.js';
-import { asyncRoute, HttpError, requireAuth, requirePaid, sendOk } from '../http.js';
+import { asyncRoute, HttpError, requireActiveAccount, requireAuth, requirePaid, sendOk } from '../http.js';
 import {
   getBaseline,
   resetBaseline,

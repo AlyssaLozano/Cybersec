@@ -330,4 +330,8 @@ export interface LobbyView {
   pendingRoomCount: number;
   /** Whether this viewer may approve a room request. */
   canReview: boolean;
+  /** Whether this viewer holds the superadmin role, read fresh from the database. */
+  isSuperadmin: boolean;
+  /** How many Stage talks are waiting on review. Zero for anybody but a superadmin. */
+  pendingStageCount: number;
 }

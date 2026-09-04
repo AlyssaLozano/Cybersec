@@ -36,7 +36,7 @@ import type { SocRoleId } from '@soc/shared';
 import { SOC_ROLES } from '@soc/shared';
 
 import { SCENARIOS } from '../content/scenarios/index.js';
-import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import { asyncRoute, HttpError, requireActiveAccount, requireAuth, sendOk } from '../http.js';
 import { requireCanEnter } from './guards.js';
 import {
   RoomError,
@@ -83,7 +83,7 @@ import {
 
 export const roomsRouter = Router();
 
-roomsRouter.use(requireAuth);
+roomsRouter.use(requireAuth, requireActiveAccount);
 
 function userIdOf(request: { session?: { sub: string } }): string {
   const id = request.session?.sub;

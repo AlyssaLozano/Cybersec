@@ -15,7 +15,7 @@ import { API_ERROR_CODES, EVENT_KINDS, LOBBY_DOORS, RSVP_STATUSES } from '@soc/s
 import type { EventAudience, UserRole } from '@soc/shared';
 
 import { prisma } from '../db/client.js';
-import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import { asyncRoute, HttpError, requireActiveAccount, requireAuth, sendOk } from '../http.js';
 import {
   EventError,
   cancelEvent,
@@ -29,7 +29,7 @@ import { getIdentity } from '../services/roomStore.js';
 
 export const eventsRouter = Router();
 
-eventsRouter.use(requireAuth);
+eventsRouter.use(requireAuth, requireActiveAccount);
 
 const AUDIENCES = ['all', ...LOBBY_DOORS.map((door) => door.id)] as [
   EventAudience,

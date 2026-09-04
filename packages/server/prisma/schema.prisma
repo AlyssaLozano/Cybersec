@@ -20,7 +20,7 @@ model User {
   username     String    @unique
   email        String    @unique
   passwordHash String
-  /// "student" | "instructor" | "admin" -- see UserRole in @soc/shared
+  /// "student" | "instructor" | "admin" | "superadmin" -- see UserRole in @soc/shared
   role         String    @default("student")
   /// "free" | "paid" -- see UserTier in @soc/shared. Free opens the whole
   /// learning platform and the war rooms; paid adds the career pack (the
@@ -58,6 +58,18 @@ model User {
   /// Indefinite war room ban, pending a person reading the file. Still not
   /// permanent and still not the learning platform.
   roomsBanned         Boolean   @default(false)
+
+  /// Platform-wide suspension/ban, set only by a superadmin and deliberately
+  /// separate from roomsSuspendedUntil/roomsBanned above: those come from the
+  /// automatic report-threshold system and are war-room-only, while these are
+  /// a direct, manual, "off the whole platform" action. Checked on every
+  /// authenticated request (see requireActiveAccount in http.ts) rather than
+  /// trusted from the session token, so it takes effect immediately.
+  platformSuspendedUntil DateTime?
+  platformBanned         Boolean   @default(false)
+  platformActionReason   String?
+  platformActionAt       DateTime?
+  platformActionByUserId String?
 
   /// How the floor addresses this person over the microphone. Nullable because
   /// it is chosen when somebody first takes a seat rather than at signup: the
@@ -490,6 +502,44 @@ model EarnedBadge {
   @@map("earned_badges")
 }
 
+/// Somebody signing up to present a topic on the Stage.
+///
+/// Shaped like ChatRoom's review fields on purpose -- same "pending until a
+/// reviewer decides" pattern -- but the reviewer here must be a superadmin
+/// specifically, not any instructor/admin: approving what gets presented to
+/// the whole lobby is the one judgement call reserved for that role.
+///
+/// meetingLink is presenter-supplied for now. There is no Zoom integration
+/// yet; see generateMeetingLink in services/stage.ts for the seam where a
+/// real Zoom API call replaces this once credentials exist.
+model StageTalk {
+  id     String @id @default(uuid())
+  presenterUserId String
+
+  title       String
+  topic       String
+  description String
+
+  proposedStartsAt DateTime
+  durationMinutes  Int
+
+  meetingLink String?
+
+  /// "pending" | "approved" | "rejected" | "cancelled" -- StageTalkStatus.
+  status String @default("pending")
+
+  reviewedByUserId String?
+  reviewedAt       DateTime?
+  /// Shown to the presenter. Same rule as ChatRoom: a refusal needs a reason.
+  reviewNote       String?
+
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([proposedStartsAt])
+  @@map("stage_talks")
+}
+
 /// A public chat room off the lobby.
 ///
 /// ALWAYS PUBLIC. There is no visibility column and no join code here on
@@ -722,4 +772,32 @@ model RoomEjection {
   @@unique([roomId, userId])
   @@index([userId, createdAt])
   @@map("room_ejections")
+}
+
+/// One thing a superadmin did: an account suspend/ban/reinstate, a Stage
+/// review decision, or reading a room's live state without holding a seat
+/// in it.
+///
+/// Room observation is deliberately SILENT to the people in the room (the
+/// occupant list never gains an entry for it -- see services/superadmin.ts),
+/// so this table is the only record that it happened. It exists for
+/// accountability, not for occupants: nothing here is ever served back to a
+/// room's participants.
+model SuperadminAction {
+  id            String @id @default(uuid())
+  actorUserId   String
+  /// "suspend" | "ban" | "reinstate" | "observe-room" | "observe-match" |
+  /// "stage-review" -- SuperadminActionKind in @soc/shared.
+  action        String
+  targetUserId  String?
+  /// "room" | "match", set only for observe-* actions.
+  roomKind      String?
+  roomId        String?
+  reason        String?
+
+  createdAt DateTime @default(now())
+
+  @@index([actorUserId, createdAt])
+  @@index([targetUserId, createdAt])
+  @@map("superadmin_actions")
 }

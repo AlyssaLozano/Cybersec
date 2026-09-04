@@ -414,3 +414,33 @@ export async function listFor(userId: string): Promise<MatchView[]> {
   });
   return rows.map((row) => matchViewFor(fromRow(row), userId));
 }
+
+/**
+ * Every match still worth watching, for the superadmin observation picker.
+ *
+ * Ordinary players never browse the whole table -- they queue or join by
+ * code -- so there was no listing to reuse here the way `listVisibleRooms`
+ * already existed for rooms. This is that listing's match-side counterpart:
+ * waiting or active only, newest activity first.
+ */
+export async function listActiveMatches(): Promise<MatchState[]> {
+  const rows = await prisma.match.findMany({
+    where: { status: { in: ['waiting', 'active'] } },
+    orderBy: { updatedAt: 'desc' },
+    take: 100,
+  });
+  return rows.map(fromRow);
+}
+
+/**
+ * The raw match, for the superadmin oversight route only.
+ *
+ * Never sent to a client as-is -- see routes/superadmin.ts, which builds each
+ * side's own `matchViewFor` from this and returns those, so oversight never
+ * duplicates the redaction logic or invents a new unredacted shape.
+ */
+export async function matchStateById(matchId: string): Promise<MatchState> {
+  const row = await prisma.match.findUnique({ where: { id: matchId } });
+  if (!row) throw new MatchError('No such match.');
+  return fromRow(row);
+}

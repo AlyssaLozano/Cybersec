@@ -24,7 +24,7 @@ import {
 import type { FloorIdentity } from '@soc/shared';
 import { AVATARS, checkCallSign } from '@soc/shared';
 
-import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import { asyncRoute, HttpError, requireActiveAccount, requireAuth, sendOk } from '../http.js';
 import { requireRoomAccess } from './guards.js';
 import { matchBriefFor, matchScenarioList } from '../content/redblue/index.js';
 import { matchViewFor } from '../services/matchEngine.js';
@@ -46,7 +46,7 @@ import {
 
 export const matchesRouter = Router();
 
-matchesRouter.use(requireAuth);
+matchesRouter.use(requireAuth, requireActiveAccount);
 
 function userIdOf(request: { session?: { sub: string } }): string {
   const id = request.session?.sub;

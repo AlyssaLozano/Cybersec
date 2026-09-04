@@ -11,6 +11,7 @@ import { API_ERROR_CODES, type ApiError, type ApiResponse, type UserRole } from 
 import { readSession, type SessionClaims } from './auth/session.js';
 import { prisma } from './db/client.js';
 import { isProduction } from './env.js';
+import { platformAccountStatus } from './services/account.js';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -96,6 +97,40 @@ export function requirePaid(request: Request, response: Response, next: NextFunc
         sendError(response, 402, {
           code: API_ERROR_CODES.paymentRequired,
           message: 'This is part of the paid career pack. Request access to unlock it.',
+        });
+        return;
+      }
+      next();
+    })
+    .catch(next);
+}
+
+/**
+ * Refuses a request from an account a superadmin has suspended or banned
+ * platform-wide. Must run after `requireAuth`.
+ *
+ * Same reasoning as `requirePaid`: read fresh from the database on every
+ * request rather than trusted from the session token, so a ban takes effect
+ * on the suspended person's very next request instead of waiting for them to
+ * sign out. This is deliberately separate from the room-conduct guards in
+ * `routes/guards.ts` -- see `services/account.ts` for why the two systems do
+ * not share columns.
+ */
+export function requireActiveAccount(request: Request, response: Response, next: NextFunction): void {
+  const userId = request.session?.sub;
+  if (!userId) {
+    sendError(response, 401, {
+      code: API_ERROR_CODES.unauthenticated,
+      message: 'You need to sign in to do that.',
+    });
+    return;
+  }
+  platformAccountStatus(userId)
+    .then((status) => {
+      if (!status.allowed) {
+        sendError(response, 403, {
+          code: API_ERROR_CODES.forbidden,
+          message: status.problem ?? 'This account cannot use the platform right now.',
         });
         return;
       }

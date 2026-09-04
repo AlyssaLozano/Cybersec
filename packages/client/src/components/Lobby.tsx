@@ -39,6 +39,9 @@ import { IdentityForm } from './IdentityForm';
 import { LobbyChat } from './LobbyChat';
 import { EventCenter } from './EventCenter';
 import { RoomReview } from './RoomReview';
+import { StagePanel } from './StagePanel';
+import { StageReview } from './StageReview';
+import { SuperadminPanel } from './SuperadminPanel';
 import { Emblem } from './BadgeCase';
 
 interface LobbyProps {
@@ -57,7 +60,7 @@ interface LobbyProps {
   onExit: () => void;
 }
 
-type Pane = 'floor' | 'chat' | 'events' | 'review';
+type Pane = 'floor' | 'chat' | 'events' | 'review' | 'stage' | 'superadmin';
 
 /** How often the floor is re-read. Matches the server's heartbeat expectation. */
 const POLL_MS = PRESENCE_HEARTBEAT_SECONDS * 1000;
@@ -242,6 +245,10 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
     <EventCenter identity={identity} rooms={view?.rooms ?? []} />
   ) : pane === 'review' && view?.canReview ? (
     <RoomReview />
+  ) : pane === 'stage' ? (
+    <StagePanel />
+  ) : pane === 'superadmin' && view?.isSuperadmin ? (
+    <SuperadminPanel />
   ) : null;
 
   const closeOverlay = () => {
@@ -290,6 +297,28 @@ export function Lobby({ initialHeading = null, onSocFloor, onRedBlue, onExit }: 
               Review
               {view.pendingRoomCount > 0 ? (
                 <span className="lobby__badgecount">{view.pendingRoomCount}</span>
+              ) : null}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className={pane === 'stage' ? 'is-on' : ''}
+            onClick={() => setPane('stage')}
+          >
+            Stage
+            {view?.isSuperadmin && view.pendingStageCount > 0 ? (
+              <span className="lobby__badgecount">{view.pendingStageCount}</span>
+            ) : null}
+          </button>
+          {view?.isSuperadmin ? (
+            <button
+              type="button"
+              className={pane === 'superadmin' ? 'is-on' : ''}
+              onClick={() => setPane('superadmin')}
+            >
+              Superadmin
+              {view.pendingStageCount > 0 ? (
+                <span className="lobby__badgecount">{view.pendingStageCount}</span>
               ) : null}
             </button>
           ) : null}

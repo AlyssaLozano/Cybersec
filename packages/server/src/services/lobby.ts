@@ -42,7 +42,9 @@ import {
 } from '@soc/shared';
 
 import { prisma } from '../db/client.js';
+import { isSuperadmin } from './account.js';
 import { pinnedFor } from './badges.js';
+import { pendingTalkCount } from './stage.js';
 
 /** Thrown for a rule a person could have broken. The message is shown to them. */
 export class LobbyError extends Error {}
@@ -506,10 +508,15 @@ export async function lobbyView(
 ): Promise<LobbyView> {
   await ensureCoreRooms();
 
-  const [present, rooms, pending] = await Promise.all([
+  const superadmin = isSuperadmin(role);
+  const [present, rooms, pending, pendingStage] = await Promise.all([
     occupants(now),
     listRooms(),
     canReview(role) ? pendingRoomCount() : Promise.resolve(0),
+    // Truthful only for the role that can act on it, same as pendingRoomCount
+    // above: a count nobody but a superadmin can do anything about is not
+    // information, it is a number that leaks who else is waiting.
+    superadmin ? pendingTalkCount() : Promise.resolve(0),
   ]);
 
   const doors: LobbyDoor[] = LOBBY_DOORS.map((door) => ({
@@ -536,5 +543,14 @@ export async function lobbyView(
       badges: [],
     };
 
-  return { occupants: present, doors, rooms, me, pendingRoomCount: pending, canReview: canReview(role) };
+  return {
+    occupants: present,
+    doors,
+    rooms,
+    me,
+    pendingRoomCount: pending,
+    canReview: canReview(role),
+    isSuperadmin: superadmin,
+    pendingStageCount: pendingStage,
+  };
 }

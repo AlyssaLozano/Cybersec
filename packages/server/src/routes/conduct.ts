@@ -31,7 +31,7 @@ import {
 } from '@soc/shared';
 import type { ReportContext, ReportSpace } from '@soc/shared';
 
-import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import { asyncRoute, HttpError, requireActiveAccount, requireAuth, sendOk } from '../http.js';
 import { prisma } from '../db/client.js';
 import { getRoom } from '../services/roomStore.js';
 import { recentActivityBy } from '../services/claimStore.js';
@@ -48,7 +48,7 @@ import {
 } from '../services/conduct.js';
 
 export const conductRouter = Router();
-conductRouter.use(requireAuth);
+conductRouter.use(requireAuth, requireActiveAccount);
 
 function userIdOf(request: { session?: { sub: string } }): string {
   const id = request.session?.sub;

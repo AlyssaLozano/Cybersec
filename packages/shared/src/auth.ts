@@ -1,5 +1,13 @@
-/** Roles are stored as strings for SQLite/Postgres portability. */
-export const USER_ROLES = ['student', 'instructor', 'admin'] as const;
+/**
+ * Roles are stored as strings for SQLite/Postgres portability.
+ *
+ * "superadmin" sits above "admin": it can suspend or ban an account
+ * platform-wide (not just from war rooms) and silently read the live state
+ * of any room, including closed ones. Granted the same way as every other
+ * role -- `npm run grant:role`, never a route. See stage.ts for the one
+ * thing only a superadmin approves: a Stage talk topic.
+ */
+export const USER_ROLES = ['student', 'instructor', 'admin', 'superadmin'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
 /**

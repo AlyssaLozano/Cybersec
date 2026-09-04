@@ -75,6 +75,10 @@ import type {
   CapstoneState,
   CapstoneSubmissionView,
   CapstoneWalkthroughStep,
+  StageTalk,
+  ProposeStageTalkRequest,
+  UserRole,
+  UserTier,
 } from '@soc/shared';
 
 export class ApiCallError extends Error {
@@ -1184,4 +1188,108 @@ export const profile = {
   /** Somebody else, by the name the floor calls them. */
   byCallSign: (callSign: string) =>
     request<{ profile: PublicProfile }>(`/profile/by-call-sign/${encodeURIComponent(callSign)}`),
+};
+
+// --- the stage -----------------------------------------------------------
+
+/**
+ * Propose a talk, browse what is coming up, and the superadmin review queue.
+ *
+ * Mirrors the `lobby.requestRoom`/`reviewQueue`/`review` shape exactly: the
+ * stage's pending-until-decided flow is the same one chat rooms already use,
+ * just always reviewed by a superadmin instead of any reviewer.
+ */
+export const stage = {
+  propose: (body: ProposeStageTalkRequest) =>
+    request<{ talk: StageTalk }>('/stage', { method: 'POST', body: JSON.stringify(body) }),
+
+  /** Approved talks still ahead of us, for anybody signed in to browse. */
+  list: () => request<{ talks: StageTalk[] }>('/stage'),
+
+  /** This person's own proposals, so a decision reaches them. */
+  mine: () => request<{ talks: StageTalk[] }>('/stage/mine'),
+
+  cancel: (id: string) => request<{ cancelled: true }>(`/stage/${encodeURIComponent(id)}/cancel`, {
+    method: 'POST',
+  }),
+
+  /** Superadmin only. A 403 here is the client asking a question it should not have. */
+  reviewQueue: () => request<{ pending: StageTalk[] }>('/stage/review'),
+
+  review: (id: string, decision: 'approve' | 'reject', note: string | null) =>
+    request<{ talk: StageTalk }>(`/stage/review/${encodeURIComponent(id)}`, {
+      method: 'POST',
+      body: JSON.stringify({ decision, note }),
+    }),
+};
+
+// --- superadmin ------------------------------------------------------------
+
+/**
+ * Platform-wide account search result.
+ *
+ * Server-only type right now (see `AccountSearchResult` in
+ * services/account.ts) -- defined locally here rather than shared, same
+ * convention `ClientRoom`/`RoomDetail`/`SeatBoard` already follow above.
+ */
+export interface AccountSearchResult {
+  id: string;
+  username: string;
+  email: string;
+  role: UserRole;
+  tier: UserTier;
+  platformBanned: boolean;
+  platformSuspendedUntil: string | null;
+}
+
+/** A room as a superadmin observes it: same chart a real occupant sees, read-only. */
+export interface SuperadminRoomObservation {
+  room: ClientRoom;
+  seating: SeatView[];
+  readiness: RoomDetail['readiness'];
+  boards: { role: SocRoleId; board: SeatBoard }[];
+}
+
+/**
+ * Account actions and read-only oversight of a live room or match.
+ *
+ * Every route here 403s cleanly for anybody who is not a superadmin, same as
+ * `lobby.reviewQueue`. Hiding these calls client-side is UX only, never the
+ * actual gate.
+ */
+export const superadmin = {
+  accounts: (query: string) =>
+    request<{ accounts: AccountSearchResult[] }>(
+      `/superadmin/accounts?query=${encodeURIComponent(query)}`,
+    ),
+
+  suspend: (userId: string, until: string, reason: string) =>
+    request<{ done: true }>(`/superadmin/accounts/${encodeURIComponent(userId)}/suspend`, {
+      method: 'POST',
+      body: JSON.stringify({ until, reason }),
+    }),
+
+  ban: (userId: string, reason: string) =>
+    request<{ done: true }>(`/superadmin/accounts/${encodeURIComponent(userId)}/ban`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    }),
+
+  reinstate: (userId: string, reason: string) =>
+    request<{ done: true }>(`/superadmin/accounts/${encodeURIComponent(userId)}/reinstate`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    }),
+
+  roomsOpen: () => request<{ rooms: ClientRoom[] }>('/superadmin/rooms-open'),
+
+  matchesOpen: () => request<{ matches: MatchView[] }>('/superadmin/matches-open'),
+
+  observeRoom: (id: string) =>
+    request<SuperadminRoomObservation>(`/superadmin/rooms/${encodeURIComponent(id)}`),
+
+  observeMatch: (id: string) =>
+    request<{ red: MatchView | null; blue: MatchView | null }>(
+      `/superadmin/matches/${encodeURIComponent(id)}`,
+    ),
 };

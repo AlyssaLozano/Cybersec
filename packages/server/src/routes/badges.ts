@@ -11,12 +11,12 @@ import { Router } from 'express';
 
 import { API_ERROR_CODES } from '@soc/shared';
 
-import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import { asyncRoute, HttpError, requireActiveAccount, requireAuth, sendOk } from '../http.js';
 import { caseFor } from '../services/badges.js';
 
 export const badgesRouter = Router();
 
-badgesRouter.use(requireAuth);
+badgesRouter.use(requireAuth, requireActiveAccount);
 
 badgesRouter.get(
   '/',

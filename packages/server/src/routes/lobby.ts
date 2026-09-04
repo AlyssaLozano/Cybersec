@@ -22,7 +22,7 @@ import { API_ERROR_CODES, CHAT_ROOM_PUBLIC_NOTICE, LOBBY_DOORS } from '@soc/shar
 import type { LobbyDoorId, UserRole } from '@soc/shared';
 
 import { prisma } from '../db/client.js';
-import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import { asyncRoute, HttpError, requireActiveAccount, requireAuth, sendOk } from '../http.js';
 import { requireRoomAccess } from './guards.js';
 import {
   LobbyError,
@@ -43,7 +43,7 @@ import { getIdentity } from '../services/roomStore.js';
 
 export const lobbyRouter = Router();
 
-lobbyRouter.use(requireAuth);
+lobbyRouter.use(requireAuth, requireActiveAccount);
 
 function userIdOf(request: { session?: { sub: string } }): string {
   const id = request.session?.sub;

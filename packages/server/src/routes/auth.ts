@@ -20,6 +20,7 @@ import { clearSession, issueSession, readSession } from '../auth/session.js';
 import { prisma } from '../db/client.js';
 import { entryCodes } from '../env.js';
 import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import { platformAccountStatus } from '../services/account.js';
 
 export const authRouter = Router();
 
@@ -179,6 +180,18 @@ authRouter.post(
     }
 
     FAILURES.delete(throttleKey(input.identifier));
+
+    // Checked here rather than left to requireActiveAccount on the next
+    // request, so a suspended or banned person is told why at the door
+    // instead of signing in successfully and finding out silently later.
+    const status = await platformAccountStatus(user.id);
+    if (!status.allowed) {
+      throw new HttpError(
+        403,
+        API_ERROR_CODES.forbidden,
+        status.problem ?? 'This account cannot use the platform right now.',
+      );
+    }
 
     const updated = await prisma.user.update({
       where: { id: user.id },

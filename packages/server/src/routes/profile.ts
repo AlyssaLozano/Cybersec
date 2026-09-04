@@ -26,7 +26,7 @@ import {
   PROFILE_VISIBILITIES,
 } from '@soc/shared';
 
-import { asyncRoute, HttpError, requireAuth, sendOk } from '../http.js';
+import { asyncRoute, HttpError, requireActiveAccount, requireAuth, sendOk } from '../http.js';
 import {
   ProfileError,
   myProfile,
@@ -80,7 +80,7 @@ profileRouter.get(
 /* -- the person's own, which needs a session ---------------------------- */
 
 const mine = Router();
-mine.use(requireAuth);
+mine.use(requireAuth, requireActiveAccount);
 
 function userIdOf(request: { session?: { sub: string } }): string {
   const id = request.session?.sub;
