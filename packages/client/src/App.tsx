@@ -98,6 +98,16 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
   const [scrollback, setScrollback] = useState<ScrollbackEntry[]>([]);
   const [cwd, setCwd] = useState('/home/student');
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
+  /**
+   * Whether the current exercise has ever been missed this visit.
+   *
+   * `evaluation` alone cannot drive "offer a practice drill after a miss",
+   * because it gets cleared to null the moment a drill is opened or the
+   * student steps back from one (see `onSelect` on `PracticePanel`). Without
+   * this, the practice panel would flash in after a failed attempt and then
+   * vanish again the instant the student looked at a drill and came back.
+   */
+  const [everFailed, setEverFailed] = useState(false);
   const [reveal, setReveal] = useState<{ solution?: string; expectedOutput?: string; debrief?: string }>({});
   const [busy, setBusy] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -116,6 +126,18 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
    * are two different clicks, not one.
    */
   const [trackHubId, setTrackHubId] = useState<string | null>(null);
+  /**
+   * Whether the hub currently open was reached straight from a home-page role
+   * tile, as opposed to the track picker or a career-fit lane.
+   *
+   * The hub's own Back button clears `trackHubId` and falls through to
+   * whatever comes next: normally that is the track picker, which is right
+   * when the student came from browsing it, but wrong when they arrived
+   * directly from a role tile on the home trail -- "back" from there should
+   * return to the trail, not drop them into the full, unfiltered list they
+   * never chose to open.
+   */
+  const [trackHubFromHome, setTrackHubFromHome] = useState(false);
   /** The drill currently being graded, or null when working the exercise. */
   const [practiceId, setPracticeId] = useState<string | null>(null);
   /** The alert queue for a triage exercise, loaded alongside the exercise. */
@@ -305,6 +327,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
       if (targetTrack) {
         await assessment.updateProfile({ chosenTrackId: targetTrack });
         setTrackHubId(targetTrack);
+        setTrackHubFromHome(false);
       } else {
         setTrackId(null);
       }
@@ -390,6 +413,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
     let cancelled = false;
 
     setEvaluation(null);
+    setEverFailed(false);
     setReveal({});
     setHints([]);
     setPrefill(null);
@@ -587,6 +611,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
         ...(regrade ? { regrade: true } : {}),
       });
       setEvaluation(result.evaluation);
+      if (!practiceId && !result.evaluation.passed) setEverFailed(true);
       setTriageDebrief(result.triageDebrief ?? null);
       setCopilotDebrief(result.copilotDebrief ?? null);
       setCollaboration(result.collaboration ?? null);
@@ -650,6 +675,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
 
       if (result.evaluation) {
         setEvaluation(result.evaluation);
+        if (!practiceId && !result.evaluation.passed) setEverFailed(true);
         // A single "try again" grades one command, then stands down.
         if (regrade) setRegrade(false);
         if (result.evaluation.passed) {
@@ -843,6 +869,7 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
         onSelectTrack={(id) => {
           setLanding(false);
           setTrackHubId(id);
+          setTrackHubFromHome(true);
         }}
         onWatchFloor={() => {
           // Straight to the floor, skipping the lobby. The lobby is where you
@@ -946,14 +973,20 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
   if (trackHubId !== null && tracks) {
     const hubTrack = tracks.find((track) => track.id === trackHubId);
     if (hubTrack) {
+      const leaveHub = () => {
+        setTrackHubId(null);
+        // A hub opened straight from a home-page role tile should return to
+        // the home trail, not fall through to the unfiltered track picker.
+        if (trackHubFromHome) setLanding(true);
+      };
       return (
         <div className="app">
-          <CareerTopBar user={user} onSignOut={signOut} onExit={() => setTrackHubId(null)} />
+          <CareerTopBar user={user} onSignOut={signOut} onExit={leaveHub} />
           <TrackHub
             track={hubTrack}
             certStudy={certStudy ?? undefined}
             onEnter={enterTrackFromHub}
-            onBack={() => setTrackHubId(null)}
+            onBack={leaveHub}
           />
         </div>
       );
@@ -1000,7 +1033,10 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
               tracks={tracks}
               activeTrackId={trackId}
               certStudy={certStudy ?? undefined}
-              onChoose={setTrackHubId}
+              onChoose={(id) => {
+                setTrackHubId(id);
+                setTrackHubFromHome(false);
+              }}
               onViewLane={openLane}
             />
           </div>
@@ -1189,13 +1225,13 @@ function Trainer({ user, onSignedOut }: { user: PublicUser; onSignedOut: () => v
                 )}
 
                 {!alreadyPassed && !practiceId && evaluation && !evaluation.passed && detail.practice.length > 0 && (
-                  <div className="feedback fail practice-offer">
+                  <div className="practice-offer">
                     Didn't land? Try a related question below instead. It's graded separately and
                     never counts against this exercise, so a miss here costs nothing.
                   </div>
                 )}
 
-                {(alreadyPassed || evaluation) && (
+                {(alreadyPassed || everFailed || evaluation) && (
                   <PracticePanel
                     practice={detail.practice}
                     state={detail.practiceState}
